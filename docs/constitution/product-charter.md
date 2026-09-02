@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: product-charter
 artifact_type: product-charter
-artifact_version: 5
+artifact_version: 2
 product: FactorFlow
 tagline: >-
   Classify a self-defined stock universe by value, growth and momentum, and
