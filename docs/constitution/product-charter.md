@@ -9,11 +9,11 @@ tagline: >-
   trade it automatically under strategies the owner controls — proven in paper
   before any capital is at risk.
 created: 2026-09-01
-updated: 2026-09-01
-last_updated: 2026-09-01
+updated: 2026-09-03
+last_updated: 2026-09-02
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: product-charter-agent
   agent_version: "1.0"
@@ -24,6 +24,11 @@ ai_provenance:
   source_artifacts: []
   invoking_user: ajodraca
   correlation_id: 6493d4a3-41a0-4991-9e37-c372f762c3d0
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-03T03:13:16Z
+  reviewed_revision: sha256:bd22e034482b4a9004705ceb14f538f543e03bac2c08aa2068ab0511bb3ca5c4
 ---
 
 # Product Charter: FactorFlow
@@ -33,16 +38,17 @@ ai_provenance:
 > first FactorFlow build, but no charter decision was inherited — every section
 > was re-decided.
 >
-> Five charter-level decisions are settled: the product keeps the name
+> Six charter-level decisions are settled: the product keeps the name
 > FactorFlow; it serves one owner-operator with no separation of duties; its
 > mandate runs from universe definition through factor classification and
-> strategy definition and execution to a deliberate paper-to-live gate; and the
+> strategy definition and execution to a deliberate paper-to-live gate; the
 > milestones run M1 through M6 in that order, with backtesting committed as M4
-> ahead of the promotion gate; and the system is a modular monolith with market
-> data ingestion split out.
+> ahead of the promotion gate; the system is a modular monolith with market
+> data ingestion split out; and Alpaca backs both paper and live trading, with
+> live expected to be movable to another broker later.
 >
-> Two questions are open rather than blocking — the dates for M2–M6 (OQ-2) and
-> the broker (OQ-3). Neither prevents capability definition from starting.
+> One question is open rather than blocking — the dates for M2–M6 (OQ-2). It
+> does not prevent capability definition from starting.
 
 ## 1. Mission Statement
 
@@ -122,7 +128,12 @@ during system design.
   fundamentals are restated and delisted instruments disappear, so state
   overwritten during M1 is lost for good.
 - **Broker Integration** — The external broker relationship used for paper and
-  live order routing.
+  live order routing. **Alpaca** backs both. Paper is a real broker environment
+  rather than a fill simulator, which is what makes a paper record worth
+  promoting on. The broker port keeps this replaceable: the owner expects to be
+  able to move live trading to a different broker if Alpaca proves inadequate
+  for a strategy, so the port is specified in the product's own terms rather
+  than any broker's.
 
 ## 4. Key Dates
 
@@ -152,5 +163,12 @@ even though the dates are not.
 - **OQ-2** — What are the target dates for M2 through M6? *(affects Key Dates)*
   Deliberately left open: the sequence is fixed, the dates depend on M1's
   outcome. Revisit once M1 lands.
-- **OQ-3** — Which broker backs paper and live trading? *(affects System
-  Overview, and gates M2 and M6)* Not chosen for the rebuild.
+- **OQ-3** — ~~Which broker backs paper and live trading?~~ **Resolved
+  2026-09-02: Alpaca, for both.** Chosen for a paper environment that is a real
+  broker rather than a simulator, and for a maintained first-party client on the
+  path where order placement and reconciliation errors become misplaced trades.
+  The choice is deliberately not permanent: the owner requires live trading to
+  be movable to another broker if Alpaca proves inadequate for some strategy, so
+  the broker port named in Section 3 is specified in the product's vocabulary
+  rather than Alpaca's. Whether paper would follow live to a new broker is left
+  to that migration. See Section 3.
