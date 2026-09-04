@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001
 artifact_type: capability
-artifact_version: 1
+artifact_version: 2
 id: CAP-001
 title: Market Data Acquisition Foundation
 description: >-
@@ -11,7 +11,7 @@ description: >-
   the owner-operator a way to see what was ingested and to tell when ingestion
   is failing.
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-09-04
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: draft
@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-03T04:02:22Z
+  timestamp: 2026-09-04T02:10:00Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
@@ -69,6 +69,9 @@ here.
 - The owner-operator names the instruments to acquire data for, as an explicit
   list they can add to and remove from. Composing universes by rule or screen is
   a later capability's concern; this capability needs only a stated list.
+- Removing an instrument retires it from future acquisition without discarding
+  what was already observed for it. Point-in-time history cannot be re-acquired
+  as-observed once discarded, so removal is not deletion.
 - Acquisition of instrument reference data, historical daily prices, company
   fundamentals and corporate actions for the named instruments, from the
   product's market data provider.
@@ -83,6 +86,9 @@ here.
 - Acquisition runs when the owner-operator starts it. The product does not
   promise continuously refreshed data, and does not judge acquired data to have
   expired.
+- The owner-operator can stop an acquisition run that is under way, and an
+  acquisition interrupted by anything else does not leave the product unable to
+  run another.
 - The owner-operator can see what was actually ingested: coverage per instrument
   (which data types are present, over what date range, and when that instrument
   was last acquired), the history of acquisition runs and their outcomes, the
@@ -154,6 +160,18 @@ here.
 4. They correct the cause and start the run again.
 5. The re-run completes and the affected instrument shows complete coverage;
    data that had already been acquired is neither duplicated nor overwritten.
+
+### Owner-Operator -- Stop an acquisition that is taking too long
+
+1. The owner-operator has started an acquisition covering a large instrument
+   list and decides not to let it finish.
+2. They see that the run is under way and ask to stop it.
+3. The run stops without starting the instruments it had not yet reached, and is
+   shown as cancelled rather than failed.
+4. The instruments it had already acquired keep their coverage, and a later run
+   completes the rest without re-fetching them.
+5. If the run had already finished by the time they asked, they are told it
+   completed rather than being shown a cancellation that did not happen.
 
 ### Owner-Operator -- Add an instrument after the first acquisition
 
@@ -233,6 +251,19 @@ here.
 18. **AC-18 — Operational visibility:** The owner-operator MUST be able to
     determine whether the product is running and whether its most recent
     acquisition run failed, without inspecting the data store directly.
+19. **AC-19 — Cancel a run in progress:** An owner-operator MUST be able to
+    cancel an acquisition run that is under way. The cancelled run MUST NOT begin
+    acquiring any instrument it had not already started, and coverage already
+    written MUST be retained.
+20. **AC-20 — An interrupted run does not block the next one:** An acquisition
+    run whose process stops unexpectedly MUST reach a terminal state without the
+    owner-operator modifying the data store, and MUST NOT prevent a subsequent
+    run from starting.
+21. **AC-21 — Removal retains history:** Removing an instrument from the
+    acquisition list MUST stop further acquisition for that instrument and MUST
+    retain every observation already recorded for it. The owner-operator MUST be
+    able to see that retained coverage and distinguish it from instruments still
+    being acquired.
 
 ## 5. Dependencies and Constraints
 
@@ -303,14 +334,16 @@ here.
 - **Does Massive's coverage and rate limiting hold for the full instrument
   count and history depth?** Provider evaluation is recorded as open in the
   approved tech stack. *(Affects AC-3, AC-4 and the assumptions above.)*
-- **What should happen to data already acquired for an instrument the
-  owner-operator removes from the list?** Retaining it preserves point-in-time
-  history; discarding it matches the owner's stated intent. *(Affects AC-1 and
-  the append-only constraint.)*
+- ~~What should happen to data already acquired for an instrument the
+  owner-operator removes from the list?~~ **Answered 2026-09-04: retained.**
+  Removal retires the instrument from future acquisition and keeps every
+  observation already recorded, because point-in-time history cannot be
+  re-acquired as-observed once discarded and an instrument dropped today may be
+  one a later backtest needs. See AC-21.
 
 ## 8. Readiness Assessment
 
-**Readiness Score: 82/100**
+**Readiness Score: 88/100**
 
 Architecture can begin. The problem, the affected user, the desired outcome and
 the scope boundaries are settled, including the three that most shape the work:
@@ -321,7 +354,12 @@ cover acquisition, point-in-time recording, re-run safety, visibility, failure
 diagnosis, credential handling, network exposure and forward data evolution.
 Every quantitative value is sourced to an owner decision rather than invented.
 
-Four open questions remain, none of them blocking. Two bear on external
+Twenty acceptance criteria now include cancellation and recovery from an
+interrupted run, both added on 2026-09-04 after system design found that a run
+claimed by a process that then dies would otherwise wedge acquisition with no
+remedy short of editing the data store by hand.
+
+Three open questions remain, none of them blocking. Two bear on external
 provider behaviour that only evaluation can settle; one is a security decision
 with a known trigger for revisiting rather than an unresolved choice; and one is
 a lifecycle detail on instrument removal that affects a single criterion. None
