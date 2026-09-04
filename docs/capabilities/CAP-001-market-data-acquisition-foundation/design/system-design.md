@@ -17,14 +17,14 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-03T22:35:47Z
+  timestamp: 2026-09-03T23:05:00Z
   source_artifacts:
     - id: CAP-001
-      version: "1, committed f0191fe"
+      version: "2, cancellation, recovery and removal semantics added 2026-09-04"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
-      version: "1, approved 2026-09-03"
+      version: "2, approved 2026-09-04 (OQ-TS-6 closed)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -170,6 +170,11 @@ sequenceDiagram
     J-->>R: 6. Run claimed (state=running)
 
     loop 7. For each named instrument
+        R->>J: 7a. Check for cancellation request<br/>and refresh claim heartbeat
+        alt 7b. Cancellation requested
+            R->>J: 7c. Mark run cancelled,<br/>keep coverage already written
+            Note over R,J: 7d. Loop exits; remaining<br/>instruments untouched
+        end
         R->>M: 8. Fetch reference, prices,<br/>fundamentals, corporate actions
         M->>G: 9. Await rate budget
         G-->>M: 10. Permit
@@ -184,10 +189,13 @@ sequenceDiagram
             X-->>M: 19. 404 / empty
             M-->>R: 20. NotFound
             R->>S: 21. Record per-instrument failure,<br/>continue loop
-        else 22. Rate budget exhausted or transport error
-            X-->>M: 23. 429 / timeout
-            M->>G: 24. Back off, retry within budget
-            Note over M,G: 25. Exhausted retries mark<br/>this instrument failed
+        else 22. Rate limited
+            X-->>M: 23. 429 (+ Retry-After)
+            M->>G: 24. Wait out the limit,<br/>not counted as an attempt
+        else 25. Transport or server error
+            X-->>M: 26. Timeout / 5xx
+            M->>G: 27. Exponential backoff,<br/>retry up to the attempt limit
+            Note over M,G: 28. On exhaustion mark this<br/>instrument failed and continue
         end
     end
 
@@ -209,6 +217,25 @@ On success it records the migration and the API begins accepting traffic. 36. On
 failure, or when the store carries a migration number this build does not know,
 the container exits non-zero and the API never binds, so no component reads or
 writes an inconsistent store.
+
+**Cancellation.** 44. The owner requests cancellation from the interface, which
+records the request against the run rather than acting on the process. 45. The
+runner observes it between instruments, at the same point it refreshes its claim
+heartbeat, so cancellation takes effect within one instrument's work rather than
+at the end of the run. 46. The run terminates as `cancelled`, distinct from
+`failed`, and the coverage already written is retained because it was committed
+per instrument. 47. Instruments not yet reached are simply absent from coverage,
+which is indistinguishable from never having been requested — there is no partial
+state to unwind.
+
+**Reclaiming an abandoned run.** 48. A runner refreshes a heartbeat on the run it
+holds. 49. A run whose heartbeat has not advanced beyond the configured staleness
+window is treated as abandoned: its claim is released and it is recorded as
+`abandoned`, terminal and distinct from both `failed` and `cancelled`. 50. This is
+what prevents a killed container, a crash or a reboot from wedging acquisition in
+`running` forever, which no other mechanism in this design recovers from. 51.
+Coverage written before the interruption stands, because AC-12's per-instrument
+commit boundary makes it independently valid.
 
 **Gap computation (AC-8).** 40. Gaps are computed at read time by
 `coverage-service`, not stored. 41. It forms the trading-day set as the union of
@@ -232,14 +259,14 @@ log record, and appears in no API response.
 |--------------|------|----------------|----------|
 | `owner-web-app` | Owner interface | React SPA presenting the instrument list, coverage, gaps, run history and failure detail | this design |
 | `ingestion-api` | Ingestion JSON API | FastAPI surface serving the interface; the only network entry point | this design |
-| `instrument-list-service` | Instrument list service | Maintains the owner's named instrument list and its history depth setting | this design |
-| `run-journal` | Run journal | Owns the acquisition run record and its lifecycle: requested, running, succeeded, partial, failed | this design |
+| `instrument-list-service` | Instrument list service | Maintains the owner's instrument list, each entry active or retired, and the history depth setting | this design |
+| `run-journal` | Run journal | Owns the acquisition run record and its lifecycle — requested, running, cancelling, succeeded, partial, failed, cancelled, abandoned — including cancellation requests and reclaim of runs whose runner died | this design |
 | `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps against the trading-day set formed from all named instruments' observed dates | this design |
 | `schema-migrator` | Schema migrator | Applies numbered forward-only SQL migrations and maintains `applied_migrations` | this design |
 | `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets | this design |
 | `acquisition-runner` | Acquisition runner | Claims a run request and drives acquisition instrument by instrument, isolating per-instrument failure | this design |
 | `massive-client` | Massive client | Hand-written HTTP client for Massive reference, aggregate, fundamental and corporate-action reads | this design |
-| `rate-limit-governor` | Rate limit governor | Paces provider requests to the configured budget and applies backoff on 429 and transport errors | this design |
+| `rate-limit-governor` | Rate limit governor | Paces provider requests to the configured budget, waits out rate limiting as flow control, and applies bounded exponential backoff to transport and server errors | this design |
 | `observation-writer` | Observation writer | Appends observations point-in-time with the observation date and extends coverage segments in the same transaction | this design |
 | `market-data-store` | Market data store | The PostgreSQL schema holding instruments, observations, coverage segments and run records | this design |
 
@@ -251,7 +278,8 @@ log record, and appears in no API response.
 | `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the owner's stated history depth, required before first run | stable within this capability |
 | `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; returns 202 and a run id | stable within this capability |
 | `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | JSON; run history, outcome, and per-instrument failure detail | stable within this capability |
-| `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days | stable within this capability |
+| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | JSON; requests cooperative cancellation of a running acquisition | stable within this capability |
+| `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days, and whether the instrument is active or retired | stable within this capability |
 | `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness and most recent run outcome | stable within this capability |
 | Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL row claimed with `SELECT ... FOR UPDATE SKIP LOCKED`; the only cross-container handoff | stable within this capability |
 | Observation append | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | **critical — C5, unrecoverable if wrong** |
@@ -264,14 +292,14 @@ log record, and appears in no API response.
 | Component repo | Language | Framework | Store | Key libraries | Source |
 |----------------|----------|-----------|-------|---------------|--------|
 | FactorFlow-v2 (application + ingestion) | Python 3.12+ | FastAPI on uvicorn | PostgreSQL 16, no ORM | `psycopg` 3, `httpx`, Pydantic, `ruff`, `mypy`, `pytest`, `testcontainers[postgres]` | tech-stack |
-| FactorFlow-v2 (owner interface) | TypeScript 5.x | React 18 with Vite | — | Tailwind CSS, **shadcn/ui on Radix primitives**, **TradingView Lightweight Charts**, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` | tech-stack + OQ-TS-6 resolved 2026-09-03 |
+| FactorFlow-v2 (owner interface) | TypeScript 5.x | React 18 with Vite | — | Tailwind CSS, **shadcn/ui on Radix primitives**, **TradingView Lightweight Charts**, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` | tech-stack v2, approved (OQ-TS-6 closed 2026-09-03) |
 
 The component and charting libraries were open as OQ-TS-6 in `tech-stack.md`,
 deferred to the first capability carrying a UX design. CAP-001 is that capability.
 The owner selected shadcn/ui on Radix primitives and TradingView Lightweight
-Charts on 2026-09-03. **This design records that decision; it does not make it
-authoritative.** `tech-stack.md` is a constitution artifact and must be updated
-through `$tech-stack` to close OQ-TS-6 — see Section 8.
+Charts on 2026-09-03, and **OQ-TS-6 was closed in `tech-stack.md` v2, approved
+2026-09-04**, so this design cites an authoritative source rather than recording a
+decision ahead of it.
 
 Charting is not used anywhere in CAP-001, which needs tables, forms and status
 only. The library is selected here because the tech stack's deferral named this
@@ -313,23 +341,42 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 6. **One market-data contract spanning historical reads and the live feed (C4).**
    Only the historical half is built here. The interface `massive-client` exposes
    must leave room for the M3 streaming half without redefinition.
-7. **Coverage is derived, never asserted.** A range is reported as covered only
+7. **Every claimed run reaches a terminal state.** A runner that dies must not
+   leave a run claimed indefinitely. Claims carry a heartbeat and a staleness
+   window, and an expired claim is reclaimed as `abandoned`. Without this, the
+   only recovery from an interrupted run is editing the database by hand, which
+   AC-18 exists to make unnecessary.
+8. **Removal retires, it never deletes.** An instrument removed from the list is
+   marked retired: `acquisition-runner` stops acquiring it, and every observation
+   already recorded for it stands. This follows from C5 — point-in-time history
+   cannot be re-acquired as observed, so a delete is unrecoverable — and it means
+   coverage reads must distinguish retired instruments rather than omit them.
+9. **Coverage is derived, never asserted.** A range is reported as covered only
    because rows exist for it. No component may record intended coverage ahead of
    the write that justifies it.
-8. **Forward-only schema evolution.** Numbered SQL migrations recorded in
+10. **Forward-only schema evolution.** Numbered SQL migrations recorded in
    `applied_migrations`. There is no reversal path, so a migration that loses data
    is unrecoverable.
-9. **Loopback-only interface, no authentication.** Owner decision of 2026-09-03.
+11. **Loopback-only interface, no authentication.** Owner decision of 2026-09-03.
    The container publishes its port to `127.0.0.1` only. The absence of
    authentication is sound solely because of that binding.
-10. **The provider credential is supplied at runtime.** It is never committed, never
+12. **The provider credential is supplied at runtime.** It is never committed, never
    logged, and never returned by any interface (AC-13, SEC-SEC-001).
-11. **Provider request rate is a configured budget.** The design is tier-agnostic:
+13. **Rate limiting is flow control; errors are failures.** A `429` means the
+    request was never served, so the governor waits — honouring `Retry-After`
+    where the provider supplies it — and does not count the wait as an attempt.
+    Timeouts and server errors are retried with exponential backoff up to a
+    configured attempt limit, **default 3 per instrument and data type** (owner
+    decision, 2026-09-04). On exhaustion the instrument is recorded as failed and
+    the run continues, which AC-11 already establishes as non-fatal. Conflating
+    the two would either abandon instruments over ordinary throttling or retry a
+    genuine outage until the run never ends.
+14. **Provider request rate is a configured budget.** The design is tier-agnostic:
     the owner's plan determines the budget, and `rate-limit-governor` paces to it.
     Runs must be resumable so that a long run is not lost to an interruption.
-12. **Structured logging only.** No direct console output in either process
+15. **Structured logging only.** No direct console output in either process
     (SA-LOG-001), and no restricted value in any log record.
-13. **One owner-operator.** No multi-tenancy, no per-user isolation, no horizontal
+16. **One owner-operator.** No multi-tenancy, no per-user isolation, no horizontal
     scale requirement anywhere in this design.
 
 ## 6. Architectural Assumptions
@@ -362,7 +409,7 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-1 | Named instrument list | `instrument-list-service`, `GET/POST/DELETE /api/instruments`, `owner-web-app` | 4.1, 4.2 |
 | AC-2 | History depth stated, not assumed | `PUT /api/settings/history-depth`; `acquisition-runner` refuses to claim a run with no depth set | 4.2, 3 |
 | AC-3 | Data types acquired | `massive-client` reference, aggregate, fundamental and corporate-action reads | 4.1, 4.2 |
-| AC-4 | Acquisition volume up to 3000 instruments | `rate-limit-governor` budget pacing; per-instrument transactions; resumable runs | 3, 5.11 |
+| AC-4 | Acquisition volume up to 3000 instruments | `rate-limit-governor` budget pacing; per-instrument transactions; resumable runs | 3, 5.13, 5.14 |
 | AC-5 | Point-in-time record | `observation-writer` appends with `observed_on`; provider `filing_date` stored as attribute only | 3, 5.3, 5.4 |
 | AC-6 | Re-run safety | `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key including a value hash | 3 step 16, 4.2 |
 | AC-7 | Coverage visibility | `coverage-service`, `GET /api/coverage`, `owner-web-app` | 4.1, 4.2 |
@@ -370,48 +417,35 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-9 | Honest run outcome | `run-journal` computes outcome from written coverage, not from intent | 3 steps 26-27 |
 | AC-10 | Failure diagnosis | Per-instrument failure records; `GET /api/acquisition-runs/{id}` | 3 step 21, 4.2 |
 | AC-11 | Unrecognised instrument does not stop the run | Per-instrument isolation in the runner loop | 3 steps 18-21 |
-| AC-12 | A failed run leaves no false history | Coverage segments extended only inside the committed write transaction | 3 step 17, 5.7 |
-| AC-13 | Credential handling | `runtime-config` environment load, redaction, no API echo | 3 steps 37-39, 5.10 |
-| AC-14 | Network exposure | Port published to `127.0.0.1` only; uvicorn bound to loopback | 5.9 |
+| AC-12 | A failed run leaves no false history | Coverage segments extended only inside the committed write transaction | 3 step 17, 5.9 |
+| AC-13 | Credential handling | `runtime-config` environment load, redaction, no API echo | 3 steps 37-39, 5.12 |
+| AC-14 | Network exposure | Port published to `127.0.0.1` only; uvicorn bound to loopback | 5.11 |
 | AC-15 | Forward data evolution | `schema-migrator`, numbered migrations, `applied_migrations` | 3 steps 32-35 |
 | AC-16 | Refuse an inconsistent start | Migrator exits non-zero; API never binds | 3 step 36 |
 | AC-17 | Honest empty state | `GET /api/coverage` distinguishes "never acquired" from "acquired, empty"; `owner-web-app` renders it | 4.2 |
 | AC-18 | Operational visibility | `GET /api/health` exposing liveness and most recent run outcome | 4.2 |
+| AC-19 | Cancel a run in progress | `POST /api/acquisition-runs/{id}/cancel`; `run-journal` cancellation request observed by `acquisition-runner` between instruments | 3 steps 44-47, 4.2 |
+| AC-20 | An interrupted run does not block the next one | Claim heartbeat and staleness window; `run-journal` reclaims an expired claim as `abandoned` | 3 steps 48-51, 5.7 |
+| AC-21 | Removal retains history | `instrument-list-service` retires rather than deletes; `GET /api/coverage` reports active and retired instruments | 4.1, 4.2, 5.8 |
 
 ## 8. Open Questions
 
-1. **OQ-TS-6 must be closed in `tech-stack.md`.** The owner selected shadcn/ui on
-   Radix primitives and TradingView Lightweight Charts on 2026-09-03, recorded in
-   Section 4.3. That file is a constitution artifact and this design cannot amend
-   it. *Answerer: owner, by running `$tech-stack`. Blocks: nothing in this design;
-   leaves governance out of step until done.*
-2. **How does the owner-operator interrupt or cancel a long-running acquisition?**
-   A 3000-instrument run against a constrained rate budget may run for hours. The
-   capability defines no cancel behaviour and no acceptance criterion covers it.
-   *Answerer: capability owner. Blocks: run lifecycle states in `run-journal`.*
-3. **What is the retry and backoff posture on provider errors?** Section 3 step 24
-   assumes retry within the rate budget, but no capability criterion states how
-   long a run should persist against a failing provider before marking an
-   instrument failed. *Answerer: owner. Blocks: `rate-limit-governor` behaviour.*
-4. **Does removing an instrument from the list remove its acquired history?** This
-   is open in the capability document itself (Section 7) and the design cannot
-   resolve it: append-only history (C5) argues for retention, the owner's intent
-   may argue otherwise. *Answerer: capability owner. Blocks: `instrument-list-service`
-   deletion semantics.*
+None. All questions raised during design were resolved on 2026-09-03 and
+2026-09-04; the resolutions are recorded in the sections above.
 
 ## 9. Source Documents
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-001 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 18 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; loopback-only decision |
+| Capability CAP-001 v2 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 21 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; loopback-only decision |
 | Product Charter v2 | `docs/constitution/product-charter.md` | Modular monolith with ingestion split out; point-in-time persistence; single owner-operator; M1 is Universe and Factors, 2026-Q4 |
-| Tech Stack v1 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider; fundamentals are not as-reported; market data source deliberately not abstracted; validation commands; OQ-TS-3 and OQ-TS-6 |
+| Tech Stack v2 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider; fundamentals are not as-reported; market data source deliberately not abstracted; validation commands; OQ-TS-3 and OQ-TS-6 |
 | Architecture inventory | `docs/architecture.md` | Empty: 0 designs, 0 components. CAP-001 declares the first component identifiers in the project |
 | Context cache | `cache/context_feeder/factorflow-v2/factorflow-v2/summary.md` | Refreshed 2026-09-03; confirms the three documents above are the whole corpus |
 
 ## 10. Design Readiness
 
-**Design Readiness Score: 84/100**
+**Design Readiness Score: 95/100**
 
 All ten sections carry substantive content. Section 4 declares twelve components
 with stable identifiers, records every cross-boundary interface with named
@@ -419,13 +453,19 @@ provider and consumer components, and names concrete approved technologies for
 both halves of the repository, so the design is implementable rather than
 technology-agnostic.
 
-Four open questions remain and none blocks decomposition into component designs.
-The question with real design consequence — how trading days are known, given that
-the provider supplies no historical calendar — was resolved on 2026-09-03 by
-deriving them from the named instruments' own observed dates, which needs no
-dependency, no capability change and no invented threshold, at the cost of two
-limits the design states plainly rather than conceals. What remains is two lifecycle
-details the capability itself left open (cancellation, instrument removal), one
-behavioural threshold needing an owner's number (retry posture), and one governance
-follow-up that leaves `tech-stack.md` out of step with the OQ-TS-6 decision already
-taken.
+No open questions remain. The four raised during design were resolved on
+2026-09-03 and 2026-09-04, and three of them changed the artifacts rather than
+merely being answered.
+
+How trading days are known was the question with real design consequence: the
+provider supplies no historical calendar, so they are derived from the named
+instruments' own observed dates — no dependency, no capability change, no invented
+threshold, at the cost of two limits the design states plainly. Cancellation
+exposed a defect rather than a gap: a run claimed by a process that then died
+would have stayed `running` for ever, recoverable only by editing the data store,
+so reclaim was added alongside cancellation and both became acceptance criteria
+in the capability. Removal semantics were settled toward retention, because
+point-in-time history cannot be re-acquired as observed once discarded.
+
+What keeps this below 100 is that the design has not yet been read by anyone but
+its author. Specification review is the gate that earns the remaining points.

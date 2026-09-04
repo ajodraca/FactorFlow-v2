@@ -2,11 +2,11 @@
 artifact_schema_version: 1
 artifact_id: tech-stack
 artifact_type: tech-stack
-artifact_version: 1
+artifact_version: 2
 product: FactorFlow
 created: 2026-09-02
-updated: 2026-09-03
-last_updated: 2026-09-02
+updated: 2026-09-04
+last_updated: 2026-09-03
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: approved
@@ -16,17 +16,21 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-02T03:09:26Z
+  timestamp: 2026-09-03T23:05:00Z
   source_artifacts:
     - id: product-charter
-      version: "2, committed 5d1fabd"
+      version: "2, approved 2026-09-03"
+    - id: CAP-001
+      version: "1, committed f0191fe"
+    - id: CAP-001-system-design
+      version: "1, committed baf246c"
   invoking_user: ajodraca
   correlation_id: 6493d4a3-41a0-4991-9e37-c372f762c3d0
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-03T03:13:16Z
-  reviewed_revision: sha256:106b54f93880f6fa3014e295fbd6608451b539a3c2bacde801c88dfe8dcaa4c3
+  approved_at: 2026-09-04T01:56:36Z
+  reviewed_revision: sha256:efbeb9c108431e5c9e2c969cde5ff3b6163846b970305aa81a3022d7da502a12
 ---
 
 # Tech Stack: FactorFlow
@@ -94,7 +98,7 @@ interface, and the specifications and constitution that govern them.
 | Package Manager | uv (Python); npm (frontend) |
 | Execution Runtime | An in-process scheduler inside the application container drives strategy evaluation cycles (`APScheduler`, or the equivalent chosen at system design). It reaches the order path only through the chokepoint that checks the kill-switch flag |
 | Container Runtime | Docker, self-hosted. PostgreSQL, the application and the ingestion process each run as a container on a machine the owner controls |
-| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), FastAPI / Starlette / Pydantic (API and validation), `httpx` (HTTP client for ingestion), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `websockets` (Massive live feed), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format). The numeric library for factor computation and backtesting is deferred — see OQ-TS-3; the component and charting libraries are deferred — see OQ-TS-6 |
+| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), FastAPI / Starlette / Pydantic (API and validation), `httpx` (HTTP client for ingestion), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `websockets` (Massive live feed), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
 
 **Rationale:**
 
@@ -349,7 +353,7 @@ Notes for agents:
 | OQ-TS-3 | **Which numeric library for factor computation and backtest replay** — `pandas`, `polars`, or SQL window functions? **Deferred by owner decision on 2026-09-02** to the system design of the first capability that requires it, because no capability has yet stated the data volumes or the computation shape and choosing without them would be guessing | Capability owner, at the system design of the first capability requiring factor computation | Classification and backtest implementation |
 | OQ-TS-4 | **How are Alpaca credentials stored and separated**, such that no test and no misconfiguration can reach the live environment? Alpaca's paper and live environments differ only by credentials and endpoint, which makes this a configuration-safety question rather than a theoretical one | Owner | Broker integration; test configuration |
 | ~~OQ-TS-5~~ | ~~Are exact dependency versions pinned now, or captured from the first lockfile?~~ **Answered 2026-09-02: captured from the first lockfile.** No version in this document is authoritative; `uv.lock` and `package-lock.json` are | — | — |
-| OQ-TS-6 | **Which component library and which charting library does the interface build on?** Options range from unstyled primitives with Tailwind, through a vendored component set, to a full component framework. **Deferred by owner decision on 2026-09-02** to the first capability that carries a UX design, because the screens that would decide it — backtest evidence (M4) and the promotion gate (M5) — are not yet specified | Owner, at the first capability with a UX design | Interface implementation; frontend dependency pinning |
+| ~~OQ-TS-6~~ | ~~Which component library and which charting library does the interface build on?~~ **Answered 2026-09-03: `shadcn/ui` on Radix primitives, and TradingView `lightweight-charts`.** The trigger fired earlier than expected: the deferral anticipated the M4 and M5 evidence screens, but CAP-001 delivers an ingestion view and so is the first capability carrying a UX design. Radix supplies keyboard and ARIA behaviour, which matters because Biome has no `jsx-a11y` equivalent; shadcn/ui vendors components into the repository rather than locking them behind a dependency, keeping the M5 promotion ceremony fully controllable. Charting is unused in CAP-001 and was chosen on the M4 and M5 screens: `lightweight-charts` is purpose-built for equity curves and OHLC series | — | — |
 
 ### Provider Evaluation — Massive
 
@@ -388,6 +392,17 @@ and growth factors. Momentum, being price-derived, is unaffected. This is the
 charter's own warning about restatement arriving through the data source rather
 than through the schema.
 
+**A second limitation, found during CAP-001 system design.** Massive supplies **no
+historical trading calendar**. Its market-holidays endpoint is
+`GET /v1/marketstatus/upcoming`, documented as forward-looking only: it accepts no
+date-range parameters, returns only future holidays, and records "Plan History: Not
+applicable to this endpoint" (verified 2026-09-03). No plan tier changes this. Any
+capability needing to distinguish a missing trading day from a non-trading day over
+a historical range must therefore source that calendar elsewhere, or derive it — as
+CAP-001 does, from the observed dates of the instruments it has acquired. Recorded
+here because it is a property of the provider rather than of any one capability, and
+because the single-provider decision is what makes it everyone's problem.
+
 **Commercial terms.** All plans are marked *individual use only*, and the free
 tier *non-pros only*. The owner confirmed non-professional status on 2026-09-02,
 which is consistent with C8 — one owner-operator trading their own capital.
@@ -418,4 +433,5 @@ limitation as a stated constraint on the promotion evidence.
 
 | Date | Change |
 |------|--------|
+| 2026-09-03 | Closed OQ-TS-6 on the owner's decision: `shadcn/ui` on Radix primitives for components, TradingView `lightweight-charts` for charting. The deferral had named "the first capability carrying a UX design" as its trigger and assumed that would be the M4 or M5 evidence screens; CAP-001 delivers an ingestion view and reached the UX stages first, so the trigger fired on a capability that needs tables and status rather than charts. Components were therefore decided on CAP-001's needs and accessibility posture, charting on M4 and M5's. Also recorded a second Massive limitation found while designing CAP-001: the provider has no historical trading calendar, its holiday endpoint being forward-looking only, which no plan tier changes. Approval was invalidated by these edits and the artifact returns to draft pending `$review-constitution` |
 | 2026-09-02 | Created for the FactorFlow rebuild, from the charter alone — no capabilities are defined yet, and nothing was inherited from the first build. Python, PostgreSQL without an ORM, and FastAPI were re-derived from the charter's backtesting commitment, its single-transaction money path and its point-in-time history requirement rather than from the broker SDK that justified the language the first time, because this charter leaves the broker open. SQLite was weighed against the two-process topology and rejected. The owner interface is React with Vite and Tailwind, chosen on the charter's committed backtest-evidence and promotion screens rather than by inheritance, and against a server-rendered alternative that would reach M1 sooner but would defer building the JSON API this choice has from the start. Docker on a self-hosted machine was chosen to express the two-process topology directly and to let database-backed tests run against real PostgreSQL, and an in-process scheduler drives execution because the charter's stated topology leaves no room for a dedicated execution process. Massive was adopted as the single provider for prices, fundamentals, corporate actions and instrument reference data, which removes the cross-provider identity problem entirely; its fundamentals are not as-reported, and that limitation was accepted with the obligation placed on the promotion evidence rather than on ingestion. Alpaca was chosen for both paper and live, closing charter OQ-3; because the owner requires live trading to be movable to another broker, the charter's existing broker port is specified in the product's vocabulary rather than Alpaca's, and no additional abstraction was introduced. The owner then closed the remaining commercial and lifecycle questions: paper and live are always the same broker, so promotion evidence is always generated against the executing venue; the owner qualifies as non-professional and upgrades the Massive plan as entitlements are needed, with the first upgrade due at M1 for fundamentals rather than at M3 for real-time; and dependency versions are captured from the first lockfile rather than pinned here. What remains open is deferred by decision rather than by omission: the numeric library, to the system design of the first capability requiring factor computation, and the interface component and charting libraries, to the first capability carrying a UX design. Alpaca credential separation is the one question still genuinely outstanding |
