@@ -29,11 +29,12 @@ standard. **It states the obligations; this design system satisfies them.** Wher
 disagree, STD-UI wins and this repository is corrected — a token or a spec is never the reason
 a rule bends.
 
-**One rule is currently unsatisfied.** STD-UI-10 requires the palette to be validated and the
-output recorded; `theme-validation.md` is that record, and it shows 16 contrast pairs below the
-WCAG 2.1 AA minimum STD-UI-24 adopts, 13 of them in the light theme. The tokens were carried
-over unchanged rather than adjusted to pass, because changing one is a design-language decision
-for the owner. See that record for what each failure affects.
+STD-UI-10 requires the palette to be validated and the output recorded; `theme-validation.md` is
+that record. The palette as ported failed it on 18 contrast pairs. All are resolved as of
+2026-09-05, and no pair now falls below the CIEDE2000 just-noticeable difference under normal or
+dichromat vision. Regenerate the record with `validate-theme.py` after changing any token, and
+read its Interpretation section before doing so: the contrast and colour-vision constraints pull
+against each other on the warm status tiers, and a change that satisfies one can break the other.
 
 Practically: STD-UI-29 obliges density, type scale and spacing to exist as tokens and be
 consumed everywhere, and `theme.css` is where they exist. STD-UI-12's six severity tiers,

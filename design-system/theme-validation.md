@@ -15,6 +15,13 @@ and Mollon (1999) applied to linear RGB.
 Contrast minima are WCAG 2.1 AA, adopted as the project target by STD-UI-24:
 4.5:1 for text, 3:1 for large text and interactive boundaries.
 
+Two pairs are measured and carry no minimum. `--border` draws separators —
+table rules, card, dialog, tabs, toast — and `--chart-grid` draws gridlines.
+Neither identifies a control, so WCAG 1.4.11 does not govern them and a
+verdict against 3:1 would be an invented obligation. The control boundary is
+`--input`, which the input, form and select specs already name, and which
+the button `outline` variant was moved onto for the same reason.
+
 **No pass threshold is applied to separation.** STD-UI-10 requires validation
 and a record; it sets no numeric floor, and none is invented here. A CIEDE2000
 difference of 1.0 is the just-noticeable difference, so a pair below it is
@@ -32,31 +39,34 @@ figures are reported and the threshold is left to the owner.
 | `--card-foreground` | `--card` | 17.90:1 | 4.5:1 | pass |
 | `--primary-foreground` | `--primary` | 17.09:1 | 4.5:1 | pass |
 | `--secondary-foreground` | `--secondary` | 16.31:1 | 4.5:1 | pass |
-| `--destructive-foreground` | `--destructive` | 4.58:1 | 4.5:1 | pass |
+| `--destructive-foreground` | `--destructive` | 4.67:1 | 4.5:1 | pass |
 | `--factor-foreground` | `--factor-momentum` | 6.52:1 | 4.5:1 | pass |
-| `--factor-foreground` | `--factor-value` | 4.37:1 | 4.5:1 | **FAIL** |
+| `--factor-foreground` | `--factor-value` | 4.76:1 | 4.5:1 | pass |
 | `--factor-foreground` | `--factor-growth` | 5.27:1 | 4.5:1 | pass |
-| `--risk-foreground` | `--risk-paper` | 4.37:1 | 4.5:1 | **FAIL** |
+| `--risk-foreground` | `--risk-paper` | 4.76:1 | 4.5:1 | pass |
 | `--risk-foreground` | `--risk-real-money` | 5.86:1 | 4.5:1 | pass |
-| `--gain` | `--gain-muted` | 3.89:1 | 4.5:1 | **FAIL** |
-| `--loss` | `--loss-muted` | 3.47:1 | 4.5:1 | **FAIL** |
+| `--gain` | `--gain-muted` | 4.65:1 | 4.5:1 | pass |
+| `--loss` | `--loss-muted` | 4.66:1 | 4.5:1 | pass |
+| `--gain` | `--background` | 5.09:1 | 4.5:1 | pass |
+| `--loss` | `--background` | 5.19:1 | 4.5:1 | pass |
 | `--neutral-value` | `--background` | 4.72:1 | 4.5:1 | pass |
-| `--value-missing` | `--background` | 2.53:1 | 4.5:1 | **FAIL** |
+| `--value-missing` | `--background` | 4.68:1 | 4.5:1 | pass |
 | `--value-indeterminate` | `--background` | 5.76:1 | 4.5:1 | pass |
-| `--border` | `--background` | 1.24:1 | 3.0:1 | **FAIL** |
+| `--input` | `--background` | 3.20:1 | 3.0:1 | pass |
 | `--ring` | `--background` | 17.90:1 | 3.0:1 | pass |
 | `--chart-axis` | `--background` | 4.72:1 | 3.0:1 | pass |
-| `--chart-grid` | `--background` | 1.24:1 | 3.0:1 | **FAIL** |
-| `--status-neutral` | `--status-neutral-muted` | 4.30:1 | 4.5:1 | **FAIL** |
-| `--status-foreground` | `--status-neutral` | 4.72:1 | 4.5:1 | pass |
-| `--status-active` | `--status-active-muted` | 4.52:1 | 4.5:1 | pass |
-| `--status-foreground` | `--status-active` | 5.05:1 | 4.5:1 | pass |
-| `--status-good` | `--status-good-muted` | 4.35:1 | 4.5:1 | **FAIL** |
-| `--status-foreground` | `--status-good` | 4.72:1 | 4.5:1 | pass |
-| `--status-warning` | `--status-warning-muted` | 2.32:1 | 4.5:1 | **FAIL** |
-| `--status-foreground` | `--status-warning` | 2.48:1 | 4.5:1 | **FAIL** |
-| `--status-serious` | `--status-serious-muted` | 3.68:1 | 4.5:1 | **FAIL** |
-| `--status-foreground` | `--status-serious` | 4.04:1 | 4.5:1 | **FAIL** |
+| `--border` | `--background` | 1.24:1 | none | not an obligation |
+| `--chart-grid` | `--background` | 1.24:1 | none | not an obligation |
+| `--status-neutral` | `--status-neutral-muted` | 4.79:1 | 4.5:1 | pass |
+| `--status-foreground` | `--status-neutral` | 5.25:1 | 4.5:1 | pass |
+| `--status-active` | `--status-active-muted` | 4.67:1 | 4.5:1 | pass |
+| `--status-foreground` | `--status-active` | 5.22:1 | 4.5:1 | pass |
+| `--status-good` | `--status-good-muted` | 4.84:1 | 4.5:1 | pass |
+| `--status-foreground` | `--status-good` | 5.24:1 | 4.5:1 | pass |
+| `--status-warning` | `--status-warning-muted` | 7.51:1 | 4.5:1 | pass |
+| `--status-foreground` | `--status-warning` | 8.04:1 | 4.5:1 | pass |
+| `--status-serious` | `--status-serious-muted` | 11.67:1 | 4.5:1 | pass |
+| `--status-foreground` | `--status-serious` | 12.84:1 | 4.5:1 | pass |
 | `--status-critical` | `--status-critical-muted` | 5.11:1 | 4.5:1 | pass |
 | `--status-foreground` | `--status-critical` | 5.81:1 | 4.5:1 | pass |
 
@@ -66,53 +76,53 @@ figures are reported and the threshold is left to the owner.
 
 | Pair | Normal | Protanopia | Deuteranopia | Tritanopia |
 |---|---|---|---|---|
-| `--status-neutral` / `--status-active` | 14.0 | 20.6 | 20.7 | 16.0 |
-| `--status-neutral` / `--status-good` | 33.1 | 34.2 | 32.5 | 9.4 |
-| `--status-neutral` / `--status-warning` | 42.5 | 45.1 | 48.6 | 61.8 |
-| `--status-neutral` / `--status-serious` | 37.2 | 39.3 | 43.4 | 57.9 |
-| `--status-neutral` / `--status-critical` | 37.6 | 35.0 | 40.9 | 56.5 |
-| `--status-active` / `--status-good` | 51.4 | 60.1 | 56.4 | 7.8 |
-| `--status-active` / `--status-warning` | 66.1 | 74.7 | 78.5 | 83.2 |
-| `--status-active` / `--status-serious` | 53.8 | 67.8 | 72.9 | 78.7 |
-| `--status-active` / `--status-critical` | 45.8 | 57.7 | 69.4 | 76.9 |
-| `--status-good` / `--status-warning` | 37.8 | 16.5 | 24.8 | 74.4 |
-| `--status-good` / `--status-serious` | 47.3 | 7.5 | 15.0 | 70.5 |
-| `--status-good` / `--status-critical` | 65.3 | 17.6 | 10.2 | 69.0 |
-| `--status-warning` / `--status-serious` | 20.9 | 16.8 | 11.7 | 8.3 |
-| `--status-warning` / `--status-critical` | 42.9 | 35.5 | 20.2 | 11.9 |
-| `--status-serious` / `--status-critical` | 21.7 | 16.5 | 8.5 | 3.6 |
+| `--status-neutral` / `--status-active` | 14.2 | 20.8 | 20.7 | 16.1 |
+| `--status-neutral` / `--status-good` | 32.1 | 33.1 | 31.3 | 9.3 |
+| `--status-neutral` / `--status-warning` | 34.3 | 37.6 | 39.0 | 50.1 |
+| `--status-neutral` / `--status-serious` | 37.2 | 37.1 | 38.9 | 49.2 |
+| `--status-neutral` / `--status-critical` | 36.9 | 33.3 | 40.3 | 56.2 |
+| `--status-active` / `--status-good` | 50.6 | 58.9 | 55.3 | 7.7 |
+| `--status-active` / `--status-warning` | 57.5 | 64.2 | 65.9 | 68.7 |
+| `--status-active` / `--status-serious` | 47.1 | 57.5 | 62.5 | 66.4 |
+| `--status-active` / `--status-critical` | 45.6 | 57.3 | 69.1 | 77.1 |
+| `--status-good` / `--status-warning` | 28.4 | 14.1 | 11.5 | 61.6 |
+| `--status-good` / `--status-serious` | 54.4 | 26.5 | 17.5 | 59.9 |
+| `--status-good` / `--status-critical` | 64.1 | 14.4 | 11.2 | 68.7 |
+| `--status-warning` / `--status-serious` | 26.1 | 15.3 | 9.7 | 6.2 |
+| `--status-warning` / `--status-critical` | 34.6 | 5.9 | 11.6 | 22.2 |
+| `--status-serious` / `--status-critical` | 20.0 | 12.4 | 21.1 | 28.2 |
 
 **Coverage presence states (STD-UI-14)**
 
 | Pair | Normal | Protanopia | Deuteranopia | Tritanopia |
 |---|---|---|---|---|
-| `--status-good` / `--value-missing` | 34.4 | 32.8 | 33.1 | 21.9 |
-| `--status-good` / `--value-indeterminate` | 35.3 | 37.4 | 35.2 | 8.8 |
-| `--value-missing` / `--value-indeterminate` | 23.2 | 22.8 | 23.7 | 23.5 |
+| `--status-good` / `--value-missing` | 31.7 | 32.3 | 30.8 | 10.6 |
+| `--status-good` / `--value-indeterminate` | 34.4 | 36.3 | 34.4 | 7.0 |
+| `--value-missing` / `--value-indeterminate` | 6.3 | 6.3 | 6.6 | 6.5 |
 
 **Direction and measured zero (STD-UI-7)**
 
 | Pair | Normal | Protanopia | Deuteranopia | Tritanopia |
 |---|---|---|---|---|
-| `--gain` / `--loss` | 49.6 | 21.8 | 32.7 | 74.6 |
-| `--gain` / `--neutral-value` | 23.6 | 17.3 | 8.6 | 12.3 |
-| `--loss` / `--neutral-value` | 38.0 | 39.0 | 44.1 | 59.3 |
+| `--gain` / `--loss` | 46.7 | 21.2 | 30.4 | 70.4 |
+| `--gain` / `--neutral-value` | 23.0 | 16.1 | 9.3 | 11.2 |
+| `--loss` / `--neutral-value` | 36.3 | 38.3 | 41.6 | 55.7 |
 
 **Factor classification**
 
 | Pair | Normal | Protanopia | Deuteranopia | Tritanopia |
 |---|---|---|---|---|
-| `--factor-momentum` / `--factor-value` | 28.4 | 20.1 | 12.3 | 17.9 |
+| `--factor-momentum` / `--factor-value` | 26.7 | 18.6 | 11.4 | 17.0 |
 | `--factor-momentum` / `--factor-growth` | 11.2 | 4.0 | 9.5 | 51.8 |
-| `--factor-value` / `--factor-growth` | 38.4 | 16.7 | 3.3 | 71.1 |
+| `--factor-value` / `--factor-growth` | 37.1 | 15.0 | 3.9 | 71.1 |
 
 **Risk channel vs destructive (STD-UI-11)**
 
 | Pair | Normal | Protanopia | Deuteranopia | Tritanopia |
 |---|---|---|---|---|
-| `--risk-paper` / `--risk-real-money` | 53.0 | 36.3 | 48.8 | 73.1 |
-| `--risk-paper` / `--destructive` | 52.8 | 44.1 | 55.0 | 75.7 |
-| `--risk-real-money` / `--destructive` | 9.5 | 10.3 | 8.5 | 6.1 |
+| `--risk-paper` / `--risk-real-money` | 52.1 | 34.5 | 48.1 | 73.4 |
+| `--risk-paper` / `--destructive` | 52.4 | 43.5 | 54.9 | 75.9 |
+| `--risk-real-money` / `--destructive` | 9.7 | 10.6 | 8.6 | 5.8 |
 
 **Categorical chart ramp (STD-UI-27)**
 
@@ -147,7 +157,7 @@ figures are reported and the threshold is left to the owner.
 
 | Pair | Normal | Protanopia | Deuteranopia | Tritanopia |
 |---|---|---|---|---|
-| `--status-serious` / `--loss` | 5.2 | **0.4** | 1.9 | 3.0 |
+| `--status-serious` / `--loss` | 22.7 | 21.0 | 22.7 | 25.7 |
 
 ## Dark theme
 
@@ -168,13 +178,16 @@ figures are reported and the threshold is left to the owner.
 | `--risk-foreground` | `--risk-real-money` | 5.13:1 | 4.5:1 | pass |
 | `--gain` | `--gain-muted` | 5.35:1 | 4.5:1 | pass |
 | `--loss` | `--loss-muted` | 5.28:1 | 4.5:1 | pass |
+| `--gain` | `--background` | 8.23:1 | 4.5:1 | pass |
+| `--loss` | `--background` | 7.38:1 | 4.5:1 | pass |
 | `--neutral-value` | `--background` | 7.47:1 | 4.5:1 | pass |
 | `--value-missing` | `--background` | 4.83:1 | 4.5:1 | pass |
 | `--value-indeterminate` | `--background` | 8.13:1 | 4.5:1 | pass |
-| `--border` | `--background` | 1.43:1 | 3.0:1 | **FAIL** |
+| `--input` | `--background` | 3.15:1 | 3.0:1 | pass |
 | `--ring` | `--background` | 12.96:1 | 3.0:1 | pass |
 | `--chart-axis` | `--background` | 7.47:1 | 3.0:1 | pass |
-| `--chart-grid` | `--background` | 1.43:1 | 3.0:1 | **FAIL** |
+| `--border` | `--background` | 1.43:1 | none | not an obligation |
+| `--chart-grid` | `--background` | 1.43:1 | none | not an obligation |
 | `--status-neutral` | `--status-neutral-muted` | 5.77:1 | 4.5:1 | pass |
 | `--status-foreground` | `--status-neutral` | 7.47:1 | 4.5:1 | pass |
 | `--status-active` | `--status-active-muted` | 4.97:1 | 4.5:1 | pass |
@@ -185,8 +198,8 @@ figures are reported and the threshold is left to the owner.
 | `--status-foreground` | `--status-warning` | 11.72:1 | 4.5:1 | pass |
 | `--status-serious` | `--status-serious-muted` | 5.76:1 | 4.5:1 | pass |
 | `--status-foreground` | `--status-serious` | 8.29:1 | 4.5:1 | pass |
-| `--status-critical` | `--status-critical-muted` | 3.95:1 | 4.5:1 | **FAIL** |
-| `--status-foreground` | `--status-critical` | 5.03:1 | 4.5:1 | pass |
+| `--status-critical` | `--status-critical-muted` | 4.64:1 | 4.5:1 | pass |
+| `--status-foreground` | `--status-critical` | 5.91:1 | 4.5:1 | pass |
 
 ### Pair separation, CIEDE2000
 
@@ -198,17 +211,17 @@ figures are reported and the threshold is left to the owner.
 | `--status-neutral` / `--status-good` | 35.2 | 36.2 | 33.9 | 7.4 |
 | `--status-neutral` / `--status-warning` | 43.5 | 42.8 | 45.8 | 60.3 |
 | `--status-neutral` / `--status-serious` | 36.5 | 38.8 | 42.8 | 58.5 |
-| `--status-neutral` / `--status-critical` | 36.1 | 31.9 | 36.4 | 56.1 |
+| `--status-neutral` / `--status-critical` | 33.4 | 26.2 | 33.7 | 56.6 |
 | `--status-active` / `--status-good` | 50.4 | 57.7 | 54.5 | 7.3 |
 | `--status-active` / `--status-warning` | 58.6 | 66.5 | 70.4 | 76.7 |
 | `--status-active` / `--status-serious` | 50.8 | 61.3 | 66.9 | 74.4 |
-| `--status-active` / `--status-critical` | 43.9 | 46.2 | 57.1 | 71.1 |
+| `--status-active` / `--status-critical` | 41.6 | 41.2 | 53.7 | 72.0 |
 | `--status-good` / `--status-warning` | 35.1 | 9.0 | 16.5 | 70.6 |
 | `--status-good` / `--status-serious` | 48.7 | 8.7 | 11.5 | 68.8 |
-| `--status-good` / `--status-critical` | 71.8 | 27.4 | 9.2 | 66.3 |
+| `--status-good` / `--status-critical` | 68.8 | 23.1 | 5.3 | 66.9 |
 | `--status-warning` / `--status-serious` | 18.5 | 11.6 | 7.7 | 4.9 |
-| `--status-warning` / `--status-critical` | 45.8 | 33.7 | 21.5 | 13.0 |
-| `--status-serious` / `--status-critical` | 28.0 | 23.1 | 14.3 | 8.2 |
+| `--status-warning` / `--status-critical` | 43.5 | 30.0 | 20.3 | 10.8 |
+| `--status-serious` / `--status-critical` | 26.7 | 20.4 | 13.8 | 6.0 |
 
 **Coverage presence states (STD-UI-14)**
 
@@ -279,129 +292,112 @@ figures are reported and the threshold is left to the owner.
 
 ## Summary
 
-**Contrast: 16 pair(s) below the WCAG 2.1 AA minimum.**
-
-| Theme | Pair | Used for | Ratio | Minimum |
-|---|---|---|---|---|
-| light | `--factor-foreground` on `--factor-value` | factor badge label | 4.37:1 | 4.5:1 |
-| light | `--risk-foreground` on `--risk-paper` | paper badge label | 4.37:1 | 4.5:1 |
-| light | `--gain` on `--gain-muted` | gain badge label | 3.89:1 | 4.5:1 |
-| light | `--loss` on `--loss-muted` | loss badge label | 3.47:1 | 4.5:1 |
-| light | `--value-missing` on `--background` | missing marker in a cell | 2.53:1 | 4.5:1 |
-| light | `--border` on `--background` | table rule and input boundary | 1.24:1 | 3.0:1 |
-| light | `--chart-grid` on `--background` | chart gridline | 1.24:1 | 3.0:1 |
-| light | `--status-neutral` on `--status-neutral-muted` | neutral status badge label | 4.30:1 | 4.5:1 |
-| light | `--status-good` on `--status-good-muted` | good status badge label | 4.35:1 | 4.5:1 |
-| light | `--status-warning` on `--status-warning-muted` | warning status badge label | 2.32:1 | 4.5:1 |
-| light | `--status-foreground` on `--status-warning` | warning status on a solid ground | 2.48:1 | 4.5:1 |
-| light | `--status-serious` on `--status-serious-muted` | serious status badge label | 3.68:1 | 4.5:1 |
-| light | `--status-foreground` on `--status-serious` | serious status on a solid ground | 4.04:1 | 4.5:1 |
-| dark | `--border` on `--background` | table rule and input boundary | 1.43:1 | 3.0:1 |
-| dark | `--chart-grid` on `--background` | chart gridline | 1.43:1 | 3.0:1 |
-| dark | `--status-critical` on `--status-critical-muted` | critical status badge label | 3.95:1 | 4.5:1 |
+**Contrast: 0 pair(s) below the WCAG 2.1 AA minimum.**
 
 **Separation: weakest pair per group, ordered worst first.**
 
 | Difference | Theme | Group | Pair | Vision |
 |---|---|---|---|---|
-| **0.4** | light | Status vs direction, the adjacency theme.css records | `--status-serious` / `--loss` | protanopia |
 | 1.6 | dark | Factor classification | `--factor-value` / `--factor-growth` | deuteranopia |
 | 1.6 | dark | Categorical chart ramp (STD-UI-27) | `--chart-1` / `--chart-5` | deuteranopia |
 | 1.6 | light | Categorical chart ramp (STD-UI-27) | `--chart-1` / `--chart-2` | tritanopia |
 | 1.8 | dark | Status vs direction, the adjacency theme.css records | `--status-serious` / `--loss` | tritanopia |
-| 3.3 | light | Factor classification | `--factor-value` / `--factor-growth` | deuteranopia |
-| 3.6 | light | Status severity tiers (STD-UI-12) | `--status-serious` / `--status-critical` | tritanopia |
+| 3.9 | light | Factor classification | `--factor-value` / `--factor-growth` | deuteranopia |
 | 4.9 | dark | Status severity tiers (STD-UI-12) | `--status-warning` / `--status-serious` | tritanopia |
+| 5.8 | light | Risk channel vs destructive (STD-UI-11) | `--risk-real-money` / `--destructive` | tritanopia |
+| 5.9 | light | Status severity tiers (STD-UI-12) | `--status-warning` / `--status-critical` | protanopia |
 | 6.0 | dark | Direction and measured zero (STD-UI-7) | `--gain` / `--neutral-value` | deuteranopia |
-| 6.1 | light | Risk channel vs destructive (STD-UI-11) | `--risk-real-money` / `--destructive` | tritanopia |
+| 6.3 | light | Coverage presence states (STD-UI-14) | `--value-missing` / `--value-indeterminate` | normal |
 | 6.4 | dark | Coverage presence states (STD-UI-14) | `--status-good` / `--value-indeterminate` | tritanopia |
 | 6.6 | dark | Risk channel vs destructive (STD-UI-11) | `--risk-real-money` / `--destructive` | tritanopia |
-| 8.6 | light | Direction and measured zero (STD-UI-7) | `--gain` / `--neutral-value` | deuteranopia |
-| 8.8 | light | Coverage presence states (STD-UI-14) | `--status-good` / `--value-indeterminate` | tritanopia |
+| 9.3 | light | Direction and measured zero (STD-UI-7) | `--gain` / `--neutral-value` | deuteranopia |
 | 9.5 | dark | Sequential ramp, consecutive steps (STD-UI-7) | `--seq-4` / `--seq-5` | protanopia |
 | 9.6 | light | Sequential ramp, consecutive steps (STD-UI-7) | `--seq-1` / `--seq-2` | protanopia |
+| 21.0 | light | Status vs direction, the adjacency theme.css records | `--status-serious` / `--loss` | protanopia |
 
 ## Interpretation
 
 Maintained by hand. Regenerating the tables above does not rewrite this section.
 
-Validated 2026-09-05 against `theme.css` as ported. **The theme does not yet
-satisfy STD-UI-10**, and this record is what that rule asked for: the validation
-exists and its output is recorded, including where it fails. No token value was
-changed to produce a better result. Changing one is a design-language decision,
-which `theme.css` reserves to a deliberate edit, so every finding below is for
-the owner to settle rather than for the pipeline to quietly fix.
+Validated 2026-09-05. **The theme satisfies STD-UI-10.** Every contrast pair that
+carries an obligation meets WCAG 2.1 AA, and no pair in any group falls below the
+CIEDE2000 just-noticeable difference under normal, protanopic, deuteranopic or
+tritanopic vision.
 
-### The sixteen contrast failures are not one problem
+It did not start there. The palette as ported carried 18 failing pairs, and the
+repair was not a matter of nudging values.
 
-**Nine are text on a `-muted` ground in the light theme, and they are the same
-mistake repeated.** The `-muted` grounds are near-white at 94 to 97 percent
-lightness, and the tier colours were chosen to look right as solid fills rather
-than as text on those grounds. `--status-warning` at 2.32:1 and
-`--status-foreground` on `--status-warning` at 2.48:1 are the worst; amber at 42
-percent lightness cannot carry white text, and no adjustment short of moving the
-hue or the lightness fixes it. Three more sit just under the bar at 4.30, 4.35
-and 4.37, which a small lightness step would clear. The dark theme has one of
-these, `--status-critical` at 3.95:1.
+### What was wrong, and what it cost to fix
 
-This matters most for CAP-001 because the run history renders all six tiers as
-badges, and the badge specification puts the tier colour on its `-muted` ground.
+**Sixteen failures were text that could not be read on the ground it sat on.**
+Nine were tier colours chosen to look right as solid fills and then used as text
+on near-white `-muted` grounds. `--status-warning` at 2.32:1 was the worst.
+Coloured text on a ground at 94 to 97 percent lightness needs the text dark, and
+that single constraint drove most of the repair.
 
-**Two are `--gain` and `--loss` on their muted grounds** at 3.89:1 and 3.47:1 in
-the light theme. Both clear comfortably in dark. CAP-001 renders no market
-direction, so these bind M2 onward rather than this capability.
+Two more were found only by widening the check. `--gain` and `--loss` are used as
+cell text on `--background` by the `data-table` specification, which the original
+record did not test; they measured 4.26:1 and 3.86:1. Both are fixed.
 
-**One is `--value-missing` on `--background` at 2.53:1.** The em dash that
-STD-UI-4 requires for an absent observation is text, so 4.5:1 applies. It is
-plausibly deliberate, a missing marker being visually quiet by design, but at
-2.53:1 it is quiet past the point of legibility. This one does bind CAP-001: the
-coverage overview renders it in every uncovered cell.
+**Two of the original sixteen were not obligations and were reclassified rather
+than fixed.** `--border` draws separators and `--chart-grid` draws gridlines.
+Neither identifies a control, so WCAG 1.4.11 does not govern them, and holding
+them to 3:1 would have produced table rules heavy enough to damage a dense table
+for no accessibility gain. The control boundary is `--input`, which the input,
+form and select specifications already name and whose own spec already required
+3:1 while measuring 1.24:1. It is fixed, and the `button` `outline` variant was
+moved from `--border` onto it so that every interactive boundary now uses the
+token that carries the obligation.
 
-**Two are `--border` and `--chart-grid` at 1.24:1 light and 1.43:1 dark**, and
-these two are not the same as each other. A chart gridline is decorative and
-WCAG 1.4.11 does not govern it, so `--chart-grid` is reported for completeness
-rather than as a defect. `--border` is different: `--input` carries the same
-value and an input's boundary is an interactive boundary, which STD-UI-24 holds
-to 3:1. The failure is real wherever the token draws a control; it is not where
-the token draws a table rule.
+### The fix broke something, and that had to be fixed too
 
-### The separation findings are mostly already mitigated, and one is not
+Darkening the warm tiers to satisfy contrast pushed `--status-warning` and
+`--status-serious` together: they fell from 11.6 apart to **0.4** under
+deuteranopia, below the just-noticeable difference. Trading a contrast failure
+for a colour-vision failure is not a repair, and the two constraints pull against
+each other directly. Contrast caps how light a warm tier may be; dark warm hues
+converge under deuteranopia.
 
-`theme.css` records the `--status-serious` against `--loss` adjacency as
-"considered and accepted", on the grounds that the two are never confusable
-because STD-UI-8 requires a text label and an icon on every status and STD-UI-3
-an explicit sign on every direction. The measurement supports the concern and
-sharpens it: under protanopia the pair differs by 0.4, which is below the
-just-noticeable difference, so the two are not merely near but indistinguishable.
-The acceptance still holds, because the mitigation is a rule rather than a
-preference. What the number changes is its standing: the non-colour encoding is
-load-bearing here, not a second line of defence, and any surface that renders
-either as a bare swatch is a genuine defect rather than a style lapse.
+Lightness alone could not resolve it, so hue was opened up as well. `--status-warning`
+moved to 47 and `--status-serious` from 30 to 12, both at 20 percent lightness,
+which was the best available outcome across a search of both dimensions subject
+to every contrast constraint. The pair now measures 6.2. The owner accepted the
+cost on 2026-09-05: the warm tiers read as dark brown and dark red rather than
+amber and orange, so they carry less at-a-glance semantic colour than they did.
 
-The same reading covers `--factor-value` against `--factor-growth` at 3.3 light
-and 1.6 dark under deuteranopia, since the badge specification requires the
-factor name as text.
+This also retired a defect the theme had already recorded as accepted.
+`--status-serious` used to sit beside `--loss` at 0.4 under protanopia. They now
+measure 21.0, and the note in `theme.css` is updated to say so.
 
-**The categorical chart ramp is the finding with no mitigation behind it.**
-`--chart-1` and `--chart-5` differ by 1.6 under deuteranopia in the dark theme,
-and `--chart-1` and `--chart-2` by 1.6 under tritanopia in the light theme. The
-comment above the ramp in `theme.css` claims it is "distinguishable in sequence
-and under common colour vision deficiencies", and for those pairs it is not.
-STD-UI-27 requires a legend on any chart with two or more series, which gives a
-reader a way to recover identity, but a legend is a lookup rather than a
-distinction, and the ramp's own stated property does not hold. CAP-001 renders no
-chart, so nothing here blocks it; M4 and M5 are where it lands.
+### What still relies on its non-colour encoding
+
+Three groups sit in single digits, and in each the mitigation is a rule rather
+than a preference.
+
+`--factor-value` against `--factor-growth` measures 3.9 light and 1.6 dark under
+deuteranopia. The `badge` specification requires the factor name as text, so the
+colour is confirmation rather than the carrier.
+
+The categorical chart ramp has pairs at 1.6, and STD-UI-27 requires a legend on
+any chart with two or more series. A legend is a lookup rather than a
+distinction, so this is the weakest of the three arguments. It binds M4 and M5;
+CAP-001 renders no chart.
+
+`--value-missing` against `--value-indeterminate` narrowed from 23.2 to 6.3 as a
+direct consequence of darkening `--value-missing` for contrast. This is by design
+rather than despite it: `theme.css` already states that colour alone cannot
+separate the three presence states at these lightnesses and mandates
+`--pattern-indeterminate` and an explicit label, which STD-UI-14 requires anyway.
+The narrowing makes that mandate load-bearing rather than supplementary.
 
 ### What is not decided here
 
 STD-UI-10 requires separation to be validated and recorded but sets no numeric
 floor, so none is applied above. The just-noticeable difference of 1.0 is a
-property of CIEDE2000 rather than a policy, and it tells you which pairs are
-indistinguishable, not which are acceptable.
+property of CIEDE2000 rather than a policy: it tells you which pairs are
+indistinguishable, not which are acceptable. Every pair now clears it, which is a
+weaker statement than clearing a threshold the product has chosen.
 
 `[REQUIRES INPUT: the minimum CIEDE2000 separation a palette pair must hold under
 normal and dichromat vision, and whether the floor differs for pairs that carry a
 mandatory text label under STD-UI-8]`
-
-Two of the findings above turn on that answer. The rest are contrast failures
-against a threshold STD-UI-24 already fixes, and they stand regardless.

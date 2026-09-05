@@ -234,13 +234,16 @@ def contrast_pairs():
         ("--risk-foreground", "--risk-real-money", 4.5, "real-money badge label"),
         ("--gain", "--gain-muted", 4.5, "gain badge label"),
         ("--loss", "--loss-muted", 4.5, "loss badge label"),
+        ("--gain", "--background", 4.5, "positive value in a table cell"),
+        ("--loss", "--background", 4.5, "negative value in a table cell"),
         ("--neutral-value", "--background", 4.5, "measured zero in a cell"),
         ("--value-missing", "--background", 4.5, "missing marker in a cell"),
         ("--value-indeterminate", "--background", 4.5, "indeterminate marker in a cell"),
-        ("--border", "--background", 3.0, "table rule and input boundary"),
+        ("--input", "--background", 3.0, "control boundary: input, select trigger, outline button"),
         ("--ring", "--background", 3.0, "focus ring"),
         ("--chart-axis", "--background", 3.0, "chart axis"),
-        ("--chart-grid", "--background", 3.0, "chart gridline"),
+        ("--border", "--background", None, "separator: table rule, card, dialog, tabs, toast"),
+        ("--chart-grid", "--background", None, "chart gridline"),
     ]
     for tier in ("neutral", "active", "good", "warning", "serious", "critical"):
         pairs.append((f"--status-{tier}", f"--status-{tier}-muted", 4.5,
@@ -278,6 +281,13 @@ def main():
     w("Contrast minima are WCAG 2.1 AA, adopted as the project target by STD-UI-24:")
     w("4.5:1 for text, 3:1 for large text and interactive boundaries.")
     w("")
+    w("Two pairs are measured and carry no minimum. `--border` draws separators —")
+    w("table rules, card, dialog, tabs, toast — and `--chart-grid` draws gridlines.")
+    w("Neither identifies a control, so WCAG 1.4.11 does not govern them and a")
+    w("verdict against 3:1 would be an invented obligation. The control boundary is")
+    w("`--input`, which the input, form and select specs already name, and which")
+    w("the button `outline` variant was moved onto for the same reason.")
+    w("")
     w("**No pass threshold is applied to separation.** STD-UI-10 requires validation")
     w("and a record; it sets no numeric floor, and none is invented here. A CIEDE2000")
     w("difference of 1.0 is the just-noticeable difference, so a pair below it is")
@@ -299,6 +309,9 @@ def main():
             if fg not in tokens or bg not in tokens:
                 continue
             r = contrast_ratio(tokens[fg], tokens[bg])
+            if minimum is None:
+                w(f"| `{fg}` | `{bg}` | {r:.2f}:1 | none | not an obligation |")
+                continue
             ok = r >= minimum
             if not ok:
                 failures.append((block, fg, bg, r, minimum, why))

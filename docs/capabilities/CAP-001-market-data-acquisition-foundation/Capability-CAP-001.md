@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001
 artifact_type: capability
-artifact_version: 4
+artifact_version: 5
 id: CAP-001
 title: Market Data Acquisition Foundation
 description: >-
@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-05T03:45:00Z
+  timestamp: 2026-09-05T04:15:00Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
@@ -330,7 +330,7 @@ must agree.
 | STD-UI-7 | partial | Status palette only. CAP-001 renders no direction, magnitude or categorical series |
 | STD-UI-8 | yes | UX brief 6. Every status carries a text label plus icon or shape; greyscale readability is the test |
 | STD-UI-9 | no | No series and no per-entity colour. CAP-001 renders no chart |
-| STD-UI-10 | no | Binds the shared theme, not this capability. `design-system/theme-validation.md` records the validation and its 16 outstanding contrast failures |
+| STD-UI-10 | no | Binds the shared theme, not this capability. `design-system/theme-validation.md` records the validation; satisfied as of 2026-09-05 |
 | STD-UI-11 | no | CAP-001 delivers no trading and has no paper or live environment. UX brief 2.6 shapes the status region to receive the obligation later |
 | STD-UI-12 | yes | UX brief 12.2 carries the tier table. No state and no tier is added |
 | STD-UI-13 | yes | UX brief 2.1. Last-acquired and covered range inline; observation dates one interaction away |
