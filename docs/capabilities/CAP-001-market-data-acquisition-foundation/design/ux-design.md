@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-ux-design
 artifact_type: ux-design
-artifact_version: 3
+artifact_version: 4
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-05
@@ -26,7 +26,7 @@ ai_provenance:
     - id: CAP-001
       version: "6"
     - id: CAP-001-system-design
-      version: "2"
+      version: "3"
     - id: CAP-001-ux-brief
       version: "5"
     - id: STD-UI
@@ -660,6 +660,8 @@ specs resolve.
 | AC-19 | Cancel a run in progress | 1.5 cancel action, `cancelling` state, the already-completed edge | `button` `secondary` + `dialog` `confirm` |
 | AC-20 | An interrupted run does not block the next one | 1.5 abandoned-run explanation and the new-run path | `badge` `status-serious` |
 | AC-21 | Removal retains history | 1.2 retire wording and `confirm` variant; 1.1 retired rows retained and marked | `dialog` `confirm` + `badge` `secondary` |
+| AC-22 | Deepening history depth backfills | 1.1 Depth column, *Short by `n` years* presentation | `badge` `status-warning` |
+| AC-23 | Concurrent run requests queue | 1.1 Start action queued state, *A run is in progress* message | `button` `default` |
 
 **Run outcome tier mapping**, reproduced from STD-UI-12 because this design is
 where it is rendered:
@@ -680,8 +682,8 @@ where it is rendered:
 | Source | Reference | Verification Method | Date |
 |--------|-----------|---------------------|------|
 | UX brief v5 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-brief.md` | Text reference. Six screens, information architecture, interactions and conformance record read in full | 2026-09-05 |
-| Capability CAP-001 v5 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | Text reference. All 21 acceptance criteria traced in Section 5 | 2026-09-05 |
-| System design v1 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` | Text reference. Endpoints, run lifecycle, 202-and-poll, derived coverage, gap unavailability | 2026-09-05 |
+| Capability CAP-001 v6 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | Text reference. All 23 acceptance criteria traced in Section 5 | 2026-09-05 |
+| System design v3 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` | Text reference. Endpoints, run lifecycle, 202-and-poll, derived coverage, gap unavailability | 2026-09-05 |
 | STD-UI v4 | `docs/constitution/standards/ui-conventions.md` | Text reference. Approved 2026-09-05; all 30 rules read, those governing this design cited inline | 2026-09-05 |
 | Component specifications | `design-system/components/` | Text reference. All 12 read; 10 used, 2 unused with reasons; token references checked mechanically against the theme, which found and closed one defect | 2026-09-05 |
 | Theme tokens | `design-system/theme.css` | Text reference. Every token named in this design verified to exist | 2026-09-05 |
