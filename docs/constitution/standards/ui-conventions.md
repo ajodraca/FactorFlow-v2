@@ -134,7 +134,7 @@ Recorded as scope conditions so that a reviewer does not raise them as findings.
 
 ### 3.1 Language and vocabulary
 
-#### STD-UI-1 — Product vocabulary
+### STD-UI-1 — Product vocabulary
 
 **Rule:** User-visible text MUST use the product's domain vocabulary. It MUST NOT
 substitute generic terms — job, sync, import, task, item, object, entity, record,
@@ -152,7 +152,7 @@ brief and implementation against this list.
 **Specialization:** permitted — a capability MAY add a term its domain
 introduces, recording it in its UX brief. It MAY NOT redefine a term above.
 
-#### STD-UI-2 — Words must describe actual behaviour
+### STD-UI-2 — Words must describe actual behaviour
 
 **Rule:** Labels, confirmations and messages MUST describe what the product
 actually does. They MUST NOT describe behaviour the product does not have.
@@ -166,7 +166,7 @@ behaviour its acceptance criterion defines.
 
 ### 3.2 Quantities and time
 
-#### STD-UI-3 — Comparable figures
+### STD-UI-3 — Comparable figures
 
 **Rule:** Numeric values that can be compared within a column MUST render in
 tabular figures, MUST be right- and decimal-aligned, MUST use a precision fixed
@@ -178,7 +178,7 @@ owner's primary activity, and factor evidence is read by scanning columns.
 **Verification:** A screenshot of any table containing a numeric column.
 **Specialization:** none.
 
-#### STD-UI-4 — Missing is not zero
+### STD-UI-4 — Missing is not zero
 
 **Rule:** A value for which no observation exists MUST render as an explicit
 missing marker, distinct from both zero and blank. Zero MUST represent only a
@@ -190,7 +190,7 @@ forbids an empty state that reads as a healthy one.
 every numeric field in the capability.
 **Specialization:** none.
 
-#### STD-UI-5 — Dates and timestamps
+### STD-UI-5 — Dates and timestamps
 
 **Rule:** Dates MUST render in ISO-8601 (`YYYY-MM-DD`) and MUST NOT be
 locale-formatted. Timestamps MUST carry a visible time zone. The product MUST
@@ -201,7 +201,7 @@ date a value was known is load-bearing evidence rather than metadata.
 **Verification:** Any rendered date or timestamp.
 **Specialization:** none. The zone itself is open — see §5.3, OQ-UI-3.
 
-#### STD-UI-6 — No abbreviation where values are compared
+### STD-UI-6 — No abbreviation where values are compared
 
 **Rule:** Magnitudes MUST NOT be abbreviated in any table or list where values
 are compared against one another. Abbreviation is permitted only where a single
@@ -213,7 +213,7 @@ value stands alone.
 
 ### 3.3 Colour and status
 
-#### STD-UI-7 — One job per palette
+### STD-UI-7 — One job per palette
 
 **Rule:** Colour MUST serve exactly one of four jobs, and no palette MUST serve
 two: **categorical** (identity), **sequential** (magnitude, one hue light to
@@ -236,7 +236,7 @@ outside the status palette resolves to a red or green hue.
 **Specialization:** none. The assignment is the rule; inverting it is an
 amendment to this rule, not a capability's choice.
 
-#### STD-UI-8 — Colour is never the sole carrier
+### STD-UI-8 — Colour is never the sole carrier
 
 **Rule:** State, identity and direction MUST each carry a non-colour encoding: a
 text label plus an icon or shape for state, a legend entry for series identity,
@@ -246,7 +246,7 @@ an explicit sign for direction.
 **Verification:** A greyscale rendering of the surface remains fully readable.
 **Specialization:** none.
 
-#### STD-UI-9 — Colour follows the entity
+### STD-UI-9 — Colour follows the entity
 
 **Rule:** A series colour MUST be assigned by entity and MUST NOT be assigned by
 rank or position. Changing a filter MUST NOT repaint the entities that remain.
@@ -256,7 +256,7 @@ rank or position. Changing a filter MUST NOT repaint the entities that remain.
 colours.
 **Specialization:** none.
 
-#### STD-UI-10 — Palettes are validated, not judged
+### STD-UI-10 — Palettes are validated, not judged
 
 **Rule:** Before use, a palette MUST be validated for adjacent-pair separation
 under colour-vision deficiency, separation under normal vision, and contrast
@@ -266,7 +266,7 @@ against its surface. The validation output MUST be recorded.
 **Verification:** The recorded validation output accompanies the theme.
 **Specialization:** stricter-only.
 
-#### STD-UI-11 — Paper and live are always distinguishable
+### STD-UI-11 — Paper and live are always distinguishable
 
 **Rule:** The interface MUST state the active environment in words, in a
 persistent region present on every screen, which MUST NOT be dismissible and MUST
@@ -277,7 +277,7 @@ identically for paper and live; charter §3, the paper-to-live gate.
 **Verification:** Every screenshot of every screen shows the environment.
 **Specialization:** stricter-only.
 
-#### STD-UI-12 — Status form and severity
+### STD-UI-12 — Status form and severity
 
 **Rule:** Every status MUST carry a text label and an icon or shape, and MUST map
 to exactly one severity tier. An outcome the owner intended MUST NOT be styled as
@@ -316,7 +316,7 @@ because `tech-stack.md` v2 places the provider's restatement limitation on the
 promotion evidence rather than on ingestion. No external design guidance covers
 them.
 
-#### STD-UI-13 — Every value carries its as-of date
+### STD-UI-13 — Every value carries its as-of date
 
 **Rule:** A value derived from point-in-time data MUST carry the date it was
 known, inline or one interaction away.
@@ -325,7 +325,7 @@ known, inline or one interaction away.
 **Verification:** For each displayed value, the as-of date is reachable.
 **Specialization:** stricter-only.
 
-#### STD-UI-14 — Presence has three states
+### STD-UI-14 — Presence has three states
 
 **Rule:** Wherever a check can fail to run, presence MUST be reported as
 **present**, **absent**, or **not determinable**. A binary healthy/unhealthy
@@ -338,7 +338,7 @@ there is vacuous.
 **Verification:** Each presence indicator is exercised in all three states.
 **Specialization:** none.
 
-#### STD-UI-15 — Nothing is asserted beyond what is derived
+### STD-UI-15 — Nothing is asserted beyond what is derived
 
 **Rule:** The interface MUST display only what recorded data supports. It MUST
 NOT present intended, expected or configured coverage as fact.
@@ -348,7 +348,7 @@ asserted.
 **Verification:** Every displayed field traces to a query over recorded rows.
 **Specialization:** none.
 
-#### STD-UI-16 — No silent substitution
+### STD-UI-16 — No silent substitution
 
 **Rule:** The interface MUST NOT carry a last-known value forward, interpolate
 across a gap, or substitute a default for an unknown, unless it states at the
@@ -359,7 +359,7 @@ point of display that it has done so.
 the disclosure.
 **Specialization:** none.
 
-#### STD-UI-17 — Known limitations propagate
+### STD-UI-17 — Known limitations propagate
 
 **Rule:** A value computed from data carrying a recorded limitation MUST be
 marked, and the mark MUST propagate to every presentation derived from it,
@@ -372,7 +372,7 @@ obligation was placed on the promotion evidence.
 classification to promotion evidence; the mark survives.
 **Specialization:** stricter-only.
 
-#### STD-UI-18 — A check states what it does not cover
+### STD-UI-18 — A check states what it does not cover
 
 **Rule:** Where a check cannot detect a class of fault, the interface MUST state
 what it does not cover, alongside its result. The absence of a detected problem
@@ -385,7 +385,7 @@ outage leaves no gap to detect, because the day never enters the trading-day set
 
 ### 3.5 Actions
 
-#### STD-UI-19 — Action tiers and error actionability
+### STD-UI-19 — Action tiers and error actionability
 
 **Rule:** Every action MUST be classified **routine** (reversible, no
 confirmation), **consequential** (confirmation describing the actual effect per
@@ -399,7 +399,7 @@ AC-10, AC-21.
 error's three parts.
 **Specialization:** stricter-only.
 
-#### STD-UI-20 — The promotion gate
+### STD-UI-20 — The promotion gate
 
 **Rule:** Promotion from paper to live MUST present the evidence in the same view
 as the action; MUST require an explicit acknowledgement, including of any mark
@@ -413,7 +413,7 @@ which makes the gate deliberate.
 **Specialization:** stricter-only. The rationale requirement is open — see §5.3,
 OQ-UI-5.
 
-#### STD-UI-21 — The kill switch
+### STD-UI-21 — The kill switch
 
 **Rule:** The kill switch MUST be reachable from every screen at a fixed
 position; MUST be a single action; MUST NOT be gated behind a confirmation; and
@@ -430,7 +430,7 @@ departure is intentional and a reviewer MUST NOT raise it as a finding.
 and its rendered state changes only when the stored state does.
 **Specialization:** none.
 
-#### STD-UI-22 — Control adjacency
+### STD-UI-22 — Control adjacency
 
 **Rule:** A capital-at-risk or destructive control MUST NOT be placed adjacent to
 a routine one, and MUST NOT be the default focus target of any dialog.
@@ -441,7 +441,7 @@ a routine one, and MUST NOT be the default focus target of any dialog.
 
 ### 3.6 States and feedback
 
-#### STD-UI-23 — State coverage
+### STD-UI-23 — State coverage
 
 **Rule:** Every data-bearing region MUST define: loading; empty because never
 populated; empty because nothing was found; partial; stale; unavailable because a
@@ -455,7 +455,7 @@ surface as a generic transport error.
 **Specialization:** permitted — a region MAY declare a state inapplicable with a
 recorded reason.
 
-#### STD-UI-24 — Programmatic semantics and feedback
+### STD-UI-24 — Programmatic semantics and feedback
 
 **Rule:** Every operation MUST be completable by keyboard; focus MUST be managed
 on dialogs and on content inserted into the page; visible focus MUST NOT be
@@ -472,7 +472,7 @@ live-region markup. Enforcement is human review: `tech-stack.md` records that
 Biome carries no `jsx-a11y` equivalent.
 **Specialization:** stricter-only.
 
-#### STD-UI-25 — Polled freshness
+### STD-UI-25 — Polled freshness
 
 **Rule:** A region updated by polling MUST display its last-updated time, and its
 cadence MUST be recorded in the capability's design rather than left to
@@ -484,7 +484,7 @@ interface learns of progress only by polling.
 cadence.
 **Specialization:** permitted — cadence varies per region.
 
-#### STD-UI-26 — Multi-step operations
+### STD-UI-26 — Multi-step operations
 
 **Rule:** A multi-step operation MUST show its steps, the current position, and
 what remains, and MUST allow retreat to a previous step without loss of entered
@@ -496,7 +496,7 @@ data.
 
 ### 3.7 Charts and scale
 
-#### STD-UI-27 — Chart integrity
+### STD-UI-27 — Chart integrity
 
 **Rule:** A chart MUST NOT use two y-scales. Bar charts MUST have a zero
 baseline. Categorical hues MUST be assigned in a fixed order and MUST NOT be
@@ -507,7 +507,7 @@ than given generated hues. A chart with two or more series MUST carry a legend.
 **Verification:** Chart inspection.
 **Specialization:** none.
 
-#### STD-UI-28 — Chart provenance
+### STD-UI-28 — Chart provenance
 
 **Rule:** Every chart MUST state what is measured, its units, its as-of date and
 its n, and MUST have a table equivalent reachable from it.
@@ -517,7 +517,7 @@ inspectable evidence.
 **Verification:** Chart inspection; the table is reachable.
 **Specialization:** stricter-only.
 
-#### STD-UI-29 — Density tokens
+### STD-UI-29 — Density tokens
 
 **Rule:** Density, type scale and spacing MUST be defined once as theme tokens
 and every surface MUST consume them. A component MUST NOT be overridden at a call
@@ -529,7 +529,7 @@ repository, so its source is the product's to correct.
 **Specialization:** permitted — a capability MAY select a density tier from the
 defined set. It MAY NOT introduce a value.
 
-#### STD-UI-30 — Lists at committed volume
+### STD-UI-30 — Lists at committed volume
 
 **Rule:** A list that can reach the volume its capability commits to MUST be
 virtualised and MUST provide search and filter. A layout that works only at

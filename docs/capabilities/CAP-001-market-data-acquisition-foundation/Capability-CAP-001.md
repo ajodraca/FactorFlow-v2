@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001
 artifact_type: capability
-artifact_version: 2
+artifact_version: 3
 id: CAP-001
 title: Market Data Acquisition Foundation
 description: >-
@@ -11,7 +11,7 @@ description: >-
   the owner-operator a way to see what was ingested and to tell when ingestion
   is failing.
 created: 2026-09-03
-updated: 2026-09-04
+updated: 2026-09-05
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: draft
@@ -21,12 +21,14 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-04T02:10:00Z
+  timestamp: 2026-09-05T03:10:00Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
       version: "1, approved 2026-09-03"
+    - id: STD-UI
+      version: "2"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -273,6 +275,7 @@ here.
 |--------|------|----------------|----------------|
 | Massive (market data provider) | requires-runtime | Historical reads for instrument reference data, daily prices, company fundamentals and corporate actions, authenticated by an API key supplied at runtime, covering the owner's stated history depth for up to 3000 named instruments. No acceptance criterion can be cited: Massive is an external provider, not a capability, and its coverage is still under evaluation. | An acquisition run completes against the live provider and returns all four data types for named instruments over the stated depth. |
 | `docs/constitution/tech-stack.md` | conforms-to | The approved technology choices and the project-wide constraints C1-C11 that bound this capability: process topology, single transactional store, the one market-data contract spanning historical and live reads, and append-only point-in-time history. | Specification review confirms the system design for this capability uses only approved technologies and honours C1, C2, C4, C5, C7 and C8. |
+| STD-UI | conforms-to | The project's enforceable owner-interface standard, 30 numbered rules governing vocabulary, quantities, colour and status, data vintage, actions, states and feedback, charts and scale. CAP-001 delivers the product's first interface surface, so every rule governing a surface it renders binds it. | Section 5.4 accounts for all 30 rules, and specification review confirms the UX brief and UX design satisfy each rule marked yes or partial. |
 
 ### 5.2 Non-Dependencies
 
@@ -308,6 +311,46 @@ here.
   multi-tenancy, no per-user isolation and no horizontal scale requirement.
 - **The provider publishes no SDK,** so the product integrates against its
   published interface directly.
+
+### 5.4 Standards Conformance
+
+Conformance to `STD-UI`, recorded as STD-UI section 4 requires. The narrative
+record, with the reasoning behind each entry, is section 12 of
+`design/ux-brief.md`; this table is the machine-checked mirror of it and the two
+must agree.
+
+| Rule | Applies | Where satisfied, or why not |
+|------|---------|------------------------------|
+| STD-UI-1 | yes | UX brief 2, 3. Adds *data type*, *run outcome* and *abandoned*; redefines no term |
+| STD-UI-2 | yes | UX brief 2.2, 3. Retirement is confirmed as retirement, with `dialog` `confirm` not `destructive` |
+| STD-UI-3 | yes | Coverage ranges, gap counts and per-run instrument counts in tabular figures, precision fixed per column |
+| STD-UI-4 | yes | UX brief 2.1. Absent renders an em dash, zero means a measured zero, blank means inapplicable |
+| STD-UI-5 | yes | UX brief 2.1, 2.4. ISO-8601 throughout. The display zone is open, OQ-UI-3 |
+| STD-UI-6 | yes | Instrument and gap counts render in full in every table |
+| STD-UI-7 | partial | Status palette only. CAP-001 renders no direction, magnitude or categorical series |
+| STD-UI-8 | yes | UX brief 6. Every status carries a text label plus icon or shape; greyscale readability is the test |
+| STD-UI-9 | no | No series and no per-entity colour. CAP-001 renders no chart |
+| STD-UI-10 | no | Binds the shared theme, not this capability. `design-system/theme-validation.md` records the validation and its 16 outstanding contrast failures |
+| STD-UI-11 | no | CAP-001 delivers no trading and has no paper or live environment. UX brief 2.6 shapes the status region to receive the obligation later |
+| STD-UI-12 | yes | UX brief 12.2 carries the tier table. No state and no tier is added |
+| STD-UI-13 | yes | UX brief 2.1. Last-acquired and covered range inline; observation dates one interaction away |
+| STD-UI-14 | yes | UX brief 2.1. `badge` `coverage-present` / `coverage-absent` / `coverage-unknown` |
+| STD-UI-15 | yes | UX brief 2.1, 5. Only ranges rows exist for are displayed |
+| STD-UI-16 | yes | No value is carried forward across a gap and none is interpolated |
+| STD-UI-17 | partial | CAP-001 acquires the fundamentals carrying the restatement limitation but derives no value from them. The obligation engages at classification and promotion |
+| STD-UI-18 | yes | UX brief 2.1. The gap check states that a market-wide outage leaves no gap to detect |
+| STD-UI-19 | yes | UX brief 3 tiers every action; 2.5 states the three parts of each error |
+| STD-UI-20 | no | CAP-001 delivers no promotion. Section 2, out of scope |
+| STD-UI-21 | no | CAP-001 has no order path. Section 5.2 records the kill switch as a non-dependency |
+| STD-UI-22 | no | CAP-001 has no capital-at-risk control and no destructive one; retirement is neither |
+| STD-UI-23 | yes | UX brief 12.4 enumerates all eight states for each of the six regions |
+| STD-UI-24 | yes | UX brief 6 |
+| STD-UI-25 | partial | The last-updated time is required; the cadence is not yet decided and is carried as the one REQUIRES INPUT value in the UX brief |
+| STD-UI-26 | no | No single operation spans steps. Making the first-run path a guided setup would engage this rule |
+| STD-UI-27 | no | CAP-001 renders no chart. System design 4.3 |
+| STD-UI-28 | no | CAP-001 renders no chart. System design 4.3 |
+| STD-UI-29 | yes | Selects a density tier from the defined set and introduces no value. Which tier is open, OQ-UI-4 |
+| STD-UI-30 | partial | Search and filter are required at AC-4's volume. The `data-table` spec offers pagination and not virtualisation, which this rule requires, so the component does not discharge it alone |
 
 ## 6. Assumptions
 
