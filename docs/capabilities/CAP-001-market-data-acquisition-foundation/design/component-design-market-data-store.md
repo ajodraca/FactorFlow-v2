@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 4
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -597,8 +597,28 @@ constraint 5.1.
 - **Rollback (OPS-MIG-003).** There is no schema-reversal path, by design. The
   rollback posture for a bad migration is: stop the containers, restore the
   PostgreSQL data directory from a backup taken before the deployment, and
-  redeploy the previous image. The backup procedure itself is not specified by
-  this capability, which is recorded in section 14.
+  redeploy the previous image.
+
+  That posture depends on a backup procedure **no capability specifies**, so
+  OPS-MIG-003 is satisfied here under branch (b) — rollback documented as not
+  currently possible, with the compensating mitigation stated — rather than
+  branch (a). The owner accepted this risk on 2026-09-05 and deferred the
+  procedure to a future operations capability.
+
+  **What is accepted, precisely.** CAP-001's first deployment applies `0001`
+  through `0004` against an **empty** database, so a failed first migration
+  destroys nothing and the accepted risk is close to zero. The exposure begins
+  at the *second* deployment, once acquired history exists: from that point a
+  data-losing migration is **unrecoverable**, because C5 makes point-in-time
+  history impossible to re-acquire as observed. The two mechanisms in section
+  2.5 prevent an application code path from overwriting history; neither reaches
+  a data-fix migration or the owner acting as superuser, which is how the
+  likeliest mistake arrives.
+
+  **Trigger.** The procedure must be specified before the second deployment of
+  this product — that is, before any deployment onto a store holding acquired
+  observations. Until then this is a recorded accepted risk rather than an open
+  question, and section 14 question 1 records it as such.
 
 ## 7. Testing
 
@@ -730,16 +750,24 @@ below records them as the system design's section 4.2 declares them.
 
 ## 14. Open Questions
 
-1. **What backup procedure protects against a data-losing migration, or an
-   overwrite of observation history?** Section 6 states restore-from-backup as
-   the rollback posture for a forward-only schema, and no capability or design
-   specifies how a backup is taken, verified or restored. OPS-MIG-003 requires a
-   defined rollback path. This question rose in priority on 2026-09-05: with role
-   grants rejected, the backup is the only control that reaches a data-fix
-   migration or the owner acting as superuser, and it is what makes the
-   difference between an overwrite being recoverable and being permanent.
-   *Owner: capability owner. Blocks: the operational claim in section 6, and any
-   honest statement that C5 is protected rather than merely required.*
+1. ~~What backup procedure protects against a data-losing migration, or an
+   overwrite of observation history?~~ **Decided 2026-09-05: deferred, with the
+   interim risk accepted.** The owner deferred the backup procedure to a future
+   operations capability rather than specifying it here. OPS-MIG-003 is
+   therefore satisfied under branch (b) — rollback documented as not currently
+   possible with the compensating mitigation described — and section 6 carries
+   that record.
+
+   The reasoning: CAP-001's first deployment runs against an empty database, so
+   there is nothing to lose on the deployment this capability actually performs.
+   The risk engages at the second deployment, once history exists, and from that
+   point a data-losing migration is unrecoverable under C5. The procedure must
+   therefore be specified **before any deployment onto a store holding acquired
+   observations**.
+
+   This is recorded as an accepted risk with a trigger, not as an open question,
+   so that a later review sees a decision rather than re-raising the gap.
+   *Owner: capability owner. Trigger: before the second deployment.*
 2. **What upper bound, if any, applies to `history_depth_years`?**
    `acquisition_run_depth_positive` enforces a lower bound of 1. No source
    states a maximum, and Massive's plan tiers cap history in a way that is not
