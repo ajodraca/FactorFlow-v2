@@ -2,11 +2,11 @@
 artifact_schema_version: 1
 artifact_id: STD-UI
 artifact_type: constitution-artifact
-artifact_version: 3
+artifact_version: 4
 id: STD-UI
 title: Owner Interface Conventions
 kind: standard
-status: draft
+status: approved
 created: 2026-09-05
 updated: 2026-09-05
 owner: Alvaro de Jodra
@@ -19,20 +19,26 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude (Cowork)
   tool_version: unknown
-  timestamp: 2026-09-05T03:40:00Z
+  timestamp: 2026-09-05T04:01:14Z
   source_artifacts:
     - id: product-charter
       version: "2"
     - id: tech-stack
       version: "2"
     - id: CAP-001-ux-brief
-      version: "1"
+      version: "5"
     - id: edg-compliance
       version: "1.0"
     - id: factorflow-design-system
       version: "ported from the first build, 2026-09-05"
   invoking_user: ajodraca
   correlation_id: 6493d4a3-41a0-4991-9e37-c372f762c3d0
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-05T04:06:20Z
+  reviewed_revision: sha256:ecce3693ba29720a0e24b9f5528be59b6d5e87d1160ab65615365f783307d39d
+  review_artifact: "docs/constitution/reviews/ui-conventions-review-v2.md"
 ---
 
 # Owner Interface Conventions
@@ -416,9 +422,14 @@ as the action; MUST require an explicit acknowledgement, including of any mark
 carried under STD-UI-17; MUST capture the owner's stated rationale; and MUST NOT
 be a toggle, switch or setting.
 
-**Authority:** Charter §3 — Persistence stores "the decision history behind
-promotions", and a decision with no recorded reason is not a history; charter §1,
-which makes the gate deliberate.
+**Authority:** Charter §3 for the evidence, acknowledgement and
+not-a-toggle clauses: Persistence stores "the decision history behind
+promotions", and charter §1 makes the gate deliberate. **Internal policy for the
+rationale clause**, pending OQ-UI-5. The charter requires a decision history; it
+does not say the owner must state a reason, and reading one into it would
+attribute an obligation to a source that does not impose it. The clause stands on
+its own argument, that a decision history without reasons cannot be revisited
+when a promotion is questioned later, and the owner has not yet confirmed it.
 **Verification:** The promotion interaction is walked; each clause is observable.
 **Specialization:** stricter-only. The rationale requirement is open — see §5.3,
 OQ-UI-5.
@@ -645,6 +656,7 @@ and it was closed on 2026-09-05 before that screen was designed.
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-09-05 | 4 | Corrected STD-UI-20's authority on FINDING-1 of `reviews/ui-conventions-review-v1.md`. The rule attributed its written-rationale clause to Charter §3, which stores "the decision history behind promotions" but does not require the owner to state a reason; OQ-UI-5 had already conceded the charter "does not say so in as many words". The clause is now labelled internal policy pending OQ-UI-5 and rests on its own argument. No rule text, obligation, numbering or specialization posture changed, and the other three clauses keep their charter authority |
 | 2026-09-05 | 3 | Closed OQ-UI-3 on the owner's decision: the product displays **America/Chicago** throughout, and `observed_on` is computed in it. US Central was chosen over exchange time, which would have put run timestamps in the same frame as the session dates that dominate every screen, and over UTC, which would have matched the container logs a failed run is diagnosed against. The question's second half was settled on correctness rather than preference: a session date is a calendar date in the exchange's terms and is rendered unconverted, because converting one moves a bar onto the wrong day. STD-UI-5 now states both, and records the consequence that Central is not the exchange zone, so a run between 23:00 and 24:00 Central stamps a calendar day that America/New_York would call the next one. Also promoted the thirty rule headings from level four to level three so `scripts/check-capabilities.py` can extract them, which is a corrected reference rather than an amendment and changed no rule text |
 | 2026-09-05 | 2 | Closed OQ-UI-1: status owns red and green, market direction keeps a non-red/green diverging pair. Closed on precedent rather than on fresh reasoning — the first FactorFlow build had already made this assignment for the same colour-vision reason, and STD-UI-7 was written independently of it and agreed, so the rule now cites the standing decision alongside its own argument. Narrowed OQ-UI-2, whose tokens now exist. Recorded that `theme.css`'s current density default is a port-time placeholder, not an answer to OQ-UI-4. Updated §1.3 and §2.2: the design system is no longer absent — it was ported into `design-system/` and configured at `projects/factorflow-v2/design-system.yaml` on 2026-09-05, so this standard now states obligations that a resolvable artifact satisfies, and the two are ranked. Corrected a rule reference in §2.2 that named STD-UI-25 where STD-UI-29 governs |
 | 2026-09-05 | 1 | Created as a `standard`, on the finding in `CAP-001-ux-brief` v1 that no design system is configured and that CAP-001's interface patterns are inherited by every later capability. Thirty numbered rules, each with an authority, a verification and a specialization posture. Establishes this artifact as factorflow-v2's enforceable UX constitution, with the scaffold-wide `edg-compliance` skill retained as advisory expertise beneath it and left unmodified. Adopts WCAG 2.1 AA as the project target, closing the question `CAP-001-ux-brief` §6 raised. Records three intentional departures from `edg-compliance` — a six-tier severity vocabulary reconciled to EDG's three levels (STD-UI-12), a kill switch that takes no confirmation on charter §3 authority (STD-UI-21), and screen-reader certification exempted as a release gate while its semantics remain mandatory (§2.3, STD-UI-24) — and four exemptions where EDG presupposes a product family, a review body, a support channel or a second user that this product does not have. Five interface questions left open, of which OQ-UI-1, the reservation of red and green for status rather than market direction, is the standing default most likely to be inverted |
