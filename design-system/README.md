@@ -10,6 +10,8 @@ The component contract the SDD UX pipeline reads. Built on
 | `theme.css` | Design tokens as CSS custom properties. The only colours a design may reference. |
 | `component-map.json` | Component to design-source mapping for Figma traceability. Empty for now. |
 | `intake.md` | What to do when a design needs a component that has no spec. |
+| `theme-validation.md` | The STD-UI-10 validation record for `theme.css`: contrast, and pair separation under normal and dichromat vision. |
+| `validate-theme.py` | Produces that record. Run `python3 validate-theme.py theme.css` after any token change. |
 
 ## How the pipeline uses this
 
@@ -26,6 +28,13 @@ Wired up through `projects/factorflow-v2/design-system.yaml` in the ai-agents re
 standard. **It states the obligations; this design system satisfies them.** Where the two
 disagree, STD-UI wins and this repository is corrected — a token or a spec is never the reason
 a rule bends.
+
+STD-UI-10 requires the palette to be validated and the output recorded; `theme-validation.md` is
+that record. The palette as ported failed it on 18 contrast pairs. All are resolved as of
+2026-09-05, and no pair now falls below the CIEDE2000 just-noticeable difference under normal or
+dichromat vision. Regenerate the record with `validate-theme.py` after changing any token, and
+read its Interpretation section before doing so: the contrast and colour-vision constraints pull
+against each other on the warm status tiers, and a change that satisfies one can break the other.
 
 Practically: STD-UI-29 obliges density, type scale and spacing to exist as tokens and be
 consumed everywhere, and `theme.css` is where they exist. STD-UI-12's six severity tiers,
@@ -70,16 +79,24 @@ and the Figma-based `$ux-spec-extraction` path has no file keys to resolve. The 
 
 ## Beyond the starting set
 
-The 11 components here cover the first UI capability of the original build, and most of what
+The 12 components here cover the first UI capability of the original build, and most of what
 CAP-001 needs. `intake.md` describes how to grow the set, and most gaps turn out to be a new
 variant of an existing component rather than a new component.
 
-**One known gap for CAP-001:** an indeterminate progress indicator, for an acquisition run whose
-duration cannot be estimated. It is genuinely new rather than a variant. It is deliberately not
-written here, because `intake.md` step 2.3 requires the interaction and accessibility contracts
-to be derived from the upstream Radix primitive documentation rather than from memory. The
-application-status region and the polled live region are compositions, not components, and
-belong in the capability's `ux-design.md`.
+**One known gap for CAP-001 remains:** an indeterminate progress indicator, for an acquisition
+run whose duration cannot be estimated. It is genuinely new rather than a variant. It is
+deliberately not written here, because `intake.md` step 2.3 requires the interaction and
+accessibility contracts to be derived from the upstream Radix primitive documentation rather
+than from memory. The application-status region and the polled live region are compositions, not
+components, and belong in the capability's `ux-design.md`.
+
+**`textarea` was added on 2026-09-05**, at `status: beta`, on a gap CAP-001's `ux-design.md`
+surfaced: AC-4 commits to acquisition runs of up to 3000 instruments and AC-1 forbids editing
+configuration files to name them, but the component set had no multi-line entry, so the design
+could only specify adding symbols one at a time. Its `list` variant carries bulk paste. Note that
+shadcn/ui's Textarea is a styled native element rather than a Radix primitive, so its contracts
+derive from the HTML element and the WAI-ARIA text field pattern; the spec says so rather than
+citing a primitive that does not exist.
 
 ## Financial tokens
 

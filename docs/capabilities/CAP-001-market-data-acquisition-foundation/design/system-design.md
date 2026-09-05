@@ -2,12 +2,12 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-system-design
 artifact_type: system-design
-artifact_version: 1
+artifact_version: 3
 capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-09-05
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: draft
@@ -17,10 +17,10 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-03T23:05:00Z
+  timestamp: 2026-09-05T05:20:00Z
   source_artifacts:
     - id: CAP-001
-      version: "2, cancellation, recovery and removal semantics added 2026-09-04"
+      version: "6, deepening-backfill and queued-run-request semantics added 2026-09-05"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
@@ -140,8 +140,9 @@ The sequence below traces one owner-triggered acquisition run from the browser t
 the store, and it is the path that carries every failure mode this capability must
 survive. Steps 1 to 4 are synchronous: the API records a run request and returns
 immediately, so the browser never waits on the provider. Steps 5 onward happen in
-the ingestion container, where the runner claims exactly one request and then
-processes instruments one at a time, each in its own transaction. The two decision
+the ingestion container, where the runner claims the oldest request only when no
+other run is active and then processes instruments one at a time, each in its own
+transaction. The two decision
 points that matter are step 9, where a single instrument's failure is isolated so
 the run continues (AC-11), and step 14, where the run's final outcome is computed
 from what was actually written rather than from what was requested (AC-9, AC-12).
@@ -166,7 +167,7 @@ sequenceDiagram
     A->>J: 3. Insert run request (state=requested)
     A-->>W: 4. 202 Accepted + run id
 
-    R->>J: 5. Claim oldest requested run<br/>(FOR UPDATE SKIP LOCKED)
+    R->>J: 5. When no run is running, claim oldest<br/>requested run (FIFO)
     J-->>R: 6. Run claimed (state=running)
 
     loop 7. For each named instrument
@@ -210,6 +211,15 @@ sequenceDiagram
 
 Two control flows outside the run path complete the picture.
 
+**Queued start requests (AC-23).** `POST /api/acquisition-runs` always records
+a new request as `requested` and returns it immediately. If a run is already
+`running`, the new request remains `requested`; it is not rejected, merged into
+the active run, or processed concurrently. When the active run reaches a
+terminal state (`succeeded`, `failed`, `partial`, `cancelled`, or `abandoned`),
+`acquisition-runner` atomically claims the oldest remaining request and changes
+it to `running`. The claim must exclude a second active run, making the request
+order the execution order.
+
 **Application start (AC-15, AC-16).** 32. The application container starts. 33.
 `schema-migrator` reads the `applied_migrations` table. 34. It applies each
 numbered migration not yet recorded, in order, each in its own transaction. 35.
@@ -229,19 +239,30 @@ which is indistinguishable from never having been requested — there is no part
 state to unwind.
 
 **Reclaiming an abandoned run.** 48. A runner refreshes a heartbeat on the run it
-holds. 49. A run whose heartbeat has not advanced beyond the configured staleness
-window is treated as abandoned: its claim is released and it is recorded as
-`abandoned`, terminal and distinct from both `failed` and `cancelled`. 50. This is
-what prevents a killed container, a crash or a reboot from wedging acquisition in
-`running` forever, which no other mechanism in this design recovers from. 51.
-Coverage written before the interruption stands, because AC-12's per-instrument
-commit boundary makes it independently valid.
+holds. 49. A periodic sweep in the **application container** finds any run whose
+heartbeat has not advanced beyond the configured staleness window, releases its
+claim, and records it as `abandoned`, terminal and distinct from both `failed` and
+`cancelled`. 50. This is what prevents a killed container, a crash or a reboot from
+wedging acquisition in `running` forever, which no other mechanism in this design
+recovers from. 51. Coverage written before the interruption stands, because AC-12's
+per-instrument commit boundary makes it independently valid.
+
+The sweep runs in the application container rather than the ingestion container
+because the failure it recovers from is the ingestion process dying, and a
+component cannot be relied on to notice its own death. AC-20 requires the run to
+reach a terminal state without the owner touching the data store, and a sweep that
+only runs when the dead process restarts would not deliver that for a container
+that is stopped or crash-looping. The sweep is idempotent and safe to run
+anywhere, so this is a placement decision rather than a correctness requirement.
 
 **Gap computation (AC-8).** 40. Gaps are computed at read time by
 `coverage-service`, not stored. 41. It forms the trading-day set as the union of
 dates on which any named instrument has a daily bar within the requested range.
 42. For each instrument it reports dates in that set that fall inside the
-instrument's own covered range but carry no bar for it. 43. When fewer than two
+instrument's own covered range but carry no bar for it. Gap detection is a
+**prices-only** notion, because a trading day is: quarterly fundamentals and
+sporadic corporate actions carry no per-day expectation, so a covered range for
+either asserts nothing about completeness within it. 43. When fewer than two
 instruments hold data in the range, it returns gap detection as unavailable
 rather than an empty gap list, so the interface never presents a vacuous zero.
 
@@ -249,7 +270,10 @@ rather than an empty gap list, so the interface never presents a vacuous zero.
 configuration and the Massive API key from the process environment at start. 38.
 A missing required value fails the start with a message naming the variable but
 never its value. 39. The credential is held in memory only, is redacted from every
-log record, and appears in no API response.
+log record, and appears in no API response. Its **presence** is reported as a
+boolean by `GET /api/health`, which is what the Settings screen renders and what
+lets the interface distinguish a missing credential from a health check that did
+not answer; a boolean is not the credential, and no interface exposes the value.
 
 ## 4. Components, Interfaces and Technology
 
@@ -261,7 +285,7 @@ log record, and appears in no API response.
 | `ingestion-api` | Ingestion JSON API | FastAPI surface serving the interface; the only network entry point | this design |
 | `instrument-list-service` | Instrument list service | Maintains the owner's instrument list, each entry active or retired, and the history depth setting | this design |
 | `run-journal` | Run journal | Owns the acquisition run record and its lifecycle — requested, running, cancelling, succeeded, partial, failed, cancelled, abandoned — including cancellation requests and reclaim of runs whose runner died | this design |
-| `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps against the trading-day set formed from all named instruments' observed dates | this design |
+| `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps in daily prices against the trading-day set formed from all named instruments' observed dates | this design |
 | `schema-migrator` | Schema migrator | Applies numbered forward-only SQL migrations and maintains `applied_migrations` | this design |
 | `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets | this design |
 | `acquisition-runner` | Acquisition runner | Claims a run request and drives acquisition instrument by instrument, isolating per-instrument failure | this design |
@@ -276,12 +300,13 @@ log record, and appears in no API response.
 |-----------|--------------------|--------------------|-------|-----------|
 | `GET/POST/DELETE /api/instruments` | `ingestion-api` | `owner-web-app` | JSON; list, add and remove named instruments | stable within this capability |
 | `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the owner's stated history depth, required before first run | stable within this capability |
-| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; returns 202 and a run id | stable within this capability |
+| `GET /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the current stated depth, or null when the owner has never stated one. The Settings screen reads it, and null is distinct from zero (AC-2) | stable within this capability |
+| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; creates a `requested` run and returns `202 Accepted`, its id and state. While another run is `running`, the new request remains queued and is claimed FIFO after that run reaches a terminal state. | stable within this capability |
 | `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | JSON; run history, outcome, and per-instrument failure detail | stable within this capability |
 | `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | JSON; requests cooperative cancellation of a running acquisition | stable within this capability |
 | `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days, and whether the instrument is active or retired | stable within this capability |
-| `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness and most recent run outcome | stable within this capability |
-| Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL row claimed with `SELECT ... FOR UPDATE SKIP LOCKED`; the only cross-container handoff | stable within this capability |
+| `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness, most recent run outcome, and whether the provider credential is present, as a boolean and never its value (AC-13, AC-18) | stable within this capability |
+| Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | stable within this capability |
 | Observation append | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | **critical — C5, unrecoverable if wrong** |
 | Coverage read | `market-data-store` | `coverage-service` | SQL reads over coverage segments and observations | stable within this capability |
 | Migration application | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | stable within this capability |
@@ -343,9 +368,9 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
    must leave room for the M3 streaming half without redefinition.
 7. **Every claimed run reaches a terminal state.** A runner that dies must not
    leave a run claimed indefinitely. Claims carry a heartbeat and a staleness
-   window, and an expired claim is reclaimed as `abandoned`. Without this, the
-   only recovery from an interrupted run is editing the database by hand, which
-   AC-18 exists to make unnecessary.
+   window, and a periodic sweep in the application container reclaims an expired
+   claim as `abandoned`. Without this, the only recovery from an interrupted run
+   is editing the database by hand, which AC-18 exists to make unnecessary.
 8. **Removal retires, it never deletes.** An instrument removed from the list is
    marked retired: `acquisition-runner` stops acquiring it, and every observation
    already recorded for it stands. This follows from C5 — point-in-time history
@@ -361,7 +386,13 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
    The container publishes its port to `127.0.0.1` only. The absence of
    authentication is sound solely because of that binding.
 12. **The provider credential is supplied at runtime.** It is never committed, never
-   logged, and never returned by any interface (AC-13, SEC-SEC-001).
+   logged, and never returned by any interface (AC-13, SEC-SEC-001). It is supplied
+   to **both containers**: the ingestion process uses it, and the application
+   process reads only whether it is set so that `GET /api/health` can report
+   presence. The application must never read the value. The alternative, having
+   ingestion record presence in the store, was rejected because it would let health
+   report a credential as supplied after ingestion had stopped, and AC-18 exists so
+   the owner can trust that answer without inspecting the store.
 13. **Rate limiting is flow control; errors are failures.** A `429` means the
     request was never served, so the governor waits — honouring `Retry-After`
     where the provider supplies it — and does not count the wait as an attempt.
@@ -378,6 +409,11 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
     (SA-LOG-001), and no restricted value in any log record.
 16. **One owner-operator.** No multi-tenancy, no per-user isolation, no horizontal
     scale requirement anywhere in this design.
+17. **One active acquisition run, FIFO requests.** The run journal permits at
+    most one `running` run. `POST /api/acquisition-runs` inserts a `requested`
+    run and returns `202 Accepted`; after each terminal transition, the runner
+    claims the oldest requested run. A request while a run is active queues; it
+    never starts work concurrently or replaces the active request.
 
 ## 6. Architectural Assumptions
 
@@ -407,7 +443,7 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC # | Acceptance Criterion | Design Element(s) | Section |
 |------|---------------------|--------------------|---------|
 | AC-1 | Named instrument list | `instrument-list-service`, `GET/POST/DELETE /api/instruments`, `owner-web-app` | 4.1, 4.2 |
-| AC-2 | History depth stated, not assumed | `PUT /api/settings/history-depth`; `acquisition-runner` refuses to claim a run with no depth set | 4.2, 3 |
+| AC-2 | History depth stated, not assumed | `PUT` and `GET /api/settings/history-depth`; `acquisition-runner` refuses to claim a run with no depth set | 4.2, 3 |
 | AC-3 | Data types acquired | `massive-client` reference, aggregate, fundamental and corporate-action reads | 4.1, 4.2 |
 | AC-4 | Acquisition volume up to 3000 instruments | `rate-limit-governor` budget pacing; per-instrument transactions; resumable runs | 3, 5.13, 5.14 |
 | AC-5 | Point-in-time record | `observation-writer` appends with `observed_on`; provider `filing_date` stored as attribute only | 3, 5.3, 5.4 |
@@ -423,10 +459,12 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-15 | Forward data evolution | `schema-migrator`, numbered migrations, `applied_migrations` | 3 steps 32-35 |
 | AC-16 | Refuse an inconsistent start | Migrator exits non-zero; API never binds | 3 step 36 |
 | AC-17 | Honest empty state | `GET /api/coverage` distinguishes "never acquired" from "acquired, empty"; `owner-web-app` renders it | 4.2 |
-| AC-18 | Operational visibility | `GET /api/health` exposing liveness and most recent run outcome | 4.2 |
+| AC-18 | Operational visibility | `GET /api/health` exposing liveness, most recent run outcome and credential presence | 4.2 |
 | AC-19 | Cancel a run in progress | `POST /api/acquisition-runs/{id}/cancel`; `run-journal` cancellation request observed by `acquisition-runner` between instruments | 3 steps 44-47, 4.2 |
-| AC-20 | An interrupted run does not block the next one | Claim heartbeat and staleness window; `run-journal` reclaims an expired claim as `abandoned` | 3 steps 48-51, 5.7 |
+| AC-20 | An interrupted run does not block the next one | Claim heartbeat and staleness window; a periodic sweep in the application container reclaims an expired claim as `abandoned` | 3 steps 48-51, 5.7 |
 | AC-21 | Removal retains history | `instrument-list-service` retires rather than deletes; `GET /api/coverage` reports active and retired instruments | 4.1, 4.2, 5.8 |
+| AC-22 | Deepening backfills history | `acquisition-runner` compares active-instrument coverage to the current stated depth and fetches only the missing earlier range; `observation-writer` preserves already-covered history | 3, 5.3, 5.9 |
+| AC-23 | Concurrent run requests queue | `POST /api/acquisition-runs` creates `requested` records; `run-journal` atomically claims the oldest request only after the active run is terminal | 3, 4.2, 5.17 |
 
 ## 8. Open Questions
 
@@ -437,7 +475,7 @@ None. All questions raised during design were resolved on 2026-09-03 and
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-001 v2 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 21 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; loopback-only decision |
+| Capability CAP-001 v6 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 23 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; deepening backfills and concurrent requests queue; loopback-only decision |
 | Product Charter v2 | `docs/constitution/product-charter.md` | Modular monolith with ingestion split out; point-in-time persistence; single owner-operator; M1 is Universe and Factors, 2026-Q4 |
 | Tech Stack v2 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider; fundamentals are not as-reported; market data source deliberately not abstracted; validation commands; OQ-TS-3 and OQ-TS-6 |
 | Architecture inventory | `docs/architecture.md` | Empty: 0 designs, 0 components. CAP-001 declares the first component identifiers in the project |
@@ -469,3 +507,27 @@ point-in-time history cannot be re-acquired as observed once discarded.
 
 What keeps this below 100 is that the design has not yet been read by anyone but
 its author. Specification review is the gate that earns the remaining points.
+
+**Revision 3, 2026-09-05.** Four changes, all raised by `$design-decomposition`
+while decomposing this design into component designs, and each applied on the
+owner's explicit decision rather than by the decomposing agent's own judgement.
+`GET /api/settings/history-depth` was added to section 4.2, because the Settings
+screen renders the current depth and nothing let it read one. `GET /api/health`
+now declares credential presence, and constraint 5.12 states that the credential
+is supplied to both containers with the application reading only whether it is
+set; the alternative, ingestion recording presence in the store, was rejected
+because health would then be able to report a credential as supplied after
+ingestion had stopped. The abandoned-run reclaim, previously written in the
+passive voice with no actor, is now assigned to a periodic sweep in the
+application container, on the reasoning that a component cannot be relied on to
+notice its own death. And gap detection is stated as a prices-only notion, which
+the mechanism already implied but no summary said.
+
+A fifth recommendation, enforcing append-only history through database role
+grants, was considered and **rejected by the owner**: the deny would have to be
+table-scoped across six rules, role passwords cannot live in a numbered migration
+without committing a secret, and the grant does not reach a data-fix migration or
+the owner acting as superuser, which is how the likeliest mistakes would arrive.
+The reasoning is recorded in the `market-data-store` component design section
+2.5, and the unspecified backup procedure was raised in its place as the
+higher-value gap.

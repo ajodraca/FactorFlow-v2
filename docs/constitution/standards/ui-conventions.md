@@ -2,11 +2,11 @@
 artifact_schema_version: 1
 artifact_id: STD-UI
 artifact_type: constitution-artifact
-artifact_version: 2
+artifact_version: 4
 id: STD-UI
 title: Owner Interface Conventions
 kind: standard
-status: draft
+status: approved
 created: 2026-09-05
 updated: 2026-09-05
 owner: Alvaro de Jodra
@@ -19,20 +19,26 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude (Cowork)
   tool_version: unknown
-  timestamp: 2026-09-05T00:00:00Z
+  timestamp: 2026-09-05T04:01:14Z
   source_artifacts:
     - id: product-charter
       version: "2"
     - id: tech-stack
       version: "2"
     - id: CAP-001-ux-brief
-      version: "1"
+      version: "5"
     - id: edg-compliance
       version: "1.0"
     - id: factorflow-design-system
       version: "ported from the first build, 2026-09-05"
   invoking_user: ajodraca
   correlation_id: 6493d4a3-41a0-4991-9e37-c372f762c3d0
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-05T04:06:20Z
+  reviewed_revision: sha256:ecce3693ba29720a0e24b9f5528be59b6d5e87d1160ab65615365f783307d39d
+  review_artifact: "docs/constitution/reviews/ui-conventions-review-v2.md"
 ---
 
 # Owner Interface Conventions
@@ -134,7 +140,7 @@ Recorded as scope conditions so that a reviewer does not raise them as findings.
 
 ### 3.1 Language and vocabulary
 
-#### STD-UI-1 — Product vocabulary
+### STD-UI-1 — Product vocabulary
 
 **Rule:** User-visible text MUST use the product's domain vocabulary. It MUST NOT
 substitute generic terms — job, sync, import, task, item, object, entity, record,
@@ -152,7 +158,7 @@ brief and implementation against this list.
 **Specialization:** permitted — a capability MAY add a term its domain
 introduces, recording it in its UX brief. It MAY NOT redefine a term above.
 
-#### STD-UI-2 — Words must describe actual behaviour
+### STD-UI-2 — Words must describe actual behaviour
 
 **Rule:** Labels, confirmations and messages MUST describe what the product
 actually does. They MUST NOT describe behaviour the product does not have.
@@ -166,7 +172,7 @@ behaviour its acceptance criterion defines.
 
 ### 3.2 Quantities and time
 
-#### STD-UI-3 — Comparable figures
+### STD-UI-3 — Comparable figures
 
 **Rule:** Numeric values that can be compared within a column MUST render in
 tabular figures, MUST be right- and decimal-aligned, MUST use a precision fixed
@@ -178,7 +184,7 @@ owner's primary activity, and factor evidence is read by scanning columns.
 **Verification:** A screenshot of any table containing a numeric column.
 **Specialization:** none.
 
-#### STD-UI-4 — Missing is not zero
+### STD-UI-4 — Missing is not zero
 
 **Rule:** A value for which no observation exists MUST render as an explicit
 missing marker, distinct from both zero and blank. Zero MUST represent only a
@@ -190,18 +196,28 @@ forbids an empty state that reads as a healthy one.
 every numeric field in the capability.
 **Specialization:** none.
 
-#### STD-UI-5 — Dates and timestamps
+### STD-UI-5 — Dates and timestamps
 
 **Rule:** Dates MUST render in ISO-8601 (`YYYY-MM-DD`) and MUST NOT be
 locale-formatted. Timestamps MUST carry a visible time zone. The product MUST
-display one zone throughout.
+display one zone throughout, and that zone is **America/Chicago**, which is also
+the zone in which `observed_on` is computed. A timestamp MUST NOT be rendered in
+the viewing machine's local zone.
+
+A market session date is not a timestamp and MUST NOT be converted. A daily bar,
+a corporate action and an as-of date carry the exchange session date as a
+calendar date; converting one between zones moves it onto the wrong day, which
+is the error this rule exists to prevent rather than an application of it.
 
 **Authority:** Charter §3 — factor and universe history is point-in-time, so the
-date a value was known is load-bearing evidence rather than metadata.
-**Verification:** Any rendered date or timestamp.
-**Specialization:** none. The zone itself is open — see §5.3, OQ-UI-3.
+date a value was known is load-bearing evidence rather than metadata. The zone is
+the owner's decision of 2026-09-05, closing OQ-UI-3.
+**Verification:** Any rendered date or timestamp. A run whose timestamp falls
+between 23:00 and 24:00 America/Chicago stamps the calendar day the display
+shows.
+**Specialization:** none.
 
-#### STD-UI-6 — No abbreviation where values are compared
+### STD-UI-6 — No abbreviation where values are compared
 
 **Rule:** Magnitudes MUST NOT be abbreviated in any table or list where values
 are compared against one another. Abbreviation is permitted only where a single
@@ -213,7 +229,7 @@ value stands alone.
 
 ### 3.3 Colour and status
 
-#### STD-UI-7 — One job per palette
+### STD-UI-7 — One job per palette
 
 **Rule:** Colour MUST serve exactly one of four jobs, and no palette MUST serve
 two: **categorical** (identity), **sequential** (magnitude, one hue light to
@@ -236,7 +252,7 @@ outside the status palette resolves to a red or green hue.
 **Specialization:** none. The assignment is the rule; inverting it is an
 amendment to this rule, not a capability's choice.
 
-#### STD-UI-8 — Colour is never the sole carrier
+### STD-UI-8 — Colour is never the sole carrier
 
 **Rule:** State, identity and direction MUST each carry a non-colour encoding: a
 text label plus an icon or shape for state, a legend entry for series identity,
@@ -246,7 +262,7 @@ an explicit sign for direction.
 **Verification:** A greyscale rendering of the surface remains fully readable.
 **Specialization:** none.
 
-#### STD-UI-9 — Colour follows the entity
+### STD-UI-9 — Colour follows the entity
 
 **Rule:** A series colour MUST be assigned by entity and MUST NOT be assigned by
 rank or position. Changing a filter MUST NOT repaint the entities that remain.
@@ -256,7 +272,7 @@ rank or position. Changing a filter MUST NOT repaint the entities that remain.
 colours.
 **Specialization:** none.
 
-#### STD-UI-10 — Palettes are validated, not judged
+### STD-UI-10 — Palettes are validated, not judged
 
 **Rule:** Before use, a palette MUST be validated for adjacent-pair separation
 under colour-vision deficiency, separation under normal vision, and contrast
@@ -266,7 +282,7 @@ against its surface. The validation output MUST be recorded.
 **Verification:** The recorded validation output accompanies the theme.
 **Specialization:** stricter-only.
 
-#### STD-UI-11 — Paper and live are always distinguishable
+### STD-UI-11 — Paper and live are always distinguishable
 
 **Rule:** The interface MUST state the active environment in words, in a
 persistent region present on every screen, which MUST NOT be dismissible and MUST
@@ -277,7 +293,7 @@ identically for paper and live; charter §3, the paper-to-live gate.
 **Verification:** Every screenshot of every screen shows the environment.
 **Specialization:** stricter-only.
 
-#### STD-UI-12 — Status form and severity
+### STD-UI-12 — Status form and severity
 
 **Rule:** Every status MUST carry a text label and an icon or shape, and MUST map
 to exactly one severity tier. An outcome the owner intended MUST NOT be styled as
@@ -316,7 +332,7 @@ because `tech-stack.md` v2 places the provider's restatement limitation on the
 promotion evidence rather than on ingestion. No external design guidance covers
 them.
 
-#### STD-UI-13 — Every value carries its as-of date
+### STD-UI-13 — Every value carries its as-of date
 
 **Rule:** A value derived from point-in-time data MUST carry the date it was
 known, inline or one interaction away.
@@ -325,7 +341,7 @@ known, inline or one interaction away.
 **Verification:** For each displayed value, the as-of date is reachable.
 **Specialization:** stricter-only.
 
-#### STD-UI-14 — Presence has three states
+### STD-UI-14 — Presence has three states
 
 **Rule:** Wherever a check can fail to run, presence MUST be reported as
 **present**, **absent**, or **not determinable**. A binary healthy/unhealthy
@@ -338,7 +354,7 @@ there is vacuous.
 **Verification:** Each presence indicator is exercised in all three states.
 **Specialization:** none.
 
-#### STD-UI-15 — Nothing is asserted beyond what is derived
+### STD-UI-15 — Nothing is asserted beyond what is derived
 
 **Rule:** The interface MUST display only what recorded data supports. It MUST
 NOT present intended, expected or configured coverage as fact.
@@ -348,7 +364,7 @@ asserted.
 **Verification:** Every displayed field traces to a query over recorded rows.
 **Specialization:** none.
 
-#### STD-UI-16 — No silent substitution
+### STD-UI-16 — No silent substitution
 
 **Rule:** The interface MUST NOT carry a last-known value forward, interpolate
 across a gap, or substitute a default for an unknown, unless it states at the
@@ -359,7 +375,7 @@ point of display that it has done so.
 the disclosure.
 **Specialization:** none.
 
-#### STD-UI-17 — Known limitations propagate
+### STD-UI-17 — Known limitations propagate
 
 **Rule:** A value computed from data carrying a recorded limitation MUST be
 marked, and the mark MUST propagate to every presentation derived from it,
@@ -372,7 +388,7 @@ obligation was placed on the promotion evidence.
 classification to promotion evidence; the mark survives.
 **Specialization:** stricter-only.
 
-#### STD-UI-18 — A check states what it does not cover
+### STD-UI-18 — A check states what it does not cover
 
 **Rule:** Where a check cannot detect a class of fault, the interface MUST state
 what it does not cover, alongside its result. The absence of a detected problem
@@ -385,7 +401,7 @@ outage leaves no gap to detect, because the day never enters the trading-day set
 
 ### 3.5 Actions
 
-#### STD-UI-19 — Action tiers and error actionability
+### STD-UI-19 — Action tiers and error actionability
 
 **Rule:** Every action MUST be classified **routine** (reversible, no
 confirmation), **consequential** (confirmation describing the actual effect per
@@ -399,21 +415,26 @@ AC-10, AC-21.
 error's three parts.
 **Specialization:** stricter-only.
 
-#### STD-UI-20 — The promotion gate
+### STD-UI-20 — The promotion gate
 
 **Rule:** Promotion from paper to live MUST present the evidence in the same view
 as the action; MUST require an explicit acknowledgement, including of any mark
 carried under STD-UI-17; MUST capture the owner's stated rationale; and MUST NOT
 be a toggle, switch or setting.
 
-**Authority:** Charter §3 — Persistence stores "the decision history behind
-promotions", and a decision with no recorded reason is not a history; charter §1,
-which makes the gate deliberate.
+**Authority:** Charter §3 for the evidence, acknowledgement and
+not-a-toggle clauses: Persistence stores "the decision history behind
+promotions", and charter §1 makes the gate deliberate. **Internal policy for the
+rationale clause**, pending OQ-UI-5. The charter requires a decision history; it
+does not say the owner must state a reason, and reading one into it would
+attribute an obligation to a source that does not impose it. The clause stands on
+its own argument, that a decision history without reasons cannot be revisited
+when a promotion is questioned later, and the owner has not yet confirmed it.
 **Verification:** The promotion interaction is walked; each clause is observable.
 **Specialization:** stricter-only. The rationale requirement is open — see §5.3,
 OQ-UI-5.
 
-#### STD-UI-21 — The kill switch
+### STD-UI-21 — The kill switch
 
 **Rule:** The kill switch MUST be reachable from every screen at a fixed
 position; MUST be a single action; MUST NOT be gated behind a confirmation; and
@@ -430,7 +451,7 @@ departure is intentional and a reviewer MUST NOT raise it as a finding.
 and its rendered state changes only when the stored state does.
 **Specialization:** none.
 
-#### STD-UI-22 — Control adjacency
+### STD-UI-22 — Control adjacency
 
 **Rule:** A capital-at-risk or destructive control MUST NOT be placed adjacent to
 a routine one, and MUST NOT be the default focus target of any dialog.
@@ -441,7 +462,7 @@ a routine one, and MUST NOT be the default focus target of any dialog.
 
 ### 3.6 States and feedback
 
-#### STD-UI-23 — State coverage
+### STD-UI-23 — State coverage
 
 **Rule:** Every data-bearing region MUST define: loading; empty because never
 populated; empty because nothing was found; partial; stale; unavailable because a
@@ -455,7 +476,7 @@ surface as a generic transport error.
 **Specialization:** permitted — a region MAY declare a state inapplicable with a
 recorded reason.
 
-#### STD-UI-24 — Programmatic semantics and feedback
+### STD-UI-24 — Programmatic semantics and feedback
 
 **Rule:** Every operation MUST be completable by keyboard; focus MUST be managed
 on dialogs and on content inserted into the page; visible focus MUST NOT be
@@ -472,7 +493,7 @@ live-region markup. Enforcement is human review: `tech-stack.md` records that
 Biome carries no `jsx-a11y` equivalent.
 **Specialization:** stricter-only.
 
-#### STD-UI-25 — Polled freshness
+### STD-UI-25 — Polled freshness
 
 **Rule:** A region updated by polling MUST display its last-updated time, and its
 cadence MUST be recorded in the capability's design rather than left to
@@ -484,7 +505,7 @@ interface learns of progress only by polling.
 cadence.
 **Specialization:** permitted — cadence varies per region.
 
-#### STD-UI-26 — Multi-step operations
+### STD-UI-26 — Multi-step operations
 
 **Rule:** A multi-step operation MUST show its steps, the current position, and
 what remains, and MUST allow retreat to a previous step without loss of entered
@@ -496,7 +517,7 @@ data.
 
 ### 3.7 Charts and scale
 
-#### STD-UI-27 — Chart integrity
+### STD-UI-27 — Chart integrity
 
 **Rule:** A chart MUST NOT use two y-scales. Bar charts MUST have a zero
 baseline. Categorical hues MUST be assigned in a fixed order and MUST NOT be
@@ -507,7 +528,7 @@ than given generated hues. A chart with two or more series MUST carry a legend.
 **Verification:** Chart inspection.
 **Specialization:** none.
 
-#### STD-UI-28 — Chart provenance
+### STD-UI-28 — Chart provenance
 
 **Rule:** Every chart MUST state what is measured, its units, its as-of date and
 its n, and MUST have a table equivalent reachable from it.
@@ -517,7 +538,7 @@ inspectable evidence.
 **Verification:** Chart inspection; the table is reachable.
 **Specialization:** stricter-only.
 
-#### STD-UI-29 — Density tokens
+### STD-UI-29 — Density tokens
 
 **Rule:** Density, type scale and spacing MUST be defined once as theme tokens
 and every surface MUST consume them. A component MUST NOT be overridden at a call
@@ -529,7 +550,7 @@ repository, so its source is the product's to correct.
 **Specialization:** permitted — a capability MAY select a density tier from the
 defined set. It MAY NOT introduce a value.
 
-#### STD-UI-30 — Lists at committed volume
+### STD-UI-30 — Lists at committed volume
 
 **Rule:** A list that can reach the volume its capability commits to MUST be
 virtualised and MUST provide search and filter. A layout that works only at
@@ -593,13 +614,13 @@ rule it would amend.
 |----|----------|--------|
 | ~~OQ-UI-1~~ | ~~Does status own red and green, with market direction on a non-red/green diverging pair, or the finance-conventional reverse?~~ **Closed 2026-09-05: status owns red and green.** Not a fresh decision — the first FactorFlow build had already placed gain and loss on teal and amber, for the colour-vision reason recorded in `design-system/README.md`, and reserved red for `--destructive`. STD-UI-7 was written independently of that build and reached the same assignment; closing it records the agreement rather than making a new choice | STD-UI-7 |
 | OQ-UI-2 | Does the product ship a dark theme, and from which milestone? **Narrowed 2026-09-05:** the tokens exist — `theme.css` carries a full `.dark` block, stepped against the dark surface rather than inverted, which is what STD-UI-29 requires of a second theme. What remains is only whether M1 exposes a way to switch to it | STD-UI-29 |
-| OQ-UI-3 | Which single time zone does the product display, and do as-of dates and run timestamps share it? | STD-UI-5 |
+| ~~OQ-UI-3~~ | ~~Which single time zone does the product display, and do as-of dates and run timestamps share it?~~ **Closed 2026-09-05: America/Chicago, and they do not share it.** The owner chose US Central over exchange time and over UTC. The second half is settled on correctness rather than preference: a session date is a calendar date in the exchange's terms, so it is rendered unconverted while timestamps carry the zone. Note the consequence the owner accepted, that America/Chicago is not the exchange zone, so between 23:00 and 24:00 Central a run stamps `observed_on` one calendar day behind what America/New_York would record | STD-UI-5 |
 | OQ-UI-4 | Which density tier is the product default? `theme.css` currently resolves `--row-height` to `--row-height-comfortable`, which is a port-time placeholder rather than an owner decision; changing it is one token | STD-UI-29 |
 | OQ-UI-5 | Does the promotion gate capture a written rationale from the owner? Charter §3's "decision history behind promotions" is read here as requiring one; the charter does not say so in as many words | STD-UI-20 |
 
-OQ-UI-3 wants answering before the first screen is built — CAP-001's run history
-is the first surface that renders a timestamp. The others can be settled against a
-working interface.
+The remaining questions can be settled against a working interface. OQ-UI-3 could
+not, because CAP-001's run history is the first surface that renders a timestamp,
+and it was closed on 2026-09-05 before that screen was designed.
 
 ## 6. Traceability
 
@@ -635,5 +656,7 @@ working interface.
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-09-05 | 4 | Corrected STD-UI-20's authority on FINDING-1 of `reviews/ui-conventions-review-v1.md`. The rule attributed its written-rationale clause to Charter §3, which stores "the decision history behind promotions" but does not require the owner to state a reason; OQ-UI-5 had already conceded the charter "does not say so in as many words". The clause is now labelled internal policy pending OQ-UI-5 and rests on its own argument. No rule text, obligation, numbering or specialization posture changed, and the other three clauses keep their charter authority |
+| 2026-09-05 | 3 | Closed OQ-UI-3 on the owner's decision: the product displays **America/Chicago** throughout, and `observed_on` is computed in it. US Central was chosen over exchange time, which would have put run timestamps in the same frame as the session dates that dominate every screen, and over UTC, which would have matched the container logs a failed run is diagnosed against. The question's second half was settled on correctness rather than preference: a session date is a calendar date in the exchange's terms and is rendered unconverted, because converting one moves a bar onto the wrong day. STD-UI-5 now states both, and records the consequence that Central is not the exchange zone, so a run between 23:00 and 24:00 Central stamps a calendar day that America/New_York would call the next one. Also promoted the thirty rule headings from level four to level three so `scripts/check-capabilities.py` can extract them, which is a corrected reference rather than an amendment and changed no rule text |
 | 2026-09-05 | 2 | Closed OQ-UI-1: status owns red and green, market direction keeps a non-red/green diverging pair. Closed on precedent rather than on fresh reasoning — the first FactorFlow build had already made this assignment for the same colour-vision reason, and STD-UI-7 was written independently of it and agreed, so the rule now cites the standing decision alongside its own argument. Narrowed OQ-UI-2, whose tokens now exist. Recorded that `theme.css`'s current density default is a port-time placeholder, not an answer to OQ-UI-4. Updated §1.3 and §2.2: the design system is no longer absent — it was ported into `design-system/` and configured at `projects/factorflow-v2/design-system.yaml` on 2026-09-05, so this standard now states obligations that a resolvable artifact satisfies, and the two are ranked. Corrected a rule reference in §2.2 that named STD-UI-25 where STD-UI-29 governs |
 | 2026-09-05 | 1 | Created as a `standard`, on the finding in `CAP-001-ux-brief` v1 that no design system is configured and that CAP-001's interface patterns are inherited by every later capability. Thirty numbered rules, each with an authority, a verification and a specialization posture. Establishes this artifact as factorflow-v2's enforceable UX constitution, with the scaffold-wide `edg-compliance` skill retained as advisory expertise beneath it and left unmodified. Adopts WCAG 2.1 AA as the project target, closing the question `CAP-001-ux-brief` §6 raised. Records three intentional departures from `edg-compliance` — a six-tier severity vocabulary reconciled to EDG's three levels (STD-UI-12), a kill switch that takes no confirmation on charter §3 authority (STD-UI-21), and screen-reader certification exempted as a release gate while its semantics remain mandatory (§2.3, STD-UI-24) — and four exemptions where EDG presupposes a product family, a review body, a support channel or a second user that this product does not have. Five interface questions left open, of which OQ-UI-1, the reservation of red and green for status rather than market direction, is the standing default most likely to be inverted |

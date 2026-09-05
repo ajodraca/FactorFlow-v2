@@ -41,11 +41,11 @@ system design's Section 4 and regenerate.
 | `GET/POST/DELETE /api/instruments` | `ingestion-api` | `owner-web-app` | JSON; list, add and remove named instruments | `CAP-001` |
 | `Migration application` | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | `CAP-001` |
 | `Observation append` | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | `CAP-001` |
-| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; returns 202 and a run id | `CAP-001` |
+| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; creates a `requested` run and returns `202 Accepted`, its id and state. While another run is `running`, the new request remains queued and is claimed FIFO after that run reaches a terminal state. | `CAP-001` |
 | `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | JSON; requests cooperative cancellation of a running acquisition | `CAP-001` |
 | `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the owner's stated history depth, required before first run | `CAP-001` |
 | `Provider reads` | `Massive REST API (external)` | `massive-client` | HTTPS/JSON; ticker reference, daily aggregates, financials, corporate actions; API-key auth | `CAP-001` |
-| `Run request claim` | `run-journal` | `acquisition-runner` | PostgreSQL row claimed with `SELECT ... FOR UPDATE SKIP LOCKED`; the only cross-container handoff | `CAP-001` |
+| `Run request claim` | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | `CAP-001` |
 
 ## Findings
 

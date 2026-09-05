@@ -67,7 +67,7 @@ name and a tooltip.
 | Primary background / text | `--primary` / `--primary-foreground` |
 | Secondary background / text | `--secondary` / `--secondary-foreground` |
 | Destructive background / text | `--destructive` / `--destructive-foreground` |
-| Border (outline) | `--border` |
+| Border (outline) | `--input` |
 | Focus ring | `--ring` |
 | Corner radius | `--radius` |
 
