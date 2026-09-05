@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-coverage-service
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,7 +21,7 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
       version: "2"
   invoking_user: ajodraca
@@ -415,7 +415,7 @@ This component exposes no HTTP surface of its own.
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-7, AC-8, AC-12, AC-17, AC-21, AC-22 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Gap computation steps 40 to 43, constraints 5.5 and 5.9 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Section 1.1, the Coverage overview and its unavailable state | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Section 1.1, the Coverage overview and its unavailable state | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Component design | Market Data Store | `coverage_segment`, `acquisition_state`, `daily_bar` and their indexes | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Standard | STD-UI v4 | STD-UI-4, STD-UI-14, STD-UI-15, STD-UI-16, STD-UI-18 | `docs/constitution/standards/ui-conventions.md` |
 | Constitution | Tech Stack v2 | Massive supplies no historical trading calendar | `docs/constitution/tech-stack.md` |

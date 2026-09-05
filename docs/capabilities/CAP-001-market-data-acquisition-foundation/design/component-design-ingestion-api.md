@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-ingestion-api
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,7 +21,7 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
       version: "2"
   invoking_user: ajodraca
@@ -406,7 +406,7 @@ connection pool. It consumes no external integration.
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-1, AC-2, AC-7 to AC-11, AC-13, AC-14, AC-17 to AC-19, AC-21, AC-23 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Interfaces 4.2, control flow 3, constraints 5.1, 5.11, 5.17 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Screens 1.1 to 1.5, cross-screen navigation, the copy this API's messages must match | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Screens 1.1 to 1.5, cross-screen navigation, the copy this API's messages must match | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Standard | STD-UI v4 | STD-UI-19 error parts, STD-UI-25 polling and last-updated | `docs/constitution/standards/ui-conventions.md` |
 | Constitution | Tech Stack v2 | FastAPI on uvicorn, Pydantic, validation commands | `docs/constitution/tech-stack.md` |
 

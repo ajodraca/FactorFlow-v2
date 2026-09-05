@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-instrument-list-service
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,7 +21,7 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
       version: "2"
   invoking_user: ajodraca
@@ -376,7 +376,7 @@ This component exposes no HTTP surface of its own. It backs the endpoints
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-1, AC-2, AC-4, AC-21, AC-22 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | `instrument-list-service` in 4.1, constraint 5.8 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Section 1.2 Instruments, section 1.3 Settings | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Section 1.2 Instruments, section 1.3 Settings | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Component design | Market Data Store | `instrument` and `owner_setting` definitions and their constraints | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Standard | STD-UI v4 | STD-UI-2, words describe real behaviour | `docs/constitution/standards/ui-conventions.md` |
 

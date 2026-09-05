@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-acquisition-runner
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,7 +21,7 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
       version: "2"
   invoking_user: ajodraca
@@ -401,7 +401,7 @@ several internal ones.
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-2 to AC-6, AC-9 to AC-12, AC-19, AC-20, AC-22, AC-23; user flows 1, 3, 4, 5 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Control flow section 3, constraints 5.1, 5.7, 5.13, 5.14 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Section 1.5, progress and cancellation copy | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Section 1.5, progress and cancellation copy | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Component design | Run Journal | Claim, heartbeat, cancellation and outcome derivation | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-run-journal.md` |
 | Component design | Observation Writer | The per-instrument transaction and idempotent append | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-observation-writer.md` |
 | Constitution | Operational Safety v1.3 | OPS-ERR-001, OPS-LOOP-001 | `docs/constitutions/operational-safety.constitution.md` |
