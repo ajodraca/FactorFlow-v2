@@ -10,6 +10,8 @@ The component contract the SDD UX pipeline reads. Built on
 | `theme.css` | Design tokens as CSS custom properties. The only colours a design may reference. |
 | `component-map.json` | Component to design-source mapping for Figma traceability. Empty for now. |
 | `intake.md` | What to do when a design needs a component that has no spec. |
+| `theme-validation.md` | The STD-UI-10 validation record for `theme.css`: contrast, and pair separation under normal and dichromat vision. |
+| `validate-theme.py` | Produces that record. Run `python3 validate-theme.py theme.css` after any token change. |
 
 ## How the pipeline uses this
 
@@ -26,6 +28,12 @@ Wired up through `projects/factorflow-v2/design-system.yaml` in the ai-agents re
 standard. **It states the obligations; this design system satisfies them.** Where the two
 disagree, STD-UI wins and this repository is corrected — a token or a spec is never the reason
 a rule bends.
+
+**One rule is currently unsatisfied.** STD-UI-10 requires the palette to be validated and the
+output recorded; `theme-validation.md` is that record, and it shows 16 contrast pairs below the
+WCAG 2.1 AA minimum STD-UI-24 adopts, 13 of them in the light theme. The tokens were carried
+over unchanged rather than adjusted to pass, because changing one is a design-language decision
+for the owner. See that record for what each failure affects.
 
 Practically: STD-UI-29 obliges density, type scale and spacing to exist as tokens and be
 consumed everywhere, and `theme.css` is where they exist. STD-UI-12's six severity tiers,
