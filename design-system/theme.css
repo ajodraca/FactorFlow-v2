@@ -1,0 +1,303 @@
+/* FactorFlow Design System — theme tokens
+ *
+ * Base layer follows the shadcn/ui token convention so the stock components work
+ * unmodified. The financial layer below it does not exist in any off-the-shelf
+ * design system and is specific to FactorFlow: gain/loss semantics, factor
+ * classification, data vintage, and trade-approval risk states.
+ *
+ * Every colour a design references must be one of these custom properties.
+ * The D8 token-usage check in $specification-review validates against this file.
+ *
+ * Values are HSL channel triplets so they compose with `hsl(var(--token) / <alpha>)`.
+ *
+ * ── Conformance ────────────────────────────────────────────────────────────
+ * This file is bound by docs/constitution/standards/ui-conventions.md (STD-UI).
+ * The rules it discharges directly:
+ *   STD-UI-7   one job per palette; red and green reserved for status
+ *   STD-UI-8   colour is never the sole carrier
+ *   STD-UI-9   colour follows the entity, never its rank
+ *   STD-UI-11  paper and live always distinguishable
+ *   STD-UI-12  six severity tiers
+ *   STD-UI-4   missing is not zero
+ *   STD-UI-14  presence has three states
+ *   STD-UI-29  density, type scale and spacing defined once as tokens
+ * Adding or changing a token here is a design-language decision. Where it also
+ * changes what a rule requires, amend STD-UI first.
+ */
+
+:root {
+  /* ── Base surfaces and text ─────────────────────────────────────── */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 222 47% 11%;
+
+  /* ── Action colours ─────────────────────────────────────────────── */
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 40% 98%;
+
+  /* ── Financial semantics — DIVERGING (polarity) ─────────────────────
+   * STD-UI-7. Deliberately NOT plain red/green. Roughly 1 in 12 men has a
+   * red-green colour vision deficiency, and gain/loss is the most repeated
+   * signal in this product. Teal/amber stays distinguishable under
+   * deuteranopia and protanopia.
+   *
+   * Red and green are reserved for STATUS (below). Direction never uses them.
+   * STD-UI-8: colour is never the only carrier — pair with sign or arrow per
+   * the Do/Don't in each component spec.
+   */
+  --gain: 173 80% 30%;
+  --gain-foreground: 0 0% 100%;
+  --gain-muted: 173 55% 94%;
+  --loss: 25 88% 44%;
+  --loss-foreground: 0 0% 100%;
+  --loss-muted: 25 90% 95%;
+  --neutral-value: 215 16% 47%;
+  --neutral-value-muted: 210 40% 96%;
+
+  /* ── Data vintage — value states ────────────────────────────────────
+   * STD-UI-4 and STD-UI-14. Three distinct facts that a plausible interface
+   * collapses into one:
+   *   --neutral-value        a MEASURED zero or no change
+   *   --value-missing        no observation exists (renders with an em dash)
+   *   --value-indeterminate  the check could not run; the answer is unknown
+   *
+   * --value-indeterminate MUST NOT render as a milder --value-missing.
+   * Colour alone cannot separate three states at these lightnesses, so a
+   * surface using --value-indeterminate MUST also carry the hatch pattern
+   * defined by --pattern-indeterminate and an explicit text label.
+   */
+  --value-missing: 215 14% 65%;
+  --value-missing-muted: 210 30% 97%;
+  --value-indeterminate: 215 22% 42%;
+  --value-indeterminate-muted: 214 28% 93%;
+  --pattern-indeterminate: repeating-linear-gradient(
+    135deg,
+    hsl(var(--value-indeterminate) / 0.14) 0 4px,
+    transparent 4px 8px
+  );
+
+  /* ── Factor classification (momentum / value / growth) ───────────── */
+  --factor-momentum: 262 60% 52%;
+  --factor-value: 199 72% 40%;
+  --factor-growth: 291 55% 48%;
+  --factor-foreground: 0 0% 100%;
+
+  /* ── Trade approval risk states ─────────────────────────────────────
+   * STD-UI-11. --risk-real-money marks any surface that can move real funds.
+   * It must be visually distinct from --destructive: destructive means "this
+   * deletes something", real-money means "this spends something".
+   *
+   * The persistent environment region required by STD-UI-11 uses these and
+   * nothing else uses them, which is what makes the channel reserved. The
+   * region also states the environment in words — the tokens are not the
+   * distinction on their own.
+   */
+  --risk-paper: 199 72% 40%;
+  --risk-paper-muted: 199 72% 95%;
+  --risk-real-money: 349 75% 44%;
+  --risk-real-money-muted: 349 80% 96%;
+  --risk-foreground: 0 0% 100%;
+
+  /* ── Status — six severity tiers ────────────────────────────────────
+   * STD-UI-12. Six tiers, mapped in that rule onto the three levels the
+   * edg-compliance skill names. Red and green live here and only here.
+   *
+   *   neutral   nothing has happened, or the owner intended it
+   *   active    in progress; will change while watched
+   *   good      completed as intended
+   *   warning   requested but not effective, or completed but degraded
+   *   serious   recoverable, and requires explanation to be understood
+   *   critical  failed
+   *
+   * KNOWN ADJACENCY, considered and accepted: --status-serious (30) sits near
+   * --loss (25). The classic six-step severity ramp wants orange for serious,
+   * and --loss already holds amber because moving it would undo the
+   * colour-vision decision above. They are never confusable in practice
+   * because STD-UI-8 requires every status to carry a text label and an icon,
+   * and STD-UI-3 requires every direction to carry an explicit sign; status
+   * renders as a labelled chip on a -muted ground, direction as coloured text.
+   * A design that renders either as a bare swatch violates STD-UI-8.
+   */
+  --status-neutral: 215 16% 47%;
+  --status-neutral-muted: 210 40% 96%;
+  --status-active: 217 91% 50%;
+  --status-active-muted: 217 91% 96%;
+  --status-good: 142 62% 32%;
+  --status-good-muted: 142 55% 95%;
+  --status-warning: 45 93% 42%;
+  --status-warning-muted: 45 95% 94%;
+  --status-serious: 30 90% 40%;
+  --status-serious-muted: 30 92% 95%;
+  --status-critical: 0 72% 45%;
+  --status-critical-muted: 0 80% 96%;
+  --status-foreground: 0 0% 100%;
+
+  /* ── Data visualisation — CATEGORICAL (identity) ─────────────────────
+   * STD-UI-9 and STD-UI-27. Ordered categorical ramp. Distinguishable in
+   * sequence and under common colour vision deficiencies. Assign in order by
+   * ENTITY; never reorder per chart and never cycle. Six is the palette's
+   * length: a seventh series is grouped, facetted, or folded into "Other" —
+   * never given a generated hue.
+   */
+  --chart-1: 199 72% 40%;
+  --chart-2: 173 80% 30%;
+  --chart-3: 262 60% 52%;
+  --chart-4: 38 92% 45%;
+  --chart-5: 291 55% 48%;
+  --chart-6: 215 28% 32%;
+  --chart-grid: 214 32% 91%;
+  --chart-axis: 215 16% 47%;
+
+  /* ── Data visualisation — SEQUENTIAL (magnitude) ─────────────────────
+   * STD-UI-7 names four colour jobs and this is the fourth. One hue, light to
+   * dark, for magnitude: coverage density, concentration, completeness. Never
+   * used for identity, never for polarity, and never a rainbow.
+   */
+  --seq-1: 199 65% 93%;
+  --seq-2: 199 68% 79%;
+  --seq-3: 199 70% 62%;
+  --seq-4: 199 74% 44%;
+  --seq-5: 199 80% 27%;
+
+  /* ── Geometry and type ──────────────────────────────────────────── */
+  --radius: 0.5rem;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Tabular figures are mandatory for any column of numbers so digits align. */
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+  --font-numeric: var(--font-mono);
+
+  /* ── Type scale ─────────────────────────────────────────────────────
+   * STD-UI-29. Defined once; every surface consumes these. The base is 14px
+   * rather than 16px because the interface is a desktop tool read for long
+   * stretches, not a marketing surface (charter §2; CAP-001 ux-brief §5).
+   */
+  --text-xs: 0.75rem;    /* 12px — dense table metadata, timestamps */
+  --text-sm: 0.8125rem;  /* 13px — dense table body */
+  --text-base: 0.875rem; /* 14px — interface default */
+  --text-lg: 1rem;       /* 16px — section headings */
+  --text-xl: 1.25rem;    /* 20px — screen titles */
+  --text-2xl: 1.5rem;    /* 24px — the rare hero number */
+  --leading-tight: 1.25;
+  --leading-normal: 1.4;
+  --leading-relaxed: 1.6;
+  --measure-prose: 75ch;  /* prose caps here; tables never do */
+
+  /* ── Spacing scale ──────────────────────────────────────────────────
+   * STD-UI-29. 4px base unit. Vertical rhythm inside a data region is a
+   * multiple of these, never a component's default padding.
+   */
+  --space-1: 0.25rem;  /*  4px */
+  --space-2: 0.5rem;   /*  8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+  --space-7: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+
+  /* ── Density ────────────────────────────────────────────────────────
+   * STD-UI-29. Two tiers. A capability selects one; it does not invent a
+   * value. Which is the product default is open — STD-UI §5.3, OQ-UI-4.
+   */
+  --row-height-comfortable: 2rem;    /* 32px */
+  --row-height-compact: 1.75rem;     /* 28px */
+  --row-height: var(--row-height-comfortable);
+  --cell-padding-x: var(--space-3);
+  --cell-padding-y: var(--space-1);
+  --control-min-target: 1.5rem;      /* 24px — minimum interactive target */
+  --focus-ring-width: 2px;
+}
+
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 44% 10%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 44% 10%;
+  --popover-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --border: 217 33% 20%;
+  --input: 217 33% 20%;
+  --ring: 213 27% 84%;
+
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 50%;
+  --destructive-foreground: 210 40% 98%;
+
+  --gain: 173 65% 45%;
+  --gain-foreground: 222 47% 7%;
+  --gain-muted: 173 40% 16%;
+  --loss: 25 85% 58%;
+  --loss-foreground: 222 47% 7%;
+  --loss-muted: 25 45% 17%;
+  --neutral-value: 215 20% 65%;
+  --neutral-value-muted: 217 33% 17%;
+
+  --value-missing: 215 18% 52%;
+  --value-missing-muted: 217 30% 14%;
+  --value-indeterminate: 215 25% 68%;
+  --value-indeterminate-muted: 217 30% 18%;
+
+  --factor-momentum: 262 70% 68%;
+  --factor-value: 199 75% 55%;
+  --factor-growth: 291 60% 65%;
+  --factor-foreground: 222 47% 7%;
+
+  --risk-paper: 199 75% 55%;
+  --risk-paper-muted: 199 45% 16%;
+  --risk-real-money: 349 78% 60%;
+  --risk-real-money-muted: 349 45% 18%;
+  --risk-foreground: 222 47% 7%;
+
+  --status-neutral: 215 20% 65%;
+  --status-neutral-muted: 217 33% 17%;
+  --status-active: 217 88% 66%;
+  --status-active-muted: 217 45% 18%;
+  --status-good: 142 55% 50%;
+  --status-good-muted: 142 40% 15%;
+  --status-warning: 45 90% 58%;
+  --status-warning-muted: 45 45% 16%;
+  --status-serious: 30 88% 58%;
+  --status-serious-muted: 30 45% 17%;
+  --status-critical: 0 70% 60%;
+  --status-critical-muted: 0 45% 18%;
+  --status-foreground: 222 47% 7%;
+
+  --chart-1: 199 75% 55%;
+  --chart-2: 173 65% 45%;
+  --chart-3: 262 70% 68%;
+  --chart-4: 38 92% 58%;
+  --chart-5: 291 60% 65%;
+  --chart-6: 215 28% 82%;
+  --chart-grid: 217 33% 20%;
+  --chart-axis: 215 20% 65%;
+
+  /* Sequential steps are re-stepped against the dark surface, not inverted:
+   * light-to-dark becomes dark-to-light so that magnitude still reads as
+   * intensity against the ground it sits on. */
+  --seq-1: 199 40% 18%;
+  --seq-2: 199 50% 28%;
+  --seq-3: 199 60% 42%;
+  --seq-4: 199 70% 58%;
+  --seq-5: 199 78% 74%;
+}
