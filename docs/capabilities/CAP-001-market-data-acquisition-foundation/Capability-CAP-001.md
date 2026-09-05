@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001
 artifact_type: capability
-artifact_version: 3
+artifact_version: 4
 id: CAP-001
 title: Market Data Acquisition Foundation
 description: >-
@@ -21,14 +21,14 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-05T03:10:00Z
+  timestamp: 2026-09-05T03:45:00Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
       version: "1, approved 2026-09-03"
     - id: STD-UI
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -325,7 +325,7 @@ must agree.
 | STD-UI-2 | yes | UX brief 2.2, 3. Retirement is confirmed as retirement, with `dialog` `confirm` not `destructive` |
 | STD-UI-3 | yes | Coverage ranges, gap counts and per-run instrument counts in tabular figures, precision fixed per column |
 | STD-UI-4 | yes | UX brief 2.1. Absent renders an em dash, zero means a measured zero, blank means inapplicable |
-| STD-UI-5 | yes | UX brief 2.1, 2.4. ISO-8601 throughout. The display zone is open, OQ-UI-3 |
+| STD-UI-5 | yes | UX brief 2.1, 2.4, 5. ISO-8601 throughout, timestamps in America/Chicago, session dates unconverted |
 | STD-UI-6 | yes | Instrument and gap counts render in full in every table |
 | STD-UI-7 | partial | Status palette only. CAP-001 renders no direction, magnitude or categorical series |
 | STD-UI-8 | yes | UX brief 6. Every status carries a text label plus icon or shape; greyscale readability is the test |
@@ -345,7 +345,7 @@ must agree.
 | STD-UI-22 | no | CAP-001 has no capital-at-risk control and no destructive one; retirement is neither |
 | STD-UI-23 | yes | UX brief 12.4 enumerates all eight states for each of the six regions |
 | STD-UI-24 | yes | UX brief 6 |
-| STD-UI-25 | partial | The last-updated time is required; the cadence is not yet decided and is carried as the one REQUIRES INPUT value in the UX brief |
+| STD-UI-25 | yes | UX brief 5 records the cadence per region: 10s run progress, 30s application status, coverage on demand |
 | STD-UI-26 | no | No single operation spans steps. Making the first-run path a guided setup would engage this rule |
 | STD-UI-27 | no | CAP-001 renders no chart. System design 4.3 |
 | STD-UI-28 | no | CAP-001 renders no chart. System design 4.3 |

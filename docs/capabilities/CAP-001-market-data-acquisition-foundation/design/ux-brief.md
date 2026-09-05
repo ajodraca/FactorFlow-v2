@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-ux-brief
 artifact_type: ux-brief
-artifact_version: 3
+artifact_version: 4
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-04
@@ -16,14 +16,14 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude Code
   tool_version: "2.1.92"
-  timestamp: 2026-09-05T03:20:00Z
+  timestamp: 2026-09-05T03:45:00Z
   source_artifacts:
     - id: CAP-001
       version: "2"
     - id: CAP-001-system-design
       version: "1"
     - id: STD-UI
-      version: "2"
+      version: "3"
     - id: factorflow-design-system
       version: "ported from the first build, 2026-09-05"
   invoking_user: ajodraca
@@ -291,7 +291,7 @@ orders.
 | Acquisition settings | State the history depth | consequential | The depth is recorded and governs what subsequent runs acquire (AC-2) | Not yet stated: the start control renders as `button` `blocked` with the reason beside it, rather than a run that starts and then refuses to be claimed. Changing depth after data exists has no stated behaviour, see §9 |
 | Coverage overview | Read per-instrument coverage | routine | Data types present, range covered, last acquired, gaps (AC-7, AC-8) | Nothing acquired yet: state that plainly (AC-17, STD-UI-23). Gap detection unavailable below two instruments holding data in range: `coverage-unknown`, never zero (STD-UI-14) |
 | Coverage overview / Run history | Start an acquisition run | consequential | The request is accepted and a run appears in history; the interface does not wait on the provider (system design control flow steps 3 and 4, a 202 with a run id) | History depth unset: `button` `blocked` with the reason, which stays focusable so the reason reaches a keyboard user. A run already in progress: behaviour unstated, see §9 |
-| Run history | See a run in progress advance | routine | Progress becomes visible without the owner reloading the page | There is no server-pushed progress (system design control flow steps 28 to 31). STD-UI-25 requires a visible last-updated time and a cadence recorded in the design rather than left to implementation |
+| Run history | See a run in progress advance | routine | Progress becomes visible without the owner reloading the page, refreshing every 10 seconds | There is no server-pushed progress (system design control flow steps 28 to 31). STD-UI-25 is satisfied: the cadence is decided and each polled region shows its last-updated time |
 | Run detail | Cancel a run that is under way | consequential | The run enters `cancelling`, then `cancelled`; instruments not yet reached are untouched; coverage already written is retained (AC-19) | The run finished before the request was observed: tell the owner it completed, do not show a cancellation that did not happen (AC-19, flow step 5). Not `destructive`: nothing is discarded |
 | Run detail | Read why a run failed or was partial | routine | The affected instrument and data type, and the reason reported (AC-10), in the three parts STD-UI-19 requires | An unrecognised instrument is reported and the run continued (AC-11); this reads as a data problem the owner fixes, not as a run failure |
 | Run detail | Understand an abandoned run | routine | The owner learns the run was reclaimed because the process holding it stopped, that coverage written before it stands, and that a new run may be started (AC-20) | Tiered `serious` by STD-UI-12, "recoverable, and requires explanation to be understood". Without that explanation it reads as a product defect |
@@ -389,8 +389,20 @@ specifically.
 - **Missing is not zero** (STD-UI-4). An absent observation renders as an em dash
   per the `data-table` specification, never `0`, and blank means only that the
   column does not apply.
-- **Dates are ISO-8601 and timestamps carry a visible zone** (STD-UI-5). Which
-  zone is open, see §9.
+- **Dates are ISO-8601 and timestamps carry a visible zone, which is
+  America/Chicago** (STD-UI-5, owner decision of 2026-09-05 closing OQ-UI-3). The
+  same zone computes `observed_on`. Session dates are calendar dates in the
+  exchange's terms and are rendered unconverted; only timestamps carry the zone.
+  Central is not the exchange zone, so a run between 23:00 and 24:00 Central
+  stamps a calendar day that exchange time would call the next one, and the run
+  history is where that is visible.
+- **Polled refresh cadences are decided** (STD-UI-25, owner decision of
+  2026-09-05): run progress every 10 seconds, application status every 30
+  seconds, and coverage on demand rather than on a timer, refreshing once when a
+  run completes. Coverage is the one expensive read, because gaps are derived at
+  read time (system design constraints 5.5 and 5.9) across up to 3000 instruments
+  and four data types, and its numbers change only as instruments complete. Every
+  polled region displays its last-updated time.
 - **The provider credential appears in no view** (AC-13).
 - **Retirement, never deletion** (AC-21, system design constraint 5.8, STD-UI-2).
   No destructive action exists in this capability at all.
@@ -495,20 +507,18 @@ someone and this product has one owner and no support channel.
 
 ## 9. Open Questions
 
-Four questions from v1 are now answered and are not repeated: the accessibility
-target (STD-UI-24 adopts WCAG 2.1 AA), the status vocabulary (STD-UI-12), the
-presence tri-state vocabulary (STD-UI-14 and the `badge` variants), and whether
-components could be named at all (the design system now exists).
+Six questions earlier versions raised are now answered and are not repeated: the
+accessibility target (STD-UI-24 adopts WCAG 2.1 AA), the status vocabulary
+(STD-UI-12), the presence tri-state vocabulary (STD-UI-14 and the `badge`
+variants), whether components could be named at all (the design system now
+exists), the display time zone (America/Chicago, closing OQ-UI-3), and the polled
+refresh cadences. The last two were settled by the owner on 2026-09-05 and are
+recorded in §5 as constraints rather than carried here as questions. Every
+quantitative value in this brief now cites a source. The one unsourced threshold
+left in the capability's orbit belongs to the design system rather than to this
+brief: the minimum palette separation, recorded in
+`design-system/theme-validation.md`.
 
-- **Which single time zone does the product display, and do as-of dates and run
-  timestamps share it?** This is STD-UI's own OQ-UI-3, and the standard says it
-  wants answering before the first screen is built, naming CAP-001's run history
-  as the first surface to render a timestamp. It is therefore this capability's
-  question to carry, and it blocks nothing else in the brief.
-- **How often should each polled region refresh?** STD-UI-25 requires the cadence
-  to be recorded in the capability's design rather than left to implementation,
-  so this is now an obligation rather than a preference. No source states a value.
-  `[REQUIRES INPUT: refresh cadence for the run-progress region and for the coverage view]`
 - **Which density tier is the default?** STD-UI's OQ-UI-4 records that
   `theme.css` currently resolves `--row-height` to `--row-height-comfortable` as
   a port-time placeholder rather than an owner decision. CAP-001's tables are the
@@ -644,7 +654,7 @@ recorded in §9.
 | STD-UI-2 Words describe behaviour | yes | §2.2 and §3: the retirement confirmation describes retirement, and takes `dialog` `confirm` rather than `destructive` |
 | STD-UI-3 Comparable figures | yes | Coverage date ranges, gap counts and per-run instrument counts, in `data-table` columns using `--font-numeric` with precision fixed per column |
 | STD-UI-4 Missing is not zero | yes | §2.1: an absent observation renders as an em dash, zero means a measured zero, blank means the column does not apply |
-| STD-UI-5 Dates and timestamps | yes | §2.1, §2.4. ISO-8601 throughout. The single display zone is open, OQ-UI-3, carried in §9 |
+| STD-UI-5 Dates and timestamps | yes | §2.1, §2.4, §5. ISO-8601 throughout, timestamps in America/Chicago, session dates rendered unconverted |
 | STD-UI-6 No abbreviation where compared | yes | Instrument counts and gap counts render in full in every table |
 | STD-UI-7 One job per palette | partial | CAP-001 uses the status palette only. It renders no market direction, no magnitude and no categorical series, so the diverging, sequential and categorical palettes are unengaged here |
 | STD-UI-8 Colour never the sole carrier | yes | §6 and §4: every status is a `badge` carrying a text label plus icon or shape; greyscale readability is the test |
@@ -664,7 +674,7 @@ recorded in §9.
 | STD-UI-22 Control adjacency | no | CAP-001 has no capital-at-risk control and no destructive one. Retirement is not destructive, per STD-UI-2 |
 | STD-UI-23 State coverage | yes | §12.4 below enumerates all eight states per region, as the rule's verification requires |
 | STD-UI-24 Programmatic semantics and feedback | yes | §6 in full |
-| STD-UI-25 Polled freshness | partial | The last-updated time is required in §3 and §5. The cadence is not yet recorded and cannot be invented; §9 carries it as the one `[REQUIRES INPUT]` value in this brief |
+| STD-UI-25 Polled freshness | yes | §5 records the cadence per region, 10s run progress, 30s application status, coverage on demand, and §3 requires the last-updated time on each |
 | STD-UI-26 Multi-step operations | no | No single operation spans steps. The first-run path crosses three screens as separate operations. §9 records that making it a guided setup would engage this rule |
 | STD-UI-27 Chart integrity | no | CAP-001 renders no chart. System design §4.3 |
 | STD-UI-28 Chart provenance | no | CAP-001 renders no chart. System design §4.3 |

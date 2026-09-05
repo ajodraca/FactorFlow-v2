@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: STD-UI
 artifact_type: constitution-artifact
-artifact_version: 2
+artifact_version: 3
 id: STD-UI
 title: Owner Interface Conventions
 kind: standard
@@ -19,7 +19,7 @@ ai_provenance:
   model: claude-opus-5
   tool: Claude (Cowork)
   tool_version: unknown
-  timestamp: 2026-09-05T00:00:00Z
+  timestamp: 2026-09-05T03:40:00Z
   source_artifacts:
     - id: product-charter
       version: "2"
@@ -194,12 +194,22 @@ every numeric field in the capability.
 
 **Rule:** Dates MUST render in ISO-8601 (`YYYY-MM-DD`) and MUST NOT be
 locale-formatted. Timestamps MUST carry a visible time zone. The product MUST
-display one zone throughout.
+display one zone throughout, and that zone is **America/Chicago**, which is also
+the zone in which `observed_on` is computed. A timestamp MUST NOT be rendered in
+the viewing machine's local zone.
+
+A market session date is not a timestamp and MUST NOT be converted. A daily bar,
+a corporate action and an as-of date carry the exchange session date as a
+calendar date; converting one between zones moves it onto the wrong day, which
+is the error this rule exists to prevent rather than an application of it.
 
 **Authority:** Charter §3 — factor and universe history is point-in-time, so the
-date a value was known is load-bearing evidence rather than metadata.
-**Verification:** Any rendered date or timestamp.
-**Specialization:** none. The zone itself is open — see §5.3, OQ-UI-3.
+date a value was known is load-bearing evidence rather than metadata. The zone is
+the owner's decision of 2026-09-05, closing OQ-UI-3.
+**Verification:** Any rendered date or timestamp. A run whose timestamp falls
+between 23:00 and 24:00 America/Chicago stamps the calendar day the display
+shows.
+**Specialization:** none.
 
 ### STD-UI-6 — No abbreviation where values are compared
 
@@ -593,13 +603,13 @@ rule it would amend.
 |----|----------|--------|
 | ~~OQ-UI-1~~ | ~~Does status own red and green, with market direction on a non-red/green diverging pair, or the finance-conventional reverse?~~ **Closed 2026-09-05: status owns red and green.** Not a fresh decision — the first FactorFlow build had already placed gain and loss on teal and amber, for the colour-vision reason recorded in `design-system/README.md`, and reserved red for `--destructive`. STD-UI-7 was written independently of that build and reached the same assignment; closing it records the agreement rather than making a new choice | STD-UI-7 |
 | OQ-UI-2 | Does the product ship a dark theme, and from which milestone? **Narrowed 2026-09-05:** the tokens exist — `theme.css` carries a full `.dark` block, stepped against the dark surface rather than inverted, which is what STD-UI-29 requires of a second theme. What remains is only whether M1 exposes a way to switch to it | STD-UI-29 |
-| OQ-UI-3 | Which single time zone does the product display, and do as-of dates and run timestamps share it? | STD-UI-5 |
+| ~~OQ-UI-3~~ | ~~Which single time zone does the product display, and do as-of dates and run timestamps share it?~~ **Closed 2026-09-05: America/Chicago, and they do not share it.** The owner chose US Central over exchange time and over UTC. The second half is settled on correctness rather than preference: a session date is a calendar date in the exchange's terms, so it is rendered unconverted while timestamps carry the zone. Note the consequence the owner accepted, that America/Chicago is not the exchange zone, so between 23:00 and 24:00 Central a run stamps `observed_on` one calendar day behind what America/New_York would record | STD-UI-5 |
 | OQ-UI-4 | Which density tier is the product default? `theme.css` currently resolves `--row-height` to `--row-height-comfortable`, which is a port-time placeholder rather than an owner decision; changing it is one token | STD-UI-29 |
 | OQ-UI-5 | Does the promotion gate capture a written rationale from the owner? Charter §3's "decision history behind promotions" is read here as requiring one; the charter does not say so in as many words | STD-UI-20 |
 
-OQ-UI-3 wants answering before the first screen is built — CAP-001's run history
-is the first surface that renders a timestamp. The others can be settled against a
-working interface.
+The remaining questions can be settled against a working interface. OQ-UI-3 could
+not, because CAP-001's run history is the first surface that renders a timestamp,
+and it was closed on 2026-09-05 before that screen was designed.
 
 ## 6. Traceability
 
@@ -635,5 +645,6 @@ working interface.
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-09-05 | 3 | Closed OQ-UI-3 on the owner's decision: the product displays **America/Chicago** throughout, and `observed_on` is computed in it. US Central was chosen over exchange time, which would have put run timestamps in the same frame as the session dates that dominate every screen, and over UTC, which would have matched the container logs a failed run is diagnosed against. The question's second half was settled on correctness rather than preference: a session date is a calendar date in the exchange's terms and is rendered unconverted, because converting one moves a bar onto the wrong day. STD-UI-5 now states both, and records the consequence that Central is not the exchange zone, so a run between 23:00 and 24:00 Central stamps a calendar day that America/New_York would call the next one. Also promoted the thirty rule headings from level four to level three so `scripts/check-capabilities.py` can extract them, which is a corrected reference rather than an amendment and changed no rule text |
 | 2026-09-05 | 2 | Closed OQ-UI-1: status owns red and green, market direction keeps a non-red/green diverging pair. Closed on precedent rather than on fresh reasoning — the first FactorFlow build had already made this assignment for the same colour-vision reason, and STD-UI-7 was written independently of it and agreed, so the rule now cites the standing decision alongside its own argument. Narrowed OQ-UI-2, whose tokens now exist. Recorded that `theme.css`'s current density default is a port-time placeholder, not an answer to OQ-UI-4. Updated §1.3 and §2.2: the design system is no longer absent — it was ported into `design-system/` and configured at `projects/factorflow-v2/design-system.yaml` on 2026-09-05, so this standard now states obligations that a resolvable artifact satisfies, and the two are ranked. Corrected a rule reference in §2.2 that named STD-UI-25 where STD-UI-29 governs |
 | 2026-09-05 | 1 | Created as a `standard`, on the finding in `CAP-001-ux-brief` v1 that no design system is configured and that CAP-001's interface patterns are inherited by every later capability. Thirty numbered rules, each with an authority, a verification and a specialization posture. Establishes this artifact as factorflow-v2's enforceable UX constitution, with the scaffold-wide `edg-compliance` skill retained as advisory expertise beneath it and left unmodified. Adopts WCAG 2.1 AA as the project target, closing the question `CAP-001-ux-brief` §6 raised. Records three intentional departures from `edg-compliance` — a six-tier severity vocabulary reconciled to EDG's three levels (STD-UI-12), a kill switch that takes no confirmation on charter §3 authority (STD-UI-21), and screen-reader certification exempted as a release gate while its semantics remain mandatory (§2.3, STD-UI-24) — and four exemptions where EDG presupposes a product family, a review body, a support channel or a second user that this product does not have. Five interface questions left open, of which OQ-UI-1, the reservation of red and green for status rather than market direction, is the standing default most likely to be inverted |
