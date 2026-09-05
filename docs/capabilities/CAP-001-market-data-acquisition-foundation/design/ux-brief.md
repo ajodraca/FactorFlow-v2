@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-ux-brief
 artifact_type: ux-brief
-artifact_version: 5
+artifact_version: 6
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-04
@@ -19,11 +19,11 @@ ai_provenance:
   timestamp: 2026-09-05T04:15:00Z
   source_artifacts:
     - id: CAP-001
-      version: "2"
+      version: "6"
     - id: CAP-001-system-design
-      version: "1"
-    - id: STD-UI
       version: "3"
+    - id: STD-UI
+      version: "4"
     - id: factorflow-design-system
       version: "ported from the first build, 2026-09-05"
   invoking_user: ajodraca
@@ -61,7 +61,7 @@ below is subordinate to them.
 |--------|---------|----------------|
 | Coverage overview | Show, per named instrument, which data types are present, the date range covered, when it was last acquired, and missing trading days inside that range, so the owner can tell which instruments are fit to rely on without inspecting the data store | AC-3, AC-7, AC-8, AC-17, AC-21; flow "Confirm the data is fit to rely on"; system design 4.2 `GET /api/coverage` |
 | Instrument list | Maintain the named acquisition list: see it, add to it, retire from it, without editing configuration files or the data store | AC-1, AC-4, AC-21; flows "Acquire market data for the first time" and "Add an instrument after the first acquisition"; system design 4.2 `GET/POST/DELETE /api/instruments` |
-| Acquisition settings | State the history depth that governs what is acquired, before the first run, and see whether the provider credential was supplied to the process | AC-2, AC-13; flow "Acquire market data for the first time" steps 2 and 5; system design 4.2 `PUT /api/settings/history-depth` |
+| Acquisition settings | State the history depth that governs what is acquired, before the first run, and see whether the provider credential was supplied to the process | AC-2, AC-13; flow "Acquire market data for the first time" steps 2 and 5; system design 4.2 `PUT /api/settings/history-depth` to state it and `GET /api/settings/history-depth` to read the current value, where null is distinct from zero |
 | Run history | Show every acquisition run and its honest outcome, so a failed, partial, cancelled or abandoned run is never mistaken for a successful one | AC-9, AC-19, AC-20; flow "Diagnose and recover from a failed acquisition" step 2; system design 4.2 `GET /api/acquisition-runs` |
 | Run detail | Show what one run did instrument by instrument and data type by data type, the reason reported for each failure, and the action to cancel a run that is under way | AC-10, AC-11, AC-19, AC-20; flows "Diagnose and recover" and "Stop an acquisition that is taking too long"; system design 4.2 `GET /api/acquisition-runs/{runId}`, `POST /api/acquisition-runs/{runId}/cancel` |
 | Application status | A persistent region of the shell reporting whether the product is running and how its most recent acquisition run ended, plus the state the interface must show when the API is not answering at all | AC-16, AC-18; flow "Operate and upgrade the running product" steps 4 and 5; system design 4.2 `GET /api/health`, control flow step 36 |
@@ -507,6 +507,15 @@ someone and this product has one owner and no support channel.
 
 ## 9. Open Questions
 
+Four further questions this section carried were settled by the owner on
+2026-09-05 and are struck through below with their answers, because a question
+that was answered is more useful than one silently deleted: the deepening of
+history depth (now CAP-001 AC-22), a run requested while one is active (now
+AC-23), bulk instrument entry (the `textarea` component now exists), and the
+shape of the history-depth control (a number of years). The first two were
+carried here as gaps in the capability and are now acceptance criteria, which
+is the escalation working as intended.
+
 Six questions earlier versions raised are now answered and are not repeated: the
 accessibility target (STD-UI-24 adopts WCAG 2.1 AA), the status vocabulary
 (STD-UI-12), the presence tri-state vocabulary (STD-UI-14 and the `badge`
@@ -524,24 +533,32 @@ brief: the minimum palette separation, recorded in
   a port-time placeholder rather than an owner decision. CAP-001's tables are the
   first consumer of it, and STD-UI-29 lets a capability select a tier from the
   defined set but never introduce a value.
-- **How does the owner add instruments at the volume the product commits to?**
-  AC-4 commits to runs of up to 3000 instruments, and AC-1 requires adding
-  without editing configuration files or the data store. Adding 3000 one at a
-  time satisfies AC-1 literally and defeats it in practice, but bulk entry, paste
-  or file import is specified nowhere and is not the interface's to invent. This
-  remains the gap most likely to matter on first use.
-- **How is history depth expressed to the owner: a number of years, a start date,
-  or a choice from a set?** AC-2 requires the depth to be stated and system design
-  section 4.2 names the endpoint, but neither fixes its shape, and the shape
-  decides between the `input` `numeric` and `select` rows in §4.
-- **What happens when the owner changes history depth after data has been
-  acquired?** Deeper history implies existing instruments are now short of the
-  stated depth, which the coverage overview would need to express under
-  STD-UI-15. Nothing in the capability or system design covers it.
-- **What should happen when a run is requested while one is already in progress?**
-  `run-journal` claims the oldest requested run, so a second request appears to
-  queue rather than to be rejected, but no acceptance criterion states the
-  behaviour and the interface must present one or the other.
+- ~~How does the owner add instruments at the volume the product commits to?~~
+  **Answered 2026-09-05: bulk entry, and the component now exists.** `textarea`
+  was added to the design system at `status: beta` with a `list` variant
+  carrying bulk paste, so the gap this question recorded is closed at its
+  source. `ux-design.md` §1.2 specifies an *Add many* region accepting symbols
+  separated by newline, comma, tab or semicolon, reporting what was recognised
+  before anything is added.
+- ~~How is history depth expressed to the owner: a number of years, a start
+  date, or a choice from a set?~~ **Answered 2026-09-05: a number of years.**
+  Chosen over an absolute start date because the two differ in meaning and not
+  only in shape: years re-evaluates on every run, and it fits how the provider
+  bounds history. `ux-design.md` §1.3 specifies `input` `numeric` with a
+  non-editable *years* suffix, reading the current value from system design
+  4.2 `GET /api/settings/history-depth`.
+- ~~What happens when the owner changes history depth after data has been
+  acquired?~~ **Answered 2026-09-05: the next run backfills.** CAP-001 AC-22
+  requires the next acquisition run to acquire the missing earlier range for
+  every active instrument short of the new depth, without re-acquiring what is
+  already covered. The coverage overview expresses the shortfall under
+  STD-UI-15; `ux-design.md` §1.1 specifies the Depth column marker.
+- ~~What should happen when a run is requested while one is already in
+  progress?~~ **Answered 2026-09-05: it queues.** CAP-001 AC-23 requires the
+  product to accept the request, record it as requested, and start it only after
+  the active run reaches a terminal state, in request order. The interface
+  presents the queue rather than a rejection; `ux-design.md` §1.1 specifies the
+  Start action wording.
 - **Should the owner be able to see the configured provider request budget?** Run
   duration follows from it (system design constraint 5.14) and the owner has no
   other way to anticipate how long a run will take, but no interface exposes it

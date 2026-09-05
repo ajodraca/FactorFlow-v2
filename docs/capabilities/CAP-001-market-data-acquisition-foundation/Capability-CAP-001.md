@@ -28,7 +28,7 @@ ai_provenance:
     - id: tech-stack
       version: "1, approved 2026-09-03"
     - id: STD-UI
-      version: "3"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---

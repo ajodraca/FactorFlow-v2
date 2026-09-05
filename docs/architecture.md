@@ -18,7 +18,7 @@ system design's Section 4 and regenerate.
 | Component | Name | Responsibility | Introduced by |
 |---|---|---|---|
 | `acquisition-runner` | Acquisition runner | Claims a run request and drives acquisition instrument by instrument, isolating per-instrument failure | `CAP-001` |
-| `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps against the trading-day set formed from all named instruments' observed dates | `CAP-001` |
+| `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps in daily prices against the trading-day set formed from all named instruments' observed dates | `CAP-001` |
 | `ingestion-api` | Ingestion JSON API | FastAPI surface serving the interface; the only network entry point | `CAP-001` |
 | `instrument-list-service` | Instrument list service | Maintains the owner's instrument list, each entry active or retired, and the history depth setting | `CAP-001` |
 | `market-data-store` | Market data store | The PostgreSQL schema holding instruments, observations, coverage segments and run records | `CAP-001` |
@@ -37,7 +37,8 @@ system design's Section 4 and regenerate.
 | `Coverage read` | `market-data-store` | `coverage-service` | SQL reads over coverage segments and observations | `CAP-001` |
 | `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | JSON; run history, outcome, and per-instrument failure detail | `CAP-001` |
 | `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days, and whether the instrument is active or retired | `CAP-001` |
-| `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness and most recent run outcome | `CAP-001` |
+| `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness, most recent run outcome, and whether the provider credential is present, as a boolean and never its value (AC-13, AC-18) | `CAP-001` |
+| `GET /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the current stated depth, or null when the owner has never stated one. The Settings screen reads it, and null is distinct from zero (AC-2) | `CAP-001` |
 | `GET/POST/DELETE /api/instruments` | `ingestion-api` | `owner-web-app` | JSON; list, add and remove named instruments | `CAP-001` |
 | `Migration application` | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | `CAP-001` |
 | `Observation append` | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | `CAP-001` |

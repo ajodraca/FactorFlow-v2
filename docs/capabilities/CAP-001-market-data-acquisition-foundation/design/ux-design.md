@@ -28,7 +28,7 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-brief
-      version: "5"
+      version: "6"
     - id: STD-UI
       version: "4"
   invoking_user: ajodraca
