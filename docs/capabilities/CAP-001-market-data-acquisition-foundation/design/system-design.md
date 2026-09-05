@@ -2,25 +2,25 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-system-design
 artifact_type: system-design
-artifact_version: 1
+artifact_version: 2
 capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-09-05
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: draft
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-03T23:05:00Z
+  model: gpt-5
+  tool: Codex
+  tool_version: "unknown"
+  timestamp: 2026-09-05T04:39:06Z
   source_artifacts:
     - id: CAP-001
-      version: "2, cancellation, recovery and removal semantics added 2026-09-04"
+      version: "6, deepening-backfill and queued-run-request semantics added 2026-09-05"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
@@ -140,8 +140,9 @@ The sequence below traces one owner-triggered acquisition run from the browser t
 the store, and it is the path that carries every failure mode this capability must
 survive. Steps 1 to 4 are synchronous: the API records a run request and returns
 immediately, so the browser never waits on the provider. Steps 5 onward happen in
-the ingestion container, where the runner claims exactly one request and then
-processes instruments one at a time, each in its own transaction. The two decision
+the ingestion container, where the runner claims the oldest request only when no
+other run is active and then processes instruments one at a time, each in its own
+transaction. The two decision
 points that matter are step 9, where a single instrument's failure is isolated so
 the run continues (AC-11), and step 14, where the run's final outcome is computed
 from what was actually written rather than from what was requested (AC-9, AC-12).
@@ -166,7 +167,7 @@ sequenceDiagram
     A->>J: 3. Insert run request (state=requested)
     A-->>W: 4. 202 Accepted + run id
 
-    R->>J: 5. Claim oldest requested run<br/>(FOR UPDATE SKIP LOCKED)
+    R->>J: 5. When no run is running, claim oldest<br/>requested run (FIFO)
     J-->>R: 6. Run claimed (state=running)
 
     loop 7. For each named instrument
@@ -209,6 +210,15 @@ sequenceDiagram
 ```
 
 Two control flows outside the run path complete the picture.
+
+**Queued start requests (AC-23).** `POST /api/acquisition-runs` always records
+a new request as `requested` and returns it immediately. If a run is already
+`running`, the new request remains `requested`; it is not rejected, merged into
+the active run, or processed concurrently. When the active run reaches a
+terminal state (`succeeded`, `failed`, `partial`, `cancelled`, or `abandoned`),
+`acquisition-runner` atomically claims the oldest remaining request and changes
+it to `running`. The claim must exclude a second active run, making the request
+order the execution order.
 
 **Application start (AC-15, AC-16).** 32. The application container starts. 33.
 `schema-migrator` reads the `applied_migrations` table. 34. It applies each
@@ -276,12 +286,12 @@ log record, and appears in no API response.
 |-----------|--------------------|--------------------|-------|-----------|
 | `GET/POST/DELETE /api/instruments` | `ingestion-api` | `owner-web-app` | JSON; list, add and remove named instruments | stable within this capability |
 | `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the owner's stated history depth, required before first run | stable within this capability |
-| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; returns 202 and a run id | stable within this capability |
+| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; creates a `requested` run and returns `202 Accepted`, its id and state. While another run is `running`, the new request remains queued and is claimed FIFO after that run reaches a terminal state. | stable within this capability |
 | `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | JSON; run history, outcome, and per-instrument failure detail | stable within this capability |
 | `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | JSON; requests cooperative cancellation of a running acquisition | stable within this capability |
 | `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days, and whether the instrument is active or retired | stable within this capability |
 | `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness and most recent run outcome | stable within this capability |
-| Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL row claimed with `SELECT ... FOR UPDATE SKIP LOCKED`; the only cross-container handoff | stable within this capability |
+| Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | stable within this capability |
 | Observation append | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | **critical — C5, unrecoverable if wrong** |
 | Coverage read | `market-data-store` | `coverage-service` | SQL reads over coverage segments and observations | stable within this capability |
 | Migration application | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | stable within this capability |
@@ -378,6 +388,11 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
     (SA-LOG-001), and no restricted value in any log record.
 16. **One owner-operator.** No multi-tenancy, no per-user isolation, no horizontal
     scale requirement anywhere in this design.
+17. **One active acquisition run, FIFO requests.** The run journal permits at
+    most one `running` run. `POST /api/acquisition-runs` inserts a `requested`
+    run and returns `202 Accepted`; after each terminal transition, the runner
+    claims the oldest requested run. A request while a run is active queues; it
+    never starts work concurrently or replaces the active request.
 
 ## 6. Architectural Assumptions
 
@@ -427,6 +442,8 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-19 | Cancel a run in progress | `POST /api/acquisition-runs/{id}/cancel`; `run-journal` cancellation request observed by `acquisition-runner` between instruments | 3 steps 44-47, 4.2 |
 | AC-20 | An interrupted run does not block the next one | Claim heartbeat and staleness window; `run-journal` reclaims an expired claim as `abandoned` | 3 steps 48-51, 5.7 |
 | AC-21 | Removal retains history | `instrument-list-service` retires rather than deletes; `GET /api/coverage` reports active and retired instruments | 4.1, 4.2, 5.8 |
+| AC-22 | Deepening backfills history | `acquisition-runner` compares active-instrument coverage to the current stated depth and fetches only the missing earlier range; `observation-writer` preserves already-covered history | 3, 5.3, 5.9 |
+| AC-23 | Concurrent run requests queue | `POST /api/acquisition-runs` creates `requested` records; `run-journal` atomically claims the oldest request only after the active run is terminal | 3, 4.2, 5.17 |
 
 ## 8. Open Questions
 
@@ -437,7 +454,7 @@ None. All questions raised during design were resolved on 2026-09-03 and
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-001 v2 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 21 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; loopback-only decision |
+| Capability CAP-001 v6 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 23 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; deepening backfills and concurrent requests queue; loopback-only decision |
 | Product Charter v2 | `docs/constitution/product-charter.md` | Modular monolith with ingestion split out; point-in-time persistence; single owner-operator; M1 is Universe and Factors, 2026-Q4 |
 | Tech Stack v2 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider; fundamentals are not as-reported; market data source deliberately not abstracted; validation commands; OQ-TS-3 and OQ-TS-6 |
 | Architecture inventory | `docs/architecture.md` | Empty: 0 designs, 0 components. CAP-001 declares the first component identifiers in the project |

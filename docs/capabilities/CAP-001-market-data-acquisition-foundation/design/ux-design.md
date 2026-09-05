@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-ux-design
 artifact_type: ux-design
-artifact_version: 2
+artifact_version: 3
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-05
@@ -18,15 +18,15 @@ theme: design-system/theme.css
 ai_provenance:
   agent_id: ux-design-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T04:30:00Z
+  model: gpt-5
+  tool: Codex
+  tool_version: "unknown"
+  timestamp: 2026-09-05T04:39:06Z
   source_artifacts:
     - id: CAP-001
-      version: "5"
+      version: "6"
     - id: CAP-001-system-design
-      version: "1"
+      version: "2"
     - id: CAP-001-ux-brief
       version: "5"
     - id: STD-UI
@@ -731,16 +731,13 @@ remain genuinely open, and they are listed last.
   reversible: if it becomes a guided setup, STD-UI-26 applies and its
   requirements come with it.
 
-### Two decisions need an acceptance criterion before implementation
+### Resolved specification escalation
 
-The deepening-backfill behaviour and the queue-on-concurrent-request behaviour
-are both owner decisions taken during UX design, and neither is stated in
-CAP-001 or its system design. This document specifies how each is presented, but
-a presentation is not a requirement: nothing downstream can test them, and
-AGT-SPEC-001 makes the specification the ceiling for what gets built. Both want
-an acceptance criterion in the capability, and the concurrency one also touches
-`POST /api/acquisition-runs`, so it is a system-design change rather than a UX
-one. Raised here rather than absorbed silently, per AGT-AUTH-003.
+The deepening-backfill and queued-concurrent-request decisions are now stated as
+CAP-001 AC-22 and AC-23. AC-23's `POST /api/acquisition-runs` contract is
+defined in the system design, including the `requested` state, FIFO order and
+the one-active-run constraint. This document remains limited to presenting
+those requirements, per AGT-SPEC-001 and AGT-AUTH-003.
 
 ### Still open
 

@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001
 artifact_type: capability
-artifact_version: 5
+artifact_version: 6
 id: CAP-001
 title: Market Data Acquisition Foundation
 description: >-
@@ -18,10 +18,10 @@ status: draft
 ai_provenance:
   agent_id: capability-definition-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T04:15:00Z
+  model: gpt-5
+  tool: Codex
+  tool_version: "unknown"
+  timestamp: 2026-09-05T04:39:06Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
@@ -266,6 +266,14 @@ here.
     retain every observation already recorded for it. The owner-operator MUST be
     able to see that retained coverage and distinguish it from instruments still
     being acquired.
+22. **AC-22 — Deepening backfills history:** When the owner-operator increases
+    the stated history depth, the next acquisition run MUST acquire the missing
+    earlier range for every active named instrument that falls short of the new
+    depth, without re-acquiring the range already covered.
+23. **AC-23 — Concurrent run requests queue:** When the owner-operator starts
+    an acquisition run while another run is under way, the product MUST accept
+    the new request, record it as requested, and start it only after the active
+    run reaches a terminal state. Requested runs MUST start in request order.
 
 ## 5. Dependencies and Constraints
 
@@ -392,15 +400,20 @@ Architecture can begin. The problem, the affected user, the desired outcome and
 the scope boundaries are settled, including the three that most shape the work:
 the live feed is deferred to M3, universe composition belongs to a later
 capability, and acquisition is owner-triggered rather than continuous. Five
-user flows carry explicit failure branches, and eighteen acceptance criteria
+user flows carry explicit failure branches, and twenty-three acceptance criteria
 cover acquisition, point-in-time recording, re-run safety, visibility, failure
 diagnosis, credential handling, network exposure and forward data evolution.
 Every quantitative value is sourced to an owner decision rather than invented.
 
-Twenty acceptance criteria now include cancellation and recovery from an
+Twenty-three acceptance criteria now include cancellation and recovery from an
 interrupted run, both added on 2026-09-04 after system design found that a run
 claimed by a process that then dies would otherwise wedge acquisition with no
 remedy short of editing the data store by hand.
+
+The two owner decisions made during UX design are now requirements rather than
+presentation details: deepening the stated history depth backfills the missing
+earlier range on the next run (AC-22), and a concurrent start request queues in
+first-in, first-out order behind the active run (AC-23).
 
 Three open questions remain, none of them blocking. Two bear on external
 provider behaviour that only evaluation can settle; one is a security decision
