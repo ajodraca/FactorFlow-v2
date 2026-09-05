@@ -4,7 +4,7 @@ name: Toast
 status: stable
 source: shadcn/ui Sonner
 upstream_docs: https://ui.shadcn.com/docs/components/sonner
-last_reviewed: 2026-08-21
+last_reviewed: 2026-09-05
 ---
 
 # Toast
@@ -61,10 +61,10 @@ Optional icon, message, optional description, optional single action, optional d
 |---------|-------|
 | Surface / text | `--popover` / `--popover-foreground` |
 | Border | `--border` |
-| Success accent | `--success` |
-| Error accent | `--destructive` |
-| Warning accent | `--warning` |
-| Info accent | `--info` |
+| Success accent | `--status-good` |
+| Error accent | `--status-critical` |
+| Warning accent | `--status-warning` |
+| Info accent | `--status-neutral` |
 | Corner radius | `--radius` |
 
 ## 7. Content Guidelines

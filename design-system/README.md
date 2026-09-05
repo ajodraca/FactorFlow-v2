@@ -79,16 +79,24 @@ and the Figma-based `$ux-spec-extraction` path has no file keys to resolve. The 
 
 ## Beyond the starting set
 
-The 11 components here cover the first UI capability of the original build, and most of what
+The 12 components here cover the first UI capability of the original build, and most of what
 CAP-001 needs. `intake.md` describes how to grow the set, and most gaps turn out to be a new
 variant of an existing component rather than a new component.
 
-**One known gap for CAP-001:** an indeterminate progress indicator, for an acquisition run whose
-duration cannot be estimated. It is genuinely new rather than a variant. It is deliberately not
-written here, because `intake.md` step 2.3 requires the interaction and accessibility contracts
-to be derived from the upstream Radix primitive documentation rather than from memory. The
-application-status region and the polled live region are compositions, not components, and
-belong in the capability's `ux-design.md`.
+**One known gap for CAP-001 remains:** an indeterminate progress indicator, for an acquisition
+run whose duration cannot be estimated. It is genuinely new rather than a variant. It is
+deliberately not written here, because `intake.md` step 2.3 requires the interaction and
+accessibility contracts to be derived from the upstream Radix primitive documentation rather
+than from memory. The application-status region and the polled live region are compositions, not
+components, and belong in the capability's `ux-design.md`.
+
+**`textarea` was added on 2026-09-05**, at `status: beta`, on a gap CAP-001's `ux-design.md`
+surfaced: AC-4 commits to acquisition runs of up to 3000 instruments and AC-1 forbids editing
+configuration files to name them, but the component set had no multi-line entry, so the design
+could only specify adding symbols one at a time. Its `list` variant carries bulk paste. Note that
+shadcn/ui's Textarea is a styled native element rather than a Radix primitive, so its contracts
+derive from the HTML element and the WAI-ARIA text field pattern; the spec says so rather than
+citing a primitive that does not exist.
 
 ## Financial tokens
 
