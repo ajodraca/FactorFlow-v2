@@ -24,11 +24,11 @@ ai_provenance:
   timestamp: 2026-09-05T04:39:06Z
   source_artifacts:
     - id: CAP-001
-      version: "6"
+      version: "8"
     - id: CAP-001-system-design
-      version: "3"
-    - id: CAP-001-ux-brief
       version: "6"
+    - id: CAP-001-ux-brief
+      version: "7"
     - id: STD-UI
       version: "4"
   invoking_user: ajodraca

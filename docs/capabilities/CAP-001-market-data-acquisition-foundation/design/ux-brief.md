@@ -19,9 +19,9 @@ ai_provenance:
   timestamp: 2026-09-05T04:15:00Z
   source_artifacts:
     - id: CAP-001
-      version: "6"
+      version: "8"
     - id: CAP-001-system-design
-      version: "3"
+      version: "6"
     - id: STD-UI
       version: "4"
     - id: factorflow-design-system
