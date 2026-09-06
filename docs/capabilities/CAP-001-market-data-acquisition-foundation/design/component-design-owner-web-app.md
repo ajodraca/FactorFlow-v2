@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-owner-web-app
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 4
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,11 +21,11 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: STD-UI
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -519,13 +519,13 @@ This component consumes the API and exposes none.
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-1, AC-2, AC-4, AC-7 to AC-11, AC-13, AC-14, AC-16 to AC-23; section 5.4 STD-UI conformance | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
-| UX design | CAP-001 UX design v3 | Shell, five screens, cross-screen navigation, component-spec gaps, EDG compliance | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Shell, five screens, cross-screen navigation, component-spec gaps, EDG compliance | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | UX brief | CAP-001 UX brief v5 | Regions, states, conformance record | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-brief.md` |
 | Standard | STD-UI v4 | Thirty owner-interface rules | `docs/constitution/standards/ui-conventions.md` |
 | Design system | Component specifications | Twelve specifications; ten used here | `design-system/components/` |
 | Design system | Theme | Every token this design names | `design-system/theme.css` |
 | System design | CAP-001 system design v3 | Interfaces 4.2, constraint 5.11 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| Constitution | Tech Stack v2 | React 18, Vite, Tailwind, shadcn/ui on Radix, Vitest, Playwright, Biome; a11y enforced by review | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | React 18, Vite, Tailwind, shadcn/ui on Radix, Vitest, Playwright, Biome; a11y enforced by review | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 

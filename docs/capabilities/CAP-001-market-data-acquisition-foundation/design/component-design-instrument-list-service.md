@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-instrument-list-service
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 6
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,9 +21,9 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -176,8 +176,9 @@ def active_instrument_ids(connection: psycopg.Connection) -> list[int]:
 Retirement is a lifecycle transition and nothing else. It writes no observation,
 touches no coverage segment, and cancels no run in progress. A run that has
 already started and is part way through the roster it read at claim time will
-still reach an instrument retired mid-run; this is recorded in section 14
-because the capability does not say which behaviour it wants.
+still reach an instrument retired mid-run, and retirement takes effect from the
+next run. That is the capability's stated behaviour (AC-25, system design
+constraint 5.19), not an artefact of the implementation.
 
 ### 2.5 History depth
 
@@ -376,7 +377,7 @@ This component exposes no HTTP surface of its own. It backs the endpoints
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-1, AC-2, AC-4, AC-21, AC-22 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | `instrument-list-service` in 4.1, constraint 5.8 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Section 1.2 Instruments, section 1.3 Settings | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Section 1.2 Instruments, section 1.3 Settings | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Component design | Market Data Store | `instrument` and `owner_setting` definitions and their constraints | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Standard | STD-UI v4 | STD-UI-2, words describe real behaviour | `docs/constitution/standards/ui-conventions.md` |
 
@@ -393,21 +394,23 @@ This component exposes no HTTP surface of its own. It backs the endpoints
 
 ## 14. Open Questions
 
-1. **What happens to an instrument retired while a run is in progress?** The
-   runner reads its roster when it claims the run. A retirement committed after
-   that will not stop the run from reaching that instrument, so one more
-   observation may be written for an instrument the owner has just retired. The
-   alternative, re-reading the roster before each instrument, makes the roster
-   inconsistent within a run. Neither the capability nor the system design says
-   which is wanted. This design takes the first, because a run that changes
-   shape underneath itself is harder to explain than one extra observation, and
-   surfaces the choice rather than treating it as settled. *Owner: capability
-   owner. Blocks: an acceptance criterion.*
-2. **Is there a maximum instrument count?** AC-4 states the product must handle
-   up to 3000 without manual intervention, which is a floor on capability rather
-   than a ceiling on the list. This design enforces no maximum. *Owner:
-   capability owner. Blocks: the bulk request model's array cap.*
-3. **What upper bound applies to history depth?** Shared with the
-   `market-data-store` and `ingestion-api` designs.
-   `[REQUIRES INPUT: what maximum history depth in years should be accepted?]`
-   *Owner: capability owner. Blocks: `write_history_depth` validation.*
+1. ~~What happens to an instrument retired while a run is in progress?~~
+   **Resolved 2026-09-05: the run in progress still reaches it.** Now stated by
+   the capability as AC-25 and by the system design as constraint 5.19.
+   Retirement takes effect from the next run. The alternative, re-reading the
+   roster before each instrument, was rejected because it makes a run
+   inexplicable from its own record — the run detail would list instruments the
+   roster no longer contains, with nothing to say why. The one extra observation
+   this may write is truthful point-in-time data and is retained under AC-21.
+2. ~~Is there a maximum instrument count?~~ **Resolved 2026-09-05: no maximum
+   on the list, and 1000 symbols per bulk request.** AC-4's 3000 is a floor on
+   capability rather than a ceiling on the list, so the list itself stays
+   unbounded; what is bounded is one request, which caps payload size and the
+   per-symbol validation loop. Adding 3000 instruments therefore takes three
+   requests. Recorded in `component-design-ingestion-api.md` section 2.4a.
+3. ~~What upper bound applies to history depth?~~ **Resolved 2026-09-05: 50
+   years.** `write_history_depth` accepts an integer in 1..50. The bound exists
+   to reject typos such as `9999`, not to enforce the provider plan's reach —
+   the owner decided separately that a depth beyond the plan is issued as stated
+   and truncated by the provider. Recorded in
+   `component-design-ingestion-api.md` section 2.4a.

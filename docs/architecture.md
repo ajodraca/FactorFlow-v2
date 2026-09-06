@@ -18,7 +18,7 @@ system design's Section 4 and regenerate.
 | Component | Name | Responsibility | Introduced by |
 |---|---|---|---|
 | `acquisition-runner` | Acquisition runner | Claims a run request and drives acquisition instrument by instrument, isolating per-instrument failure | `CAP-001` |
-| `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps against the trading-day set formed from all named instruments' observed dates | `CAP-001` |
+| `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps in daily prices against the trading-day set formed from all named instruments' observed dates | `CAP-001` |
 | `ingestion-api` | Ingestion JSON API | FastAPI surface serving the interface; the only network entry point | `CAP-001` |
 | `instrument-list-service` | Instrument list service | Maintains the owner's instrument list, each entry active or retired, and the history depth setting | `CAP-001` |
 | `market-data-store` | Market data store | The PostgreSQL schema holding instruments, observations, coverage segments and run records | `CAP-001` |
@@ -35,16 +35,20 @@ system design's Section 4 and regenerate.
 | Interface | Provider | Consumer | Shape | Declared by |
 |---|---|---|---|---|
 | `Coverage read` | `market-data-store` | `coverage-service` | SQL reads over coverage segments and observations | `CAP-001` |
-| `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | JSON; run history, outcome, and per-instrument failure detail | `CAP-001` |
-| `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days, and whether the instrument is active or retired | `CAP-001` |
-| `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness and most recent run outcome | `CAP-001` |
-| `GET/POST/DELETE /api/instruments` | `ingestion-api` | `owner-web-app` | JSON; list, add and remove named instruments | `CAP-001` |
+| `DELETE /api/instruments/{symbol}` | `ingestion-api` | `owner-web-app` | Request: path `symbol`. Response: `lifecycle: retired`, `retired_at`. Full schema: ingestion-api §11 | `CAP-001` |
+| `GET /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: `state` filter, `limit`, `cursor`. Response: runs reverse-chronological, `next_cursor`. Full schema: ingestion-api §11 | `CAP-001` |
+| `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | Request: path `id`, `outcome` filter, `limit`, `cursor`. Response: the run, counts, per-instrument per-data-type results. Full schema: ingestion-api §11 | `CAP-001` |
+| `GET /api/coverage` | `ingestion-api` | `owner-web-app` | Request: `symbol` filter, `lifecycle`, `from`, `to`, `limit`, `cursor`. Response: per-instrument data-type presence, covered ranges, last acquired, gap counts, `never_acquired`, `gap_detection` availability with a reason. Full schema: ingestion-api §11 | `CAP-001` |
+| `GET /api/health` | `ingestion-api` | `owner-web-app` | Request: none. Response: `status`, `database`, `credential_present` (boolean, never the value — AC-13), `schema_version`, `most_recent_run` (AC-18). Full schema: ingestion-api §11 | `CAP-001` |
+| `GET /api/instruments` | `ingestion-api` | `owner-web-app` | Request: `symbol` prefix filter, `lifecycle`, `limit`, `cursor` (query). Response: instruments, active/retired counts, `next_cursor`. Full schema: ingestion-api §11 | `CAP-001` |
+| `GET /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: none. Response: `years` or `null` when never set — the Settings screen reads it, and null is distinct from zero (AC-2). Full schema: ingestion-api §11 | `CAP-001` |
 | `Migration application` | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | `CAP-001` |
 | `Observation append` | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | `CAP-001` |
-| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; creates a `requested` run and returns `202 Accepted`, its id and state. While another run is `running`, the new request remains queued and is claimed FIFO after that run reaches a terminal state. | `CAP-001` |
-| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | JSON; requests cooperative cancellation of a running acquisition | `CAP-001` |
-| `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the owner's stated history depth, required before first run | `CAP-001` |
-| `Provider reads` | `Massive REST API (external)` | `massive-client` | HTTPS/JSON; ticker reference, daily aggregates, financials, corporate actions; API-key auth | `CAP-001` |
+| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: empty body. Response: `run_id`, `state: requested`, `queued_behind` (the active run's id when one exists, else `null`, per AC-23 — the endpoint never rejects for an active run). Full schema: ingestion-api §11 | `CAP-001` |
+| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | Request: path `id`. Response: `state: cancelling`, or the run's actual terminal state on conflict. Full schema: ingestion-api §11 | `CAP-001` |
+| `POST /api/instruments` | `ingestion-api` | `owner-web-app` | Request: `{"symbols": [...]}`. Response: `added`, `reactivated`, `rejected` (each with a reason). Full schema: ingestion-api §11 | `CAP-001` |
+| `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: `{"years": <positive integer>}`. Response: `years`, `updated_at`. Full schema: ingestion-api §11 | `CAP-001` |
+| `Provider reads` | `Massive REST API (external)` | `massive-client` | HTTPS/JSON; ticker reference, daily aggregates, financials, corporate actions. Full schema: not yet available, tracked by `component-design-massive-client.md` §14 | `CAP-001` |
 | `Run request claim` | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | `CAP-001` |
 
 ## Findings

@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-coverage-service
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 6
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,9 +21,9 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -162,6 +162,24 @@ Gap detection applies to `prices` only. Fundamentals are quarterly and
 corporate actions are sporadic, so a missing trading day is not a meaningful
 notion for either, and the capability's AC-8 speaks of trading days.
 
+**When no range is requested, the range is everything acquired.** Owner
+decision, 2026-09-05. `from_date` and `to_date` are optional on the read; when
+either is omitted the service substitutes the instrument's own coverage bounds
+rather than a default window such as a trailing year.
+
+This is not a convenience default. Gaps are computed only *inside* the requested
+range, so a trailing window would compute gaps over that window alone and report
+a healthy screen while older gaps sat outside it — the false negative AC-8 and
+AC-17 exist to prevent, and the one this component was written to avoid on the
+availability path. Deriving the range per instrument also keeps the answer
+correct when instruments were acquired over different spans, which is the normal
+case once an instrument is added after the first run.
+
+The cost is that the default read is the widest one. That is acceptable here:
+the query is keyset-paginated at 50 rows by default (`ingestion-api` section
+2.4a), and the trading-day set is built from bars already indexed by session
+date.
+
 ### 2.4 Interface
 
 ```python
@@ -244,6 +262,28 @@ N/A, not applicable for this component.
   instrument is missing that day so the day never enters the set. STD-UI-18
   requires the check to state what it does not cover, and the UX design places
   that sentence once below the table.
+- **A plan-truncated history is not a gap** (owner decision, 2026-09-05). The
+  provider plan caps how far back history reaches — five years on Stocks
+  Starter — and the capability deliberately does not validate the owner's stated
+  depth against it, so a deeper request returns short for **every** instrument
+  at once. That uniform shortfall is a plan limit, not missing data, and
+  reporting it as a gap would be the false negative AC-12 and AC-17 exist to
+  prevent.
+
+  Two properties of this method already contain the damage. Gaps are computed
+  only *inside* the range actually covered, so dates before the provider's
+  earliest holding are outside every instrument's segment and are never
+  candidates. And trading days are derived from acquired data, so a date no
+  instrument reached never enters the set — the same mechanism that makes a
+  market-wide outage undetectable makes a uniform plan cap undetectable, and
+  here that is the correct behaviour rather than a limitation.
+
+  What the service must not do is present the covered range as though it were
+  the requested one. The response already carries the covered range per
+  instrument rather than the stated depth, which is what keeps the shortfall
+  visible to the owner as a shorter range instead of as a gap count. If the
+  distinction later proves unclear in use, the fix is a sentence on the coverage
+  screen naming the plan, not a change to gap detection.
 - **Retired instruments are included** in coverage reads, marked (AC-21,
   system design constraint 5.8). Omitting them would make retained history
   invisible.
@@ -326,6 +366,7 @@ N/A, not applicable for this component.
 | Gaps found inside a covered range | `tests/integration/test_coverage_gaps.py` | Three instruments, one missing a session the other two have, produces exactly one gap (AC-8) |
 | Dates outside coverage are not gaps | `tests/integration/test_coverage_gaps.py` | A session before an instrument's `covered_from` is not reported (AC-8) |
 | Gap detection unavailable below two | `tests/integration/test_coverage_gaps.py` | One instrument with data yields `available: false` with a reason, and no zero count (AC-8, STD-UI-14) |
+| A uniform short history is not a gap | `tests/integration/test_coverage_gaps.py` | When every instrument's history starts on the same date, dates before it produce no gaps; the covered range reports the truth and the shortfall is not counted as missing data (AC-12, AC-17, section 3) |
 | A market-wide missing day is not reported | `tests/integration/test_coverage_gaps.py` | A session absent for every instrument produces no gap, documenting the stated limit |
 | Retired instruments keep coverage | `tests/integration/test_coverage_retired.py` | A retired instrument appears with its range and is marked retired (AC-21) |
 | Depth shortfall is computed | `tests/integration/test_coverage_depth.py` | Raising the stated depth marks short instruments and leaves compliant ones unmarked (AC-22) |
@@ -415,10 +456,10 @@ This component exposes no HTTP surface of its own.
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-7, AC-8, AC-12, AC-17, AC-21, AC-22 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Gap computation steps 40 to 43, constraints 5.5 and 5.9 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Section 1.1, the Coverage overview and its unavailable state | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Section 1.1, the Coverage overview and its unavailable state | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Component design | Market Data Store | `coverage_segment`, `acquisition_state`, `daily_bar` and their indexes | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Standard | STD-UI v4 | STD-UI-4, STD-UI-14, STD-UI-15, STD-UI-16, STD-UI-18 | `docs/constitution/standards/ui-conventions.md` |
-| Constitution | Tech Stack v2 | Massive supplies no historical trading calendar | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | Massive supplies no historical trading calendar | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 

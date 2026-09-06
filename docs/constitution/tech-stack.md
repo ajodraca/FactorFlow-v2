@@ -2,35 +2,35 @@
 artifact_schema_version: 1
 artifact_id: tech-stack
 artifact_type: tech-stack
-artifact_version: 2
+artifact_version: 3
 product: FactorFlow
 created: 2026-09-02
-updated: 2026-09-04
-last_updated: 2026-09-03
+updated: 2026-09-05
+last_updated: 2026-09-05
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: approved
 ai_provenance:
   agent_id: tech-stack-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-03T23:05:00Z
+  model: gpt-5
+  tool: Codex
+  tool_version: "unknown"
+  timestamp: 2026-09-05T22:51:06Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: CAP-001
-      version: "1, committed f0191fe"
+      version: "7, draft 2026-09-05"
     - id: CAP-001-system-design
-      version: "1, committed baf246c"
+      version: "5, draft 2026-09-05"
   invoking_user: ajodraca
   correlation_id: 6493d4a3-41a0-4991-9e37-c372f762c3d0
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-04T01:56:36Z
-  reviewed_revision: sha256:efbeb9c108431e5c9e2c969cde5ff3b6163846b970305aa81a3022d7da502a12
+  approved_at: 2026-09-05T22:51:58Z
+  reviewed_revision: sha256:c420b44757a80a79850febb25be747f804eae77e7ca55b2918ea1a3a88f490cd
 ---
 
 # Tech Stack: FactorFlow
@@ -42,16 +42,12 @@ and implementation stories MUST use the technologies defined here.
 FactorFlow is a **single repository** holding the specifications, the
 application, the market data ingestion process, and the owner interface.
 
-This stack is greenfield in the strict sense: at the time of writing the
-repository contains one file, the product charter. Nothing was carried forward
-from the first FactorFlow build. Where a choice below matches that build, it was
-re-derived from this charter and the reasoning is recorded; where this charter
-differs — most consequentially in leaving the broker undecided and in committing
-backtesting as a milestone — the conclusion differs.
-
-No capabilities are defined yet. The product charter is therefore the sole
-authority for every choice below, and each rationale cites the charter section
-it rests on rather than a capability ID.
+This stack was selected for a greenfield rebuild; nothing was carried forward
+from the first FactorFlow implementation. The product charter remains the
+governing product authority, while CAP-001 and its system design supply the
+current provider, ingestion, interface and validation requirements used to
+refine this revision. Where a choice matches the first build, it was re-derived
+from those sources and the reasoning is recorded.
 
 ## Project-Wide Constraints
 
@@ -84,7 +80,7 @@ interface, and the specifications and constitution that govern them.
 
 | Property | Value |
 |----------|-------|
-| Source | greenfield (repository contains only the product charter) |
+| Source | greenfield implementation; refined against product charter v2, CAP-001 v7 and CAP-001 system design v5 |
 | Primary Language(s) | Python 3.12+ (application and ingestion); TypeScript 5.x (owner interface) |
 | Backend Framework | FastAPI on uvicorn (ASGI). A read-and-write surface: configuring strategies, promoting to live and operating the kill switch are all writes |
 | Frontend Framework | React 18 with Vite. The FastAPI surface is therefore a JSON API, consumed by the interface rather than rendering it |
@@ -92,13 +88,13 @@ interface, and the specifications and constitution that govern them.
 | Database / Storage | PostgreSQL 16, the single application store. Schema evolved by numbered, forward-only SQL migration files with an applied-migrations table. **No ORM** |
 | Process Topology | Two processes from one codebase: the application (API, strategy engine, execution scheduler) and market data ingestion (C1). They share the PostgreSQL instance; ingestion writes, the application reads |
 | Broker Integration | **Alpaca**, via its official Python SDK (`alpaca-py`), for both paper and live trading. It sits behind the broker port (C3) as two of that port's three implementations, alongside the backtest simulator. The port is specified in the product's own vocabulary, not Alpaca's, so that a different broker can back live trading later |
-| Data Providers | **Massive**, as the single provider for price data, company fundamentals, corporate actions and instrument reference data. REST for historical reads and WebSocket for the live feed, behind one provider contract (C4). Accessed by a hand-written client — Massive publishes no SDK — authenticated by an API key supplied at runtime |
+| Data Providers | **Massive**, as the single provider for price data, company fundamentals, corporate actions and instrument reference data. REST for historical reads and WebSocket for the live feed, behind one provider contract (C4). Accessed through Massive's official Python client (`massive`), authenticated by an API key supplied at runtime |
 | Build Tool | uv for Python dependency resolution and lockfile; setuptools as the build backend with a `src/` layout; Vite for frontend bundling |
 | Test Framework | **Python:** pytest with `testcontainers[postgres]` for database-backed tests. **TypeScript:** Vitest with React Testing Library; Playwright for end-to-end |
 | Package Manager | uv (Python); npm (frontend) |
 | Execution Runtime | An in-process scheduler inside the application container drives strategy evaluation cycles (`APScheduler`, or the equivalent chosen at system design). It reaches the order path only through the chokepoint that checks the kill-switch flag |
 | Container Runtime | Docker, self-hosted. PostgreSQL, the application and the ingestion process each run as a container on a machine the owner controls |
-| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), FastAPI / Starlette / Pydantic (API and validation), `httpx` (HTTP client for ingestion), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `websockets` (Massive live feed), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
+| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), FastAPI / Starlette / Pydantic (API and validation), `massive` (official Massive REST and WebSocket client), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
 
 **Rationale:**
 
@@ -219,6 +215,14 @@ number. Its ticker reference data carries CIK, composite FIGI and share class
 FIGI, so instrument identity does not rest on the ticker, and delisted securities
 remain queryable with their list and delist dates — which is what keeps
 survivorship bias out of the M4 backtests (C9).
+
+**The official Massive Python client is the provider integration library.** It
+supports the REST and WebSocket access patterns this stack requires and avoids
+reimplementing provider transport, authentication and protocol handling. The
+CAP-001 `MassiveClient` remains the project-owned operational boundary around
+the SDK for pacing, retries, telemetry and test substitution. It is not a
+provider-portability layer: Massive response shapes may remain vendor-shaped
+inside ingestion, consistent with C4 and the deliberate single-provider choice.
 
 **Its fundamentals are not point-in-time, and that limitation is accepted
 deliberately.** Massive's `filing_date` is the date of the most recent SEC filing
@@ -349,7 +353,8 @@ Notes for agents:
 | ~~OQ-TS-1~~ | ~~Which broker backs paper and live trading?~~ **Answered 2026-09-02: Alpaca for both**, behind the vendor-neutral broker port, with the live broker expected to be replaceable. Closes charter OQ-3 | — | — |
 | ~~OQ-TS-8~~ | ~~If live trading later moves to a different broker, does paper move with it?~~ **Answered 2026-09-02: yes — paper and live are always the same provider.** Promotion evidence is therefore always generated against the venue that will execute it | — | — |
 | ~~OQ-TS-2~~ | ~~Which providers supply price data and company fundamentals?~~ **Answered 2026-09-02: Massive, as the single provider**, with its lack of as-reported fundamentals accepted as a known limitation. See the evaluation below | — | — |
-| ~~OQ-TS-7~~ | ~~Which Massive plan, and does the owner qualify as non-professional?~~ **Answered 2026-09-02: the owner qualifies as non-professional**, and the plan is upgraded when a strategy requires real-time data. Note that this is not the first paid entitlement needed — see the plan note in the evaluation below | — | — |
+| ~~OQ-TS-7~~ | ~~Which Massive plan, and does the owner qualify as non-professional?~~ **Answered 2026-09-02: the owner qualifies as non-professional.** Plan path settled 2026-09-05: currently unsubscribed on Basic; **Stocks Starter + Financials & Ratios ($58/month)** for CAP-001 through M1; **Stocks Advanced** at M3 for real-time. Verified tier table and the three consequences are in the evaluation below | — | — |
+| OQ-TS-9 | **Does M4's backtest range require Advanced's 20+ year history before M3 does?** Starter caps history at 5 years and Developer at 10; only Advanced spans 20+. If promotion evidence must cover multiple market regimes, the upgrade trigger arrives at M4 rather than at M3's real-time need. Raised 2026-09-05 from the verified pricing tiers | Capability owner, at M4 system design | Whether the M3 upgrade timing holds; M4 backtest range |
 | OQ-TS-3 | **Which numeric library for factor computation and backtest replay** — `pandas`, `polars`, or SQL window functions? **Deferred by owner decision on 2026-09-02** to the system design of the first capability that requires it, because no capability has yet stated the data volumes or the computation shape and choosing without them would be guessing | Capability owner, at the system design of the first capability requiring factor computation | Classification and backtest implementation |
 | OQ-TS-4 | **How are Alpaca credentials stored and separated**, such that no test and no misconfiguration can reach the live environment? Alpaca's paper and live environments differ only by credentials and endpoint, which makes this a configuration-safety question rather than a theoretical one | Owner | Broker integration; test configuration |
 | ~~OQ-TS-5~~ | ~~Are exact dependency versions pinned now, or captured from the first lockfile?~~ **Answered 2026-09-02: captured from the first lockfile.** No version in this document is authoritative; `uv.lock` and `package-lock.json` are | — | — |
@@ -407,25 +412,101 @@ because the single-provider decision is what makes it everyone's problem.
 tier *non-pros only*. The owner confirmed non-professional status on 2026-09-02,
 which is consistent with C8 — one owner-operator trading their own capital.
 
-**Plan note: the free tier does not reach M1.** The owner's position is to
-upgrade when a strategy requires real-time data, and real-time is indeed
-Advanced-only. But real-time is not the first entitlement this product needs.
-M1 classifies instruments by **value, growth** and momentum, and the first two
-are computed from fundamentals — which the free tier does not include at all;
-they are a paid add-on or bundled with Advanced. The free tier is also capped at
-five API calls per minute and two years of history, neither of which supports
-universe-wide factor computation. So a paid entitlement is required at **M1**
-for fundamentals, and separately at **M3** for real-time. M4 adds a third
-consideration, since backtesting across market regimes wants the longest history
-tier. The exact plan at each point is the owner's call at the time; what this
-note records is that the first upgrade is due earlier than the real-time one.
+**Plan tiers, verified 2026-09-05.** Read from `https://massive.com/pricing`,
+and the Basic rate limit confirmed by probe against the live API the same day.
+
+| Tier | Price | Rate limit | History | Notable inclusions |
+|------|-------|-----------|---------|--------------------|
+| Stocks Basic | free | **5 calls/minute** | 2 years | End-of-day, reference data, corporate actions, minute aggregates |
+| Stocks Starter | $29/mo | unlimited | **5 years** | 15-minute delayed, WebSockets, flat files, second aggregates |
+| Stocks Developer | $79/mo | unlimited | 10 years | adds trades |
+| Stocks Advanced | $199/mo | unlimited | 20+ years | adds real-time, quotes, **financials & ratios** |
+| Financials & Ratios | $29/mo | — | — | Add-on; available without a stocks subscription |
+
+**The owner's plan path, decided 2026-09-05.** Currently unsubscribed, on Basic.
+The stated path is **Stocks Starter + Financials & Ratios add-on ($58/month)**
+for CAP-001 through M1, moving to **Stocks Advanced** when real-time is required
+at M3.
+
+Three consequences follow, and they are recorded because each one binds a
+capability rather than a preference.
+
+**The rate limit is not a design constraint on the target plan.** Basic's five
+calls per minute would make CAP-001's committed volume impossible — roughly
+12,000 requests for a full run at AC-4's 3000 instruments, or about 40 hours of
+pure waiting. Starter removes the limit entirely. The rate-limit governor is
+still required, because a budget the owner configures is what makes the design
+tier-agnostic and because an unlimited plan is not a promise of unlimited
+throughput, but it is pacing rather than a ceiling on feasibility.
+
+**Fundamentals are an add-on, not a Starter inclusion.** Financials and ratios
+appear only in Advanced or as the separate $29 add-on. This confirms the earlier
+finding that the first paid entitlement is due at **M1** for fundamentals rather
+than at M3 for real-time; the owner's chosen combination buys it deliberately.
+
+**Starter caps history at 5 years, and that is the binding limit for CAP-001.**
+See the history-depth note below.
+
+**History depth is capped by plan, and CAP-001 does not enforce it.** AC-2 has
+the owner state a history depth and AC-4 commits to acquiring it; on Starter the
+provider returns at most 5 years regardless of what is stated. The owner decided
+on 2026-09-05 **not** to validate the stated depth against the plan: no
+configured ceiling, no rejection at the Settings screen. A deeper request is
+issued as stated and the provider returns what it holds.
+
+This is a deliberate acceptance, and it has one obligation attached. CAP-001's
+purpose is telling the owner the truth about what the product holds (AC-12,
+AC-17), so a uniform 5-year shortfall across every instrument must not render as
+though it were a provider data gap. Coverage reports what was actually acquired,
+which is already the design; what this note adds is that the shortfall is
+expected and attributable to the plan, not to acquisition failure. If it later
+proves confusing in practice, the cheaper fix is a note on the coverage screen
+rather than input validation.
+
+**Flat files are the right tool for whole-market backfill, and the wrong one for
+CAP-001.** Evaluated 2026-09-05 against the flat-file documentation, because
+Starter includes them and they look at first like a cheaper way to acquire
+history.
+
+They cover **day aggregates, minute aggregates, quotes and trades only**. There
+are no flat files for fundamentals, corporate actions or ticker reference data,
+so they can replace at most one of CAP-001's four reads and the REST client is
+required regardless.
+
+The deciding property is granularity. A flat file is one **day** containing
+**every** ticker — the schema carries a `ticker` column and a single
+`window_start` — which is the inverse of what CAP-001 needs. Acquiring 3000
+named instruments over five years means roughly 1,260 daily files, of which
+about three-quarters of each file's rows are discarded, against roughly 3,000
+per-instrument REST calls that return only what was asked for. The argument for
+flat files is request count, and the unlimited rate limit on Starter removes it.
+Adopting them would add an S3 client, credential handling, a
+download-decompress-filter pipeline and local staging to this capability, in
+exchange for nothing it needs. It also cuts against CAP-001's own scope
+boundary, which excludes acquiring data for instruments the owner has not named.
+
+Recorded rather than dismissed, because the calculation inverts at scale. A
+capability that backfills the whole market — universe construction, or M4's
+backtest history — wants every ticker for every day, which is exactly the shape
+a flat file has and exactly the case where per-instrument REST calls become the
+expensive path. Decided 2026-09-05: REST for CAP-001; revisit flat files when a
+capability needs market-wide history rather than a named list.
+
+**M4 may force the Advanced upgrade before M3 does.** The owner's path upgrades
+to Advanced for real-time at M3, but M4 backtests across market regimes, and a
+5-year window on Starter or 10 on Developer may not span the regimes the
+promotion evidence needs — 20+ years is Advanced-only. This is the same pattern
+already recorded for fundamentals at M1: the upgrade trigger arrives earlier
+than the headline reason for it. Flagged as a milestone risk on 2026-09-05
+rather than decided; M4's design states the required backtest range, and that is
+when this resolves.
 
 **Assessment, and the decision taken.** Massive covers the price side of the charter fully and the
 fundamentals side adequately for point-in-time capture from the day ingestion
 starts. It does not supply as-reported history, so if M4 requires unbiased
 fundamental backtests over years the product did not observe, that needs either a
 second source for as-reported fundamentals or an explicit, recorded acceptance of
-restatement bias in the promotion evidence. The owner chose the first of these on
+restatement bias in the promotion evidence. The owner chose the second of these on
 2026-09-02: adopt Massive as the single provider and carry the restatement
 limitation as a stated constraint on the promotion evidence.
 
@@ -433,5 +514,7 @@ limitation as a stated constraint on the promotion evidence.
 
 | Date | Change |
 |------|--------|
-| 2026-09-03 | Closed OQ-TS-6 on the owner's decision: `shadcn/ui` on Radix primitives for components, TradingView `lightweight-charts` for charting. The deferral had named "the first capability carrying a UX design" as its trigger and assumed that would be the M4 or M5 evidence screens; CAP-001 delivers an ingestion view and reached the UX stages first, so the trigger fired on a capability that needs tables and status rather than charts. Components were therefore decided on CAP-001's needs and accessibility posture, charting on M4 and M5's. Also recorded a second Massive limitation found while designing CAP-001: the provider has no historical trading calendar, its holiday endpoint being forward-looking only, which no plan tier changes. Approval was invalidated by these edits and the artifact returns to draft pending `$review-constitution` |
+| 2026-09-05 | Adopted Massive's official Python client by owner decision, retaining the CAP-001 `MassiveClient` as the operational boundary around the SDK rather than a portability layer. Refreshed the document's source context and provenance against CAP-001 v7 and system design v5, and corrected the restatement-bias decision wording. |
+| 2026-09-05 | Recorded the verified Massive plan tiers and settled the owner's plan path, closing the remainder of OQ-TS-7. Pricing was read from `massive.com/pricing` and the Basic tier's five-calls-per-minute limit confirmed by probe against the live API, alongside the base URL, the `Authorization: Bearer` scheme and the error envelope — none of which Massive documents publicly. The path is **Stocks Starter + Financials & Ratios ($58/month)** for CAP-001 through M1, moving to **Advanced** at M3 for real-time. Three consequences were recorded: the rate limit stops being a feasibility constraint once off Basic, which resolves the provider-throughput half of CAP-001's specification review FINDING-6; fundamentals remain an add-on rather than a Starter inclusion, confirming the first paid entitlement falls at M1; and Starter caps history at five years, which the owner decided on 2026-09-05 **not** to enforce in CAP-001 — a deeper stated depth is issued as stated and the provider returns what it holds, with the obligation that coverage must not present the uniform shortfall as a provider data gap (AC-12, AC-17). Raised OQ-TS-9: M4's backtest range may force the Advanced upgrade before M3's real-time need does, since 20+ year history is Advanced-only. Approval was invalidated by these edits and the artifact returned to draft pending the dedicated `$tech-stack` workflow |
+| 2026-09-03 | Closed OQ-TS-6 on the owner's decision: `shadcn/ui` on Radix primitives for components, TradingView `lightweight-charts` for charting. The deferral had named "the first capability carrying a UX design" as its trigger and assumed that would be the M4 or M5 evidence screens; CAP-001 delivers an ingestion view and reached the UX stages first, so the trigger fired on a capability that needs tables and status rather than charts. Components were therefore decided on CAP-001's needs and accessibility posture, charting on M4 and M5's. Also recorded a second Massive limitation found while designing CAP-001: the provider has no historical trading calendar, its holiday endpoint being forward-looking only, which no plan tier changes. Approval was invalidated by these edits and the artifact returned to draft pending the dedicated `$tech-stack` workflow |
 | 2026-09-02 | Created for the FactorFlow rebuild, from the charter alone — no capabilities are defined yet, and nothing was inherited from the first build. Python, PostgreSQL without an ORM, and FastAPI were re-derived from the charter's backtesting commitment, its single-transaction money path and its point-in-time history requirement rather than from the broker SDK that justified the language the first time, because this charter leaves the broker open. SQLite was weighed against the two-process topology and rejected. The owner interface is React with Vite and Tailwind, chosen on the charter's committed backtest-evidence and promotion screens rather than by inheritance, and against a server-rendered alternative that would reach M1 sooner but would defer building the JSON API this choice has from the start. Docker on a self-hosted machine was chosen to express the two-process topology directly and to let database-backed tests run against real PostgreSQL, and an in-process scheduler drives execution because the charter's stated topology leaves no room for a dedicated execution process. Massive was adopted as the single provider for prices, fundamentals, corporate actions and instrument reference data, which removes the cross-provider identity problem entirely; its fundamentals are not as-reported, and that limitation was accepted with the obligation placed on the promotion evidence rather than on ingestion. Alpaca was chosen for both paper and live, closing charter OQ-3; because the owner requires live trading to be movable to another broker, the charter's existing broker port is specified in the product's vocabulary rather than Alpaca's, and no additional abstraction was introduced. The owner then closed the remaining commercial and lifecycle questions: paper and live are always the same broker, so promotion evidence is always generated against the executing venue; the owner qualifies as non-professional and upgrades the Massive plan as entitlements are needed, with the first upgrade due at M1 for fundamentals rather than at M3 for real-time; and dependency versions are captured from the first lockfile rather than pinned here. What remains open is deferred by decision rather than by omission: the numeric library, to the system design of the first capability requiring factor computation, and the interface component and charting libraries, to the first capability carrying a UX design. Alpaca credential separation is the one question still genuinely outstanding |

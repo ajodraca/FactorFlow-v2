@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-run-journal
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 6
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -21,9 +21,9 @@ ai_provenance:
     - id: CAP-001-system-design
       version: "3"
     - id: CAP-001-ux-design
-      version: "3"
+      version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -382,6 +382,8 @@ and it is a table rather than a queue by system design constraint 5.1.
 | Cancel before the claim | `tests/integration/test_run_cancel.py` | A `requested` run cancelled becomes `cancelled` without ever running (AC-19) |
 | Cancel is cooperative | `tests/integration/test_run_cancel.py` | The run becomes `cancelling` and only then `cancelled` (AC-19) |
 | Cancel on a terminal run raises | `tests/integration/test_run_cancel.py` | `RunAlreadyTerminal` carries the actual state (AC-19) |
+| A queued run cancels without being claimed | `tests/integration/test_run_cancel.py` | A `requested` run moves straight to `cancelled`, and a subsequent `claim_next` does not return it (AC-26) |
+| Cancelling a queued run leaves the active one alone | `tests/integration/test_run_cancel.py` | With one run `running` and one `requested`, cancelling the second leaves the first `running` (AC-26) |
 | Stale claim is reclaimed | `tests/integration/test_run_reclaim.py` | A run whose heartbeat is older than the window becomes `abandoned` and the slot frees (AC-20) |
 | A reclaimed runner stops | `tests/integration/test_run_reclaim.py` | `heartbeat` returns `False` after a reclaim (AC-20) |
 | Reclaim keeps coverage | `tests/integration/test_run_reclaim.py` | Coverage written before the interruption is unchanged (AC-12, AC-20) |
@@ -402,6 +404,8 @@ and it is a table rather than a queue by system design constraint 5.1.
    then to `cancelled`, never to `failed`.
 7. A cancellation request against a terminal run reports the run's actual state
    and does not change it.
+7a. A run cancelled while `requested` reaches `cancelled` without ever being
+    claimed, and a run already `running` is unaffected by it.
 8. A run whose heartbeat has not advanced past the staleness window reaches
    `abandoned` without any manual database change.
 9. After a reclaim, a subsequent run can be claimed and started.
@@ -480,7 +484,7 @@ This component exposes no HTTP surface of its own.
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | AC-9, AC-10, AC-11, AC-18, AC-19, AC-20, AC-23 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Queued start requests, cancellation, reclaim, constraints 5.7 and 5.17 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| UX design | CAP-001 UX design v3 | Sections 1.4 and 1.5, the run outcome tier mapping | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
+| UX design | CAP-001 UX design v4 | Sections 1.4 and 1.5, the run outcome tier mapping | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Component design | Market Data Store | `acquisition_run`, `run_instrument_result`, the single-active-run index | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Standard | STD-UI v4 | STD-UI-12, the state and tier table | `docs/constitution/standards/ui-conventions.md` |
 
@@ -504,10 +508,13 @@ This component exposes no HTTP surface of its own.
    system design requires all three mechanisms and states no value for any of
    them. The staleness window is the consequential one: too short reclaims a
    healthy but slow run, too long leaves acquisition blocked after a crash.
-   `[REQUIRES INPUT: after how long without a heartbeat should a run be
-   abandoned, how often should the runner refresh, and how often should an idle
-   runner poll for work?]` *Owner: capability owner with the system design
-   owner. Blocks: the reclaim sweeper and the runner loop.*
+   **Resolved 2026-09-05 by owner decision:** staleness window 900s, heartbeat
+   period 60s, idle poll interval 5s. The window is derived rather than chosen —
+   it must exceed the worst case for one instrument, because the heartbeat fires
+   between instruments and not on a timer. `component-design-runtime-config.md`
+   section 2.2a carries the arithmetic and enforces the relationship at load, so
+   raising the request timeout later cannot silently bring the window below the
+   worst case.
 2. ~~Where does the reclaim sweeper run?~~ **Resolved 2026-09-05: the
    application container**, now stated in system design v3 section 3 and
    constraint 5.7. It runs as a periodic `asyncio` task in the FastAPI lifespan
@@ -516,8 +523,10 @@ This component exposes no HTTP surface of its own.
    leaves to the capability that first needs strategy evaluation. The sweep is
    idempotent, so the placement is a default rather than a correctness
    requirement.
-3. **Should a run requested and then cancelled before it is claimed be
-   `cancelled`?** This design says yes, because the owner's intent is
-   unambiguous and the alternative, refusing to cancel a run that has not
-   started, is worse. The capability's AC-19 speaks only of a run that is under
-   way. *Owner: capability owner. Blocks: an acceptance criterion.*
+3. ~~Should a run requested and then cancelled before it is claimed be
+   `cancelled`?~~ **Resolved 2026-09-05: yes**, and the capability now states it
+   as AC-26 with the system design as constraint 5.20. The `requested -->
+   cancelled` transition this design already carried is therefore ratified
+   rather than assumed. It is a direct state transition rather than cooperative
+   cancellation, because there is no runner holding the claim to signal; the
+   runner simply never claims it. A run already `running` is unaffected.
