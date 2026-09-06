@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
-artifact_version: 4
+artifact_version: 5
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -768,12 +768,14 @@ below records them as the system design's section 4.2 declares them.
    This is recorded as an accepted risk with a trigger, not as an open question,
    so that a later review sees a decision rather than re-raising the gap.
    *Owner: capability owner. Trigger: before the second deployment.*
-2. **What upper bound, if any, applies to `history_depth_years`?**
-   `acquisition_run_depth_positive` enforces a lower bound of 1. No source
-   states a maximum, and Massive's plan tiers cap history in a way that is not
-   knowable from the schema. `[REQUIRES INPUT: what maximum history depth should
-   the store accept?]` *Owner: capability owner. Blocks: the validation rule in
-   `ingestion-api`.*
+2. ~~What upper bound, if any, applies to `history_depth_years`?~~ **Resolved
+   2026-09-05: 50 years.** `acquisition_run_depth_positive` already enforces the
+   lower bound of 1; the upper bound is enforced by `ingestion-api`'s request
+   model rather than by a check constraint, because it is an input-validation
+   rule rather than a data-integrity one — a stored 60 would be odd but not
+   corrupt, and the store's constraints are reserved for what must never be true
+   of a row. The store therefore keeps its lower bound and adds no maximum.
+   Recorded in `component-design-ingestion-api.md` section 2.4a.
 3. **What read latency is acceptable for a coverage read at 3000 instruments?**
    No capability or design value exists, so section 5 sizes the workload without
    asserting a target. *Owner: capability owner. Blocks: a performance

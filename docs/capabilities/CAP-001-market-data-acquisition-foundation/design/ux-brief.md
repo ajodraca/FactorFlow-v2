@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-ux-brief
 artifact_type: ux-brief
-artifact_version: 6
+artifact_version: 7
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-04
@@ -33,21 +33,21 @@ ai_provenance:
 # UX Brief: Market Data Acquisition Foundation
 
 **Capability:** CAP-001
-**Design System:** FactorFlow Design System (shadcn/ui + Radix), configured at `projects/factorflow-v2/design-system.yaml`, held in `design-system/` in this repository. 11 component specifications, resolved and read for this brief.
+**Design System:** FactorFlow Design System (shadcn/ui + Radix), configured at `projects/factorflow-v2/design-system.yaml`, held in `design-system/` in this repository. 12 component specifications, resolved and read for this brief.
 **Theme:** `design-system/theme.css`
 **Designer Handoff Date:** 2026-09-05
 
 This is the first interface FactorFlow-v2 builds, but it is no longer the first
 place its interface decisions are made. Since v1 of this brief, two artifacts
 have landed that govern it: `docs/constitution/standards/ui-conventions.md`
-(STD-UI v2), the project's enforceable UX standard, and the design system at
+(STD-UI v4), the project's enforceable UX standard, and the design system at
 `design-system/`. Both cite this brief's v1 as a source. Several questions v1
 raised are now answered by them rather than by the designer, and §12 records
 conformance rule by rule as STD-UI §4 requires.
 
 What has not changed is what the interface is for. It has one job that is easy to
 state and easy to get wrong: tell the owner-operator the truth about what data
-the product holds. Three of the twenty one acceptance criteria exist only because
+the product holds. Three of the twenty six acceptance criteria exist only because
 a plausible interface would lie. AC-17 forbids an empty state that reads as a
 healthy one. AC-9 forbids a run that failed presenting as succeeded. AC-8, read
 against system design constraint 5.5, forbids reporting zero gaps when gap
@@ -354,7 +354,7 @@ specifically.
 
 ## 5. Constraints
 
-- **STD-UI v2 governs every surface here.** Where this brief and the standard
+- **STD-UI v4 governs every surface here.** Where this brief and the standard
   disagree, the standard wins; a capability may be stricter than a rule but never
   looser. §12 records conformance rule by rule, which STD-UI §4 requires of the
   UX brief rather than of a later artifact.
@@ -595,10 +595,10 @@ this skill may not write:
 
 | Document | Path | Key Findings |
 |----------|------|--------------|
-| Capability CAP-001 v2 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 21 acceptance criteria; six user flows with explicit failure branches; owner-triggered acquisition; history depth stated rather than assumed; removal retains history; loopback-only with no authentication; up to 3000 instruments |
-| System Design CAP-001 v1 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` | `ui_facing: true`; `owner-web-app` is a React SPA talking only to `ingestion-api`; seven JSON endpoints; eight run lifecycle states; 202-and-poll rather than server push; coverage derived not asserted; gap detection unavailable below two instruments; cooperative cancellation; abandoned-run reclaim; charting explicitly unused |
-| STD-UI v2 | `docs/constitution/standards/ui-conventions.md` | The project's enforceable UX standard, 30 rules. Adopts WCAG 2.1 AA; fixes the six severity tiers and CAP-001's own run-state mapping; requires the three-state presence model, the eight-state region model, action tiering, ISO-8601 dates, virtualised lists at committed volume, and a conformance record in this brief. Cites this brief's v1 as a source artifact |
-| Design system | `design-system/` and `projects/factorflow-v2/design-system.yaml` | 11 component specifications; `theme.css` tokens including the six status tiers and the missing, indeterminate and neutral-value distinctions; `component-map.json` empty with a null Figma file key; `intake.md` governing gaps; `README.md` recording the port from the first build and the one known CAP-001 gap |
+| Capability CAP-001 v7 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 26 acceptance criteria; six user flows with explicit failure branches; owner-triggered acquisition; history depth stated rather than assumed; removal retains history; loopback-only with no authentication; up to 3000 instruments |
+| System Design CAP-001 v3 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` | `ui_facing: true`; `owner-web-app` is a React SPA talking only to `ingestion-api`; nine JSON HTTP operations; eight run lifecycle states; 202-and-poll rather than server push; coverage derived not asserted; gap detection unavailable below two instruments; cooperative cancellation; abandoned-run reclaim; charting explicitly unused |
+| STD-UI v4 | `docs/constitution/standards/ui-conventions.md` | The project's enforceable UX standard, 30 rules. Adopts WCAG 2.1 AA; fixes the six severity tiers and CAP-001's own run-state mapping; requires the three-state presence model, the eight-state region model, action tiering, ISO-8601 dates, virtualised lists at committed volume, and a conformance record in this brief. Cites this brief's v1 as a source artifact |
+| Design system | `design-system/` and `projects/factorflow-v2/design-system.yaml` | 12 component specifications; `theme.css` tokens including the six status tiers and the missing, indeterminate and neutral-value distinctions; `component-map.json` empty with a null Figma file key; `intake.md` governing gaps; `README.md` recording the port from the first build and the one known CAP-001 gap |
 | Product Charter v2 | `docs/constitution/product-charter.md` | Single owner-operator with no separation of duties; the Owner Interface is one of the product's building blocks; point-in-time history is the constraint that cannot be repaired later; M1 is Universe and Factors, 2026-Q4 |
 | Tech Stack v2 | `docs/constitution/tech-stack.md` | React 18 with Vite, Tailwind, `shadcn/ui` on Radix and TradingView `lightweight-charts` (OQ-TS-6 closed 2026-09-03); Radix chosen partly for keyboard and ARIA behaviour; Biome has no `jsx-a11y` equivalent, so accessibility is enforced by review |
 | EDG compliance skill | `.claude/skills/edg-compliance/SKILL.md` | Advisory beneath STD-UI per STD-UI §1.2. Four core principles and the catalogue of common agent violations this brief is checked against |
@@ -609,9 +609,9 @@ this skill may not write:
 **Readiness Score: 93/100**
 
 Ready for either path, and readier than v1. Six screens are derived from six user
-flows and cover all 21 acceptance criteria; the seven endpoints the system design
-declares each have a consumer named here, and no screen depends on an endpoint
-that does not exist. Every component proposed was read from its specification,
+flows and cover all 26 acceptance criteria; the nine HTTP operations the system
+design declares each have a consumer named here, and no screen depends on an
+operation that does not exist. Every component proposed was read from its specification,
 and the one thing CAP-001 needs that the design system lacks is recorded as a
 gap rather than invented.
 

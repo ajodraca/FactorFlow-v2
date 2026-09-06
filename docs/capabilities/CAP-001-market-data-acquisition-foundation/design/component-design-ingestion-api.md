@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-ingestion-api
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 5
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -37,8 +37,8 @@ ai_provenance:
 
 ## 1. Overview
 
-The FastAPI application serving the owner interface: seven JSON endpoints and
-the built React bundle, bound to loopback, with no authentication. It is the
+The FastAPI application serving the owner interface: nine JSON HTTP operations
+across seven paths, plus the built React bundle, bound to loopback, with no authentication. It is the
 only network entry point in the capability and the only component the browser
 can reach. It never calls Massive and never blocks on a provider request, which
 is what keeps the provider's failure modes out of the interface (C1, system
@@ -178,11 +178,62 @@ exists and `null` otherwise. The interface uses it to render *A run is in
 progress. This will start when it finishes.* The endpoint never rejects a
 request because a run is active; that would contradict AC-23.
 
+It does reject two preconditions, both `409` and both nothing to do with
+concurrency: `history_depth_not_set` when no depth has been stated (AC-2), and
+`no_active_instruments` when the roster holds no active instrument (AC-24,
+system design constraint 5.18). Both create no run. The distinction worth
+holding is that a queued run is a run the product will do later, whereas these
+two are requests it can never satisfy as asked, so recording them as runs would
+put rows in the journal that never had work to do.
+
+**Cancelling a queued run.** `POST /api/acquisition-runs/{id}/cancel` accepts a
+run in `requested` as well as one `running` (AC-26, constraint 5.20). A
+`requested` run moves directly to `cancelled` and is never claimed; a `running`
+run moves to `cancelling` and stops cooperatively. Both return `202` with the
+resulting state, so the interface renders the difference from the response
+rather than by knowing which case it asked for.
+
 **Cancellation.** `POST /api/acquisition-runs/{id}/cancel` returns `202` and
 state `cancelling` when the run was `running`, and `409` with code
 `run_already_terminal` and the run's actual state when it was not. The `409`
 is what the UX design's *This run had already completed.* renders, and it is
 the reason the endpoint reports the state rather than only refusing.
+
+### 2.4a Request bounds: the canonical set
+
+Every bound the API validates is declared here and nowhere else, so the request
+models, the store's check constraints and the interface's own client-side limits
+cannot drift apart. Set by owner decision on 2026-09-05.
+
+These are **API contract constants, not deployment settings.** They are literals
+in `api/bounds.py` rather than environment variables, because changing one
+changes what the interface may send and what a stored value may be — a contract
+change belonging to a capability revision, not to a deployment.
+
+| Bound | Value | Applies to | Why |
+|-------|-------|-----------|-----|
+| `MAX_HISTORY_DEPTH_YEARS` | 50 | `PUT /api/settings/history-depth` | A sanity bound against typos, not plan enforcement. Comfortably beyond Massive's deepest tier — Advanced reaches back to September 2003, so about 23 years — so it never constrains a legitimate request on any plan |
+| `MIN_HISTORY_DEPTH_YEARS` | 1 | as above | Already enforced by the store's `acquisition_run_depth_positive` constraint; restated here so the API rejects before the store has to |
+| `DEFAULT_PAGE_SIZE` | 50 | every paginated endpoint | Fills a virtualised viewport with room to scroll |
+| `MAX_PAGE_SIZE` | 500 | every paginated endpoint | Bounds one response payload. At 3000 instruments the coverage set spans about 60 pages at the default and 6 at the maximum |
+| `MAX_SYMBOLS_PER_REQUEST` | 1000 | `POST /api/instruments` | Bounds request size and the per-symbol validation loop. Adding the full 3000-instrument universe takes three requests. **This is a cap on one request, not on the list** — no maximum instrument count exists, per the `instrument-list-service` design |
+
+**History depth is bounded but not plan-validated.** The owner decided on
+2026-09-05 that a stated depth beyond the provider plan's reach is issued as
+stated and the provider returns what it holds — recorded in the tech stack's
+provider evaluation. `MAX_HISTORY_DEPTH_YEARS` therefore exists to reject
+`9999`, not to reject `10` on a five-year plan. The two rules are independent
+and both hold: the API refuses the absurd, and the plan silently truncates the
+merely optimistic.
+
+**The coverage range defaults to everything acquired.** When `from` and `to` are
+omitted from `GET /api/coverage`, the service derives the range per instrument
+from its own coverage segments rather than applying a default window. This is
+the load-bearing choice of the four, because gap detection is computed only
+*inside* the requested range: a default trailing window would compute gaps over
+that window alone and render a healthy screen while older gaps sat outside it,
+which is the false negative AC-8 and AC-17 exist to prevent. Omitting the range
+therefore means "everything you hold", which is also the question AC-7 asks.
 
 ### 2.5 Serving the interface bundle
 
@@ -235,8 +286,8 @@ learns of run completion by polling, per the UX design's 10-second run poll and
   listening on a non-loopback interface.
 - **Input validation (SEC-INP-001).** Every request body and query string is a
   Pydantic model. Symbols are validated against the same pattern the database
-  check constraint enforces, with a maximum length; `symbols` arrays are capped;
-  `limit` is bounded; `state` and `outcome` filters are validated against
+  check constraint enforces, with a maximum length; `symbols` arrays are capped
+  at 1000; `limit` is bounded at 500, defaulting to 50 (section 2.4a); `state` and `outcome` filters are validated against
   enumerations rather than passed through.
 - **Injection (SEC-INP-002).** No query is built by concatenation. The one
   dynamic element, sort column, resolves through an allowlist in the service
@@ -304,12 +355,20 @@ integration tests that need a real store.
 | Run request returns immediately | `tests/integration/test_api_runs.py` | 202 with a run id, and the run row is `requested` (AC-23) |
 | Second request queues | `tests/integration/test_api_runs.py` | With one run `running`, a second request returns 202 and `queued_behind` naming the first (AC-23) |
 | Cancel on a terminal run | `tests/integration/test_api_runs.py` | 409 `run_already_terminal` carrying the actual state (AC-19) |
+| Run with an empty roster is refused | `tests/integration/test_api_runs.py` | With no active instrument, 409 `no_active_instruments` and no run row is created (AC-24) |
+| A retired-only roster is an empty roster | `tests/integration/test_api_runs.py` | Instruments that exist but are all retired still produce 409 `no_active_instruments` (AC-24) |
+| Cancelling a queued run does not touch the active one | `tests/integration/test_api_runs.py` | The queued run becomes `cancelled`, the running run stays `running` (AC-26) |
 | Never-acquired coverage is distinct from empty | `tests/integration/test_api_coverage.py` | The response marks never-acquired explicitly rather than returning an empty list (AC-17) |
 | Gap detection unavailable below two instruments | `tests/integration/test_api_coverage.py` | `gap_detection.available` is false with a reason, and no zero is reported (AC-8) |
 | Health reports the most recent run outcome | `tests/integration/test_api_health.py` | Liveness, credential presence and last run state (AC-18) |
 | No response model leaks the credential | `tests/unit/test_api_no_secrets.py` | Static inspection of every response model finds no credential field (AC-13) |
 | The API does not import the provider client | `tests/unit/test_api_isolation.py` | No module under `api/` imports `massive_client` (C1) |
 | Bind address is loopback | `tests/integration/test_api_binding.py` | The server is not listening on a non-loopback interface (AC-14) |
+| History depth above the maximum is refused | `tests/integration/test_api_settings.py` | `{"years": 9999}` returns 422 naming the 1..50 range, and the stored depth is unchanged (section 2.4a) |
+| A depth beyond the plan is accepted | `tests/integration/test_api_settings.py` | `{"years": 10}` succeeds even though the plan holds five years; the bound rejects typos, not plans (section 2.4a) |
+| Page size defaults and caps | `tests/integration/test_api_pagination.py` | Omitting `limit` returns at most 50; `limit=500` is accepted; `limit=501` returns 422 |
+| Bulk add is capped per request | `tests/integration/test_api_instruments.py` | 1000 symbols is accepted; 1001 returns 422 naming the cap, and no symbol is added |
+| Coverage without a range covers everything | `tests/integration/test_api_coverage.py` | Omitting `from` and `to` returns each instrument's full covered range, and a gap outside any trailing window is still reported (AC-8, section 2.4a) |
 | Unknown API path returns the envelope | `tests/unit/test_api_errors.py` | 404 with code `not_found`, not the SPA bundle |
 | Internal error hides detail | `tests/unit/test_api_errors.py` | A raised exception returns code and request id only, and the detail is in the log (SEC-ERR-001) |
 
@@ -328,6 +387,10 @@ End-to-end coverage of these flows through the browser belongs to
    the active run in `queued_behind`.
 5. `POST /api/acquisition-runs/{id}/cancel` on a terminal run returns 409
    carrying that run's state.
+5a. `POST /api/acquisition-runs` with no active instrument returns 409 with code
+   `no_active_instruments` and creates no run.
+5b. `POST /api/acquisition-runs/{id}/cancel` on a `requested` run returns 202
+   with state `cancelled`, and any run already `running` is unaffected.
 6. `GET /api/coverage` before any acquisition distinguishes never-acquired from
    an empty result.
 7. `GET /api/coverage` reports gap detection as unavailable, with a reason, when
@@ -383,16 +446,16 @@ rendering is the interface's concern per STD-UI-5.
 
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
-| `/api/instruments` | GET | none, loopback only | `symbol` prefix filter, `lifecycle`, `limit`, `cursor` | `200` with instruments, counts of active and retired, `next_cursor` | AC-1 |
-| `/api/instruments` | POST | none | `{"symbols": ["AAPL", "MSFT"]}` | `201` with `added`, `reactivated`, `rejected` each carrying a reason; `409` when all duplicate; `422` when all malformed | AC-1; bulk and single share one endpoint |
+| `/api/instruments` | GET | none, loopback only | `symbol` prefix filter, `lifecycle`, `limit` (default 50, max 500), `cursor` | `200` with instruments, counts of active and retired, `next_cursor` | AC-1 |
+| `/api/instruments` | POST | none | `{"symbols": ["AAPL", "MSFT"]}`, at most 1000 per request | `201` with `added`, `reactivated`, `rejected` each carrying a reason; `409` when all duplicate; `422` when all malformed or the array exceeds 1000 | AC-1; bulk and single share one endpoint. Section 2.4a |
 | `/api/instruments/{symbol}` | DELETE | none | path symbol | `200` with `lifecycle: retired` and `retired_at`; `404` unknown; `409` already retired | AC-21, retires and never deletes |
-| `/api/settings/history-depth` | PUT | none | `{"years": 5}` | `200` with `years` and `updated_at`; `422` when not a positive integer | AC-2 |
+| `/api/settings/history-depth` | PUT | none | `{"years": 5}`, an integer in 1..50 | `200` with `years` and `updated_at`; `422` when not a positive integer or above 50 | AC-2; section 2.4a. The bound rejects typos, not plans |
 | `/api/settings/history-depth` | GET | none | none | `200` with `years` or `null` when never set | AC-2; declared in system design v3 section 4.2 |
-| `/api/acquisition-runs` | POST | none | empty body | `202` with `run_id`, `state: requested`, `queued_behind`; `409` `history_depth_not_set` | AC-23, never blocks |
-| `/api/acquisition-runs` | GET | none | `state` filter, `limit`, `cursor` | `200` with runs in reverse chronological order and `next_cursor` | AC-9 |
-| `/api/acquisition-runs/{id}` | GET | none | path id, `outcome` filter, `limit`, `cursor` | `200` with the run, its counts, and per-instrument per-data-type results; `404` unknown | AC-10, AC-11 |
-| `/api/acquisition-runs/{id}/cancel` | POST | none | path id | `202` with `state: cancelling`; `409` `run_already_terminal` with the actual state; `404` unknown | AC-19 |
-| `/api/coverage` | GET | none | `symbol` filter, `lifecycle`, `from`, `to`, `limit`, `cursor` | `200` with per-instrument data-type presence, covered ranges, last acquired, gap counts, `never_acquired`, and `gap_detection` availability with a reason | AC-7, AC-8, AC-17, AC-21 |
+| `/api/acquisition-runs` | POST | none | empty body | `202` with `run_id`, `state: requested`, `queued_behind`; `409` `history_depth_not_set`; `409` `no_active_instruments` | AC-23, never blocks; AC-24 refuses an empty roster |
+| `/api/acquisition-runs` | GET | none | `state` filter, `limit` (default 50, max 500), `cursor` | `200` with runs in reverse chronological order and `next_cursor` | AC-9 |
+| `/api/acquisition-runs/{id}` | GET | none | path id, `outcome` filter, `limit` (default 50, max 500), `cursor` | `200` with the run, its counts, and per-instrument per-data-type results; `404` unknown | AC-10, AC-11 |
+| `/api/acquisition-runs/{id}/cancel` | POST | none | path id | `202` with `state: cancelling` when the run was running, or `state: cancelled` when it was still queued; `409` `run_already_terminal` with the actual state; `404` unknown | AC-19, AC-26 |
+| `/api/coverage` | GET | none | `symbol` filter, `lifecycle`, `from`, `to` (both optional; omitted means the full covered range per instrument), `limit` (default 50, max 500), `cursor` | `200` with per-instrument data-type presence, covered ranges, last acquired, gap counts, `never_acquired`, and `gap_detection` availability with a reason | AC-7, AC-8, AC-17, AC-21. Section 2.4a |
 | `/api/health` | GET | none | none | `200` with `status`, `database`, `credential_present`, `schema_version`, `most_recent_run` | AC-18; `credential_present` declared in system design v3 section 4.2, sourced from the application's own environment per constraint 5.12 |
 | `/` and any non-API path | GET | none | none | `200` `index.html`, or the built asset | SPA fallback, section 2.5 |
 
@@ -443,18 +506,20 @@ connection pool. It consumes no external integration.
    ingestion record presence in the store, was rejected because health would then
    report a credential as supplied after ingestion had stopped, and AC-18 exists
    so the owner can trust that answer.
-3. **What happens when a run is requested with no active instruments?** Nothing
-   in the capability or the system design says. This design accepts the request
-   and lets the run complete with zero instruments named rather than inventing a
-   refusal, because a new refusal is a product decision. It is arguably a
-   vacuous success and AC-9's honesty requirement is at least adjacent.
-   *Owner: capability owner. Blocks: an acceptance criterion, not the
-   implementation.*
-4. **What page size should the paginated endpoints use?** The UX design requires
-   server-side filtering across the full result set and a virtualised table, so
-   pagination is by keyset cursor. No capability or design value sizes the page.
-   `[REQUIRES INPUT: what default and maximum page size for coverage, runs and
-   instruments?]` *Owner: capability owner. Blocks: the request models.*
+3. ~~What happens when a run is requested with no active instruments?~~
+   **Resolved 2026-09-05: refused at this boundary.** The capability now states
+   it as AC-24 and the system design as constraint 5.18. `POST
+   /api/acquisition-runs` returns `409` with code `no_active_instruments` and
+   creates no run. This design previously accepted the request and let the run
+   complete, which conflicted with `acquisition-runner` section 2.4 — deriving
+   the outcome from what was written makes a zero-instrument run `failed`. The
+   refusal removes the conflict rather than special-casing the outcome rule.
+4. ~~What page size should the paginated endpoints use?~~ **Resolved 2026-09-05
+   by owner decision: default 50, maximum 500**, together with the other request
+   bounds now recorded in section 2.4a — maximum history depth 50 years, and at
+   most 1000 symbols per bulk add. The coverage range defaults to everything
+   acquired rather than a trailing window, which section 2.4a explains is the
+   consequential one of the four.
 5. **What API latency is acceptable at 3000 instruments?** No value is stated
    anywhere, so section 5 sizes the work without asserting a target. *Owner:
    capability owner. Blocks: a performance acceptance criterion.*

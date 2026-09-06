@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-acquisition-runner
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 7
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -104,7 +104,8 @@ flowchart TD
     D --> E["run-journal.claim_next"]
     E --> F{"Claimed a run?"}
     F -->|no| G["Wait the poll interval"] --> D
-    F -->|yes| H{"Run carries a stated depth?"}
+    F -->|yes| H2["Re-read the provider credential;<br/>rebuild the client if it changed"]
+    H2 --> H{"Run carries a stated depth?"}
     H -->|no| I["Finalise as failed:<br/>history_depth_not_set"] --> D
     H -->|yes| J["Read active roster and per-instrument coverage"]
     J --> K["For each instrument in roster order"]
@@ -221,9 +222,19 @@ N/A, not applicable for this component. The run journal table is the handoff.
   step naturally fetches only what is missing.
 - **Assumption: exactly one runner process.** A second would idle. Nothing
   breaks, but nothing is gained.
-- **Assumption: roster order is stable within a run.** The roster is read once at
-  claim time; an instrument retired mid-run is still reached, which the
-  `instrument-list-service` design records as an open question.
+- **The provider credential is re-read at claim time** (SEC-SEC-002, owner
+  decision 2026-09-05). Before touching the roster, the runner re-reads the key
+  from the environment and rebuilds `massive-client` when its fingerprint has
+  changed. This is what makes the credential rotatable without a restart, and
+  claim time is chosen because it is the one point where no provider connection
+  and no partial instrument write is in flight. The mechanism belongs to
+  `runtime-config` section 2.2b; this component is where it is invoked.
+- **The roster is a snapshot taken at claim time** (AC-25, system design
+  constraint 5.19, owner decision 2026-09-05). Order is stable within a run, and
+  an instrument retired mid-run is still reached by that run and excluded from
+  every later one. No longer an assumption: the capability states it, because a
+  run that changes shape underneath itself cannot be explained from its own
+  record. The extra observation this may write is retained under AC-21.
 
 ## 4. Security
 
@@ -250,7 +261,7 @@ N/A, not applicable for this component. The run journal table is the handoff.
   unbounded retry loop.
 - **Privacy impact: none.**
 - **OSS inventory:** the components it composes; no direct third-party
-  dependency of its own beyond `psycopg` 3 and `httpx` through those.
+  dependency of its own beyond `psycopg` 3 and the `massive` client through those.
 
 ## 5. Scalability and Performance
 
@@ -269,12 +280,12 @@ N/A, not applicable for this component. The run journal table is the handoff.
 - **The roster is read once per run** as a list of identifiers, at most 3000
   integers.
 - **Concurrency (SA-CONC-001).** The runner is single-threaded through the
-  roster. Concurrent fetching of the four data types for one instrument is
-  possible with `httpx`'s async client and is deliberately not specified here,
-  because it interacts with the rate budget and no requirement asks for it.
-  Recorded in section 14.
-- **Timeouts.** Every provider call carries a timeout, supplied by
-  `runtime-config`, whose value is recorded as needing input (SA-RES-001).
+  roster, and the provider SDK's REST client is synchronous, so concurrency
+  would mean threads rather than coroutines. Deliberately not specified here:
+  it interacts with the rate budget and no requirement asks for it. Recorded in
+  section 14.
+- **Timeouts.** Every provider call carries a 30-second connect and read
+  timeout, supplied by `runtime-config` section 2.2a (SA-RES-001).
 
 ## 6. Upgrade
 
@@ -303,6 +314,8 @@ Massive is tested in its component.
 | Test | File | What it proves |
 |------|------|----------------|
 | Four data types per instrument | `tests/integration/test_runner_acquires.py` | A successful run writes reference, prices, fundamentals and corporate actions (AC-3) |
+| A rotated credential is used by the next run | `tests/integration/test_runner_credential.py` | Changing the environment value between two runs has the second use the new key in the same process, with no restart (SEC-SEC-002, runtime-config 2.2b) |
+| An unchanged credential keeps one client | `tests/integration/test_runner_credential.py` | Two consecutive runs with the same key reuse one SDK `RESTClient` rather than discarding the connection pool |
 | Unknown instrument does not stop the run | `tests/integration/test_runner_isolation.py` | With instrument 2 of 3 unknown, instruments 1 and 3 are written and the run is `partial` (AC-11) |
 | Exhausted attempts fail one instrument | `tests/integration/test_runner_isolation.py` | Three timeouts on one instrument record `failed` and the run continues (5.13) |
 | Rate limiting is not an attempt | `tests/integration/test_runner_isolation.py` | Repeated 429 responses do not exhaust the attempt budget (5.13) |
@@ -426,18 +439,28 @@ several internal ones.
 ## 14. Open Questions
 
 1. **Should the four data types for one instrument be fetched concurrently?**
-   `httpx` supports it and the rate budget bounds it either way. No requirement
-   asks for it, and it interacts with the governor's pacing in ways that would
-   need specifying. This design fetches sequentially and records the option.
-   *Owner: system design owner. Blocks: nothing; sequential fetching meets every
-   stated criterion.*
-2. **What poll interval should an idle runner use between claim attempts?** No
-   source states one. `[REQUIRES INPUT: how often should an idle runner poll for
-   a requested run?]` It trades interface responsiveness after Start against
-   database chatter while idle. *Owner: capability owner. Blocks: the idle
-   loop.*
-3. **Should a run finalise as failed when the roster is empty?** The runner would
-   complete having written nothing, which by section 2.4's rules is `failed`
-   rather than `succeeded`. That may read oddly for a deliberate empty roster.
-   Shared with the `ingestion-api` design's open question 3. *Owner: capability
-   owner. Blocks: an acceptance criterion.*
+   The rate budget bounds it either way, and it interacts with the governor's
+   pacing in ways that would need specifying. Adopting the official SDK makes
+   this slightly harder rather than easier: its REST client is synchronous, so
+   concurrency would mean a thread pool rather than coroutines. This design
+   fetches sequentially and records the option. *Owner: system design owner.
+   Blocks: nothing; sequential fetching meets every stated criterion.*
+2. ~~What poll interval should an idle runner use between claim attempts?~~
+   **Resolved 2026-09-05 by owner decision: 5 seconds**, as
+   `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` in
+   `component-design-runtime-config.md` section 2.2a. A queued run therefore
+   starts within five seconds of being requested, which is well inside the UX
+   design's ten-second run poll, and one claim query every five seconds is
+   negligible against a store sized for 3000 instruments.
+3. ~~Should a run finalise as failed when the roster is empty?~~ **Resolved
+   2026-09-05: the case cannot arise.** `ingestion-api` now refuses a run
+   request when no instrument is active, returning `409 no_active_instruments`
+   and creating no run (AC-24, system design constraint 5.18). Section 2.4's
+   derive-from-what-was-written rule therefore needs no special case, which was
+   the point of refusing at the boundary rather than encoding an exception here.
+
+   One residual case remains and is deliberately left as `failed`: every
+   instrument is retired *after* the run is claimed, so the roster snapshot is
+   non-empty but every instrument fails or returns nothing. That is a real run
+   that did real work and came back with nothing, and `failed` is the honest
+   outcome for it.

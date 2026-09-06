@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-system-design
 artifact_type: system-design
-artifact_version: 3
+artifact_version: 6
 capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
@@ -20,7 +20,7 @@ ai_provenance:
   timestamp: 2026-09-05T05:20:00Z
   source_artifacts:
     - id: CAP-001
-      version: "6, deepening-backfill and queued-run-request semantics added 2026-09-05"
+      version: "7, lifecycle edge cases AC-24 to AC-26 added 2026-09-05"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
@@ -191,7 +191,7 @@ sequenceDiagram
             M-->>R: 20. NotFound
             R->>S: 21. Record per-instrument failure,<br/>continue loop
         else 22. Rate limited
-            X-->>M: 23. 429 (+ Retry-After)
+            X-->>M: 23. 429 (no Retry-After from Massive)
             M->>G: 24. Wait out the limit,<br/>not counted as an attempt
         else 25. Transport or server error
             X-->>M: 26. Timeout / 5xx
@@ -296,27 +296,38 @@ not answer; a boolean is not the credential, and no interface exposes the value.
 
 ### 4.2 Interfaces
 
-| Interface | Provider component | Consumer component | Shape | Stability |
-|-----------|--------------------|--------------------|-------|-----------|
-| `GET/POST/DELETE /api/instruments` | `ingestion-api` | `owner-web-app` | JSON; list, add and remove named instruments | stable within this capability |
-| `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the owner's stated history depth, required before first run | stable within this capability |
-| `GET /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | JSON; the current stated depth, or null when the owner has never stated one. The Settings screen reads it, and null is distinct from zero (AC-2) | stable within this capability |
-| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | JSON; creates a `requested` run and returns `202 Accepted`, its id and state. While another run is `running`, the new request remains queued and is claimed FIFO after that run reaches a terminal state. | stable within this capability |
-| `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | JSON; run history, outcome, and per-instrument failure detail | stable within this capability |
-| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | JSON; requests cooperative cancellation of a running acquisition | stable within this capability |
-| `GET /api/coverage` | `ingestion-api` | `owner-web-app` | JSON; per-instrument data types, covered ranges, last acquired, missing trading days, and whether the instrument is active or retired | stable within this capability |
-| `GET /api/health` | `ingestion-api` | `owner-web-app` | JSON; process liveness, most recent run outcome, and whether the provider credential is present, as a boolean and never its value (AC-13, AC-18) | stable within this capability |
-| Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | stable within this capability |
-| Observation append | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | **critical — C5, unrecoverable if wrong** |
-| Coverage read | `market-data-store` | `coverage-service` | SQL reads over coverage segments and observations | stable within this capability |
-| Migration application | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | stable within this capability |
-| Provider reads | Massive REST API (external) | `massive-client` | HTTPS/JSON; ticker reference, daily aggregates, financials, corporate actions; API-key auth | external, vendor-controlled |
+Every HTTP operation below is unauthenticated by deliberate design: the API
+binds loopback-only and publishes no port beyond it (AC-14), so no endpoint
+declares a credential, session or token requirement — see constraint 5.11 and
+`component-design-ingestion-api.md` §4. The full request schema, response
+schema, and status codes for each operation are the authoritative contract in
+`component-design-ingestion-api.md` §11; the rows below summarize it and must
+not be read as a competing source.
+
+| Interface | Provider component | Consumer component | Shape | Auth | Status codes | Stability |
+|-----------|--------------------|--------------------|-------|------|---------------|-----------|
+| `GET /api/instruments` | `ingestion-api` | `owner-web-app` | Request: `symbol` prefix filter, `lifecycle`, `limit`, `cursor` (query). Response: instruments, active/retired counts, `next_cursor`. Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
+| `POST /api/instruments` | `ingestion-api` | `owner-web-app` | Request: `{"symbols": [...]}`. Response: `added`, `reactivated`, `rejected` (each with a reason). Full schema: ingestion-api §11 | none, loopback only | `201` at least one added/reactivated; `409` all duplicate; `422` all malformed | stable within this capability |
+| `DELETE /api/instruments/{symbol}` | `ingestion-api` | `owner-web-app` | Request: path `symbol`. Response: `lifecycle: retired`, `retired_at`. Full schema: ingestion-api §11 | none, loopback only | `200`; `404` unknown; `409` already retired | stable within this capability |
+| `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: `{"years": <positive integer>}`. Response: `years`, `updated_at`. Full schema: ingestion-api §11 | none, loopback only | `200`; `422` not a positive integer | stable within this capability |
+| `GET /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: none. Response: `years` or `null` when never set — the Settings screen reads it, and null is distinct from zero (AC-2). Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
+| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: empty body. Response: `run_id`, `state: requested`, `queued_behind` (the active run's id when one exists, else `null`, per AC-23 — the endpoint never rejects for an active run). Full schema: ingestion-api §11 | none, loopback only | `202`; `409` `history_depth_not_set` | stable within this capability |
+| `GET /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: `state` filter, `limit`, `cursor`. Response: runs reverse-chronological, `next_cursor`. Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
+| `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | Request: path `id`, `outcome` filter, `limit`, `cursor`. Response: the run, counts, per-instrument per-data-type results. Full schema: ingestion-api §11 | none, loopback only | `200`; `404` unknown | stable within this capability |
+| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | Request: path `id`. Response: `state: cancelling`, or the run's actual terminal state on conflict. Full schema: ingestion-api §11 | none, loopback only | `202`; `409` `run_already_terminal` with actual state; `404` unknown | stable within this capability |
+| `GET /api/coverage` | `ingestion-api` | `owner-web-app` | Request: `symbol` filter, `lifecycle`, `from`, `to`, `limit`, `cursor`. Response: per-instrument data-type presence, covered ranges, last acquired, gap counts, `never_acquired`, `gap_detection` availability with a reason. Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
+| `GET /api/health` | `ingestion-api` | `owner-web-app` | Request: none. Response: `status`, `database`, `credential_present` (boolean, never the value — AC-13), `schema_version`, `most_recent_run` (AC-18). Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
+| Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | n/a — in-process | n/a | stable within this capability |
+| Observation append | `market-data-store` | `observation-writer` | SQL `INSERT ... ON CONFLICT DO NOTHING` on the observation natural key; no UPDATE or DELETE | n/a — in-process | n/a | **critical — C5, unrecoverable if wrong** |
+| Coverage read | `market-data-store` | `coverage-service` | SQL reads over coverage segments and observations | n/a — in-process | n/a | stable within this capability |
+| Migration application | `market-data-store` | `schema-migrator` | Numbered SQL files plus the `applied_migrations` table | n/a — in-process | n/a | stable within this capability |
+| Provider reads | Massive REST API (external) | `massive-client` | HTTPS/JSON; ticker reference, daily aggregates, financials, corporate actions. Full schema: not yet available, tracked by `component-design-massive-client.md` §14 | API-key, vendor-controlled | vendor-defined, not yet documented | external, vendor-controlled |
 
 ### 4.3 Technology Selections
 
 | Component repo | Language | Framework | Store | Key libraries | Source |
 |----------------|----------|-----------|-------|---------------|--------|
-| FactorFlow-v2 (application + ingestion) | Python 3.12+ | FastAPI on uvicorn | PostgreSQL 16, no ORM | `psycopg` 3, `httpx`, Pydantic, `ruff`, `mypy`, `pytest`, `testcontainers[postgres]` | tech-stack |
+| FactorFlow-v2 (application + ingestion) | Python 3.12+ | FastAPI on uvicorn | PostgreSQL 16, no ORM | `psycopg` 3, `massive` (official provider client), Pydantic, `ruff`, `mypy`, `pytest`, `testcontainers[postgres]` | tech-stack v3 |
 | FactorFlow-v2 (owner interface) | TypeScript 5.x | React 18 with Vite | — | Tailwind CSS, **shadcn/ui on Radix primitives**, **TradingView Lightweight Charts**, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` | tech-stack v2, approved (OQ-TS-6 closed 2026-09-03) |
 
 The component and charting libraries were open as OQ-TS-6 in `tech-stack.md`,
@@ -393,9 +404,21 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
    ingestion record presence in the store, was rejected because it would let health
    report a credential as supplied after ingestion had stopped, and AC-18 exists so
    the owner can trust that answer without inspecting the store.
+
+   **It is rotatable without a restart** (SEC-SEC-002). The ingestion process
+   re-reads the credential when it claims a run and rebuilds its provider client
+   when the value has changed, so a rotated key takes effect on the next run
+   with no redeployment and no interruption to a run already under way. Claim
+   time is chosen because it is the only point at which no provider connection
+   and no partial instrument write is in flight. See
+   `component-design-runtime-config.md` section 2.2b.
 13. **Rate limiting is flow control; errors are failures.** A `429` means the
-    request was never served, so the governor waits — honouring `Retry-After`
-    where the provider supplies it — and does not count the wait as an attempt.
+    request was never served, so the governor waits and does not count the wait
+    as an attempt. It honours `Retry-After` where a provider supplies one, but
+    **Massive does not** — verified against the live provider on 2026-09-05 —
+    so the live path waits to the next minute boundary, matching the fixed
+    per-minute window the provider actually enforces. See
+    `component-design-rate-limit-governor.md` section 2.5.
     Timeouts and server errors are retried with exponential backoff up to a
     configured attempt limit, **default 3 per instrument and data type** (owner
     decision, 2026-09-04). On exhaustion the instrument is recorded as failed and
@@ -414,6 +437,31 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
     run and returns `202 Accepted`; after each terminal transition, the runner
     claims the oldest requested run. A request while a run is active queues; it
     never starts work concurrently or replaces the active request.
+18. **A run with nothing to acquire is refused, not recorded** (AC-24, owner
+    decision 2026-09-05). `POST /api/acquisition-runs` returns `409` with code
+    `no_active_instruments` and creates no run when no instrument is active. The
+    refusal sits alongside the existing `history_depth_not_set` refusal and for
+    the same reason: both are preconditions the owner can act on, and both are
+    cheaper to state at the boundary than to encode as a run outcome. Without
+    it, a zero-instrument run would finalise as `failed` under constraint 5.3's
+    derive-from-what-was-written rule, which would report a system fault for
+    what is an empty list.
+19. **A run's scope is fixed when it starts** (AC-25, owner decision
+    2026-09-05). `acquisition-runner` reads the active roster once, at claim
+    time. An instrument retired while that run is under way is still reached by
+    it, and is excluded from every later run. The alternative, re-reading the
+    roster before each instrument, was rejected because a run that changes shape
+    underneath itself cannot be explained from its own record: the run detail
+    would list instruments the roster no longer contains, with no way to say
+    why. One extra observation for a just-retired instrument is truthful
+    point-in-time data and is retained under AC-21.
+20. **A queued run can be cancelled before it is claimed** (AC-26, owner
+    decision 2026-09-05). `POST /api/acquisition-runs/{id}/cancel` on a
+    `requested` run moves it directly to the terminal `cancelled` state, so the
+    runner never claims it. This is a state transition in the journal rather
+    than cooperative cancellation: there is no runner to signal. A run already
+    `running` is unaffected, which is what keeps cancelling a queued request
+    from disturbing work in progress.
 
 ## 6. Architectural Assumptions
 
@@ -454,7 +502,7 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-10 | Failure diagnosis | Per-instrument failure records; `GET /api/acquisition-runs/{id}` | 3 step 21, 4.2 |
 | AC-11 | Unrecognised instrument does not stop the run | Per-instrument isolation in the runner loop | 3 steps 18-21 |
 | AC-12 | A failed run leaves no false history | Coverage segments extended only inside the committed write transaction | 3 step 17, 5.9 |
-| AC-13 | Credential handling | `runtime-config` environment load, redaction, no API echo | 3 steps 37-39, 5.12 |
+| AC-13 | Credential handling | `runtime-config` environment load with reload at claim time, redaction, no API echo | 3 steps 37-39, 5.12 |
 | AC-14 | Network exposure | Port published to `127.0.0.1` only; uvicorn bound to loopback | 5.11 |
 | AC-15 | Forward data evolution | `schema-migrator`, numbered migrations, `applied_migrations` | 3 steps 32-35 |
 | AC-16 | Refuse an inconsistent start | Migrator exits non-zero; API never binds | 3 step 36 |
@@ -465,6 +513,9 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-21 | Removal retains history | `instrument-list-service` retires rather than deletes; `GET /api/coverage` reports active and retired instruments | 4.1, 4.2, 5.8 |
 | AC-22 | Deepening backfills history | `acquisition-runner` compares active-instrument coverage to the current stated depth and fetches only the missing earlier range; `observation-writer` preserves already-covered history | 3, 5.3, 5.9 |
 | AC-23 | Concurrent run requests queue | `POST /api/acquisition-runs` creates `requested` records; `run-journal` atomically claims the oldest request only after the active run is terminal | 3, 4.2, 5.17 |
+| AC-24 | A run with nothing to acquire is refused | `POST /api/acquisition-runs` returns `409 no_active_instruments` and creates no run, alongside the existing `history_depth_not_set` refusal | 4.2, 5.18 |
+| AC-25 | Retiring takes effect from the next run | `acquisition-runner` reads the roster once at claim time, so the run's scope is fixed when it starts; `instrument-list-service` retirement stops acquisition from the next run onward | 3, 5.19 |
+| AC-26 | A queued run can be cancelled before it starts | `POST /api/acquisition-runs/{id}/cancel` moves a `requested` run directly to `cancelled`; the runner never claims it, and an active run is unaffected | 3, 4.2, 5.20 |
 
 ## 8. Open Questions
 
@@ -475,7 +526,7 @@ None. All questions raised during design were resolved on 2026-09-03 and
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-001 v6 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 23 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; deepening backfills and concurrent requests queue; loopback-only decision |
+| Capability CAP-001 v7 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 26 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; deepening backfills and concurrent requests queue; loopback-only decision |
 | Product Charter v2 | `docs/constitution/product-charter.md` | Modular monolith with ingestion split out; point-in-time persistence; single owner-operator; M1 is Universe and Factors, 2026-Q4 |
 | Tech Stack v2 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider; fundamentals are not as-reported; market data source deliberately not abstracted; validation commands; OQ-TS-3 and OQ-TS-6 |
 | Architecture inventory | `docs/architecture.md` | Empty: 0 designs, 0 components. CAP-001 declares the first component identifiers in the project |

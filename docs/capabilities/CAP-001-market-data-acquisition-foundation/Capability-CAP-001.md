@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001
 artifact_type: capability
-artifact_version: 6
+artifact_version: 8
 id: CAP-001
 title: Market Data Acquisition Foundation
 description: >-
@@ -274,6 +274,22 @@ here.
     an acquisition run while another run is under way, the product MUST accept
     the new request, record it as requested, and start it only after the active
     run reaches a terminal state. Requested runs MUST start in request order.
+24. **AC-24 — A run with nothing to acquire is refused, not run:** When the
+    owner-operator starts an acquisition run while no instrument is active, the
+    product MUST refuse the request, state that no instruments are named, and
+    record no run. A run that completes having acquired nothing would be either
+    a success that did nothing or a failure the owner did not cause, and AC-9
+    requires the recorded outcome to mean what it says.
+25. **AC-25 — Retiring an instrument takes effect from the next run:** An
+    instrument retired while an acquisition run is under way MUST still be
+    reached by that run, and MUST NOT be acquired by any later run. Observations
+    written for it before the run ends are retained (AC-21). The run's scope is
+    fixed when it starts, so that what a run did is explainable from what it set
+    out to do.
+26. **AC-26 — A queued run can be cancelled before it starts:** When the
+    owner-operator cancels an acquisition run that has been requested but not
+    yet started, the product MUST record it as cancelled, MUST NOT start it, and
+    MUST leave any run already under way unaffected.
 
 ## 5. Dependencies and Constraints
 
@@ -281,7 +297,7 @@ here.
 
 | Target | Type | What is needed | Satisfied when |
 |--------|------|----------------|----------------|
-| Massive (market data provider) | requires-runtime | Historical reads for instrument reference data, daily prices, company fundamentals and corporate actions, authenticated by an API key supplied at runtime, covering the owner's stated history depth for up to 3000 named instruments. No acceptance criterion can be cited: Massive is an external provider, not a capability, and its coverage is still under evaluation. | An acquisition run completes against the live provider and returns all four data types for named instruments over the stated depth. |
+| Massive (market data provider) | requires-runtime | Historical reads for instrument reference data, daily prices, company fundamentals and corporate actions, authenticated by an API key supplied at runtime, covering the owner's stated history depth for up to 3000 named instruments. `no-acceptance-criterion`: Massive is an external provider, not a capability, so it defines no citable acceptance criterion; its coverage is still under evaluation (see FINDING-6 / open question in §7). | An acquisition run completes against the live provider and returns all four data types for named instruments over the stated depth. |
 | `docs/constitution/tech-stack.md` | conforms-to | The approved technology choices and the project-wide constraints C1-C11 that bound this capability: process topology, single transactional store, the one market-data contract spanning historical and live reads, and append-only point-in-time history. | Specification review confirms the system design for this capability uses only approved technologies and honours C1, C2, C4, C5, C7 and C8. |
 | STD-UI | conforms-to | The project's enforceable owner-interface standard, 30 numbered rules governing vocabulary, quantities, colour and status, data vintage, actions, states and feedback, charts and scale. CAP-001 delivers the product's first interface surface, so every rule governing a surface it renders binds it. | Section 5.4 accounts for all 30 rules, and specification review confirms the UX brief and UX design satisfy each rule marked yes or partial. |
 
@@ -317,8 +333,10 @@ here.
   network.
 - **One owner-operator, no separation of duties, no subscribers.** There is no
   multi-tenancy, no per-user isolation and no horizontal scale requirement.
-- **The provider publishes no SDK,** so the product integrates against its
-  published interface directly.
+- **The provider publishes an official Python client,** adopted 2026-09-05 as
+  the integration library. The product keeps a thin project-owned boundary
+  around it for pacing, retry, error typing and test substitution, but does not
+  reimplement transport, authentication or protocol handling.
 
 ### 5.4 Standards Conformance
 
@@ -362,10 +380,20 @@ must agree.
 
 ## 6. Assumptions
 
-- **Massive covers the named instruments over the stated history depth, for all
-  four data types, and its rate limits permit a run of up to 3000 instruments.**
-  Coverage and limits have not been tested; the tech stack records provider
-  evaluation as still open. If the provider falls short, AC-3 and AC-4 change.
+- **Massive covers the named instruments for all four data types.** Instrument
+  coverage remains untested; if the provider falls short, AC-3 changes.
+  **Rate limits are no longer an assumption:** verified 2026-09-05, the target
+  plan (Stocks Starter + Financials & Ratios) has no rate limit, so AC-4's 3000
+  instruments are not throughput-bound. The free Basic tier's five calls per
+  minute would have made AC-4 infeasible, which is why the plan is a
+  precondition rather than a preference. See the tech stack's provider
+  evaluation.
+- **History depth is capped by the provider's plan, and this capability does not
+  enforce the cap.** Stocks Starter holds five years. A stated depth beyond that
+  is issued as stated and the provider returns what it holds (owner decision,
+  2026-09-05). AC-2 remains satisfied — the depth is stated rather than assumed
+  — but a uniform shortfall across every instrument is a plan limit and must not
+  be presented as a provider data gap (AC-12, AC-17).
 - **The owner-operator holds valid provider credentials** before the first
   acquisition run. Nothing in this capability provisions them.
 - **The instruments of interest are US-listed equities,** consistent with the
@@ -382,9 +410,14 @@ must agree.
 - **What is an acceptable duration for a first acquisition run of 3000
   instruments?** No duration target is fixed, so AC-4 constrains completeness
   but not time. *(Affects whether a run that takes many hours is acceptable.)*
-- **Does Massive's coverage and rate limiting hold for the full instrument
-  count and history depth?** Provider evaluation is recorded as open in the
-  approved tech stack. *(Affects AC-3, AC-4 and the assumptions above.)*
+- ~~Does Massive's coverage and rate limiting hold for the full instrument
+  count and history depth?~~ **Rate limiting answered 2026-09-05: yes, on the
+  target plan.** The chosen Stocks Starter tier is unlimited; the free tier's
+  five calls per minute is what would have made AC-4 infeasible. History depth
+  is capped at five years on Starter, accepted without enforcement. **Instrument
+  coverage remains untested** — whether Massive holds all four data types for
+  every named instrument is still unverified, and a shortfall changes AC-3.
+  *(Affects AC-3; AC-4's throughput half is closed.)*
 - ~~What should happen to data already acquired for an instrument the
   owner-operator removes from the list?~~ **Answered 2026-09-04: retained.**
   Removal retires the instrument from future acquisition and keeps every

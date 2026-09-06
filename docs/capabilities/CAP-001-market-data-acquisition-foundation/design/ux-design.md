@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-ux-design
 artifact_type: ux-design
-artifact_version: 4
+artifact_version: 5
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-05
@@ -38,7 +38,7 @@ ai_provenance:
 # UX Design: Market Data Acquisition Foundation
 
 **Capability:** CAP-001
-**Design Source:** Generated from UX brief v5, then refined against owner decisions of 2026-09-05 resolving seven of its eight open questions. No Figma frames exist: `design-system/component-map.json` carries a null Figma file key because shadcn/ui publishes no official kit.
+**Design Source:** Generated from UX brief v6, then refined against owner decisions of 2026-09-05 resolving seven of its eight open questions. No Figma frames exist: `design-system/component-map.json` carries a null Figma file key because shadcn/ui publishes no official kit.
 **Approved By:** Pending review
 **Approval Date:** none
 **Design System:** FactorFlow Design System (shadcn/ui + Radix), 12 component specifications
@@ -146,7 +146,7 @@ because at 3000 instruments an expanded view is unreadable.
 | Data type presence | `badge` | `coverage-present`, `coverage-absent`, `coverage-unknown` | `design-system/components/badge/design-spec.md` |
 | Retired marker | `badge` | `secondary` | `design-system/components/badge/design-spec.md` |
 | Start acquisition run | `button` | `default` | `design-system/components/button/design-spec.md` |
-| Start, when history depth is unset | `button` | `blocked` | `design-system/components/button/design-spec.md` |
+| Start, when history depth is unset or no instrument is active | `button` | `blocked` | `design-system/components/button/design-spec.md` |
 
 The filter is the table's own toolbar filter rather than a standalone `input`:
 the `input` specification directs table filtering to the toolbar, and using a
@@ -174,21 +174,27 @@ Requesting a run while one is already active queues it: the run journal claims
 the oldest requested run, so the new run appears in Runs as `requested` and
 begins when the active one finishes. The Start action stays available and says
 so: *A run is in progress. This will start when it finishes.* This is the owner's
-decision of 2026-09-05 and, like the depth behaviour above, wants an acceptance
-criterion. With history depth
-unset, the action renders as `button` `blocked` with the reason stated beside it:
-*History depth is not set. Set it in Settings before acquiring.* The `blocked`
-variant stays focusable and exposes the reason through `aria-describedby`, where
-a plain disabled control would hide the reason from a keyboard or screen reader
-user entirely.
+decision of 2026-09-05, now stated as AC-23.
+
+**Start has two blocked reasons, and they are not interchangeable.** With history
+depth unset, the action renders as `button` `blocked` beside *History depth is
+not set. Set it in Settings before acquiring.* (AC-2). With no active instrument
+named, it renders `blocked` beside *No instruments are named. Add instruments
+before acquiring.* (AC-24). Each names the screen that fixes it, because the two
+are fixed in different places and a single generic *Cannot start* would send the
+owner to the wrong one. When both hold, the depth reason is shown first, matching
+the order of the API's own refusals.
+
+The `blocked` variant stays focusable and exposes the reason through
+`aria-describedby`, where a plain disabled control would hide the reason from a
+keyboard or screen reader user entirely.
 
 **Short of stated depth.** When the owner deepens history depth, instruments
 already acquired are now short of it. The Depth column marks those rows *Short by
 `n` years* using `badge` `status-warning`, and the next run backfills the missing
 earlier range (AC-6 makes the re-run safe). Rows meeting the stated depth carry no
 marker rather than a redundant confirmation. This presentation exists because
-deepening is the owner's decision of 2026-09-05; it needs an acceptance criterion
-before it is implemented, which Section 7 records.
+deepening is the owner's decision of 2026-09-05, stated as AC-22.
 
 **Gap detection unavailable.** When fewer than two named instruments hold data in
 the range, the Gaps column renders `coverage-unknown` carrying
@@ -298,6 +304,13 @@ The confirmation reads: *Stop acquiring `SYMBOL`? Its recorded history is kept
 and stays visible on the Coverage screen. You can add it again later.* Initial
 focus is on cancel, per the `dialog` contract. The confirm action is labelled
 **Stop acquiring**, not "Delete" and not "Remove".
+
+When a run is under way, the dialog adds a sentence: *A run is in progress and
+will still acquire `SYMBOL` this time. Retirement takes effect from the next
+run.* This is AC-25's behaviour made visible at the point the owner acts,
+because the alternative — saying nothing — leaves them to discover an
+observation written after they retired the instrument and read it as a defect
+rather than as the stated scope rule.
 
 Retiring the last active instrument holding data in a range makes gap detection
 unavailable. The dialog says so when it applies, because the consequence is not
@@ -494,17 +507,30 @@ outcome. The owner opens this screen because something went wrong.
 
 #### Interaction Flows
 
-**Cancelling.** The action opens `dialog` `confirm`, not `destructive`: nothing
-is discarded. The confirmation states what cancellation actually does, because
-STD-UI-2 requires words to describe real behaviour and cancellation here is
-cooperative: *Stop this run? Instruments already acquired keep their coverage.
-Instruments not yet started will be skipped. The run stops after the instrument
-it is working on now.*
+**Cancelling a running run.** The action opens `dialog` `confirm`, not
+`destructive`: nothing is discarded. The confirmation states what cancellation
+actually does, because STD-UI-2 requires words to describe real behaviour and
+cancellation here is cooperative: *Stop this run? Instruments already acquired
+keep their coverage. Instruments not yet started will be skipped. The run stops
+after the instrument it is working on now.*
 
 On confirm the run enters `cancelling`, tiered **warning**, "requested but not
 effective". That state persists for up to one instrument's work. The interface
 must not present cancellation as immediate, and the Cancel action becomes
 unavailable rather than remaining clickable.
+
+**Cancelling a queued run** (AC-26). A run still `requested` has not started, so
+the copy above would be false: there is no instrument it is working on now, and
+nothing has been acquired to keep. The confirmation instead reads *Cancel this
+queued run? It has not started, so nothing has been acquired. The run in
+progress is not affected.* The last sentence is there because the owner is
+cancelling one of two visible runs and the destructive-looking action sits
+beside an active one.
+
+On confirm the run goes straight to `cancelled` — terminal, tiered neutral, with
+no `cancelling` intermediate and no started time on the run detail. This is the
+one cancellation the interface may present as immediate, because it is: the
+runner never claims the run rather than being asked to stop.
 
 **The run finished first.** AC-19's edge: if the run reached a terminal state
 before the request was observed, the interface says *This run had already
@@ -598,7 +624,7 @@ stranded.
 
 | UI Element | Source Reference | Suggested Slug | Intake Reference |
 |------------|-----------------|----------------|------------------|
-| Indeterminate progress indicator, for an acquisition run whose duration cannot be estimated | UX brief v5 §4; `design-system/README.md` records this as the one known gap for CAP-001 | `progress` | `design-system/intake.md` |
+| Indeterminate progress indicator, for an acquisition run whose duration cannot be estimated | UX brief v6 §4; `design-system/README.md` records this as the one known gap for CAP-001 | `progress` | `design-system/intake.md` |
 
 **The progress indicator** is genuinely new rather than a variant, and
 `README.md` says why it was deliberately not written: `intake.md` step 2.3
@@ -662,6 +688,9 @@ specs resolve.
 | AC-21 | Removal retains history | 1.2 retire wording and `confirm` variant; 1.1 retired rows retained and marked | `dialog` `confirm` + `badge` `secondary` |
 | AC-22 | Deepening history depth backfills | 1.1 Depth column, *Short by `n` years* presentation | `badge` `status-warning` |
 | AC-23 | Concurrent run requests queue | 1.1 Start action queued state, *A run is in progress* message | `button` `default` |
+| AC-24 | A run with nothing to acquire is refused | 1.1 Start rendered `blocked` with the reason *No instruments are named. Add instruments before acquiring.*, mirroring the depth-not-set treatment | `button` `blocked` |
+| AC-25 | Retiring takes effect from the next run | 1.2 retire confirmation states that a run in progress still finishes with the instrument included | `dialog` `confirm` |
+| AC-26 | A queued run can be cancelled before it starts | 1.5 cancel on a queued run, its distinct confirmation copy, and the immediate `cancelled` state with no started time | `button` `secondary` + `dialog` `confirm` |
 
 **Run outcome tier mapping**, reproduced from STD-UI-12 because this design is
 where it is rendered:
@@ -681,8 +710,8 @@ where it is rendered:
 
 | Source | Reference | Verification Method | Date |
 |--------|-----------|---------------------|------|
-| UX brief v5 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-brief.md` | Text reference. Six screens, information architecture, interactions and conformance record read in full | 2026-09-05 |
-| Capability CAP-001 v6 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | Text reference. All 23 acceptance criteria traced in Section 5 | 2026-09-05 |
+| UX brief v6 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-brief.md` | Text reference. Six screens, information architecture, interactions and conformance record read in full | 2026-09-05 |
+| Capability CAP-001 v7 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | Text reference. All 26 acceptance criteria traced in Section 5 | 2026-09-05 |
 | System design v3 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` | Text reference. Endpoints, run lifecycle, 202-and-poll, derived coverage, gap unavailability | 2026-09-05 |
 | STD-UI v4 | `docs/constitution/standards/ui-conventions.md` | Text reference. Approved 2026-09-05; all 30 rules read, those governing this design cited inline | 2026-09-05 |
 | Component specifications | `design-system/components/` | Text reference. All 12 read; 10 used, 2 unused with reasons; token references checked mechanically against the theme, which found and closed one defect | 2026-09-05 |

@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-rate-limit-governor
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 5
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -44,10 +44,12 @@ system design's sharper distinctions: a `429` and a `500` look alike to a naive
 retry loop and mean opposite things.
 
 System design constraint 5.13 states it directly. A `429` means the request was
-never served, so the governor waits, honouring `Retry-After` where the provider
-supplies it, and does not count the wait as an attempt. Timeouts and server
-errors are retried with exponential backoff up to a configured attempt limit,
-default 3 per instrument and data type by owner decision of 2026-09-04, after
+never served, so the governor waits and does not count the wait as an attempt.
+It honours `Retry-After` where a provider supplies one; Massive does not, so
+the live path waits to the next minute boundary instead — section 2.5.
+Timeouts and server errors are retried with exponential backoff up to a
+configured attempt limit, default 3 per instrument and data type by owner
+decision of 2026-09-04, after
 which the instrument is recorded as failed and the run continues. Conflating the
 two would either abandon instruments over ordinary throttling or retry a genuine
 outage until the run never ends.
@@ -83,9 +85,9 @@ separates them, and it is drawn because that decision is the component's entire
 reason for existing. Before any request, the caller waits for a permit from the
 token bucket, which is what holds the process to the configured budget. After
 the request, the outcome routes one of three ways: success returns immediately,
-throttling waits the provider's own stated delay and retries without counting an
-attempt, and a transport or server error consumes one attempt and backs off
-exponentially. The expected outcome is that throttling slows a run and never
+throttling waits — to the next minute boundary against Massive, which sends no
+`Retry-After` — and retries without counting an attempt, and a transport or
+server error consumes one attempt and backs off exponentially. The expected outcome is that throttling slows a run and never
 fails it, while a genuine outage fails one instrument after a bounded number of
 tries and lets the run continue.
 
@@ -95,28 +97,39 @@ flowchart TD
     B --> C{"Budget available?"}
     C -->|no| D["sleep until the next token"] --> B
     C -->|yes| E["issue the HTTPS request"]
-    E --> F{"Outcome"}
-    F -->|"2xx"| G["return the response"]
-    F -->|"429"| H["read Retry-After, or use the backoff delay"]
+    E --> F{"Outcome, as classified<br/>by the caller"}
+    F -->|"OK"| G["return the result"]
+    F -->|"THROTTLED"| H["Retry-After if present;<br/>else wait to the next minute boundary"]
     H --> I["sleep, and do NOT count an attempt"]
     I --> J{"Throttle wait budget exceeded?"}
     J -->|no| B
     J -->|yes| K["raise ProviderUnavailable:<br/>persistently throttled"]
-    F -->|"timeout or 5xx"| L["count one attempt"]
+    F -->|"RETRYABLE"| L["count one attempt"]
     L --> M{"Attempts below the limit?"}
     M -->|yes| N["sleep initial delay times 2 to the power<br/>of attempts, with jitter"] --> B
     M -->|no| O["raise ProviderUnavailable:<br/>attempts exhausted"]
-    F -->|"4xx other than 429"| P["return to the client;<br/>not the governor's concern"]
+    F -->|"FATAL"| P["re-raise to the client;<br/>not the governor's concern"]
 ```
 
 ### 2.3 Interface
 
 ```python
 # src/factorflow/ingestion/rate_limit.py
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
+from enum import StrEnum
+from typing import TypeVar
 
-import httpx
+T = TypeVar("T")
+
+
+class Outcome(StrEnum):
+    """How the caller classified one attempt. The governor never inspects a
+    provider response itself."""
+    OK = "ok"
+    THROTTLED = "throttled"        # never an attempt (5.13)
+    RETRYABLE = "retryable"        # transport failure or 5xx; costs an attempt
+    FATAL = "fatal"                # do not retry; return to the caller
 
 
 @dataclass(frozen=True)
@@ -130,10 +143,16 @@ class GovernorSettings:
 class RateLimitGovernor:
     """Paces provider requests and classifies retryable failures."""
 
-    async def execute(
-        self, send: Callable[[], Awaitable[httpx.Response]]
-    ) -> httpx.Response:
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+    ) -> T:
         """Run one request under the budget, retrying per section 2.2.
+
+        `send` performs one attempt. `classify` maps an exception raised by it
+        onto an Outcome; the governor decides what to do with that Outcome and
+        never examines the exception itself.
 
         Raises ProviderUnavailable when attempts are exhausted or the request
         is throttled beyond the throttle wait budget.
@@ -143,6 +162,20 @@ class RateLimitGovernor:
 The governor takes a callable rather than a URL, so it knows nothing about
 Massive. That keeps the provider's shapes inside `massive-client` and makes the
 governor testable without any HTTP at all.
+
+**It also no longer sees a response object.** The provider SDK raises
+`BadResponse` on every non-200 and discards the status code
+(`component-design-massive-client.md` section 2.4), so there is no status for
+the governor to switch on. Classification therefore moves to the caller, which
+is the only component that can reconstruct the distinction from the error body,
+and the governor consumes the `Outcome` it returns. This keeps the two
+responsibilities where the knowledge is: `massive-client` knows what a provider
+error means, and the governor knows what to do about it.
+
+`execute` is synchronous because the SDK's REST client is. The async form was
+written for `httpx` and is not needed by a runner that drives instruments
+sequentially; C7's async requirement lands on the M3 live feed, which the SDK
+serves through a separate WebSocket client.
 
 ### 2.4 The token bucket
 
@@ -161,13 +194,32 @@ throttling the governor exists to avoid.
 
 The rule stated once, because it is the component's whole point:
 
-| Provider response | Attempt counter | Wait | Then |
-|-------------------|-----------------|------|------|
-| `429` with `Retry-After` | unchanged | the provider's stated delay | retry |
-| `429` without `Retry-After` | unchanged | the backoff delay for the current retry index | retry |
-| timeout | plus one | initial delay times two to the power of attempts, with jitter | retry while attempts remain |
-| `5xx` | plus one | as above | retry while attempts remain |
-| `2xx`, or a `4xx` other than `429` | unchanged | none | return to the client |
+| Outcome (classified by the caller) | Attempt counter | Wait | Then |
+|------------------------------------|-----------------|------|------|
+| `THROTTLED`, provider stated a delay | unchanged | the provider's stated delay | retry |
+| `THROTTLED`, no stated delay — **the Massive case** | unchanged | to the next minute boundary, with jitter | retry |
+| `RETRYABLE` (timeout or 5xx) | plus one | initial delay times two to the power of attempts, with jitter | retry while attempts remain |
+| `OK` | unchanged | none | return the result |
+| `FATAL` (404, 401, anything not retryable) | unchanged | none | re-raise to the caller |
+
+**Massive sends no `Retry-After`.** Verified against the live provider on
+2026-09-05 and recorded in `component-design-massive-client.md` section 2.6b: a
+429 carries only `Content-Type` and `X-Request-Id`, and no `X-RateLimit-*`
+header appears on success responses either. The first row is therefore dead
+code against the only provider this capability has, retained because the
+governor is provider-agnostic and a future provider may populate it.
+
+The second row is the live path, and its wait is **not** the exponential backoff
+delay. Massive's limit is a fixed *requests per minute* window, so the quota
+refills at the next minute boundary regardless of how long the client waits;
+exponential backoff would either wait far past the refill, idling the run, or
+retry before it and consume a second 429. Waiting to the boundary matches the
+limit's actual shape. Jitter still applies, because several retries queued
+behind the same boundary would otherwise resynchronise onto it.
+
+This distinction only matters because throttling is not an attempt: a wait that
+is too short burns no attempt budget but does burn the throttle wait budget
+below, which is what would eventually fail the instrument.
 
 A throttle wait budget bounds the first two rows, so a provider that returns
 `429` indefinitely, which is what an exhausted monthly quota looks like, fails
@@ -193,13 +245,17 @@ N/A, not applicable for this component.
   overridable by configuration.
 - **Retries are bounded** (OPS-LOOP-001). Both the attempt counter and the
   throttle wait budget have ceilings, so no path retries indefinitely.
-- **The governor is provider-agnostic.** It takes a callable and inspects only
-  the HTTP status and `Retry-After`.
-- **Assumption: the provider's limit is expressible as requests per minute.**
-  The tech stack's provider evaluation records the free tier as five calls per
-  minute, so a per-minute budget matches how the provider states its limits. A
-  provider expressing limits per day as well would need a second bucket, which
-  section 14 records.
+- **The governor is provider-agnostic.** It takes a callable and an `Outcome`
+  from the caller, and inspects no provider type at all. Massive supplies no
+  `Retry-After`, verified
+  2026-09-05, so the boundary wait is the live path and the header path is
+  retained for a future provider.
+- **The provider's limit is expressible as requests per minute.** No longer an
+  assumption: a probe on 2026-09-05 tripped the limit on the sixth rapid request
+  and the 429 body names "maximum requests per minute" explicitly, consistent
+  with the tech stack's record of five calls per minute on the free tier. This is
+  what makes the minute boundary the correct wait. A provider expressing limits
+  per day as well would need a second bucket, which section 14 records.
 - **Assumption: one process consumes the budget.** With one ingestion container
   and one active run, a process-local bucket is the whole budget. A second
   ingestion process would exceed it, because nothing coordinates buckets across
@@ -223,7 +279,8 @@ N/A, not applicable for this component.
   nothing.
 - **Privacy impact: none.**
 - **Crypto usage: none.**
-- **OSS inventory:** `httpx` types only, for the response and status; no
+- **OSS inventory:** no provider or transport types at all; the governor's
+  signature is generic and its classification comes from the caller. No
   additional dependency.
 
 ## 5. Scalability and Performance
@@ -271,13 +328,15 @@ and backoff without sleeping in real time and without any network.
 | Requests are paced to the budget | `tests/unit/test_governor_pacing.py` | Ten requests at a budget of five per minute span at least the expected virtual time (5.14) |
 | A burst does not exceed capacity | `tests/unit/test_governor_pacing.py` | No more than `requests_per_minute` requests issue in any one virtual minute |
 | 429 does not consume an attempt | `tests/unit/test_governor_retry.py` | Five consecutive 429 responses then a 200 succeeds with the attempt counter at zero (5.13) |
-| Retry-After is honoured | `tests/unit/test_governor_retry.py` | The wait matches the header rather than the backoff schedule |
-| 429 without Retry-After falls back | `tests/unit/test_governor_retry.py` | The backoff delay is used |
+| Retry-After is honoured when present | `tests/unit/test_governor_retry.py` | The wait matches the header rather than the boundary. Provider-agnostic path; Massive never exercises it |
+| 429 without Retry-After waits to the boundary | `tests/unit/test_governor_retry.py` | The wait reaches the next minute boundary, not the exponential backoff delay. This is the Massive path (section 2.5) |
+| Boundary waits are jittered | `tests/unit/test_governor_retry.py` | Two callers throttled in the same window do not resume at the identical instant |
 | Throttle wait is bounded | `tests/unit/test_governor_retry.py` | Endless 429 responses raise once the throttle budget is exceeded rather than waiting forever (OPS-LOOP-001) |
 | Timeouts consume attempts | `tests/unit/test_governor_retry.py` | Three timeouts raise `ProviderUnavailable` and the fourth request is never issued (5.13) |
 | 5xx consumes attempts | `tests/unit/test_governor_retry.py` | Same bound as timeouts |
 | Backoff grows exponentially with jitter | `tests/unit/test_governor_backoff.py` | Delays grow as a power of two and vary within the jitter range |
-| 4xx other than 429 returns | `tests/unit/test_governor_retry.py` | A 404 is returned to the client unretried, so `massive-client` can classify it as `InstrumentNotFound` (AC-11) |
+| FATAL is re-raised unretried | `tests/unit/test_governor_retry.py` | An outcome the caller classified FATAL is re-raised without retry or delay, so `massive-client` can map it to `InstrumentNotFound` or `CredentialRejected` (AC-11) |
+| The governor never inspects the exception | `tests/unit/test_governor_retry.py` | Given a classifier returning fixed outcomes, behaviour is identical for unrelated exception types, proving no provider knowledge leaked in |
 | No log record carries a URL | `tests/unit/test_governor_logging.py` | Retry logs name status, attempt and delay only (AC-13) |
 | The lock is not held across a sleep | `tests/unit/test_governor_concurrency.py` | Two concurrent callers interleave rather than serialising on the whole request (SA-CONC-001) |
 
@@ -289,7 +348,8 @@ All tests here run without a container and without a network, so they carry no
 1. Requests issue at no more than the configured budget over any one-minute
    window.
 2. A `429` response is retried without incrementing the attempt counter.
-3. A `429` carrying `Retry-After` waits the provider's stated delay.
+3. A `429` carrying `Retry-After` waits the provider's stated delay, and a `429`
+   without one waits to the next minute boundary rather than the backoff delay.
 4. Persistent throttling raises a typed failure once the throttle wait budget is
    exceeded rather than waiting indefinitely.
 5. A timeout or `5xx` increments the attempt counter and is retried with an
@@ -347,7 +407,7 @@ This component exposes no HTTP surface.
 | Capability | CAP-001 v6 | AC-4 volume, AC-11 unrecognised instrument, open question on run duration | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Constraints 5.13 and 5.14; control flow steps 22 to 28 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Component design | Massive Client | The caller, its error taxonomy, and header authentication | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-massive-client.md` |
-| Constitution | Tech Stack v2 | Provider plan limits, `httpx` | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | Provider plan limits; official `massive` client adopted 2026-09-05 | `docs/constitution/tech-stack.md` |
 | Constitution | Operational Safety v1.3 | OPS-LOOP-001 repetitive action bounds, OPS-ERR-001 | `docs/constitutions/operational-safety.constitution.md` |
 
 ## 13. Traceability
@@ -362,19 +422,20 @@ This component exposes no HTTP surface.
 
 ## 14. Open Questions
 
-1. **What initial backoff delay, throttle wait budget and request timeout?**
-   The system design requires exponential backoff and a throttle wait without
-   stating any value. `[REQUIRES INPUT: what initial backoff delay, what maximum
-   total throttle wait per request, and what per-request timeout?]` The throttle
-   wait budget is the consequential one, because it decides whether an exhausted
-   monthly quota fails a run in minutes or in hours. *Owner: capability owner.
-   Blocks: `GovernorSettings` defaults.*
-2. **Does Massive express a limit per day or per month as well as per minute?**
-   The tech stack records a per-minute cap for the free tier and does not
-   describe the paid tiers' shape. A daily cap would need a second bucket, since
-   pacing to a per-minute rate says nothing about a daily total. *Owner:
-   capability owner, from provider documentation. Blocks: whether one bucket is
-   sufficient.*
+1. ~~What initial backoff delay, throttle wait budget and request timeout?~~
+   **Resolved 2026-09-05 by owner decision:** initial backoff 2s, throttle wait
+   budget 300s, request timeout 30s. The canonical set and its derivation are in
+   `component-design-runtime-config.md` section 2.2a, which this component reads
+   rather than defining its own. The throttle budget was the consequential one,
+   and the plan decision changed its meaning: on an unlimited tier a sustained
+   429 signals a real problem rather than normal pacing, so five minutes surfaces
+   it instead of absorbing it.
+2. ~~Does Massive express a limit per day or per month as well as per minute?~~
+   **Resolved 2026-09-05.** The verified pricing tiers state a per-minute call
+   limit on Basic and **unlimited** on Starter and above, with no daily or
+   monthly cap published at any tier. One bucket is sufficient. The owner's plan
+   is Starter, so the bucket paces to a configured budget rather than to a
+   provider ceiling — see the tech stack's provider evaluation.
 3. **Should the configured budget be visible in the interface?** Carried from
    the UX design's still-open questions. Run duration follows from the budget
    and the owner has no other way to anticipate it, but no endpoint exposes it
