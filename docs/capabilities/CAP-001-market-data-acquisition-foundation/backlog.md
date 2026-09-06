@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
 artifact_version: 1
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
@@ -24,6 +24,12 @@ ai_provenance:
       version: "approved"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-06T04:04:41Z
+  reviewed_revision: sha256:020071550dddd716949ded7fcec63caa2e819c31e5e9c259a424cb6e6f9767a7
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v2.md"
 ---
 
 # Backlog: Market Data Acquisition Foundation
