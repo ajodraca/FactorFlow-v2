@@ -55,10 +55,10 @@ This story delivers migration `0001_extensions_owner_state.sql` (the `btree_gist
 
 **Purpose**: Bootstrap the Python project structure this and every later story builds on — there is no existing `pyproject.toml`, `src/` layout, or test configuration in the repository.
 
-- [ ] T001 Create `pyproject.toml` at repo root defining the `src/` layout (setuptools backend), the `factorflow` package under `src/factorflow/`, and dependencies `psycopg[binary]>=3`, with dev dependencies `pytest`, `testcontainers[postgres]`, `ruff`, `mypy`
-- [ ] T002 [P] Create `src/factorflow/__init__.py` and `src/factorflow/db/__init__.py` as empty package markers
-- [ ] T003 [P] Create `pytest.ini` or `[tool.pytest.ini_options]` in `pyproject.toml` registering the `postgres` marker (so `uv run pytest -m 'not postgres'` works from the first commit) and setting `testpaths = ["tests"]`
-- [ ] T004 [P] Create `tests/__init__.py`, `tests/unit/__init__.py`, `tests/integration/__init__.py`, and `tests/conftest.py` with a session-scoped `testcontainers` PostgreSQL 16 fixture (marked `postgres`) that yields a `psycopg` connection string, per the tech stack's `testcontainers[postgres]` choice
+- [x] T001 Create `pyproject.toml` at repo root defining the `src/` layout (setuptools backend), the `factorflow` package under `src/factorflow/`, and dependencies `psycopg[binary]>=3`, with dev dependencies `pytest`, `testcontainers[postgres]`, `ruff`, `mypy`
+- [x] T002 [P] Create `src/factorflow/__init__.py` and `src/factorflow/db/__init__.py` as empty package markers
+- [x] T003 [P] Create `pytest.ini` or `[tool.pytest.ini_options]` in `pyproject.toml` registering the `postgres` marker (so `uv run pytest -m 'not postgres'` works from the first commit) and setting `testpaths = ["tests"]`
+- [x] T004 [P] Create `tests/__init__.py`, `tests/unit/__init__.py`, `tests/integration/__init__.py`, and `tests/conftest.py` with a session-scoped `testcontainers` PostgreSQL 16 fixture (marked `postgres`) that yields a `psycopg` connection string, per the tech stack's `testcontainers[postgres]` choice
 
 **Checkpoint**: `uv sync --all-extras` succeeds; `uv run pytest -m 'not postgres'` runs (collects zero tests, exits 0); `uv run ruff check .` and `uv run mypy src` run cleanly against the empty package.
 
@@ -70,16 +70,16 @@ This story delivers migration `0001_extensions_owner_state.sql` (the `btree_gist
 
 ### Mandatory Component Tests
 
-- [ ] T005 [P] Implement TC-COMP-293 and TC-COMP-313 (`applied_migrations` is created before the first migration file runs; its row carries `version` PK, `name`, `checksum`, `applied_at`) in `tests/integration/test_applied_migrations_table.py` — assert the constant DDL from `src/factorflow/db/applied_migrations.py` (T011) creates the table with exactly those four columns and `version` as primary key, and that it can be created before any migration file is applied
-- [ ] T006 [P] Implement TC-COMP-309 (applying `0001` creates the `btree_gist` extension) in `tests/integration/test_migration_0001.py` — apply `migrations/0001_extensions_owner_state.sql` to an empty database and assert `btree_gist` appears in `pg_extension`
-- [ ] T007 [P] Implement TC-COMP-310 and TC-COMP-311 (symbol shape/case check constraints; lifecycle and `retired_at` agreement) in `tests/integration/test_instrument_constraints.py` — one test per rejected case: lowercase symbol, symbol over 16 characters, unknown lifecycle value, `retired` without `retired_at`, `active` with `retired_at` (per the story's own Testing section)
-- [ ] T008 [P] Implement TC-COMP-312 (`owner_setting.setting_value` is `jsonb` keyed by `setting_key`) in `tests/integration/test_owner_setting.py` — assert the column type is `jsonb`, `setting_key` is the primary key, and a row with an arbitrary JSON-shaped value round-trips
-- [ ] T009 [P] Implement TC-COMP-314 (applying `0001` twice records one row and re-runs no statement) in `tests/integration/test_migration_idempotence.py` — apply `0001`, record it in `applied_migrations`, attempt the same version again guarded by a `SELECT ... WHERE version = 1`, and assert exactly one row exists and the second attempt executes no DDL
+- [x] T005 [P] Implement TC-COMP-293 and TC-COMP-313 (`applied_migrations` is created before the first migration file runs; its row carries `version` PK, `name`, `checksum`, `applied_at`) in `tests/integration/test_applied_migrations_table.py` — assert the constant DDL from `src/factorflow/db/applied_migrations.py` (T011) creates the table with exactly those four columns and `version` as primary key, and that it can be created before any migration file is applied
+- [x] T006 [P] Implement TC-COMP-309 (applying `0001` creates the `btree_gist` extension) in `tests/integration/test_migration_0001.py` — apply `migrations/0001_extensions_owner_state.sql` to an empty database and assert `btree_gist` appears in `pg_extension`
+- [x] T007 [P] Implement TC-COMP-310 and TC-COMP-311 (symbol shape/case check constraints; lifecycle and `retired_at` agreement) in `tests/integration/test_instrument_constraints.py` — one test per rejected case: lowercase symbol, symbol over 16 characters, unknown lifecycle value, `retired` without `retired_at`, `active` with `retired_at` (per the story's own Testing section)
+- [x] T008 [P] Implement TC-COMP-312 (`owner_setting.setting_value` is `jsonb` keyed by `setting_key`) in `tests/integration/test_owner_setting.py` — assert the column type is `jsonb`, `setting_key` is the primary key, and a row with an arbitrary JSON-shaped value round-trips
+- [x] T009 [P] Implement TC-COMP-314 (applying `0001` twice records one row and re-runs no statement) in `tests/integration/test_migration_idempotence.py` — apply `0001`, record it in `applied_migrations`, attempt the same version again guarded by a `SELECT ... WHERE version = 1`, and assert exactly one row exists and the second attempt executes no DDL
 
 ### Additional Unit Tests
 
-- [ ] T010 [P] Write a unit test asserting `migrations/0001_extensions_owner_state.sql` matches byte-for-byte the SQL text embedded in `component-design-market-data-store.md` section 2.3, in `tests/unit/test_migration_0001_matches_design.py` — catches silent drift between the design doc and the shipped file, since the design explicitly says the migrator must never see an edited already-applied file
-- [ ] T011 [P] Write a unit test asserting the `applied_migrations` DDL constant in `src/factorflow/db/applied_migrations.py` matches the SQL text reproduced in `component-design-market-data-store.md` section 2.2, in `tests/unit/test_applied_migrations_ddl_matches_design.py`
+- [x] T010 [P] Write a unit test asserting `migrations/0001_extensions_owner_state.sql` matches byte-for-byte the SQL text embedded in `component-design-market-data-store.md` section 2.3, in `tests/unit/test_migration_0001_matches_design.py` — catches silent drift between the design doc and the shipped file, since the design explicitly says the migrator must never see an edited already-applied file
+- [x] T011 [P] Write a unit test asserting the `applied_migrations` DDL constant in `src/factorflow/db/applied_migrations.py` matches the SQL text reproduced in `component-design-market-data-store.md` section 2.2, in `tests/unit/test_applied_migrations_ddl_matches_design.py`
 
 **Checkpoint**: All tests above written and failing — `migrations/0001_extensions_owner_state.sql` and `src/factorflow/db/applied_migrations.py` do not yet exist. `uv run pytest -m postgres` fails with collection or assertion errors; `uv run pytest -m 'not postgres'` fails on T010/T011.
 
@@ -89,9 +89,9 @@ This story delivers migration `0001_extensions_owner_state.sql` (the `btree_gist
 
 **Purpose**: Add the migration file and the `applied_migrations` definition the tests require.
 
-- [ ] T012 Create `migrations/0001_extensions_owner_state.sql` at the repo root with the `btree_gist` extension, `instrument` table (with all four check constraints, `idx_instrument_symbol` unique index, `idx_instrument_active` partial index), and `owner_setting` table, exactly as specified in `component-design-market-data-store.md` section 2.3
-- [ ] T013 (covered by T012 — no separate file; `instrument` and `owner_setting` are both defined in `migrations/0001_extensions_owner_state.sql`)
-- [ ] T011-impl Create `src/factorflow/db/applied_migrations.py` exporting a module-level constant `APPLIED_MIGRATIONS_DDL` holding the `CREATE TABLE IF NOT EXISTS applied_migrations (...)` statement from `component-design-market-data-store.md` section 2.2, verbatim, for CAP-001-E1-S2's migrator to import and execute before running migration files
+- [x] T012 Create `migrations/0001_extensions_owner_state.sql` at the repo root with the `btree_gist` extension, `instrument` table (with all four check constraints, `idx_instrument_symbol` unique index, `idx_instrument_active` partial index), and `owner_setting` table, exactly as specified in `component-design-market-data-store.md` section 2.3
+- [x] T013 (covered by T012 — no separate file; `instrument` and `owner_setting` are both defined in `migrations/0001_extensions_owner_state.sql`)
+- [x] T011-impl Create `src/factorflow/db/applied_migrations.py` exporting a module-level constant `APPLIED_MIGRATIONS_DDL` holding the `CREATE TABLE IF NOT EXISTS applied_migrations (...)` statement from `component-design-market-data-store.md` section 2.2, verbatim, for CAP-001-E1-S2's migrator to import and execute before running migration files
 
 **Checkpoint**: `migrations/0001_extensions_owner_state.sql` exists and is syntactically valid SQL; `src/factorflow/db/applied_migrations.py` exports the DDL constant; T010 and T011 unit tests pass.
 
@@ -101,7 +101,7 @@ This story delivers migration `0001_extensions_owner_state.sql` (the `btree_gist
 
 **Purpose**: Prove the migration file and the `applied_migrations` definition work together against a real PostgreSQL 16 instance, closing out the mandatory component tests.
 
-- [ ] T014 Run the full `tests/integration/` suite from Phase 2 against the `testcontainers[postgres]` fixture (T004) with `migrations/0001_extensions_owner_state.sql` and `applied_migrations.py` now present, and fix any constraint or type mismatch surfaced by TC-COMP-293, TC-COMP-309 through TC-COMP-314
+- [x] T014 Run the full `tests/integration/` suite from Phase 2 against the `testcontainers[postgres]` fixture (T004) with `migrations/0001_extensions_owner_state.sql` and `applied_migrations.py` now present, and fix any constraint or type mismatch surfaced by TC-COMP-293, TC-COMP-309 through TC-COMP-314 (fixed a test-isolation bug in the fixture itself: each test now gets its own freshly created database inside the shared session container, rather than all tests sharing one database's tables)
 
 **Checkpoint**: `uv run pytest -m postgres` passes in full. All eight mandatory TC-IDs (TC-COMP-292, 293, 309–314) are green. TC-COMP-292 (single-database state) is satisfied structurally — no task creates a second store — and is asserted by confirming every table in this story lives in the one PostgreSQL schema the fixture provisions.
 
@@ -111,8 +111,8 @@ This story delivers migration `0001_extensions_owner_state.sql` (the `btree_gist
 
 **Purpose**: Close the two intentional design gaps this story leaves for later stories, and confirm the full validation suite is green.
 
-- [ ] T015 Add a short `migrations/README.md` noting the forward-only, one-file-per-migration convention (numbered, ascending, never edited once applied) so `0002`–`0004` in later E1 stories follow the same shape without re-deriving it from the design doc
-- [ ] T016 Run the complete validation plan (below) and confirm every command passes with nothing excluded except the documented `postgres`-marker exclusion rule
+- [x] T015 Add a short `migrations/README.md` noting the forward-only, one-file-per-migration convention (numbered, ascending, never edited once applied) so `0002`–`0004` in later E1 stories follow the same shape without re-deriving it from the design doc
+- [x] T016 Run the complete validation plan (below) and confirm every command passes with nothing excluded except the documented `postgres`-marker exclusion rule (also scoped `ruff`'s `extend-exclude` to skip `docs/` and `design-system/`, since ruff's markdown support would otherwise reformat Python code fences embedded in approved design documents — out of this story's scope to edit)
 
 **Checkpoint**: All acceptance criteria this story owns are satisfied; `uv run ruff format --check .`, `uv run ruff check .`, `uv run mypy src`, and `uv run pytest -m postgres` all pass.
 
