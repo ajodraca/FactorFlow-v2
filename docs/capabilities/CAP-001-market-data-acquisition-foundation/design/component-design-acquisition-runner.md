@@ -3,11 +3,11 @@ artifact_schema_version: 1
 artifact_id: CAP-001-component-design-acquisition-runner
 artifact_type: component-design
 artifact_version: 7
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-05
+updated: 2026-09-06
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
@@ -17,15 +17,21 @@ ai_provenance:
   timestamp: 2026-09-05T05:20:00Z
   source_artifacts:
     - id: CAP-001
-      version: "6"
+      version: "8"
     - id: CAP-001-system-design
-      version: "3"
+      version: "6"
     - id: CAP-001-ux-design
-      version: "4"
+      version: "5"
     - id: tech-stack
       version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-06T01:59:59Z
+  reviewed_revision: sha256:87a130bc8f229715adf20082b54654f479f3438ff339d06ad5564dd6532059a6
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
 # Component: Acquisition Runner

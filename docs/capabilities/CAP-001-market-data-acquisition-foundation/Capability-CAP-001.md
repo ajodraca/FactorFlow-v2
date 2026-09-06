@@ -11,10 +11,10 @@ description: >-
   the owner-operator a way to see what was ingested and to tell when ingestion
   is failing.
 created: 2026-09-03
-updated: 2026-09-05
+updated: 2026-09-06
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: capability-definition-agent
   agent_version: "1.0"
@@ -31,6 +31,12 @@ ai_provenance:
       version: "4"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-06T01:59:33Z
+  reviewed_revision: sha256:2da86c13c7da83c486e4cb5df4ab0596a5fd75669326c0cfed21c5719bf82397
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
 # Market Data Acquisition Foundation

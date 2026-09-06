@@ -7,10 +7,10 @@ capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
 created: 2026-09-03
-updated: 2026-09-05
+updated: 2026-09-06
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.0"
@@ -20,13 +20,19 @@ ai_provenance:
   timestamp: 2026-09-05T05:20:00Z
   source_artifacts:
     - id: CAP-001
-      version: "7, lifecycle edge cases AC-24 to AC-26 added 2026-09-05"
+      version: "8"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
-      version: "2, approved 2026-09-04 (OQ-TS-6 closed)"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-06T01:59:38Z
+  reviewed_revision: sha256:62a3a399a3315ccd3ee1a2d40d9b277ae7a3c5dc6baf9bad3eeca67399cdf688
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
 # System Design: Market Data Acquisition Foundation
@@ -311,10 +317,10 @@ not be read as a competing source.
 | `DELETE /api/instruments/{symbol}` | `ingestion-api` | `owner-web-app` | Request: path `symbol`. Response: `lifecycle: retired`, `retired_at`. Full schema: ingestion-api §11 | none, loopback only | `200`; `404` unknown; `409` already retired | stable within this capability |
 | `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: `{"years": <positive integer>}`. Response: `years`, `updated_at`. Full schema: ingestion-api §11 | none, loopback only | `200`; `422` not a positive integer | stable within this capability |
 | `GET /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: none. Response: `years` or `null` when never set — the Settings screen reads it, and null is distinct from zero (AC-2). Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
-| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: empty body. Response: `run_id`, `state: requested`, `queued_behind` (the active run's id when one exists, else `null`, per AC-23 — the endpoint never rejects for an active run). Full schema: ingestion-api §11 | none, loopback only | `202`; `409` `history_depth_not_set` | stable within this capability |
+| `POST /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: empty body. Response: `run_id`, `state: requested`, `queued_behind` (the active run's id when one exists, else `null`, per AC-23 — the endpoint never rejects for an active run). Full schema: ingestion-api §11 | none, loopback only | `202`; `409` `history_depth_not_set`; `409` `no_active_instruments` (AC-24) | stable within this capability |
 | `GET /api/acquisition-runs` | `ingestion-api` | `owner-web-app` | Request: `state` filter, `limit`, `cursor`. Response: runs reverse-chronological, `next_cursor`. Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
 | `GET /api/acquisition-runs/{id}` | `ingestion-api` | `owner-web-app` | Request: path `id`, `outcome` filter, `limit`, `cursor`. Response: the run, counts, per-instrument per-data-type results. Full schema: ingestion-api §11 | none, loopback only | `200`; `404` unknown | stable within this capability |
-| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | Request: path `id`. Response: `state: cancelling`, or the run's actual terminal state on conflict. Full schema: ingestion-api §11 | none, loopback only | `202`; `409` `run_already_terminal` with actual state; `404` unknown | stable within this capability |
+| `POST /api/acquisition-runs/{id}/cancel` | `ingestion-api` | `owner-web-app` | Request: path `id`. Response: `state: cancelling` when the run was running, or `state: cancelled` when it was still queued (AC-26); the run's actual terminal state on conflict. Full schema: ingestion-api §11 | none, loopback only | `202`; `409` `run_already_terminal` with actual state; `404` unknown | stable within this capability |
 | `GET /api/coverage` | `ingestion-api` | `owner-web-app` | Request: `symbol` filter, `lifecycle`, `from`, `to`, `limit`, `cursor`. Response: per-instrument data-type presence, covered ranges, last acquired, gap counts, `never_acquired`, `gap_detection` availability with a reason. Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
 | `GET /api/health` | `ingestion-api` | `owner-web-app` | Request: none. Response: `status`, `database`, `credential_present` (boolean, never the value — AC-13), `schema_version`, `most_recent_run` (AC-18). Full schema: ingestion-api §11 | none, loopback only | `200` | stable within this capability |
 | Run request claim | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | n/a — in-process | n/a | stable within this capability |
