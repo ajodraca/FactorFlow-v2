@@ -37,7 +37,7 @@ ai_provenance:
 
 | EPIC ID | Jira Key | Title | Estimate | Stories | Total Points |
 |---------|----------|-------|----------|---------|-------------|
-| [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation and Schema | L | | |
+| [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation, Schema and Application Shell | L | | |
 | [CAP-001-E2](epics/instrument-list-and-history-depth/CAP-001-E2.md) | N/A | Instrument List and History Depth | M | | |
 | [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | | |
 | [CAP-001-E4](epics/point-in-time-acquisition/CAP-001-E4.md) | N/A | Point-in-Time Acquisition and Re-run Safety | XL | | |
@@ -62,12 +62,18 @@ E1 ──┬── E2 ──┬── E4 ──┬── E6
      └── E5 ───────────┴── E7
 ```
 
-- **E1** first and alone. Nothing else can start without the schema, migrations and runtime configuration.
+E1 also delivers the application shell and status region that every screen
+renders inside, so E2, E5, E6 and E7 each depend on E1 for their frame as well
+as for the schema. That is why the shell sits in E1 rather than in E7: three
+screen-delivering EPICs would otherwise be scheduled ahead of the frame they
+need, or each would invent its own.
+
+- **E1** first and alone. Nothing else can start without the schema, migrations, runtime configuration and the application shell.
 - **E2 and E3** are parallelizable once E1 lands, and share no components.
 - **E4** needs E2's instrument list and stated depth, and E3's provider client. It is the largest EPIC and carries the three commitments the system design names unrecoverable if wrong.
 - **E5** needs only E1 and E2, so it can run alongside E3 and E4. E4 consumes its claim contract, which the component design fixes, so the two can be developed against that contract in parallel.
 - **E6** needs E4's written coverage segments to read, though its read contract is fixed and can be built against in parallel.
-- **E7** needs E5's run records. Its application shell is consumed by E2, E5 and E6, so it is worth building early despite its position here.
+- **E7** needs E5's run records. It supplies the most recent run's outcome to the status region E1 delivers, and owns the error envelope every screen renders, so its error contract is worth settling early even though its run detail screen comes last.
 
 ## Full Traceability
 
@@ -76,33 +82,38 @@ appearing in more than one EPIC are genuinely shared: AC-13 is loaded in E1 and
 enforced on the provider path in E3, AC-11 is produced in E3, classified in E4
 and presented in E7, and so on.
 
+An EPIC marked **(derived)** contributes to that criterion through one of its
+derived criteria rather than by restating the capability criterion in its own
+"From Capability" section. Both are real coverage; the distinction is recorded
+so a reader reconciling this table against an EPIC file finds what they expect.
+
 | Capability AC | System Design Element | Component Design Element | EPIC | Story |
 |--------------|----------------------|--------------------------|------|-------|
 | AC-1 Named instrument list | 4.1, 4.2 | instrument-list-service, ingestion-api, owner-web-app | E2 | |
-| AC-2 History depth stated, not assumed | 4.2, 3 | instrument-list-service, ingestion-api | E2, E4, E5 | |
+| AC-2 History depth stated, not assumed | 4.2, 3 | instrument-list-service, ingestion-api | E2; E4, E5 (derived) | |
 | AC-3 Data types acquired | 4.1, 4.2 | massive-client, acquisition-runner, observation-writer | E3, E4 | |
-| AC-4 Acquisition volume, 3000 instruments | 3, 5.13, 5.14 | rate-limit-governor, acquisition-runner | E3, E4 | |
+| AC-4 Acquisition volume, 3000 instruments | 3, 5.13, 5.14 | rate-limit-governor, acquisition-runner | E4; E3 (derived) | |
 | AC-5 Point-in-time record | 3, 5.3, 5.4 | observation-writer, massive-client | E3, E4 | |
 | AC-6 Re-run safety | 3 step 16, 4.2 | observation-writer, acquisition-runner | E4 | |
 | AC-7 Coverage visibility | 4.1, 4.2 | coverage-service, ingestion-api, owner-web-app | E6 | |
 | AC-8 Gap visibility | 4.1, 5.5 | coverage-service | E6 | |
 | AC-9 Honest run outcome | 3 steps 26-27 | run-journal | E5 | |
 | AC-10 Failure diagnosis | 3 step 21, 4.2 | run-journal, ingestion-api, owner-web-app | E7 | |
-| AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E4, E7 | |
+| AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E7; E4 (derived) | |
 | AC-12 A failed run leaves no false history | 3 step 17, 5.9 | observation-writer, coverage-service | E4, E6 | |
-| AC-13 Credential handling | 3 steps 37-39, 5.12 | runtime-config, massive-client, schema-migrator | E1, E3, E7 | |
-| AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1, E7 | |
+| AC-13 Credential handling | 3 steps 37-39, 5.12 | runtime-config, massive-client, schema-migrator | E1, E3; E7 (derived) | |
+| AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | |
 | AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1 | |
-| AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1, E7 | |
-| AC-17 Honest empty state | 4.2 | coverage-service, owner-web-app | E6 | |
-| AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app | E7 | |
+| AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1; E7 (derived) | |
+| AC-17 Honest empty state | 4.2 | coverage-service, owner-web-app | E6; E1 (derived) | |
+| AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app | E1, E7 | |
 | AC-19 Cancel a run in progress | 3 steps 44-47, 4.2 | run-journal, acquisition-runner, ingestion-api | E5 | |
 | AC-20 An interrupted run does not block the next | 3 steps 48-51, 5.7 | run-journal reclaim sweep | E5 | |
 | AC-21 Removal retains history | 4.1, 4.2, 5.8 | instrument-list-service, coverage-service | E2, E6 | |
 | AC-22 Deepening backfills history | 3, 5.3, 5.9 | acquisition-runner, coverage-service | E4, E6 | |
 | AC-23 Concurrent run requests queue | 3, 4.2, 5.17 | run-journal, ingestion-api | E5 | |
 | AC-24 A run with nothing to acquire is refused | 4.2, 5.18 | ingestion-api | E5 | |
-| AC-25 Retiring takes effect from the next run | 3, 5.19 | instrument-list-service, acquisition-runner | E2, E4 | |
+| AC-25 Retiring takes effect from the next run | 3, 5.19 | instrument-list-service, acquisition-runner | E2; E4 (derived) | |
 | AC-26 A queued run can be cancelled before it starts | 3, 4.2, 5.20 | run-journal, ingestion-api | E5 | |
 
 ## Derived Acceptance Criteria
@@ -113,14 +124,14 @@ traceability table.
 
 | EPIC | Derived ACs | Count |
 |------|-------------|-------|
-| E1 | DAC-E1-1 to DAC-E1-11 | 11 |
+| E1 | DAC-E1-1 to DAC-E1-17 | 17 |
 | E2 | DAC-E2-1 to DAC-E2-12 | 12 |
 | E3 | DAC-E3-1 to DAC-E3-14 | 14 |
 | E4 | DAC-E4-1 to DAC-E4-15 | 15 |
 | E5 | DAC-E5-1 to DAC-E5-17 | 17 |
 | E6 | DAC-E6-1 to DAC-E6-14 | 14 |
-| E7 | DAC-E7-1 to DAC-E7-16 | 16 |
-| **Total** | | **99** |
+| E7 | DAC-E7-1 to DAC-E7-12 | 12 |
+| **Total** | | **101** |
 
 ## Open Questions Carried From the Capability and Designs
 
