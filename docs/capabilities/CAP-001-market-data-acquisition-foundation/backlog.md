@@ -27,9 +27,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T04:04:41Z
-  reviewed_revision: sha256:020071550dddd716949ded7fcec63caa2e819c31e5e9c259a424cb6e6f9767a7
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v2.md"
+  approved_at: 2026-09-06T15:20:03Z
+  reviewed_revision: sha256:ed00937dd9578b7d44b90393f553efcd18f04e5ffdeba9b922b27f862df89046
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v5.md"
 ---
 
 # Backlog: Market Data Acquisition Foundation
@@ -37,19 +37,20 @@ approval:
 **Capability:** CAP-001
 **Generated:** 2026-09-06
 **Total EPICs:** 7
-**Total Stories:** to be populated by the story generation agent
+**Total Stories:** 36
+**Total Points:** 151
 
 ## EPICs
 
 | EPIC ID | Jira Key | Title | Estimate | Stories | Total Points |
 |---------|----------|-------|----------|---------|-------------|
-| [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation, Schema and Application Shell | L | | |
-| [CAP-001-E2](epics/instrument-list-and-history-depth/CAP-001-E2.md) | N/A | Instrument List and History Depth | M | | |
-| [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | | |
-| [CAP-001-E4](epics/point-in-time-acquisition/CAP-001-E4.md) | N/A | Point-in-Time Acquisition and Re-run Safety | XL | | |
-| [CAP-001-E5](epics/run-lifecycle/CAP-001-E5.md) | N/A | Run Lifecycle: Queueing, Cancellation and Recovery | L | | |
-| [CAP-001-E6](epics/coverage-and-gap-visibility/CAP-001-E6.md) | N/A | Coverage and Gap Visibility | L | | |
-| [CAP-001-E7](epics/failure-diagnosis-and-operability/CAP-001-E7.md) | N/A | Failure Diagnosis and Operational Visibility | M | | |
+| [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation, Schema and Application Shell | L | 6 | 24 |
+| [CAP-001-E2](epics/instrument-list-and-history-depth/CAP-001-E2.md) | N/A | Instrument List and History Depth | M | 4 | 16 |
+| [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | 5 | 20 |
+| [CAP-001-E4](epics/point-in-time-acquisition/CAP-001-E4.md) | N/A | Point-in-Time Acquisition and Re-run Safety | XL | 7 | 32 |
+| [CAP-001-E5](epics/run-lifecycle/CAP-001-E5.md) | N/A | Run Lifecycle: Queueing, Cancellation and Recovery | L | 6 | 28 |
+| [CAP-001-E6](epics/coverage-and-gap-visibility/CAP-001-E6.md) | N/A | Coverage and Gap Visibility | L | 4 | 18 |
+| [CAP-001-E7](epics/failure-diagnosis-and-operability/CAP-001-E7.md) | N/A | Failure Diagnosis and Operational Visibility | M | 4 | 13 |
 
 ## Sequencing
 
@@ -81,6 +82,37 @@ need, or each would invent its own.
 - **E6** needs E4's written coverage segments to read, though its read contract is fixed and can be built against in parallel.
 - **E7** needs E5's run records. It supplies the most recent run's outcome to the status region E1 delivers, and owns the error envelope every screen renders, so its error contract is worth settling early even though its run detail screen comes last.
 
+## Stories
+
+36 stories across the seven EPICs, 151 points. Every story is scoped to the
+single writable repository `FactorFlow-v2`, which `project.yaml` declares; the
+twelve component names from the system design are modules within it rather than
+separate repositories, and each story names its module in the description.
+
+| EPIC | Stories | Points | Language split |
+|------|---------|--------|----------------|
+| E1 Runnable Foundation, Schema and Application Shell | 6 | 24 | 4 Python, 2 TypeScript |
+| E2 Instrument List and History Depth | 4 | 16 | 3 Python, 1 TypeScript |
+| E3 Provider Integration and Pacing | 5 | 20 | 5 Python |
+| E4 Point-in-Time Acquisition and Re-run Safety | 7 | 32 | 7 Python |
+| E5 Run Lifecycle: Queueing, Cancellation and Recovery | 6 | 28 | 5 Python, 1 TypeScript |
+| E6 Coverage and Gap Visibility | 4 | 18 | 3 Python, 1 TypeScript |
+| E7 Failure Diagnosis and Operational Visibility | 4 | 13 | 3 Python, 1 TypeScript |
+| **Total** | **36** | **151** | 30 Python, 6 TypeScript |
+
+No story spans both languages, so none straddles the pytest and vitest boundary.
+
+### Critical path
+
+`E1-S1` schema, then `E1-S2` migrator, then `E1-S3` configuration, are the three
+stories every other story waits on. `E4-S5`, the acquisition run loop at 8
+points, is the largest single story and depends on the most: the writer, range
+planning, the provider client, pacing and the claim contract.
+
+`E1-S4` and `E1-S5`, the application shell and status region, unblock every
+screen story in E2, E5, E6 and E7, which is why the shell sits in E1.
+
+
 ## Full Traceability
 
 Every capability acceptance criterion is assigned to at least one EPIC. Criteria
@@ -95,32 +127,32 @@ so a reader reconciling this table against an EPIC file finds what they expect.
 
 | Capability AC | System Design Element | Component Design Element | EPIC | Story |
 |--------------|----------------------|--------------------------|------|-------|
-| AC-1 Named instrument list | 4.1, 4.2 | instrument-list-service, ingestion-api, owner-web-app | E2 | |
-| AC-2 History depth stated, not assumed | 4.2, 3 | instrument-list-service, ingestion-api | E2; E4, E5 (derived) | |
-| AC-3 Data types acquired | 4.1, 4.2 | massive-client, acquisition-runner, observation-writer | E3, E4 | |
-| AC-4 Acquisition volume, 3000 instruments | 3, 5.13, 5.14 | rate-limit-governor, acquisition-runner | E4; E3 (derived) | |
-| AC-5 Point-in-time record | 3, 5.3, 5.4 | observation-writer, massive-client | E3, E4 | |
-| AC-6 Re-run safety | 3 step 16, 4.2 | observation-writer, acquisition-runner | E4 | |
-| AC-7 Coverage visibility | 4.1, 4.2 | coverage-service, ingestion-api, owner-web-app | E6 | |
-| AC-8 Gap visibility | 4.1, 5.5 | coverage-service | E6 | |
-| AC-9 Honest run outcome | 3 steps 26-27 | run-journal | E5 | |
-| AC-10 Failure diagnosis | 3 step 21, 4.2 | run-journal, ingestion-api, owner-web-app | E7 | |
-| AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E7; E4 (derived) | |
-| AC-12 A failed run leaves no false history | 3 step 17, 5.9 | observation-writer, coverage-service | E4, E6 | |
-| AC-13 Credential handling | 3 steps 37-39, 5.12 | runtime-config, massive-client, schema-migrator | E1, E3; E7 (derived) | |
-| AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | |
-| AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1 | |
-| AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1; E7 (derived) | |
-| AC-17 Honest empty state | 4.2 | coverage-service, owner-web-app | E6; E1 (derived) | |
-| AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app | E1, E7 | |
-| AC-19 Cancel a run in progress | 3 steps 44-47, 4.2 | run-journal, acquisition-runner, ingestion-api | E5 | |
-| AC-20 An interrupted run does not block the next | 3 steps 48-51, 5.7 | run-journal reclaim sweep | E5 | |
-| AC-21 Removal retains history | 4.1, 4.2, 5.8 | instrument-list-service, coverage-service | E2, E6 | |
-| AC-22 Deepening backfills history | 3, 5.3, 5.9 | acquisition-runner, coverage-service | E4, E6 | |
-| AC-23 Concurrent run requests queue | 3, 4.2, 5.17 | run-journal, ingestion-api | E5 | |
-| AC-24 A run with nothing to acquire is refused | 4.2, 5.18 | ingestion-api | E5 | |
-| AC-25 Retiring takes effect from the next run | 3, 5.19 | instrument-list-service, acquisition-runner | E2; E4 (derived) | |
-| AC-26 A queued run can be cancelled before it starts | 3, 4.2, 5.20 | run-journal, ingestion-api | E5 | |
+| AC-1 Named instrument list | 4.1, 4.2 | instrument-list-service, ingestion-api, owner-web-app | E2 | E1-S1, E2-S1, E2-S3, E2-S4 |
+| AC-2 History depth stated, not assumed | 4.2, 3 | instrument-list-service, ingestion-api | E2; E4, E5 (derived) | E1-S1, E2-S2, E2-S3, E2-S4 |
+| AC-3 Data types acquired | 4.1, 4.2 | massive-client, acquisition-runner, observation-writer | E3, E4 | E3-S1, E3-S2, E4-S4, E4-S5 |
+| AC-4 Acquisition volume, 3000 instruments | 3, 5.13, 5.14 | rate-limit-governor, acquisition-runner | E4; E3 (derived) | E3-S4, E4-S5, E4-S7 |
+| AC-5 Point-in-time record | 3, 5.3, 5.4 | observation-writer, massive-client | E3, E4 | E3-S2, E4-S1, E4-S2, E4-S3 |
+| AC-6 Re-run safety | 3 step 16, 4.2 | observation-writer, acquisition-runner | E4 | E4-S1, E4-S2, E4-S3, E4-S4, E4-S6 |
+| AC-7 Coverage visibility | 4.1, 4.2 | coverage-service, ingestion-api, owner-web-app | E6 | E4-S3, E6-S1, E6-S3, E6-S4 |
+| AC-8 Gap visibility | 4.1, 5.5 | coverage-service | E6 | E6-S2, E6-S3, E6-S4 |
+| AC-9 Honest run outcome | 3 steps 26-27 | run-journal | E5 | E5-S1, E5-S3, E5-S5, E5-S6, E7-S1 |
+| AC-10 Failure diagnosis | 3 step 21, 4.2 | run-journal, ingestion-api, owner-web-app | E7 | E4-S6, E5-S5, E7-S1, E7-S2, E7-S4 |
+| AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E7; E4 (derived) | E3-S3, E3-S5, E4-S6, E7-S1, E7-S4 |
+| AC-12 A failed run leaves no false history | 3 step 17, 5.9 | observation-writer, coverage-service | E4, E6 | E4-S1, E4-S3, E6-S1 |
+| AC-13 Credential handling | 3 steps 37-39, 5.12 | runtime-config, massive-client, schema-migrator | E1, E3; E7 (derived) | E1-S2, E1-S3, E3-S1, E3-S5, E7-S2 |
+| AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | E1-S3, E1-S4, E1-S6 |
+| AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1 | E1-S1, E1-S2 |
+| AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1; E7 (derived) | E1-S2, E1-S5 |
+| AC-17 Honest empty state | 4.2 | coverage-service, owner-web-app | E6; E1 (derived) | E6-S1, E6-S3, E6-S4, E1-S5 |
+| AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app | E1, E7 | E1-S5, E1-S6, E7-S3 |
+| AC-19 Cancel a run in progress | 3 steps 44-47, 4.2 | run-journal, acquisition-runner, ingestion-api | E5 | E4-S5, E5-S3, E5-S5, E7-S4 |
+| AC-20 An interrupted run does not block the next | 3 steps 48-51, 5.7 | run-journal reclaim sweep | E5 | E4-S7, E5-S4 |
+| AC-21 Removal retains history | 4.1, 4.2, 5.8 | instrument-list-service, coverage-service | E2, E6 | E2-S1, E2-S4, E6-S1, E6-S3, E6-S4 |
+| AC-22 Deepening backfills history | 3, 5.3, 5.9 | acquisition-runner, coverage-service | E4, E6 | E4-S4, E6-S1, E6-S4 |
+| AC-23 Concurrent run requests queue | 3, 4.2, 5.17 | run-journal, ingestion-api | E5 | E5-S2, E5-S5, E5-S6 |
+| AC-24 A run with nothing to acquire is refused | 4.2, 5.18 | ingestion-api | E5 | E5-S5, E5-S6 |
+| AC-25 Retiring takes effect from the next run | 3, 5.19 | instrument-list-service, acquisition-runner | E2; E4 (derived) | E2-S4, E4-S5 (via roster-read-once) |
+| AC-26 A queued run can be cancelled before it starts | 3, 4.2, 5.20 | run-journal, ingestion-api | E5 | E5-S3, E5-S5, E5-S6, E7-S4 |
 
 ## Derived Acceptance Criteria
 
