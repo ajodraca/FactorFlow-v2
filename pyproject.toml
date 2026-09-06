@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "factorflow"
+version = "0.1.0"
+description = "FactorFlow: classify a self-defined stock universe and trade it automatically under owner-controlled strategies, proven in paper before capital is at risk."
+requires-python = ">=3.12"
+dependencies = [
+    "psycopg[binary]>=3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "testcontainers[postgres]",
+    "ruff",
+    "mypy",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "postgres: marks tests that require a running PostgreSQL container (testcontainers)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# design-system/ carries the vendored design-system tooling this repository's
+# Python package does not own; it predates this project's pyproject.toml and
+# is out of scope for factorflow's own lint rules. docs/ carries approved,
+# reviewed specification and design content, including Python code fences
+# inside markdown; ruff's markdown support would reformat those fences as
+# real source, which this project's constitution forbids editing outside the
+# specification-review process.
+extend-exclude = ["design-system", "docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
