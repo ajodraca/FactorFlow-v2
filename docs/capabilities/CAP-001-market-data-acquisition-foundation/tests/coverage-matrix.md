@@ -1,0 +1,393 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-001-coverage-matrix
+artifact_type: coverage-matrix
+artifact_version: 1
+status: draft
+owner: Alvaro de Jodra
+owner_github: ajodraca
+created: 2026-09-06
+updated: 2026-09-06
+ai_provenance:
+  agent_id: test-design-agent
+  agent_version: "1.0"
+  model: gpt-5.6
+  tool: Codex
+  tool_version: "unknown"
+  timestamp: 2026-09-06T00:00:00Z
+  source_artifacts:
+    - id: CAP-001
+      version: "8"
+    - id: CAP-001-system-design
+      version: "6"
+  invoking_user: ajodraca
+  correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+---
+
+# Test Coverage Matrix
+
+## AC Coverage
+
+| AC ID | Source | AC Description | Component Tests | Integration Tests | E2E Tests | Status |
+|-------|--------|----------------|-----------------|-------------------|-----------|--------|
+| AC-1 | Capability | Named instrument list: The owner-operator MUST be able to add instruments to and remove them from the acquisition list, and see the current list, without editing configuration files or the data store directly. | TC-COMP-001 | — | TC-E2E-001, TC-E2E-009 | Covered |
+| AC-2 | Capability | History depth is stated, not assumed: The product MUST require the owner-operator to state the history depth before the first acquisition run, and MUST NOT acquire to a depth the owner has not stated. | TC-COMP-002 | — | TC-E2E-001 | Covered |
+| AC-3 | Capability | Data types acquired: A successful acquisition run MUST provide, for each named instrument the provider covers, instrument reference data, daily prices, company fundamentals and corporate actions over the stated history depth. | TC-COMP-003 | — | TC-E2E-001, TC-E2E-009 | Covered |
+| AC-4 | Capability | Acquisition volume: The product MUST complete an acquisition run covering up to 3000 named instruments without manual intervention. | TC-COMP-004 | — | — | Covered |
+| AC-5 | Capability | Point-in-time record: Every acquired value MUST be recorded with the date on which it was known, and a run returning a restated value for a date already held MUST add a record rather than replace the existing one. | TC-COMP-005 | — | — | Covered |
+| AC-6 | Capability | Re-run safety: Re-running acquisition over a period already acquired MUST NOT duplicate, overwrite or remove previously recorded data. | TC-COMP-006 | — | TC-E2E-005, TC-E2E-009 | Covered |
+| AC-7 | Capability | Coverage visibility: The owner-operator MUST be able to see, for each named instrument, which data types are present, the date range covered, and when that instrument was last acquired. | TC-COMP-007 | — | TC-E2E-001, TC-E2E-003 | Covered |
+| AC-8 | Capability | Gap visibility: The product MUST identify missing trading days within a date range it has acquired for an instrument. | TC-COMP-008 | — | TC-E2E-003 | Covered |
+| AC-9 | Capability | Honest run outcome: Every acquisition run MUST be recorded as succeeded, failed or partial, and MUST NOT be recorded as succeeded when any named instrument failed to acquire. | TC-COMP-009 | — | TC-E2E-002, TC-E2E-005 | Covered |
+| AC-10 | Capability | Failure diagnosis: For a failed or partial run, the owner-operator MUST be able to see which instrument and which data type was affected and the reason reported for the failure. | TC-COMP-010 | — | TC-E2E-002, TC-E2E-005 | Covered |
+| AC-11 | Capability | Unrecognised instrument does not stop the run: When the provider does not recognise a named instrument, the run MUST report that instrument and MUST continue acquiring the remaining instruments. | TC-COMP-011 | — | TC-E2E-006 | Covered |
+| AC-12 | Capability | A failed run leaves no false history: A run that fails partway MUST NOT leave data that presents as complete coverage for a range it did not fully acquire. | TC-COMP-012 | — | TC-E2E-002 | Covered |
+| AC-13 | Capability | Credential handling: The provider credential MUST be supplied at runtime from the environment, and MUST NOT appear in the repository, in log output, or in any view the product renders. | TC-COMP-013 | — | TC-E2E-011 | Covered |
+| AC-14 | Capability | Network exposure: The owner interface MUST NOT be reachable from a non-loopback network interface. | TC-COMP-014 | — | TC-E2E-011 | Covered |
+| AC-15 | Capability | Forward data evolution: Deploying a newer version of the product onto an existing data store MUST bring the stored data forward without losing or rewriting previously acquired history. | TC-COMP-015 | — | TC-E2E-011 | Covered |
+| AC-16 | Capability | Refuse an inconsistent start: When the stored data cannot be brought forward to the running version, the product MUST report the failure and MUST NOT serve or write data. | TC-COMP-016 | — | TC-E2E-012 | Covered |
+| AC-17 | Capability | Honest empty state: Before any acquisition has run, the ingestion view MUST state that no data has been acquired rather than presenting an empty successful state. | TC-COMP-017 | — | TC-E2E-004 | Covered |
+| AC-18 | Capability | Operational visibility: The owner-operator MUST be able to determine whether the product is running and whether its most recent acquisition run failed, without inspecting the data store directly. | TC-COMP-018 | — | TC-E2E-011 | Covered |
+| AC-19 | Capability | Cancel a run in progress: An owner-operator MUST be able to cancel an acquisition run that is under way. The cancelled run MUST NOT begin acquiring any instrument it had not already started, and coverage already written MUST be retained. | TC-COMP-019 | — | TC-E2E-007, TC-E2E-008 | Covered |
+| AC-20 | Capability | An interrupted run does not block the next one: An acquisition run whose process stops unexpectedly MUST reach a terminal state without the owner-operator modifying the data store, and MUST NOT prevent a subsequent run from starting. | TC-COMP-020 | — | — | Covered |
+| AC-21 | Capability | Removal retains history: Removing an instrument from the acquisition list MUST stop further acquisition for that instrument and MUST retain every observation already recorded for it. The owner-operator MUST be able to see that retained coverage and distinguish it from instruments still being acquired. | TC-COMP-021 | — | TC-E2E-010 | Covered |
+| AC-22 | Capability | Deepening backfills history: When the owner-operator increases the stated history depth, the next acquisition run MUST acquire the missing earlier range for every active named instrument that falls short of the new depth, without re-acquiring the range already covered. | TC-COMP-022 | — | — | Covered |
+| AC-23 | Capability | Concurrent run requests queue: When the owner-operator starts an acquisition run while another run is under way, the product MUST accept the new request, record it as requested, and start it only after the active run reaches a terminal state. Requested runs MUST start in request order. | TC-COMP-023 | — | — | Covered |
+| AC-24 | Capability | A run with nothing to acquire is refused, not run: When the owner-operator starts an acquisition run while no instrument is active, the product MUST refuse the request, state that no instruments are named, and record no run. A run that completes having acquired nothing would be either a success that did nothing or a failure the owner did not cause, and AC-9 requires the recorded outcome to mean what it says. | TC-COMP-024 | — | — | Covered |
+| AC-25 | Capability | Retiring an instrument takes effect from the next run: An instrument retired while an acquisition run is under way MUST still be reached by that run, and MUST NOT be acquired by any later run. Observations written for it before the run ends are retained (AC-21). The run's scope is fixed when it starts, so that what a run did is explainable from what it set out to do. | TC-COMP-025 | — | TC-E2E-010 | Covered |
+| AC-26 | Capability | A queued run can be cancelled before it starts: When the owner-operator cancels an acquisition run that has been requested but not yet started, the product MUST record it as cancelled, MUST NOT start it, and MUST leave any run already under way unaffected. | TC-COMP-026 | — | TC-E2E-007 | Covered |
+| DAC-E6-1 | Derived | Coverage MUST be derived at read time from coverage segments and observation rows, and MUST NOT be stored as an asserted summary. | TC-COMP-027 | — | — | Covered |
+| DAC-E6-2 | Derived | The trading-day set MUST be formed as the union of dates on which any named instrument has a daily bar in the requested range. | TC-COMP-028 | — | — | Covered |
+| DAC-E6-3 | Derived | A missing date MUST be reported as a gap only when it falls inside that instrument's own covered range, since a date before the instrument was first acquired is outside coverage rather than a gap. | TC-COMP-029 | — | — | Covered |
+| DAC-E6-4 | Derived | Gap detection MUST be reported as unavailable, with a reason, when fewer than two named instruments hold data in the range, rather than returning an empty gap list. | TC-COMP-030 | — | — | Covered |
+| DAC-E6-5 | Derived | Gap detection MUST apply to daily prices only. | TC-COMP-031 | — | — | Covered |
+| DAC-E6-6 | Derived | The product MUST NOT claim to detect a market-wide provider outage, since every instrument is missing that day and the derived set cannot represent it. | TC-COMP-032 | — | — | Covered |
+| DAC-E6-7 | Derived | Never-acquired MUST be computed as the absence of any observation row in the store, not as an empty result for the current filter, and the two MUST render distinct copy. | TC-COMP-033 | — | — | Covered |
+| DAC-E6-8 | Derived | Retired instruments MUST appear in coverage reads with their retained coverage, marked distinctly from active instruments rather than omitted. | TC-COMP-034 | — | — | Covered |
+| DAC-E6-9 | Derived | An instrument covered to a shallower depth than the current stated depth MUST be presented as short by a stated amount. | TC-COMP-035 | — | — | Covered |
+| DAC-E6-10 | Derived | Coverage reads MUST support symbol filter, lifecycle filter, date bounds and cursor paging at 3000 instruments. | TC-COMP-036 | — | — | Covered |
+| DAC-E6-11 | Derived | Each instrument row MUST report per-data-type presence as present, absent or unknown. | TC-COMP-037 | — | — | Covered |
+| DAC-E6-12 | Derived | A uniform shortfall across every instrument caused by the provider plan's history cap MUST NOT be presented as a provider data gap. | TC-COMP-038 | — | — | Covered |
+| DAC-E6-13 | Derived | The Coverage screen MUST NOT auto-poll and MUST show a last-updated time. | TC-COMP-039 | — | — | Covered |
+| DAC-E6-14 | Derived | Specific missing dates MUST be available behind expansion rather than in the collapsed row. | TC-COMP-040 | — | — | Covered |
+| DAC-E6-S1-1 | Derived | Given an instrument, When its per-data-type presence is reported, Then each of the four types is present, absent or unknown. | TC-COMP-041 | — | — | Covered |
+| DAC-E6-S1-2 | Derived | Given `never_acquired`, When it is computed, Then it uses its own query over observation existence, separate from the filtered coverage query, because conflating them produces AC-17's exact failure. | TC-COMP-042 | — | — | Covered |
+| DAC-E6-S1-3 | Derived | Given an instrument covered to a shallower depth than the current stated depth, When coverage is read, Then it reports how far short it falls. | TC-COMP-043 | — | — | Covered |
+| DAC-E6-S1-4 | Derived | Given a retired instrument, When coverage is read, Then it is included with a lifecycle marker rather than omitted. | TC-COMP-044 | — | — | Covered |
+| DAC-E6-S1-5 | Derived | Given last-acquired, When it is reported, Then it comes from `acquisition_state` stamped inside the write transaction, not from a run's intent. | TC-COMP-045 | — | — | Covered |
+| DAC-E6-S1-6 | Derived | Given a uniform shortfall across every instrument caused by the plan's history cap, When coverage renders, Then it is not presented as a provider data gap. | TC-COMP-046 | — | — | Covered |
+| DAC-E6-S1-7 | Derived | Given coverage reads, When they are issued, Then they support a symbol filter, lifecycle filter, date bounds and cursor paging at 3000 instruments. | TC-COMP-047 | — | — | Covered |
+| DAC-E6-S2-1 | Derived | Given an instrument checked against its own dates alone, When the set is built, Then this is explicitly avoided, because it would report zero gaps for every instrument always. | TC-COMP-048 | — | — | Covered |
+| DAC-E6-S2-2 | Derived | Given a date before an instrument was first acquired, When it is evaluated, Then it is outside coverage rather than a gap. | TC-COMP-049 | — | — | Covered |
+| DAC-E6-S2-3 | Derived | Given the availability predicate, When it is applied, Then it is evaluated inside the statement so an unavailable check returns no rows rather than a zero count. | TC-COMP-050 | — | — | Covered |
+| DAC-E6-S2-4 | Derived | Given fundamentals or corporate actions, When gaps are considered, Then none are computed, since quarterly and sporadic data carry no per-day expectation. | TC-COMP-051 | — | — | Covered |
+| DAC-E6-S2-5 | Derived | Given a day on which every instrument is missing a bar, When gaps are computed, Then no gap is reported for anyone, which is the market-wide outage limitation stated plainly rather than hidden. | TC-COMP-052 | — | — | Covered |
+| DAC-E6-S2-6 | Derived | Given gap results, When they are returned, Then a count is available for the collapsed row and specific dates for expansion. | TC-COMP-053 | — | — | Covered |
+| DAC-E6-S3-1 | Derived | Given gap detection unavailable, When the response is built, Then `gap_detection` reports unavailable together with the reason, and gap counts are absent rather than zero. | TC-COMP-054 | — | — | Covered |
+| DAC-E6-S3-2 | Derived | Given specific gap dates, When they are requested, Then they are available through expansion rather than included in every collapsed row, keeping the default response bounded at 3000 instruments. | TC-COMP-055 | — | — | Covered |
+| DAC-E6-S3-3 | Derived | Given a `limit` beyond the canonical bound, When it is supplied, Then `422` is returned rather than silently clamping. | TC-COMP-056 | — | — | Covered |
+| DAC-E6-S3-4 | Derived | Given a lifecycle filter, When it is applied, Then retired instruments can be included or excluded explicitly, and the default includes them so retained history is not hidden. | TC-COMP-057 | — | — | Covered |
+| DAC-E6-S3-5 | Derived | Given `from` later than `to`, When supplied, Then `422` is returned. | TC-COMP-058 | — | — | Covered |
+| DAC-E6-S4-1 | Derived | Given an absent value, When it renders, Then an em dash is shown; a measured zero renders as zero; an inapplicable cell renders blank. These three are visually distinct. | TC-COMP-059 | — | — | Covered |
+| DAC-E6-S4-2 | Derived | Given dates, When they render, Then they use ISO-8601, with session dates left unconverted and timestamps in America/Chicago. | TC-COMP-060 | — | — | Covered |
+| DAC-E6-S4-3 | Derived | Given per-data-type presence, When it renders, Then present, absent and unknown use distinct badge variants, each carrying text plus icon or shape. | TC-COMP-061 | — | — | Covered |
+| DAC-E6-S4-4 | Derived | Given never-acquired, When it renders, Then its copy differs from a filter matching nothing, and the never-acquired state offers the run action. | TC-COMP-062 | — | — | Covered |
+| DAC-E6-S4-5 | Derived | Given 3000 instruments, When the screen renders, Then search and filter remain usable and the table scrolls within its own container rather than the page. | TC-COMP-063 | — | — | Covered |
+| DAC-E6-S4-6 | Derived | Given a uniform depth shortfall across all instruments, When it renders, Then it reads as a plan limit rather than as a provider data gap. | TC-COMP-064 | — | — | Covered |
+| DAC-E6-S4-7 | Derived | Given the screen in greyscale, When it renders, Then every status remains distinguishable. | TC-COMP-065 | — | — | Covered |
+| DAC-E7-1 | Derived | Per-instrument results MUST be recorded per data type, so an instrument recognised for prices but holding no fundamentals is reported precisely. | TC-COMP-066 | — | — | Covered |
+| DAC-E7-2 | Derived | A not-found outcome MUST render distinguishably from a failed outcome, since the owner's remedy differs. | TC-COMP-067 | — | — | Covered |
+| DAC-E7-3 | Derived | Every stored failure reason MUST name the symbol, the data type and the provider's request id. | TC-COMP-068 | — | — | Covered |
+| DAC-E7-4 | Derived | No stored or rendered failure reason MUST contain the provider credential. | TC-COMP-069 | — | — | Covered |
+| DAC-E7-5 | Derived | Every non-2xx API response MUST carry one envelope shape: a stable snake_case code the interface may branch on, owner-facing prose, the resource, and a request id. | TC-COMP-070 | — | — | Covered |
+| DAC-E7-6 | Derived | The request id MUST be generated per request and included in every log record for that request. | TC-COMP-071 | — | — | Covered |
+| DAC-E7-7 | Derived | A `500` MUST return an internal-error code and request id only, with stack traces and driver messages going to the log. | TC-COMP-072 | — | — | Covered |
+| DAC-E7-8 | Derived | `GET /api/health` MUST report the most recent run's outcome, completing the payload whose liveness, database, credential-presence and schema-version fields E1 delivers. | TC-COMP-073 | — | — | Covered |
+| DAC-E7-9 | Derived | Run detail MUST collapse to one row per instrument and expand to four data types, so a 3000-instrument run remains navigable. | TC-COMP-074 | — | — | Covered |
+| DAC-E7-10 | Derived | Run detail MUST support filtering by outcome and cursor paging. | TC-COMP-075 | — | — | Covered |
+| DAC-E7-11 | Derived | Every status MUST carry a text label plus icon or shape, so the interface is readable in greyscale. | TC-COMP-076 | — | — | Covered |
+| DAC-E7-12 | Derived | Migration failure detail MUST be written to the container log the owner reads and MUST NOT be constructed by formatting a driver exception directly, since a connection error can include the connection string. | TC-COMP-077 | — | — | Covered |
+| DAC-E7-S1-1 | Derived | Given a run of 3000 instruments, When detail is read, Then results page rather than returning in one response. | TC-COMP-078 | — | — | Covered |
+| DAC-E7-S1-2 | Derived | Given run detail, When it is read, Then per-outcome counts are available without paging through every row. | TC-COMP-079 | — | — | Covered |
+| DAC-E7-S1-3 | Derived | Given an instrument with mixed per-data-type outcomes, When it is read, Then all four data types are returned together for that instrument. | TC-COMP-080 | — | — | Covered |
+| DAC-E7-S1-4 | Derived | Given run history, When it is read, Then runs return reverse-chronologically with a state filter and cursor paging. | TC-COMP-081 | — | — | Covered |
+| DAC-E7-S1-5 | Derived | Given a stored reason, When it is returned, Then it contains no credential, asserted by test. | TC-COMP-082 | — | — | Covered |
+| DAC-E7-S2-1 | Derived | Given an error code, When the interface branches on it, Then the code is stable snake_case and does not change with message wording. | TC-COMP-083 | — | — | Covered |
+| DAC-E7-S2-2 | Derived | Given an unhandled exception, When it reaches the handler, Then no stack trace or driver message appears in the response body. | TC-COMP-084 | — | — | Covered |
+| DAC-E7-S2-3 | Derived | Given a request id, When it appears in a response, Then the same id appears in that request's log records, which is what makes a reported failure findable. | TC-COMP-085 | — | — | Covered |
+| DAC-E7-S2-4 | Derived | Given any error response, When it is composed, Then no credential value can appear in it. | TC-COMP-086 | — | — | Covered |
+| DAC-E7-S2-5 | Derived | Given a validation failure from Pydantic, When it is returned, Then it is mapped into the shared envelope rather than FastAPI's default shape, so the interface has one shape only. | TC-COMP-087 | — | — | Covered |
+| DAC-E7-S3-1 | Derived | Given no run has ever been recorded, When health responds, Then `most_recent_run` is `null`, which the status region renders as no run recorded rather than as a failure. | TC-COMP-088 | — | — | Covered |
+| DAC-E7-S3-2 | Derived | Given a run in a non-terminal state, When health responds, Then that run is reported with its current state rather than skipped in favour of an older terminal one. | TC-COMP-089 | — | — | Covered |
+| DAC-E7-S3-3 | Derived | Given the most recent run, When it is reported, Then it carries its id, state and end timestamp, enough for the status region without a second request. | TC-COMP-090 | — | — | Covered |
+| DAC-E7-S3-4 | Derived | Given health is polled every 30 seconds from every screen, When this query runs, Then it is indexed so the poll is cheap. | TC-COMP-091 | — | — | Covered |
+| DAC-E7-S4-1 | Derived | Given an abandoned run, When it is opened, Then a written explanation states that the run's process stopped and the run was reclaimed, with the path to starting a new run. | TC-COMP-092 | — | — | Covered |
+| DAC-E7-S4-2 | Derived | Given a failed or partial run, When it is opened, Then re-run is offered as the named recovery action. | TC-COMP-093 | — | — | Covered |
+| DAC-E7-S4-3 | Derived | Given a cancel that races completion, When `409` returns, Then the screen states the run completed rather than showing a cancellation that did not happen. | TC-COMP-094 | — | — | Covered |
+| DAC-E7-S4-4 | Derived | Given per-instrument outcomes, When they render, Then `not_found` uses a warning tier distinct from `failed`, since the owner's remedy differs. | TC-COMP-095 | — | — | Covered |
+| DAC-E7-S4-5 | Derived | Given a reason, When it renders, Then it shows the data type and the provider request id, and never any credential. | TC-COMP-096 | — | — | Covered |
+| DAC-E7-S4-6 | Derived | Given a run in a non-terminal state, When the screen is open, Then it polls every 10 seconds and stops once the run is terminal. | TC-COMP-097 | — | — | Covered |
+| DAC-E7-S4-7 | Derived | Given an outcome filter, When it is applied, Then only matching instruments render, and results page rather than loading 3000 rows at once. | TC-COMP-098 | — | — | Covered |
+| DAC-E2-1 | Derived | Symbols MUST be normalised on entry to a single canonical form, so that the same instrument named two ways is one row. | TC-COMP-099 | — | — | Covered |
+| DAC-E2-2 | Derived | Adding a symbol already present and active MUST be reported as a duplicate rather than creating a second row; adding one already present and retired MUST reactivate it. | TC-COMP-100 | — | — | Covered |
+| DAC-E2-3 | Derived | Bulk entry MUST accept newline, comma, tab or semicolon separated symbols, and MUST report recognised and rejected entries separately before anything is added, with rejected entries never discarding accepted ones. | TC-COMP-101 | — | — | Covered |
+| DAC-E2-4 | Derived | `POST /api/instruments` MUST return `201` when at least one symbol was added or reactivated, `409` when all were duplicates, and `422` when all were malformed. | TC-COMP-102 | — | — | Covered |
+| DAC-E2-5 | Derived | Retiring an instrument MUST be a lifecycle transition, never a delete. `DELETE /api/instruments/{symbol}` MUST return `404` for an unknown symbol and `409` for one already retired. | TC-COMP-103 | — | — | Covered |
+| DAC-E2-6 | Derived | Coverage reads MUST distinguish retired instruments rather than omitting them, so that retained history remains visible. | TC-COMP-104 | — | — | Covered |
+| DAC-E2-7 | Derived | History depth MUST be stated as a number of years, and `GET /api/settings/history-depth` MUST return `null` when never set, distinct from zero. | TC-COMP-105 | — | — | Covered |
+| DAC-E2-8 | Derived | `PUT /api/settings/history-depth` MUST reject a value that is not a positive integer with `422`. | TC-COMP-106 | — | — | Covered |
+| DAC-E2-9 | Derived | When no history depth is set, the Start action MUST render as `blocked` with its reason stated, rather than disabled or absent. | TC-COMP-107 | — | — | Covered |
+| DAC-E2-10 | Derived | The instrument list MUST support search and filter at 3000 instruments, and MUST report active and retired counts. | TC-COMP-108 | — | — | Covered |
+| DAC-E2-11 | Derived | The retire confirmation MUST state that a run already under way still finishes with the instrument included. | TC-COMP-109 | — | — | Covered |
+| DAC-E2-12 | Derived | A depth beyond what the provider plan holds MUST be issued as stated, and a uniform shortfall across every instrument MUST NOT be presented as a provider data gap. | TC-COMP-110 | — | — | Covered |
+| DAC-E2-S1-1 | Derived | Given a symbol with surrounding whitespace or lowercase letters, When it is normalised, Then it is trimmed and uppercased before any lookup or insert. | TC-COMP-111 | — | — | Covered |
+| DAC-E2-S1-2 | Derived | Given a symbol that does not match `^[A-Z][A-Z0-9.-]{0,15}$` after normalisation, When it is added, Then it is rejected as malformed and no row is written. | TC-COMP-112 | — | — | Covered |
+| DAC-E2-S1-3 | Derived | Given a retired instrument, When the same symbol is added again, Then the existing row's lifecycle returns to `active` and `retired_at` is cleared, rather than a second row being created. | TC-COMP-113 | — | — | Covered |
+| DAC-E2-S1-4 | Derived | Given a batch containing valid, duplicate and malformed symbols, When it is added, Then each symbol is classified independently and rejected entries never discard accepted ones. | TC-COMP-114 | — | — | Covered |
+| DAC-E2-S1-5 | Derived | Given retirement of a symbol that is unknown, When it is attempted, Then it is reported as unknown and distinguished from one already retired. | TC-COMP-115 | — | — | Covered |
+| DAC-E2-S1-6 | Derived | Given retirement, When it completes, Then no observation, coverage segment or run result for that instrument is modified or removed. | TC-COMP-116 | — | — | Covered |
+| DAC-E2-S1-7 | Derived | Given the list read, When it is called, Then it supports a symbol prefix filter, a lifecycle filter, and cursor paging, and reports active and retired counts. | TC-COMP-117 | — | — | Covered |
+| DAC-E2-S2-1 | Derived | Given a depth value, When it is written, Then it must be a positive integer number of years and any other value is rejected. | TC-COMP-118 | — | — | Covered |
+| DAC-E2-S2-2 | Derived | Given the setting store, When depth is written, Then it is held in `owner_setting` as a `jsonb` value under a fixed key, so a later setting needs no schema change. | TC-COMP-119 | — | — | Covered |
+| DAC-E2-S2-3 | Derived | Given a depth already set, When a new value is written, Then it replaces the previous one and `updated_at` advances. | TC-COMP-120 | — | — | Covered |
+| DAC-E2-S2-4 | Derived | Given a depth read, When it returns, Then it carries the `updated_at` timestamp alongside the value, so the interface can show when it was last changed. | TC-COMP-121 | — | — | Covered |
+| DAC-E2-S2-5 | Derived | Given the plan's five-year cap, When a larger depth is stated, Then this module records it unchanged and enforces no cap, because the provider returns what it holds. | TC-COMP-122 | — | — | Covered |
+| DAC-E2-S3-1 | Derived | Given a mixed batch, When it returns `201`, Then the body reports `added`, `reactivated` and `rejected` separately, each rejected entry carrying a reason. | TC-COMP-123 | — | — | Covered |
+| DAC-E2-S3-2 | Derived | Given `GET /api/settings/history-depth` with no depth set, When it responds, Then `years` is `null`, distinct from zero. | TC-COMP-124 | — | — | Covered |
+| DAC-E2-S3-3 | Derived | Given any non-2xx response from these routes, When it is returned, Then it carries the shared error envelope with a stable snake_case code, owner-facing message, resource and request id. | TC-COMP-125 | — | — | Covered |
+| DAC-E2-S3-4 | Derived | Given a `limit` beyond the canonical bound, When it is supplied, Then it is rejected with `422` rather than silently clamped. | TC-COMP-126 | — | — | Covered |
+| DAC-E2-S3-5 | Derived | Given a cursor from a previous page, When it is supplied, Then the next page continues from it and the ordering is stable across requests. | TC-COMP-127 | — | — | Covered |
+| DAC-E2-S4-1 | Derived | Given a bulk paste containing rejected entries, When the preview is shown, Then rejected entries are listed with reasons and the accepted ones remain available to add. | TC-COMP-128 | — | — | Covered |
+| DAC-E2-S4-2 | Derived | Given the retire confirmation, When it renders, Then it uses `dialog` `confirm` and not `destructive`, and its copy says retirement rather than deletion. | TC-COMP-129 | — | — | Covered |
+| DAC-E2-S4-3 | Derived | Given a control that cannot be used, When it renders, Then it uses `button` `blocked` with the reason visible, never a bare disabled control, because a disabled control hides its reason from keyboard and screen-reader users. | TC-COMP-130 | — | — | Covered |
+| DAC-E2-S4-4 | Derived | Given the instrument table, When it renders, Then active and retired instruments are distinguishable and retired ones are not omitted. | TC-COMP-131 | — | — | Covered |
+| DAC-E2-S4-5 | Derived | Given the depth input, When a non-positive or non-integer value is entered, Then the error names the operation, the resource and the reason per STD-UI-19. | TC-COMP-132 | — | — | Covered |
+| DAC-E2-S4-6 | Derived | Given the list has never been populated, When the screen renders, Then it states that no instruments are named, distinct from a filter matching nothing. | TC-COMP-133 | — | — | Covered |
+| DAC-E2-S4-7 | Derived | Given every status shown, When it renders, Then it carries a text label plus icon or shape and is readable in greyscale. | TC-COMP-134 | — | — | Covered |
+| DAC-E4-1 | Derived | Observations MUST be appended with the date FactorFlow observed them. The provider's filing date MAY be stored as a descriptive attribute but MUST NEVER serve as the as-of date, because it conflates restatements of the same period. | TC-COMP-135 | — | — | Covered |
+| DAC-E4-2 | Derived | Appending MUST use insert-on-conflict-do-nothing against a natural key that includes a hash of the value, so an identical value writes nothing and a restated value writes a new row. | TC-COMP-136 | — | — | Covered |
+| DAC-E4-3 | Derived | Value hashing MUST be deterministic across processes: canonical JSON with sorted keys, no whitespace and decimals rendered as strings, hashed with SHA-256. | TC-COMP-137 | — | — | Covered |
+| DAC-E4-4 | Derived | All four data types for one instrument, the coverage segment merge, the acquisition-state stamp and the per-instrument results MUST commit in a single transaction, and any failure MUST roll back the whole instrument. | TC-COMP-138 | — | — | Covered |
+| DAC-E4-5 | Derived | A coverage segment MUST be extended only inside the transaction that wrote the rows justifying it. No component may record intended coverage ahead of the write. | TC-COMP-139 | — | — | Covered |
+| DAC-E4-6 | Derived | The runner MUST compute, per instrument and data type, only the sub-ranges of the requested depth not already covered. | TC-COMP-140 | — | — | Covered |
+| DAC-E4-7 | Derived | An instrument covered from a later date than the depth start MUST yield the earlier gap for fetching, which is the deepening backfill. | TC-COMP-141 | — | — | Covered |
+| DAC-E4-8 | Derived | The depth start MUST be computed from the depth snapshotted onto the run row at request time, not from the current setting, so a depth changed mid-queue does not redefine a run already requested. | TC-COMP-142 | — | — | Covered |
+| DAC-E4-9 | Derived | The trailing range since the last covered day MUST be re-fetched on every run, because the last covered day may have been a partial session, and idempotence makes re-fetching a day already held write nothing. | TC-COMP-143 | — | — | Covered |
+| DAC-E4-10 | Derived | Each instrument's per-data-type outcome MUST be classified as written, unchanged, not-found or failed, with not-found recorded per data type as well as per instrument, since the provider may recognise an instrument for prices and hold no fundamentals for it. | TC-COMP-144 | — | — | Covered |
+| DAC-E4-11 | Derived | An instrument not reached because the run was cancelled MUST write no row, leaving neither coverage nor a failure record. | TC-COMP-145 | — | — | Covered |
+| DAC-E4-12 | Derived | The run's instrument roster MUST be read once, at claim time, so that the run's scope is fixed when it starts. | TC-COMP-146 | — | — | Covered |
+| DAC-E4-13 | Derived | A run whose stated history depth is unset MUST acquire nothing and MUST be finalised as failed. | TC-COMP-147 | — | — | Covered |
+| DAC-E4-14 | Derived | Each instrument MUST be processed in its own transaction so that a run is resumable and an interruption loses at most one instrument's work. | TC-COMP-148 | — | — | Covered |
+| DAC-E4-15 | Derived | No recorded failure reason MUST contain the provider credential. | TC-COMP-149 | — | — | Covered |
+| DAC-E4-S1-1 | Derived | Given any observation row, When it is written, Then `observed_on` is FactorFlow's own observation date, defaulting to the current date, and is never taken from a provider field. | TC-COMP-150 | — | — | Covered |
+| DAC-E4-S1-2 | Derived | Given an identical value re-fetched, When it is inserted with `ON CONFLICT DO NOTHING`, Then zero rows are affected and the existing row is untouched. | TC-COMP-151 | — | — | Covered |
+| DAC-E4-S1-3 | Derived | Given a restated value for a date already held, When it is inserted, Then the differing value hash makes it a new row and both records coexist. | TC-COMP-152 | — | — | Covered |
+| DAC-E4-S1-4 | Derived | Given the value hash column, When it is defined, Then it is a 32-byte digest with a length check constraint, matching SHA-256 output. | TC-COMP-153 | — | — | Covered |
+| DAC-E4-S1-5 | Derived | Given `daily_bar`, When it is defined, Then price and volume columns use exact numeric types rather than floating point, so no binary rounding enters recorded history. | TC-COMP-154 | — | — | Covered |
+| DAC-E4-S1-6 | Derived | Given every observation table, When migration `0002` is reviewed, Then it contains no `UPDATE` or `DELETE` statement against observation history, and no later migration may introduce one. | TC-COMP-155 | — | — | Covered |
+| DAC-E4-S1-7 | Derived | Given a query path over observations, When it is written anywhere in the codebase, Then it performs no `UPDATE` or `DELETE` against these tables. | TC-COMP-156 | — | — | Covered |
+| DAC-E4-S2-1 | Derived | Given two dictionaries with the same pairs in different insertion order, When each is hashed, Then the digests are equal, because keys are sorted. | TC-COMP-157 | — | — | Covered |
+| DAC-E4-S2-2 | Derived | Given a `Decimal` value, When it is canonicalised, Then it renders as a string, so no float repr enters the digest and `1.10` stays distinct from `1.1` only if the provider distinguishes them. | TC-COMP-158 | — | — | Covered |
+| DAC-E4-S2-3 | Derived | Given a value containing a type the canonicaliser does not support, When it is hashed, Then it raises rather than silently coercing, since a wrong digest is worse than a failed write. | TC-COMP-159 | — | — | Covered |
+| DAC-E4-S2-4 | Derived | Given the digest, When it is returned, Then it is 32 raw bytes, matching the column's length check constraint. | TC-COMP-160 | — | — | Covered |
+| DAC-E4-S2-5 | Derived | Given a value differing in any field, When it is hashed, Then the digest differs, so a restatement is always recorded as new. | TC-COMP-161 | — | — | Covered |
+| DAC-E4-S3-1 | Derived | Given the write call, When it succeeds, Then it reports rows appended per data type and whether anything changed, so the runner can classify the outcome as written or unchanged. | TC-COMP-162 | — | — | Covered |
+| DAC-E4-S3-2 | Derived | Given existing coverage segments for an instrument and data type, When a newly written range abuts or overlaps them, Then they are merged into the minimal set of non-overlapping segments. | TC-COMP-163 | — | — | Covered |
+| DAC-E4-S3-3 | Derived | Given the `coverage_no_overlap` exclusion constraint, When a merge is attempted that would overlap, Then the constraint rejects it, so the invariant is enforced by the database and not only by the merge arithmetic. | TC-COMP-164 | — | — | Covered |
+| DAC-E4-S3-4 | Derived | Given a write that raises partway, When the transaction rolls back, Then neither observations nor a coverage segment exist for the attempted range, leaving the instrument as though never attempted. | TC-COMP-165 | — | — | Covered |
+| DAC-E4-S3-5 | Derived | Given acquisition state, When a write commits, Then `last_acquired_at`, `last_run_id` and `last_outcome` are stamped in the same transaction. | TC-COMP-166 | — | — | Covered |
+| DAC-E4-S3-6 | Derived | Given per-instrument results, When a write commits, Then one row per data type is recorded in the same transaction. | TC-COMP-167 | — | — | Covered |
+| DAC-E4-S3-7 | Derived | Given inserts, When they execute, Then they use `INSERT ... ON CONFLICT DO NOTHING` and never `UPDATE` or `DELETE` against observation history. | TC-COMP-168 | — | — | Covered |
+| DAC-E4-S4-1 | Derived | Given an instrument with no coverage, When planning runs, Then the whole range from `depth_start` to today is yielded as one fetch range. | TC-COMP-169 | — | — | Covered |
+| DAC-E4-S4-2 | Derived | Given an instrument covering the whole requested range, When planning runs, Then only the trailing range since `covered_to` is yielded. | TC-COMP-170 | — | — | Covered |
+| DAC-E4-S4-3 | Derived | Given coverage with an interior gap, When planning runs, Then each missing sub-range is yielded separately rather than as one span covering held data. | TC-COMP-171 | — | — | Covered |
+| DAC-E4-S4-4 | Derived | Given a depth changed while a run is queued, When that run is claimed and plans, Then it uses its own snapshotted depth, so its scope is explainable from its own record. | TC-COMP-172 | — | — | Covered |
+| DAC-E4-S4-5 | Derived | Given planning per data type, When it runs, Then reference, prices, fundamentals and corporate actions are planned independently, since their coverage can differ. | TC-COMP-173 | — | — | Covered |
+| DAC-E4-S4-6 | Derived | Given `depth_start` later than today, When it is computed, Then the plan is empty rather than yielding an inverted range. | TC-COMP-174 | — | — | Covered |
+| DAC-E4-S5-1 | Derived | Given the instrument loop, When each iteration begins, Then it checks for a cancellation request and refreshes the claim heartbeat at the same point. | TC-COMP-175 | — | — | Covered |
+| DAC-E4-S5-2 | Derived | Given a cancellation observed between instruments, When it is seen, Then the loop exits without starting the next instrument and the run finalises cancelled. | TC-COMP-176 | — | — | Covered |
+| DAC-E4-S5-3 | Derived | Given a runner whose claim has been reclaimed by the sweep, When it notices, Then it stops without writing further results against that run. | TC-COMP-177 | — | — | Covered |
+| DAC-E4-S5-4 | Derived | Given an instrument raising any provider error, When it is caught, Then it is recorded against that instrument and the loop continues to the next. | TC-COMP-178 | — | — | Covered |
+| DAC-E4-S5-5 | Derived | Given the run finishes its roster, When it finalises, Then the outcome is computed from what was written rather than from what was requested. | TC-COMP-179 | — | — | Covered |
+| DAC-E4-S5-6 | Derived | Given no run is available to claim, When the runner polls, Then it waits and polls again at the configured interval rather than exiting. | TC-COMP-180 | — | — | Covered |
+| DAC-E4-S5-7 | Derived | Given the credential has changed since the last run, When a run is claimed, Then the provider client is rebuilt before the first fetch. | TC-COMP-181 | — | — | Covered |
+| DAC-E4-S5-8 | Derived | Given a run of 3000 instruments, When it executes, Then no manual step is required and progress is observable through the journal between instruments. | TC-COMP-182 | — | — | Covered |
+| DAC-E4-S6-1 | Derived | Given data returned and rows appended, When it is classified, Then the outcome is `written` and counts toward `succeeded`. | TC-COMP-183 | — | — | Covered |
+| DAC-E4-S6-2 | Derived | Given data returned whose values are all already held, When it is classified, Then the outcome is `unchanged` and counts toward `succeeded`, because nothing was wrong. | TC-COMP-184 | — | — | Covered |
+| DAC-E4-S6-3 | Derived | Given an instrument unknown to the provider, When it is classified, Then the outcome is `not_found`, the run continues, and the run's outcome becomes `partial`. | TC-COMP-185 | — | — | Covered |
+| DAC-E4-S6-4 | Derived | Given attempts exhausted by transport or server errors, When it is classified, Then the outcome is `failed`, the run continues, and the run's outcome becomes `partial`. | TC-COMP-186 | — | — | Covered |
+| DAC-E4-S6-5 | Derived | Given a `429`, When outcomes are classified, Then it never appears as an outcome, since it is flow control rather than a result. | TC-COMP-187 | — | — | Covered |
+| DAC-E4-S6-6 | Derived | Given an instrument recognised for prices but not for fundamentals, When it is classified, Then prices record `written` and fundamentals record `not_found` for the same instrument. | TC-COMP-188 | — | — | Covered |
+| DAC-E4-S6-7 | Derived | Given a recorded reason, When it is stored, Then it carries the provider request id and no credential. | TC-COMP-189 | — | — | Covered |
+| DAC-E4-S7-1 | Derived | Given a run of 3000 instruments, When it executes, Then memory use stays bounded, with no accumulation of per-instrument results in process memory. | TC-COMP-190 | — | — | Covered |
+| DAC-E4-S7-2 | Derived | Given the ingestion process is killed mid-run, When a later run starts, Then instruments already committed are not re-fetched and the remainder completes. | TC-COMP-191 | — | — | Covered |
+| DAC-E4-S7-3 | Derived | Given database connections, When a long run executes, Then connections are not leaked across instruments. | TC-COMP-192 | — | — | Covered |
+| DAC-E4-S7-4 | Derived | Given a run interrupted after some instruments, When coverage is read, Then it reports exactly the committed instruments, with no partial range for the one in flight. | TC-COMP-193 | — | — | Covered |
+| DAC-E4-S7-5 | Derived | Given no duration target exists, When this story is verified, Then completion and resumability are asserted and elapsed time is recorded for information rather than asserted as a threshold. | TC-COMP-194 | — | — | Covered |
+| DAC-E3-1 | Derived | The client MUST expose one operation per data type, each accepting a symbol and a date range, so that the runner drives acquisition without knowing provider paths. | TC-COMP-195 | — | — | Covered |
+| DAC-E3-2 | Derived | Provider failures MUST be typed as `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable` or `ProviderContractViolation`, since AC-11 depends on telling a 404 from a 401. | TC-COMP-196 | — | — | Covered |
+| DAC-E3-3 | Derived | Because the SDK discards the status code and raises only the response body, the client MUST reconstruct the distinction by parsing the error envelope, accepting either `message` or `error` as the failure field and requiring neither. | TC-COMP-197 | — | — | Covered |
+| DAC-E3-4 | Derived | An error payload that will not parse as JSON MUST be classified `ProviderUnavailable` and never `InstrumentNotFound`, because guessing not-found from an unparseable error would let an outage look like an empty instrument. | TC-COMP-198 | — | — | Covered |
+| DAC-E3-5 | Derived | A `200` response that does not validate against the model MUST be `ProviderContractViolation`, distinct from unavailability, because it means the provider changed rather than that it is down and retrying will not help. | TC-COMP-199 | — | — | Covered |
+| DAC-E3-6 | Derived | A `429` MUST NOT consume the attempt budget, because the request was never served. | TC-COMP-200 | — | — | Covered |
+| DAC-E3-7 | Derived | Since Massive sends no `Retry-After`, verified against the live provider on 2026-09-05, the throttled path MUST wait to the next minute boundary with jitter, matching the fixed per-minute window the provider enforces, rather than applying exponential backoff. | TC-COMP-201 | — | — | Covered |
+| DAC-E3-8 | Derived | Timeouts and server errors MUST be retried with exponential backoff up to a configured attempt limit, defaulting to 3, after which the instrument is recorded failed and the run continues. | TC-COMP-202 | — | — | Covered |
+| DAC-E3-9 | Derived | A throttle wait budget MUST bound the throttled path so that indefinite `429` responses fail the instrument rather than stalling the run. | TC-COMP-203 | — | — | Covered |
+| DAC-E3-10 | Derived | Reference data MUST capture stable instrument identity, including CIK, composite FIGI and share class FIGI, so identity does not rest on the ticker. | TC-COMP-204 | — | — | Covered |
+| DAC-E3-11 | Derived | A delisted instrument MUST remain acquirable, carrying its active flag and delisting date, so survivorship bias does not enter the recorded history. | TC-COMP-205 | — | — | Covered |
+| DAC-E3-12 | Derived | Provider wire field names MUST NOT escape this component; models MUST name fields in the product's vocabulary. | TC-COMP-206 | — | — | Covered |
+| DAC-E3-13 | Derived | Every stored failure reason MUST carry the provider's `request_id` alongside the symbol and data type, and MUST NOT contain the credential. | TC-COMP-207 | — | — | Covered |
+| DAC-E3-14 | Derived | The client's interface MUST NOT foreclose the M3 streaming half of the same provider contract. | TC-COMP-208 | — | — | Covered |
+| DAC-E3-S1-1 | Derived | Given the SDK's default construction, When the client is built, Then the defaults the component design identifies as requiring override are overridden explicitly rather than inherited. | TC-COMP-209 | — | — | Covered |
+| DAC-E3-S1-2 | Derived | Given daily aggregates, When they are requested, Then the multiplier is `1`, the timespan is `day`, and `from` and `to` are inclusive `YYYY-MM-DD`. | TC-COMP-210 | — | — | Covered |
+| DAC-E3-S1-3 | Derived | Given a paged response, When `next_url` is present, Then paging follows it until exhausted and the caller sees one complete result. | TC-COMP-211 | — | — | Covered |
+| DAC-E3-S1-4 | Derived | Given the ticker reference endpoint, When it is called, Then the single-ticker form is used, since the instrument list is the owner's and reference data is fetched per named symbol. | TC-COMP-212 | — | — | Covered |
+| DAC-E3-S1-5 | Derived | Given the market-status endpoint, When acquisition runs, Then it is never called, because it is forward-looking only and trading days are derived from acquired data instead. | TC-COMP-213 | — | — | Covered |
+| DAC-E3-S1-6 | Derived | Given the credential, When the client is constructed, Then it is passed to the SDK and never written to a log record. | TC-COMP-214 | — | — | Covered |
+| DAC-E3-S2-1 | Derived | Given a daily bar, When it is parsed, Then `t`, `o`, `h`, `l`, `c`, `v`, `vw` and `n` map to named fields for timestamp, open, high, low, close, volume, volume-weighted average price and transaction count. | TC-COMP-215 | — | — | Covered |
+| DAC-E3-S2-2 | Derived | Given a bar timestamp in Unix milliseconds, When it is parsed, Then it converts to a session date without timezone ambiguity. | TC-COMP-216 | — | — | Covered |
+| DAC-E3-S2-3 | Derived | Given a monetary or ratio value, When it is parsed, Then it is held as `Decimal` rather than `float`, so no binary rounding enters recorded history. | TC-COMP-217 | — | — | Covered |
+| DAC-E3-S2-4 | Derived | Given a response missing a field the model requires, When it is parsed, Then validation fails and the failure is classified `ProviderContractViolation` by CAP-001-E3-S3 rather than passing a partial record on. | TC-COMP-218 | — | — | Covered |
+| DAC-E3-S2-5 | Derived | Given an optional field absent, When it is parsed, Then the model records its absence rather than substituting a zero, because absent and zero are different facts. | TC-COMP-219 | — | — | Covered |
+| DAC-E3-S3-1 | Derived | Given an envelope whose `status` is `"NOT_FOUND"`, When it is classified, Then it becomes `InstrumentNotFound`. | TC-COMP-220 | — | — | Covered |
+| DAC-E3-S3-2 | Derived | Given an envelope whose `error` names an API-key problem, When it is classified, Then it becomes `CredentialRejected`, and the credential value appears in neither the exception nor any log record. | TC-COMP-221 | — | — | Covered |
+| DAC-E3-S3-3 | Derived | Given an envelope that parses but matches no known case, When it is classified, Then it becomes `ProviderUnavailable`, the safe default. | TC-COMP-222 | — | — | Covered |
+| DAC-E3-S3-4 | Derived | Given a `ProviderContractViolation`, When the runner handles it, Then retrying is not attempted, because it means the provider changed rather than that it is down. | TC-COMP-223 | — | — | Covered |
+| DAC-E3-S3-5 | Derived | Given every typed error, When it is constructed, Then `provider_request_id` is populated from the response when present and `None` when absent, never fabricated. | TC-COMP-224 | — | — | Covered |
+| DAC-E3-S3-6 | Derived | Given a `429`, When it is seen, Then it is not raised as a failure at all but handed to the governor as flow control. | TC-COMP-225 | — | — | Covered |
+| DAC-E3-S4-1 | Derived | Given a provider that does state a delay, When throttled, Then the stated delay is honoured. This path is dead code against Massive and is retained because the governor is provider-agnostic. | TC-COMP-226 | — | — | Covered |
+| DAC-E3-S4-2 | Derived | Given several retries queued behind the same minute boundary, When they wait, Then full jitter is applied so they do not resynchronise onto the same instant. | TC-COMP-227 | — | — | Covered |
+| DAC-E3-S4-3 | Derived | Given a `FATAL` outcome such as 404 or 401, When it is seen, Then no wait and no retry occur and it re-raises to the caller immediately. | TC-COMP-228 | — | — | Covered |
+| DAC-E3-S4-4 | Derived | Given the attempt limit is exhausted for one instrument and data type, When exhaustion occurs, Then that instrument is recorded failed and the run continues. | TC-COMP-229 | — | — | Covered |
+| DAC-E3-S4-5 | Derived | Given the configured request budget, When the plan has no limit, Then pacing introduces no artificial delay, since the target plan is unlimited as verified 2026-09-05. | TC-COMP-230 | — | — | Covered |
+| DAC-E3-S4-6 | Derived | Given the throttle wait budget, When it is configured, Then it bounds the throttled path so `OPS-LOOP-001`'s unbounded-loop failure cannot occur. | TC-COMP-231 | — | — | Covered |
+| DAC-E3-S5-1 | Derived | Given a provider response without a `request_id`, When a reason is composed, Then the reason records its absence rather than fabricating or omitting the field silently. | TC-COMP-232 | — | — | Covered |
+| DAC-E3-S5-2 | Derived | Given a `CredentialRejected` error, When its reason is composed, Then it states that the credential was rejected without echoing any part of the value. | TC-COMP-233 | — | — | Covered |
+| DAC-E3-S5-3 | Derived | Given a reason string, When it is stored, Then it is bounded in length so a pathological provider message cannot bloat the run record. | TC-COMP-234 | — | — | Covered |
+| DAC-E3-S5-4 | Derived | Given any of the four typed errors, When a reason is composed, Then the resulting text distinguishes which type it came from, so `not_found` is separable from `failed` downstream. | TC-COMP-235 | — | — | Covered |
+| DAC-E5-1 | Derived | The run state machine MUST define exactly the states requested, running, cancelling, succeeded, partial, failed, cancelled and abandoned, with illegal transitions raising rather than being written. | TC-COMP-236 | — | — | Covered |
+| DAC-E5-2 | Derived | The claim MUST be a single statement claiming the oldest requested run only when no run is running or cancelling, so that request order is execution order. | TC-COMP-237 | — | — | Covered |
+| DAC-E5-3 | Derived | A partial unique index MUST make a concurrent second claim fail on a unique violation rather than start a second run. | TC-COMP-238 | — | — | Covered |
+| DAC-E5-4 | Derived | The run outcome MUST be computed from what was actually written rather than from what was requested. | TC-COMP-239 | — | — | Covered |
+| DAC-E5-5 | Derived | A run MUST be recorded succeeded only when every instrument in its roster wrote; otherwise partial when some wrote, or failed when none wrote or the run itself failed. | TC-COMP-240 | — | — | Covered |
+| DAC-E5-6 | Derived | Cancellation of a running run MUST be recorded as a request against the run rather than acting on the process, and MUST be observed by the runner between instruments, so it takes effect within one instrument's work. | TC-COMP-241 | — | — | Covered |
+| DAC-E5-7 | Derived | A cancelled run MUST be terminal and distinct from failed, and coverage already committed MUST be retained. | TC-COMP-242 | — | — | Covered |
+| DAC-E5-8 | Derived | Cancelling a run still in the requested state MUST move it directly to cancelled as a state transition rather than cooperative cancellation, since there is no runner to signal, and MUST leave an active run unaffected. | TC-COMP-243 | — | — | Covered |
+| DAC-E5-9 | Derived | Cancelling a run that has already reached a terminal state MUST return a conflict naming the run's actual state, so the owner is told it completed rather than shown a cancellation that did not happen. | TC-COMP-244 | — | — | Covered |
+| DAC-E5-10 | Derived | A runner MUST refresh a heartbeat on the run it holds, at the same point it checks for cancellation. | TC-COMP-245 | — | — | Covered |
+| DAC-E5-11 | Derived | A periodic sweep in the application container MUST release any claim whose heartbeat is stale past the configured window and record the run as abandoned, terminal and distinct from both failed and cancelled. | TC-COMP-246 | — | — | Covered |
+| DAC-E5-12 | Derived | The sweep MUST be idempotent and MUST NOT prevent a subsequent run from starting once it has released a stale claim. | TC-COMP-247 | — | — | Covered |
+| DAC-E5-13 | Derived | A runner whose claim has been reclaimed MUST stop without writing further results against that run. | TC-COMP-248 | — | — | Covered |
+| DAC-E5-14 | Derived | The start endpoint MUST refuse with a conflict and create no run when no history depth is set, and separately when no instrument is active, naming which precondition failed. | TC-COMP-249 | — | — | Covered |
+| DAC-E5-15 | Derived | The start endpoint MUST accept a request while a run is active, returning the new run as requested together with the active run it is queued behind, and MUST NOT reject, merge or start it concurrently. | TC-COMP-250 | — | — | Covered |
+| DAC-E5-16 | Derived | Run outcomes MUST render in the tiers STD-UI-12 fixes, with partial never good, cancelled never critical, and abandoned distinct and serious. | TC-COMP-251 | — | — | Covered |
+| DAC-E5-17 | Derived | The abandoned state MUST be explained to the owner rather than presented as a bare state, together with the path to a new run. | TC-COMP-252 | — | — | Covered |
+| DAC-E5-S1-1 | Derived | Given `states.py`, When a transition is requested, Then it is checked against a mapping of legal transitions and an illegal one raises before any write. | TC-COMP-253 | — | — | Covered |
+| DAC-E5-S1-2 | Derived | Given the database, When a run row is written, Then check constraints `acquisition_run_state_known`, `acquisition_run_claim_agrees` and `acquisition_run_terminal_has_end` act as the backstop behind the application check. | TC-COMP-254 | — | — | Covered |
+| DAC-E5-S1-3 | Derived | Given a run row, When it is created, Then it snapshots `history_depth_years` at request time, so a depth changed while queued does not redefine it. | TC-COMP-255 | — | — | Covered |
+| DAC-E5-S1-4 | Derived | Given at most one active run, When the index is defined, Then a partial unique index over runs in `running` or `cancelling` enforces it. | TC-COMP-256 | — | — | Covered |
+| DAC-E5-S1-5 | Derived | Given FIFO ordering, When requested runs are queried, Then an index on `requested_at` serves the claim's ordering. | TC-COMP-257 | — | — | Covered |
+| DAC-E5-S1-6 | Derived | Given a terminal run, When it is written, Then it carries an end timestamp, enforced by constraint. | TC-COMP-258 | — | — | Covered |
+| DAC-E5-S1-7 | Derived | Given `run_instrument_result`, When rows are written, Then each carries instrument, data type, outcome and reason, supporting per-data-type reporting. | TC-COMP-259 | — | — | Covered |
+| DAC-E5-S2-1 | Derived | Given several requested runs, When claims occur, Then they are claimed oldest-first by `requested_at`, so request order is execution order. | TC-COMP-260 | — | — | Covered |
+| DAC-E5-S2-2 | Derived | Given no claimable run, When the runner polls, Then it receives no row and waits at the configured interval rather than erroring. | TC-COMP-261 | — | — | Covered |
+| DAC-E5-S2-3 | Derived | Given a claim, When it succeeds, Then it sets `state`, `started_at`, `claimed_by` and `heartbeat_at` in the same statement. | TC-COMP-262 | — | — | Covered |
+| DAC-E5-S2-4 | Derived | Given a claim, When it returns, Then it yields the run id and the snapshotted `history_depth_years`, so the runner plans from the run's own record. | TC-COMP-263 | — | — | Covered |
+| DAC-E5-S2-5 | Derived | Given `FOR UPDATE SKIP LOCKED`, When two runners contend, Then neither blocks on the other's row. | TC-COMP-264 | — | — | Covered |
+| DAC-E5-S2-6 | Derived | Given a queued request, When it is created while a run is active, Then the response reports the active run it is queued behind. | TC-COMP-265 | — | — | Covered |
+| DAC-E5-S3-1 | Derived | Given a running run, When cancellation is requested, Then the run moves to `cancelling` and only reaches `cancelled` once the runner acknowledges it. | TC-COMP-266 | — | — | Covered |
+| DAC-E5-S3-2 | Derived | Given a cancelled run, When coverage is read afterwards, Then instruments it committed retain their coverage and instruments never reached are simply absent. | TC-COMP-267 | — | — | Covered |
+| DAC-E5-S3-3 | Derived | Given a run cancelled while queued, When an active run is executing, Then the active run is entirely unaffected. | TC-COMP-268 | — | — | Covered |
+| DAC-E5-S3-4 | Derived | Given a run that completed between the owner's decision and the request arriving, When cancellation is attempted, Then the owner is told it completed rather than shown a cancellation that did not happen. | TC-COMP-269 | — | — | Covered |
+| DAC-E5-S3-5 | Derived | Given a run where every instrument recorded `written` or `unchanged`, When it finalises, Then it is `succeeded`. | TC-COMP-270 | — | — | Covered |
+| DAC-E5-S3-6 | Derived | Given a run where at least one instrument recorded `not_found` or `failed` and at least one wrote, When it finalises, Then it is `partial` and never `succeeded`. | TC-COMP-271 | — | — | Covered |
+| DAC-E5-S3-7 | Derived | Given a run where nothing wrote, When it finalises, Then it is `failed`. | TC-COMP-272 | — | — | Covered |
+| DAC-E5-S4-1 | Derived | Given a live runner refreshing its heartbeat, When the sweep runs, Then that run is not reclaimed. | TC-COMP-273 | — | — | Covered |
+| DAC-E5-S4-2 | Derived | Given a run in `cancelling` whose runner died, When the sweep runs, Then it is reclaimed as `abandoned`, since that state is also claimable-stale. | TC-COMP-274 | — | — | Covered |
+| DAC-E5-S4-3 | Derived | Given coverage written before an interruption, When the run is reclaimed, Then that coverage stands, because the per-instrument commit boundary makes it independently valid. | TC-COMP-275 | — | — | Covered |
+| DAC-E5-S4-4 | Derived | Given the sweep placed in the application container, When ingestion is stopped entirely, Then reclaim still happens, which is the property that makes AC-20 hold for a crash-looping container. | TC-COMP-276 | — | — | Covered |
+| DAC-E5-S4-5 | Derived | Given two sweeps running concurrently, When both find the same stale claim, Then exactly one reclaims it and the other is a no-op. | TC-COMP-277 | — | — | Covered |
+| DAC-E5-S4-6 | Derived | Given a reclaimed run, When the original runner attempts a write, Then the write is rejected because its claim no longer matches. | TC-COMP-278 | — | — | Covered |
+| DAC-E5-S5-1 | Derived | Given both preconditions unmet, When a run is requested, Then one `409` is returned naming which precondition failed, and the response is deterministic rather than order-dependent. | TC-COMP-279 | — | — | Covered |
+| DAC-E5-S5-2 | Derived | Given a cancellation of an already-terminal run, When it is requested, Then `409 run_already_terminal` is returned carrying the run's actual state. | TC-COMP-280 | — | — | Covered |
+| DAC-E5-S5-3 | Derived | Given a cancellation of an unknown run id, When it is requested, Then `404` is returned. | TC-COMP-281 | — | — | Covered |
+| DAC-E5-S5-4 | Derived | Given `GET /api/acquisition-runs`, When it is called, Then runs are returned reverse-chronologically with a state filter, limit and cursor. | TC-COMP-282 | — | — | Covered |
+| DAC-E5-S5-5 | Derived | Given `GET /api/acquisition-runs/{id}`, When it is called, Then it returns the run, its counts and its per-instrument per-data-type results, with an outcome filter and paging. | TC-COMP-283 | — | — | Covered |
+| DAC-E5-S5-6 | Derived | Given any refusal, When it is returned, Then no run row is created, asserted by count. | TC-COMP-284 | — | — | Covered |
+| DAC-E5-S6-1 | Derived | Given any run in a non-terminal state, When the screen is open, Then it polls every 10 seconds, and polling stops when no run is non-terminal. | TC-COMP-285 | — | — | Covered |
+| DAC-E5-S6-2 | Derived | Given the tier mapping, When each state renders, Then `requested` is neutral, `running` active, `cancelling` warning, `succeeded` good, `partial` warning, `failed` critical, `cancelled` neutral and `abandoned` serious. | TC-COMP-286 | — | — | Covered |
+| DAC-E5-S6-3 | Derived | Given no history depth set, When Start renders, Then it is `blocked` with its own distinct reason, mirroring the no-instruments treatment. | TC-COMP-287 | — | — | Covered |
+| DAC-E5-S6-4 | Derived | Given a run id in the list, When it renders, Then it links to run detail as an anchor, so middle-click and open-in-new-tab work. | TC-COMP-288 | — | — | Covered |
+| DAC-E5-S6-5 | Derived | Given a cancel confirmation for a queued run, When it renders, Then its copy differs from the running-run confirmation, since the effects differ. | TC-COMP-289 | — | — | Covered |
+| DAC-E5-S6-6 | Derived | Given a cancel that races a completion, When `409` returns, Then the screen tells the owner the run completed rather than showing a cancellation that did not happen. | TC-COMP-290 | — | — | Covered |
+| DAC-E5-S6-7 | Derived | Given no run has ever been recorded, When the list renders, Then it says so plainly rather than appearing empty and healthy. | TC-COMP-291 | — | — | Covered |
+| DAC-E1-1 | Derived | The schema MUST hold all capability state in one PostgreSQL database, with no part of it split across another store. | TC-COMP-292 | — | — | Covered |
+| DAC-E1-2 | Derived | `applied_migrations` MUST be created by the migrator before the first migration file runs, rather than by a migration file, because the migrator reads it to decide what to apply. | TC-COMP-293 | — | — | Covered |
+| DAC-E1-3 | Derived | Migrations MUST be applied in ascending numbered order, each recorded with its version, name and checksum on success. A correction MUST be a new file, never an edit to a file already applied. | TC-COMP-294 | — | — | Covered |
+| DAC-E1-4 | Derived | When the store carries a migration number this build does not know, the container MUST exit non-zero and the API MUST never bind. | TC-COMP-295 | — | — | Covered |
+| DAC-E1-5 | Derived | Migration MUST be serialised by an advisory lock, so that two containers starting concurrently cannot apply the same migration twice. | TC-COMP-296 | — | — | Covered |
+| DAC-E1-6 | Derived | The observation tables MUST carry a natural-key uniqueness constraint including a value hash, so that appending an identical value is a no-op and appending a restated value adds a row. | TC-COMP-297 | — | — | Covered |
+| DAC-E1-7 | Derived | A missing required configuration value MUST fail process start with a message naming the environment variable but never its value. | TC-COMP-298 | — | — | Covered |
+| DAC-E1-8 | Derived | The credential MUST be held in memory only, redacted from every log record, and absent from every API response. | TC-COMP-299 | — | — | Covered |
+| DAC-E1-9 | Derived | The credential MUST be supplied to both containers: the ingestion process uses its value, and the application process reads only whether it is set, so that health can report presence without the application ever reading the value. | TC-COMP-300 | — | — | Covered |
+| DAC-E1-10 | Derived | The credential MUST be rotatable without a restart: the ingestion process re-reads it when it claims a run and rebuilds its provider client when the value has changed. | TC-COMP-301 | — | — | Covered |
+| DAC-E1-11 | Derived | Both processes MUST emit structured log records only, with no direct console output. | TC-COMP-302 | — | — | Covered |
+| DAC-E1-12 | Derived | The application shell MUST present four destinations in the order Coverage, Instruments, Runs, Settings, with run detail as a child route rather than a fifth destination, and MUST NOT include a user menu, account area or sign-in, since no principal is assumed anywhere. | TC-COMP-303 | — | — | Covered |
+| DAC-E1-13 | Derived | A persistent status region MUST appear on every screen, poll health every 30 seconds, and show its last-updated time. | TC-COMP-304 | — | — | Covered |
+| DAC-E1-14 | Derived | The status region MUST be sized to take a third line later without restructuring, since the trading-environment indicator lands there when a capability introduces one. | TC-COMP-305 | — | — | Covered |
+| DAC-E1-15 | Derived | A failure to reach the API MUST render as a named unreachable state identifying the likely cause and where to look, rather than surfacing a transport failure, so that a refused start is legible rather than blank. | TC-COMP-306 | — | — | Covered |
+| DAC-E1-16 | Derived | `GET /api/health` MUST report liveness, database reachability, credential presence as a boolean and schema version. Its most-recent-run field is delivered by E7. | TC-COMP-307 | — | — | Covered |
+| DAC-E1-17 | Derived | The status region MUST render correctly before any run exists, since the shell ships before the EPICs that create runs. | TC-COMP-308 | — | — | Covered |
+| DAC-E1-S1-1 | Derived | Given migration `0001`, When it is applied, Then the `btree_gist` extension is created, since `coverage_segment`'s exclusion constraint in a later migration depends on it. | TC-COMP-309 | — | — | Covered |
+| DAC-E1-S1-2 | Derived | Given the `instrument` table, When a row is inserted, Then `symbol` must be uppercase and match `^[A-Z][A-Z0-9.-]{0,15}$`, enforced by check constraints rather than by application code. | TC-COMP-310 | — | — | Covered |
+| DAC-E1-S1-3 | Derived | Given the `instrument` table, When `lifecycle` is written, Then it must be `active` or `retired`, and `retired_at` must be non-null if and only if `lifecycle` is `retired`. | TC-COMP-311 | — | — | Covered |
+| DAC-E1-S1-4 | Derived | Given `owner_setting`, When the history depth is stored, Then it is held as a `jsonb` value keyed by `setting_key`, so a later setting needs no schema change. | TC-COMP-312 | — | — | Covered |
+| DAC-E1-S1-5 | Derived | Given `applied_migrations`, When a migration is recorded, Then the row carries `version` as primary key, `name`, `checksum` and `applied_at`. | TC-COMP-313 | — | — | Covered |
+| DAC-E1-S1-6 | Derived | Given migration `0001` applied twice, When the second application is attempted, Then it is skipped because its version is already recorded, and no statement runs. | TC-COMP-314 | — | — | Covered |
+| DAC-E1-S2-1 | Derived | Given a schema already current, When the migrator runs, Then it exits `0` logging `schema current at version N` and applies nothing. | TC-COMP-315 | — | — | Covered |
+| DAC-E1-S2-2 | Derived | Given an unreachable database or rejected credentials, When the migrator runs, Then it exits `1` with a message naming the host and database but never the password. | TC-COMP-316 | — | — | Covered |
+| DAC-E1-S2-3 | Derived | Given a store at a version this build does not carry, When the migrator runs, Then it exits `2` stating the store's version and the highest this build carries. | TC-COMP-317 | — | — | Covered |
+| DAC-E1-S2-4 | Derived | Given a recorded migration whose checksum differs from the file this build carries, When the migrator runs, Then it exits `3`, because a file that has been applied must never be edited. | TC-COMP-318 | — | — | Covered |
+| DAC-E1-S2-5 | Derived | Given a migration that fails partway, When the failure occurs, Then the migrator exits `4` and no change from that migration is committed, since each migration runs in its own transaction. | TC-COMP-319 | — | — | Covered |
+| DAC-E1-S2-6 | Derived | Given any migrator message, When it is emitted, Then it goes through the structured logger at `error` level carrying the migration version as a field, never through `print`. | TC-COMP-320 | — | — | Covered |
+| DAC-E1-S2-7 | Derived | Given a connection failure, When its message is constructed, Then it is built from known-safe fields rather than by formatting the driver exception, because a `psycopg` connection error can include the connection string. | TC-COMP-321 | — | — | Covered |
+| DAC-E1-S2-8 | Derived | Given a long migration on a populated store, When it runs, Then the advisory lock is held for its duration so a second container waits rather than corrupting the store. | TC-COMP-322 | — | — | Covered |
+| DAC-E1-S3-1 | Derived | Given a Pydantic settings model, When the environment is loaded, Then every required field is validated at start and a type error fails the process. | TC-COMP-323 | — | — | Covered |
+| DAC-E1-S3-2 | Derived | Given a credential value, When it is held, Then it uses a secret-wrapping type whose `repr` and `str` do not expose the value, so an accidental interpolation cannot leak it. | TC-COMP-324 | — | — | Covered |
+| DAC-E1-S3-3 | Derived | Given the logging configuration, When it is installed, Then a redaction filter removes any configured secret value from every record, including records emitted by third-party libraries. | TC-COMP-325 | — | — | Covered |
+| DAC-E1-S3-4 | Derived | Given the bind address setting, When it is defaulted, Then it defaults to `127.0.0.1` and a non-loopback value is rejected at start rather than accepted silently. | TC-COMP-326 | — | — | Covered |
+| DAC-E1-S3-5 | Derived | Given the application process, When health reports credential presence, Then it reports a boolean derived from whether the variable is set, and the value is never read into the API's response path. | TC-COMP-327 | — | — | Covered |
+| DAC-E1-S3-6 | Derived | Given ingestion holding a provider client, When it claims a run and the credential has changed, Then it rebuilds the client, because claim time is the only point at which no provider connection and no partial instrument write is in flight. | TC-COMP-328 | — | — | Covered |
+| DAC-E1-S4-1 | Derived | Given the destination labels, When they render, Then they use the product vocabulary STD-UI-1 fixes: Coverage, Instruments, Runs, Settings. Not "Jobs", not "Sync", not "Import". | TC-COMP-329 | — | — | Covered |
+| DAC-E1-S4-2 | Derived | Given a run detail route, When it is opened, Then it renders as a child of Runs and the Runs destination remains the active one in the rail. | TC-COMP-330 | — | — | Covered |
+| DAC-E1-S4-3 | Derived | Given any spacing or type value in the shell, When it is applied, Then it comes from the defined scale and introduces no new value. | TC-COMP-331 | — | — | Covered |
+| DAC-E1-S4-4 | Derived | Given keyboard navigation, When the user tabs through the rail, Then every destination is reachable and the active one is announced, meeting WCAG 2.1 AA. | TC-COMP-332 | — | — | Covered |
+| DAC-E1-S4-5 | Derived | Given an unknown route, When it is opened, Then the shell renders a not-found state inside the frame rather than an empty page or a crash. | TC-COMP-333 | — | — | Covered |
+| DAC-E1-S4-6 | Derived | Given the built bundle, When `npm run build` runs, Then output lands in the API package's static directory so one image serves both. | TC-COMP-334 | — | — | Covered |
+| DAC-E1-S5-1 | Derived | Given a successful health response, When it renders, Then the region shows the product as answering with a text label plus icon or shape, readable in greyscale. | TC-COMP-335 | — | — | Covered |
+| DAC-E1-S5-2 | Derived | Given the last-updated time, When it renders, Then it uses ISO-8601 and the America/Chicago timezone for timestamps. | TC-COMP-336 | — | — | Covered |
+| DAC-E1-S5-3 | Derived | Given a health request that fails, When the failure is a transport error, Then the unreachable state names the likely cause, that the application container may not have started, and where to look, the container log. | TC-COMP-337 | — | — | Covered |
+| DAC-E1-S5-4 | Derived | Given the run-outcome line before CAP-001-E7-S3 lands, When the region renders, Then it states that no run has been recorded rather than presenting an empty successful state. | TC-COMP-338 | — | — | Covered |
+| DAC-E1-S5-5 | Derived | Given the polling interval, When the component unmounts, Then the interval is cleared so no request continues after navigation. | TC-COMP-339 | — | — | Covered |
+| DAC-E1-S5-6 | Derived | Given `credential_present` is false in the health response, When the region renders, Then it distinguishes a missing credential from a health check that did not answer. | TC-COMP-340 | — | — | Covered |
+| DAC-E1-S6-1 | Derived | Given a reachable database, When health is called, Then `database` reports reachable and `schema_version` reports the highest applied migration version. | TC-COMP-341 | — | — | Covered |
+| DAC-E1-S6-2 | Derived | Given an unreachable database, When health is called, Then it responds `200` with `database` reporting unreachable, rather than failing the request, so the interface can distinguish a dead database from a dead API. | TC-COMP-342 | — | — | Covered |
+| DAC-E1-S6-3 | Derived | Given the health response, When it is serialised, Then `most_recent_run` is present as `null` until CAP-001-E7-S3 populates it, so the field's absence never has to be handled by the interface. | TC-COMP-343 | — | — | Covered |
+| DAC-E1-S6-4 | Derived | Given the application factory, When it is constructed, Then it mounts the built frontend bundle from the API package's static directory. | TC-COMP-344 | — | — | Covered |
+| DAC-E1-S6-5 | Derived | Given request handling, When any request is served, Then middleware generates a request id and includes it in every log record for that request. | TC-COMP-345 | — | — | Covered |
+| DAC-E1-S6-6 | Derived | Given any endpoint in the application, When it is declared, Then it declares no authentication requirement, because the loopback binding is what makes that sound. | TC-COMP-346 | — | — | Covered |
+
+## Coverage Summary
+
+- **Total ACs:** 346 (capability: 26, derived: 320)
+- **Covered:** 346
+- **Gaps:** 0
+- **Component test cases:** 346
+- **Integration test cases:** 26
+- **E2E test cases:** 12
+
+### Coverage Notes
+
+- The approved market-data-store design identifies backup and restore as unspecified; this is a product-operability gap, not a CAP-001 acceptance criterion, so no scenario is invented for it.
+- The provider's historical calendar limitation means market-wide outages are not detectable through gap analysis; the capability explicitly requires that limitation to be presented honestly.
+
