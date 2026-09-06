@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-instrument-list-service
 artifact_type: component-design
-artifact_version: 5
+artifact_version: 6
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---

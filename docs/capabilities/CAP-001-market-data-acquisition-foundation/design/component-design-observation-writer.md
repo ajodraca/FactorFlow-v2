@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-observation-writer
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 4
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -442,7 +442,7 @@ This component exposes no HTTP surface.
 | System design | CAP-001 system design v3 | Control flow steps 15 to 17, constraints 5.3, 5.4, 5.9; the critical interface in 4.2 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Component design | Market Data Store | Observation tables, natural keys, the coverage exclusion constraint | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Constitution | Product Charter v2 | C5, append-only point-in-time history | `docs/constitution/product-charter.md` |
-| Constitution | Tech Stack v2 | Provider fundamentals are not as-reported; no ORM | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | Provider fundamentals are not as-reported; no ORM | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 

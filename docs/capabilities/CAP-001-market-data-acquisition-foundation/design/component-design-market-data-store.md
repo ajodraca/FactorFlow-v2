@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
-artifact_version: 5
+artifact_version: 6
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -719,7 +719,7 @@ below records them as the system design's section 4.2 declares them.
 |------|---------------|-------------|------|
 | Capability | CAP-001 v6 | Acceptance criteria AC-1, AC-2, AC-5 to AC-9, AC-12, AC-15, AC-21, AC-22 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Components 4.1, interfaces 4.2, constraints 5.2 to 5.10 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| Constitution | Tech Stack v2 | PostgreSQL 16, no ORM, numbered forward-only migrations, validation commands | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | PostgreSQL 16, no ORM, numbered forward-only migrations, validation commands | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C2 single transactional store, C5 append-only point-in-time history | `docs/constitution/product-charter.md` |
 | Architecture | Architecture inventory | `market-data-store` component identity and its declared interfaces | `docs/architecture.md` |
 

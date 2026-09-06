@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-ingestion-api
 artifact_type: component-design
-artifact_version: 5
+artifact_version: 6
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -471,7 +471,7 @@ connection pool. It consumes no external integration.
 | System design | CAP-001 system design v3 | Interfaces 4.2, control flow 3, constraints 5.1, 5.11, 5.17 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Screens 1.1 to 1.5, cross-screen navigation, the copy this API's messages must match | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Standard | STD-UI v4 | STD-UI-19 error parts, STD-UI-25 polling and last-updated | `docs/constitution/standards/ui-conventions.md` |
-| Constitution | Tech Stack v2 | FastAPI on uvicorn, Pydantic, validation commands | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | FastAPI on uvicorn, Pydantic, validation commands | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 

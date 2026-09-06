@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-schema-migrator
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 4
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -357,7 +357,7 @@ This component exposes no HTTP surface.
 | System design | CAP-001 system design v3 | Application start steps 32 to 36, constraint 5.10 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Component design | Market Data Store | `applied_migrations` definition and the four migration files | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | UX design | CAP-001 UX design v4 | Section 2, the unreachable state naming a failed migration | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Tech Stack v2 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 

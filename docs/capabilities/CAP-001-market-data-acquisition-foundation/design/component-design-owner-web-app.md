@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-owner-web-app
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 4
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -25,7 +25,7 @@ ai_provenance:
     - id: STD-UI
       version: "4"
     - id: tech-stack
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -525,7 +525,7 @@ This component consumes the API and exposes none.
 | Design system | Component specifications | Twelve specifications; ten used here | `design-system/components/` |
 | Design system | Theme | Every token this design names | `design-system/theme.css` |
 | System design | CAP-001 system design v3 | Interfaces 4.2, constraint 5.11 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
-| Constitution | Tech Stack v2 | React 18, Vite, Tailwind, shadcn/ui on Radix, Vitest, Playwright, Biome; a11y enforced by review | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v3 | React 18, Vite, Tailwind, shadcn/ui on Radix, Vitest, Playwright, Biome; a11y enforced by review | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 

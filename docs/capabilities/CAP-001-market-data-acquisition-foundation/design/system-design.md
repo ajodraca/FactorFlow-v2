@@ -528,7 +528,7 @@ None. All questions raised during design were resolved on 2026-09-03 and
 |----------|------|-------------------|
 | Capability CAP-001 v7 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` | 26 acceptance criteria; scope excludes live feed, classification and universe composition; acquisition is owner-triggered; history depth is owner-stated; deepening backfills and concurrent requests queue; loopback-only decision |
 | Product Charter v2 | `docs/constitution/product-charter.md` | Modular monolith with ingestion split out; point-in-time persistence; single owner-operator; M1 is Universe and Factors, 2026-Q4 |
-| Tech Stack v2 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider; fundamentals are not as-reported; market data source deliberately not abstracted; validation commands; OQ-TS-3 and OQ-TS-6 |
+| Tech Stack v3 | `docs/constitution/tech-stack.md` | C1-C11; Python/FastAPI/PostgreSQL without ORM; React/Vite/Tailwind; Massive as single provider via its official `massive` client, with `massive-client` retained as the operational boundary rather than a portability layer; fundamentals are not as-reported; validation commands; OQ-TS-3 and OQ-TS-9 |
 | Architecture inventory | `docs/architecture.md` | Empty: 0 designs, 0 components. CAP-001 declares the first component identifiers in the project |
 | Context cache | `cache/context_feeder/factorflow-v2/factorflow-v2/summary.md` | Refreshed 2026-09-03; confirms the three documents above are the whole corpus |
 
