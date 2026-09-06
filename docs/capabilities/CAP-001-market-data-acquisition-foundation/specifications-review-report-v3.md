@@ -66,7 +66,7 @@ review_subjects:
     content_revision: sha256:2da86c13c7da83c486e4cb5df4ab0596a5fd75669326c0cfed21c5719bf82397
   - artifact_id: CAP-001-system-design
     artifact_version: 6
-    content_revision: sha256:9f45fb9ddc2bf420eebb1cd6f0f2935e9182e976df91dba5af606e829402d3fa
+    content_revision: sha256:62a3a399a3315ccd3ee1a2d40d9b277ae7a3c5dc6baf9bad3eeca67399cdf688
   - artifact_id: CAP-001-ux-brief
     artifact_version: 7
     content_revision: sha256:b657501bed0da0852bf88b4a0537776c84a23c916bd967fb3917a80fc314c984
@@ -132,6 +132,30 @@ ai_provenance:
       version: "7"
     - id: CAP-001-ux-design
       version: "5"
+    - id: CAP-001-component-design-acquisition-runner
+      version: "7"
+    - id: CAP-001-component-design-coverage-service
+      version: "6"
+    - id: CAP-001-component-design-ingestion-api
+      version: "6"
+    - id: CAP-001-component-design-instrument-list-service
+      version: "6"
+    - id: CAP-001-component-design-market-data-store
+      version: "6"
+    - id: CAP-001-component-design-massive-client
+      version: "6"
+    - id: CAP-001-component-design-observation-writer
+      version: "4"
+    - id: CAP-001-component-design-owner-web-app
+      version: "4"
+    - id: CAP-001-component-design-rate-limit-governor
+      version: "5"
+    - id: CAP-001-component-design-run-journal
+      version: "6"
+    - id: CAP-001-component-design-runtime-config
+      version: "6"
+    - id: CAP-001-component-design-schema-migrator
+      version: "4"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -506,6 +530,11 @@ raised, and its remedy is part of the same record.
    §4.2.~~ **Applied.** The response cell now names `state: cancelling` when the
    run was running and `state: cancelled` when it was still queued (AC-26),
    matching `component-design-ingestion-api.md` §11.
+
+The `content_revision` recorded for `CAP-001-system-design` under
+`review_subjects` is the post-fix digest, so it names the content this review
+actually vouches for. The pre-fix digest was
+`sha256:9f45fb9d...`; the fixes above are the only difference between them.
 
 `docs/architecture.md` was regenerated with `build-architecture.py --write`,
 which propagated the AC-26 wording into the derived interface inventory. All five

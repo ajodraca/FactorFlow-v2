@@ -6,8 +6,8 @@ artifact_version: 7
 capability_id: CAP-001
 title: Market Data Acquisition Foundation
 created: 2026-09-04
-updated: 2026-09-05
-status: draft
+updated: 2026-09-06
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -28,6 +28,12 @@ ai_provenance:
       version: "ported from the first build, 2026-09-05"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-09-06T01:59:38Z
+  reviewed_revision: sha256:b657501bed0da0852bf88b4a0537776c84a23c916bd967fb3917a80fc314c984
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
 # UX Brief: Market Data Acquisition Foundation
