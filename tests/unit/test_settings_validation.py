@@ -5,9 +5,8 @@ bounds.
 """
 
 import pytest
-from pydantic import ValidationError
 
-from factorflow.config.settings import ApiSettings, DatabaseSettings, Settings
+from factorflow.config.settings import ApiSettings, ConfigurationError, DatabaseSettings, Settings
 
 
 def _base_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -21,7 +20,7 @@ class TestNonLoopbackHostRejected:
     @pytest.mark.parametrize("host", ["0.0.0.0", "10.0.0.5", "example.com"])
     def test_non_loopback_host_rejected(self, monkeypatch: pytest.MonkeyPatch, host: str) -> None:
         monkeypatch.setenv("FACTORFLOW_API_HOST", host)
-        with pytest.raises(ValidationError):
+        with pytest.raises(ConfigurationError):
             ApiSettings(_env_file=None)  # type: ignore[call-arg]
 
     @pytest.mark.parametrize("host", ["127.0.0.1", "localhost", "::1"])
@@ -39,7 +38,7 @@ class TestTimingInvariants:
         _base_env(monkeypatch)
         monkeypatch.setenv("FACTORFLOW_RUN_HEARTBEAT_SECONDS", "60")
         monkeypatch.setenv("FACTORFLOW_RUN_STALE_AFTER_SECONDS", "180")  # exactly 3x, not >
-        with pytest.raises(ValidationError, match="HEARTBEAT"):
+        with pytest.raises(ConfigurationError, match="HEARTBEAT"):
             Settings(_env_file=None)  # type: ignore[call-arg]
 
     def test_invariant_2_stale_after_must_exceed_worst_case(
@@ -50,7 +49,7 @@ class TestTimingInvariants:
         #            = 3 * 30 * 4 + 300 = 660
         monkeypatch.setenv("FACTORFLOW_RUN_HEARTBEAT_SECONDS", "60")
         monkeypatch.setenv("FACTORFLOW_RUN_STALE_AFTER_SECONDS", "660")  # exactly worst case
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(ConfigurationError) as exc_info:
             Settings(_env_file=None)  # type: ignore[call-arg]
         assert "660" in str(exc_info.value)
 
@@ -60,7 +59,7 @@ class TestTimingInvariants:
         _base_env(monkeypatch)
         monkeypatch.setenv("FACTORFLOW_RUN_STALE_AFTER_SECONDS", "900")
         monkeypatch.setenv("FACTORFLOW_RUN_POLL_INTERVAL_SECONDS", "900")
-        with pytest.raises(ValidationError, match="POLL_INTERVAL"):
+        with pytest.raises(ConfigurationError, match="POLL_INTERVAL"):
             Settings(_env_file=None)  # type: ignore[call-arg]
 
     @pytest.mark.parametrize(
@@ -79,7 +78,26 @@ class TestTimingInvariants:
     ) -> None:
         _base_env(monkeypatch)
         monkeypatch.setenv(var, value)
-        with pytest.raises(ValidationError):
+        with pytest.raises(ConfigurationError):
+            Settings(_env_file=None)  # type: ignore[call-arg]
+
+    @pytest.mark.parametrize(
+        "var",
+        [
+            "FACTORFLOW_MASSIVE_TIMEOUT_SECONDS",
+            "FACTORFLOW_RUN_HEARTBEAT_SECONDS",
+            "FACTORFLOW_RUN_POLL_INTERVAL_SECONDS",
+        ],
+    )
+    def test_invariant_4_sub_one_second_values_rejected(
+        self, monkeypatch: pytest.MonkeyPatch, var: str
+    ) -> None:
+        """Invariant 4 requires timeout, heartbeat and poll_interval each
+        >= 1 second specifically -- positive but under a second must still
+        be rejected."""
+        _base_env(monkeypatch)
+        monkeypatch.setenv(var, "0.5")
+        with pytest.raises(ConfigurationError):
             Settings(_env_file=None)  # type: ignore[call-arg]
 
 
@@ -89,7 +107,7 @@ class TestFieldBounds:
         self, monkeypatch: pytest.MonkeyPatch, port: int
     ) -> None:
         monkeypatch.setenv("FACTORFLOW_API_PORT", str(port))
-        with pytest.raises(ValidationError):
+        with pytest.raises(ConfigurationError):
             ApiSettings(_env_file=None)  # type: ignore[call-arg]
 
     @pytest.mark.parametrize("port", [1, 8000, 65535])
@@ -105,5 +123,5 @@ class TestFieldBounds:
     ) -> None:
         monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://u:p@localhost/db")
         monkeypatch.setenv(var, "0")
-        with pytest.raises(ValidationError):
+        with pytest.raises(ConfigurationError):
             DatabaseSettings(_env_file=None)  # type: ignore[call-arg]

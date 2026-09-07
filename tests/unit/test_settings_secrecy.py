@@ -12,7 +12,7 @@ import pytest
 from factorflow.config.settings import DatabaseSettings, MassiveSettings
 
 KNOWN_DB_URL = "postgresql://owner:s3cr3t-db-password@localhost/factorflow"
-KNOWN_API_KEY = "sk-massive-test-credential-abc123"
+KNOWN_API_KEY = "TEST-FIXTURE-CREDENTIAL-abc123"
 
 
 @pytest.fixture

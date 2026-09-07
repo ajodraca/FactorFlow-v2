@@ -14,8 +14,8 @@ import pytest
 
 from factorflow.config.settings import credential_fingerprint, read_provider_credential
 
-KEY_A = "sk-massive-credential-aaa"
-KEY_B = "sk-massive-credential-bbb"
+KEY_A = "TEST-FIXTURE-CREDENTIAL-AAA"
+KEY_B = "TEST-FIXTURE-CREDENTIAL-BBB"
 
 
 class TestReadProviderCredential:
