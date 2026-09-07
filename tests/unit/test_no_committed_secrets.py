@@ -15,6 +15,25 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # published.
 KEY_SHAPE = re.compile(r"\bsk-massive-[A-Za-z0-9_-]{16,}\b")
 
+# Where a real credential could plausibly land: code that ships, its tests,
+# and configuration/manifest files. `docs/` is excluded deliberately, not to
+# weaken the guard but to scope it correctly -- AC-13 is about the
+# credential appearing in shipped code, not about a *test fixture value*
+# being quoted verbatim as evidence inside a governance document, which is
+# what an implementation review's own findings do when they cite the exact
+# string a prior test used. Narrowing KEY_SHAPE itself was rejected as a fix
+# (implementation-review-v2, IR-001): a real leaked key in docs/ would still
+# be a leak worth catching, just not the failure mode this exclusion exists
+# for, and this repository's own precedent (`.gitignore`, `pyproject.toml`'s
+# ruff `extend-exclude`) already treats `docs/` as carrying reviewed content
+# this package does not own.
+_SCANNED_PREFIXES = ("src/", "tests/", "migrations/")
+_SCANNED_FILES = {"pyproject.toml", "uv.lock", "Dockerfile", ".gitignore"}
+
+
+def _in_scanned_scope(rel_path: str) -> bool:
+    return rel_path.startswith(_SCANNED_PREFIXES) or rel_path in _SCANNED_FILES
+
 
 def _tracked_files() -> list[str]:
     result = subprocess.run(
@@ -38,7 +57,7 @@ def test_no_env_file_is_tracked() -> None:
 
 
 def test_no_tracked_file_contains_a_key_shaped_value() -> None:
-    tracked = _tracked_files()
+    tracked = [f for f in _tracked_files() if _in_scanned_scope(f)]
     offenders = []
     for rel_path in tracked:
         path = REPO_ROOT / rel_path
@@ -51,3 +70,23 @@ def test_no_tracked_file_contains_a_key_shaped_value() -> None:
         if KEY_SHAPE.search(text):
             offenders.append(rel_path)
     assert offenders == [], f"key-shaped value found in: {offenders}"
+
+
+def test_scanned_scope_still_covers_this_story_own_files() -> None:
+    """A guard against the exclusion becoming too broad: the files this
+    story actually ships must remain in scope, or narrowing the scan
+    silently defeats the guard it exists to keep."""
+    for rel_path in (
+        "src/factorflow/config/settings.py",
+        "tests/unit/test_settings_secrecy.py",
+        "pyproject.toml",
+    ):
+        assert _in_scanned_scope(rel_path), f"{rel_path} unexpectedly out of scope"
+
+
+def test_scanned_scope_excludes_docs() -> None:
+    """The exclusion this fix relies on: a governance document quoting a
+    key-shaped fixture value as review evidence must not trip the scan."""
+    assert not _in_scanned_scope(
+        "docs/capabilities/CAP-001-x/epics/e1/stories/CAP-001-E1-S3-implementation-review-v1.md"
+    )

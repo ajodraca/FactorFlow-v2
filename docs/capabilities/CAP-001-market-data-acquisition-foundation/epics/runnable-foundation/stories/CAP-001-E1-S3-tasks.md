@@ -8,7 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
 updated: 2026-09-07
-last_reworked_review: CAP-001-E1-S3-implementation-review-v1.md
+last_reworked_review: CAP-001-E1-S3-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -173,3 +173,4 @@ This story delivers `src/factorflow/config/settings.py` (Pydantic settings model
 - **`credential_present()` is not wired into `GET /api/health` here.** That endpoint belongs to `ingestion-api`, a separate component design. This story delivers the function; a later story consumes it.
 - **The database URL is explicitly not rotatable**, per component design section 2.2b's own scope statement — no task in this plan should add reload logic for `FACTORFLOW_DATABASE_URL`.
 - **This story can be developed in parallel with CAP-001-E1-S1 and CAP-001-E1-S2**, per its own "Dependencies: None" — other stories consume this module's settings contract rather than this story consuming theirs.
+- **`FACTORFLOW_LOG_LEVEL` (component design section 2.2, SA-LOG-001) was added to `Settings` during rework**, resolving implementation-review-v2's IR-005. It was absent from the original task list despite being one of this story's own variables; added as `Settings.log_level` (default `INFO`) and applied to the root logger in `configure_logging()`.

@@ -197,3 +197,37 @@ def test_configure_logging_redacts_a_handler_on_a_non_propagating_child_logger(
 
     assert records, "no record was captured"
     assert SECRET not in records[0].getMessage()
+
+
+def test_configure_logging_applies_the_configured_log_level(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """FACTORFLOW_LOG_LEVEL (component design section 2.2, SA-LOG-001):
+    configure_logging() applies it to the root logger."""
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://u:p@localhost/db")
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", SECRET)
+    monkeypatch.setenv("FACTORFLOW_LOG_LEVEL", "WARNING")
+
+    root = logging.getLogger()
+    original_level = root.level
+    try:
+        configure_logging()
+        assert root.level == logging.WARNING
+    finally:
+        root.setLevel(original_level)
+
+
+def test_configure_logging_defaults_to_info_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://u:p@localhost/db")
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", SECRET)
+    monkeypatch.delenv("FACTORFLOW_LOG_LEVEL", raising=False)
+
+    root = logging.getLogger()
+    original_level = root.level
+    try:
+        configure_logging()
+        assert root.level == logging.INFO
+    finally:
+        root.setLevel(original_level)

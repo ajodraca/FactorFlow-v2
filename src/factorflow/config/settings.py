@@ -22,6 +22,7 @@ _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
 _MASSIVE_API_KEY_VAR = "FACTORFLOW_MASSIVE_API_KEY"
 _DATABASE_URL_VAR = "FACTORFLOW_DATABASE_URL"
+_LOG_LEVEL_VAR = "FACTORFLOW_LOG_LEVEL"
 
 
 class ConfigurationError(ValueError):
@@ -136,10 +137,17 @@ class Settings(_EnvNamedSettings):
     `massive` and so cannot be checked by either model alone.
     """
 
+    model_config = SettingsConfigDict(env_prefix="FACTORFLOW_")
+
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)  # type: ignore[arg-type]
     api: ApiSettings = Field(default_factory=ApiSettings)
     massive: MassiveSettings = Field(default_factory=MassiveSettings)  # type: ignore[arg-type]
     run: RunSettings = Field(default_factory=RunSettings)
+    # Component design section 2.2, SA-LOG-001: both processes, optional,
+    # default INFO. It has no prefix-group siblings of its own (unlike
+    # `run`/`massive`/`api`), so it lives directly on the top-level model
+    # under the bare `FACTORFLOW_` prefix rather than a nested sub-model.
+    log_level: str = "INFO"
 
     @model_validator(mode="after")
     def _check_timing_invariants(self) -> "Settings":
@@ -243,6 +251,10 @@ def configure_logging() -> None:
         os.environ.get(_MASSIVE_API_KEY_VAR, ""),
     ]
     redacting_filter = RedactingFilter(secrets)
+
+    # FACTORFLOW_LOG_LEVEL (component design section 2.2, SA-LOG-001): both
+    # processes, optional, default INFO.
+    logging.getLogger().setLevel(os.environ.get(_LOG_LEVEL_VAR, "INFO"))
 
     original_handle = getattr(logging.Handler, "_unfiltered_handle", None)
     if original_handle is None:

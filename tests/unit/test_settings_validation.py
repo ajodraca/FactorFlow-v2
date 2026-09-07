@@ -6,7 +6,13 @@ bounds.
 
 import pytest
 
-from factorflow.config.settings import ApiSettings, ConfigurationError, DatabaseSettings, Settings
+from factorflow.config.settings import (
+    ApiSettings,
+    ConfigurationError,
+    DatabaseSettings,
+    MassiveSettings,
+    Settings,
+)
 
 
 def _base_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -125,3 +131,18 @@ class TestFieldBounds:
         monkeypatch.setenv(var, "0")
         with pytest.raises(ConfigurationError):
             DatabaseSettings(_env_file=None)  # type: ignore[call-arg]
+
+    def test_requests_per_minute_zero_rejected(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Component design section 7: 'requests per minute 0 ... raises'."""
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", "test-key")
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "0")
+        with pytest.raises(ConfigurationError):
+            MassiveSettings(_env_file=None)  # type: ignore[call-arg]
+
+    def test_max_attempts_zero_rejected(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Component design section 7: 'attempts 0 ... raises'."""
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", "test-key")
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_MAX_ATTEMPTS", "0")
+        with pytest.raises(ConfigurationError):
+            MassiveSettings(_env_file=None)  # type: ignore[call-arg]
