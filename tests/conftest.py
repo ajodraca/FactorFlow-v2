@@ -52,13 +52,18 @@ def postgres_connection_string(_postgres_admin_connection_string: str) -> Iterat
 
         base_url = _postgres_admin_connection_string.rsplit("/", 1)[0]
         yield f"{base_url}/{db_name}"
-
-        with admin_conn.cursor() as cur:
-            cur.execute(
-                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
-                "WHERE datname = %s AND pid <> pg_backend_pid()",
-                (db_name,),
-            )
-            cur.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(db_name)))
     finally:
-        admin_conn.close()
+        # Teardown belongs in `finally`: a failing test throws in at the yield
+        # above, and cleanup placed after it would be skipped, leaking the
+        # database into the shared session container.
+        try:
+            with admin_conn.cursor() as cur:
+                cur.execute(
+                    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                    "WHERE datname = %s AND pid <> pg_backend_pid()",
+                    (db_name,),
+                )
+                cur.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(db_name)))
+        finally:
+            # Close the admin connection even if the drop itself raises.
+            admin_conn.close()

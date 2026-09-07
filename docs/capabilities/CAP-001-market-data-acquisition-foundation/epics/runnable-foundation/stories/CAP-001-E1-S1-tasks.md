@@ -8,6 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
 updated: 2026-09-06
+last_reworked_review: CAP-001-E1-S1-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -103,7 +104,7 @@ This story delivers migration `0001_extensions_owner_state.sql` (the `btree_gist
 
 - [x] T014 Run the full `tests/integration/` suite from Phase 2 against the `testcontainers[postgres]` fixture (T004) with `migrations/0001_extensions_owner_state.sql` and `applied_migrations.py` now present, and fix any constraint or type mismatch surfaced by TC-COMP-293, TC-COMP-309 through TC-COMP-314 (fixed a test-isolation bug in the fixture itself: each test now gets its own freshly created database inside the shared session container, rather than all tests sharing one database's tables)
 
-**Checkpoint**: `uv run pytest -m postgres` passes in full. All eight mandatory TC-IDs (TC-COMP-292, 293, 309–314) are green. TC-COMP-292 (single-database state) is satisfied structurally — no task creates a second store — and is asserted by confirming every table in this story lives in the one PostgreSQL schema the fixture provisions.
+**Checkpoint**: `uv run pytest -m postgres` passes in full. Seven of the eight mandatory TC-IDs (TC-COMP-293, 309–314) have implementing tests and are green. TC-COMP-292 (single-database state) has no implementing test: it is satisfied structurally — no task creates a second store — and is verified by inspection, confirming every table in this story lives in the one PostgreSQL schema the fixture provisions. It is not counted as a green test.
 
 ---
 
@@ -166,5 +167,6 @@ Per the tech stack's validation notes: if no container runtime is available when
 - **T013 is a placeholder, not a real task.** `instrument` and `owner_setting` are both defined inside the single file `migrations/0001_extensions_owner_state.sql` created by T012; there is no second file to create. It is listed in the traceability table only so the table's task references stay stable against the AC list — no action is required beyond T012.
 - **Task ID `T011-impl` is used for the `applied_migrations.py` implementation** to keep it visibly paired with its T011 unit test without renumbering the whole sequence; a coding agent should feel free to renumber sequentially when executing, as long as the dependency ordering above is preserved.
 - **DAC-E1-1 (single-database state) has no dedicated implementation task.** It is a structural property — nothing in this story or any story in this capability introduces a second store — and is verified by inspection at T014 rather than by a targeted test, consistent with TC-COMP-292's own preconditions ("no additional condition is assumed").
-- **Symbol uniqueness across lifecycle states is deliberately not enforced here.** `idx_instrument_symbol` is a plain unique index in this migration; reactivation semantics (a retired symbol becoming active again) are explicitly deferred to CAP-001-E2-S1 per the story text, and no task in this plan should add logic anticipating that.
+- **Symbol uniqueness is enforced here, in the schema.** `idx_instrument_symbol` is a plain unique index created by T012 in this migration, per `component-design-market-data-store.md` section 2.3, whose traceability table maps AC-1 to "`instrument` table, symbol uniqueness, lifecycle check" in that section. What CAP-001-E2-S1 owns is *reactivation semantics* — a retired symbol becoming active again by returning the existing row to `active` rather than inserting a second row (DAC-E2-S1-3) — which the unique index supports rather than pre-empts. E2-S1 must not create a second unique index on `symbol`. No task in this plan should add reactivation logic. Resolved per implementation review v1, finding IR-001.
 - **AC-15 is only partially satisfied by this story.** Full forward-evolution behavior (applying several unapplied migrations in order, refusing an inconsistent store) belongs to CAP-001-E1-S2's migrator. This story's contribution to AC-15 is narrower: applying `0001` twice must not lose or rewrite the `instrument`/`owner_setting` rows already present, which T009/T014 verify directly against the SQL file rather than through a migrator.
+- **TC-COMP-314's proof here is contributory, not final.** The idempotence guard T009 exercises (`_apply_0001_if_not_recorded`) is defined in `tests/integration/test_migration_idempotence.py`, because the migrator that will own that decision is CAP-001-E1-S2. No shipped code in this story implements it, so no production regression can fail that test. CAP-001-E1-S2 must re-verify TC-COMP-314 against the real migrator alongside DAC-E1-S2-1. Recorded per implementation review v1, finding IR-002.
