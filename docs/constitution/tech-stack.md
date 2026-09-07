@@ -343,8 +343,10 @@ Notes for agents:
   the only place the promotion flow and the kill switch are exercised end to end.
   The same exclusion rule applies: report the exclusion, do not report a partial
   run as a green suite.
-- None of these scripts exist yet. The first stories create `pyproject.toml` and
-  `package.json`, and MUST define these command names.
+- The seven Python commands above exist and are verified working.
+  `pyproject.toml` was created by CAP-001-E1-S1, which defined them.
+- The `npm` and `npx` commands do not exist yet. The first frontend story
+  creates `package.json` and MUST define those command names.
 
 ## Open Questions
 
