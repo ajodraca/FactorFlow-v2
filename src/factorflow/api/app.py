@@ -20,16 +20,17 @@ from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
 from factorflow.api.routes import health
-from factorflow.config.settings import DatabaseSettings
+from factorflow.config.settings import DatabaseSettings, configure_logging
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
 # Bound by the request-id middleware for the duration of one request, and
-# read by `_RequestIdLogFilter` so every log record emitted while handling
-# it -- regardless of which logger or module emits it -- carries the same
-# id, per DAC-E1-S6-5. A `ContextVar` rather than a module-level variable is
-# what makes this safe under concurrent requests: each request's task gets
-# its own view of the variable.
+# read by `_install_request_id_patch`'s `Handler.handle` wrapper so every
+# log record emitted while handling it -- regardless of which logger or
+# module emits it -- carries the same id, per DAC-E1-S6-5. A `ContextVar`
+# rather than a module-level variable is what makes this safe under
+# concurrent requests: each request's task gets its own view of the
+# variable.
 _request_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
 )
@@ -47,24 +48,36 @@ def _install_request_id_patch() -> None:
     module logger with no handler of its own too, since propagation runs
     the record through root's *handlers*, not root's filters. The same
     module solves this for credential redaction by patching
-    `logging.Handler.handle` at the class level, once, so every handler --
-    existing, future, and on any logger -- is stamped before it emits,
-    independent of the propagation path. This reuses that mechanism rather
-    than inventing a second one.
+    `logging.Handler.handle` at the class level, once. This function
+    follows the same strategy, but it must compose with that patch rather
+    than collide with it.
 
-    Idempotent: calling it more than once re-wraps from the same
-    `_unfiltered_handle` baseline rather than double-wrapping.
+    IR-001: an earlier version of this function shared `configure_logging`'s
+    `_unfiltered_handle` sentinel to look up "the original" `Handler.handle`.
+    Whichever of the two patches installs second reads that sentinel and
+    finds the *pristine* original -- not the other patch's wrapper -- and
+    reassigns `Handler.handle` to wrap the pristine original again. The
+    first patch's wrapper is then unreachable: nothing calls it any more,
+    silently disabling credential redaction (or request-id stamping,
+    depending on install order). The two effects must compose regardless of
+    order, so this function stores its own baseline under a distinct
+    sentinel (`_request_id_unstamped_handle`) and always wraps whatever
+    `Handler.handle` currently is -- `configure_logging`'s wrapper if that
+    ran first, the class default otherwise -- rather than reaching past it.
+
+    Idempotent: calling it more than once re-wraps from this function's own
+    stored baseline rather than double-wrapping.
     """
-    original_handle = getattr(logging.Handler, "_unfiltered_handle", None)
-    if original_handle is None:
-        original_handle = logging.Handler.handle
-        logging.Handler._unfiltered_handle = original_handle  # type: ignore[attr-defined]
+    baseline = getattr(logging.Handler, "_request_id_unstamped_handle", None)
+    if baseline is None:
+        baseline = logging.Handler.handle
+        logging.Handler._request_id_unstamped_handle = baseline  # type: ignore[attr-defined]
 
     def _stamped_handle(self: logging.Handler, record: logging.LogRecord) -> bool:
         request_id = _request_id_var.get()
         if request_id is not None and not hasattr(record, "request_id"):
             record.request_id = request_id
-        return original_handle(self, record)
+        return baseline(self, record)
 
     logging.Handler.handle = _stamped_handle  # type: ignore[method-assign]
 
@@ -79,6 +92,13 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     on `app.state` so `health.py` and every later route can reach it
     without importing `app.py` directly.
     """
+    # IR-001: `configure_logging()` (CAP-001-E1-S3) was never called in this
+    # process before this story. It must run here, in the API process's own
+    # startup, for AC-13's redaction guarantee to hold at all -- and before
+    # `_install_request_id_patch()` so the composition is exercised the same
+    # way in every environment that constructs this app (tests included),
+    # not left to depend on which happens to run first.
+    configure_logging()
     _install_request_id_patch()
 
     db_settings = DatabaseSettings()  # type: ignore[call-arg]
@@ -100,9 +120,10 @@ def _add_request_id_middleware(app: FastAPI) -> None:
     """T005, T020: generate a UUID per request, bind it for logging, echo it back.
 
     Bound into `_request_id_var` for the duration of the request so every
-    log record emitted while handling it carries the id (`_RequestIdLogFilter`),
-    included as the `X-Request-Id` response header on every response, and
-    passed to the error envelope (`errors.py`) on any non-2xx response via
+    log record emitted while handling it carries the id
+    (`_install_request_id_patch`'s `Handler.handle` wrapper), included as
+    the `X-Request-Id` response header on every response, and passed to the
+    error envelope (`errors.py`) on any non-2xx response via
     `request.state.request_id`.
     """
 

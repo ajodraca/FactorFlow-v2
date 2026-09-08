@@ -3,11 +3,12 @@ artifact_schema_version: 1
 artifact_id: CAP-001-E1-S6-tasks
 artifact_type: story-tasks
 artifact_version: 1
-status: draft
+status: in-progress
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-09-08
+last_reworked_review: CAP-001-E1-S6-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -30,7 +31,7 @@ ai_provenance:
 
 **Story**: `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/runnable-foundation/stories/CAP-001-E1-S6.md`
 **Component**: `FactorFlow-v2`
-**Branch**: `usr/alvaro-de-jodra/CAP-001-epics`
+**Branch**: `usr/alvaro-de-jodra/CAP-001-E1-S6`
 **Date**: 2026-09-06
 
 ## Summary

@@ -10,9 +10,9 @@ import time
 
 import httpx
 import pytest
-import uvicorn
 
 from factorflow.api.app import create_app
+from factorflow.app_main import build_server
 
 
 @pytest.fixture(autouse=True)
@@ -26,16 +26,48 @@ def _free_port() -> int:
         return sock.getsockname()[1]
 
 
+def _find_non_loopback_ipv4() -> str | None:
+    """A real, non-loopback IPv4 address this host owns, or `None`.
+
+    `socket.gethostbyname(socket.gethostname())` (the previous approach)
+    raises `gaierror` on hosts without a forward DNS entry for their own
+    hostname, which silently skipped the one assertion AC-14 exists to
+    make (IR-003). `getaddrinfo` resolves the *interface* addresses
+    directly rather than depending on that name lookup, so it is not
+    subject to the same failure mode -- but a sandboxed CI runner can
+    still have no non-loopback interface at all, so callers must still
+    handle `None`.
+    """
+    try:
+        infos = socket.getaddrinfo(socket.gethostname(), None, family=socket.AF_INET)
+    except socket.gaierror:
+        return None
+    for _, _, _, _, sockaddr in infos:
+        ip = sockaddr[0]
+        if ip != "127.0.0.1":
+            return ip
+    return None
+
+
 def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The default `FACTORFLOW_API_HOST` binds the socket to `127.0.0.1`."""
+    """The default `FACTORFLOW_API_HOST` binds the socket to `127.0.0.1`.
+
+    IR-005: drives the server through `app_main.build_server`, the actual
+    settings-to-socket path this story ships, rather than constructing a
+    `uvicorn.Config` with a literal `host="127.0.0.1"` that no production
+    code path produces.
+    """
+    non_loopback_ip = _find_non_loopback_ipv4()
+    if non_loopback_ip is None:
+        pytest.skip(
+            "no non-loopback IPv4 interface found on this host; "
+            "the non-loopback-rejection half of AC-14 cannot be exercised here"
+        )
+
     port = _free_port()
     monkeypatch.delenv("FACTORFLOW_API_HOST", raising=False)
-    monkeypatch.setenv("FACTORFLOW_API_PORT", str(port))
 
-    app = create_app()
-    config = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning")
-    server = uvicorn.Server(config)
-
+    server = build_server(port=port)
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     try:
@@ -48,16 +80,9 @@ def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
         response = httpx.get(f"http://127.0.0.1:{port}/api/health", timeout=10)
         assert response.status_code == 200
 
-        # Not reachable on any non-loopback interface the host exposes.
-        hostname = socket.gethostname()
-        try:
-            non_loopback_ip = socket.gethostbyname(hostname)
-        except socket.gaierror:
-            non_loopback_ip = None
-
-        if non_loopback_ip and non_loopback_ip != "127.0.0.1":
-            with pytest.raises((httpx.ConnectError, httpx.ConnectTimeout)):
-                httpx.get(f"http://{non_loopback_ip}:{port}/api/health", timeout=1)
+        # Not reachable on the non-loopback interface this host actually owns.
+        with pytest.raises((httpx.ConnectError, httpx.ConnectTimeout)):
+            httpx.get(f"http://{non_loopback_ip}:{port}/api/health", timeout=1)
     finally:
         server.should_exit = True
         thread.join(timeout=5)

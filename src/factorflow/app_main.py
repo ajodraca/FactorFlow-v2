@@ -13,9 +13,25 @@ from factorflow.config.settings import ApiSettings
 app = create_app()
 
 
-def main() -> None:
+def build_server(port: int | None = None) -> uvicorn.Server:
+    """Build the `uvicorn.Server` this process would run, from `ApiSettings`.
+
+    `port` overrides `ApiSettings.port` when given (IR-005: a test needs a
+    free ephemeral port rather than the configured default, but must still
+    exercise this same settings-to-config path -- particularly `host`,
+    which `ApiSettings._reject_non_loopback_host` (CAP-001-E1-S3) already
+    constrains at the config layer, and which this function is the one
+    place that turns into a bound socket).
+    """
     settings = ApiSettings()
-    uvicorn.run(app, host=settings.host, port=settings.port)
+    config = uvicorn.Config(
+        app, host=settings.host, port=port if port is not None else settings.port
+    )
+    return uvicorn.Server(config)
+
+
+def main() -> None:
+    build_server().run()
 
 
 if __name__ == "__main__":

@@ -82,10 +82,10 @@ def get_health(request: Request) -> HealthResponse:
             reachable = False
             schema_version = None
 
-    _LOGGER.info(
-        "health check completed",
-        extra={"database": "reachable" if reachable else "unreachable"},
-    )
+    # IR-009: no formatter in this component renders arbitrary `extra`
+    # fields, so a field an operator needs to actually see in the log must
+    # be in the message text itself, not only attached to the record.
+    _LOGGER.info("health check completed: database=%s", "reachable" if reachable else "unreachable")
 
     return HealthResponse(
         status="ok",

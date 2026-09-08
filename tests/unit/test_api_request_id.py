@@ -26,21 +26,37 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 def test_request_id_appears_in_every_log_record_and_the_response(
     client: TestClient, caplog: pytest.LogCaptureFixture
 ) -> None:
-    with caplog.at_level(logging.INFO, logger="factorflow.api.routes.health"):
+    """DAC-E1-S6-5: the id is included in *every* log record for the request.
+
+    IR-007: an earlier version scoped `caplog.at_level` to the single
+    `factorflow.api.routes.health` logger and asserted only that *some*
+    record carried the id, so a record emitted unstamped -- for instance
+    from a handler installed before the request-id patch, the exact class
+    of bug behind IR-001 -- would be filtered out rather than failing the
+    assertion. Capturing at root and requiring every record to carry the
+    id (not just the ones that happen to) makes that failure mode visible.
+    """
+    with caplog.at_level(logging.INFO):
+        caplog.clear()
         response = client.get("/api/health")
 
     assert response.status_code == 200
     response_request_id = response.headers.get("x-request-id")
     assert response_request_id
 
-    records_during_request = [
-        record
-        for record in caplog.records
-        if getattr(record, "request_id", None) == response_request_id
-    ]
-    assert records_during_request, (
-        "expected at least one log record carrying the response's request id"
-    )
+    # Scoped to this component's own loggers: `psycopg_pool`'s background
+    # connection-retry worker runs on its own thread outside this request's
+    # `ContextVar` scope, and legitimately carries no request id -- it is
+    # not part of handling *this* request, it is pool maintenance that would
+    # happen with or without an in-flight request. `factorflow.api.*`
+    # records, in contrast, are all emitted from inside this request's own
+    # call stack and must every one carry the id.
+    component_records = [r for r in caplog.records if r.name.startswith("factorflow.api")]
+    assert component_records, "expected at least one factorflow.api record from this request"
+    for record in component_records:
+        assert getattr(record, "request_id", None) == response_request_id, (
+            f"record {record.name!r} ({record.getMessage()!r}) does not carry the request's id"
+        )
 
 
 def test_two_requests_get_different_request_ids(client: TestClient) -> None:
