@@ -8,7 +8,7 @@ import { Shell } from "./shell";
 // no principal is assumed anywhere (loopback with no authentication).
 describe("Shell — no principal is assumed (AC-14)", () => {
   it("renders no element matching sign-in, account, or user-menu semantics", () => {
-    render(
+    const { container } = render(
       <MemoryRouter>
         <Shell />
       </MemoryRouter>,
@@ -25,6 +25,17 @@ describe("Shell — no principal is assumed (AC-14)", () => {
       expect(el.getAttribute("aria-label") ?? "").not.toMatch(forbidden);
     }
     expect(screen.queryByTestId(/sign-in|account|user-menu/i)).toBeNull();
+
+    // AC-14 says the shell contains no sign-in, user menu, or account
+    // *area* — not merely no button or link carrying that semantics. A
+    // static label ("Account", "Signed in as owner") or a non-interactive
+    // menu region would satisfy the checks above while violating the
+    // criterion, so also scan the whole rendered tree's text content and
+    // every accessible name in its accessibility tree.
+    expect(container.textContent ?? "").not.toMatch(forbidden);
+    for (const el of container.querySelectorAll<HTMLElement>("[role], [aria-label]")) {
+      expect(el.getAttribute("aria-label") ?? "").not.toMatch(forbidden);
+    }
   });
 });
 

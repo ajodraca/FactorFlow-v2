@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-09-08
+last_reworked_review: CAP-001-E1-S4-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -175,3 +176,4 @@ This story delivers the frontend project's first code: `package.json`, `vite.con
 - **No design-system component (`badge`, `button`, `data-table`, etc.) is used by this story.** The ten components mapped in the component design's section 2.5 belong to the screens E2, E5, E6, and E7 deliver; the shell itself is pure composition, per both the story's and the UX design's own description.
 - **Token discipline (T012, T023) is closer to a static scan than a rendering assertion.** The story's phrasing ("introduces no spacing value outside the scale") is a code-review-style constraint. This plan treats it as a test where practical (grepping rendered styles or source for literal length values) but notes that some part of this may end up enforced by human review rather than an automated assertion, consistent with `ui-conventions.md`'s own statement that Biome carries no `jsx-a11y` equivalent and that STD-UI-24's accessibility enforcement is human review.
 - **CAP-001-E2-S1's task plan is present but uncommitted on this branch** (from a different planning pass). This story's plan does not depend on it and was not affected by it.
+- **Open design question (implementation-review-v1, IR-004): the rail's `--space-7` width (48px) cannot legibly contain the visible text label "Instruments" DAC-E1-S4-1 requires.** `shell.tsx` implements the rail width exactly as ux-design §0 specifies (`--space-7`), and `theme.css` defines that token as `3rem`/48px — confirmed in the built CSS. ux-design §0 also requires the four destinations to render as visible text labels, and those two statements are in tension: 48px is an icon-rail width, and the design names no icons. This is faithful-to-design behavior, not an implementation defect, so it is not resolved here — introducing a width outside the defined scale would violate STD-UI-29. **Follow-up owed to the UX design owner:** either widen the rail to a wider scale value, specify icons with accessible names instead of (or alongside) visible text, or state explicitly that labels wrap. Until ux-design §0 is revised, `shell.tsx` keeps `--space-7` as specified.
