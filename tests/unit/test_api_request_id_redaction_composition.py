@@ -6,17 +6,29 @@ earlier version of the request-id patch shared `configure_logging`'s
 `_unfiltered_handle` sentinel to find "the original" handler method,
 which meant whichever patch installed second discarded the other's
 wrapper rather than composing with it -- silently disabling credential
-redaction in the API process. This test installs both, in both orders,
-and asserts a record carrying a secret is emitted both redacted and
-carrying the request id every time.
+redaction in the API process. The two tests below install both patches
+directly, in both orders, and assert a record carrying a secret is
+emitted both redacted and carrying the request id every time.
+
+IR-201 (v2 review): those two tests call `configure_logging` and
+`_install_request_id_patch` directly and never construct the app or enter
+its lifespan, so they cannot observe whether the *application* actually
+calls `configure_logging()` at startup -- which is the other half of
+v1's actual field defect (no call site at all, not just a composition
+bug). `test_lifespan_installs_redaction_end_to_end` below closes that gap
+by driving a real request through `TestClient(create_app())` and
+asserting a record logged from inside that request is redacted; deleting
+the `configure_logging()` call from `_lifespan` must fail it.
 """
 
 import logging
 
 import pytest
+from fastapi.testclient import TestClient
 
 import factorflow.api.app as app_module
 import factorflow.config.settings as settings_module
+from factorflow.api.app import create_app
 
 
 @pytest.fixture(autouse=True)
@@ -87,3 +99,49 @@ def test_request_id_then_redaction_compose(monkeypatch: pytest.MonkeyPatch) -> N
     assert secret not in record.getMessage()
     assert record.getMessage() == "leaking [redacted] here"
     assert record.request_id == "rid-order-b"  # type: ignore[attr-defined]
+
+
+def test_lifespan_installs_redaction_end_to_end(monkeypatch: pytest.MonkeyPatch) -> None:
+    """IR-201: the application's own startup, not a direct patch call, must
+    install redaction.
+
+    Constructs the app through `create_app()` and drives a real request
+    through `TestClient`, which runs `_lifespan` exactly as the deployed
+    process does. A record carrying the secret, logged from a module
+    logger during that request (standing in for a driver exception or a
+    third-party library's debug output -- the disclosure path v1 actually
+    left open), must come out redacted. Deleting `configure_logging()`
+    from `app.py`'s `_lifespan` fails this test; the two tests above
+    cannot.
+    """
+    secret = "SECRETKEY789"
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", secret)
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+
+    records: list[logging.LogRecord] = []
+
+    class _Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            records.append(record)
+
+    logger = logging.getLogger("factorflow.api.test.lifespan_redaction")
+    logger.setLevel(logging.INFO)
+    handler = _Capture()
+    logger.addHandler(handler)
+    try:
+        app = create_app()
+        with TestClient(app) as client:
+            # A real request, so the emitted record is inside the
+            # request-id middleware's ContextVar scope -- exercising both
+            # halves (redaction and stamping) together, the way a genuine
+            # in-request log call would.
+            response = client.get("/api/health")
+            logger.info("leaking %s here", secret)
+    finally:
+        logger.removeHandler(handler)
+
+    assert response.status_code == 200
+    assert records, "expected the logger call inside the `with` block to emit a record"
+    record = records[-1]
+    assert secret not in record.getMessage()
+    assert record.getMessage() == "leaking [redacted] here"
