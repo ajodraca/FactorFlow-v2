@@ -9,12 +9,17 @@ description = "FactorFlow: classify a self-defined stock universe and trade it a
 requires-python = ">=3.12"
 dependencies = [
     "psycopg[binary]>=3",
+    "psycopg-pool>=3",
     "pydantic-settings>=2",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-asyncio",
+    "httpx",
     "testcontainers[postgres]",
     "ruff",
     "mypy",
