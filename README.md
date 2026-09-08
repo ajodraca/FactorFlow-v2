@@ -10,10 +10,11 @@ data ingestion process, and the owner interface. See
 
 ## Status
 
-Early. The database schema foundation is in place; the application, the
-ingestion process, and the owner interface are not yet built. What exists
-today is described below — everything else in `docs/` is specification for
-work not yet implemented.
+Early. The database schema foundation and the API's health endpoint and
+application factory are in place; the remaining API routes, the ingestion
+process, and the owner interface are not yet built. What exists today is
+described below — everything else in `docs/` is specification for work not
+yet implemented.
 
 ## Requirements
 
@@ -31,11 +32,13 @@ uv sync --all-extras
 
 | Path | Contents |
 |------|----------|
-| `Dockerfile` | Application container image. Runs the schema migrator, then execs `uvicorn`, chained with `&&` so a failed migration prevents the API from ever binding. Not yet a runnable service — no FastAPI app module exists yet |
+| `Dockerfile` | Application container image. Runs the schema migrator, then execs the API process (`python -m factorflow.app_main`), chained with `&&` so a failed migration prevents the API from ever binding |
 | `migrations/` | Numbered, forward-only SQL migrations. See `migrations/README.md` for the conventions |
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory — empty until a frontend build lands. See [Running the API](#running-the-api) |
+| `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
 | `docs/` | Constitution, capability specifications, and designs |
@@ -113,6 +116,39 @@ Exit code 0 means the schema is current or was brought forward; 1–4 each
 name a distinct reason the store could not be brought forward (unreachable
 database, store ahead of this build, a tampered migration, or a migration
 that failed partway) and none of them start the API.
+
+## Running the API
+
+The API binds to `127.0.0.1` only by default, and no endpoint declares an
+authentication requirement — the loopback binding is what makes that sound.
+Once the schema is current (see above), start it with:
+
+```bash
+FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
+FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
+  uv run python -m factorflow.app_main
+```
+
+`GET /api/health` reports liveness, database reachability, whether the
+provider credential is set (a boolean, never the value), and the highest
+applied migration version:
+
+```json
+{
+  "status": "ok",
+  "database": "reachable",
+  "credential_present": true,
+  "schema_version": 4,
+  "most_recent_run": null
+}
+```
+
+An unreachable database still responds `200` with `database: "unreachable"`,
+rather than failing the request, so a caller can distinguish a dead database
+from a dead API. `most_recent_run` is `null` until a later story populates
+it. No frontend bundle is built into this branch yet: an unmatched non-API
+path falls back to `index.html` once one exists, and 404s until then; an
+unmatched path under `/api` always returns the `{"error": {...}}` envelope.
 
 ## Testing
 
