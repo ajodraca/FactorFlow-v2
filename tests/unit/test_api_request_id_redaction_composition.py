@@ -16,9 +16,11 @@ its lifespan, so they cannot observe whether the *application* actually
 calls `configure_logging()` at startup -- which is the other half of
 v1's actual field defect (no call site at all, not just a composition
 bug). `test_lifespan_installs_redaction_end_to_end` below closes that gap
-by driving a real request through `TestClient(create_app())` and
-asserting a record logged from inside that request is redacted; deleting
-the `configure_logging()` call from `_lifespan` must fail it.
+by driving a real request through `TestClient(create_app())`, with the
+health route monkeypatched to log the secret genuinely from inside
+request handling, and asserting the resulting record is both redacted
+and carries the request id; deleting the `configure_logging()` call from
+`_lifespan` must fail it.
 """
 
 import logging
@@ -27,6 +29,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import factorflow.api.app as app_module
+import factorflow.api.routes.health as health_module
 import factorflow.config.settings as settings_module
 from factorflow.api.app import create_app
 
@@ -107,12 +110,16 @@ def test_lifespan_installs_redaction_end_to_end(monkeypatch: pytest.MonkeyPatch)
 
     Constructs the app through `create_app()` and drives a real request
     through `TestClient`, which runs `_lifespan` exactly as the deployed
-    process does. A record carrying the secret, logged from a module
-    logger during that request (standing in for a driver exception or a
-    third-party library's debug output -- the disclosure path v1 actually
-    left open), must come out redacted. Deleting `configure_logging()`
-    from `app.py`'s `_lifespan` fails this test; the two tests above
-    cannot.
+    process does. The health route (`routes.health.get_health`) is
+    monkeypatched to log the secret as its first action, so the record is
+    genuinely emitted from *inside* request handling -- standing in for a
+    driver exception or a third-party library's debug output, the
+    disclosure path v1 actually left open -- rather than after
+    `client.get()` has already returned. This also exercises stamping and
+    redaction together (IR-202): the record is checked for both the
+    redacted message and a request id bound while the middleware's
+    `ContextVar` scope is still open. Deleting `configure_logging()` from
+    `app.py`'s `_lifespan` fails this test; the two tests above cannot.
     """
     secret = "SECRETKEY789"
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", secret)
@@ -128,20 +135,30 @@ def test_lifespan_installs_redaction_end_to_end(monkeypatch: pytest.MonkeyPatch)
     logger.setLevel(logging.INFO)
     handler = _Capture()
     logger.addHandler(handler)
+
+    original_credential_present = health_module.credential_present
+
+    def _credential_present_that_leaks() -> bool:
+        # `get_health` (routes/health.py) calls `credential_present()` as
+        # part of handling the request, so logging here runs genuinely
+        # inside the request-id middleware's `ContextVar` scope -- the way
+        # a caught driver exception or a third-party library's own logger
+        # would, rather than after `client.get()` has already returned.
+        logger.info("leaking %s here", secret)
+        return original_credential_present()
+
+    monkeypatch.setattr(health_module, "credential_present", _credential_present_that_leaks)
+
     try:
         app = create_app()
         with TestClient(app) as client:
-            # A real request, so the emitted record is inside the
-            # request-id middleware's ContextVar scope -- exercising both
-            # halves (redaction and stamping) together, the way a genuine
-            # in-request log call would.
             response = client.get("/api/health")
-            logger.info("leaking %s here", secret)
     finally:
         logger.removeHandler(handler)
 
     assert response.status_code == 200
-    assert records, "expected the logger call inside the `with` block to emit a record"
+    assert records, "expected the health route's logger call to emit a record"
     record = records[-1]
     assert secret not in record.getMessage()
     assert record.getMessage() == "leaking [redacted] here"
+    assert getattr(record, "request_id", None) == response.headers["x-request-id"]
