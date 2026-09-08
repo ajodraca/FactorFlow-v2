@@ -56,14 +56,14 @@ This story delivers the frontend project's first code: `package.json`, `vite.con
 
 **Purpose**: Bootstrap the frontend project — no `package.json`, Vite config, or `web/` directory exists anywhere in the repository yet. This is the first frontend code in the capability.
 
-- [ ] T001 Create `package.json` at the repo root defining the npm scripts the tech stack's validation table names (`build`, `test`, `test:e2e`, `lint`, `format`) and dependencies `react`, `react-dom`, `react-router-dom` (routing library implied by the story's "routes.tsx" and "child route" language but not named explicitly by either the component design or the story; `react-router-dom` v6 is the conventional choice for this shape in the React 18 ecosystem the tech stack specifies — flagged in Notes as a gap-fill), dev dependencies `vite`, `typescript`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome`
-- [ ] T002 [P] Create `vite.config.ts` at the repo root with `root: "web"` and `build.outDir` pointing into `src/factorflow/api/static` (relative path from `web/`), per component design section 2.1 — this is what makes `npm run build`'s output land where CAP-001-E1-S6's static-file mount expects it
-- [ ] T003 [P] Create `web/index.html` as the Vite entry HTML, loading `web/src/main.tsx`
-- [ ] T004 [P] Create `web/src/main.tsx` mounting the React root and rendering the shell from `web/src/app/shell.tsx`
-- [ ] T005 [P] Create `tsconfig.json` at the repo root (or `web/tsconfig.json` per Vite convention) targeting the tech stack's TypeScript 5.x, with `web/src` as the source root
-- [ ] T006 [P] Create `tailwind.config.js` referencing `design-system/theme.css`'s custom properties (the token scale this shell and every later screen must consume, per STD-UI-29) rather than introducing a separate Tailwind theme
-- [ ] T007 [P] Create `vitest.config.ts` (or extend `vite.config.ts`) configuring Vitest with React Testing Library's jsdom environment
-- [ ] T008 [P] Create `web/src/app/__init__`-equivalent scaffolding: an empty `web/src/app/status-region.tsx` placeholder module exporting a no-op component, so `shell.tsx` can import and render the slot CAP-001-E1-S5 will fill without this story building it
+- [x] T001 Create `package.json` at the repo root defining the npm scripts the tech stack's validation table names (`build`, `test`, `test:e2e`, `lint`, `format`) and dependencies `react`, `react-dom`, `react-router-dom` (routing library implied by the story's "routes.tsx" and "child route" language but not named explicitly by either the component design or the story; `react-router-dom` v6 is the conventional choice for this shape in the React 18 ecosystem the tech stack specifies — flagged in Notes as a gap-fill), dev dependencies `vite`, `typescript`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome`
+- [x] T002 [P] Create `vite.config.ts` at the repo root with `root: "web"` and `build.outDir` pointing into `src/factorflow/api/static` (relative path from `web/`), per component design section 2.1 — this is what makes `npm run build`'s output land where CAP-001-E1-S6's static-file mount expects it
+- [x] T003 [P] Create `web/index.html` as the Vite entry HTML, loading `web/src/main.tsx`
+- [x] T004 [P] Create `web/src/main.tsx` mounting the React root and rendering the shell from `web/src/app/shell.tsx`
+- [x] T005 [P] Create `tsconfig.json` at the repo root (or `web/tsconfig.json` per Vite convention) targeting the tech stack's TypeScript 5.x, with `web/src` as the source root
+- [x] T006 [P] Create `tailwind.config.js` referencing `design-system/theme.css`'s custom properties (the token scale this shell and every later screen must consume, per STD-UI-29) rather than introducing a separate Tailwind theme
+- [x] T007 [P] Create `vitest.config.ts` (or extend `vite.config.ts`) configuring Vitest with React Testing Library's jsdom environment
+- [x] T008 [P] Create `web/src/app/__init__`-equivalent scaffolding: an empty `web/src/app/status-region.tsx` placeholder module exporting a no-op component, so `shell.tsx` can import and render the slot CAP-001-E1-S5 will fill without this story building it
 
 **Checkpoint**: `npm ci` resolves; `npm run build` succeeds and produces output under `src/factorflow/api/static/`; `npm run lint` and `npx tsc --noEmit` run cleanly against the empty scaffolding; `npm run test` collects zero tests and exits 0.
 
@@ -75,17 +75,17 @@ This story delivers the frontend project's first code: `package.json`, `vite.con
 
 ### Mandatory Component Tests
 
-- [ ] T009 [P] Implement TC-COMP-014 (partial — shell has no auth-implying element), TC-COMP-303, and AC-14's shell-level assertion (no sign-in, user menu, or account area) in `web/src/app/shell.test.tsx` — render the shell, assert no element matches sign-in, account, or user-menu semantics (by role, accessible name, or test id), per the story's own Testing section
-- [ ] T010 [P] Implement TC-COMP-303 (rail presents four destinations in order), TC-COMP-329 (labels use the exact product vocabulary) in `web/src/app/shell.test.tsx` — assert the rail renders exactly four navigation items, in the order Coverage, Instruments, Runs, Settings, with those exact labels and no others (not "Jobs", not "Sync", not "Import")
-- [ ] T011 [P] Implement TC-COMP-330 (run detail route renders as a child of Runs; Runs stays active) in `web/src/app/routes.test.tsx` — navigate to a run detail path, assert the Runs rail item still carries the active/current indicator and no fifth rail item appears
-- [ ] T012 [P] Implement TC-COMP-331 (every spacing/type value in the shell comes from the defined scale) in `web/src/app/shell.test.tsx` (or a dedicated `web/src/app/shell.tokens.test.tsx`) — statically inspect the shell's rendered styles or its source for any CSS length/font-size value not resolving to one of `theme.css`'s `--space-*`/`--text-*` custom properties; this is closer to a lint/static-scan test than a rendering assertion, consistent with the story's "introduces no spacing value outside the scale" wording
-- [ ] T013 [P] Implement TC-COMP-332 (keyboard traversal reaches every destination; the active one is announced, WCAG 2.1 AA) in `web/src/app/shell.a11y.test.tsx` — using Testing Library's `userEvent`, tab through the rail, assert focus visits all four destinations in order and the active route is exposed via `aria-current` (or an equivalent accessible-name/state mechanism)
-- [ ] T014 [P] Implement TC-COMP-333 (an unknown route renders a not-found state inside the frame) in `web/src/app/routes.test.tsx` — navigate to an undefined path, assert the shell's main region renders a not-found state and the rail/status-region frame remains present (no empty page, no crash)
+- [x] T009 [P] Implement TC-COMP-014 (partial — shell has no auth-implying element), TC-COMP-303, and AC-14's shell-level assertion (no sign-in, user menu, or account area) in `web/src/app/shell.test.tsx` — render the shell, assert no element matches sign-in, account, or user-menu semantics (by role, accessible name, or test id), per the story's own Testing section
+- [x] T010 [P] Implement TC-COMP-303 (rail presents four destinations in order), TC-COMP-329 (labels use the exact product vocabulary) in `web/src/app/shell.test.tsx` — assert the rail renders exactly four navigation items, in the order Coverage, Instruments, Runs, Settings, with those exact labels and no others (not "Jobs", not "Sync", not "Import")
+- [x] T011 [P] Implement TC-COMP-330 (run detail route renders as a child of Runs; Runs stays active) in `web/src/app/routes.test.tsx` — navigate to a run detail path, assert the Runs rail item still carries the active/current indicator and no fifth rail item appears
+- [x] T012 [P] Implement TC-COMP-331 (every spacing/type value in the shell comes from the defined scale) in `web/src/app/shell.test.tsx` (or a dedicated `web/src/app/shell.tokens.test.tsx`) — statically inspect the shell's rendered styles or its source for any CSS length/font-size value not resolving to one of `theme.css`'s `--space-*`/`--text-*` custom properties; this is closer to a lint/static-scan test than a rendering assertion, consistent with the story's "introduces no spacing value outside the scale" wording
+- [x] T013 [P] Implement TC-COMP-332 (keyboard traversal reaches every destination; the active one is announced, WCAG 2.1 AA) in `web/src/app/shell.a11y.test.tsx` — using Testing Library's `userEvent`, tab through the rail, assert focus visits all four destinations in order and the active route is exposed via `aria-current` (or an equivalent accessible-name/state mechanism)
+- [x] T014 [P] Implement TC-COMP-333 (an unknown route renders a not-found state inside the frame) in `web/src/app/routes.test.tsx` — navigate to an undefined path, assert the shell's main region renders a not-found state and the rail/status-region frame remains present (no empty page, no crash)
 
 ### Additional Unit Tests
 
-- [ ] T015 [P] Write a unit test asserting the shell's DOM structure matches the layout contract (fixed left rail, main region, status-region slot pinned to the bottom of the rail) rather than only checking content, in `web/src/app/shell.layout.test.tsx`
-- [ ] T016 [P] Write a unit test asserting `routes.tsx` declares exactly the five routes this story owns (four destinations plus one run-detail child route) and no additional top-level route, in `web/src/app/routes.test.tsx`
+- [x] T015 [P] Write a unit test asserting the shell's DOM structure matches the layout contract (fixed left rail, main region, status-region slot pinned to the bottom of the rail) rather than only checking content, in `web/src/app/shell.layout.test.tsx`
+- [x] T016 [P] Write a unit test asserting `routes.tsx` declares exactly the five routes this story owns (four destinations plus one run-detail child route) and no additional top-level route, in `web/src/app/routes.test.tsx`
 
 **Checkpoint**: All eight mandatory TC-ID tests and the two additional unit tests are written and fail — `shell.tsx` and `routes.tsx` do not yet exist.
 
@@ -95,10 +95,10 @@ This story delivers the frontend project's first code: `package.json`, `vite.con
 
 **Purpose**: Implement the shell composition and its routing per the UX design's section 0 and the component design's section 2.2.
 
-- [ ] T017 Create `web/src/app/shell.tsx` implementing the fixed left navigation rail (`--space-7` width per UX design section 0), the main region (`--space-5` padding, `--space-5` inter-region gap), and a status-region slot rendering the placeholder from T008 — the rail lists Coverage, Instruments, Runs, Settings in that exact order and exact labels, with no sign-in, user menu, or account element anywhere, and no fifth destination
-- [ ] T018 Create `web/src/app/routes.tsx` declaring the four destination routes plus one run-detail child route nested under Runs, using `react-router-dom` (per T001's dependency choice) — an unmatched route renders a not-found state inside the shell's main region rather than outside the frame
-- [ ] T019 Style the shell exclusively with `theme.css`'s custom properties (`--space-3`, `--space-5`, `--space-7`, `--text-base`, `--text-sm`, `--text-xs`, `--text-xl`, `--row-height`) via Tailwind's token-referencing config (T006) — no literal pixel or rem value should appear in `shell.tsx`'s styling
-- [ ] T020 Implement keyboard accessibility in `shell.tsx`: every rail item is a focusable, keyboard-activatable element in natural tab order, and the active destination is marked with `aria-current="page"` (or the ARIA state React Router's `NavLink` exposes), satisfying WCAG 2.1 AA per STD-UI-24
+- [x] T017 Create `web/src/app/shell.tsx` implementing the fixed left navigation rail (`--space-7` width per UX design section 0), the main region (`--space-5` padding, `--space-5` inter-region gap), and a status-region slot rendering the placeholder from T008 — the rail lists Coverage, Instruments, Runs, Settings in that exact order and exact labels, with no sign-in, user menu, or account element anywhere, and no fifth destination
+- [x] T018 Create `web/src/app/routes.tsx` declaring the four destination routes plus one run-detail child route nested under Runs, using `react-router-dom` (per T001's dependency choice) — an unmatched route renders a not-found state inside the shell's main region rather than outside the frame
+- [x] T019 Style the shell exclusively with `theme.css`'s custom properties (`--space-3`, `--space-5`, `--space-7`, `--text-base`, `--text-sm`, `--text-xs`, `--text-xl`, `--row-height`) via Tailwind's token-referencing config (T006) — no literal pixel or rem value should appear in `shell.tsx`'s styling
+- [x] T020 Implement keyboard accessibility in `shell.tsx`: every rail item is a focusable, keyboard-activatable element in natural tab order, and the active destination is marked with `aria-current="page"` (or the ARIA state React Router's `NavLink` exposes), satisfying WCAG 2.1 AA per STD-UI-24
 
 **Checkpoint**: `shell.tsx` and `routes.tsx` exist implementing every behavior Phase 2's tests require; T009–T016 all pass.
 
@@ -108,8 +108,8 @@ This story delivers the frontend project's first code: `package.json`, `vite.con
 
 **Purpose**: Confirm the shell, routing, and build pipeline work together, and that the built bundle lands where the API expects it.
 
-- [ ] T021 Run `npm run build` and verify the output lands under `src/factorflow/api/static/` (per T002's Vite config), confirming DAC-E1-S4-6 and the assumption CAP-001-E1-S6's static-file mount depends on
-- [ ] T022 Run the full Phase 2 test suite against the finished `shell.tsx`/`routes.tsx` and fix any mismatch between actual rendered structure and the UX design's section 0 layout contract
+- [x] T021 Run `npm run build` and verify the output lands under `src/factorflow/api/static/` (per T002's Vite config), confirming DAC-E1-S4-6 and the assumption CAP-001-E1-S6's static-file mount depends on
+- [x] T022 Run the full Phase 2 test suite against the finished `shell.tsx`/`routes.tsx` and fix any mismatch between actual rendered structure and the UX design's section 0 layout contract
 
 **Checkpoint**: `npm run test` passes in full. All eight mandatory TC-IDs (TC-COMP-014, 303, 329–334) are green. `npm run build` succeeds and its output directory matches CAP-001-E1-S6's expectation.
 
@@ -119,8 +119,8 @@ This story delivers the frontend project's first code: `package.json`, `vite.con
 
 **Purpose**: Confirm the density/token discipline holds and the complete validation suite is green.
 
-- [ ] T023 Review `shell.tsx` and its styling for any hardcoded value that should instead resolve to a `theme.css` token (per DAC-E1-S4-3), including any Tailwind utility class that bypasses the configured token scale
-- [ ] T024 Run the complete validation plan (below) and confirm every command passes
+- [x] T023 Review `shell.tsx` and its styling for any hardcoded value that should instead resolve to a `theme.css` token (per DAC-E1-S4-3), including any Tailwind utility class that bypasses the configured token scale
+- [x] T024 Run the complete validation plan (below) and confirm every command passes
 
 **Checkpoint**: All acceptance criteria this story owns are satisfied; `npm run test`, `npm run lint`, `npx tsc --noEmit`, and `npm run build` all pass.
 
