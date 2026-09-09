@@ -16,7 +16,7 @@ review_version: 2
 reviewed_at: "2026-09-08T23:37:00Z"
 reviewed_head: "d9a8da850fcf831c7561fa4992e693b0cb85d1b4"
 review_base: "1f7d3d9b3a112cd8911782423d6f9e76b3532a53"
-reviewed_state_revision: "sha256:2eb300a4567e590fc1d0d159d07768379e43496106f6d6d93cf3adb527ee024c"
+reviewed_state_revision: "sha256:a0c744a1d9b5fc1b0810475fde75ece8765414426f995c3fb5509cb90b8d5dd7"
 verdict: PASS-WITH-WARNINGS
 review_subjects:
   - artifact_id: CAP-001-E1-S4
