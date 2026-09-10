@@ -10,13 +10,13 @@ data ingestion process, and the owner interface. See
 
 ## Status
 
-Early. The database schema foundation, the API's health endpoint and
-application factory, and the owner interface's application shell — its
-navigation rail, routing, and status region — are in place; the remaining
-API routes, the ingestion process, and the interface's screen content are
-not yet built. Each of the four destinations currently renders a
-placeholder. What exists today is described below — everything else in
-`docs/` is specification for work not yet implemented.
+Early. The database schema foundation, the instrument-list domain service,
+the API's health endpoint and application factory, and the owner interface's
+application shell — its navigation rail, routing, and status region — are in
+place. The remaining API routes, the ingestion process, and the interface's
+screen content are not yet built. Each of the four destinations currently
+renders a placeholder. What exists today is described below — everything else
+in `docs/` is specification for work not yet implemented.
 
 ## Requirements
 
@@ -60,6 +60,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
+| `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order. This internal API is not yet exposed through HTTP; CAP-001-E2-S3 owns the route layer. |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
