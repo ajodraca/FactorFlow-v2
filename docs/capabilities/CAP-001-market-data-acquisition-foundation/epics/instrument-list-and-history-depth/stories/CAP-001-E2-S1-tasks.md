@@ -2,28 +2,28 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-E2-S1-tasks
 artifact_type: story-tasks
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-09-09
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
-  model: claude-sonnet-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-06T21:28:51Z
+  model: gpt-5.6
+  tool: Codex
+  tool_version: "unknown"
+  timestamp: 2026-09-10T02:39:44Z
   source_artifacts:
     - id: CAP-001-E2-S1
-      version: "1"
+      version: "2"
     - id: CAP-001-component-design-instrument-list-service
       version: "6"
     - id: CAP-001-component-design-market-data-store
       version: "approved"
     - id: tech-stack
-      version: "3"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -119,7 +119,7 @@ This story delivers `src/factorflow/instruments/symbols.py` (normalisation and s
 
 **Purpose**: Close remaining edge cases named in the story's own Testing section and confirm the full validation suite is green.
 
-- [ ] T019 Add a test for the bulk-batch volume boundary named in component design section 5 (up to 1000 symbols per request, per Open Question 2's resolution) in `tests/integration/test_instrument_volume.py` — assert `add_symbols` completes within the suite timeout for a batch at that size and every symbol receives a disposition
+- [ ] T019 Add a test for the bulk-batch volume boundary named in component design section 5 (up to 3000 symbols per request) in `tests/integration/test_instrument_volume.py` — assert `add_symbols` completes within the suite timeout for a batch at that size and every symbol receives a disposition
 - [ ] T020 Run the complete validation plan (below) and confirm every command passes
 
 **Checkpoint**: All acceptance criteria this story owns are satisfied; `uv run ruff format --check .`, `uv run ruff check .`, `uv run mypy src`, and `uv run pytest -m postgres` all pass.
