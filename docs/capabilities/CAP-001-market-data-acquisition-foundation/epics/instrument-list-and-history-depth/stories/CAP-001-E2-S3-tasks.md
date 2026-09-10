@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-09-10
+last_reworked_review: CAP-001-E2-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -191,3 +192,15 @@ This story delivers `src/factorflow/api/routes/instruments.py` and `src/factorfl
 - **The 1..50 history-depth bound lives at the API layer, not in `instrument-list-service`.** CAP-001-E2-S2's task plan (already committed) deliberately left `write_history_depth` uncapped, per that story's own DAC-E2-S2-5 ("this module records it unchanged and enforces no cap"). This story's `PUT /api/settings/history-depth` (T021) is where `MAX_HISTORY_DEPTH_YEARS` is actually enforced, via Pydantic validation before `write_history_depth` is ever called — this resolves the ambiguity flagged in CAP-001-E2-S2-tasks.md's Notes section: the design's "1..50" bound and the story's "no cap" instruction are both correct, just at different layers.
 - No component test spec entry for TC-COMP-102–127 in this story provides scenario-level detail beyond a restated Given/When/Then; the concrete test scenarios in Phase 2 are derived from the story's own API Contract table and Testing section.
 - **Resolution of the error-envelope conflict noted above (implemented 2026-09-10).** By the time this story was actually coded, CAP-001-E1-S6 had landed and `src/factorflow/api/errors.py` (`error_response`, `ErrorEnvelope`) already existed in the repository, even though CAP-001-E7-S2 itself is still `status: todo`. Rather than following the plan literally (`xfail` T012 pending E7-S2), this was raised to the owner, who confirmed wiring the envelope in this story: `instruments.py`/`settings.py` catch `InstrumentNotFound`/`AlreadyRetired` and format them with the existing `error_response()`, and `app.py` gained a `RequestValidationError` handler using the same envelope for `422`s (previously only the generic `500` and the static-mount `404` were wired). T012's tests assert the real envelope directly; no `xfail` markers were added. This does not resolve the underlying E1-S6/E7-S2 ownership overlap the original note flagged — that remains open — but it means DAC-E2-S3-3 is fully satisfied by this story rather than deferred.
+
+## Rework — CAP-001-E2-S3-implementation-review-v1.md (2026-09-10)
+
+Verdict: CHANGES-REQUIRED (1 HIGH, 3 MEDIUM, 1 LOW). Disposition of each finding:
+
+- **IR-001 (HIGH, blocking) — fixed.** `_validation_error_handler` in `app.py` was registered application-wide but hard-coded no `resource`, so every `422` from these routes reported `resource: null` — including the failure mode DAC-E2-8 and DAC-E2-S3-4 name directly. Added `_resource_for_path()`, which derives the resource from the request path (`/api/instruments` → `"instruments"`, `/api/settings/history-depth` → `"settings"`, with a generic fallback for any future route). T012's tests now assert `resource` on a `422` case from each route (`test_error_envelope_shape`'s new `invalid` case; `test_error_envelope_shape_on_settings`).
+- **IR-002 (MEDIUM) — fixed.** `test_error_envelope_shape`'s `409` block asserted only three of the four envelope fields even though the route sets `resource` there; added the missing assertion.
+- **IR-003 (MEDIUM) — fixed, owner-confirmed.** `GET /api/instruments?lifecycle=<anything>` previously matched the value against nothing and returned an empty `200` list. `lifecycle`'s query-parameter type is now `Literal["active", "retired"] | None`, so an unrecognised value is rejected `422` by FastAPI/Pydantic before the route body runs, consistent with `limit`'s existing bound. Added `test_list_rejects_unrecognised_lifecycle`.
+- **IR-004 (MEDIUM) — fixed, owner-confirmed.** `retire_instrument`'s `retired_at` was sampled from the API process clock *before* `retire_symbol`'s transaction ran, which the review found could diverge from the database's own `now()` by more than the stated "sub-millisecond". Kept `retire_symbol`'s signature unchanged (a CAP-001-E2-S1 contract change was out of scope for this rework) but moved the sample to *after* the transaction commits, and corrected the code comment to state plainly that this is the API's approximation, not the exact persisted value.
+- **IR-005 (LOW) — fixed.** Added `test_list_limit_at_bound_accepted`, asserting `limit=500` (`MAX_PAGE_SIZE`, inclusive) is accepted, so an `le`-to-`lt` regression on the bound would now fail.
+
+All validation re-run after rework: `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src` clean; `uv run pytest` 192 passed (190 + 2 new: `test_list_rejects_unrecognised_lifecycle`, `test_list_limit_at_bound_accepted`).

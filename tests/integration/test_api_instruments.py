@@ -94,6 +94,15 @@ def test_list_filters_and_counts(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+def test_list_rejects_unrecognised_lifecycle(client: TestClient) -> None:
+    """DAC-E2-10/adversarial review v1, IR-003: an unrecognised `lifecycle`
+    value is rejected with `422`, not silently matched against nothing."""
+    response = client.get("/api/instruments", params={"lifecycle": "bogus-value"})
+
+    assert response.status_code == 422
+
+
+@pytest.mark.postgres
 def test_error_envelope_shape(client: TestClient) -> None:
     """TC-COMP-125/DAC-E2-S3-3: every non-2xx response from this route
     carries the shared error envelope."""
@@ -113,7 +122,19 @@ def test_error_envelope_shape(client: TestClient) -> None:
     conflict_envelope = conflict.json()["error"]
     assert conflict_envelope["code"]
     assert conflict_envelope["message"]
+    assert conflict_envelope["resource"]
     assert conflict_envelope["request_id"]
+
+    # Adversarial review v1, IR-001: a `422` from this route previously
+    # reported `resource: null`, since `_validation_error_handler` is
+    # registered application-wide in `app.py` and omitted the argument.
+    invalid = client.get("/api/instruments", params={"limit": 501})
+    assert invalid.status_code == 422
+    invalid_envelope = invalid.json()["error"]
+    assert invalid_envelope["code"]
+    assert invalid_envelope["message"]
+    assert invalid_envelope["resource"]
+    assert invalid_envelope["request_id"]
 
 
 @pytest.mark.postgres
@@ -123,6 +144,17 @@ def test_list_limit_over_bound_rejected(client: TestClient) -> None:
     response = client.get("/api/instruments", params={"limit": 501})
 
     assert response.status_code == 422
+
+
+@pytest.mark.postgres
+def test_list_limit_at_bound_accepted(client: TestClient) -> None:
+    """DAC-E2-S3-4/adversarial review v1, IR-005: `MAX_PAGE_SIZE` (500) is
+    inclusive, so the boundary value itself must be accepted, not just the
+    value one above it rejected -- otherwise an `le`-to-`lt` regression on
+    the bound would pass unnoticed."""
+    response = client.get("/api/instruments", params={"limit": 500})
+
+    assert response.status_code == 200
 
 
 @pytest.mark.postgres

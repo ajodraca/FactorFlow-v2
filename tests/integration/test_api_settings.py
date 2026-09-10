@@ -52,11 +52,14 @@ def test_get_depth_when_unset(client: TestClient) -> None:
 @pytest.mark.postgres
 def test_error_envelope_shape_on_settings(client: TestClient) -> None:
     """TC-COMP-125/DAC-E2-S3-3: a non-2xx response from this route also
-    carries the shared error envelope."""
+    carries the shared error envelope, with all four fields present and
+    non-empty -- including `resource` (adversarial review v1, IR-001:
+    a `422` on this route previously reported `resource: null`)."""
     response = client.put("/api/settings/history-depth", json={"years": 0})
 
     assert response.status_code == 422
     envelope = response.json()["error"]
     assert envelope["code"]
     assert envelope["message"]
+    assert envelope["resource"]
     assert envelope["request_id"]

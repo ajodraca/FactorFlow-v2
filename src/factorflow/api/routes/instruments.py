@@ -7,6 +7,7 @@ the response. No business rule is re-implemented here (task plan T025).
 """
 
 from datetime import UTC, datetime
+from typing import Literal
 
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
@@ -105,14 +106,6 @@ def retire_instrument(symbol: str, request: Request) -> RetireInstrumentResponse
     """
     pool = request.app.state.db_pool
     request_id = getattr(request.state, "request_id", "unknown")
-    # `retire_symbol` (CAP-001-E2-S1) returns nothing, so `retired_at` is
-    # taken from this process's clock at the moment of the call rather than
-    # re-queried from the store -- a second query would duplicate a
-    # data-access concern that belongs to the domain module, not this
-    # thin HTTP surface (task plan T025). The field is informational only,
-    # never used for ordering, so the sub-millisecond gap against the
-    # database's own `now()` does not matter.
-    retired_at = datetime.now(UTC)
     try:
         with pool.connection() as connection:
             retire_symbol(connection, symbol)
@@ -133,6 +126,18 @@ def retire_instrument(symbol: str, request: Request) -> RetireInstrumentResponse
             resource="instruments",
         )
 
+    # `retire_symbol` (CAP-001-E2-S1) returns nothing, so `retired_at` is
+    # not the exact value the store wrote with its own `now()` -- it is
+    # this process's clock, sampled here, immediately after the
+    # transaction above has committed (adversarial review v1, IR-004: an
+    # earlier version sampled *before* the call, which could diverge by
+    # more than the transaction's own duration). A second query to read
+    # the stored value back would duplicate a data-access concern that
+    # belongs to the domain module, not this thin HTTP surface (task plan
+    # T025); the field is informational only and never used for ordering,
+    # so this approximation -- not the exact persisted value -- is
+    # accepted as the response's `retired_at`.
+    retired_at = datetime.now(UTC)
     return RetireInstrumentResponse(lifecycle="retired", retired_at=retired_at)
 
 
@@ -140,14 +145,18 @@ def retire_instrument(symbol: str, request: Request) -> RetireInstrumentResponse
 def list_instruments_route(
     request: Request,
     symbol: str | None = Query(default=None),
-    lifecycle: str | None = Query(default=None),
+    lifecycle: Literal["active", "retired"] | None = Query(default=None),
     limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),
     cursor: str | None = Query(default=None),
 ) -> InstrumentListResponse:
     """`GET /api/instruments` (DAC-E2-10, DAC-E2-S3-4, DAC-E2-S3-5).
 
     `limit` beyond `MAX_PAGE_SIZE` is rejected with `422` by the `Query`
-    bound above, rather than silently clamped.
+    bound above, rather than silently clamped. `lifecycle` is constrained
+    to the store's two known values (adversarial review v1, IR-003): an
+    unrecognised value previously matched nothing and returned an empty
+    list indistinguishable from a genuinely empty result, the same silent-
+    acceptance shape DAC-E2-S3-4 already rejects for `limit`.
     """
     pool = request.app.state.db_pool
     filters = InstrumentFilters(

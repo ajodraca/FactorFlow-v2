@@ -177,6 +177,30 @@ def _add_static_mount(app: FastAPI) -> None:
         app.mount("/", StaticFiles(directory=_STATIC_DIR, html=True), name="static")
 
 
+_VALIDATION_ERROR_RESOURCES = {
+    "/api/instruments": "instruments",
+    "/api/settings/history-depth": "settings",
+}
+
+
+def _resource_for_path(path: str) -> str:
+    """The envelope's `resource` for a request path this handler sees.
+
+    This handler is registered application-wide (`create_app`), so it
+    cannot hard-code one resource name (IR-001, adversarial review v1):
+    a `422` from `/api/settings/history-depth` must not claim to be about
+    `instruments`. `/api/instruments/{symbol}` is matched by prefix since
+    a validation error on that path (e.g. a malformed path parameter)
+    still concerns the instruments resource. Falls back to the path's own
+    first segment for any route this story does not own, so a future
+    route never silently reports someone else's resource name.
+    """
+    for known_path, resource in _VALIDATION_ERROR_RESOURCES.items():
+        if path == known_path or path.startswith(known_path + "/"):
+            return resource
+    return path.strip("/").split("/")[-1] or "request"
+
+
 async def _validation_error_handler(request: Request, exc: Exception) -> Response:
     """Map FastAPI's default `422` body to the shared error envelope.
 
@@ -190,6 +214,7 @@ async def _validation_error_handler(request: Request, exc: Exception) -> Respons
         code="validation_error",
         message="The request did not match the expected shape.",
         request_id=request_id,
+        resource=_resource_for_path(request.url.path),
     )
 
 
