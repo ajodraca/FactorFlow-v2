@@ -12,11 +12,16 @@ other's tables or rows.
 
 import uuid
 from collections.abc import Iterator
+from pathlib import Path
 
 import psycopg
 import pytest
 from psycopg import sql
 from testcontainers.community.postgres import PostgresContainer
+
+MIGRATION_0001_PATH = (
+    Path(__file__).resolve().parents[1] / "migrations" / "0001_extensions_owner_state.sql"
+)
 
 
 @pytest.fixture(scope="session")
@@ -67,3 +72,16 @@ def postgres_connection_string(_postgres_admin_connection_string: str) -> Iterat
         finally:
             # Close the admin connection even if the drop itself raises.
             admin_conn.close()
+
+
+@pytest.fixture
+def migrated_instrument_connection(postgres_connection_string: str) -> Iterator[psycopg.Connection]:
+    """Yield a connection whose database has the instrument migration applied."""
+    conn = psycopg.connect(postgres_connection_string)
+    with conn.cursor() as cur:
+        cur.execute(MIGRATION_0001_PATH.read_text())
+    conn.commit()
+    try:
+        yield conn
+    finally:
+        conn.close()
