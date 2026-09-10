@@ -8,13 +8,18 @@ from factorflow.instruments.service import Disposition, add_symbols
 pytestmark = pytest.mark.postgres
 
 
-def test_add_symbols_classifies_every_symbol_in_a_3000_symbol_batch(
+def test_add_symbols_commits_valid_symbols_from_a_3000_item_malformed_batch(
     migrated_instrument_connection: psycopg.Connection,
 ) -> None:
-    """The CAP-001 component design requires a 3000-symbol request to complete."""
+    """One malformed line cannot discard the other 2999 additions at capacity."""
     symbols = [f"S{number:04}" for number in range(3000)]
+    symbols[1500] = "1BAD"
 
     outcomes = add_symbols(migrated_instrument_connection, symbols)
 
     assert len(outcomes) == len(symbols)
-    assert all(outcome.disposition is Disposition.ADDED for outcome in outcomes)
+    assert outcomes[1500].disposition is Disposition.MALFORMED
+    assert sum(outcome.disposition is Disposition.ADDED for outcome in outcomes) == 2999
+    with migrated_instrument_connection.cursor() as cur:
+        cur.execute("SELECT count(*) FROM instrument")
+        assert cur.fetchone() == (2999,)

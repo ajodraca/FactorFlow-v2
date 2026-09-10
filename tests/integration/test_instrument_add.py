@@ -56,3 +56,17 @@ def test_mixed_batch_commits_only_accepted_symbols(
     with migrated_instrument_connection.cursor() as cur:
         cur.execute("SELECT symbol FROM instrument ORDER BY symbol")
         assert cur.fetchall() == [("AAPL",), ("MSFT",)]
+
+
+def test_add_symbols_canonicalises_before_database_lookup(
+    migrated_instrument_connection: psycopg.Connection,
+) -> None:
+    """Equivalent raw forms resolve to one canonical persisted instrument."""
+    first_outcome = add_symbols(migrated_instrument_connection, [" aapl "])
+    second_outcome = add_symbols(migrated_instrument_connection, ["AAPL"])
+
+    assert [outcome.disposition for outcome in first_outcome] == [Disposition.ADDED]
+    assert [outcome.disposition for outcome in second_outcome] == [Disposition.DUPLICATE_ACTIVE]
+    with migrated_instrument_connection.cursor() as cur:
+        cur.execute("SELECT symbol FROM instrument")
+        assert cur.fetchall() == [("AAPL",)]

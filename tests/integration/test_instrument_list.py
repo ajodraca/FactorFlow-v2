@@ -39,3 +39,34 @@ def test_list_filters_and_keyset_pages_with_lifecycle_counts(
     assert first_page.active_count == 3
     assert first_page.retired_count == 1
     assert [row.symbol for row in retired_page.rows] == ["GOOG"]
+
+
+def test_list_filters_and_pages_a_3000_instrument_roster(
+    migrated_instrument_connection: psycopg.Connection,
+) -> None:
+    """The required operating volume preserves filtering, paging, and counts."""
+    add_symbols(
+        migrated_instrument_connection,
+        [f"S{number:04}" for number in range(3000)],
+    )
+    retire_symbol(migrated_instrument_connection, "S0001")
+
+    first_page = list_instruments(
+        migrated_instrument_connection,
+        InstrumentFilters(symbol_prefix="S0", lifecycle="active", page_size=2),
+    )
+    second_page = list_instruments(
+        migrated_instrument_connection,
+        InstrumentFilters(
+            symbol_prefix="S0",
+            lifecycle="active",
+            cursor=first_page.next_cursor,
+            page_size=2,
+        ),
+    )
+
+    assert [row.symbol for row in first_page.rows] == ["S0000", "S0002"]
+    assert [row.symbol for row in second_page.rows] == ["S0003", "S0004"]
+    assert first_page.next_cursor == "S0002"
+    assert first_page.active_count == 2999
+    assert first_page.retired_count == 1
