@@ -85,3 +85,22 @@ def migrated_instrument_connection(postgres_connection_string: str) -> Iterator[
         yield conn
     finally:
         conn.close()
+
+
+@pytest.fixture
+def migrated_connection_string(postgres_connection_string: str) -> str:
+    """A connection string whose database already has migration 0001 applied.
+
+    For tests that boot the application factory (`create_app`) against a real
+    database rather than calling a service module directly -- the app opens
+    its own pool from `FACTORFLOW_DATABASE_URL`, so the schema must exist
+    before the app is constructed, not merely before the test's assertions.
+    """
+    conn = psycopg.connect(postgres_connection_string)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(MIGRATION_0001_PATH.read_text())
+        conn.commit()
+    finally:
+        conn.close()
+    return postgres_connection_string
