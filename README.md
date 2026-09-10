@@ -10,23 +10,46 @@ data ingestion process, and the owner interface. See
 
 ## Status
 
-Early. The database schema foundation and the API's health endpoint and
-application factory are in place; the remaining API routes, the ingestion
-process, and the owner interface are not yet built. What exists today is
-described below — everything else in `docs/` is specification for work not
-yet implemented.
+Early. The database schema foundation, the API's health endpoint and
+application factory, and the owner interface's application shell — its
+navigation rail and routing — are in place; the remaining API routes, the
+ingestion process, and the interface's screen content are not yet built.
+Each of the four destinations currently renders a placeholder. What exists
+today is described below — everything else in `docs/` is specification for
+work not yet implemented.
 
 ## Requirements
 
 - Python 3.12 or newer
 - [uv](https://docs.astral.sh/uv/) for dependency resolution
+- Node.js 18 or 20+ with npm, for the owner interface (Vite 5 requires
+  `^18.0.0 || >=20.0.0`; Node 19 is not supported)
 - Docker, for the `postgres`-marked test suite (see Testing)
 
 ## Setup
 
 ```bash
-uv sync --all-extras
+uv sync --all-extras   # Python dependencies
+npm ci                 # frontend dependencies, from package-lock.json
 ```
+
+## Building the interface
+
+The interface builds into the API package's static directory, so one
+container image ships both:
+
+```bash
+npm run build
+```
+
+Output lands in `src/factorflow/api/static/`. The build sets
+`emptyOutDir: false`, because the default would delete the tracked
+`.gitkeep` that keeps that directory in version control — and the API's
+static mount is guarded by whether the directory exists. Vite still
+overwrites `index.html` and `assets/` each time, but it no longer removes
+files it did not produce, so **hashed assets from earlier builds accumulate
+there**. Clear `assets/` by hand when that matters; nothing serves the stale
+files, since `index.html` references only the current ones.
 
 ## Layout
 
@@ -37,8 +60,11 @@ uv sync --all-extras
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory — empty until a frontend build lands. See [Running the API](#running-the-api) |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
+| `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
+| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and a status-region slot; `routes.tsx` declares those four routes plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` is a slot placeholder a later story fills |
+| `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
 | `docs/` | Constitution, capability specifications, and designs |
@@ -146,9 +172,10 @@ applied migration version:
 An unreachable database still responds `200` with `database: "unreachable"`,
 rather than failing the request, so a caller can distinguish a dead database
 from a dead API. `most_recent_run` is `null` until a later story populates
-it. No frontend bundle is built into this branch yet: an unmatched non-API
-path falls back to `index.html` once one exists, and 404s until then; an
-unmatched path under `/api` always returns the `{"error": {...}}` envelope.
+it. An unmatched non-API path falls back to the built `index.html` when a
+bundle is present, and 404s when it is not — the bundle is build output, so a
+fresh clone has none until `npm run build` runs; an unmatched path under
+`/api` always returns the `{"error": {...}}` envelope.
 
 ## Testing
 
@@ -166,6 +193,21 @@ uv run pytest -m 'not postgres'    # no container runtime required
 Without a container runtime, run the `not postgres` variant and report the
 exclusion — a partial run is not a green suite.
 
+The interface suite is Vitest with React Testing Library, run from the
+repository root:
+
+```bash
+npm run test
+```
+
+One of its files drives a real Vite production build to assert the bundle
+lands in `src/factorflow/api/static/` and leaves `.gitkeep` intact, so this
+command writes build output as a side effect and takes appreciably longer
+than a pure unit suite. It leaves no tracked file modified.
+
+`npm run test:e2e` is defined but has no Playwright specs yet; the
+end-to-end suite arrives with a later story.
+
 ## Validation
 
 The full set of checks, all of which must pass:
@@ -177,7 +219,17 @@ uv run pytest
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
+
+npm ci
+npm run build
+npm run test
+npm run lint
+npm run format
+npx tsc --noEmit
 ```
+
+Note that `npm run format` is `biome format .`, which reports formatting
+without writing; add `--write` to apply it.
 
 `ruff` excludes `docs/` and `design-system/`: both carry content this
 package does not own, and `docs/` holds approved specifications whose

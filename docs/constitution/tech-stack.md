@@ -2,11 +2,11 @@
 artifact_schema_version: 1
 artifact_id: tech-stack
 artifact_type: tech-stack
-artifact_version: 3
+artifact_version: 4
 product: FactorFlow
 created: 2026-09-02
-updated: 2026-09-05
-last_updated: 2026-09-05
+updated: 2026-09-09
+last_updated: 2026-09-08
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: approved
@@ -29,8 +29,8 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-05T22:51:58Z
-  reviewed_revision: sha256:c420b44757a80a79850febb25be747f804eae77e7ca55b2918ea1a3a88f490cd
+  approved_at: 2026-09-09T04:13:30Z
+  reviewed_revision: sha256:46408823e3b649448bfdb39abccefa98063a54fd7187ae62704a54ae78f40d8c
 ---
 
 # Tech Stack: FactorFlow
@@ -94,7 +94,7 @@ interface, and the specifications and constitution that govern them.
 | Package Manager | uv (Python); npm (frontend) |
 | Execution Runtime | An in-process scheduler inside the application container drives strategy evaluation cycles (`APScheduler`, or the equivalent chosen at system design). It reaches the order path only through the chokepoint that checks the kill-switch flag |
 | Container Runtime | Docker, self-hosted. PostgreSQL, the application and the ingestion process each run as a container on a machine the owner controls |
-| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), `psycopg_pool` (connection pooling, CAP-001-E1-S6), FastAPI / Starlette / Pydantic (API and validation), `pydantic-settings` (environment-based configuration), `massive` (official Massive REST and WebSocket client), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `tailwindcss`, `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
+| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), `psycopg_pool` (connection pooling, CAP-001-E1-S6), FastAPI / Starlette / Pydantic (API and validation), `pydantic-settings` (environment-based configuration), `massive` (official Massive REST and WebSocket client), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `react-router-dom` (client routing; the shell's active-destination state is its `NavLink` `aria-current`), `tailwindcss` with `autoprefixer` (`postcss.config.js` runs both on every build, so autoprefixer is in the CSS path for every rendered surface), `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
 
 **Rationale:**
 
@@ -345,8 +345,12 @@ Notes for agents:
   run as a green suite.
 - The seven Python commands above exist and are verified working.
   `pyproject.toml` was created by CAP-001-E1-S1, which defined them.
-- The `npm` and `npx` commands do not exist yet. The first frontend story
-  creates `package.json` and MUST define those command names.
+- The six `npm` and `npx` commands above exist and are verified working.
+  `package.json` was created by CAP-001-E1-S4, which defined them.
+  `npm run test` drives a real Vite production build as part of the suite, so
+  it writes into `src/factorflow/api/static/`; it leaves no tracked file
+  modified. `npm run test:e2e` is defined but has no Playwright specs yet, so
+  it exercises nothing until the first end-to-end story lands.
 
 ## Open Questions
 
@@ -516,6 +520,7 @@ limitation as a stated constraint on the promotion evidence.
 
 | Date | Change |
 |------|--------|
+| 2026-09-08 | Recorded the frontend toolchain as built, from CAP-001-E1-S4's implementation. The note claiming the `npm` and `npx` commands "do not exist yet" was false once that story created `package.json`: all six are verified working, so the note now matches the seven Python commands' form and records two behaviours a reader would otherwise meet as surprises — `npm run test` drives a real Vite build and so writes into the API's static directory, and `npm run test:e2e` is defined but has no Playwright specs yet. Added `react-router-dom` to the TypeScript key libraries: it was adopted as a runtime dependency without being recorded here, and it is load-bearing rather than incidental, since the shell's active-destination state is its `NavLink` `aria-current` behaviour. Approval was invalidated by these edits and the artifact returned to draft pending the dedicated `$tech-stack` workflow. A `$tech-stack` review the same day added `autoprefixer`, the one further gap its research surfaced: it is installed and run by `postcss.config.js` on every build, so it sits in the CSS path for every rendered surface, and it had been carried as unrecorded build plumbing. That review confirmed the entry otherwise complete and found no missing or stale components, the project being a single repository |
 | 2026-09-05 | Adopted Massive's official Python client by owner decision, retaining the CAP-001 `MassiveClient` as the operational boundary around the SDK rather than a portability layer. Refreshed the document's source context and provenance against CAP-001 v7 and system design v5, and corrected the restatement-bias decision wording. |
 | 2026-09-05 | Recorded the verified Massive plan tiers and settled the owner's plan path, closing the remainder of OQ-TS-7. Pricing was read from `massive.com/pricing` and the Basic tier's five-calls-per-minute limit confirmed by probe against the live API, alongside the base URL, the `Authorization: Bearer` scheme and the error envelope — none of which Massive documents publicly. The path is **Stocks Starter + Financials & Ratios ($58/month)** for CAP-001 through M1, moving to **Advanced** at M3 for real-time. Three consequences were recorded: the rate limit stops being a feasibility constraint once off Basic, which resolves the provider-throughput half of CAP-001's specification review FINDING-6; fundamentals remain an add-on rather than a Starter inclusion, confirming the first paid entitlement falls at M1; and Starter caps history at five years, which the owner decided on 2026-09-05 **not** to enforce in CAP-001 — a deeper stated depth is issued as stated and the provider returns what it holds, with the obligation that coverage must not present the uniform shortfall as a provider data gap (AC-12, AC-17). Raised OQ-TS-9: M4's backtest range may force the Advanced upgrade before M3's real-time need does, since 20+ year history is Advanced-only. Approval was invalidated by these edits and the artifact returned to draft pending the dedicated `$tech-stack` workflow |
 | 2026-09-03 | Closed OQ-TS-6 on the owner's decision: `shadcn/ui` on Radix primitives for components, TradingView `lightweight-charts` for charting. The deferral had named "the first capability carrying a UX design" as its trigger and assumed that would be the M4 or M5 evidence screens; CAP-001 delivers an ingestion view and reached the UX stages first, so the trigger fired on a capability that needs tables and status rather than charts. Components were therefore decided on CAP-001's needs and accessibility posture, charting on M4 and M5's. Also recorded a second Massive limitation found while designing CAP-001: the provider has no historical trading calendar, its holiday endpoint being forward-looking only, which no plan tier changes. Approval was invalidated by these edits and the artifact returned to draft pending the dedicated `$tech-stack` workflow |
