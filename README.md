@@ -60,7 +60,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order. This internal API is not yet exposed through HTTP; CAP-001-E2-S3 owns the route layer. |
+| `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). This internal API is not yet exposed through HTTP; CAP-001-E2-S3 owns the route layer. |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
@@ -128,6 +128,38 @@ an API response. Three mechanisms enforce this together:
 Rotation needs no restart: `read_provider_credential()` re-reads the
 environment on every call, and `credential_fingerprint()` gives a short,
 non-reversible digest for detecting that the value changed.
+
+## History depth setting
+
+`src/factorflow/instruments/settings.py` holds the owner's stated history
+depth — how many years of history an acquisition run reaches back for — as a
+number of years rather than an absolute start date, so the reach re-evaluates
+on every run instead of drifting fixed to whenever it was set. The setting is
+stored in the `owner_setting` table (created by migration
+`0001_extensions_owner_state.sql`) as a `jsonb` value under the fixed key
+`history_depth_years`, so a later owner setting needs no schema change.
+
+`read_history_depth(connection)` returns a `HistoryDepth | None`: `None` when
+the owner has never stated a depth, distinct from a stated zero, since a
+missing depth is meant to block acquisition rather than the product silently
+choosing a depth on the owner's behalf. When set, it returns a frozen
+`HistoryDepth` dataclass carrying `years` and `updated_at`, so a caller can
+show when the value was last changed.
+
+`write_history_depth(connection, years)` upserts the value and advances
+`updated_at`, raising `ValueError` when `years` is not a positive integer
+(zero, negative, non-integer, and `bool` values are all rejected — `bool` is
+explicitly excluded even though it is an `int` subclass, so `True` cannot
+silently store as a depth of 1). No upper bound is enforced here: a depth
+beyond what the provider plan holds is recorded unchanged, because the
+product reports what was actually acquired rather than presenting a shortfall
+as a data gap. A 50-year sanity cap exists, but at the HTTP layer
+(`PUT /api/settings/history-depth`, owned by CAP-001-E2-S3) rather than in
+this module.
+
+Both functions take a caller-supplied `psycopg.Connection` rather than
+opening their own, so a caller can compose a depth write with other
+instrument-list operations inside one transaction.
 
 ## Running the migrator
 
