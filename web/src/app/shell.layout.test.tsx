@@ -1,18 +1,33 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { Shell } from "./shell";
+
+/**
+ * Waits for the shell's health poll to settle.
+ *
+ * `Shell` polls `GET /api/health` on mount (CAP-001-E1-S5), and the state
+ * update that follows lands after a synchronous test body returns. Awaiting
+ * it keeps the update inside the test's `act(...)` scope rather than leaving
+ * React to warn about one that escaped it.
+ */
+async function settleHealthPoll(): Promise<void> {
+  await waitFor(() =>
+    expect(screen.getByTestId("liveness-state")).toHaveAttribute("data-liveness", "answering"),
+  );
+}
 
 // DAC-E1-12, UX design section 0: a fixed left rail, a main region, and a
 // status-region slot pinned to the bottom of the rail. This asserts the DOM
 // structure of the layout contract, not merely its content.
 describe("Shell — layout contract (UX design section 0)", () => {
-  it("renders a fixed left rail containing navigation and the status-region slot", () => {
+  it("renders a fixed left rail containing navigation and the status-region slot", async () => {
     render(
       <MemoryRouter>
         <Shell />
       </MemoryRouter>,
     );
+    await settleHealthPoll();
 
     const rail = screen.getByTestId("nav-rail");
     const nav = screen.getByRole("navigation");
@@ -22,12 +37,13 @@ describe("Shell — layout contract (UX design section 0)", () => {
     expect(rail).toContainElement(statusRegion);
   });
 
-  it("renders a main region as a sibling of the rail, not nested inside it", () => {
+  it("renders a main region as a sibling of the rail, not nested inside it", async () => {
     render(
       <MemoryRouter>
         <Shell />
       </MemoryRouter>,
     );
+    await settleHealthPoll();
 
     const rail = screen.getByTestId("nav-rail");
     const main = screen.getByRole("main");
@@ -35,12 +51,13 @@ describe("Shell — layout contract (UX design section 0)", () => {
     expect(rail).not.toContainElement(main);
   });
 
-  it("pins the status-region slot to the bottom of the rail", () => {
+  it("pins the status-region slot to the bottom of the rail", async () => {
     render(
       <MemoryRouter>
         <Shell />
       </MemoryRouter>,
     );
+    await settleHealthPoll();
 
     const rail = screen.getByTestId("nav-rail");
     const statusRegion = screen.getByTestId("status-region");
