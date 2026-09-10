@@ -30,6 +30,24 @@ export default {
       },
       height: {
         row: "var(--row-height)",
+        // The status region's icons and its reserved third line take their
+        // height from the spacing scale, not from Tailwind's default height
+        // scale, whose values are literals rather than tokens (STD-UI-29).
+        1: "var(--space-1)",
+        2: "var(--space-2)",
+        3: "var(--space-3)",
+        4: "var(--space-4)",
+        5: "var(--space-5)",
+        6: "var(--space-6)",
+        7: "var(--space-7)",
+        8: "var(--space-8)",
+      },
+      fontFamily: {
+        sans: "var(--font-sans)",
+        mono: "var(--font-mono)",
+        // Timestamps and counts render in the numeric face the design system
+        // names, rather than in Tailwind's default monospace stack.
+        numeric: "var(--font-numeric)",
       },
     },
   },

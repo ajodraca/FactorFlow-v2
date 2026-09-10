@@ -1,21 +1,36 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { Shell } from "./shell";
+
+/**
+ * Waits for the shell's health poll to settle.
+ *
+ * `Shell` polls `GET /api/health` on mount (CAP-001-E1-S5), and the state
+ * update that follows lands after a synchronous test body returns. Awaiting
+ * it keeps the update inside the test's `act(...)` scope rather than leaving
+ * React to warn about one that escaped it.
+ */
+async function settleHealthPoll(): Promise<void> {
+  await waitFor(() =>
+    expect(screen.getByTestId("liveness-state")).toHaveAttribute("data-liveness", "answering"),
+  );
+}
 
 // TC-COMP-330 (DAC-E1-S4-2): opening a run detail route renders it as a
 // child of Runs, and Runs stays the active rail item — no fifth destination
 // appears.
 describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
-  it("keeps Runs active and adds no fifth rail item when a run detail route opens", () => {
+  it("keeps Runs active and adds no fifth rail item when a run detail route opens", async () => {
     render(
       <MemoryRouter initialEntries={["/runs/run-123"]}>
         <Shell />
       </MemoryRouter>,
     );
+    await settleHealthPoll();
 
     const nav = screen.getByRole("navigation");
     const items = within(nav).getAllByRole("link");
@@ -30,12 +45,13 @@ describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
 // inside the shell's frame — no empty page, no crash, and the rail/status
 // region remain present.
 describe("Routes — unknown route renders not-found inside the frame (DAC-E1-S4-5)", () => {
-  it("renders a not-found state in the main region while keeping the shell frame", () => {
+  it("renders a not-found state in the main region while keeping the shell frame", async () => {
     render(
       <MemoryRouter initialEntries={["/this-route-does-not-exist"]}>
         <Shell />
       </MemoryRouter>,
     );
+    await settleHealthPoll();
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
     expect(screen.getByTestId("status-region")).toBeInTheDocument();
