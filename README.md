@@ -12,11 +12,11 @@ data ingestion process, and the owner interface. See
 
 Early. The database schema foundation, the API's health endpoint and
 application factory, and the owner interface's application shell — its
-navigation rail and routing — are in place; the remaining API routes, the
-ingestion process, and the interface's screen content are not yet built.
-Each of the four destinations currently renders a placeholder. What exists
-today is described below — everything else in `docs/` is specification for
-work not yet implemented.
+navigation rail, routing, and status region — are in place; the remaining
+API routes, the ingestion process, and the interface's screen content are
+not yet built. Each of the four destinations currently renders a
+placeholder. What exists today is described below — everything else in
+`docs/` is specification for work not yet implemented.
 
 ## Requirements
 
@@ -63,7 +63,8 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
-| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and a status-region slot; `routes.tsx` declares those four routes plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` is a slot placeholder a later story fills |
+| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract; `client.ts` holds `fetchHealth()` and the `ApiUnreachableError` it raises when the API does not answer. Same-origin only — the bundle is served by the API process, so every path is relative |
+| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` declares those four routes plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
 | `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
@@ -176,6 +177,60 @@ it. An unmatched non-API path falls back to the built `index.html` when a
 bundle is present, and 404s when it is not — the bundle is build output, so a
 fresh clone has none until `npm run build` runs; an unmatched path under
 `/api` always returns the `{"error": {...}}` envelope.
+
+## The status region
+
+The interface reads `GET /api/health` for itself. `HealthProvider` wraps the
+shell and polls once on mount and every 30 seconds thereafter, so exactly one
+interval exists no matter how many parts of the interface read the result; the
+interval is cleared on unmount, and navigating between destinations does not
+reset the cadence. The region renders at the bottom of the navigation rail, so
+it is present on every screen.
+
+It distinguishes three liveness states, each carrying a distinct shape as well
+as its text so the difference survives in greyscale:
+
+| State | Reads | Means |
+|---|---|---|
+| `unknown` | Checking | The first poll has not resolved yet |
+| `answering` | Answering | The last poll returned a health response |
+| `unreachable` | Not answering | The fetch itself failed — the API did not answer at all |
+
+A successful response reporting `database: "unreachable"` is deliberately not
+the `unreachable` state: that is the API answering that its store is down, a
+different fact from the API being gone, and the two are kept apart so a dead
+database does not look like a dead product.
+
+When liveness is `unreachable`, the shell replaces the main region on every
+route with a named unreachable state — it replaces rather than accompanies, so
+no stale screen renders beside a message saying the product is not answering.
+The rail and the region stay put around it. The copy names the likely cause and
+where to look, and never surfaces the underlying transport error:
+
+> FactorFlow is not answering. The application container may have stopped, or a
+> database migration may have failed and prevented it from starting. Check the
+> container logs.
+
+That is the shape a refused start takes in the interface: a failed migration
+means the API never binds, so the interface cannot reach it.
+
+Three further behaviors are worth knowing:
+
+- **Timestamps** render as ISO-8601 in `America/Chicago` with the zone visible
+  (`2026-09-06 13:30:00 America/Chicago`), never in the viewing machine's local
+  zone and never in a locale format. Before the first poll resolves the line
+  reads `Not yet checked`.
+- **`most_recent_run: null`** renders as `No run recorded` — not as an empty
+  success and not as a failure. A later story populates the field and fills in
+  the recorded branch.
+- **A missing provider credential** is reported only on the strength of a
+  response that actually arrived. When the API did not answer, presence is
+  unknown and the region says nothing about it rather than inferring absence
+  from a failed request.
+
+The region reserves a third line, sized but empty and hidden from assistive
+technology, so a trading-environment indicator can land later without
+restructuring the layout.
 
 ## Testing
 
