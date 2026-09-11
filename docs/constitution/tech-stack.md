@@ -349,8 +349,8 @@ Notes for agents:
   `package.json` was created by CAP-001-E1-S4, which defined them.
   `npm run test` drives a real Vite production build as part of the suite, so
   it writes into `src/factorflow/api/static/`; it leaves no tracked file
-  modified. `npm run test:e2e` is defined but has no Playwright specs yet, so
-  it exercises nothing until the first end-to-end story lands.
+  modified. `npm run test:e2e` now runs `tests/e2e/instruments-add-retire.spec.ts`
+  against a real API and PostgreSQL container, landed by CAP-001-E2-S4.
 
 ## Open Questions
 
