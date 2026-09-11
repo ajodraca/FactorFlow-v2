@@ -15,10 +15,11 @@ belong to the observation writer and the run lifecycle (CAP-001-E4); a
 provider-parsed value earns no as-of date just by being parsed.
 """
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
+from decimal import Decimal
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 __all__ = [
     "CorporateAction",
@@ -68,7 +69,53 @@ class TickerReference(BaseModel):
 
 
 class DailyBar(BaseModel):
-    """Placeholder -- fields land in CAP-001-E3-S2 Phase 3."""
+    """A daily aggregate bar, named for `daily_bar`.
+
+    Source: `component-design-massive-client.md` section 2.5, `GET
+    /v2/aggs/ticker/{ticker}/range/1/day/{from}/{to}`.
+
+    Every field Massive's daily-aggregate response documents is required
+    (DAC-E3-S2-1): `t`, `o`, `h`, `l`, `c`, `v`, `vw` and `n` are all
+    present on every bar the endpoint returns, so a response missing one of
+    them is not a usable bar (DAC-E3-S2-4). `otc` is the one genuinely
+    optional field -- most sessions are not OTC, and its absence must
+    remain `None`, distinguishable from an explicit `False`
+    (DAC-E3-S2-5).
+
+    `t` is Unix milliseconds and is converted to `session_date` through a
+    timezone-aware UTC conversion (DAC-E3-S2-2): a naive local-time
+    conversion would shift the date near midnight depending on the host's
+    timezone, which would silently corrupt the `daily_bar` natural key.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    session_date: date = Field(alias="t")
+    open_price: Decimal = Field(alias="o")
+    high_price: Decimal = Field(alias="h")
+    low_price: Decimal = Field(alias="l")
+    close_price: Decimal = Field(alias="c")
+    volume: Decimal = Field(alias="v")
+    vwap: Decimal = Field(alias="vw")
+    transaction_count: int = Field(alias="n")
+    is_otc: bool | None = Field(alias="otc", default=None)
+
+    @field_validator("session_date", mode="before")
+    @classmethod
+    def _millis_to_utc_session_date(cls, value: Any) -> Any:
+        """Convert Unix milliseconds to a UTC calendar date before Pydantic's
+        own `date` coercion runs, so the conversion is always
+        timezone-aware UTC rather than the host's local timezone."""
+        if isinstance(value, int | float):
+            return datetime.fromtimestamp(value / 1000, tz=UTC).date()
+        return value
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for `daily_bar`'s `payload`
+        column, and for the append-only hash CAP-001-E4 computes over it.
+        This model owns no `observed_on`, `run_id` or `recorded_at`, so
+        none can appear here."""
+        return self.model_dump(mode="json")
 
 
 class FinancialStatement(BaseModel):
