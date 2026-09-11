@@ -7,7 +7,7 @@ status: completed
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-09-11
 document: spec-review-report
 capability: CAP-001
 version: v3
@@ -89,8 +89,8 @@ review_subjects:
     artifact_version: 6
     content_revision: sha256:2f1c55747db5ed2faa6f977a7e2a8523f9f55cc1248caebf3fd2457b5394703e
   - artifact_id: CAP-001-component-design-massive-client
-    artifact_version: 6
-    content_revision: sha256:06b2374963b2db68ff6cab57bfb8924d96d08991f8e5208659cfc11d788d4db8
+    artifact_version: 7
+    content_revision: sha256:a547b2e319c58207eb95fb91151d2317f21cd2bd001a80a37c54f0ba97b2c030
   - artifact_id: CAP-001-component-design-observation-writer
     artifact_version: 4
     content_revision: sha256:7572b6887e699496869a902b98fb5eb5499a2ce727a04d8774063fef1b996794
@@ -98,8 +98,8 @@ review_subjects:
     artifact_version: 4
     content_revision: sha256:f2ff988206f8bea4ec5cbfe73ac0bfc95bd964f2ced2625d513c03ca2d12286e
   - artifact_id: CAP-001-component-design-rate-limit-governor
-    artifact_version: 5
-    content_revision: sha256:11250c8b5e32b8e1b9329095cc63bb3a188f0df8c87db557d5185931aeebbf5b
+    artifact_version: 6
+    content_revision: sha256:44fe044354a1d0d5ef1271bf7278e558565351229fd29b49907637367317f9b8
   - artifact_id: CAP-001-component-design-run-journal
     artifact_version: 6
     content_revision: sha256:8bdac7de84190e35600ce2e6db041a8b7ea55165b92cd5b533b2f6dee9cadea5
@@ -560,6 +560,44 @@ design decision. Recorded here so the choice is visible rather than silent.
    capability-level.
 6. **FINDING-6** — State the operational recovery procedure for a failed
    migration, so OPS-MIG-003 is met by a documented step.
+
+### Post-Review Amendment — 2026-09-11
+
+`review_subjects` was amended after this review completed, to cover
+`CAP-001-component-design-massive-client` at v7 and
+`CAP-001-component-design-rate-limit-governor` at v6. The previously recorded
+revisions were `sha256:06b23749...` (client v6) and `sha256:11250c8b...`
+(governor v5).
+
+The amendment carries an editorial correction, not a design change. Both
+documents contradicted themselves on whether the provider reads and the
+governor's `execute` are synchronous or asynchronous: the client declared
+`async def` on its four reads (§2.3) and "one pooled async client" (§13) while
+stating the SDK's REST client is synchronous (§5); the governor declared
+`execute` synchronous (§2.3) while describing an `await`ed acquisition (§2.4)
+and an `asyncio.Lock` (§5). The split was residue from the 2026-09-05 owner
+decision adopting Massive's official Python client: the prose rationale was
+updated, the code blocks and concurrency notes were not.
+
+The correction resolves every contradiction toward synchronous, which is what
+the already-approved SDK decision entails and what both documents' rationale
+sections already asserted. It also removes the governor's
+`test_governor_concurrency.py` test row, which asserted a lock the design no
+longer specifies. No design decision, interface semantic or acceptance-criteria
+mapping changed.
+
+This amendment is recorded rather than carried by a fresh review because the
+edit alters no decision this review assessed, on the same reasoning applied to
+the system design above. Two consequences are deliberately left standing for
+the owner:
+
+- The `massive` SDK is not yet a declared dependency, so the claim that its
+  `RESTClient` has no asynchronous variant rests on both component designs'
+  own assertions rather than on inspection. If the SDK ships an async client,
+  this correction warrants re-examination before E3 implementation.
+- `source_artifacts` pins in artifacts downstream of these two component
+  designs still name the superseded versions. That is the condition FINDING-5
+  describes and it is not made worse here.
 
 ### Next Step
 

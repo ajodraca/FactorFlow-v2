@@ -2,12 +2,12 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-rate-limit-governor
 artifact_type: component-design
-artifact_version: 5
+artifact_version: 6
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-09-11
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
@@ -29,8 +29,8 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:01Z
-  reviewed_revision: sha256:11250c8b5e32b8e1b9329095cc63bb3a188f0df8c87db557d5185931aeebbf5b
+  approved_at: 2026-09-11T00:35:00Z
+  reviewed_revision: sha256:44fe044354a1d0d5ef1271bf7278e558565351229fd29b49907637367317f9b8
   review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
@@ -192,9 +192,9 @@ throttling the governor exists to avoid.
 - Capacity equals `requests_per_minute`, refilled continuously at
   `requests_per_minute / 60` tokens per second.
 - One token per request, including each page of a paged response.
-- Acquisition is `await`ed, so a caller blocks rather than failing when the
-  budget is spent. There is one runner and one active run, so blocking is the
-  correct behaviour: nothing else needs the process.
+- Acquisition blocks the calling thread rather than failing when the budget is
+  spent. There is one runner and one active run, so blocking is the correct
+  behaviour: nothing else needs the process.
 
 ### 2.5 Throttling is not an attempt
 
@@ -302,10 +302,14 @@ N/A, not applicable for this component.
   per-instrument commits and the reclaim mechanism provide.
 - **Overhead.** Token accounting is arithmetic on two floats. The cost of the
   governor is the waiting it is there to do.
-- **Concurrency (SA-CONC-001).** The bucket is shared mutable state. It is
-  guarded by an `asyncio.Lock` around the token accounting, so a future
-  concurrent fetcher cannot double-spend a token. The lock is held only for the
-  accounting, never across a sleep or a request.
+- **Concurrency (SA-CONC-001).** The bucket is shared mutable state, but only
+  one thread touches it: the runner drives instruments sequentially and the
+  SDK's REST client is synchronous. No lock is specified, because an
+  unexercised lock cannot be tested. Should
+  `component-design-acquisition-runner.md` open question 1 be answered in
+  favour of concurrent fetching, that answer brings a thread pool rather than
+  coroutines, and the guard it needs is a `threading.Lock` held around the
+  token accounting alone, never across a sleep or a request.
 - **No throughput target is stated** by the capability, and the provider's real
   limits are untested.
 
@@ -344,7 +348,6 @@ and backoff without sleeping in real time and without any network.
 | FATAL is re-raised unretried | `tests/unit/test_governor_retry.py` | An outcome the caller classified FATAL is re-raised without retry or delay, so `massive-client` can map it to `InstrumentNotFound` or `CredentialRejected` (AC-11) |
 | The governor never inspects the exception | `tests/unit/test_governor_retry.py` | Given a classifier returning fixed outcomes, behaviour is identical for unrelated exception types, proving no provider knowledge leaked in |
 | No log record carries a URL | `tests/unit/test_governor_logging.py` | Retry logs name status, attempt and delay only (AC-13) |
-| The lock is not held across a sleep | `tests/unit/test_governor_concurrency.py` | Two concurrent callers interleave rather than serialising on the whole request (SA-CONC-001) |
 
 All tests here run without a container and without a network, so they carry no
 `postgres` marker.

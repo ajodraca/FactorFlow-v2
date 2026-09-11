@@ -2,12 +2,12 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 6
+artifact_version: 7
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-09-11
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
@@ -29,8 +29,8 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:00Z
-  reviewed_revision: sha256:06b2374963b2db68ff6cab57bfb8924d96d08991f8e5208659cfc11d788d4db8
+  approved_at: 2026-09-11T00:35:00Z
+  reviewed_revision: sha256:a547b2e319c58207eb95fb91151d2317f21cd2bd001a80a37c54f0ba97b2c030
   review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
@@ -224,23 +224,23 @@ from factorflow.ingestion.massive import models
 class MassiveClient:
     """Historical reads against Massive. The live feed (M3) attaches here."""
 
-    async def fetch_reference(self, symbol: str) -> models.TickerReference:
+    def fetch_reference(self, symbol: str) -> models.TickerReference:
         """Ticker reference: CIK, composite FIGI, share class FIGI, list and
         delist dates. Raises InstrumentNotFound when the provider does not
         recognise the symbol."""
 
-    async def fetch_daily_bars(
+    def fetch_daily_bars(
         self, symbol: str, start: date, end: date
     ) -> list[models.DailyBar]:
         """Daily aggregates over an inclusive range. Follows paging."""
 
-    async def fetch_financials(
+    def fetch_financials(
         self, symbol: str, start: date, end: date
     ) -> list[models.FinancialStatement]:
         """Company financials. filing_date is carried as a descriptive
         attribute and is never the as-of date (C5)."""
 
-    async def fetch_corporate_actions(
+    def fetch_corporate_actions(
         self, symbol: str, start: date, end: date
     ) -> list[models.CorporateAction]:
         """Splits, dividends, ticker changes and IPOs over a range."""
@@ -781,7 +781,7 @@ never uses (section 2.6).
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
 | AC-3 | `massive-client` reference, aggregate, fundamental and corporate-action reads | Four typed methods with validated models | 2.3 |
-| AC-4 | Budget pacing, resumable runs | One pooled async client, permits per request and per page | 5 |
+| AC-4 | Budget pacing, resumable runs | One pooled SDK client, permits per request and per page | 5 |
 | AC-5 | `observation-writer` stamps `observed_on` | This component sets no as-of date; `filing_date` is an attribute | 2.3, 3 |
 | AC-11 | Unrecognised instrument reported, run continues | `InstrumentNotFound` as a distinct type | 2.4 |
 | AC-12 | A failed run leaves no false history | `ProviderContractViolation` rather than lenient parsing | 2.4 |
