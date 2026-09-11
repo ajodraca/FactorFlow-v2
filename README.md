@@ -15,11 +15,14 @@ the instrument and settings API routes, the API's health endpoint and
 application factory, and the owner interface's application shell — its
 navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
-consuming the instrument and settings API. The remaining API routes
-(acquisition runs, coverage), the ingestion process, and the Coverage and
-Runs screens are not yet built; those two destinations still render a
-placeholder. What exists today is described below — everything else in
-`docs/` is specification for work not yet implemented.
+consuming the instrument and settings API. The market data ingestion
+process's Massive provider response models — parsing the provider's four
+historical data shapes into the product's own vocabulary — are also in
+place, though no client yet calls them. The remaining API routes
+(acquisition runs, coverage), the rest of the ingestion process, and the
+Coverage and Runs screens are not yet built; those two destinations still
+render a placeholder. What exists today is described below — everything else
+in `docs/` is specification for work not yet implemented.
 
 ## Requirements
 
@@ -65,6 +68,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `__init__.py` re-exports exactly these four types — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
@@ -188,6 +192,61 @@ Every non-2xx response from these two route modules carries the shared
 including FastAPI's own request-validation `422`s — `app.py`'s
 `_validation_error_handler` derives `resource` from the request path so a
 shared, application-wide handler still names the right resource per route.
+
+## Massive provider response models
+
+`src/factorflow/ingestion/massive/models.py` defines four Pydantic v2 models,
+one per Massive response shape, each named for the observation table it will
+feed: `TickerReference` (`instrument_reference`), `DailyBar` (`daily_bar`),
+`FinancialStatement` (`fundamental_observation`), and `CorporateAction`
+(`corporate_action`). No client calls Massive yet — these models exist so
+that when one does (CAP-001-E3-S1), wire field names never leak past this
+package boundary.
+
+- Every wire field name (`t`, `o`, `h`, `l`, `c`, `filing_date`, `active`,
+  `name`, and the rest) appears only inside a `Field(alias=...)`; every
+  public attribute is the product's own vocabulary.
+- Every monetary or ratio value is `Decimal`, never `float`, so no binary
+  rounding enters a value bound for append-only history. `DailyBar.session_date`
+  converts from Massive's Unix-millisecond `t` through a timezone-aware UTC
+  conversion, not the host's local timezone.
+- `FinancialStatement.provider_filing_date` (aliased from `filing_date`) is
+  documented as descriptive only — the provider's most recent filing date,
+  which conflates restatements of the same period. It must never be read as
+  the observation date; `observed_on` belongs solely to the observation
+  writer (CAP-001-E4), which no model here declares.
+- A field genuinely absent on the wire (e.g. `TickerReference.delisted_utc`,
+  `DailyBar.is_otc`, `FinancialStatement.fiscal_quarter`) parses to `None`,
+  never to a substituted zero or `False`.
+- A response missing a field the model requires raises Pydantic
+  `ValidationError`; CAP-001-E3-S3 maps that to `ProviderContractViolation`
+  rather than passing a partial record on.
+- Each model's `value_payload()` returns a JSON-round-trippable dict — every
+  `Decimal` serializes as a string — for the observation writer's JSONB
+  payload column and its append-only value hash. No model declares
+  `observed_on`, `run_id`, or `recorded_at`; those remain writer- and
+  run-lifecycle-owned.
+
+**Known limitations, carried forward as accepted warnings from
+implementation review v1** (`CAP-001-E3-S2-implementation-review-v1.md`,
+IR-002 through IR-004) — none blocks a current acceptance criterion, and
+none is fixed by this change:
+
+- `FinancialStatement.statement_type` and `timeframe` accept any string;
+  unlike `CorporateAction.action_type`, they are not constrained to the
+  persistence contract's known values (`fundamental_statement_known`,
+  `quarterly`/`annual`), so an out-of-domain value passes parsing and would
+  fail later as a raw database constraint violation instead of a classifiable
+  `ProviderContractViolation`.
+- Decimal coercion of retained, undeclared provider fields
+  (`FinancialStatement` and `CorporateAction`'s extra line items) is
+  top-level only; a numeric value nested inside a provider-shaped object
+  (e.g. `action_ticker_change.json`'s nested `ticker_change` object) is not
+  recursed into and can reach the JSONB payload and value hash as a `float`.
+- `DailyBar`'s timestamp validator accepts any numeric `t` without checking
+  it is plausibly Unix milliseconds — a provider or SDK change to seconds
+  (or a malformed value) would parse to a wrong `session_date` rather than
+  raising.
 
 ## Running the migrator
 
