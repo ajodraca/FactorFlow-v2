@@ -55,7 +55,7 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 **Purpose**: Establish the model module and the four fixture-backed test destinations in the existing Python package layout.
 
-- [ ] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/massive/__init__.py`, and `src/factorflow/ingestion/massive/models.py`; create `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py` as the component design’s specified test locations.
+- [x] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/massive/__init__.py`, and `src/factorflow/ingestion/massive/models.py`; create `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py` as the component design’s specified test locations.
 
 **Checkpoint**: The package and test modules collect successfully; no additional dependency is required because Pydantic is already a transitive project dependency through FastAPI.
 
