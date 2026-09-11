@@ -17,7 +17,7 @@ provider-parsed value earns no as-of date just by being parsed.
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -27,6 +27,23 @@ __all__ = [
     "FinancialStatement",
     "TickerReference",
 ]
+
+
+def _coerce_extra_numeric_fields_to_decimal(
+    known_fields: set[str], data: dict[str, Any]
+) -> dict[str, Any]:
+    """Convert every field not already declared on the model from `int` or
+    `float` to `Decimal`, via `str()` rather than a direct `float`
+    conversion, so no binary rounding enters a value that will be recorded
+    permanently (DAC-E3-S2-3). Shared by every model here that retains
+    provider-specific, undeclared line items in its JSONB payload."""
+    coerced = dict(data)
+    for key, value in data.items():
+        if key in known_fields or isinstance(value, bool):
+            continue
+        if isinstance(value, int | float):
+            coerced[key] = Decimal(str(value))
+    return coerced
 
 
 class TickerReference(BaseModel):
@@ -175,16 +192,7 @@ class FinancialStatement(BaseModel):
         recorded permanently."""
         if not isinstance(data, dict):
             return data
-        known = set(cls.model_fields)
-        coerced = dict(data)
-        for key, value in data.items():
-            if key in known:
-                continue
-            if isinstance(value, bool):
-                continue
-            if isinstance(value, int | float):
-                coerced[key] = Decimal(str(value))
-        return coerced
+        return _coerce_extra_numeric_fields_to_decimal(set(cls.model_fields), data)
 
     def value_payload(self) -> dict[str, Any]:
         """A JSON-round-trippable value payload for
@@ -196,4 +204,55 @@ class FinancialStatement(BaseModel):
 
 
 class CorporateAction(BaseModel):
-    """Placeholder -- fields land in CAP-001-E3-S2 Phase 3."""
+    """One corporate action -- a split, dividend, ticker change, or IPO --
+    named for `corporate_action`.
+
+    Source: `component-design-massive-client.md` section 2.5, the four
+    corporate-action endpoints (`GET /stocks/v1/splits`,
+    `GET /stocks/v1/dividends`, `GET /vX/reference/ipos` and
+    `GET /vX/reference/tickers/{id}/events`).
+
+    Per the component design's Notes, `CorporateAction` is **one** product
+    model keyed by `action_type` and `effective_on` -- `corporate_action`'s
+    natural key -- rather than four separate storage shapes for the four
+    provider endpoint variants. Each endpoint names its own effective date
+    differently (a split's `execution_date`, a dividend's
+    `ex_dividend_date`, a ticker event's `date`, an IPO's `listing_date`)
+    and none of the four responses names an `action_type` field at all --
+    it is known from which endpoint was called. Both are therefore
+    supplied by the caller (CAP-001-E3-S1's client) alongside the raw
+    response, the same pattern `FinancialStatement.statement_type` uses,
+    rather than aliased from one wire key that does not exist across all
+    four shapes.
+
+    `action_type` is constrained to the DDL's four known values
+    (`corporate_action_type_known`); an unrecognised value fails
+    validation rather than being written. Every other, endpoint-specific
+    field (`split_from`, `cash_amount`, `historical_adjustment_factor`,
+    and so on) is retained as additional data, coerced to `Decimal`
+    (DAC-E3-S2-3) and carried into `value_payload()` for the writer's
+    JSONB payload and hash.
+    """
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    action_type: Literal["split", "dividend", "ticker_change", "ipo"] = Field(alias="action_type")
+    effective_on: date = Field(alias="effective_on")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_action_values_to_decimal(cls, data: Any) -> Any:
+        """Convert every extra (endpoint-specific) numeric field to
+        `Decimal` via its string representation, never via `float`
+        directly, so no binary rounding enters a value that will be
+        recorded permanently."""
+        if not isinstance(data, dict):
+            return data
+        return _coerce_extra_numeric_fields_to_decimal(set(cls.model_fields), data)
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for `corporate_action`'s
+        `payload` column, and for the append-only hash CAP-001-E4 computes
+        over it. This model owns no `observed_on`, `run_id` or
+        `recorded_at`, so none can appear here."""
+        return self.model_dump(mode="json")
