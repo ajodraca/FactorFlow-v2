@@ -170,8 +170,8 @@ Add the loopback-only HTTP boundary for requesting, listing, inspecting, and can
 
 ### Open Gaps
 
-- **PROVISIONAL — awaiting owner confirmation (2026-09-11):** When both start preconditions are absent, return `409 history_depth_not_set` before checking the active roster. Derivation: the request-flow sequence in `component-design-ingestion-api.md` section 2.2 checks depth before entering the journal path, and the story requires a deterministic single refusal but names no precedence. Record this decision in the next revision of `component-design-ingestion-api.md` section 2.4.
-- **PROVISIONAL — awaiting owner confirmation (2026-09-11):** Use the response field names `runs`, `next_cursor`, `run`, `counts`, and `results`; represent a run with the persisted `acquisition_run` columns needed by the story and a result with `instrument_id`, `data_type`, `outcome`, `reason`, `attempts`, and `completed_at`. Derivation: existing API responses use plural collection keys plus `next_cursor` (`InstrumentListResponse`), the storage schema defines those persisted columns, and the design fixes required content but not JSON key names or the exact count shape. Record the final public response schema in the next revision of `component-design-ingestion-api.md` section 11.
+- **Owner-confirmed (2026-09-11):** When both start preconditions are absent, return `409 history_depth_not_set` before checking the active roster. Record this decision in the next revision of `component-design-ingestion-api.md` section 2.4.
+- **Owner-confirmed (2026-09-11):** Use the response field names `runs`, `next_cursor`, `run`, `counts`, and `results`; represent a run with the persisted `acquisition_run` columns needed by the story and a result with `instrument_id`, `data_type`, `outcome`, `reason`, `attempts`, and `completed_at`. Record the final public response schema in the next revision of `component-design-ingestion-api.md` section 11.
 
 ### Other Notes
 

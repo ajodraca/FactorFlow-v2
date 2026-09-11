@@ -166,7 +166,7 @@ Implement the run-journal heartbeat and application-side reclaim sweep. A runner
 
 ### Open Gaps
 
-- **PROVISIONAL — awaiting owner confirmation (2026-09-11): application reclaim-loop cadence.** No approved artifact specifies how often the FastAPI lifespan repeats the sweep. This plan adopts 5 seconds, derived from the already owner-pinned five-second idle claim-poll cadence in `component-design-runtime-config.md` section 2.2a: both are low-cost periodic journal checks and the cadence bounds release-to-next-claim delay without changing the 900-second stale predicate. Implement this as a named local schedule argument at the lifespan/reclaim boundary, flag it for the next revision of `component-design-run-journal.md` and `component-design-runtime-config.md`, and do not present it as an existing configured value.
+- **Owner-confirmed (2026-09-11): application reclaim-loop cadence.** Use 5 seconds, derived from the already owner-pinned five-second idle claim-poll cadence in `component-design-runtime-config.md` section 2.2a. Implement this as a named local schedule argument at the lifespan/reclaim boundary and flag it for the next revision of `component-design-run-journal.md` and `component-design-runtime-config.md`.
 
 ### Other Notes
 
