@@ -2,9 +2,24 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Shell } from "./shell";
+
+vi.mock("../api/client", async () => {
+  const actual = await vi.importActual<typeof import("../api/client")>("../api/client");
+  return {
+    ...actual,
+    listInstruments: vi.fn().mockResolvedValue({
+      rows: [],
+      activeCount: 0,
+      retiredCount: 0,
+      nextCursor: null,
+    }),
+    getHistoryDepth: vi.fn().mockResolvedValue({ years: null, updatedAt: null }),
+  };
+});
 
 /**
  * Waits for the shell's health poll to settle.
@@ -78,5 +93,47 @@ describe("Routes — declares exactly five routes", () => {
     expect(storyOwnedRoutes.sort()).toEqual(
       ["/coverage", "/instruments", "/runs", "/runs/:runId", "/settings"].sort(),
     );
+  });
+});
+
+// T030 (CAP-001-E2-S4): both screens render their real content inside the
+// CAP-001-E1-S4 shell at their routed destinations, and navigating between
+// them preserves the shell's active-rail-item state.
+describe("Routes — Instruments and Settings render inside the shell (T030)", () => {
+  it("renders the real Instruments screen, not a placeholder, with Instruments active", async () => {
+    render(
+      <MemoryRouter initialEntries={["/instruments"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const main = screen.getByRole("main");
+    expect(within(main).getByRole("heading", { name: "Instruments" })).toBeInTheDocument();
+    expect(within(main).getByRole("textbox", { name: /instrument symbol/i })).toBeInTheDocument();
+
+    const nav = screen.getByRole("navigation");
+    expect(within(nav).getByText("Instruments").closest("a")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("navigating to Settings renders its real screen and moves the active rail item", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/instruments"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const nav = screen.getByRole("navigation");
+    await user.click(within(nav).getByText("Settings"));
+
+    const main = screen.getByRole("main");
+    expect(await within(main).findByRole("heading", { name: "Settings" })).toBeInTheDocument();
+    expect(within(nav).getByText("Settings").closest("a")).toHaveAttribute("aria-current", "page");
+    expect(within(nav).getByText("Instruments").closest("a")).not.toHaveAttribute("aria-current");
   });
 });

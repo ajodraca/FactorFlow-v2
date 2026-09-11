@@ -9,6 +9,18 @@ export default {
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
         border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        card: "hsl(var(--card) / <alpha-value>)",
+        "card-foreground": "hsl(var(--card-foreground) / <alpha-value>)",
+        "muted-foreground": "hsl(var(--muted-foreground) / <alpha-value>)",
+        secondary: "hsl(var(--secondary) / <alpha-value>)",
+        "secondary-foreground": "hsl(var(--secondary-foreground) / <alpha-value>)",
+        "status-good": "hsl(var(--status-good) / <alpha-value>)",
+        "status-good-muted": "hsl(var(--status-good-muted) / <alpha-value>)",
+        "status-warning": "hsl(var(--status-warning) / <alpha-value>)",
+        "status-warning-muted": "hsl(var(--status-warning-muted) / <alpha-value>)",
+        "status-critical": "hsl(var(--status-critical) / <alpha-value>)",
+        "status-critical-muted": "hsl(var(--status-critical-muted) / <alpha-value>)",
       },
       spacing: {
         1: "var(--space-1)",
@@ -48,6 +60,11 @@ export default {
         // Timestamps and counts render in the numeric face the design system
         // names, rather than in Tailwind's default monospace stack.
         numeric: "var(--font-numeric)",
+      },
+      maxWidth: {
+        // The Settings screen's single narrow column (ux-design section 1.3
+        // Page Layout): prose caps at this measure, tables never do.
+        prose: "var(--measure-prose)",
       },
     },
   },
