@@ -14,12 +14,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from psycopg_pool import ConnectionPool
 from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
-from factorflow.api.routes import health
+from factorflow.api.routes import health, instruments, settings
 from factorflow.config.settings import DatabaseSettings, configure_logging
 
 _STATIC_DIR = Path(__file__).parent / "static"
@@ -176,6 +177,47 @@ def _add_static_mount(app: FastAPI) -> None:
         app.mount("/", StaticFiles(directory=_STATIC_DIR, html=True), name="static")
 
 
+_VALIDATION_ERROR_RESOURCES = {
+    "/api/instruments": "instruments",
+    "/api/settings/history-depth": "settings",
+}
+
+
+def _resource_for_path(path: str) -> str:
+    """The envelope's `resource` for a request path this handler sees.
+
+    This handler is registered application-wide (`create_app`), so it
+    cannot hard-code one resource name (IR-001, adversarial review v1):
+    a `422` from `/api/settings/history-depth` must not claim to be about
+    `instruments`. `/api/instruments/{symbol}` is matched by prefix since
+    a validation error on that path (e.g. a malformed path parameter)
+    still concerns the instruments resource. Falls back to the path's own
+    first segment for any route this story does not own, so a future
+    route never silently reports someone else's resource name.
+    """
+    for known_path, resource in _VALIDATION_ERROR_RESOURCES.items():
+        if path == known_path or path.startswith(known_path + "/"):
+            return resource
+    return path.strip("/").split("/")[-1] or "request"
+
+
+async def _validation_error_handler(request: Request, exc: Exception) -> Response:
+    """Map FastAPI's default `422` body to the shared error envelope.
+
+    CAP-001-E2-S3: every non-2xx response from `instruments.py` and
+    `settings.py` must carry the envelope (DAC-E2-S3-3), including request
+    validation failures FastAPI raises before a route body ever runs.
+    """
+    request_id = getattr(request.state, "request_id", "unknown")
+    return error_response(
+        status_code=422,
+        code="validation_error",
+        message="The request did not match the expected shape.",
+        request_id=request_id,
+        resource=_resource_for_path(request.url.path),
+    )
+
+
 def create_app() -> FastAPI:
     """Construct the application: no default dependencies, so no route
     inherits an auth requirement (DAC-E1-S6-6).
@@ -183,8 +225,11 @@ def create_app() -> FastAPI:
     app = FastAPI(lifespan=_lifespan)
 
     app.add_exception_handler(Exception, internal_error_handler)
+    app.add_exception_handler(RequestValidationError, _validation_error_handler)
 
     app.include_router(health.router)
+    app.include_router(instruments.router)
+    app.include_router(settings.router)
 
     _add_request_id_middleware(app)
     _add_static_mount(app)

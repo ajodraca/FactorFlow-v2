@@ -11,12 +11,13 @@ data ingestion process, and the owner interface. See
 ## Status
 
 Early. The database schema foundation, the instrument-list domain service,
-the API's health endpoint and application factory, and the owner interface's
-application shell — its navigation rail, routing, and status region — are in
-place. The remaining API routes, the ingestion process, and the interface's
-screen content are not yet built. Each of the four destinations currently
-renders a placeholder. What exists today is described below — everything else
-in `docs/` is specification for work not yet implemented.
+the instrument and settings API routes, the API's health endpoint and
+application factory, and the owner interface's application shell — its
+navigation rail, routing, and status region — are in place. The remaining API
+routes (acquisition runs, coverage), the ingestion process, and the
+interface's screen content are not yet built. Each of the four destinations
+currently renders a placeholder. What exists today is described below —
+everything else in `docs/` is specification for work not yet implemented.
 
 ## Requirements
 
@@ -60,8 +61,8 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). This internal API is not yet exposed through HTTP; CAP-001-E2-S3 owns the route layer. |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, and the static-bundle mount with its SPA fallback. `routes/health.py` implements `GET /api/health`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
+| `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract; `client.ts` holds `fetchHealth()` and the `ApiUnreachableError` it raises when the API does not answer. Same-origin only — the bundle is served by the API process, so every path is relative |
@@ -153,13 +154,35 @@ explicitly excluded even though it is an `int` subclass, so `True` cannot
 silently store as a depth of 1). No upper bound is enforced here: a depth
 beyond what the provider plan holds is recorded unchanged, because the
 product reports what was actually acquired rather than presenting a shortfall
-as a data gap. A 50-year sanity cap exists, but at the HTTP layer
-(`PUT /api/settings/history-depth`, owned by CAP-001-E2-S3) rather than in
-this module.
+as a data gap. A 50-year sanity cap (`MAX_HISTORY_DEPTH_YEARS` in
+`src/factorflow/api/bounds.py`) exists instead at the HTTP layer, enforced by
+`PUT /api/settings/history-depth`'s request model before this module's write
+ever runs — see [Instrument and settings API](#instrument-and-settings-api).
 
 Both functions take a caller-supplied `psycopg.Connection` rather than
 opening their own, so a caller can compose a depth write with other
 instrument-list operations inside one transaction.
+
+## Instrument and settings API
+
+`src/factorflow/api/routes/instruments.py` and `settings.py` expose the
+instrument-list domain service over HTTP — a thin surface that validates the
+request, delegates to `src/factorflow/instruments/`, and shapes the
+response; no business rule is duplicated in the route layer.
+
+| Endpoint | Behavior |
+|---|---|
+| `GET /api/instruments` | `symbol` prefix filter, `lifecycle` filter (`active` or `retired`; any other value is rejected `422`), `limit` (default 50, max 500, rejected `422` above the bound rather than clamped), and keyset `cursor` pagination. Returns `active_count`/`retired_count` computed over the whole list, independent of the current filter |
+| `POST /api/instruments` | Adds or reactivates up to 1000 symbols (`MAX_SYMBOLS_PER_REQUEST`) per request. `201` when at least one symbol is added or reactivated, with the batch split into `added`/`reactivated`/`rejected` groups, each rejection carrying a reason; `409` when every symbol duplicates an active instrument; `422` when every symbol is malformed |
+| `DELETE /api/instruments/{symbol}` | `404` for an unknown symbol, `409` for one already retired, `200` with `lifecycle: "retired"` and `retired_at` otherwise. `retired_at` is the API process's own clock, sampled immediately after the store's transaction commits — an approximation of the store's own `now()`, not a read-back of the exact persisted value |
+| `GET /api/settings/history-depth` | `years` (or `null` when never set — distinct from zero) and `updated_at` |
+| `PUT /api/settings/history-depth` | Sets the depth; `422` for anything outside `1..50` inclusive |
+
+Every non-2xx response from these two route modules carries the shared
+`{"error": {code, message, resource, request_id}}` envelope (`errors.py`),
+including FastAPI's own request-validation `422`s — `app.py`'s
+`_validation_error_handler` derives `resource` from the request path so a
+shared, application-wide handler still names the right resource per route.
 
 ## Running the migrator
 
