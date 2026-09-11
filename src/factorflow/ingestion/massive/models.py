@@ -19,7 +19,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 __all__ = [
     "CorporateAction",
@@ -119,7 +119,80 @@ class DailyBar(BaseModel):
 
 
 class FinancialStatement(BaseModel):
-    """Placeholder -- fields land in CAP-001-E3-S2 Phase 3."""
+    """A company financial statement, named for `fundamental_observation`.
+
+    Source: `component-design-massive-client.md` section 2.5, the four
+    sibling `GET /stocks/financials/v1/...` endpoints (balance sheets,
+    income statements, cash-flow statements and ratios).
+
+    `cik`, `tickers`, `fiscal_period_end`, `provider_filing_date`,
+    `fiscal_year` and `timeframe` are all required: the component design
+    states each result carries them, so a response missing one is not a
+    usable statement (DAC-E3-S2-4). `fiscal_quarter` is optional --
+    `timeframe` distinguishes `annual` from `quarterly` filings, and an
+    annual filing carries no quarter; its absence must remain `None`, not
+    a substituted value (DAC-E3-S2-5).
+
+    `statement_type` discriminates which of the four sibling endpoints a
+    record came from (`fundamental_observation.statement_type`, part of
+    its natural key). Massive does not return it on the wire -- it is
+    known from which endpoint was called -- so this is the one field the
+    caller (CAP-001-E3-S1's client) supplies rather than one carried by
+    the response body; it remains required because the persistence
+    contract requires it.
+
+    `provider_filing_date` is **descriptive only** (C5, AC-5): it is the
+    most recent filing including the period and conflates restatements of
+    the same period, so it must never be read or used as the observation
+    date. `observed_on` belongs to the observation writer alone
+    (CAP-001-E4) and is not a field of this model.
+
+    Every statement-specific line item (total assets, a given ratio, and
+    so on) varies by `statement_type` and is not enumerated by the
+    component design, so this model accepts them as additional data
+    rather than declaring one field per possible line item. They are
+    coerced to `Decimal` (DAC-E3-S2-3) and retained verbatim in
+    `value_payload()` for the writer's JSONB payload and hash.
+    """
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    cik: str = Field(alias="cik")
+    tickers: list[str] = Field(alias="tickers")
+    fiscal_period_end: date = Field(alias="period_end")
+    provider_filing_date: date = Field(alias="filing_date")
+    fiscal_year: int = Field(alias="fiscal_year")
+    fiscal_quarter: int | None = Field(alias="fiscal_quarter", default=None)
+    timeframe: str = Field(alias="timeframe")
+    statement_type: str = Field(alias="statement_type")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_statement_values_to_decimal(cls, data: Any) -> Any:
+        """Convert every extra (statement-specific) numeric line item to
+        `Decimal` via its string representation, never via `float`
+        directly, so no binary rounding enters a value that will be
+        recorded permanently."""
+        if not isinstance(data, dict):
+            return data
+        known = set(cls.model_fields)
+        coerced = dict(data)
+        for key, value in data.items():
+            if key in known:
+                continue
+            if isinstance(value, bool):
+                continue
+            if isinstance(value, int | float):
+                coerced[key] = Decimal(str(value))
+        return coerced
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for
+        `fundamental_observation`'s `payload` column, and for the
+        append-only hash CAP-001-E4 computes over it. This model owns no
+        `observed_on`, `run_id` or `recorded_at`, so none can appear
+        here."""
+        return self.model_dump(mode="json")
 
 
 class CorporateAction(BaseModel):
