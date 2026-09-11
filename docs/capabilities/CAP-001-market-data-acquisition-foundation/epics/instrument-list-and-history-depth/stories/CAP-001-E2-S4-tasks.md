@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-001-E2-S4-tasks
 artifact_type: story-tasks
 artifact_version: 1
-status: in-review
+status: docs-sync
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
