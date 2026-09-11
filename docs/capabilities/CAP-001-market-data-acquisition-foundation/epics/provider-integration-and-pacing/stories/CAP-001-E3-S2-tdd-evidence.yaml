@@ -1,0 +1,175 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S2-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E3-S2
+tasks_file: CAP-001-E3-S2-tasks.md
+created: 2026-09-11
+updated: 2026-09-11
+
+# RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for the four
+# provider response models (T007/T008), one cycle per model, plus the T010
+# manual-mutation session run against the finished models.py before marking
+# implementation tasks complete.
+
+cycles:
+  - model: TickerReference
+    red:
+      description: >-
+        tests/unit/test_massive_reference.py written against a
+        placeholder TickerReference(BaseModel) with no fields.
+      commit: 20d1842
+      result: failing (Pydantic accepted any input; field/attribute
+        assertions failed)
+    green:
+      description: >-
+        Implemented TickerReference with aliased fields (cik,
+        composite_figi, share_class_figi, is_active, company_name,
+        list_date, delisted_utc, primary_exchange, security_type,
+        currency_name) and value_payload().
+      commit: 20d1842
+      test_command: uv run pytest tests/unit/test_massive_reference.py -q
+      result: "10 passed"
+
+  - model: DailyBar
+    red:
+      description: >-
+        tests/unit/test_massive_bars.py extended with TC-COMP-206/215/216
+        and payload-contract tests; bar_regular.json and bar_otc.json
+        fixtures added. Run before implementation, against the
+        placeholder DailyBar(BaseModel) with no fields.
+      test_command: uv run pytest tests/unit/test_massive_bars.py -q
+      result: "12 failed, 2 passed (AttributeError: 'DailyBar' object has
+        no attribute '<field>' / 'value_payload')"
+    green:
+      description: >-
+        Implemented DailyBar: aliases t/o/h/l/c/v/vw/n/otc to
+        session_date/open_price/high_price/low_price/close_price/volume/
+        vwap/transaction_count/is_otc; a field_validator converts Unix
+        milliseconds to a UTC calendar date before Pydantic's date
+        coercion; value_payload() dumps Decimals as strings. Also fixed a
+        test-only bug (date.fromtimestamp() does not accept a tz kwarg)
+        without weakening the assertion's intent.
+      commit: 7393560
+      test_command: uv run pytest tests/unit/test_massive_bars.py
+        tests/unit/test_massive_reference.py -q
+      result: "24 passed"
+
+  - model: FinancialStatement
+    red:
+      description: >-
+        tests/unit/test_massive_financials.py written (TC-COMP-005, 217,
+        218, 219) against a placeholder FinancialStatement(BaseModel)
+        with no fields; financial_annual.json and financial_quarterly.json
+        fixtures added.
+      test_command: uv run pytest tests/unit/test_massive_financials.py -q
+      result: "12 failed, 1 passed (AttributeError: 'FinancialStatement'
+        object has no attribute '<field>' / 'value_payload')"
+    green:
+      description: >-
+        Implemented FinancialStatement: period_end/filing_date aliased to
+        fiscal_period_end/provider_filing_date (descriptive only, never an
+        as-of date per AC-5/C5); cik, tickers, fiscal_year, timeframe and
+        statement_type required; fiscal_quarter optional (absent on
+        annual filings); a model_validator(mode="before") coerces every
+        extra statement-specific line item to Decimal via str().
+      commit: 883700d
+      test_command: uv run pytest tests/unit/test_massive_financials.py -q
+      result: "13 passed"
+
+  - model: CorporateAction
+    red:
+      description: >-
+        tests/unit/test_massive_actions.py written against a placeholder
+        CorporateAction(BaseModel) with no fields; action_split.json,
+        action_dividend.json, action_ticker_change.json and
+        action_ipo.json fixtures added.
+      test_command: uv run pytest tests/unit/test_massive_actions.py -q
+      result: "10 failed, 1 passed (AttributeError: 'CorporateAction'
+        object has no attribute '<field>' / 'value_payload')"
+    green:
+      description: >-
+        Implemented CorporateAction as one model keyed by action_type
+        (Literal of the DDL's four known values) and effective_on, both
+        supplied by the caller since no single provider endpoint names
+        either consistently; endpoint-specific fields retained as extra
+        payload data via the shared _coerce_extra_numeric_fields_to_decimal
+        helper (factored out of FinancialStatement's identical validator).
+        One self-authored test assertion was corrected in the same
+        commit (it contradicted the design's own intent to retain
+        variant-specific provider fields such as execution_date in the
+        payload).
+      commit: 2099be9
+      test_command: uv run pytest tests/unit -q
+      result: "175 passed"
+
+# T010: manual mutation session, run against the committed models.py
+# (commit 2099be9) after all four GREEN cycles above, one mutation at a
+# time, each reverted and the suite re-confirmed green before the next.
+manual_mutations_baseline_commit: 2099be9
+manual_mutations:
+  - id: mutation-1-bar-alias
+    target: DailyBar.open_price
+    change: 'alias="o" -> alias="open"'
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "5 failed, 9 passed (Field required: 'open'; missing input
+      'o' left unconsumed)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-timestamp-conversion
+    target: DailyBar._millis_to_utc_session_date
+    change: >-
+      datetime.fromtimestamp(value / 1000, tz=UTC).date() ->
+      datetime.fromtimestamp(value / 1000).date() (dropped the UTC
+      timezone, so the conversion uses host-local time)
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "2 failed, 12 passed (session_date computed as 2024-01-01
+      instead of 2024-01-02 on this host's local timezone)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-decimal-annotation
+    target: DailyBar.open_price
+    change: 'Decimal -> float'
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "3 failed, 11 passed (test_no_field_is_typed_float failed;
+      value_payload emitted 187.15 as a JSON number, not the string
+      '187.15')"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-required-field
+    target: TickerReference.cik
+    change: 'str (required) -> str | None = None (optional)'
+    test_command: uv run pytest tests/unit/test_massive_reference.py -q
+    result: "1 failed, 9 passed
+      (test_missing_required_field_fails_validation[cik]: DID NOT RAISE
+      ValidationError)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-optional-field
+    target: DailyBar.is_otc
+    change: 'bool | None = None -> bool = False'
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "1 failed, 13 passed
+      (test_otc_flag_is_optional_and_absence_is_not_false: assert False
+      is None)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  description: >-
+    After all five mutations were individually applied, observed caught,
+    and reverted, models.py was diffed byte-for-byte against the
+    baseline commit (2099be9) to confirm no mutation was left in place,
+    then the full suite and static checks were re-run.
+  commands:
+    - uv run pytest tests/unit -q
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+    - uv build
+  result: "175 passed; ruff check clean; ruff format clean (after one
+    reformat of models.py's CorporateAction.action_type line); mypy:
+    Success, no issues found in 26 source files; uv build succeeded"

@@ -105,7 +105,7 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 **Purpose**: Prove the model contract survives the project’s static checks and required TDD mutation discipline.
 
-- [ ] T010 Run the S2 test files in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`; perform and document manual mutations for a bar alias, timestamp conversion, a `Decimal` annotation, a required field, and an optional field in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S2-tdd-evidence.yaml` before marking implementation tasks complete.
+- [x] T010 Run the S2 test files in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`; perform and document manual mutations for a bar alias, timestamp conversion, a `Decimal` annotation, a required field, and an optional field in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S2-tdd-evidence.yaml` before marking implementation tasks complete.
 
 **Checkpoint**: All mapped tests are green, each changed behavior has recorded RED→GREEN→MUTATE evidence, and lint, format, type, and build validation pass.
 
