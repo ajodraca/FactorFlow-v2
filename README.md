@@ -13,11 +13,13 @@ data ingestion process, and the owner interface. See
 Early. The database schema foundation, the instrument-list domain service,
 the instrument and settings API routes, the API's health endpoint and
 application factory, and the owner interface's application shell — its
-navigation rail, routing, and status region — are in place. The remaining API
-routes (acquisition runs, coverage), the ingestion process, and the
-interface's screen content are not yet built. Each of the four destinations
-currently renders a placeholder. What exists today is described below —
-everything else in `docs/` is specification for work not yet implemented.
+navigation rail, routing, and status region — are in place. The Instruments
+and Settings screens are also built, rendering inside that shell and
+consuming the instrument and settings API. The remaining API routes
+(acquisition runs, coverage), the ingestion process, and the Coverage and
+Runs screens are not yet built; those two destinations still render a
+placeholder. What exists today is described below — everything else in
+`docs/` is specification for work not yet implemented.
 
 ## Requirements
 
@@ -65,11 +67,14 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
-| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract; `client.ts` holds `fetchHealth()` and the `ApiUnreachableError` it raises when the API does not answer. Same-origin only — the bundle is served by the API process, so every path is relative |
-| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` declares those four routes plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
+| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
+| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` mounts the Instruments and Settings screens (see below) at their destinations, with Coverage and Runs still `ScreenPlaceholder`, plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
+| `web/src/screens/instruments/` | The Instruments screen: one table with a lifecycle column (never two tables), single-symbol and bulk (`textarea`) add, and retirement through a `dialog` `confirm`. `index.tsx` composes the screen's `ScreenState`; `instrument-table.tsx` holds server-side search/filter and keyset "Load more" paging; `add-field.tsx` and `bulk-add.tsx` (with `parse-bulk-symbols.ts`) add instruments; `retire-dialog.tsx` confirms retirement; `start-action.tsx` renders the acquisition-run trigger `blocked` when history depth is unset; `badges.tsx` renders the active/retired lifecycle badge. See [Instruments and Settings screens](#instruments-and-settings-screens) |
+| `web/src/screens/settings/` | The Settings screen: `index.tsx` composes the layout; `history-depth-form.tsx` reads and writes the history-depth setting with STD-UI-19-shaped validation errors; `credential-status.tsx` reports provider credential presence only, never the value, with a distinct icon/shape per state. See [Instruments and Settings screens](#instruments-and-settings-screens) |
 | `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
+| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh` |
 | `docs/` | Constitution, capability specifications, and designs |
 
 ## Configuration
@@ -288,6 +293,47 @@ The region reserves a third line, sized but empty and hidden from assistive
 technology, so a trading-environment indicator can land later without
 restructuring the layout.
 
+## Instruments and Settings screens
+
+Both screens render inside the shell (`web/src/app/shell.tsx`) at their
+navigation destinations and use the `ScreenState<T>` union
+(`web/src/api/types.ts`) to distinguish loading, both empty states, error,
+and unreachable.
+
+**Instruments** (`web/src/screens/instruments/`) is one table with a
+lifecycle column — active and retired instruments are never split into two
+tables, so a retired instrument's history does not read as archived. An
+inline field adds a single symbol; a `textarea` region accepts a
+newline/comma/tab/semicolon-separated batch (`parse-bulk-symbols.ts`),
+previews which entries are recognised and which are rejected (with a reason)
+before anything is submitted, and reports the server's per-symbol outcome
+(added/reactivated/rejected) after submission — a rejection never discards
+the accepted symbols. Retiring an instrument opens a `dialog` `confirm` (never
+`destructive`) that states retirement, not deletion, traps focus, and closes
+on Escape or on a successful confirm; the dialog's in-flight-run sentence
+renders on every open, unconditionally, because no run-status source exists
+yet in the product (a known, disclosed gap — see
+`docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/instrument-list-and-history-depth/stories/CAP-001-E2-S4-implementation-review-v2.md`
+finding IR-201). Search and lifecycle filtering are server-side
+(`listInstruments`), not a client-side filter over the loaded page, which is
+required for the filter to stay correct at 3000 instruments; the table pages
+further results with a "Load more" control that appends rows using the
+server's keyset `cursor` rather than replacing them. Two known gaps remain
+open, tracked in the implementation review above: "Load more" has no guard
+against a filter changing while a page request is in flight (IR-202), and
+loaded rows are never windowed, so the DOM grows unbounded once many pages
+accumulate (IR-203). The acquisition-run start action renders `blocked` (never
+a bare `disabled`) with its reason when history depth is unset.
+
+**Settings** (`web/src/screens/settings/`) states history depth as a
+positive whole number of years, validating on blur with an error that names
+the operation, resource, and reason (`history-depth-form.tsx`); a failed read
+is reported distinctly from an unset value. Provider credential presence
+(`credential-status.tsx`) is shown as a read-only status — a filled circle,
+a cross, or a dashed circle for present/missing/unknown — never the value
+itself, each state carrying its own text label so the distinction survives in
+greyscale.
+
 ## Testing
 
 Integration tests run against a real PostgreSQL 16 instance started by
@@ -316,8 +362,13 @@ lands in `src/factorflow/api/static/` and leaves `.gitkeep` intact, so this
 command writes build output as a side effect and takes appreciably longer
 than a pure unit suite. It leaves no tracked file modified.
 
-`npm run test:e2e` is defined but has no Playwright specs yet; the
-end-to-end suite arrives with a later story.
+`npm run test:e2e` runs the Playwright suite in `tests/e2e/` against a real
+API and PostgreSQL container: `scripts/run-e2e-server.sh` (Playwright's
+`webServer.command`) starts the container, applies migrations, builds the
+interface bundle, and runs the API process on `127.0.0.1:8123` (or
+`FACTORFLOW_API_PORT`), tearing both down after the run; `posttest:e2e`
+removes the container by name as a backstop against a hard-killed teardown.
+Needs Docker and Playwright's browsers installed (`npx playwright install`).
 
 ## Validation
 
