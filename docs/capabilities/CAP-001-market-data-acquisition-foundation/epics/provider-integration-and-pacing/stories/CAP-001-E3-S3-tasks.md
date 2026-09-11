@@ -58,7 +58,7 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Add the isolated taxonomy module and its deterministic unit-test locations.
 
-- [ ] T001 Create `src/factorflow/ingestion/massive/errors.py`, `tests/unit/test_massive_errors.py`, and `tests/unit/test_massive_error_classification.py`; retain the existing `factorflow.ingestion.massive` package created by CAP-001-E3-S2.
+- [x] T001 Create `src/factorflow/ingestion/massive/errors.py`, `tests/unit/test_massive_errors.py`, and `tests/unit/test_massive_error_classification.py`; retain the existing `factorflow.ingestion.massive` package created by CAP-001-E3-S2.
 
 **Checkpoint**: The test modules collect and can import the empty taxonomy module without provider network access.
 
