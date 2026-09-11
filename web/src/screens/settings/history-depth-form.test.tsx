@@ -81,4 +81,21 @@ describe("HistoryDepthForm", () => {
     await user.tab();
     expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
+
+  // IR-005: a failed read must not be indistinguishable from a genuinely
+  // unset depth, and must not leave an unhandled rejection.
+  it("reports a failed read distinctly from an unset depth", async () => {
+    vi.mocked(client.getHistoryDepth).mockReset();
+    vi.mocked(client.getHistoryDepth).mockRejectedValue(
+      new Error("the request could not be completed"),
+    );
+    render(<HistoryDepthForm />);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toMatch(/history depth/i);
+    expect(alert.textContent).toMatch(/could not be completed/i);
+    expect(
+      screen.queryByText(/required before the first acquisition run/i),
+    ).not.toBeInTheDocument();
+  });
 });

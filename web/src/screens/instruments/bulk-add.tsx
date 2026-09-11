@@ -1,5 +1,6 @@
 import { type JSX, useId, useState } from "react";
 import { addInstruments } from "../../api/client";
+import type { AddInstrumentsResult } from "../../api/types";
 import { type ParsedSymbol, parseBulkSymbols } from "./parse-bulk-symbols";
 
 /**
@@ -21,11 +22,19 @@ export function BulkAdd({ onAdded }: { onAdded: () => void }): JSX.Element {
   const [parsed, setParsed] = useState<ParsedSymbol[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitResult, setSubmitResult] = useState<AddInstrumentsResult | null>(null);
   const labelId = useId();
   const countId = useId();
+  const blockedReasonId = useId();
 
   const recognised = parsed?.filter((entry) => entry.valid) ?? [];
   const rejected = parsed?.filter((entry) => !entry.valid) ?? [];
+  // Persistent, reachable state — an all-rejected paste — rather than the
+  // transient in-flight `submitting` state below (IR-003): only this one
+  // gets the `blocked` treatment. `submitting` stays a native `disabled`
+  // because it resolves in well under a second and DAC-E2-S4-3's own
+  // remediation permits a sub-second in-flight state to remain disabled.
+  const blocked = parsed !== null && recognised.length === 0;
 
   function handleBlur(): void {
     setParsed(raw.trim().length === 0 ? null : parseBulkSymbols(raw));
@@ -37,11 +46,17 @@ export function BulkAdd({ onAdded }: { onAdded: () => void }): JSX.Element {
     }
     setSubmitting(true);
     setSubmitError(null);
+    setSubmitResult(null);
     try {
       // Deduplicate normalised symbols: the same symbol pasted twice in one
       // batch should not be sent to the API twice within a single request.
       const symbols = Array.from(new Set(recognised.map((entry) => entry.normalised)));
-      await addInstruments(symbols);
+      const result = await addInstruments(symbols);
+      // IR-008: the API's per-symbol outcomes (a mixed batch's rejections
+      // included) are reported after submission rather than discarded —
+      // clearing the textarea must not also clear what the store did with
+      // what was sent.
+      setSubmitResult(result);
       setRaw("");
       setParsed(null);
       onAdded();
@@ -96,12 +111,49 @@ export function BulkAdd({ onAdded }: { onAdded: () => void }): JSX.Element {
           ) : null}
           <button
             type="button"
-            className="w-fit rounded bg-foreground px-3 py-2 text-background"
-            disabled={recognised.length === 0 || submitting}
-            onClick={() => void handleSubmit()}
+            data-variant={blocked ? "blocked" : "default"}
+            aria-describedby={blocked ? blockedReasonId : undefined}
+            // Never a bare `disabled` attribute for the blocked case: a
+            // plain disabled control is not focusable, so its reason never
+            // reaches a keyboard or screen-reader user (DAC-E2-S4-3). The
+            // transient `submitting` state below is the sub-second
+            // exception that rule's own remediation allows.
+            tabIndex={0}
+            disabled={!blocked && submitting}
+            className="w-fit rounded bg-foreground px-3 py-2 text-background data-[variant=blocked]:border data-[variant=blocked]:border-border data-[variant=blocked]:bg-transparent data-[variant=blocked]:text-muted-foreground"
+            onClick={(event) => {
+              if (blocked) {
+                event.preventDefault();
+                return;
+              }
+              void handleSubmit();
+            }}
           >
             Add {recognised.length} instrument{recognised.length === 1 ? "" : "s"}
           </button>
+          {blocked ? (
+            <p id={blockedReasonId} className="text-muted-foreground text-sm">
+              Add at least one recognised symbol before submitting.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {submitResult !== null ? (
+        <div data-testid="bulk-add-result" className="flex flex-col gap-1 text-sm">
+          <p>
+            {submitResult.added.length} added, {submitResult.reactivated.length} reactivated,{" "}
+            {submitResult.rejected.length} rejected
+          </p>
+          {submitResult.rejected.length > 0 ? (
+            <ul data-testid="bulk-add-result-rejected" className="flex flex-col gap-1">
+              {submitResult.rejected.map((entry) => (
+                <li key={entry.inputSymbol} className="text-status-critical">
+                  <span className="font-numeric">{entry.inputSymbol}</span>:{" "}
+                  {entry.reason ?? "rejected"}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       ) : null}
     </div>

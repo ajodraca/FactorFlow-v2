@@ -30,8 +30,11 @@ export function InstrumentTable({ refreshToken = 0 }: { refreshToken?: number } 
   const [rows, setRows] = useState<Instrument[] | null>(null);
   const [activeCount, setActiveCount] = useState(0);
   const [retiredCount, setRetiredCount] = useState(0);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retireTarget, setRetireTarget] = useState<RetireTarget | null>(null);
+  const [retireError, setRetireError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
   // refreshToken and reloadToken below are deliberate re-fetch triggers
@@ -51,9 +54,14 @@ export function InstrumentTable({ refreshToken = 0 }: { refreshToken?: number } 
             if (cancelled) {
               return;
             }
+            // A fresh filter/refresh/reload always replaces the loaded set
+            // with the first page — "Load more" below is what accumulates
+            // further pages (IR-001); a filter change must not keep stale
+            // rows from a previous filter's later pages.
             setRows(page.rows);
             setActiveCount(page.activeCount);
             setRetiredCount(page.retiredCount);
+            setNextCursor(page.nextCursor);
             setLoadError(null);
           })
           .catch((cause: unknown) => {
@@ -74,12 +82,50 @@ export function InstrumentTable({ refreshToken = 0 }: { refreshToken?: number } 
     };
   }, [symbolFilter, lifecycleFilter, refreshToken, reloadToken]);
 
+  /**
+   * Consumes `nextCursor` (IR-001): at AC-4's 3000-instrument volume, the
+   * server's `DEFAULT_PAGE_SIZE` only ever returns the first page unless a
+   * caller asks for more. Appends the next page's rows to what is already
+   * rendered rather than replacing them, so every instrument in the
+   * filtered result set is reachable.
+   */
+  async function handleLoadMore(): Promise<void> {
+    if (nextCursor === null || loadingMore) {
+      return;
+    }
+    setLoadingMore(true);
+    try {
+      const page = await listInstruments({
+        symbol: symbolFilter || undefined,
+        lifecycle: lifecycleFilter || undefined,
+        cursor: nextCursor,
+      });
+      setRows((current) => (current ?? []).concat(page.rows));
+      setActiveCount(page.activeCount);
+      setRetiredCount(page.retiredCount);
+      setNextCursor(page.nextCursor);
+      setLoadError(null);
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : "the request could not be completed");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  /**
+   * A rejected `retireInstrument` (404 unknown symbol, 409 already retired,
+   * or a transport failure) must not be presented as a completed retirement
+   * (IR-004): the dialog stays open with a visible error, and the table is
+   * only reloaded once the call actually succeeds.
+   */
   async function handleRetireConfirm(symbol: string): Promise<void> {
+    setRetireError(null);
     try {
       await retireInstrument(symbol);
-    } finally {
       setRetireTarget(null);
       setReloadToken((token) => token + 1);
+    } catch (cause) {
+      setRetireError(cause instanceof Error ? cause.message : "the request could not be completed");
     }
   }
 
@@ -177,12 +223,26 @@ export function InstrumentTable({ refreshToken = 0 }: { refreshToken?: number } 
         </table>
       )}
 
+      {nextCursor !== null ? (
+        <button
+          type="button"
+          onClick={() => void handleLoadMore()}
+          disabled={loadingMore}
+          className="w-fit rounded border border-border px-3 py-2 text-sm"
+        >
+          {loadingMore ? "Loading more…" : "Load more"}
+        </button>
+      ) : null}
+
       {retireTarget !== null ? (
         <RetireDialog
           symbol={retireTarget.symbol}
-          hasActiveRun={false}
+          error={retireError}
           onConfirm={() => void handleRetireConfirm(retireTarget.symbol)}
-          onCancel={() => setRetireTarget(null)}
+          onCancel={() => {
+            setRetireTarget(null);
+            setRetireError(null);
+          }}
         />
       ) : null}
     </div>

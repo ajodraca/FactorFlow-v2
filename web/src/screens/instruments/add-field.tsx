@@ -103,6 +103,11 @@ export function AddField({
       </div>
       <button
         type="submit"
+        // `submitting` is a native `disabled`, not `blocked` (IR-003):
+        // it is a single in-flight POST, resolving in well under a second,
+        // which DAC-E2-S4-3's own remediation permits to remain disabled
+        // rather than requiring the `blocked` treatment reserved for a
+        // persistent, reachable "cannot currently be used" state.
         disabled={submitting}
         className="rounded bg-foreground px-3 py-2 text-background"
       >

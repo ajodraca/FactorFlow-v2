@@ -16,16 +16,28 @@ export function HistoryDepthForm(): JSX.Element {
   const [years, setYears] = useState<number | null>(null);
   const [rawValue, setRawValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const inputId = useId();
   const errorId = useId();
+  const loadErrorId = useId();
   const descriptionId = useId();
 
+  // IR-005: `.finally` alone does not handle a rejection — a failed read
+  // left the promise rejected (an unhandled rejection) and rendered an
+  // empty field indistinguishable from a genuinely unset depth. The read
+  // failure is now reported explicitly and distinctly from "not yet
+  // stated" (the `descriptionId` paragraph below), rather than silently
+  // read as unset.
   useEffect(() => {
     getHistoryDepth()
       .then((depth) => {
         setYears(depth.years);
         setRawValue(depth.years === null ? "" : String(depth.years));
+        setLoadError(null);
+      })
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "the request could not be completed");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -63,12 +75,22 @@ export function HistoryDepthForm(): JSX.Element {
           type="number"
           inputMode="numeric"
           min={1}
+          // A native `disabled`, not `blocked` (IR-003): this is the
+          // single in-flight `GET` on mount, resolving in well under a
+          // second, which DAC-E2-S4-3's own remediation permits to remain
+          // disabled rather than requiring the `blocked` treatment
+          // reserved for a persistent, reachable "cannot currently be
+          // used" state.
           disabled={loading}
           value={rawValue}
           aria-label="History depth, in years"
           aria-invalid={error !== null ? "true" : undefined}
           aria-describedby={
-            [error !== null ? errorId : null, years === null ? descriptionId : null]
+            [
+              error !== null ? errorId : null,
+              loadError !== null ? loadErrorId : null,
+              years === null && loadError === null ? descriptionId : null,
+            ]
               .filter((id): id is string => id !== null)
               .join(" ") || undefined
           }
@@ -83,7 +105,11 @@ export function HistoryDepthForm(): JSX.Element {
         />
         <span className="text-sm">years</span>
       </div>
-      {years === null ? (
+      {loadError !== null ? (
+        <p id={loadErrorId} role="alert" className="text-status-critical text-sm">
+          Reading history depth failed: {loadError}
+        </p>
+      ) : years === null ? (
         <p id={descriptionId} className="text-muted-foreground text-sm">
           Required before the first acquisition run.
         </p>
