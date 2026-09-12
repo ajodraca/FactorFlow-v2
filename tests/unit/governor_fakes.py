@@ -42,6 +42,32 @@ class FakeSleeper:
         self._clock.advance(seconds)
 
 
+class FlakySender:
+    """A `send` callable that raises a caller-supplied exception for the
+    first `fail_count` calls, then returns `result`. Used to simulate a
+    provider that throttles or fails transiently before succeeding (or
+    never succeeds, when `fail_count` exceeds the test's attempt/throttle
+    budget)."""
+
+    def __init__(
+        self,
+        fail_count: int,
+        *,
+        exception_factory: type[BaseException] = RuntimeError,
+        result: object = "ok",
+    ) -> None:
+        self.fail_count = fail_count
+        self._exception_factory = exception_factory
+        self._result = result
+        self.calls = 0
+
+    def __call__(self) -> object:
+        self.calls += 1
+        if self.calls <= self.fail_count:
+            raise self._exception_factory(f"attempt {self.calls} failed")
+        return self._result
+
+
 class SequenceJitter:
     """A deterministic jitter source cycling through a fixed sequence of
     values, each expected in `[0, 1)`, so a test can assert an exact

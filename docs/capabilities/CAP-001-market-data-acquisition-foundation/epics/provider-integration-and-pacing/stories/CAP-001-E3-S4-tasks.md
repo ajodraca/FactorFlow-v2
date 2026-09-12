@@ -71,14 +71,14 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-230 and the pacing portion of AC-4 in `tests/unit/test_governor_pacing.py`: with a virtual clock and capacity `N`, assert `N` consecutive sends advance virtual time by zero, the `N+1` send blocks until a token refills, and no virtual one-minute window issues more than the configured budget.
-- [ ] T003 [P] Implement TC-COMP-200, TC-COMP-201, TC-COMP-203, TC-COMP-226, TC-COMP-227, and TC-COMP-231 in `tests/unit/test_governor_retry.py`: assert repeated `THROTTLED` outcomes leave attempts at zero; a no-delay throttle waits to the next minute boundary with full jitter; a stub `stated_delay_seconds` callback delay is honoured exactly without jitter; and both throttle paths count their waits against and raise after `max_throttle_wait_seconds`.
-- [ ] T004 [P] Implement TC-COMP-202, TC-COMP-228, and TC-COMP-229 in `tests/unit/test_governor_retry.py` and `tests/unit/test_governor_backoff.py`: assert retryable timeout/5xx outcomes increment attempts and use jittered exponential delays, no fourth send occurs after the configured limit, and a caller-classified `FATAL` exception is re-raised with neither sleep nor retry.
+- [x] T002 [P] Implement TC-COMP-230 and the pacing portion of AC-4 in `tests/unit/test_governor_pacing.py`: with a virtual clock and capacity `N`, assert `N` consecutive sends advance virtual time by zero, the `N+1` send blocks until a token refills, and no virtual one-minute window issues more than the configured budget.
+- [x] T003 [P] Implement TC-COMP-200, TC-COMP-201, TC-COMP-203, TC-COMP-226, TC-COMP-227, and TC-COMP-231 in `tests/unit/test_governor_retry.py`: assert repeated `THROTTLED` outcomes leave attempts at zero; a no-delay throttle waits to the next minute boundary with full jitter; a stub `stated_delay_seconds` callback delay is honoured exactly without jitter; and both throttle paths count their waits against and raise after `max_throttle_wait_seconds`.
+- [x] T004 [P] Implement TC-COMP-202, TC-COMP-228, and TC-COMP-229 in `tests/unit/test_governor_retry.py` and `tests/unit/test_governor_backoff.py`: assert retryable timeout/5xx outcomes increment attempts and use jittered exponential delays, no fourth send occurs after the configured limit, and a caller-classified `FATAL` exception is re-raised with neither sleep nor retry.
 
 ### Additional Unit Tests
 
-- [ ] T005 [P] Add provider-agnostic boundary tests in `tests/unit/test_governor_retry.py`: use unrelated exception classes with a fixed classifier outcome to prove the governor does not inspect exception type or provider fields, and assert `OK` returns the sender value without a retry.
-- [ ] T006 [P] Add token-accounting edge tests in `tests/unit/test_governor_pacing.py`: assert partial refill credits elapsed virtual time correctly, each pager-like send consumes one permit, and a new governor instance starts with its configured bucket capacity.
+- [x] T005 [P] Add provider-agnostic boundary tests in `tests/unit/test_governor_retry.py`: use unrelated exception classes with a fixed classifier outcome to prove the governor does not inspect exception type or provider fields, and assert `OK` returns the sender value without a retry.
+- [x] T006 [P] Add token-accounting edge tests in `tests/unit/test_governor_pacing.py`: assert partial refill credits elapsed virtual time correctly, each pager-like send consumes one permit, and a new governor instance starts with its configured bucket capacity.
 
 **Checkpoint**: TC-COMP-200–203 and TC-COMP-226–231 are traceability-labelled, deterministic, RED tests; no test sleeps in real time or contacts Massive.
 
