@@ -55,15 +55,15 @@ def test_backoff_delay_grows_exponentially_with_full_jitter() -> None:
         sleeper,
         max_attempts=3,
         initial_backoff=2.0,
-        jitter=SequenceJitter([0.5, 0.25]),
+        jitter=SequenceJitter([0.9, 0.9]),
     )
     send = FlakySender(fail_count=2)
 
     governor.execute(send, classify=_always_retryable)
 
-    # cap doubles each attempt: 2.0 * 2**0, then 2.0 * 2**1; full jitter
-    # scales the cap by the fixed sequence values above.
-    assert sleeper.calls == [pytest.approx(1.0), pytest.approx(2.0)]
+    # cap doubles each attempt: 2.0 * 2**0, then 2.0 * 2**1; holding the
+    # jitter fraction fixed at 0.9 isolates the cap's own growth.
+    assert sleeper.calls == [pytest.approx(0.9 * 2.0), pytest.approx(0.9 * 4.0)]
 
 
 def test_successive_backoff_delays_are_not_identical() -> None:

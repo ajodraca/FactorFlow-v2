@@ -83,9 +83,7 @@ def test_no_delay_throttle_waits_to_next_minute_boundary_with_full_jitter() -> N
     full jitter so queued retries do not resynchronise on it."""
     clock = FakeClock()
     sleeper = FakeSleeper(clock)
-    governor = _governor(
-        60, clock, sleeper, max_throttle_wait=1000.0, jitter=SequenceJitter([0.5])
-    )
+    governor = _governor(60, clock, sleeper, max_throttle_wait=1000.0, jitter=SequenceJitter([0.5]))
     send = FlakySender(fail_count=1)
 
     governor.execute(send, classify=_always_throttled)
@@ -123,9 +121,7 @@ def test_boundary_throttle_wait_exhausts_the_budget_and_raises() -> None:
     looping forever (DAC-E3-9, DAC-E3-S4-6)."""
     clock = FakeClock()
     sleeper = FakeSleeper(clock)
-    governor = _governor(
-        60, clock, sleeper, max_throttle_wait=90.0, jitter=SequenceJitter([0.0])
-    )
+    governor = _governor(60, clock, sleeper, max_throttle_wait=90.0, jitter=SequenceJitter([0.0]))
     send = FlakySender(fail_count=1_000_000)
 
     with pytest.raises(ProviderUnavailable):
