@@ -88,8 +88,8 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Implement the typed error hierarchy and safe response-body reconstruction in one provider-boundary module.
 
-- [ ] T008 Implement `MassiveError`, `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` in `src/factorflow/ingestion/massive/errors.py`; store only a safe message and the optional provider request ID, preserve no raw SDK exception body or credential, and make the base error’s public string representation safe for later failure records.
-- [ ] T009 Implement the provider-body decoding and classification functions in `src/factorflow/ingestion/massive/errors.py`: parse the SDK response body as JSON; map `status == "NOT_FOUND"` or the documented not-found message to `InstrumentNotFound`; map API-key errors to `CredentialRejected`; map malformed and valid-but-unknown error envelopes to `ProviderUnavailable`; and map S2 Pydantic validation failures from a successful response to `ProviderContractViolation`.
+- [x] T008 Implement `MassiveError`, `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` in `src/factorflow/ingestion/massive/errors.py`; store only a safe message and the optional provider request ID, preserve no raw SDK exception body or credential, and make the base error’s public string representation safe for later failure records.
+- [x] T009 Implement the provider-body decoding and classification functions in `src/factorflow/ingestion/massive/errors.py`: parse the SDK response body as JSON; map `status == "NOT_FOUND"` or the documented not-found message to `InstrumentNotFound`; map API-key errors to `CredentialRejected`; map malformed and valid-but-unknown error envelopes to `ProviderUnavailable`; and map S2 Pydantic validation failures from a successful response to `ProviderContractViolation`.
 
 **Checkpoint**: Every non-200 body is safely mapped from documented evidence, a `200` model-validation failure stays distinguishable, and the resulting exception can be persisted without provider URL or credential disclosure.
 

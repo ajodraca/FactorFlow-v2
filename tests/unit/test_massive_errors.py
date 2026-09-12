@@ -13,7 +13,6 @@ import pytest
 from factorflow.ingestion.massive.errors import (
     CredentialRejected,
     InstrumentNotFound,
-    ProviderUnavailable,
     classify_error_body,
 )
 
