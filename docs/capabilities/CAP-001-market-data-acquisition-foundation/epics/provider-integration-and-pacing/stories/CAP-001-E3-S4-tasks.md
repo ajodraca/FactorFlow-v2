@@ -59,7 +59,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Establish the new ingestion package and deterministic governor-test support without provider or wall-clock dependencies.
 
-- [ ] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/rate_limit.py`, `tests/unit/governor_fakes.py`, `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; provide a test-only fake monotonic clock, sleeper, and deterministic jitter source in `tests/unit/governor_fakes.py`.
+- [x] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/rate_limit.py`, `tests/unit/governor_fakes.py`, `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; provide a test-only fake monotonic clock, sleeper, and deterministic jitter source in `tests/unit/governor_fakes.py`.
 
 **Checkpoint**: Governor tests collect against package imports and can advance virtual time without a network call or real sleep.
 
