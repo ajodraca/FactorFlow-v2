@@ -70,6 +70,19 @@ def test_status_not_found_classifies_as_instrument_not_found() -> None:
     assert isinstance(result, InstrumentNotFound)
 
 
+def test_status_not_found_alone_classifies_even_with_an_unrelated_message() -> None:
+    """TC-COMP-220 / DAC-E3-S3-1: `status: "NOT_FOUND"` classifies on its
+    own, independent of the message text -- distinguishing this from
+    `test_not_found_message_recognised_when_status_is_absent`, which
+    proves the reverse path."""
+    body = _load_text("error_not_found_status_only.json")
+    assert "ticker not found" not in json.loads(body)["message"].lower()
+
+    result = classify_error_body(body)
+
+    assert isinstance(result, InstrumentNotFound)
+
+
 # --- TC-COMP-197 / DAC-E3-3: message vs error field, neither required --
 
 

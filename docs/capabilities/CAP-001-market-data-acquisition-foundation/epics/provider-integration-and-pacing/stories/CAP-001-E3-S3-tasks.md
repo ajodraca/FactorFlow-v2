@@ -109,7 +109,7 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Run the required validation and demonstrate that classifications cannot silently degrade to an unsafe default.
 
-- [ ] T012 Run `tests/unit/test_massive_errors.py` and `tests/unit/test_massive_error_classification.py`; perform and document manual mutations for `NOT_FOUND` detection, API-key detection, malformed-body fallback, validation-failure mapping, request-ID extraction, and 429 handling in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S3-tdd-evidence.yaml` before marking implementation tasks complete.
+- [x] T012 Run `tests/unit/test_massive_errors.py` and `tests/unit/test_massive_error_classification.py`; perform and document manual mutations for `NOT_FOUND` detection, API-key detection, malformed-body fallback, validation-failure mapping, request-ID extraction, and 429 handling in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S3-tdd-evidence.yaml` before marking implementation tasks complete.
 
 **Checkpoint**: Mandatory tests are green, each manual mutation is killed or the test strengthened, and no exception or log assertion permits a credential leak.
 
