@@ -144,7 +144,7 @@ def is_rate_limited_body(raw_body: bytes | str) -> bool:
     fields = _safe_fields(raw_body)
     if fields is None:
         return False
-    reason = fields["error"] or fields["message"] or ""
+    reason = fields["error"] or ""
     return _RATE_LIMIT_MARKER in reason.lower()
 
 

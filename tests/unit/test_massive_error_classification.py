@@ -146,6 +146,19 @@ def test_valid_json_of_unknown_shape_classifies_as_provider_unavailable() -> Non
     assert isinstance(result, ProviderUnavailable)
 
 
+@pytest.mark.parametrize("body", ["[1, 2]", "null", '"text"', "42"])
+def test_non_object_json_classifies_as_provider_unavailable_not_a_crash(
+    body: str,
+) -> None:
+    """DAC-E3-4 / DAC-E3-S3-3: valid JSON that is not an object (an array,
+    `null`, a bare string, or a number) does not present a usable envelope
+    and must classify as `ProviderUnavailable`, never raise `AttributeError`
+    while looking up an envelope field that a non-dict value cannot have."""
+    result = classify_error_body(body)
+
+    assert isinstance(result, ProviderUnavailable)
+
+
 # --- TC-COMP-199 / DAC-E3-5: 200 failing model validation --------------
 
 
@@ -154,7 +167,7 @@ def test_validation_error_from_a_successful_response_wraps_to_contract_violation
     (a 200 response missing a required field) becomes
     `ProviderContractViolation`, and no partially parsed value is
     returned."""
-    incomplete_bar = {"t": 1704153600000, "o": 187.15, "h": 188.44}  # missing h/l/c/v/vw/n
+    incomplete_bar = {"t": 1704153600000, "o": 187.15, "h": 188.44}  # missing l/c/v/vw/n
     try:
         DailyBar.model_validate(incomplete_bar)
         pytest.fail("fixture must fail model validation for this test to be meaningful")
