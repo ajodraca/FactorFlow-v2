@@ -99,7 +99,7 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Supply the classification seam used by the synchronous client and rate-limit governor without duplicating either component’s behavior.
 
-- [ ] T010 Update `src/factorflow/ingestion/massive/__init__.py` to expose the taxonomy and safe decoding/classification primitives consumed by `src/factorflow/ingestion/massive/client.py`; do not expose the raw Massive SDK `BadResponse` type to callers. The client, as the caller identified by `component-design-rate-limit-governor.md` §2.3, adapts these primitives to `Outcome.THROTTLED`, `RETRYABLE`, or `FATAL`.
+- [x] T010 Update `src/factorflow/ingestion/massive/__init__.py` to expose the taxonomy and safe decoding/classification primitives consumed by `src/factorflow/ingestion/massive/client.py`; do not expose the raw Massive SDK `BadResponse` type to callers. The client, as the caller identified by `component-design-rate-limit-governor.md` §2.3, adapts these primitives to `Outcome.THROTTLED`, `RETRYABLE`, or `FATAL`.
 
 **Checkpoint**: CAP-001-E3-S1 can adapt decoded provider outcomes for the governor through the typed taxonomy, while CAP-001-E3-S4 remains the sole owner of pacing and retry behavior.
 
