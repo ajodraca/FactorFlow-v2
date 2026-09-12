@@ -99,7 +99,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Preserve the boundary that CAP-001-E3-S1 uses to submit every SDK request through this governor.
 
-- [ ] T009 Update `src/factorflow/ingestion/__init__.py` to expose `GovernorSettings`, `Outcome`, and `RateLimitGovernor` for `src/factorflow/ingestion/massive/client.py`; do not add a Massive-specific delay callback, because CAP-001-E3-S1 passes none and Massive has no `Retry-After`.
+- [x] T009 Update `src/factorflow/ingestion/__init__.py` to expose `GovernorSettings`, `Outcome`, and `RateLimitGovernor` for `src/factorflow/ingestion/massive/client.py`; do not add a Massive-specific delay callback, because CAP-001-E3-S1 passes none and Massive has no `Retry-After`.
 
 **Checkpoint**: CAP-001-E3-S1 can supply its provider-aware classifier to `execute` while this module retains no provider knowledge.
 
