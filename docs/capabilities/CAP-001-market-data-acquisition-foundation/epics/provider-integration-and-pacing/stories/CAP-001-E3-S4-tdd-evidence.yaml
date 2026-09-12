@@ -1,0 +1,113 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S4-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E3-S4
+tasks_file: CAP-001-E3-S4-tasks.md
+created: 2026-09-12
+updated: 2026-09-12
+
+# T010: manual mutation session, run against the committed rate_limit.py
+# (baseline: e554152, Phase 4 integration) after RED->GREEN (T002-T009),
+# one mutation at a time, each reverted and the story's three test files
+# re-confirmed byte-identical/green before the next.
+
+manual_mutations_baseline_commit: e554152
+manual_mutations:
+  - id: mutation-1-permit-consumption
+    target: RateLimitGovernor._acquire_permit
+    change: removed 'self._tokens -= 1.0' so an acquired permit is never debited from the bucket
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
+    result: "4 failed, 15 passed
+      (test_capacity_n_sends_incur_no_delay_and_the_next_waits_for_refill,
+      test_no_virtual_minute_window_exceeds_the_configured_budget,
+      test_partial_refill_credits_elapsed_virtual_time,
+      test_each_send_consumes_exactly_one_permit: all asserted a wait or
+      token count that only occurs when permits are actually consumed)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-429-attempt-counting
+    target: RateLimitGovernor.execute (THROTTLED branch)
+    change: added 'attempts += 1' inside the Outcome.THROTTLED branch, so a 429 would consume an attempt (violates DAC-E3-6)
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
+    result: "1 failed, 18 passed
+      (test_throttled_outcomes_do_not_share_the_retry_attempt_counter:
+      ProviderUnavailable raised after 4 consecutive THROTTLED+RETRYABLE
+      outcomes even though only 1 RETRYABLE outcome occurred and
+      max_attempts=2, proving the mutation let THROTTLED partially
+      exhaust the retry budget)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-no-delay-boundary-selection
+    target: RateLimitGovernor._seconds_to_next_boundary
+    change: "'_SECONDS_PER_MINUTE - remainder' -> 'remainder', selecting elapsed
+      time since the last boundary instead of the wait until the next one"
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
+    result: "2 failed, 17 passed
+      (test_no_delay_throttle_waits_to_next_minute_boundary_with_full_jitter,
+      test_boundary_throttle_wait_exhausts_the_budget_and_raises: both
+      observed near-zero sleeper waits instead of the expected ~60s
+      boundary wait)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-stated-delay-jitter-exclusion
+    target: RateLimitGovernor._throttle_delay
+    change: "'return stated' -> 'return stated + self._jitter() * stated',
+      applying jitter to a provider-stated delay (violates DAC-E3-S4-1)"
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
+    result: "1 failed, 18 passed
+      (test_stated_delay_is_honoured_exactly_without_jitter: sleeper
+      recorded 23.75 instead of the stated 12.5, with a SequenceJitter([0.9])
+      source that would only perturb the value if jitter were misapplied)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-retry-limit-termination
+    target: RateLimitGovernor.execute (RETRYABLE branch)
+    change: "'attempts >= self._settings.max_attempts' -> 'attempts >
+      self._settings.max_attempts', an off-by-one that permits one extra
+      send beyond the configured attempt budget"
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
+    result: "2 failed, 17 passed
+      (test_retry_limit_exhausted_raises_and_no_fourth_send,
+      test_no_fourth_send_after_the_default_attempt_limit: both observed
+      a 4th send against max_attempts=3)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-6-throttle-budget-termination
+    target: RateLimitGovernor.execute (THROTTLED branch)
+    change: "'throttle_wait_used > self._settings.max_throttle_wait_seconds' ->
+      'throttle_wait_used > self._settings.max_throttle_wait_seconds * 2',
+      doubling the effective throttle-wait budget so exhaustion is
+      detected far later than configured"
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
+    result: "2 failed, 17 passed
+      (test_boundary_throttle_wait_exhausts_the_budget_and_raises,
+      test_stated_delay_throttle_wait_exhausts_the_budget_and_raises: both
+      observed more sleeper calls / no raise where the configured budget
+      should have already terminated the loop)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  description: >-
+    After all six mutations were individually applied, observed caught,
+    and reverted, src/factorflow/ingestion/rate_limit.py was diffed
+    byte-for-byte against the baseline commit (e554152) via `git diff`
+    (empty output on that file) to confirm no mutation was left in
+    place, then the full validation suite was run once.
+  commands:
+    - uv run pytest
+    - uv run pytest -m 'not postgres'
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+    - uv build
+  result: "285 passed (full suite, includes postgres-marked tests); 226
+    passed, 59 deselected (not postgres); ruff check: All checks passed;
+    ruff format --check: 94 files already formatted; mypy src: Success,
+    no issues found in 28 source files; uv build succeeded (sdist +
+    wheel)"

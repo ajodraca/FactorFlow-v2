@@ -75,6 +75,27 @@ def test_repeated_throttled_outcomes_do_not_consume_attempts() -> None:
     assert send.calls == 6
 
 
+def test_throttled_outcomes_do_not_share_the_retry_attempt_counter() -> None:
+    """DAC-E3-6: throttling must never partially exhaust the retry
+    budget. Three `THROTTLED` outcomes exceed `max_attempts=2`, but a
+    single `RETRYABLE` failure afterwards must still be allowed to
+    retry -- proving the throttle path never touches the attempt
+    counter at all, not merely that it tolerates more throttles than
+    the limit on its own."""
+    clock = FakeClock()
+    sleeper = FakeSleeper(clock)
+    governor = _governor(60, clock, sleeper, max_attempts=2, max_throttle_wait=1000.0)
+    send = FlakySender(fail_count=4)
+
+    def classify(exc: BaseException) -> Outcome:
+        return Outcome.THROTTLED if send.calls <= 3 else Outcome.RETRYABLE
+
+    result = governor.execute(send, classify=classify)
+
+    assert result == "ok"
+    assert send.calls == 5
+
+
 # --- TC-COMP-201 / DAC-E3-7 / DAC-E3-S4-2 ---------------------------------
 
 

@@ -109,7 +109,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Verify bounded behavior and capture TDD/mutation evidence before the implementation handoff.
 
-- [ ] T010 Run `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; perform and record manual mutations for permit consumption, 429 attempt counting, no-delay boundary selection, stated-delay jitter exclusion, retry-limit termination, and throttle-budget termination in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S4-tdd-evidence.yaml`.
+- [x] T010 Run `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; perform and record manual mutations for permit consumption, 429 attempt counting, no-delay boundary selection, stated-delay jitter exclusion, retry-limit termination, and throttle-budget termination in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S4-tdd-evidence.yaml`.
 
 **Checkpoint**: Mandatory tests pass, each mutation is killed or the test is strengthened, and the component has no unbounded wait or retry path.
 
