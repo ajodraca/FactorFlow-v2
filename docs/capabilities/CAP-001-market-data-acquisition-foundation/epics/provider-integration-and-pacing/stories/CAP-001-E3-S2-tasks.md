@@ -55,7 +55,7 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 **Purpose**: Establish the model module and the four fixture-backed test destinations in the existing Python package layout.
 
-- [ ] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/massive/__init__.py`, and `src/factorflow/ingestion/massive/models.py`; create `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py` as the component design’s specified test locations.
+- [x] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/massive/__init__.py`, and `src/factorflow/ingestion/massive/models.py`; create `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py` as the component design’s specified test locations.
 
 **Checkpoint**: The package and test modules collect successfully; no additional dependency is required because Pydantic is already a transitive project dependency through FastAPI.
 
@@ -67,14 +67,14 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-206 in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`: parse recorded provider-shaped inputs and assert public model attributes use the observation-table vocabulary rather than provider shorthand or wire keys.
-- [ ] T003 [P] Implement TC-COMP-215 and TC-COMP-216 in `tests/unit/test_massive_bars.py`: assert aliases map `t`, `o`, `h`, `l`, `c`, `v`, `vw`, and `n` to named bar attributes; assert `t` converts from Unix milliseconds using a timezone-aware UTC conversion to the `daily_bar.session_date` value.
-- [ ] T004 [P] Implement TC-COMP-005, TC-COMP-217, TC-COMP-218, and TC-COMP-219 in `tests/unit/test_massive_financials.py`: assert financial records preserve `filing_date` as `provider_filing_date`, use `Decimal` for monetary and ratio values, reject missing DDL-required fields, and distinguish an absent optional value from `Decimal("0")`.
-- [ ] T005 [P] Implement the corporate-action portion of TC-COMP-206 in `tests/unit/test_massive_actions.py`: assert each recorded split, dividend, ticker-change, and IPO input maps to an action with a product-named `action_type`, `effective_on`, and payload compatible with the `corporate_action` table’s `action_type`/`effective_on` natural key.
+- [x] T002 [P] Implement TC-COMP-206 in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`: parse recorded provider-shaped inputs and assert public model attributes use the observation-table vocabulary rather than provider shorthand or wire keys.
+- [x] T003 [P] Implement TC-COMP-215 and TC-COMP-216 in `tests/unit/test_massive_bars.py`: assert aliases map `t`, `o`, `h`, `l`, `c`, `v`, `vw`, and `n` to named bar attributes; assert `t` converts from Unix milliseconds using a timezone-aware UTC conversion to the `daily_bar.session_date` value.
+- [x] T004 [P] Implement TC-COMP-005, TC-COMP-217, TC-COMP-218, and TC-COMP-219 in `tests/unit/test_massive_financials.py`: assert financial records preserve `filing_date` as `provider_filing_date`, use `Decimal` for monetary and ratio values, reject missing DDL-required fields, and distinguish an absent optional value from `Decimal("0")`.
+- [x] T005 [P] Implement the corporate-action portion of TC-COMP-206 in `tests/unit/test_massive_actions.py`: assert each recorded split, dividend, ticker-change, and IPO input maps to an action with a product-named `action_type`, `effective_on`, and payload compatible with the `corporate_action` table’s `action_type`/`effective_on` natural key.
 
 ### Additional Unit Tests
 
-- [ ] T006 [P] Add payload-contract tests in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`: assert model serialization keeps `Decimal` values as strings for `canonical_json`, carries provider filing date only as descriptive value data, and contains no writer-owned `observed_on`, `run_id`, or `recorded_at` field.
+- [x] T006 [P] Add payload-contract tests in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`: assert model serialization keeps `Decimal` values as strings for `canonical_json`, carries provider filing date only as descriptive value data, and contains no writer-owned `observed_on`, `run_id`, or `recorded_at` field.
 
 **Checkpoint**: TC-COMP-005, TC-COMP-206, and TC-COMP-215 through TC-COMP-219 are represented with traceability comments and have been observed failing before model implementation begins.
 
@@ -84,8 +84,8 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 **Purpose**: Implement four validated product models and their explicit alias and serialization behavior.
 
-- [ ] T007 Implement `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction` in `src/factorflow/ingestion/massive/models.py`. Map provider keys through Pydantic aliases to the product fields required by `instrument_reference`, `daily_bar`, `fundamental_observation`, and `corporate_action` in `component-design-market-data-store.md` §2.3; retain a serializable value payload for fields held in JSONB. Use `Decimal` for price, ratio, and monetary data; make only the fields described as optional in the source provider contract optional; and document that `provider_filing_date` is descriptive and not an observation date.
-- [ ] T008 Add parsing and serialization helpers in `src/factorflow/ingestion/massive/models.py` that convert daily-bar Unix milliseconds to a timezone-aware UTC session date, produce deterministic JSON-compatible value payloads with decimals as strings, and reject unsupported or missing required input rather than silently coercing it. Do not add writer metadata or hashing logic; those belong to CAP-001-E4’s observation writer.
+- [x] T007 Implement `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction` in `src/factorflow/ingestion/massive/models.py`. Map provider keys through Pydantic aliases to the product fields required by `instrument_reference`, `daily_bar`, `fundamental_observation`, and `corporate_action` in `component-design-market-data-store.md` §2.3; retain a serializable value payload for fields held in JSONB. Use `Decimal` for price, ratio, and monetary data; make only the fields described as optional in the source provider contract optional; and document that `provider_filing_date` is descriptive and not an observation date.
+- [x] T008 Add parsing and serialization helpers in `src/factorflow/ingestion/massive/models.py` that convert daily-bar Unix milliseconds to a timezone-aware UTC session date, produce deterministic JSON-compatible value payloads with decimals as strings, and reject unsupported or missing required input rather than silently coercing it. Do not add writer metadata or hashing logic; those belong to CAP-001-E4’s observation writer.
 
 **Checkpoint**: All four provider response types validate into the storage-compatible product vocabulary, value payloads can be hashed deterministically, and validation errors remain available for CAP-001-E3-S3 to map to `ProviderContractViolation`.
 
@@ -95,7 +95,7 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 **Purpose**: Make the models consumable by the historical client without implementing that client’s provider calls.
 
-- [ ] T009 Update `src/factorflow/ingestion/massive/__init__.py` to expose only the product model types consumed by `src/factorflow/ingestion/massive/client.py`; do not expose Massive SDK response types or raw wire dictionaries beyond the package boundary.
+- [x] T009 Update `src/factorflow/ingestion/massive/__init__.py` to expose only the product model types consumed by `src/factorflow/ingestion/massive/client.py`; do not expose Massive SDK response types or raw wire dictionaries beyond the package boundary.
 
 **Checkpoint**: CAP-001-E3-S1 can import the four model types from the Massive package, while CAP-001-E3-S3 can catch their validation failure without duplicating model logic.
 
@@ -105,7 +105,7 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 
 **Purpose**: Prove the model contract survives the project’s static checks and required TDD mutation discipline.
 
-- [ ] T010 Run the S2 test files in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`; perform and document manual mutations for a bar alias, timestamp conversion, a `Decimal` annotation, a required field, and an optional field in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S2-tdd-evidence.yaml` before marking implementation tasks complete.
+- [x] T010 Run the S2 test files in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, and `tests/unit/test_massive_actions.py`; perform and document manual mutations for a bar alias, timestamp conversion, a `Decimal` annotation, a required field, and an optional field in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S2-tdd-evidence.yaml` before marking implementation tasks complete.
 
 **Checkpoint**: All mapped tests are green, each changed behavior has recorded RED→GREEN→MUTATE evidence, and lint, format, type, and build validation pass.
 

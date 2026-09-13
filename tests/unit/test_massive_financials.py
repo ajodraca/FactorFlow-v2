@@ -1,0 +1,114 @@
+"""`FinancialStatement` tests (CAP-001-E3-S2). See `models.py` for the model.
+
+Component design: `component-design-massive-client.md` section 7 (`Financials
+keep filing date as an attribute`); `component-design-market-data-store.md`
+section 2.3 (`fundamental_observation`).
+"""
+
+import json
+from datetime import date
+from decimal import Decimal
+from pathlib import Path
+
+import pytest
+from pydantic import ValidationError
+
+from factorflow.ingestion.massive.models import FinancialStatement
+
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
+
+
+def _load(name: str) -> dict:
+    return json.loads((FIXTURES / name).read_text())
+
+
+def test_parses_wire_shape_into_product_vocabulary() -> None:
+    """TC-COMP-206: public attributes use the observation-table vocabulary
+    (`fiscal_period_end`, `provider_filing_date`), never the provider's own
+    field names (`period_end`, `filing_date`)."""
+    statement = FinancialStatement.model_validate(_load("financial_annual.json"))
+
+    assert statement.fiscal_period_end == date(2023, 9, 30)
+    assert statement.provider_filing_date == date(2023, 11, 3)
+    assert statement.cik == "0000320193"
+    assert statement.fiscal_year == 2023
+    assert statement.timeframe == "annual"
+    assert statement.statement_type == "balance_sheet"
+
+    for wire_name in ("period_end", "filing_date"):
+        assert not hasattr(statement, wire_name)
+
+
+def test_filing_date_is_preserved_as_a_descriptive_attribute_only() -> None:
+    """TC-COMP-005 / AC-5: the provider's filing date survives as
+    `provider_filing_date`. It conflates restatements of the same period
+    (C5), so this model exposes no other attribute that could be mistaken
+    for an as-of date -- `observed_on` is the writer's alone."""
+    statement = FinancialStatement.model_validate(_load("financial_annual.json"))
+
+    assert statement.provider_filing_date == date(2023, 11, 3)
+    assert not hasattr(statement, "observed_on")
+    assert not hasattr(statement, "recorded_at")
+
+
+def test_monetary_values_are_decimal_not_float() -> None:
+    """TC-COMP-217: monetary and ratio values are held as `Decimal`, so no
+    binary rounding enters recorded history (DAC-E3-S2-3)."""
+    statement = FinancialStatement.model_validate(_load("financial_annual.json"))
+
+    assert statement.model_extra is not None
+    assert statement.model_extra["total_assets"] == Decimal("352755000000")
+    assert isinstance(statement.model_extra["total_assets"], Decimal)
+
+    ratios = FinancialStatement.model_validate(_load("financial_quarterly.json"))
+    assert ratios.model_extra["current_ratio"] == Decimal("0.988")
+    assert isinstance(ratios.model_extra["current_ratio"], Decimal)
+
+
+def test_no_declared_field_is_typed_float() -> None:
+    """DAC-E3-S2-3: no declared monetary or ratio field is typed `float`."""
+    for name, info in FinancialStatement.model_fields.items():
+        assert info.annotation is not float, name
+
+
+def test_fiscal_quarter_is_optional_for_annual_statements() -> None:
+    """DAC-E3-S2-5: an annual statement carries no `fiscal_quarter` -- its
+    absence is `None`, not a substituted value; a quarterly statement
+    carries the quarter it was filed for."""
+    annual = FinancialStatement.model_validate(_load("financial_annual.json"))
+    quarterly = FinancialStatement.model_validate(_load("financial_quarterly.json"))
+
+    assert annual.fiscal_quarter is None
+    assert quarterly.fiscal_quarter == 1
+
+
+@pytest.mark.parametrize(
+    "missing_field",
+    ["cik", "tickers", "period_end", "filing_date", "fiscal_year", "timeframe", "statement_type"],
+)
+def test_missing_required_field_fails_validation(missing_field: str) -> None:
+    """TC-COMP-218: a response missing a field the model requires fails
+    Pydantic validation rather than producing a partial record
+    (DAC-E3-S2-4). Every field named in the component design's "Each
+    result carries..." sentence is required, and `statement_type` is
+    required because `fundamental_observation.statement_type` is
+    `NOT NULL` and part of its natural key."""
+    wire = _load("financial_annual.json")
+    del wire[missing_field]
+
+    with pytest.raises(ValidationError):
+        FinancialStatement.model_validate(wire)
+
+
+def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> None:
+    """Payload-contract test: `Decimal` values -- including the arbitrary
+    statement line items retained for JSONB storage -- serialize as
+    strings, and the payload carries none of the writer-owned fields."""
+    statement = FinancialStatement.model_validate(_load("financial_annual.json"))
+    payload = statement.value_payload()
+
+    json.dumps(payload)  # must not raise
+    assert payload["total_assets"] == "352755000000"
+    assert payload["provider_filing_date"] == "2023-11-03"
+    for writer_owned in ("observed_on", "run_id", "recorded_at"):
+        assert writer_owned not in payload
