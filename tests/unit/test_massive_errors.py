@@ -13,6 +13,7 @@ import pytest
 from factorflow.ingestion.massive.errors import (
     CredentialRejected,
     InstrumentNotFound,
+    ProviderUnavailable,
     classify_error_body,
 )
 
@@ -25,11 +26,11 @@ def _load_text(name: str) -> str:
     return (FIXTURES / name).read_text()
 
 
-# --- TC-COMP-207 / DAC-E3-S3-2: API-key errors -------------------------
+# --- TC-COMP-221 / DAC-E3-S3-2: API-key errors -------------------------
 
 
 def test_unknown_api_key_classifies_as_credential_rejected() -> None:
-    """TC-COMP-207 / DAC-E3-S3-2: an `error` naming an unknown API key
+    """TC-COMP-221 / DAC-E3-S3-2: an `error` naming an unknown API key
     becomes `CredentialRejected`."""
     body = _load_text("error_credential_unknown_key.json")
 
@@ -39,7 +40,7 @@ def test_unknown_api_key_classifies_as_credential_rejected() -> None:
 
 
 def test_malformed_authorization_header_classifies_as_credential_rejected() -> None:
-    """TC-COMP-207 / DAC-E3-S3-2: a malformed `Authorization` header error
+    """TC-COMP-221 / DAC-E3-S3-2: a malformed `Authorization` header error
     also becomes `CredentialRejected`, not merely the "unknown key" case."""
     body = _load_text("error_credential_malformed_header.json")
 
@@ -59,11 +60,11 @@ def test_credential_rejected_never_contains_the_credential_value() -> None:
     assert _CREDENTIAL_FIXTURE not in repr(result)
 
 
-# --- TC-COMP-221 / DAC-E3-S3-5: request_id propagation -----------------
+# --- TC-COMP-224 / DAC-E3-S3-5: request_id propagation -----------------
 
 
 def test_request_id_is_populated_when_present() -> None:
-    """TC-COMP-221 / DAC-E3-S3-5: `provider_request_id` is populated from
+    """TC-COMP-224 / DAC-E3-S3-5: `provider_request_id` is populated from
     the response when present."""
     body = _load_text("error_not_found.json")
 
@@ -73,7 +74,7 @@ def test_request_id_is_populated_when_present() -> None:
 
 
 def test_request_id_is_none_when_absent_never_fabricated() -> None:
-    """TC-COMP-221 / DAC-E3-S3-5: `provider_request_id` is `None` when the
+    """TC-COMP-224 / DAC-E3-S3-5: `provider_request_id` is `None` when the
     response carries none -- never fabricated as an empty string or
     placeholder."""
     body = _load_text("error_no_request_id.json")
@@ -84,26 +85,30 @@ def test_request_id_is_none_when_absent_never_fabricated() -> None:
 
 
 def test_every_taxonomy_type_carries_request_id_uniformly() -> None:
-    """DAC-E3-S3-5 applies to every typed error, not only
-    `InstrumentNotFound`."""
+    """TC-COMP-224 / DAC-E3-S3-5 applies to every typed error, not only
+    `InstrumentNotFound` -- including `ProviderUnavailable`, the taxonomy's
+    default and highest-traffic path, when the envelope carries one."""
     not_found = classify_error_body(_load_text("error_not_found.json"))
     credential = classify_error_body(_load_text("error_credential_unknown_key.json"))
-    unavailable = classify_error_body(_load_text("error_unknown_shape.json"))
+    unavailable_with_id = classify_error_body(_load_text("error_missing_message_and_error.json"))
+    unavailable_without_id = classify_error_body(_load_text("error_unknown_shape.json"))
 
     assert not_found.provider_request_id == "req_notfound_001"
     assert credential.provider_request_id == "req_cred_001"
-    assert unavailable.provider_request_id is None  # this fixture carries none
+    assert isinstance(unavailable_with_id, ProviderUnavailable)
+    assert unavailable_with_id.provider_request_id == "req_missing_001"
+    assert unavailable_without_id.provider_request_id is None  # this fixture carries none
 
 
-# --- TC-COMP-224: no credential in message, repr, or log record --------
+# --- TC-COMP-207 / DAC-E3-13: no credential in message, repr, or log record --------
 
 
 def test_no_credential_fixture_in_str_repr_or_captured_log(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """TC-COMP-224: no exception message, representation, or captured log
-    record contains a known credential fixture, across every taxonomy
-    type this module can produce from an envelope."""
+    """TC-COMP-207 / DAC-E3-13: no exception message, representation, or
+    captured log record contains a known credential fixture, across every
+    taxonomy type this module can produce from an envelope."""
     logger = logging.getLogger("factorflow.ingestion.massive.errors.test")
 
     fixtures = [
