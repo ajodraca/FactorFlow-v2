@@ -43,7 +43,7 @@ def _always_retryable(exc: BaseException) -> Outcome:
     return Outcome.RETRYABLE
 
 
-# --- TC-COMP-228 / DAC-E3-8 ------------------------------------------------
+# --- TC-COMP-202 / DAC-E3-8 ------------------------------------------------
 
 
 def test_backoff_delay_grows_exponentially_with_full_jitter() -> None:

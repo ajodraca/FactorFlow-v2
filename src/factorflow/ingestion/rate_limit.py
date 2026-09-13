@@ -29,9 +29,12 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from factorflow.ingestion.massive.errors import ProviderUnavailable
+
+if TYPE_CHECKING:
+    from factorflow.config.settings import MassiveSettings
 
 T = TypeVar("T")
 
@@ -60,14 +63,28 @@ class GovernorSettings:
     initial_backoff_seconds: float
     max_throttle_wait_seconds: float
 
+    @classmethod
+    def from_massive_settings(cls, settings: MassiveSettings) -> GovernorSettings:
+        """Construct from `factorflow.config.settings.MassiveSettings`
+        (IR-003). Reconciles the one field-name mismatch between the two
+        settings classes -- `MassiveSettings.backoff_initial_seconds` maps
+        onto `GovernorSettings.initial_backoff_seconds` -- without
+        renaming either class. Every other field is a direct mapping."""
+        return cls(
+            requests_per_minute=settings.requests_per_minute,
+            max_attempts=settings.max_attempts,
+            initial_backoff_seconds=settings.backoff_initial_seconds,
+            max_throttle_wait_seconds=settings.max_throttle_wait_seconds,
+        )
+
 
 class RateLimitGovernor:
     """Paces provider requests through a token bucket and classifies
     retryable failures per component design section 2.2/2.5.
 
-    `monotonic`, `sleep` and `jitter` are controllable collaborators
-    used only so tests can advance virtual time deterministically; a
-    caller in production never needs to pass them.
+    `monotonic`, `sleep`, `jitter` and `now` are controllable
+    collaborators used only so tests can advance virtual time
+    deterministically; a caller in production never needs to pass them.
     """
 
     def __init__(
@@ -77,21 +94,23 @@ class RateLimitGovernor:
         monotonic: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
         jitter: Callable[[], float] = random.random,
+        now: Callable[[], float] = time.time,
     ) -> None:
         self._settings = settings
         self._monotonic = monotonic
         self._sleep = sleep
         self._jitter = jitter
+        # Wall-clock source for the minute-boundary wait only (IR-001):
+        # kept separate from `monotonic`, which paces the token bucket.
+        # The boundary wait must track the provider's actual per-minute
+        # window, which is anchored to wall-clock time, not to an
+        # arbitrary phase of this governor instance's own lifetime.
+        self._now = now
 
         self._capacity = float(settings.requests_per_minute)
         self._refill_rate = settings.requests_per_minute / _SECONDS_PER_MINUTE
         self._tokens = self._capacity
         self._last_refill = monotonic()
-        # Reference instant for the minute-boundary wait (section 2.5, the
-        # Massive path): a fixed offset from governor construction, not
-        # wall-clock time, since only relative elapsed time is observable
-        # through the injected monotonic collaborator.
-        self._boundary_epoch = self._last_refill
 
     def execute(
         self,
@@ -192,14 +211,29 @@ class RateLimitGovernor:
     def _boundary_wait_with_jitter(self) -> float:
         """The no-delay throttle path (the Massive case, component design
         section 2.5 row 2): wait to the next minute boundary, then add
-        full jitter on top so several retries queued behind the same
-        boundary do not resynchronise onto it (DAC-E3-S4-2)."""
+        jitter on top so several retries queued behind the same boundary
+        do not resynchronise onto it (DAC-E3-S4-2).
+
+        Deviation from design section 2.5's literal "full jitter over
+        the computed delay" (recorded as an owner-accepted deviation in
+        the task plan's Notes, IR-005): this applies jitter additively
+        on top of the boundary wait, giving a range of
+        `[boundary, 2 * boundary]`, rather than full jitter over
+        `[0, boundary)`. True full jitter here would often fire before
+        the provider's per-minute quota actually refills, defeating the
+        purpose of waiting for the boundary at all.
+        """
         boundary_wait = self._seconds_to_next_boundary()
         return boundary_wait + self._jitter() * boundary_wait
 
     def _seconds_to_next_boundary(self) -> float:
-        elapsed = self._monotonic() - self._boundary_epoch
-        remainder = elapsed % _SECONDS_PER_MINUTE
+        """Seconds until the wall clock reaches the next minute boundary
+        (i.e. the next `:00` second of any minute). Anchored to the
+        injected wall-clock `now` source rather than `monotonic()` or any
+        instant fixed at construction (IR-001), so the wait tracks the
+        provider's actual per-minute window regardless of how long this
+        governor instance has been alive."""
+        remainder = self._now() % _SECONDS_PER_MINUTE
         return _SECONDS_PER_MINUTE - remainder
 
     def _backoff_delay(self, attempts: int) -> float:

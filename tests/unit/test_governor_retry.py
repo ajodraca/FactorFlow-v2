@@ -30,6 +30,7 @@ def _governor(
     initial_backoff: float = 2.0,
     max_throttle_wait: float = 300.0,
     jitter: SequenceJitter | None = None,
+    now: FakeClock | None = None,
 ) -> RateLimitGovernor:
     settings = GovernorSettings(
         requests_per_minute=requests_per_minute,
@@ -42,6 +43,12 @@ def _governor(
         monotonic=clock,
         sleep=sleeper,
         jitter=jitter or SequenceJitter([0.0]),
+        # A fresh, never-advanced `FakeClock` starting at 0.0 unless the
+        # test supplies its own wall-clock phase (IR-001): this keeps
+        # every pre-existing test's boundary computation deterministic
+        # (remainder always 0, boundary always 60s) without each test
+        # having to wire up a wall-clock fake it does not care about.
+        now=now or FakeClock(),
     )
 
 
@@ -101,10 +108,21 @@ def test_throttled_outcomes_do_not_share_the_retry_attempt_counter() -> None:
 
 def test_no_delay_throttle_waits_to_next_minute_boundary_with_full_jitter() -> None:
     """No stated delay: the wait reaches the next minute boundary, plus
-    full jitter so queued retries do not resynchronise on it."""
+    jitter so queued retries do not resynchronise on it. The jitter here
+    is additive over the boundary wait (range `[boundary, 2*boundary]`),
+    a deliberate deviation from design section 2.5's literal "full
+    jitter" wording -- see IR-005 and `_boundary_wait_with_jitter`."""
     clock = FakeClock()
     sleeper = FakeSleeper(clock)
-    governor = _governor(60, clock, sleeper, max_throttle_wait=1000.0, jitter=SequenceJitter([0.5]))
+    wall_clock = FakeClock()  # remainder 0.0 -> a full 60s to the boundary
+    governor = _governor(
+        60,
+        clock,
+        sleeper,
+        max_throttle_wait=1000.0,
+        jitter=SequenceJitter([0.5]),
+        now=wall_clock,
+    )
     send = FlakySender(fail_count=1)
 
     governor.execute(send, classify=_always_throttled)
@@ -112,7 +130,69 @@ def test_no_delay_throttle_waits_to_next_minute_boundary_with_full_jitter() -> N
     assert sleeper.calls == [pytest.approx(90.0)]  # 60s boundary + 0.5 * 60s jitter
 
 
-# --- TC-COMP-203 / DAC-E3-S4-1 --------------------------------------------
+def test_no_delay_throttle_wait_tracks_wall_clock_phase_not_construction_time() -> None:
+    """IR-001: the boundary wait must track the provider's actual
+    per-minute window via wall-clock time, not an arbitrary phase of the
+    governor's own lifetime. Constructing the governor mid-minute must
+    still land on the true wall-clock boundary. Replacing the whole
+    computation with a constant (the reviewer's Probe A) fails this
+    test, because the wait pinned here is not the degenerate `elapsed ==
+    0` case every other test happens to exercise."""
+    clock = FakeClock()
+    sleeper = FakeSleeper(clock)
+    # 125s of wall-clock time has elapsed: 5s past the top of a minute,
+    # so only 55s remain until the next boundary -- not a full 60s.
+    wall_clock = FakeClock(start=125.0)
+    governor = _governor(
+        60,
+        clock,
+        sleeper,
+        max_throttle_wait=1000.0,
+        jitter=SequenceJitter([0.5]),
+        now=wall_clock,
+    )
+    send = FlakySender(fail_count=1)
+
+    governor.execute(send, classify=_always_throttled)
+
+    # 55s boundary + 0.5 * 55s additive jitter (IR-005) = 82.5s.
+    assert sleeper.calls == [pytest.approx(82.5)]
+
+
+# --- TC-COMP-227 / DAC-E3-S4-2 --------------------------------------------
+
+
+def test_successive_boundary_throttle_waits_receive_independent_jitter() -> None:
+    """TC-COMP-227 / DAC-E3-S4-2: queued retries throttled behind the same
+    minute boundary must not resynchronise onto the same instant. Two
+    boundary waits driven through a varying jitter source must produce
+    different delays. A frozen jitter draw -- the literal
+    resynchronisation defect this criterion exists to catch -- fails
+    this test, because the second wait would equal the first instead of
+    differing from it (previously this label sat on IR-004's
+    budget-exhaustion tests, which pin jitter to a fixed `0.0` and so
+    cannot observe any variation at all)."""
+    clock = FakeClock()
+    sleeper = FakeSleeper(clock)
+    governor = _governor(
+        60,
+        clock,
+        sleeper,
+        max_throttle_wait=1000.0,
+        jitter=SequenceJitter([0.2, 0.8]),
+    )
+    send = FlakySender(fail_count=2)
+
+    governor.execute(send, classify=_always_throttled)
+
+    # Both waits are computed from the same 60s boundary (the wall clock
+    # never advances between them), so only jitter distinguishes them:
+    # 60 + 0.2*60 = 72.0, then 60 + 0.8*60 = 108.0.
+    assert sleeper.calls == [pytest.approx(72.0), pytest.approx(108.0)]
+    assert sleeper.calls[0] != pytest.approx(sleeper.calls[1])
+
+
+# --- TC-COMP-226 / DAC-E3-S4-1 --------------------------------------------
 
 
 def test_stated_delay_is_honoured_exactly_without_jitter() -> None:
@@ -134,7 +214,7 @@ def test_stated_delay_is_honoured_exactly_without_jitter() -> None:
     assert jitter.calls == 0
 
 
-# --- TC-COMP-226 / TC-COMP-227 / TC-COMP-231 / DAC-E3-9 / DAC-E3-S4-6 -----
+# --- TC-COMP-203 / TC-COMP-231 / DAC-E3-9 / DAC-E3-S4-6 -------------------
 
 
 def test_boundary_throttle_wait_exhausts_the_budget_and_raises() -> None:

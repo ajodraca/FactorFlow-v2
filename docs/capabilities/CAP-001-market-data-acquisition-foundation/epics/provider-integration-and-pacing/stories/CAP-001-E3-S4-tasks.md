@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-13
+last_reworked_review: CAP-001-E3-S4-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -162,3 +163,4 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 - Per owner resolution, `requests_per_minute` remains required and positive (`ge=1`); there is no unlimited, `None`, or sentinel governor mode. “Unlimited” in DAC-E3-S4-5 refers to the provider tier. The required behavior is zero artificial delay while bucket tokens remain, followed by refill waiting, consistent with component-design-rate-limit-governor.md §3 and §14 OQ2 and component-design-runtime-config.md §2.2.
 - Component-design-rate-limit-governor.md §2.5 requires a provider-stated delay but its §2.3 `Outcome`-only interface provides no channel for it. Per owner resolution, this story adds the optional provider-agnostic `stated_delay_seconds` callback to `execute` while preserving the documented `send` and `classify` signatures and bare `Outcome`. Record this interface gap for the next design revision; do not edit the approved design in this story.
 - The stated-delay path is dead for Massive: CAP-001-E3-S1 passes no callback because the provider has no `Retry-After`. It remains tested with a stub callback for TC-COMP-226.
+- **Recorded deviation (IR-004 rework, review v1).** The no-delay throttle path's jitter is additive over the boundary wait (`boundary + jitter() * boundary`, range `[boundary, 2 * boundary]`), not "full jitter over the computed delay" as component-design-rate-limit-governor.md §2.5 literally states for every jittered delay. This is a deliberate choice: true full jitter over a boundary wait (uniform over `[0, boundary)`) would frequently retry before the provider's per-minute quota actually refills, reintroducing the failure mode §2.5 itself argues the boundary wait exists to avoid. The backoff path (§2.5 row 3) does use full jitter as written. Flagging for the next design revision to either amend §2.5's wording for the boundary case or record this as an approved exception. See `src/factorflow/ingestion/rate_limit.py::_boundary_wait_with_jitter` and its covering tests in `tests/unit/test_governor_retry.py`.
