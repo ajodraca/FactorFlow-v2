@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-12
+last_reworked_review: CAP-001-E3-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -58,7 +59,7 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Add the isolated taxonomy module and its deterministic unit-test locations.
 
-- [ ] T001 Create `src/factorflow/ingestion/massive/errors.py`, `tests/unit/test_massive_errors.py`, and `tests/unit/test_massive_error_classification.py`; retain the existing `factorflow.ingestion.massive` package created by CAP-001-E3-S2.
+- [x] T001 Create `src/factorflow/ingestion/massive/errors.py`, `tests/unit/test_massive_errors.py`, and `tests/unit/test_massive_error_classification.py`; retain the existing `factorflow.ingestion.massive` package created by CAP-001-E3-S2.
 
 **Checkpoint**: The test modules collect and can import the empty taxonomy module without provider network access.
 
@@ -70,15 +71,15 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-196, TC-COMP-197, TC-COMP-198, TC-COMP-220, and TC-COMP-222 in `tests/unit/test_massive_error_classification.py`: use substituted SDK `BadResponse`-equivalent body values to assert all four taxonomy types exist, a `NOT_FOUND` envelope becomes `InstrumentNotFound`, both `message` and `error` forms parse without being mandatory, and malformed or valid-but-unknown envelopes become `ProviderUnavailable` rather than `InstrumentNotFound`.
-- [ ] T003 [P] Implement TC-COMP-207, TC-COMP-221, and TC-COMP-224 in `tests/unit/test_massive_errors.py`: assert an API-key envelope becomes `CredentialRejected`; every typed error preserves the response `request_id` when present and `None` when absent; and no exception message, representation, or captured log record contains a known credential fixture.
-- [ ] T004 [P] Implement TC-COMP-199 in `tests/unit/test_massive_error_classification.py`: pass the `ValidationError` produced by a CAP-001-E3-S2 model fixture through the taxonomy boundary and assert `ProviderContractViolation` is raised without a partial parsed value.
-- [ ] T005 [P] Implement TC-COMP-223 and TC-COMP-225 in `tests/unit/test_massive_error_classification.py`: assert the taxonomy identifies a model contract violation as fatal input for the caller’s governor classifier, and identifies a Massive `429` as flow control rather than constructing any `MassiveError`; exercise the client-facing classification seam without testing governor retry behavior.
-- [ ] T006 [P] Implement TC-COMP-011 in `tests/unit/test_massive_errors.py`: assert a classified not-found failure retains a safe, provider-request-ID-bearing reason that an acquisition-runner can record per instrument without exposing a raw SDK exception or credential.
+- [x] T002 [P] Implement TC-COMP-196, TC-COMP-197, TC-COMP-198, TC-COMP-220, and TC-COMP-222 in `tests/unit/test_massive_error_classification.py`: use substituted SDK `BadResponse`-equivalent body values to assert all four taxonomy types exist, a `NOT_FOUND` envelope becomes `InstrumentNotFound`, both `message` and `error` forms parse without being mandatory, and malformed or valid-but-unknown envelopes become `ProviderUnavailable` rather than `InstrumentNotFound`.
+- [x] T003 [P] Implement TC-COMP-207, TC-COMP-221, and TC-COMP-224 in `tests/unit/test_massive_errors.py`: assert an API-key envelope becomes `CredentialRejected`; every typed error preserves the response `request_id` when present and `None` when absent; and no exception message, representation, or captured log record contains a known credential fixture.
+- [x] T004 [P] Implement TC-COMP-199 in `tests/unit/test_massive_error_classification.py`: pass the `ValidationError` produced by a CAP-001-E3-S2 model fixture through the taxonomy boundary and assert `ProviderContractViolation` is raised without a partial parsed value.
+- [x] T005 [P] Implement TC-COMP-223 and TC-COMP-225 in `tests/unit/test_massive_error_classification.py`: assert the taxonomy identifies a model contract violation as fatal input for the caller’s governor classifier, and identifies a Massive `429` as flow control rather than constructing any `MassiveError`; exercise the client-facing classification seam without testing governor retry behavior.
+- [x] T006 [P] Implement TC-COMP-011 in `tests/unit/test_massive_errors.py`: assert a classified not-found failure retains a safe, provider-request-ID-bearing reason that an acquisition-runner can record per instrument without exposing a raw SDK exception or credential.
 
 ### Additional Unit Tests
 
-- [ ] T007 [P] Add classifier boundary tests in `tests/unit/test_massive_error_classification.py`: assert a documented not-found message is recognised when `status` is absent, an absent `message` and `error` still produces `ProviderUnavailable`, and response-body parsing never accesses a provider URL or credential.
+- [x] T007 [P] Add classifier boundary tests in `tests/unit/test_massive_error_classification.py`: assert a documented not-found message is recognised when `status` is absent, an absent `message` and `error` still produces `ProviderUnavailable`, and response-body parsing never accesses a provider URL or credential.
 
 **Checkpoint**: TC-COMP-011, 196–199, 207, and 220–225 have traceability comments, all failure paths are observed RED, and no test uses a live provider request.
 
@@ -88,8 +89,8 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Implement the typed error hierarchy and safe response-body reconstruction in one provider-boundary module.
 
-- [ ] T008 Implement `MassiveError`, `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` in `src/factorflow/ingestion/massive/errors.py`; store only a safe message and the optional provider request ID, preserve no raw SDK exception body or credential, and make the base error’s public string representation safe for later failure records.
-- [ ] T009 Implement the provider-body decoding and classification functions in `src/factorflow/ingestion/massive/errors.py`: parse the SDK response body as JSON; map `status == "NOT_FOUND"` or the documented not-found message to `InstrumentNotFound`; map API-key errors to `CredentialRejected`; map malformed and valid-but-unknown error envelopes to `ProviderUnavailable`; and map S2 Pydantic validation failures from a successful response to `ProviderContractViolation`.
+- [x] T008 Implement `MassiveError`, `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` in `src/factorflow/ingestion/massive/errors.py`; store only a safe message and the optional provider request ID, preserve no raw SDK exception body or credential, and make the base error’s public string representation safe for later failure records.
+- [x] T009 Implement the provider-body decoding and classification functions in `src/factorflow/ingestion/massive/errors.py`: parse the SDK response body as JSON; map `status == "NOT_FOUND"` or the documented not-found message to `InstrumentNotFound`; map API-key errors to `CredentialRejected`; map malformed and valid-but-unknown error envelopes to `ProviderUnavailable`; and map S2 Pydantic validation failures from a successful response to `ProviderContractViolation`.
 
 **Checkpoint**: Every non-200 body is safely mapped from documented evidence, a `200` model-validation failure stays distinguishable, and the resulting exception can be persisted without provider URL or credential disclosure.
 
@@ -99,7 +100,7 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Supply the classification seam used by the synchronous client and rate-limit governor without duplicating either component’s behavior.
 
-- [ ] T010 Update `src/factorflow/ingestion/massive/__init__.py` to expose the taxonomy and safe decoding/classification primitives consumed by `src/factorflow/ingestion/massive/client.py`; do not expose the raw Massive SDK `BadResponse` type to callers. The client, as the caller identified by `component-design-rate-limit-governor.md` §2.3, adapts these primitives to `Outcome.THROTTLED`, `RETRYABLE`, or `FATAL`.
+- [x] T010 Update `src/factorflow/ingestion/massive/__init__.py` to expose the taxonomy and safe decoding/classification primitives consumed by `src/factorflow/ingestion/massive/client.py`; do not expose the raw Massive SDK `BadResponse` type to callers. The client, as the caller identified by `component-design-rate-limit-governor.md` §2.3, adapts these primitives to `Outcome.THROTTLED`, `RETRYABLE`, or `FATAL`.
 
 **Checkpoint**: CAP-001-E3-S1 can adapt decoded provider outcomes for the governor through the typed taxonomy, while CAP-001-E3-S4 remains the sole owner of pacing and retry behavior.
 
@@ -109,7 +110,7 @@ Implement the Massive failure taxonomy that reconstructs provider meaning from t
 
 **Purpose**: Run the required validation and demonstrate that classifications cannot silently degrade to an unsafe default.
 
-- [ ] T012 Run `tests/unit/test_massive_errors.py` and `tests/unit/test_massive_error_classification.py`; perform and document manual mutations for `NOT_FOUND` detection, API-key detection, malformed-body fallback, validation-failure mapping, request-ID extraction, and 429 handling in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S3-tdd-evidence.yaml` before marking implementation tasks complete.
+- [x] T012 Run `tests/unit/test_massive_errors.py` and `tests/unit/test_massive_error_classification.py`; perform and document manual mutations for `NOT_FOUND` detection, API-key detection, malformed-body fallback, validation-failure mapping, request-ID extraction, and 429 handling in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S3-tdd-evidence.yaml` before marking implementation tasks complete.
 
 **Checkpoint**: Mandatory tests are green, each manual mutation is killed or the test strengthened, and no exception or log assertion permits a credential leak.
 
