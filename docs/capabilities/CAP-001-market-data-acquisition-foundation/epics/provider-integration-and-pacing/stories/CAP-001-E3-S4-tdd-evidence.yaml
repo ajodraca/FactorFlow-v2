@@ -4,38 +4,53 @@ artifact_type: tdd-evidence
 story: CAP-001-E3-S4
 tasks_file: CAP-001-E3-S4-tasks.md
 created: 2026-09-12
-updated: 2026-09-12
+updated: 2026-09-13
 
-# T010: manual mutation session, run against the committed rate_limit.py
-# (baseline: e554152, Phase 4 integration) after RED->GREEN (T002-T009),
-# one mutation at a time, each reverted and the story's three test files
-# re-confirmed byte-identical/green before the next.
+# T010: manual mutation session, refreshed against the post-rework HEAD
+# (baseline: 58052fd, "rework -- address implementation-review-v1
+# findings") after the IR-001/IR-002/IR-003 rework landed. Mutations 1-6
+# are the original T010 session, re-run against 58052fd's rate_limit.py
+# to correct their stale pass/fail counts (recorded against the pre-rework
+# 19-test baseline in commit e554152). Mutations 7-8 are new, added
+# because implementation-review-v2 (IR-003) found the rework's two new
+# behaviors -- wall-clock boundary anchoring and MassiveSettings mapping
+# -- uncovered by this file. All eight mutations and their exact results
+# were doc-sync-reproduced one at a time against the current
+# src/factorflow/ingestion/rate_limit.py, each reverted and the file's
+# SHA-256 (15d9aabb7aab37ed74acdb71c5864bf73aecadcf1034d4dc66e4dfcb9ae0e012)
+# reconfirmed before the next; they also match the independent probe
+# results in CAP-001-E3-S4-implementation-review-v2.md (Probes A-E),
+# which the v2 reviewer ran the same way for the same reason.
 
-manual_mutations_baseline_commit: e554152
+manual_mutations_baseline_commit: 58052fd
 manual_mutations:
   - id: mutation-1-permit-consumption
     target: RateLimitGovernor._acquire_permit
     change: removed 'self._tokens -= 1.0' so an acquired permit is never debited from the bucket
-    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
-    result: "4 failed, 15 passed
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "4 failed, 19 passed
       (test_capacity_n_sends_incur_no_delay_and_the_next_waits_for_refill,
       test_no_virtual_minute_window_exceeds_the_configured_budget,
       test_partial_refill_credits_elapsed_virtual_time,
       test_each_send_consumes_exactly_one_permit: all asserted a wait or
-      token count that only occurs when permits are actually consumed)"
+      token count that only occurs when permits are actually consumed).
+      Same four tests as the original T010 session; count re-based to the
+      23-test suite (was 4 failed, 15 passed of 19 pre-rework)."
     caught: true
     reverted_and_reconfirmed_green: true
 
   - id: mutation-2-429-attempt-counting
     target: RateLimitGovernor.execute (THROTTLED branch)
     change: added 'attempts += 1' inside the Outcome.THROTTLED branch, so a 429 would consume an attempt (violates DAC-E3-6)
-    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
-    result: "1 failed, 18 passed
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "1 failed, 22 passed
       (test_throttled_outcomes_do_not_share_the_retry_attempt_counter:
       ProviderUnavailable raised after 4 consecutive THROTTLED+RETRYABLE
       outcomes even though only 1 RETRYABLE outcome occurred and
       max_attempts=2, proving the mutation let THROTTLED partially
-      exhaust the retry budget)"
+      exhaust the retry budget). Same test as the original T010 session;
+      count re-based to the 23-test suite (was 1 failed, 18 passed of 19
+      pre-rework)."
     caught: true
     reverted_and_reconfirmed_green: true
 
@@ -43,12 +58,19 @@ manual_mutations:
     target: RateLimitGovernor._seconds_to_next_boundary
     change: "'_SECONDS_PER_MINUTE - remainder' -> 'remainder', selecting elapsed
       time since the last boundary instead of the wait until the next one"
-    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
-    result: "2 failed, 17 passed
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "4 failed, 19 passed
       (test_no_delay_throttle_waits_to_next_minute_boundary_with_full_jitter,
-      test_boundary_throttle_wait_exhausts_the_budget_and_raises: both
-      observed near-zero sleeper waits instead of the expected ~60s
-      boundary wait)"
+      test_no_delay_throttle_wait_tracks_wall_clock_phase_not_construction_time,
+      test_successive_boundary_throttle_waits_receive_independent_jitter,
+      test_boundary_throttle_wait_exhausts_the_budget_and_raises: all
+      observed a near-zero or wrong-magnitude wait instead of the expected
+      boundary wait). Strictly more tests catch this mutation than in the
+      original T010 session (was 2 failed, 17 passed of 19 pre-rework),
+      because the rework's wall-clock-anchoring fix (IR-001) added two new
+      tests that also exercise this function -- confirming
+      implementation-review-v2's note that this mutation's target is now
+      more strongly pinned than before the rework."
     caught: true
     reverted_and_reconfirmed_green: true
 
@@ -56,11 +78,13 @@ manual_mutations:
     target: RateLimitGovernor._throttle_delay
     change: "'return stated' -> 'return stated + self._jitter() * stated',
       applying jitter to a provider-stated delay (violates DAC-E3-S4-1)"
-    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
-    result: "1 failed, 18 passed
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "1 failed, 22 passed
       (test_stated_delay_is_honoured_exactly_without_jitter: sleeper
       recorded 23.75 instead of the stated 12.5, with a SequenceJitter([0.9])
-      source that would only perturb the value if jitter were misapplied)"
+      source that would only perturb the value if jitter were misapplied).
+      Same test as the original T010 session; count re-based to the
+      23-test suite (was 1 failed, 18 passed of 19 pre-rework)."
     caught: true
     reverted_and_reconfirmed_green: true
 
@@ -69,11 +93,13 @@ manual_mutations:
     change: "'attempts >= self._settings.max_attempts' -> 'attempts >
       self._settings.max_attempts', an off-by-one that permits one extra
       send beyond the configured attempt budget"
-    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
-    result: "2 failed, 17 passed
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "2 failed, 21 passed
       (test_retry_limit_exhausted_raises_and_no_fourth_send,
       test_no_fourth_send_after_the_default_attempt_limit: both observed
-      a 4th send against max_attempts=3)"
+      a 4th send against max_attempts=3). Same two tests as the original
+      T010 session; count re-based to the 23-test suite (was 2 failed,
+      17 passed of 19 pre-rework)."
     caught: true
     reverted_and_reconfirmed_green: true
 
@@ -83,22 +109,73 @@ manual_mutations:
       'throttle_wait_used > self._settings.max_throttle_wait_seconds * 2',
       doubling the effective throttle-wait budget so exhaustion is
       detected far later than configured"
-    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py -q
-    result: "2 failed, 17 passed
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "2 failed, 21 passed
       (test_boundary_throttle_wait_exhausts_the_budget_and_raises,
       test_stated_delay_throttle_wait_exhausts_the_budget_and_raises: both
       observed more sleeper calls / no raise where the configured budget
-      should have already terminated the loop)"
+      should have already terminated the loop). Same two tests as the
+      original T010 session; count re-based to the 23-test suite (was 2
+      failed, 17 passed of 19 pre-rework)."
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-7-boundary-anchor-regression
+    target: RateLimitGovernor._seconds_to_next_boundary
+    change: "reproduces implementation-review-v2 Probes A and D: (A) body
+      replaced with 'return _SECONDS_PER_MINUTE' (the wait becomes a
+      constant, independent of wall-clock phase); (D) 'self._now()' ->
+      'self._monotonic()' (re-anchoring the boundary to the governor's
+      construction-time monotonic clock instead of wall-clock time -- the
+      exact defect implementation-review-v1's IR-001 found and the rework
+      fixed)"
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "Probe A: 1 failed, 22 passed
+      (test_no_delay_throttle_wait_tracks_wall_clock_phase_not_construction_time:
+      90.0 != 82.5). Probe D: 2 failed, 21 passed
+      (test_no_delay_throttle_wait_tracks_wall_clock_phase_not_construction_time
+      and test_successive_boundary_throttle_waits_receive_independent_jitter:
+      86.4 != 108.0 at index 1). Reproduces implementation-review-v2's
+      reported results exactly; added because this rework-introduced
+      behavior had no dedicated mutation in the pre-rework evidence file."
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-8-settings-mapping-regression
+    target: GovernorSettings.from_massive_settings
+    change: "reproduces implementation-review-v2 Probes C and E: (C)
+      'initial_backoff_seconds=settings.backoff_initial_seconds' ->
+      'initial_backoff_seconds=settings.timeout_seconds' (wrong source
+      field); (E) 'max_throttle_wait_seconds=settings.max_throttle_wait_seconds'
+      -> 'max_throttle_wait_seconds=300.0' (hardcoded, ignoring the
+      configured value)"
+    test_command: uv run pytest tests/unit/test_governor_pacing.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_settings.py -q
+    result: "Probe C: 2 failed, 21 passed
+      (test_from_massive_settings_maps_every_field_correctly:
+      initial_backoff_seconds 30.0 != 2.0;
+      test_from_massive_settings_uses_massive_defaults also fails). Probe
+      E: 1 failed, 22 passed
+      (test_from_massive_settings_maps_every_field_correctly:
+      max_throttle_wait_seconds 300.0 != 120.0). Reproduces
+      implementation-review-v2's reported results exactly; added because
+      this rework-introduced factory (IR-003 remediation) had no
+      dedicated mutation in the pre-rework evidence file."
     caught: true
     reverted_and_reconfirmed_green: true
 
 post_mutation_verification:
   description: >-
-    After all six mutations were individually applied, observed caught,
-    and reverted, src/factorflow/ingestion/rate_limit.py was diffed
-    byte-for-byte against the baseline commit (e554152) via `git diff`
-    (empty output on that file) to confirm no mutation was left in
-    place, then the full validation suite was run once.
+    After all eight mutations were individually applied, observed
+    caught, and reverted, src/factorflow/ingestion/rate_limit.py was
+    diffed byte-for-byte against the current HEAD (58052fd, and
+    confirmed unchanged by the subsequent review-only commit aca60db)
+    via `git status --porcelain` (empty) and SHA-256
+    (15d9aabb7aab37ed74acdb71c5864bf73aecadcf1034d4dc66e4dfcb9ae0e012,
+    matching implementation-review-v2's recorded value) after every
+    single mutation, then the full validation suite was run once more.
+    Mutations 1-6 and their re-based counts, and mutations 7-8 and their
+    counts, were each independently reproduced by doc-sync and match
+    implementation-review-v2.md's own five probes (A-E) exactly.
   commands:
     - uv run pytest
     - uv run pytest -m 'not postgres'
@@ -106,8 +183,30 @@ post_mutation_verification:
     - uv run ruff format --check .
     - uv run mypy src
     - uv build
-  result: "285 passed (full suite, includes postgres-marked tests); 226
+  result: "289 passed (full suite, includes postgres-marked tests); 230
     passed, 59 deselected (not postgres); ruff check: All checks passed;
-    ruff format --check: 94 files already formatted; mypy src: Success,
+    ruff format --check: 95 files already formatted; mypy src: Success,
     no issues found in 28 source files; uv build succeeded (sdist +
-    wheel)"
+    wheel). Counts match implementation-review-v2.md's Independent
+    Validation table exactly (289/230+59/95/28)."
+
+known_limitations:
+  - id: pacing-window-bound-tolerates-2x-budget
+    description: >-
+      test_no_virtual_minute_window_exceeds_the_configured_budget
+      (tests/unit/test_governor_pacing.py) asserts
+      `count_in_window <= capacity + refill_rate * 60.0`, which at
+      capacity=N tolerates up to 2N sends in a one-minute window --
+      double the configured budget. This reflects a genuine, unresolved
+      conflict between design acceptance criterion 1 ("no more than the
+      configured budget over any one-minute window") and the governor's
+      full-start token bucket (required by T006), which cannot satisfy
+      that literal bound in its first window. Recorded as
+      implementation-review-v1's IR-007 and carried forward, still open,
+      as implementation-review-v2's IR-002. This needs an owner decision
+      -- either the bucket starts empty/documents a first-window
+      exception and the test is strengthened, or design AC 1 is amended
+      to the standard token-bucket bound -- not a coding fix, and it does
+      not block this story's gate.
+    source: CAP-001-E3-S4-implementation-review-v2.md, finding IR-002 (carried from v1 IR-007)
+    status: open, owner decision required
