@@ -17,8 +17,10 @@ navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
 consuming the instrument and settings API. The market data ingestion
 process's Massive provider response models — parsing the provider's four
-historical data shapes into the product's own vocabulary — are also in
-place, though no client yet calls them. The remaining API routes
+historical data shapes into the product's own vocabulary — and its typed
+error taxonomy — reconstructing which provider failure occurred from the
+SDK's single status-code-discarding exception — are also in place, though
+no client yet calls either. The remaining API routes
 (acquisition runs, coverage), the rest of the ingestion process, and the
 Coverage and Runs screens are not yet built; those two destinations still
 render a placeholder. What exists today is described below — everything else
@@ -68,7 +70,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
-| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `__init__.py` re-exports exactly these four types — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models) |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, plus the provider's typed error taxonomy. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception. `__init__.py` re-exports exactly these model and error-taxonomy names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models) and [Massive provider error taxonomy](#massive-provider-error-taxonomy) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
@@ -247,6 +249,60 @@ none is fixed by this change:
   it is plausibly Unix milliseconds — a provider or SDK change to seconds
   (or a malformed value) would parse to a wrong `session_date` rather than
   raising.
+
+## Massive provider error taxonomy
+
+`src/factorflow/ingestion/massive/errors.py` reconstructs which provider
+failure occurred from the Massive SDK's single exception, `BadResponse`,
+which is raised for every non-`200` response and discards the HTTP status
+code — only the raw response body survives. No client calls Massive yet
+(CAP-001-E3-S1); the taxonomy exists so that when one does, the client and
+the rate-limit governor (CAP-001-E3-S4) receive a distinction between an
+unrecognised instrument, a rejected credential, a temporary provider
+failure, and a successful response that failed model validation, rather
+than one undifferentiated exception.
+
+- Four `MassiveError` subclasses: `InstrumentNotFound` (the provider does
+  not recognise the symbol), `CredentialRejected` (the API key was
+  missing, unknown, or malformed), `ProviderUnavailable` (a transport
+  failure, a server error, or any error envelope the module does not
+  recognise — the safe default), and `ProviderContractViolation` (a `200`
+  response that failed model validation via `wrap_validation_error`,
+  reserved exclusively for that case and never returned by
+  `classify_error_body`).
+- `classify_error_body()` parses the response body as JSON and reads only
+  four documented, safe fields — `status`, `message`, `error`,
+  `request_id` — discarding everything else so an unexpected field cannot
+  reach a constructed exception. Neither `message` nor `error` is
+  required; a body missing both, or one that is not valid JSON, or valid
+  JSON that is not an object, all classify as `ProviderUnavailable` rather
+  than `InstrumentNotFound`.
+- `is_rate_limited_body()` identifies Massive's `429` envelope by its
+  `error` text before `classify_error_body` runs — a rate-limited response
+  is flow control for the rate-limit governor, never a raised
+  `MassiveError`.
+- `is_fatal_for_governor()` labels every type but `ProviderUnavailable` as
+  non-retryable, for a caller's governor classifier to consume, without
+  this module importing the governor's `Outcome` enum.
+- Every constructed error carries the provider's own `request_id` when the
+  envelope supplies one and `None` when it does not — never fabricated —
+  and never the raw SDK exception, a request URL, or the credential, so
+  `str()` of any instance is safe to place in a stored failure reason or a
+  log record without further redaction.
+
+**Known limitation, carried forward as an accepted warning from
+implementation review v2** (`CAP-001-E3-S3-implementation-review-v2.md`,
+IR-001) — does not block a current acceptance criterion and is not fixed
+by this change:
+
+- `_safe_fields`' per-field coercion (`_str_or_none`) — which discards a
+  non-string value for `status`, `message`, `error`, or `request_id`
+  rather than passing it through — has no regression test. The
+  implementation is correct today (confirmed by mutation probing: a JSON
+  object whose `message` is a nested object still classifies safely as
+  `ProviderUnavailable`), but nothing in the suite would catch a future
+  refactor that removed the coercion and let an `AttributeError` escape
+  the provider boundary instead.
 
 ## Running the migrator
 
