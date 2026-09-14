@@ -17,10 +17,11 @@ navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
 consuming the instrument and settings API. The market data ingestion
 process's Massive provider response models — parsing the provider's four
-historical data shapes into the product's own vocabulary — and its typed
+historical data shapes into the product's own vocabulary — its typed
 error taxonomy — reconstructing which provider failure occurred from the
-SDK's single status-code-discarding exception — are also in place, though
-no client yet calls either. The remaining API routes
+SDK's single status-code-discarding exception — and a safe failure-reason
+composer built on that taxonomy are also in place, though no client yet
+calls any of them. The remaining API routes
 (acquisition runs, coverage), the rest of the ingestion process, and the
 Coverage and Runs screens are not yet built; those two destinations still
 render a placeholder. What exists today is described below — everything else
@@ -70,7 +71,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
-| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, plus the provider's typed error taxonomy. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception. `__init__.py` re-exports exactly these model and error-taxonomy names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models) and [Massive provider error taxonomy](#massive-provider-error-taxonomy) |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, plus the provider's typed error taxonomy and a safe failure-reason composer. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models) and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
@@ -249,6 +250,34 @@ none is fixed by this change:
   it is plausibly Unix milliseconds — a provider or SDK change to seconds
   (or a malformed value) would parse to a wrong `session_date` rather than
   raising.
+
+## Massive provider failure reasons
+
+`src/factorflow/ingestion/massive/errors.py` also defines
+`compose_failure_reason`, which turns one of the four typed `MassiveError`
+subclasses into the safe, owner-visible text stored as
+`run_instrument_result.reason` (CAP-001-E4-S6 is the consumer; no caller
+wires it in yet). The composer takes the typed `error`, the `symbol`, the
+`data_type`, and a caller-supplied `redact` callable — it never reads
+runtime configuration or a credential itself.
+
+The stable fields — error kind, `symbol`, `data_type`, and the provider's
+`request_id` (`request_id=unavailable` when the provider did not return one,
+rather than fabricating or silently omitting it) — are composed first and are
+never truncated or redacted, since they never carry provider-supplied free
+text. Only the variable segment — the error's own diagnostic message — is
+passed through `redact` before being bounded to
+`MAX_FAILURE_REASON_VARIABLE_TEXT` (500 characters), so a credential anywhere
+in the raw text, including near the truncation boundary, is removed before
+the cut is made rather than after; a truncated segment ends with the
+`…[truncated]` marker.
+
+`CredentialRejected` is the one exception: its variable segment is always a
+fixed description ("the provider rejected the configured credential"),
+never the error's own message even redacted, because the reason must not
+depend on redaction catching every way a credential could appear in
+provider-echoed text. `compose_failure_reason` raises `TypeError` for any
+error not in the four-type taxonomy.
 
 ## Rate limit governor
 
