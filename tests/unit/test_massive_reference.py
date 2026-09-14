@@ -8,17 +8,45 @@ parse`); `component-design-market-data-store.md` section 2.3
 import json
 from datetime import date, datetime
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
 
+from factorflow.config.settings import MassiveSettings
+from factorflow.ingestion.massive.client import MassiveClient
+from factorflow.ingestion.massive.errors import InstrumentNotFound
 from factorflow.ingestion.massive.models import TickerReference
+from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
 
 def _load(name: str) -> dict:
     return json.loads((FIXTURES / name).read_text())
+
+
+def _settings() -> MassiveSettings:
+    return MassiveSettings.model_validate(
+        {
+            "api_key": "test-secret-key",
+            "requests_per_minute": 60,
+            "max_attempts": 3,
+            "timeout_seconds": 30.0,
+        }
+    )
+
+
+def _governor() -> RateLimitGovernor:
+    return RateLimitGovernor(
+        GovernorSettings(
+            requests_per_minute=60,
+            max_attempts=3,
+            initial_backoff_seconds=0.0,
+            max_throttle_wait_seconds=1.0,
+        ),
+        sleep=lambda _seconds: None,
+    )
 
 
 def test_parses_wire_shape_into_product_vocabulary() -> None:
@@ -93,3 +121,91 @@ def test_no_field_is_typed_float() -> None:
     checked only where a price happens to exist."""
     for info in TickerReference.model_fields.values():
         assert info.annotation is not float
+
+
+# --- MassiveClient.fetch_reference (CAP-001-E3-S1) -----------------------
+
+
+class _FakeResponse:
+    """A minimal stand-in for `urllib3.HTTPResponse`, carrying only what
+    `MassiveClient` reads off a raw SDK response: `status` and `data`."""
+
+    def __init__(self, payload: dict, status: int = 200) -> None:
+        self.status = status
+        self.data = json.dumps(payload).encode()
+
+
+def _envelope(results: dict, request_id: str = "req_ok_001") -> dict:
+    return {"request_id": request_id, "results": results}
+
+
+def test_fetch_reference_returns_product_shaped_reference() -> None:
+    """TC-COMP-003 / TC-COMP-204: `fetch_reference` returns a
+    `TickerReference` retaining CIK, composite FIGI and share class FIGI
+    for a covered symbol (AC-3, DAC-E3-10)."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_ticker_details.return_value = _FakeResponse(
+            _envelope(_load("reference_active.json"))
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        reference = client.fetch_reference("AAPL")
+
+    assert isinstance(reference, TickerReference)
+    assert reference.cik == "0000320193"
+    assert reference.composite_figi == "BBG000B9XRY4"
+    assert reference.share_class_figi == "BBG001S5N8V8"
+
+
+def test_fetch_reference_uses_the_single_ticker_endpoint_only() -> None:
+    """TC-COMP-205 / DAC-E3-S1-4: reference reads use the single-ticker
+    endpoint (`get_ticker_details`); the list-form endpoint
+    (`list_tickers`) is never called."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_ticker_details.return_value = _FakeResponse(
+            _envelope(_load("reference_active.json"))
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        client.fetch_reference("AAPL")
+
+    instance.get_ticker_details.assert_called_once()
+    call_args = instance.get_ticker_details.call_args
+    assert call_args.args[0] == "AAPL" or call_args.kwargs.get("ticker") == "AAPL"
+    assert call_args.kwargs.get("raw") is True
+    assert not instance.list_tickers.called
+
+
+def test_fetch_reference_delisted_instrument_carries_active_and_delisted_fields() -> None:
+    """TC-COMP-212 / DAC-E3-11: a delisted instrument remains acquirable
+    and its `is_active` and `delisted_utc` survive through the client."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_ticker_details.return_value = _FakeResponse(
+            _envelope(_load("reference_delisted.json"))
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        reference = client.fetch_reference("LEHMQ")
+
+    assert reference.is_active is False
+    assert reference.delisted_utc is not None
+
+
+def test_fetch_reference_raises_instrument_not_found_for_unknown_symbol() -> None:
+    """AC-3's covered-instrument guarantee has a counterpart: an unknown
+    symbol raises the typed `InstrumentNotFound`, not a raw SDK
+    exception."""
+    from massive.exceptions import BadResponse
+
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_ticker_details.side_effect = BadResponse(
+            (FIXTURES / "error_not_found.json").read_text()
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        with pytest.raises(InstrumentNotFound):
+            client.fetch_reference("NOTREAL")

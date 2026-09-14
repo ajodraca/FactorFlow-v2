@@ -1,0 +1,211 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S1-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E3-S1
+tasks_file: CAP-001-E3-S1-tasks.md
+created: 2026-09-13
+updated: 2026-09-13
+
+# RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for
+# MassiveClient (client.py) and its pager (paging.py). Recorded as one
+# cycle spanning T003-T010: the four reads, the pager, and their tests
+# were developed together against the CAP-001-E3-S2/S3/S4 dependencies,
+# which were already present in the repository at the start of this
+# story.
+#
+# Commits: this coding pass was run under pipeline-run, which commits on
+# the agent's behalf after validation passes. No commit hash exists yet
+# at the time this evidence was written, so `commit` below reads
+# "uncommitted (story-coding session)" rather than a hash; the driving
+# process's commit after this handoff is the durable record.
+
+cycles:
+  - unit: "MassiveClient (client.py) + paging.follow_pages (paging.py)"
+    red:
+      description: >-
+        tests/unit/test_massive_sdk_config.py and
+        tests/unit/test_massive_auth.py written from scratch (TC-COMP-013,
+        209, 213, 214, DAC-E3-S1-1, DAC-E3-S1-5, DAC-E3-S1-6);
+        tests/unit/test_massive_client_interface.py written from scratch
+        (TC-COMP-195, TC-COMP-208, DAC-E3-1, DAC-E3-14); and client-facing
+        tests appended to the four existing S2 model-test files
+        (test_massive_reference.py, test_massive_bars.py,
+        test_massive_financials.py, test_massive_actions.py) for
+        TC-COMP-003, 204, 205, 210, 211, 212, plus the T008 page-failure
+        test -- all written against a package with no client.py or
+        paging.py module at all.
+      test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_reference.py
+        tests/unit/test_massive_bars.py tests/unit/test_massive_financials.py
+        tests/unit/test_massive_actions.py tests/unit/test_massive_client_interface.py
+        tests/unit/test_massive_sdk_config.py tests/unit/test_massive_auth.py
+      result: "7 errors during collection (ModuleNotFoundError: No module
+        named 'factorflow.ingestion.massive.client', raised from every one
+        of the seven files)"
+      commit: uncommitted (story-coding session)
+    green:
+      description: >-
+        Implemented paging.follow_pages, which decodes a raw SDK response,
+        accumulates results, and follows next_url one page at a time via a
+        caller-supplied next_page callable -- never catching a later
+        page's exception, so an incomplete range cannot be mistaken for a
+        complete one. Implemented MassiveClient: one reusable
+        massive.RESTClient built with retries=0, pagination=False,
+        trace=False and explicit connect/read timeouts from
+        MassiveSettings; fetch_reference (single-ticker endpoint only);
+        fetch_daily_bars (multiplier 1, timespan day, inclusive ISO dates,
+        adjusted=False -- see the flagged OQ-3 note below); fetch_financials
+        (four sibling statement endpoints, statement_type supplied by the
+        caller per endpoint since it is not on the wire); and
+        fetch_corporate_actions (splits, dividends, IPOs and ticker events,
+        action_type/effective_on supplied by the caller per endpoint).
+        Every SDK request is routed through a private _through_governor
+        helper that calls RateLimitGovernor.execute with a classify
+        callable built from errors.classify_error_body,
+        errors.is_rate_limited_body and errors.is_fatal_for_governor.
+      commit: uncommitted (story-coding session)
+      test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_reference.py
+        tests/unit/test_massive_bars.py tests/unit/test_massive_financials.py
+        tests/unit/test_massive_actions.py tests/unit/test_massive_client_interface.py
+        tests/unit/test_massive_sdk_config.py tests/unit/test_massive_auth.py
+      result: "78 passed"
+      full_suite_command: uv run pytest -m 'not postgres' -q
+      full_suite_result: "263 passed, 59 deselected, 1 pre-existing
+        unrelated failure (tests/integration/test_api_static_mount.py::test_no_bundle_yet_falls_back_to_a_bare_404,
+        confirmed present on the pre-story baseline via git stash before
+        any code in this story was written -- a stale local frontend
+        build artifact, not a regression from this story)"
+      full_suite_with_postgres_command: uv run pytest
+      full_suite_with_postgres_result: "321 passed, 1 pre-existing
+        unrelated failure (same test as above)"
+      static_checks: "ruff check: All checks passed; ruff format --check:
+        100 files already formatted; mypy src: Success, no issues found in
+        30 source files (with a scoped [[tool.mypy.overrides]] for the
+        massive package, which ships no type stubs); uv build succeeded"
+
+# T012: manual mutation session, run against the finished, committed-in-
+# working-tree client.py and paging.py, one mutation at a time, each
+# reverted and the suite re-confirmed byte-identical (via `diff` against a
+# saved baseline copy) before the next.
+manual_mutations_baseline: uncommitted working tree at end of this story-coding session
+manual_mutations:
+  - id: mutation-1-daily-bar-multiplier
+    target: client.MassiveClient.fetch_daily_bars
+    change: 'multiplier=1 -> multiplier=2'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_bars.py -q
+    result: "1 failed, 17 passed
+      (test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates:
+      AssertionError -- assert 2 == 1)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-sdk-pagination-flag
+    target: client.MassiveClient.__init__
+    change: 'pagination=False -> pagination=True'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_sdk_config.py -q
+    result: "1 failed, 6 passed
+      (test_constructs_one_rest_client_with_pagination_disabled:
+      AssertionError -- assert True is False)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-split-effective-date-field
+    target: client.MassiveClient.fetch_corporate_actions (split branch)
+    change: 'effective_date_field="execution_date" -> "ex_dividend_date"'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_actions.py -q
+    result: "2 failed, 12 passed (KeyError: 'ex_dividend_date' raised from
+      _corporate_actions, surfacing in both
+      test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol
+      and test_fetch_corporate_actions_split_effective_on_is_execution_date)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-statement-type-label-swap
+    target: client.MassiveClient.fetch_financials
+    change: 'the ("balance_sheet", list_financials_balance_sheets) pair
+      relabelled to ("income_statement", list_financials_balance_sheets)'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_financials.py -q
+    result: "1 failed, 14 passed
+      (test_fetch_financials_returns_a_complete_result_for_a_covered_symbol:
+      AssertionError -- statement_type == 'income_statement', expected
+      'balance_sheet')"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-ticker-events-extraction
+    target: client.MassiveClient.fetch_corporate_actions (ticker-events branch)
+    change: 'event_rows = (events_envelope.get("results") or {}).get("events") or [] -> event_rows = []'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_actions.py -q
+    result: "2 failed, 12 passed
+      (test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol,
+      test_fetch_corporate_actions_ticker_events_endpoint_has_no_paging_assumed:
+      both asserted len(actions) == 1, got 0)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-6-paging-never-follows-next-url
+    target: paging.follow_pages
+    change: 'next_url = envelope.get("next_url") (first assignment) -> next_url = None'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_bars.py -q
+    result: "2 failed, 16 passed
+      (test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order:
+      only 1 of 2 bars returned;
+      test_fetch_daily_bars_raises_when_a_later_page_fails_rather_than_returning_partial:
+      'DID NOT RAISE ProviderUnavailable', because the mutation stopped the
+      pager from ever reaching the failing second page -- exactly the
+      component design section 8 acceptance criterion 12 failure mode this
+      story's pager exists to prevent)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-7-governor-classify-never-fatal
+    target: client.MassiveClient._through_governor (classify closure)
+    change: 'return Outcome.FATAL if is_fatal_for_governor(error) else Outcome.RETRYABLE -> return Outcome.RETRYABLE'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_reference.py -q
+    result: "1 failed, 13 passed
+      (test_fetch_reference_raises_instrument_not_found_for_unknown_symbol:
+      the call raised ProviderUnavailable after exhausting the governor's
+      retry budget instead of the typed InstrumentNotFound the taxonomy
+      produces, because every BadResponse was misrouted as retryable)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  description: >-
+    After each of the seven mutations was individually applied, observed
+    caught, and reverted, client.py and paging.py were diffed
+    byte-for-byte against saved baseline copies (`diff` reporting no
+    output, i.e. CLEAN, after every revert) to confirm no mutation was
+    left in place. The full suite and static checks were then re-run once
+    more at the end of the session.
+  commands:
+    - uv run pytest -m 'not postgres' -q
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+  result: "263 passed, 59 deselected, 1 pre-existing unrelated failure
+    (tests/integration/test_api_static_mount.py, confirmed pre-existing on
+    the branch baseline before this story's changes); ruff check: All
+    checks passed; ruff format --check: 100 files already formatted; mypy
+    src: Success, no issues found in 30 source files"
+
+# Follow-up items surfaced during implementation, not resolved by this
+# story per constraint 9 (project-repo edits are metadata-only; this
+# story does not edit capability specs, design content, or acceptance
+# criteria).
+open_items:
+  - id: OQ-3-adjusted-parameter-still-unresolved
+    description: >-
+      component-design-massive-client.md section 14, open question 3
+      ("Should daily aggregates be requested adjusted or unadjusted?") is
+      recorded as still open, owned by the capability owner, and blocking
+      "the meaning of stored price history, and therefore AC-5 and AC-6".
+      Neither this story's task plan nor any other CAP-001-E3 story
+      records an owner resolution. fetch_daily_bars was implemented with
+      adjusted=False (the design document's own stated leaning, given C5
+      and this component's separate acquisition of corporate actions),
+      flagged explicitly in the method's docstring and pinned by
+      test_fetch_daily_bars_requests_unadjusted_bars, rather than left to
+      the SDK's server-side default (adjusted=true) or left
+      undocumented. Follow-up: the capability owner should confirm or
+      override this choice; changing it is a one-line change plus a test
+      update in fetch_daily_bars.

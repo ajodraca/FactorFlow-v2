@@ -9,17 +9,54 @@ import json
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
 
+from factorflow.config.settings import MassiveSettings
+from factorflow.ingestion.massive.client import MassiveClient
 from factorflow.ingestion.massive.models import CorporateAction
+from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
 
 def _load(name: str) -> dict:
     return json.loads((FIXTURES / name).read_text())
+
+
+def _settings() -> MassiveSettings:
+    return MassiveSettings.model_validate(
+        {
+            "api_key": "test-secret-key",
+            "requests_per_minute": 60,
+            "max_attempts": 3,
+            "timeout_seconds": 30.0,
+        }
+    )
+
+
+def _governor() -> RateLimitGovernor:
+    return RateLimitGovernor(
+        GovernorSettings(
+            requests_per_minute=60,
+            max_attempts=3,
+            initial_backoff_seconds=0.0,
+            max_throttle_wait_seconds=1.0,
+        ),
+        sleep=lambda _seconds: None,
+    )
+
+
+class _FakeResponse:
+    def __init__(self, payload: dict, status: int = 200) -> None:
+        self.status = status
+        self.data = json.dumps(payload).encode()
+
+
+def _envelope(results: object) -> dict:
+    return {"request_id": "req_ok_001", "results": results}
 
 
 def test_split_maps_to_a_product_named_action() -> None:
@@ -140,3 +177,70 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
     assert payload["action_type"] == "split"
     for writer_owned in ("observed_on", "run_id", "recorded_at"):
         assert writer_owned not in payload
+
+
+# --- MassiveClient.fetch_corporate_actions (CAP-001-E3-S1) ---------------
+
+
+def test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol() -> None:
+    """TC-COMP-003: `fetch_corporate_actions` returns splits, dividends,
+    ticker changes and IPOs mapped to the product's enumeration for a
+    covered symbol (AC-3)."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_stocks_splits.return_value = _FakeResponse(
+            _envelope([_load("action_split.json")])
+        )
+        instance.list_stocks_dividends.return_value = _FakeResponse(
+            _envelope([_load("action_dividend.json")])
+        )
+        instance.vx.list_ipos.return_value = _FakeResponse(_envelope([_load("action_ipo.json")]))
+        instance.get_ticker_events.return_value = _FakeResponse(
+            _envelope({"events": [_load("action_ticker_change.json")]})
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
+
+    action_types = {action.action_type for action in actions}
+    assert action_types == {"split", "dividend", "ticker_change", "ipo"}
+    assert all(isinstance(action, CorporateAction) for action in actions)
+
+
+def test_fetch_corporate_actions_split_effective_on_is_execution_date() -> None:
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_stocks_splits.return_value = _FakeResponse(
+            _envelope([_load("action_split.json")])
+        )
+        instance.list_stocks_dividends.return_value = _FakeResponse(_envelope([]))
+        instance.vx.list_ipos.return_value = _FakeResponse(_envelope([]))
+        instance.get_ticker_events.return_value = _FakeResponse(_envelope({"events": []}))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
+
+    assert len(actions) == 1
+    assert actions[0].action_type == "split"
+    assert actions[0].effective_on == date(2020, 8, 31)
+
+
+def test_fetch_corporate_actions_ticker_events_endpoint_has_no_paging_assumed() -> None:
+    """Component design section 2.5: ticker events documents no paging, so
+    this component must not assume `next_url` is universally present --
+    absence is a complete result, not an error."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_stocks_splits.return_value = _FakeResponse(_envelope([]))
+        instance.list_stocks_dividends.return_value = _FakeResponse(_envelope([]))
+        instance.vx.list_ipos.return_value = _FakeResponse(_envelope([]))
+        instance.get_ticker_events.return_value = _FakeResponse(
+            _envelope({"events": [_load("action_ticker_change.json")]})
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
+
+    assert len(actions) == 1
+    assert actions[0].action_type == "ticker_change"
+    assert actions[0].effective_on == date(2007, 1, 9)

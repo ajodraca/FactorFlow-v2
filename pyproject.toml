@@ -13,6 +13,7 @@ dependencies = [
     "pydantic-settings>=2",
     "fastapi>=0.115",
     "uvicorn>=0.30",
+    "massive>=2",
 ]
 
 [project.optional-dependencies]
@@ -52,3 +53,13 @@ select = ["E", "F", "I", "UP", "B"]
 python_version = "3.12"
 strict = true
 mypy_path = "src"
+
+# The official `massive` SDK (docs/constitution/tech-stack.md) ships no
+# type stubs or py.typed marker. `factorflow.ingestion.massive.client` is
+# the one module that imports it directly; every value this component
+# reads off it is validated through this component's own Pydantic models
+# before crossing back out (component design section 2.4), so the
+# suppressed stub gap does not propagate untyped values past this seam.
+[[tool.mypy.overrides]]
+module = ["massive", "massive.*"]
+ignore_missing_imports = true

@@ -11,17 +11,61 @@ import time as time_module
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
 
+from factorflow.config.settings import MassiveSettings
+from factorflow.ingestion.massive.client import MassiveClient
+from factorflow.ingestion.massive.errors import ProviderUnavailable
 from factorflow.ingestion.massive.models import DailyBar
+from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
 
 def _load(name: str) -> dict:
     return json.loads((FIXTURES / name).read_text())
+
+
+def _settings() -> MassiveSettings:
+    return MassiveSettings.model_validate(
+        {
+            "api_key": "test-secret-key",
+            "requests_per_minute": 60,
+            "max_attempts": 3,
+            "timeout_seconds": 30.0,
+        }
+    )
+
+
+def _governor() -> RateLimitGovernor:
+    return RateLimitGovernor(
+        GovernorSettings(
+            requests_per_minute=60,
+            max_attempts=3,
+            initial_backoff_seconds=0.0,
+            max_throttle_wait_seconds=1.0,
+        ),
+        sleep=lambda _seconds: None,
+    )
+
+
+class _FakeResponse:
+    """A minimal stand-in for `urllib3.HTTPResponse`: only `status` and
+    `data`, which is all `MassiveClient` reads off a raw SDK response."""
+
+    def __init__(self, payload: dict, status: int = 200) -> None:
+        self.status = status
+        self.data = json.dumps(payload).encode()
+
+
+def _bar_envelope(bars: list[dict], next_url: str | None = None) -> dict:
+    body: dict = {"request_id": "req_ok_001", "results": bars}
+    if next_url is not None:
+        body["next_url"] = next_url
+    return body
 
 
 def test_parses_wire_shape_into_product_vocabulary() -> None:
@@ -145,3 +189,93 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
     assert payload["volume"] == "82488677"
     for writer_owned in ("observed_on", "run_id", "recorded_at"):
         assert writer_owned not in payload
+
+
+# --- MassiveClient.fetch_daily_bars (CAP-001-E3-S1) ----------------------
+
+
+def test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates() -> None:
+    """TC-COMP-003 / TC-COMP-210 / DAC-E3-S1-2: the daily aggregate request
+    uses multiplier `1`, timespan `day`, and inclusive `YYYY-MM-DD` range
+    values."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_aggs.return_value = _FakeResponse(_bar_envelope([_load("bar_regular.json")]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+
+    instance.get_aggs.assert_called_once()
+    _, kwargs = instance.get_aggs.call_args
+    assert kwargs["multiplier"] == 1
+    assert kwargs["timespan"] == "day"
+    assert kwargs["from_"] == "2024-01-01"
+    assert kwargs["to"] == "2024-01-31"
+    assert kwargs["raw"] is True
+
+
+def test_fetch_daily_bars_requests_unadjusted_bars() -> None:
+    """Component design section 14, open question 3: `adjusted=False` is
+    passed explicitly rather than left to the SDK's server-side default
+    (adjusted=true), pending the owner's resolution of OQ-3. See
+    `MassiveClient.fetch_daily_bars`'s docstring for the flagged rationale
+    and follow-up."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_aggs.return_value = _FakeResponse(_bar_envelope([_load("bar_regular.json")]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+
+    _, kwargs = instance.get_aggs.call_args
+    assert kwargs["adjusted"] is False
+
+
+def test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order() -> None:
+    """TC-COMP-003 / TC-COMP-211: two recorded pages return all rows, in
+    order, as one complete result (DAC-E3-S1-3, AC-3 acceptance criterion
+    11)."""
+    page_two_url = (
+        "https://api.massive.com/v2/aggs/ticker/AAPL/range/1/day/2024-01-01/2024-01-31?cursor=abc"
+    )
+    first_bar = _load("bar_regular.json")
+    second_bar = {**_load("bar_regular.json"), "t": 1704240000000}  # one day later
+
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_aggs.return_value = _FakeResponse(
+            _bar_envelope([first_bar], next_url=page_two_url)
+        )
+        instance._get.return_value = _FakeResponse(_bar_envelope([second_bar]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        bars = client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+
+    assert len(bars) == 2
+    assert bars[0].session_date == date(2024, 1, 2)
+    assert bars[1].session_date == date(2024, 1, 3)
+    instance._get.assert_called_once()
+    _, kwargs = instance._get.call_args
+    assert kwargs["raw"] is True
+
+
+def test_fetch_daily_bars_raises_when_a_later_page_fails_rather_than_returning_partial() -> None:
+    """T008 / component design section 8, acceptance criterion 12: a
+    later page request fails, and the method raises rather than returning
+    the earlier page as a complete range."""
+    from massive.exceptions import BadResponse
+
+    page_two_url = (
+        "https://api.massive.com/v2/aggs/ticker/AAPL/range/1/day/2024-01-01/2024-01-31?cursor=abc"
+    )
+
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_aggs.return_value = _FakeResponse(
+            _bar_envelope([_load("bar_regular.json")], next_url=page_two_url)
+        )
+        instance._get.side_effect = BadResponse((FIXTURES / "error_unknown_shape.json").read_text())
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        with pytest.raises(ProviderUnavailable):
+            client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
