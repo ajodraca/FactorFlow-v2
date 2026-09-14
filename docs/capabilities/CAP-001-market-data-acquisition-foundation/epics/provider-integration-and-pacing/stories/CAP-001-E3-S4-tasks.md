@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-13
+last_reworked_review: CAP-001-E3-S4-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -59,7 +60,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Establish the new ingestion package and deterministic governor-test support without provider or wall-clock dependencies.
 
-- [ ] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/rate_limit.py`, `tests/unit/governor_fakes.py`, `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; provide a test-only fake monotonic clock, sleeper, and deterministic jitter source in `tests/unit/governor_fakes.py`.
+- [x] T001 Create `src/factorflow/ingestion/__init__.py`, `src/factorflow/ingestion/rate_limit.py`, `tests/unit/governor_fakes.py`, `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; provide a test-only fake monotonic clock, sleeper, and deterministic jitter source in `tests/unit/governor_fakes.py`.
 
 **Checkpoint**: Governor tests collect against package imports and can advance virtual time without a network call or real sleep.
 
@@ -71,14 +72,14 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-230 and the pacing portion of AC-4 in `tests/unit/test_governor_pacing.py`: with a virtual clock and capacity `N`, assert `N` consecutive sends advance virtual time by zero, the `N+1` send blocks until a token refills, and no virtual one-minute window issues more than the configured budget.
-- [ ] T003 [P] Implement TC-COMP-200, TC-COMP-201, TC-COMP-203, TC-COMP-226, TC-COMP-227, and TC-COMP-231 in `tests/unit/test_governor_retry.py`: assert repeated `THROTTLED` outcomes leave attempts at zero; a no-delay throttle waits to the next minute boundary with full jitter; a stub `stated_delay_seconds` callback delay is honoured exactly without jitter; and both throttle paths count their waits against and raise after `max_throttle_wait_seconds`.
-- [ ] T004 [P] Implement TC-COMP-202, TC-COMP-228, and TC-COMP-229 in `tests/unit/test_governor_retry.py` and `tests/unit/test_governor_backoff.py`: assert retryable timeout/5xx outcomes increment attempts and use jittered exponential delays, no fourth send occurs after the configured limit, and a caller-classified `FATAL` exception is re-raised with neither sleep nor retry.
+- [x] T002 [P] Implement TC-COMP-230 and the pacing portion of AC-4 in `tests/unit/test_governor_pacing.py`: with a virtual clock and capacity `N`, assert `N` consecutive sends advance virtual time by zero, the `N+1` send blocks until a token refills, and no virtual one-minute window issues more than the configured budget.
+- [x] T003 [P] Implement TC-COMP-200, TC-COMP-201, TC-COMP-203, TC-COMP-226, TC-COMP-227, and TC-COMP-231 in `tests/unit/test_governor_retry.py`: assert repeated `THROTTLED` outcomes leave attempts at zero; a no-delay throttle waits to the next minute boundary with full jitter; a stub `stated_delay_seconds` callback delay is honoured exactly without jitter; and both throttle paths count their waits against and raise after `max_throttle_wait_seconds`.
+- [x] T004 [P] Implement TC-COMP-202, TC-COMP-228, and TC-COMP-229 in `tests/unit/test_governor_retry.py` and `tests/unit/test_governor_backoff.py`: assert retryable timeout/5xx outcomes increment attempts and use jittered exponential delays, no fourth send occurs after the configured limit, and a caller-classified `FATAL` exception is re-raised with neither sleep nor retry.
 
 ### Additional Unit Tests
 
-- [ ] T005 [P] Add provider-agnostic boundary tests in `tests/unit/test_governor_retry.py`: use unrelated exception classes with a fixed classifier outcome to prove the governor does not inspect exception type or provider fields, and assert `OK` returns the sender value without a retry.
-- [ ] T006 [P] Add token-accounting edge tests in `tests/unit/test_governor_pacing.py`: assert partial refill credits elapsed virtual time correctly, each pager-like send consumes one permit, and a new governor instance starts with its configured bucket capacity.
+- [x] T005 [P] Add provider-agnostic boundary tests in `tests/unit/test_governor_retry.py`: use unrelated exception classes with a fixed classifier outcome to prove the governor does not inspect exception type or provider fields, and assert `OK` returns the sender value without a retry.
+- [x] T006 [P] Add token-accounting edge tests in `tests/unit/test_governor_pacing.py`: assert partial refill credits elapsed virtual time correctly, each pager-like send consumes one permit, and a new governor instance starts with its configured bucket capacity.
 
 **Checkpoint**: TC-COMP-200–203 and TC-COMP-226–231 are traceability-labelled, deterministic, RED tests; no test sleeps in real time or contacts Massive.
 
@@ -88,8 +89,8 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Build the typed, synchronous governor and the token bucket behind the caller-provided `Outcome` boundary.
 
-- [ ] T007 Implement `Outcome`, frozen `GovernorSettings`, and `RateLimitGovernor` in `src/factorflow/ingestion/rate_limit.py`; construct `GovernorSettings` from the existing positive `MassiveSettings.requests_per_minute`, attempt limit, initial backoff, and throttle-wait fields without modifying `src/factorflow/config/settings.py`; expose controllable monotonic-time, sleep, and jitter collaborators only as needed for deterministic tests.
-- [ ] T008 Implement the permit acquisition and `RateLimitGovernor.execute()` loop in `src/factorflow/ingestion/rate_limit.py`: continuously refill a capacity-`requests_per_minute` bucket, consume exactly one permit per `send`, return `OK`, re-raise `FATAL`, and route `RETRYABLE` and `THROTTLED` through their distinct bounded paths. Preserve the declared `send` and `classify` signatures and add `stated_delay_seconds: Callable[[BaseException], float | None] | None = None`; document that parameter in code with component-design-rate-limit-governor.md §2.5 row 1, DAC-E3-S4-1, and TC-COMP-226. Use its stated delay without jitter, use full jitter only for no-delay throttle and retry backoff, and raise the typed unavailability failure supplied by CAP-001-E3-S3 on exhausted attempts or throttle budget.
+- [x] T007 Implement `Outcome`, frozen `GovernorSettings`, and `RateLimitGovernor` in `src/factorflow/ingestion/rate_limit.py`; construct `GovernorSettings` from the existing positive `MassiveSettings.requests_per_minute`, attempt limit, initial backoff, and throttle-wait fields without modifying `src/factorflow/config/settings.py`; expose controllable monotonic-time, sleep, and jitter collaborators only as needed for deterministic tests.
+- [x] T008 Implement the permit acquisition and `RateLimitGovernor.execute()` loop in `src/factorflow/ingestion/rate_limit.py`: continuously refill a capacity-`requests_per_minute` bucket, consume exactly one permit per `send`, return `OK`, re-raise `FATAL`, and route `RETRYABLE` and `THROTTLED` through their distinct bounded paths. Preserve the declared `send` and `classify` signatures and add `stated_delay_seconds: Callable[[BaseException], float | None] | None = None`; document that parameter in code with component-design-rate-limit-governor.md §2.5 row 1, DAC-E3-S4-1, and TC-COMP-226. Use its stated delay without jitter, use full jitter only for no-delay throttle and retry backoff, and raise the typed unavailability failure supplied by CAP-001-E3-S3 on exhausted attempts or throttle budget.
 
 **Checkpoint**: The governor is synchronous, generic over sender result, has no Massive import or response parsing, and distinguishes an unserved throttle from a retryable served failure.
 
@@ -99,7 +100,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Preserve the boundary that CAP-001-E3-S1 uses to submit every SDK request through this governor.
 
-- [ ] T009 Update `src/factorflow/ingestion/__init__.py` to expose `GovernorSettings`, `Outcome`, and `RateLimitGovernor` for `src/factorflow/ingestion/massive/client.py`; do not add a Massive-specific delay callback, because CAP-001-E3-S1 passes none and Massive has no `Retry-After`.
+- [x] T009 Update `src/factorflow/ingestion/__init__.py` to expose `GovernorSettings`, `Outcome`, and `RateLimitGovernor` for `src/factorflow/ingestion/massive/client.py`; do not add a Massive-specific delay callback, because CAP-001-E3-S1 passes none and Massive has no `Retry-After`.
 
 **Checkpoint**: CAP-001-E3-S1 can supply its provider-aware classifier to `execute` while this module retains no provider knowledge.
 
@@ -109,7 +110,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 **Purpose**: Verify bounded behavior and capture TDD/mutation evidence before the implementation handoff.
 
-- [ ] T010 Run `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; perform and record manual mutations for permit consumption, 429 attempt counting, no-delay boundary selection, stated-delay jitter exclusion, retry-limit termination, and throttle-budget termination in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S4-tdd-evidence.yaml`.
+- [x] T010 Run `tests/unit/test_governor_pacing.py`, `tests/unit/test_governor_retry.py`, and `tests/unit/test_governor_backoff.py`; perform and record manual mutations for permit consumption, 429 attempt counting, no-delay boundary selection, stated-delay jitter exclusion, retry-limit termination, and throttle-budget termination in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S4-tdd-evidence.yaml`.
 
 **Checkpoint**: Mandatory tests pass, each mutation is killed or the test is strengthened, and the component has no unbounded wait or retry path.
 
@@ -162,3 +163,4 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 - Per owner resolution, `requests_per_minute` remains required and positive (`ge=1`); there is no unlimited, `None`, or sentinel governor mode. “Unlimited” in DAC-E3-S4-5 refers to the provider tier. The required behavior is zero artificial delay while bucket tokens remain, followed by refill waiting, consistent with component-design-rate-limit-governor.md §3 and §14 OQ2 and component-design-runtime-config.md §2.2.
 - Component-design-rate-limit-governor.md §2.5 requires a provider-stated delay but its §2.3 `Outcome`-only interface provides no channel for it. Per owner resolution, this story adds the optional provider-agnostic `stated_delay_seconds` callback to `execute` while preserving the documented `send` and `classify` signatures and bare `Outcome`. Record this interface gap for the next design revision; do not edit the approved design in this story.
 - The stated-delay path is dead for Massive: CAP-001-E3-S1 passes no callback because the provider has no `Retry-After`. It remains tested with a stub callback for TC-COMP-226.
+- **Recorded deviation (IR-004 rework, review v1).** The no-delay throttle path's jitter is additive over the boundary wait (`boundary + jitter() * boundary`, range `[boundary, 2 * boundary]`), not "full jitter over the computed delay" as component-design-rate-limit-governor.md §2.5 literally states for every jittered delay. This is a deliberate choice: true full jitter over a boundary wait (uniform over `[0, boundary)`) would frequently retry before the provider's per-minute quota actually refills, reintroducing the failure mode §2.5 itself argues the boundary wait exists to avoid. The backoff path (§2.5 row 3) does use full jitter as written. Flagging for the next design revision to either amend §2.5's wording for the boundary case or record this as an approved exception. See `src/factorflow/ingestion/rate_limit.py::_boundary_wait_with_jitter` and its covering tests in `tests/unit/test_governor_retry.py`.

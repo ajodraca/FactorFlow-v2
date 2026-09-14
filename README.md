@@ -250,59 +250,112 @@ none is fixed by this change:
   (or a malformed value) would parse to a wrong `session_date` rather than
   raising.
 
-## Massive provider error taxonomy
+## Rate limit governor
 
-`src/factorflow/ingestion/massive/errors.py` reconstructs which provider
-failure occurred from the Massive SDK's single exception, `BadResponse`,
-which is raised for every non-`200` response and discards the HTTP status
-code — only the raw response body survives. No client calls Massive yet
-(CAP-001-E3-S1); the taxonomy exists so that when one does, the client and
-the rate-limit governor (CAP-001-E3-S4) receive a distinction between an
-unrecognised instrument, a rejected credential, a temporary provider
-failure, and a successful response that failed model validation, rather
-than one undifferentiated exception.
+`src/factorflow/ingestion/rate_limit.py` implements `RateLimitGovernor`, the
+synchronous, provider-agnostic governor every SDK request is meant to be
+submitted through (CAP-001-E3-S1's `massive/client.py` is the intended
+caller; no client calls it yet). It imports no Massive SDK, response type,
+or wire shape — `send` and `classify` are opaque callables the caller
+supplies, and the governor inspects only the `Outcome` `classify` returns,
+never the raised exception's type or fields.
 
-- Four `MassiveError` subclasses: `InstrumentNotFound` (the provider does
-  not recognise the symbol), `CredentialRejected` (the API key was
-  missing, unknown, or malformed), `ProviderUnavailable` (a transport
-  failure, a server error, or any error envelope the module does not
-  recognise — the safe default), and `ProviderContractViolation` (a `200`
-  response that failed model validation via `wrap_validation_error`,
-  reserved exclusively for that case and never returned by
-  `classify_error_body`).
-- `classify_error_body()` parses the response body as JSON and reads only
-  four documented, safe fields — `status`, `message`, `error`,
-  `request_id` — discarding everything else so an unexpected field cannot
-  reach a constructed exception. Neither `message` nor `error` is
-  required; a body missing both, or one that is not valid JSON, or valid
-  JSON that is not an object, all classify as `ProviderUnavailable` rather
-  than `InstrumentNotFound`.
-- `is_rate_limited_body()` identifies Massive's `429` envelope by its
-  `error` text before `classify_error_body` runs — a rate-limited response
-  is flow control for the rate-limit governor, never a raised
-  `MassiveError`.
-- `is_fatal_for_governor()` labels every type but `ProviderUnavailable` as
-  non-retryable, for a caller's governor classifier to consume, without
-  this module importing the governor's `Outcome` enum.
-- Every constructed error carries the provider's own `request_id` when the
-  envelope supplies one and `None` when it does not — never fabricated —
-  and never the raw SDK exception, a request URL, or the credential, so
-  `str()` of any instance is safe to place in a stored failure reason or a
-  log record without further redaction.
+`execute(send, classify, stated_delay_seconds=None)` calls `send()` under a
+token bucket sized to `GovernorSettings.requests_per_minute` (continuous
+refill, one permit per send, no artificial delay while tokens remain), then
+routes the classified outcome through a distinct, bounded path:
 
-**Known limitation, carried forward as an accepted warning from
-implementation review v2** (`CAP-001-E3-S3-implementation-review-v2.md`,
-IR-001) — does not block a current acceptance criterion and is not fixed
-by this change:
+| Outcome | Attempt counter | Wait | Then |
+|---|---|---|---|
+| `THROTTLED`, provider stated a delay | unchanged | the stated delay, no jitter | retry |
+| `THROTTLED`, no stated delay (the Massive case) | unchanged | to the next minute boundary, plus jitter | retry |
+| `RETRYABLE` (timeout or 5xx) | plus one | `initial_backoff_seconds × 2^(attempts−1)`, full jitter | retry while attempts remain |
+| `OK` | unchanged | none | return |
+| `FATAL` (404, 401, not retryable) | unchanged | none | re-raise |
 
-- `_safe_fields`' per-field coercion (`_str_or_none`) — which discards a
-  non-string value for `status`, `message`, `error`, or `request_id`
-  rather than passing it through — has no regression test. The
-  implementation is correct today (confirmed by mutation probing: a JSON
-  object whose `message` is a nested object still classifies safely as
-  `ProviderUnavailable`), but nothing in the suite would catch a future
-  refactor that removed the coercion and let an `AttributeError` escape
-  the provider boundary instead.
+Two independent budgets bound the loop, both configured through
+`GovernorSettings.from_massive_settings()` (built from `MassiveSettings`
+without either settings class importing the other, `MassiveSettings`
+imported only under `TYPE_CHECKING`): `max_attempts` (default 3) bounds the
+`RETRYABLE` path, and `max_throttle_wait_seconds` bounds the cumulative wait
+across `THROTTLED` retries, independently of `max_attempts` — a `429` never
+consumes an attempt, so persistent throttling is bounded by the throttle
+budget alone, raising `ProviderUnavailable` (CAP-001-E3-S3) when either
+budget is exhausted.
+
+The no-delay throttle wait is anchored to a wall-clock `now` collaborator
+(default `time.time`), not to `monotonic()` or any instant fixed at
+governor construction, so the wait tracks the provider's actual per-minute
+window regardless of how long the governor instance has been alive. Its
+jitter is applied additively on top of the boundary wait
+(`boundary + jitter() × boundary`, range `[boundary, 2 × boundary]`) rather
+than the literal "full jitter over the computed delay" that
+`component-design-rate-limit-governor.md` §2.5 states for every jittered
+delay — a deliberate, recorded deviation: true full jitter here
+(`[0, boundary)`) would often fire before the provider's per-minute quota
+refills, defeating the reason the boundary wait exists. The backoff path
+(retryable failures) does use full jitter as written. See
+`_boundary_wait_with_jitter`'s docstring and the task plan's Notes.
+
+**Known limitations, carried forward as accepted warnings from
+implementation review v2**
+(`CAP-001-E3-S4-implementation-review-v2.md`) — none blocks a current
+acceptance criterion, and none is fixed by this change:
+
+- **Needs an owner decision — not simply a follow-up fix.**
+  `test_no_virtual_minute_window_exceeds_the_configured_budget`
+  (`tests/unit/test_governor_pacing.py`) asserts a bound of
+  `capacity + refill_rate × 60`, i.e. up to **twice** the configured budget
+  in a one-minute window, because a bucket that starts full (required by
+  the pacing tests) cannot satisfy the design's literal acceptance
+  criterion 1 ("no more than the configured budget over any one-minute
+  window") in its first window. The conflict between the two approved
+  statements is recorded only in a test docstring today. Resolving it
+  needs an owner to choose between starting the bucket empty (or
+  documenting a first-window exception) and strengthening the test, or
+  amending design AC 1 to the standard token-bucket bound (IR-002, carried
+  from implementation-review-v1's IR-007).
+- The `except BaseException` classification boundary (`execute`, per the
+  design-mandated `Callable[[BaseException], Outcome]` signature) hands
+  `KeyboardInterrupt` and `SystemExit` to the caller's `classify` along with
+  every other exception. No test covers either type, and a classifier that
+  defaults an unrecognised exception to `RETRYABLE` or `THROTTLED` would
+  make the governor sleep through a cancellation signal — for the no-delay
+  throttle path, now a genuine up-to-60-second wall-clock wait (IR-001).
+- `GovernorSettings` is a plain frozen dataclass with no construction-time
+  validation, so a direct literal construction with `requests_per_minute=0`
+  succeeds and only fails later, obscurely, with `ZeroDivisionError` inside
+  permit acquisition. Every production caller goes through
+  `from_massive_settings()`, where `MassiveSettings`'s `Field(ge=1)` already
+  enforces positivity, so this affects only direct construction, which
+  today only the tests do (IR-008).
+- The backoff cap on the first retry is `initial_backoff_seconds × 2**0`,
+  i.e. `initial_backoff_seconds` itself — one doubling below component
+  design section 2.5 row 3's literal wording ("initial delay times two to
+  the power of attempts"). The implementation is the conventional reading
+  and the bound holds; the wording gap is flagged for the next design
+  revision (IR-005).
+- `ProviderUnavailable` is raised with only a message string on exhaustion;
+  the attempt count is interpolated into prose rather than carried as a
+  structured field, and the module emits no log records naming the attempt
+  index, delay, or status code (component design section 4's expectation).
+  Whether governor logging and a structured exhaustion failure belong to
+  CAP-001-E5 or a later story is an open owner decision (IR-009).
+- The test double clock used for the throttle-boundary tests never
+  advances the injected wall-clock `now` source during a sleep, so no test
+  exercises a multi-wait throttle sequence in which each wait lands on a
+  genuinely fresh wall-clock phase, the shape production actually takes
+  (IR-006).
+- `test_from_massive_settings_uses_massive_defaults`
+  (`tests/unit/test_governor_settings.py`) asserts `MassiveSettings`'s
+  defaults for `max_attempts`, `initial_backoff_seconds`, and
+  `max_throttle_wait_seconds` without clearing the corresponding
+  `FACTORFLOW_MASSIVE_*` environment variables first, so it fails under a
+  polluted environment (e.g. `FACTORFLOW_MASSIVE_MAX_ATTEMPTS=7` set) —
+  demonstrated in implementation-review-v2. `test_settings_defaults.py`
+  a few files away shows the established, unaffected pattern
+  (`monkeypatch.delenv` for every timing variable before asserting
+  defaults) that this test should follow (IR-004).
 
 ## Running the migrator
 
