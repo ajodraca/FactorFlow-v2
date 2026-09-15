@@ -1,0 +1,182 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S5-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E3-S5
+tasks_file: CAP-001-E3-S5-tasks.md
+created: 2026-09-13
+updated: 2026-09-13
+
+# RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for the
+# Massive failure-reason composer (compose_failure_reason,
+# MAX_FAILURE_REASON_VARIABLE_TEXT, added to the existing
+# src/factorflow/ingestion/massive/errors.py module delivered by
+# CAP-001-E3-S3). Base branch commit at start of work: 5ce8710
+# (Merge pull request #39 from ajodraca/usr/alvaro-de-jodra/CAP-001-E3-S3).
+# All work in this file is recorded against the uncommitted working tree;
+# the driver commits on this agent's behalf per the story-coding workflow.
+
+cycles:
+  - unit: "compose_failure_reason + MAX_FAILURE_REASON_VARIABLE_TEXT"
+    red:
+      description: >-
+        tests/unit/test_massive_failure_reasons.py written in full
+        (TC-COMP-013, 207, 232-235, plus T006's composition-boundary
+        tests) against errors.py before the composer existed.
+      test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+      result: "ImportError: cannot import name
+        'MAX_FAILURE_REASON_VARIABLE_TEXT' from
+        'factorflow.ingestion.massive.errors' -- 1 error during collection"
+    green:
+      description: >-
+        Added MAX_FAILURE_REASON_VARIABLE_TEXT = 500 (T007, following the
+        bounds.py named-constant/docstring style) and
+        compose_failure_reason (T008): composes the fixed error kind,
+        symbol, data type, and explicit request-ID state first; passes
+        only the variable diagnostic text through the caller-supplied
+        redact callable; then bounds that segment to 500 characters with
+        a trailing "…[truncated]" marker when needed. CredentialRejected
+        always uses a fixed rejection description, never its own message.
+        Unsupported error classes raise TypeError. Exported both names
+        from massive/__init__.py (T009) alongside the existing taxonomy.
+      test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+      result: "13 passed"
+      full_suite_command: uv run pytest -m 'not postgres' -q
+      full_suite_result: "246 passed, 59 deselected, 1 failed
+        (tests/integration/test_api_static_mount.py::test_no_bundle_yet_falls_back_to_a_bare_404
+        -- pre-existing on the base branch, confirmed via `git stash` before
+        any story change was applied; unrelated to this story's module and
+        left untouched per scope discipline)"
+      static_checks: "ruff check: All checks passed; ruff format --check:
+        96 files already formatted (after `uv run ruff format .` fixed 2
+        files' line-wrapping); mypy src: Success, no issues found in 28
+        source files; uv build succeeded"
+
+# T010: manual mutation session, run one mutation at a time against the
+# GREEN implementation above, each reverted and the suite re-confirmed
+# byte-identical (via `diff` against a saved baseline copy) before the
+# next mutation.
+manual_mutations_baseline: "uncommitted working tree, GREEN cycle above"
+manual_mutations:
+  - id: mutation-1-omit-symbol-field
+    target: compose_failure_reason (return statement)
+    change: 'f"[{kind}] symbol={symbol} data_type={data_type} ..." -> f"[{kind}] data_type={data_type} ..." (symbol dropped)'
+    test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    result: "3 failed, 10 passed
+      (test_reason_includes_symbol_data_type_and_request_id_when_present,
+      test_reason_renders_absent_request_id_explicitly_not_fabricated,
+      test_pathological_diagnostic_text_is_visibly_truncated: all
+      asserted a symbol value was present in the reason)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-fabricated-absent-request-id-marker
+    target: compose_failure_reason (absent-request-id branch)
+    change: '"request_id=unavailable" -> "request_id=UNKNOWN"'
+    test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    result: "13 passed -- NOT CAUGHT on first attempt. The original
+      absent-request-id test accepted any of 'unavailable' / 'none' /
+      'absent' in the *whole* reason, and InstrumentNotFound-independent
+      wording happened not to be exercised; worse, a ProviderUnavailable
+      fixture meant the error KIND text '[unavailable]' itself satisfied
+      the loose substring check regardless of the request-ID segment's
+      own wording."
+    caught: false
+    strengthened: >-
+      Rewrote test_reason_renders_absent_request_id_explicitly_not_fabricated
+      to use InstrumentNotFound (whose kind text is '[not_found]', which
+      cannot collide with the request-ID field's own wording) and to
+      assert the pinned exact marker 'request_id=unavailable' is present,
+      rather than a loose set of alternative substrings anywhere in the
+      reason.
+    retest_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    retest_result: "1 failed
+      (test_reason_renders_absent_request_id_explicitly_not_fabricated:
+      AssertionError -- 'request_id=unavailable' not in
+      '...request_id=UNKNOWN...')"
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-reorder-redact-and-truncate
+    target: compose_failure_reason (non-CredentialRejected branch)
+    change: 'variable_segment = _bound_variable_text(redact(str(error))) -> variable_segment = redact(_bound_variable_text(str(error)))'
+    test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    result: "13 passed -- NOT CAUGHT on first attempt. The original
+      boundary-order test placed the credential fixture using padding
+      that kept the whole fixture inside the pre-cut region, so
+      truncate-then-redact still redacted it intact; the fixture never
+      actually straddled the real cut point (500 - len('…[truncated]') =
+      488 characters kept, not 500)."
+    caught: false
+    strengthened: >-
+      Recomputed the padding from MAX_FAILURE_REASON_VARIABLE_TEXT and the
+      literal truncation marker's length so the credential fixture
+      straddles the exact character index compose_failure_reason cuts at,
+      guaranteeing a truncate-then-redact implementation slices the
+      fixture into an unredacted partial fragment. Added a second
+      assertion that no 10-character prefix of the fixture survives,
+      catching a surviving partial fragment even if the full-fixture
+      check alone would not.
+    retest_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q -k redacted_before
+    retest_result: "1 failed
+      (test_diagnostic_text_is_redacted_before_truncation: AssertionError
+      -- 'SECRET_TES' (the fixture's surviving prefix) found in
+      '...aaaaaaaaaaSECRET_TES…[truncated]')"
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-silent-truncation-no-marker
+    target: _bound_variable_text
+    change: 'return text[:keep] + _TRUNCATION_MARKER -> return text[:MAX_FAILURE_REASON_VARIABLE_TEXT] (marker dropped)'
+    test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    result: "1 failed, 12 passed
+      (test_pathological_diagnostic_text_is_visibly_truncated:
+      AssertionError -- '…[truncated]' not found in the reason)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-truncation-threshold-off-by-one
+    target: _bound_variable_text
+    change: 'if len(text) <= MAX_FAILURE_REASON_VARIABLE_TEXT -> if len(text) < MAX_FAILURE_REASON_VARIABLE_TEXT'
+    test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    result: "1 failed, 12 passed
+      (test_text_at_or_below_bound_is_not_marked_truncated:
+      AssertionError -- '…[truncated]' unexpectedly present for
+      exactly-500-character text)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-6-error-kind-mapping-collision
+    target: _ERROR_KIND_BY_TYPE
+    change: 'InstrumentNotFound: "not_found" -> InstrumentNotFound: "unavailable" (collides with ProviderUnavailable's kind)'
+    test_command: uv run pytest tests/unit/test_massive_failure_reasons.py -q
+    result: "1 failed, 12 passed
+      (test_each_typed_error_yields_a_distinguishable_reason_kind:
+      AssertionError -- 'not_found' not in
+      '[unavailable] symbol=AAPL data_type=daily_bars request_id=r1: x')"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  description: >-
+    After all six mutations were individually applied (two triggering a
+    STRENGTHEN step), observed, and reverted, errors.py was diffed
+    byte-for-byte against the saved pre-mutation copy via `diff` (identical
+    output, "IDENTICAL" printed) to confirm no mutation was left in place,
+    then the full suite and static checks were re-run.
+  commands:
+    - uv run pytest -m 'not postgres' -q
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+    - uv build
+  result: "246 passed, 59 deselected, 1 failed (the same pre-existing,
+    unrelated tests/integration/test_api_static_mount.py failure noted in
+    the GREEN cycle above); ruff check: All checks passed; ruff format
+    --check: 96 files already formatted; mypy: Success, no issues found in
+    28 source files; uv build succeeded"
+
+known_gap_carried_forward:
+  description: >-
+    None. All six manual mutations across the composer's stable-field
+    composition, request-ID absence rendering, redact-before-truncate
+    ordering, truncation marker, threshold boundary, and error-kind
+    mapping are now caught by the suite as strengthened.
+  status: none open

@@ -55,7 +55,7 @@ Implement the Massive failure-reason composer at the typed-error boundary. It pr
 
 **Purpose**: Add the focused unit-test location beside the typed-error module delivered by CAP-001-E3-S3.
 
-- [ ] T001 Create `tests/unit/test_massive_failure_reasons.py`; import the four typed errors and the reason composer from `src/factorflow/ingestion/massive/errors.py` without importing the SDK or making a provider request.
+- [x] T001 Create `tests/unit/test_massive_failure_reasons.py`; import the four typed errors and the reason composer from `src/factorflow/ingestion/massive/errors.py` without importing the SDK or making a provider request.
 
 **Checkpoint**: The new test module collects against the S3 taxonomy boundary only.
 
@@ -67,14 +67,14 @@ Implement the Massive failure-reason composer at the typed-error boundary. It pr
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-207 and TC-COMP-232 in `tests/unit/test_massive_failure_reasons.py`: compose reasons for a typed error with a request ID and with `provider_request_id=None`; assert each reason includes the supplied symbol, data type, and request-ID field, and the absent case is rendered explicitly without inventing an ID.
-- [ ] T003 [P] Implement TC-COMP-013 and TC-COMP-233 in `tests/unit/test_massive_failure_reasons.py`: set a known credential-like fixture in the environment; compose each typed failure, including `CredentialRejected`, with diagnostic text containing that value; supply the client-style redaction callable and assert neither the returned reason nor its credential-rejected kind contains any substring of the fixture.
-- [ ] T004 [P] Implement TC-COMP-234 in `tests/unit/test_massive_failure_reasons.py`: use over-500-character diagnostic text and assert the variable segment ends with `…[truncated]`, while the assembled reason still includes its complete symbol, data type, error kind, and provider request ID.
-- [ ] T005 [P] Implement TC-COMP-235 in `tests/unit/test_massive_failure_reasons.py`: compose a reason for `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation`, then assert their error-kind portions are stable and distinguishable so `not_found` remains separable downstream.
+- [x] T002 [P] Implement TC-COMP-207 and TC-COMP-232 in `tests/unit/test_massive_failure_reasons.py`: compose reasons for a typed error with a request ID and with `provider_request_id=None`; assert each reason includes the supplied symbol, data type, and request-ID field, and the absent case is rendered explicitly without inventing an ID.
+- [x] T003 [P] Implement TC-COMP-013 and TC-COMP-233 in `tests/unit/test_massive_failure_reasons.py`: set a known credential-like fixture in the environment; compose each typed failure, including `CredentialRejected`, with diagnostic text containing that value; supply the client-style redaction callable and assert neither the returned reason nor its credential-rejected kind contains any substring of the fixture.
+- [x] T004 [P] Implement TC-COMP-234 in `tests/unit/test_massive_failure_reasons.py`: use over-500-character diagnostic text and assert the variable segment ends with `…[truncated]`, while the assembled reason still includes its complete symbol, data type, error kind, and provider request ID.
+- [x] T005 [P] Implement TC-COMP-235 in `tests/unit/test_massive_failure_reasons.py`: compose a reason for `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation`, then assert their error-kind portions are stable and distinguishable so `not_found` remains separable downstream.
 
 ### Additional Unit Tests
 
-- [ ] T006 [P] Add composition-boundary tests in `tests/unit/test_massive_failure_reasons.py`: assert diagnostic text is redacted before truncation, text at or below the 500-character bound is not marked truncated, a redact callback never receives the assembled symbol/data-type/request-ID fields, and no raw SDK exception or URL is accepted by the composer.
+- [x] T006 [P] Add composition-boundary tests in `tests/unit/test_massive_failure_reasons.py`: assert diagnostic text is redacted before truncation, text at or below the 500-character bound is not marked truncated, a redact callback never receives the assembled symbol/data-type/request-ID fields, and no raw SDK exception or URL is accepted by the composer.
 
 **Checkpoint**: TC-COMP-013, 207, and 232–235 are traceability-labelled RED tests, covering every typed error, secret boundary, explicit missing ID, and truncation boundary without a live provider.
 
@@ -84,8 +84,8 @@ Implement the Massive failure-reason composer at the typed-error boundary. It pr
 
 **Purpose**: Add one safe reason-composition function to the existing Massive typed-error module.
 
-- [ ] T007 Add `MAX_FAILURE_REASON_VARIABLE_TEXT = 500` in `src/factorflow/ingestion/massive/errors.py`, following the named-constant/docstring style of `src/factorflow/api/bounds.py`; document the owner decision of 2026-09-11 and its derivation: 500 `MAX_PAGE_SIZE` reasons remain under roughly 250 KB, while the bound is about 2.5 times the approximately 200-character legitimate worst case from component-design-massive-client.md §4.
-- [ ] T008 Implement a reason composer in `src/factorflow/ingestion/massive/errors.py` that accepts a `MassiveError`, symbol, data type, and `redact: Callable[[str], str]`. Compose the fixed error kind, symbol, data type, and explicit request-ID state first; pass only the variable diagnostic text through `redact`; then bound that segment to 500 characters and append `…[truncated]` when needed. Map `CredentialRejected` to a fixed rejection description, never a supplied credential value, and reject unsupported error classes rather than silently emitting an untyped reason.
+- [x] T007 Add `MAX_FAILURE_REASON_VARIABLE_TEXT = 500` in `src/factorflow/ingestion/massive/errors.py`, following the named-constant/docstring style of `src/factorflow/api/bounds.py`; document the owner decision of 2026-09-11 and its derivation: 500 `MAX_PAGE_SIZE` reasons remain under roughly 250 KB, while the bound is about 2.5 times the approximately 200-character legitimate worst case from component-design-massive-client.md §4.
+- [x] T008 Implement a reason composer in `src/factorflow/ingestion/massive/errors.py` that accepts a `MassiveError`, symbol, data type, and `redact: Callable[[str], str]`. Compose the fixed error kind, symbol, data type, and explicit request-ID state first; pass only the variable diagnostic text through `redact`; then bound that segment to 500 characters and append `…[truncated]` when needed. Map `CredentialRejected` to a fixed rejection description, never a supplied credential value, and reject unsupported error classes rather than silently emitting an untyped reason.
 
 **Checkpoint**: A reason is constructed entirely from typed-error data; its stable identifying fields cannot be displaced by truncation, and its only variable segment is redacted before it is bounded.
 
@@ -95,7 +95,7 @@ Implement the Massive failure-reason composer at the typed-error boundary. It pr
 
 **Purpose**: Expose the safe composer to the future Massive client and acquisition-runner handoff without giving it settings ownership.
 
-- [ ] T009 Update `src/factorflow/ingestion/massive/__init__.py` to export the reason composer and `MAX_FAILURE_REASON_VARIABLE_TEXT` with the existing taxonomy types. CAP-001-E3-S1's `MassiveClient` supplies the credential-aware redaction closure; CAP-001-E4-S6 consumes only the resulting string for `run_instrument_result.reason`.
+- [x] T009 Update `src/factorflow/ingestion/massive/__init__.py` to export the reason composer and `MAX_FAILURE_REASON_VARIABLE_TEXT` with the existing taxonomy types. CAP-001-E3-S1's `MassiveClient` supplies the credential-aware redaction closure; CAP-001-E4-S6 consumes only the resulting string for `run_instrument_result.reason`.
 
 **Checkpoint**: The composer has a narrow, testable API: Massive-client owns credential-aware redaction and downstream code receives a safe reason string only.
 
@@ -105,7 +105,7 @@ Implement the Massive failure-reason composer at the typed-error boundary. It pr
 
 **Purpose**: Demonstrate that secrecy and diagnostic identity survive the boundary and its size limit.
 
-- [ ] T010 Run `tests/unit/test_massive_failure_reasons.py`; perform and record manual mutations for omission of each stable field, missing-ID rendering, removal or reordering of redaction, the 500-character threshold, truncation marker, and error-kind mapping in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S5-tdd-evidence.yaml`.
+- [x] T010 Run `tests/unit/test_massive_failure_reasons.py`; perform and record manual mutations for omission of each stable field, missing-ID rendering, removal or reordering of redaction, the 500-character threshold, truncation marker, and error-kind mapping in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S5-tdd-evidence.yaml`.
 
 **Checkpoint**: Mandatory tests are green, every mutation is killed or the test is strengthened, and no tested reason contains the credential fixture.
 

@@ -37,6 +37,7 @@ DAC-E3-13).
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import Any
 
 from pydantic import ValidationError
@@ -51,6 +52,8 @@ __all__ = [
     "is_rate_limited_body",
     "is_fatal_for_governor",
     "wrap_validation_error",
+    "MAX_FAILURE_REASON_VARIABLE_TEXT",
+    "compose_failure_reason",
 ]
 
 _NOT_FOUND_STATUS = "NOT_FOUND"
@@ -218,3 +221,107 @@ def wrap_validation_error(
         f"({error.error_count()} field(s)).",
         provider_request_id=provider_request_id,
     )
+
+
+MAX_FAILURE_REASON_VARIABLE_TEXT = 500
+"""Bounds the composed reason's one variable segment (the redacted
+diagnostic text), in characters.
+
+Owner decision, 2026-09-11 (this story's task plan Notes): a full
+`MAX_PAGE_SIZE = 500` (`src/factorflow/api/bounds.py`) run-detail response
+in which every instrument fails therefore stays under roughly 250 KB of
+reason text. The bound is also about 2.5 times the approximately
+200-character legitimate worst case recorded in
+`component-design-massive-client.md` section 4, so it does not truncate a
+realistic provider diagnostic while still capping a pathological one.
+
+This is a genuine missing bound in `component-design-massive-client.md`,
+the store DDL, and `src/factorflow/api/bounds.py` -- not a precedence
+conflict with any of them. It is recorded here for the next
+massive-client design revision rather than backfilled into those
+artifacts by this story.
+"""
+
+_TRUNCATION_MARKER = "…[truncated]"
+
+_ERROR_KIND_BY_TYPE: dict[type[MassiveError], str] = {
+    InstrumentNotFound: "not_found",
+    CredentialRejected: "credential_rejected",
+    ProviderUnavailable: "unavailable",
+    ProviderContractViolation: "contract_violation",
+}
+
+_CREDENTIAL_REJECTED_DESCRIPTION = "the provider rejected the configured credential"
+"""A fixed description for `CredentialRejected` (DAC-E3-S5-2). Never built
+from the error's own message, which may itself embed provider-supplied
+diagnostic text -- only the fixed kind and the typed fields (symbol, data
+type, request ID) are safe to compose unconditionally."""
+
+
+def compose_failure_reason(
+    error: MassiveError,
+    *,
+    symbol: str,
+    data_type: str,
+    redact: Callable[[str], str],
+) -> str:
+    """Compose a safe, owner-visible failure reason from a typed `error`
+    (DAC-E3-13, AC-13, AC-11).
+
+    The stable fields -- the error kind, `symbol`, `data_type`, and the
+    provider request ID (explicit even when absent, DAC-E3-S5-1) -- are
+    composed first and are never subject to truncation or redaction: they
+    never carry provider-supplied free text. Only `error`'s own message is
+    variable diagnostic text; it is passed through `redact` *before* it is
+    bounded to `MAX_FAILURE_REASON_VARIABLE_TEXT` characters, so a
+    credential sitting anywhere in the raw text -- including near the
+    truncation boundary -- is removed before the cut is made, not after.
+
+    `redact` is supplied by the caller (`MassiveClient`, which owns the
+    usable credential) and is invoked only with `error`'s own message --
+    never with `symbol`, `data_type`, or the request ID mixed in.
+
+    `CredentialRejected` never composes its own message into the reason,
+    even redacted: it always uses a fixed rejection description
+    (DAC-E3-S5-2), because stating "credential rejected" must not depend
+    on trusting redaction to catch every way a credential could appear in
+    provider-echoed text.
+
+    Raises `TypeError` if `error` is not one of the four typed
+    `MassiveError` subclasses this module defines -- this composer never
+    emits an untyped reason for an unrecognised error class.
+    """
+    kind = _ERROR_KIND_BY_TYPE.get(type(error))
+    if kind is None:
+        raise TypeError(
+            f"compose_failure_reason does not support {type(error).__name__}; "
+            "only the four typed MassiveError subclasses are accepted."
+        )
+
+    if error.provider_request_id is None:
+        request_id_segment = "request_id=unavailable"
+    else:
+        request_id_segment = f"request_id={error.provider_request_id}"
+
+    if isinstance(error, CredentialRejected):
+        variable_segment = _CREDENTIAL_REJECTED_DESCRIPTION
+    else:
+        variable_segment = _bound_variable_text(redact(str(error)))
+
+    return (
+        f"[{kind}] symbol={symbol} data_type={data_type} {request_id_segment}: {variable_segment}"
+    )
+
+
+def _bound_variable_text(text: str) -> str:
+    """Bound already-redacted `text` to `MAX_FAILURE_REASON_VARIABLE_TEXT`
+    characters, marking the cut with `_TRUNCATION_MARKER` when it is made.
+
+    Called only after redaction (`compose_failure_reason`), so truncating
+    here never re-exposes a credential a naive truncate-then-redact order
+    could have split across the cut boundary.
+    """
+    if len(text) <= MAX_FAILURE_REASON_VARIABLE_TEXT:
+        return text
+    keep = MAX_FAILURE_REASON_VARIABLE_TEXT - len(_TRUNCATION_MARKER)
+    return text[:keep] + _TRUNCATION_MARKER
