@@ -217,9 +217,8 @@ def test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates
 def test_fetch_daily_bars_requests_unadjusted_bars() -> None:
     """Component design section 14, open question 3: `adjusted=False` is
     passed explicitly rather than left to the SDK's server-side default
-    (adjusted=true), pending the owner's resolution of OQ-3. See
-    `MassiveClient.fetch_daily_bars`'s docstring for the flagged rationale
-    and follow-up."""
+    (adjusted=true), per the owner's decision in `DEC-0001`. See
+    `MassiveClient.fetch_daily_bars`'s docstring for the rationale."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
         instance = rest_client_cls.return_value
         instance.get_aggs.return_value = _FakeResponse(_bar_envelope([_load("bar_regular.json")]))

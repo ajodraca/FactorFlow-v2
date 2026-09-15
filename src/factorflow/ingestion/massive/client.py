@@ -78,17 +78,12 @@ class MassiveClient:
         """Daily aggregates over an inclusive range. Follows paging.
 
         Requests **unadjusted** bars (`adjusted=False`). Component design
-        section 14, open question 3, records this as a still-open owner
-        decision at design time -- unadjusted was the design's own stated
-        leaning (it suits an append-only point-in-time store per C5, and
-        this component acquires corporate actions separately so adjustment
-        can be derived at read time), but the task plan for this story does
-        not record an owner resolution. This is implemented as a flagged,
-        provisional choice rather than left to the SDK's own default
-        (server-side adjusted=true), because silently accepting that
-        default would resolve a data-meaning decision the owner has not
-        made. Follow-up: obtain the owner's explicit decision on OQ-3 and
-        confirm or change this value.
+        section 14, open question 3, left this as an owner decision at
+        design time -- unadjusted was the design's own stated leaning (it
+        suits an append-only point-in-time store per C5, and this component
+        acquires corporate actions separately so adjustment can be derived
+        at read time). The owner confirmed unadjusted; see `DEC-0001`
+        (`projects/factorflow-v2/decisions/DEC-0001.md`).
         """
         rows = follow_pages(
             first_page=lambda: self._rest_client.get_aggs(
