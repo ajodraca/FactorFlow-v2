@@ -10,12 +10,26 @@ exact keyword arguments this component passes to it, never a live
 connection.
 """
 
+import json
 from decimal import Decimal
+from pathlib import Path
 from unittest.mock import patch
 
 from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive.client import MassiveClient
 from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
+
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
+
+
+def _load(name: str) -> dict:
+    return json.loads((FIXTURES / name).read_text())
+
+
+class _FakeResponse:
+    def __init__(self, payload: dict, status: int = 200) -> None:
+        self.status = status
+        self.data = json.dumps(payload).encode()
 
 
 def _settings(**overrides: object) -> MassiveSettings:
@@ -43,11 +57,11 @@ def _governor() -> RateLimitGovernor:
     )
 
 
-# --- TC-COMP-013 / DAC-E3-S1-1: SDK defaults requiring override ---------
+# --- TC-COMP-209 / DAC-E3-S1-1: SDK defaults requiring override ---------
 
 
 def test_constructs_one_rest_client_with_retries_disabled() -> None:
-    """TC-COMP-013: `retries=0` is passed explicitly, so the governor owns
+    """TC-COMP-209: `retries=0` is passed explicitly, so the governor owns
     retry alone (section 2.2b) -- a default reasserting itself on an SDK
     upgrade must not silently multiply attempts."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
@@ -68,7 +82,7 @@ def test_constructs_one_rest_client_with_pagination_disabled() -> None:
 
 
 def test_constructs_one_rest_client_with_trace_disabled() -> None:
-    """TC-COMP-213: `trace=False`, so request headers carrying the
+    """TC-COMP-209: `trace=False`, so request headers carrying the
     credential are never logged (AC-13)."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
         MassiveClient(settings=_settings(), governor=_governor())
@@ -98,16 +112,27 @@ def test_constructs_exactly_one_reusable_rest_client() -> None:
     assert rest_client_cls.call_count == 1
 
 
-# --- TC-COMP-214: the market-status endpoint is never called ------------
+# --- TC-COMP-213: the market-status endpoint is never called ------------
 
 
 def test_market_status_endpoint_is_never_called() -> None:
     """DAC-E3-S1-5: `MassiveClient` never calls the forward-looking
     market-holidays endpoint (`GET /v1/marketstatus/upcoming`); trading
-    days are derived from acquired data instead."""
+    days are derived from acquired data instead.
+
+    Constructing the client alone can never fail this assertion, since
+    nothing calls any endpoint at construction time -- it would pass even
+    if every one of the four reads called the forbidden endpoint. A real
+    read is exercised so the assertion actually depends on client
+    behavior (IR-003)."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
         instance = rest_client_cls.return_value
-        MassiveClient(settings=_settings(), governor=_governor())
+        instance.get_ticker_details.return_value = _FakeResponse(
+            {"request_id": "req_ok_001", "results": _load("reference_active.json")}
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        client.fetch_reference("AAPL")
 
     assert not instance.get_market_holidays.called
     assert not instance.get_market_status.called

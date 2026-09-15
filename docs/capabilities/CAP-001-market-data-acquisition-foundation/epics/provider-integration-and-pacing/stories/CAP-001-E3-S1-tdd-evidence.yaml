@@ -4,7 +4,7 @@ artifact_type: tdd-evidence
 story: CAP-001-E3-S1
 tasks_file: CAP-001-E3-S1-tasks.md
 created: 2026-09-13
-updated: 2026-09-13
+updated: 2026-09-15
 
 # RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for
 # MassiveClient (client.py) and its pager (paging.py). Recorded as one
@@ -169,6 +169,33 @@ manual_mutations:
     caught: true
     reverted_and_reconfirmed_green: true
 
+  # T012 named five mutation areas; the original session recorded seven
+  # mutations but none against "forbidden endpoints" or "credential
+  # redaction" -- IR-004 in implementation-review-v1. Added during v2
+  # rework, after IR-003's fix to test_market_status_endpoint_is_never_called
+  # (which previously asserted nothing without ever exercising a read, so
+  # it could never have caught mutation-9 below).
+  - id: mutation-8-credential-redaction-trace-flag
+    target: client.MassiveClient.__init__
+    change: 'trace=False -> trace=True'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_sdk_config.py tests/unit/test_massive_auth.py -q
+    result: "1 failed, 10 passed
+      (test_constructs_one_rest_client_with_trace_disabled: AssertionError
+      -- assert True is False)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-9-forbidden-endpoint-call
+    target: client.MassiveClient.fetch_reference
+    change: 'a spurious self._rest_client.get_market_status() call added
+      at the top of the method'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_sdk_config.py -q
+    result: "1 failed, 6 passed
+      (test_market_status_endpoint_is_never_called: AssertionError --
+      assert not True, where True = ...get_market_status.called)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
 post_mutation_verification:
   description: >-
     After each of the seven mutations was individually applied, observed
@@ -188,24 +215,72 @@ post_mutation_verification:
     checks passed; ruff format --check: 100 files already formatted; mypy
     src: Success, no issues found in 30 source files"
 
+# Review-rework cycle: implementation-review-v1 returned CHANGES-REQUIRED
+# (CRITICAL 1, HIGH 3, MEDIUM 4, LOW 4). All twelve findings addressed:
+#
+# - IR-001 (CRITICAL): first-page SDK calls in fetch_reference,
+#   fetch_daily_bars, fetch_financials and three of fetch_corporate_actions's
+#   four reads bypassed the rate-limit governor entirely -- only
+#   paging.follow_pages's next_page callback and the ticker-events read went
+#   through _through_governor. Every first_page lambda now wraps its SDK call
+#   through _through_governor, so every provider request (first page and
+#   every subsequent page) acquires a governor permit and a first-page
+#   BadResponse now surfaces as a typed error instead of escaping raw.
+# - IR-002 (HIGH): added tests/unit/test_massive_client_governor_integration.py,
+#   which patches RateLimitGovernor.execute directly and counts calls per
+#   fetch method, plus a parametrized first-page-failure test across all
+#   four methods -- the gap that let IR-001 pass a green 78-test suite.
+# - IR-003 (HIGH): test_market_status_endpoint_is_never_called asserted
+#   nothing was called without ever invoking a read; it now exercises
+#   fetch_reference first, so the assertion depends on client behavior.
+# - IR-004 (HIGH): mutation-8 and mutation-9 below, covering the two T012
+#   areas the original session never mutated (credential redaction,
+#   forbidden endpoints).
+# - IR-005: fetch_reference indexed envelope["results"] directly, raising a
+#   bare KeyError on a malformed/empty 200; changed to envelope.get("results")
+#   so a missing key reaches _validate and surfaces as ProviderContractViolation
+#   like any other model-validation failure. Covered by
+#   test_fetch_reference_raises_provider_contract_violation_when_results_is_missing.
+# - IR-006: fetch_corporate_actions's ticker-events read (no server-side
+#   date-range parameter on this endpoint) ignored the requested [start, end]
+#   entirely; now filtered client-side against each event's date. Covered by
+#   test_fetch_corporate_actions_excludes_ticker_events_outside_the_requested_range;
+#   the two existing tests using action_ticker_change.json (dated
+#   2007-01-09) widened their query range so the fixture still survives
+#   the new filter.
+# - IR-007: four TC-COMP IDs corrected against
+#   tests/component/all-component-tests.md: the SDK-defaults-override
+#   section (retries/pagination/trace) now cites TC-COMP-209 throughout
+#   (was 013 on retries, 209 only on pagination, 213 on trace); the
+#   market-status-never-called test now cites TC-COMP-213 (was 214, which
+#   is credential handling); and test_massive_reference.py's single-ticker
+#   test and delisted-instrument test had TC-COMP-212 and TC-COMP-205
+#   swapped between them.
+# - IR-008: fetch_daily_bars's docstring cited
+#   `projects/factorflow-v2/decisions/DEC-0001.md` as if it were a path in
+#   this repo; reworded to state DEC-0001 is an SDD decision record in the
+#   separate ai-agents harness repo, not a local file.
+#
+# Full validation re-run after rework: uv run pytest -m 'not postgres' -q
+# (287 passed, 59 deselected), uv run pytest -m postgres -q (59 passed),
+# ruff check/format --check (clean), mypy src (clean, 30 source files).
+rework_test_command: uv run pytest -q -m 'not postgres'
+rework_test_result: "287 passed, 59 deselected"
+
 # Follow-up items surfaced during implementation, not resolved by this
 # story per constraint 9 (project-repo edits are metadata-only; this
 # story does not edit capability specs, design content, or acceptance
 # criteria).
 open_items:
-  - id: OQ-3-adjusted-parameter-still-unresolved
+  - id: OQ-3-adjusted-parameter-resolved
     description: >-
       component-design-massive-client.md section 14, open question 3
-      ("Should daily aggregates be requested adjusted or unadjusted?") is
-      recorded as still open, owned by the capability owner, and blocking
-      "the meaning of stored price history, and therefore AC-5 and AC-6".
-      Neither this story's task plan nor any other CAP-001-E3 story
-      records an owner resolution. fetch_daily_bars was implemented with
-      adjusted=False (the design document's own stated leaning, given C5
-      and this component's separate acquisition of corporate actions),
-      flagged explicitly in the method's docstring and pinned by
-      test_fetch_daily_bars_requests_unadjusted_bars, rather than left to
-      the SDK's server-side default (adjusted=true) or left
-      undocumented. Follow-up: the capability owner should confirm or
-      override this choice; changing it is a one-line change plus a test
-      update in fetch_daily_bars.
+      ("Should daily aggregates be requested adjusted or unadjusted?") was
+      recorded as owned by the capability owner and blocking "the meaning
+      of stored price history, and therefore AC-5 and AC-6". Resolved:
+      the owner confirmed unadjusted (DEC-0001, decided_by owner,
+      owner_reviewed true, verdict upheld), matching the implementation's
+      existing adjusted=False and the design document's own stated
+      leaning. fetch_daily_bars's docstring and
+      test_fetch_daily_bars_requests_unadjusted_bars updated to cite
+      DEC-0001 instead of describing the choice as flagged/provisional.

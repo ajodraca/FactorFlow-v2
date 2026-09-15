@@ -70,7 +70,7 @@ class MassiveClient:
         list form is not this capability's to call (component design
         section 2.5)."""
         envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
-        return self._validate(models.TickerReference, envelope["results"])
+        return self._validate(models.TickerReference, envelope.get("results"))
 
     # -- fetch_daily_bars (DAC-E3-S1-2, DAC-E3-S1-3) ----------------------
 
@@ -82,18 +82,21 @@ class MassiveClient:
         design time -- unadjusted was the design's own stated leaning (it
         suits an append-only point-in-time store per C5, and this component
         acquires corporate actions separately so adjustment can be derived
-        at read time). The owner confirmed unadjusted; see `DEC-0001`
-        (`projects/factorflow-v2/decisions/DEC-0001.md`).
+        at read time). The owner confirmed unadjusted: SDD decision record
+        `DEC-0001` in the project's ai-agents SDD harness (a separate repo;
+        no `DEC-0001` file exists in this repository).
         """
         rows = follow_pages(
-            first_page=lambda: self._rest_client.get_aggs(
-                symbol,
-                multiplier=1,
-                timespan="day",
-                from_=start.isoformat(),
-                to=end.isoformat(),
-                adjusted=False,
-                raw=True,
+            first_page=lambda: self._through_governor(
+                lambda: self._rest_client.get_aggs(
+                    symbol,
+                    multiplier=1,
+                    timespan="day",
+                    from_=start.isoformat(),
+                    to=end.isoformat(),
+                    adjusted=False,
+                    raw=True,
+                )
             ),
             next_page=self._next_page,
             decode=self._decode,
@@ -150,11 +153,13 @@ class MassiveClient:
                 action_type="split",
                 effective_date_field="execution_date",
                 rows=follow_pages(
-                    first_page=lambda: self._rest_client.list_stocks_splits(
-                        ticker=symbol,
-                        execution_date_gte=start.isoformat(),
-                        execution_date_lte=end.isoformat(),
-                        raw=True,
+                    first_page=lambda: self._through_governor(
+                        lambda: self._rest_client.list_stocks_splits(
+                            ticker=symbol,
+                            execution_date_gte=start.isoformat(),
+                            execution_date_lte=end.isoformat(),
+                            raw=True,
+                        )
                     ),
                     next_page=self._next_page,
                     decode=self._decode,
@@ -166,11 +171,13 @@ class MassiveClient:
                 action_type="dividend",
                 effective_date_field="ex_dividend_date",
                 rows=follow_pages(
-                    first_page=lambda: self._rest_client.list_stocks_dividends(
-                        ticker=symbol,
-                        ex_dividend_date_gte=start.isoformat(),
-                        ex_dividend_date_lte=end.isoformat(),
-                        raw=True,
+                    first_page=lambda: self._through_governor(
+                        lambda: self._rest_client.list_stocks_dividends(
+                            ticker=symbol,
+                            ex_dividend_date_gte=start.isoformat(),
+                            ex_dividend_date_lte=end.isoformat(),
+                            raw=True,
+                        )
                     ),
                     next_page=self._next_page,
                     decode=self._decode,
@@ -182,11 +189,13 @@ class MassiveClient:
                 action_type="ipo",
                 effective_date_field="listing_date",
                 rows=follow_pages(
-                    first_page=lambda: self._rest_client.vx.list_ipos(
-                        ticker=symbol,
-                        listing_date_gte=start.isoformat(),
-                        listing_date_lte=end.isoformat(),
-                        raw=True,
+                    first_page=lambda: self._through_governor(
+                        lambda: self._rest_client.vx.list_ipos(
+                            ticker=symbol,
+                            listing_date_gte=start.isoformat(),
+                            listing_date_lte=end.isoformat(),
+                            raw=True,
+                        )
                     ),
                     next_page=self._next_page,
                     decode=self._decode,
@@ -196,11 +205,15 @@ class MassiveClient:
 
         # Ticker events: no pagination is documented (component design
         # section 2.5), and its response nests rows under
-        # `results.events[]` rather than `results` directly.
+        # `results.events[]` rather than `results` directly. The endpoint
+        # takes no date-range parameter (only `ticker` and `types`), so the
+        # range is applied client-side against each event's own `date`.
         events_envelope = self._get_one(
             lambda: self._rest_client.get_ticker_events(symbol, types="ticker_change", raw=True)
         )
-        event_rows = (events_envelope.get("results") or {}).get("events") or []
+        all_event_rows = (events_envelope.get("results") or {}).get("events") or []
+        start_iso, end_iso = start.isoformat(), end.isoformat()
+        event_rows = [row for row in all_event_rows if start_iso <= row.get("date", "") <= end_iso]
         actions.extend(
             self._corporate_actions(
                 action_type="ticker_change",
@@ -235,11 +248,13 @@ class MassiveClient:
         start: date,
         end: date,
     ) -> Callable[[], HTTPResponse]:
-        return lambda: sdk_method(
-            tickers=symbol,
-            period_end_gte=start.isoformat(),
-            period_end_lte=end.isoformat(),
-            raw=True,
+        return lambda: self._through_governor(
+            lambda: sdk_method(
+                tickers=symbol,
+                period_end_gte=start.isoformat(),
+                period_end_lte=end.isoformat(),
+                raw=True,
+            )
         )
 
     def _next_page(self, path: str, params: dict[str, str]) -> HTTPResponse:
@@ -275,7 +290,7 @@ class MassiveClient:
         decoded: dict[str, Any] = json.loads(response.data.decode("utf-8"))
         return decoded
 
-    def _validate(self, model: type[T], raw: dict[str, Any]) -> T:
+    def _validate(self, model: type[T], raw: Any) -> T:
         try:
             return model.model_validate(raw)  # type: ignore[attr-defined, no-any-return]
         except ValidationError as exc:

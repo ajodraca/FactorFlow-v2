@@ -200,7 +200,11 @@ def test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol(
         )
         client = MassiveClient(settings=_settings(), governor=_governor())
 
-        actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
+        # `action_ticker_change.json` dates to 2007-01-09; the ticker-events
+        # endpoint takes no date-range parameter (component design section
+        # 2.5), so the client filters client-side -- the queried range must
+        # bracket the fixture's date for it to survive that filter.
+        actions = client.fetch_corporate_actions("AAPL", date(2000, 1, 1), date(2024, 12, 31))
 
     action_types = {action.action_type for action in actions}
     assert action_types == {"split", "dividend", "ticker_change", "ipo"}
@@ -239,8 +243,29 @@ def test_fetch_corporate_actions_ticker_events_endpoint_has_no_paging_assumed() 
         )
         client = MassiveClient(settings=_settings(), governor=_governor())
 
-        actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
+        actions = client.fetch_corporate_actions("AAPL", date(2000, 1, 1), date(2024, 12, 31))
 
     assert len(actions) == 1
     assert actions[0].action_type == "ticker_change"
     assert actions[0].effective_on == date(2007, 1, 9)
+
+
+def test_fetch_corporate_actions_excludes_ticker_events_outside_the_requested_range() -> None:
+    """The ticker-events endpoint takes no date-range parameter (component
+    design section 2.5: only `ticker` and `types`), so an event outside
+    the requested `[start, end]` must be filtered client-side rather than
+    returned -- `action_ticker_change.json` dates to 2007-01-09, outside
+    this query's 2020-2024 range."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_stocks_splits.return_value = _FakeResponse(_envelope([]))
+        instance.list_stocks_dividends.return_value = _FakeResponse(_envelope([]))
+        instance.vx.list_ipos.return_value = _FakeResponse(_envelope([]))
+        instance.get_ticker_events.return_value = _FakeResponse(
+            _envelope({"events": [_load("action_ticker_change.json")]})
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
+
+    assert actions == []

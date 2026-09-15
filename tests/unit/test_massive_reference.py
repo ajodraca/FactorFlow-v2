@@ -15,7 +15,7 @@ from pydantic import ValidationError
 
 from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive.client import MassiveClient
-from factorflow.ingestion.massive.errors import InstrumentNotFound
+from factorflow.ingestion.massive.errors import InstrumentNotFound, ProviderContractViolation
 from factorflow.ingestion.massive.models import TickerReference
 from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
@@ -158,8 +158,24 @@ def test_fetch_reference_returns_product_shaped_reference() -> None:
     assert reference.share_class_figi == "BBG001S5N8V8"
 
 
+def test_fetch_reference_raises_provider_contract_violation_when_results_is_missing() -> None:
+    """A `200` envelope missing `results` entirely -- as distinct from the
+    typed-error envelopes `errors.py` classifies -- fails model validation
+    and must surface as `ProviderContractViolation` (component design
+    section 2.4), not an unhandled `KeyError`."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_ticker_details.return_value = _FakeResponse(
+            {"request_id": "req_ok_001"}  # no "results" key
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        with pytest.raises(ProviderContractViolation):
+            client.fetch_reference("AAPL")
+
+
 def test_fetch_reference_uses_the_single_ticker_endpoint_only() -> None:
-    """TC-COMP-205 / DAC-E3-S1-4: reference reads use the single-ticker
+    """TC-COMP-212 / DAC-E3-S1-4: reference reads use the single-ticker
     endpoint (`get_ticker_details`); the list-form endpoint
     (`list_tickers`) is never called."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
@@ -179,7 +195,7 @@ def test_fetch_reference_uses_the_single_ticker_endpoint_only() -> None:
 
 
 def test_fetch_reference_delisted_instrument_carries_active_and_delisted_fields() -> None:
-    """TC-COMP-212 / DAC-E3-11: a delisted instrument remains acquirable
+    """TC-COMP-205 / DAC-E3-11: a delisted instrument remains acquirable
     and its `is_active` and `delisted_utc` survive through the client."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
         instance = rest_client_cls.return_value
