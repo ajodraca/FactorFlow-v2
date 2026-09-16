@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-15
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
-  model: gpt-5.6
+  model: gpt-5
   tool: Codex
   tool_version: "unknown"
-  timestamp: 2026-09-11T22:10:00Z
+  timestamp: 2026-09-16T04:00:28Z
   source_artifacts:
     - id: CAP-001-E4-S2
       version: "1"

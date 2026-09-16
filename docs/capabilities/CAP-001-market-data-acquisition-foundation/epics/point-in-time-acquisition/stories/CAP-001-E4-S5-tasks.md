@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-16
 ai_provenance:
   agent_id: implementation-planning-agent
-  agent_version: "1.0"
-  model: gpt-5.6
+  agent_version: "1.1"
+  model: gpt-5
   tool: Codex
   tool_version: "unknown"
-  timestamp: 2026-09-11T22:06:55Z
+  timestamp: 2026-09-16T16:01:15Z
   source_artifacts:
     - id: CAP-001-E4-S5
       version: "1"
@@ -26,6 +26,8 @@ ai_provenance:
       version: "approved"
     - id: CAP-001-component-design-runtime-config
       version: "approved"
+    - id: CAP-001-component-design-rate-limit-governor
+      version: "approved"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -35,7 +37,7 @@ ai_provenance:
 **Story**: `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/point-in-time-acquisition/stories/CAP-001-E4-S5.md`
 **Component**: `FactorFlow-v2`
 **Branch**: `usr/alvaro-de-jodra/CAP-001-E4-tasks`
-**Date**: 2026-09-11
+**Date**: 2026-09-16
 
 ## Summary
 
@@ -83,7 +85,7 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Create `tests/integration/test_runner_acquires.py` and `tests/integration/test_runner_depth.py` for TC-COMP-003, TC-COMP-004, TC-COMP-146, TC-COMP-147, and TC-COMP-148; stub the provider boundary, seed a claimed run and active roster, assert the roster is read once, all four data types are sent through the writer for each reached instrument, a missing claimed depth makes no provider or writer call and finalises failed, and committed instruments remain independently durable. Add a `# Implements TC-COMP-...` trace comment for every mapped case.
+- [ ] T002 [P] Create `tests/integration/test_runner_acquires.py`, `tests/integration/test_runner_depth.py`, and `tests/integration/test_runner_transactions.py` for TC-COMP-003, TC-COMP-004, TC-COMP-146, TC-COMP-147, and TC-COMP-148; stub the provider boundary, seed a claimed run and active roster, assert the roster is read once, all four data types are sent through the writer for each reached instrument, a missing claimed depth makes no provider or writer call and finalises failed, and a simulated interruption after one committed instrument leaves it durable while a later run fetches only the remaining coverage. Add a `# Implements TC-COMP-...` trace comment for every mapped case.
 - [ ] T003 [P] Create `tests/integration/test_runner_isolation.py`, `tests/integration/test_runner_cancel.py`, and `tests/integration/test_runner_reclaim.py` for TC-COMP-009, TC-COMP-011, TC-COMP-019, TC-COMP-175, TC-COMP-176, TC-COMP-177, TC-COMP-178, TC-COMP-179, TC-COMP-239, TC-COMP-245, and TC-COMP-248; assert heartbeat/cancellation occur together before each instrument, cancellation leaves the next instrument untouched and finalises cancelled, a false heartbeat prevents later writes, typed `InstrumentNotFound` and exhausted provider failures record results then continue, and finalisation is delegated without a caller-selected outcome. Add matching trace comments.
 - [ ] T004 [P] Create `tests/integration/test_runner_credential.py` and `tests/unit/test_ingestion_main.py` for TC-COMP-023, TC-COMP-180, TC-COMP-181, and TC-COMP-301; use a controlled wait function to assert an empty claim sleeps for `settings.run.poll_interval_seconds` then polls again, and assert a changed credential replaces the client before the first fetch while an unchanged one preserves the existing client. Add matching trace comments.
 - [ ] T005 [P] Create `tests/integration/test_runner_volume.py` for TC-COMP-182; execute 3,000 stubbed roster entries, assert one-at-a-time processing with no retained earlier payload collection, and assert each completed instrument becomes observable through its writer/journal result before the next begins. Add a `# Implements TC-COMP-182` trace comment.
@@ -168,14 +170,15 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 ### Resolved Conflicts
 
-- `CAP-001-E4-S5.md` says heartbeat and cancellation are checked "at the same point," while the run-journal interface presents `heartbeat` and `cancellation_requested` as separate calls. `component-design-acquisition-runner.md` §2.5 governs their placement: issue both journal operations at the top of each iteration before planning or writing; the journal design's interface signatures remain binding for the individual calls.
+- `component-design-acquisition-runner.md` §2.5 describes a single journal round trip, while its API table and `component-design-run-journal.md` §2.4 define separate `heartbeat` and `cancellation_requested` operations. The story's DAC-E4-S5-1 requires only the same iteration point. The explicit interfaces govern: issue both operations at the top of each iteration before planning or writing; do not invent a combined journal API.
 - The story describes the runner recording provider errors, while `CAP-001-E4-S3-tasks.md` assigns `run_instrument_result` insertion to `writer.py`. The existing S3 task plan and the writer design's one-transaction contract govern: the runner maps typed provider failures into writer-facing result input rather than inserting journal rows directly.
 
 ### Open Gaps
 
 - **PROVISIONAL — awaiting owner confirmation (2026-09-11):** No approved artifact specifies the concrete dependency-injection shape for the runner's wait operation, clock, journal/roster access, or provider-client factory. This plan adopts explicit constructor dependencies, including an injected wait callable, so unit tests can observe polling without real time and the production entrypoint supplies the configured dependencies. It is the minimal shape consistent with the specified in-process interfaces and belongs in the next revision of `component-design-acquisition-runner.md` §2.2.
+- **PROVISIONAL — provider daily-bars adjustment (2026-09-16):** The Massive-client Open Questions leave adjusted versus unadjusted daily bars unresolved. S5 has no parameter or acceptance criterion that selects that provider option, so the runner will invoke the established daily-bars client operation without adding a selector, default, or transformation. This preserves the client boundary and makes no unsupported provider choice; the owning `component-design-massive-client.md` must absorb the owner decision before its behavior is implemented.
 
 ### Other Notes
 
 - CAP-001-E4-S3 supplies `write_instrument` and its one-instrument transaction, CAP-001-E4-S4 supplies `plan_fetches`, CAP-001-E3-S1 and CAP-001-E3-S4 supply typed provider reads and pacing, and CAP-001-E5-S2 supplies the claim/journal contract. This story integrates those interfaces and must not duplicate their database or provider logic.
-- The resolution register is correct for S5: `history_depth_years` is bounded to 1–50, the claim returns the run ID and depth, the poll interval is 5 seconds, and the runtime-config Open Questions resolve credential reload and heartbeat values. No correction is required.
+- The resolution register is correct for S5: `history_depth_years` is bounded to 1–50, the claim returns the run ID and depth, the poll interval is 5 seconds, and the runtime-config Open Questions resolve credential reload and heartbeat values. Its adjusted/unadjusted-bars note is now recorded as an explicit S5 provisional boundary; no correction is required.
