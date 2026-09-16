@@ -2,12 +2,12 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-rate-limit-governor
 artifact_type: component-design
-artifact_version: 6
+artifact_version: 7
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-11
+updated: 2026-09-16
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
@@ -354,8 +354,18 @@ All tests here run without a container and without a network, so they carry no
 
 ## 8. Acceptance Criteria
 
-1. Requests issue at no more than the configured budget over any one-minute
-   window.
+1. Requests issue under a token-bucket admission control sized to the
+   configured budget: the bucket starts full (capacity equal to
+   `requests_per_minute`) and refills continuously at
+   `requests_per_minute / 60` tokens per second. A window that begins with
+   a full bucket may therefore issue up to twice the configured budget --
+   capacity plus one window's refill, the standard token-bucket bound --
+   and every subsequent window, once the bucket has been drawn down, is
+   capped at the configured budget alone. (Amended 2026-09-16, DEC-0002:
+   the original wording ("no more than the configured budget over any
+   one-minute window") was unsatisfiable by a bucket required to start
+   full, discovered across three implementation reviews of CAP-001-E3-S4;
+   see `docs/decision-records.md`.)
 2. A `429` response is retried without incrementing the attempt counter.
 3. A `429` carrying `Retry-After` waits the provider's stated delay, and a `429`
    without one waits to the next minute boundary rather than the backoff delay.
