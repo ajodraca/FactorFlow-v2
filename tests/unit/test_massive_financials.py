@@ -100,6 +100,49 @@ def test_missing_required_field_fails_validation(missing_field: str) -> None:
         FinancialStatement.model_validate(wire)
 
 
+def test_only_the_four_known_statement_types_are_accepted() -> None:
+    """CAP-001-E3-S2-implementation-review-v2 IR-002:
+    `fundamental_statement_known` in the DDL constrains `statement_type`
+    to `balance_sheet`, `income_statement`, `cash_flow_statement` and
+    `ratios`; an unrecognised value fails validation here rather than as
+    a database `CHECK` violation inside the writer's per-instrument
+    transaction."""
+    wire = _load("financial_annual.json")
+
+    with pytest.raises(ValidationError):
+        FinancialStatement.model_validate({**wire, "statement_type": "not_a_statement_type"})
+
+
+def test_only_annual_or_quarterly_timeframe_is_accepted() -> None:
+    """CAP-001-E3-S2-implementation-review-v2 IR-002:
+    `component-design-massive-client.md` section 2.5 names `annual` and
+    `quarterly` as `timeframe`'s only two values."""
+    wire = _load("financial_annual.json")
+
+    with pytest.raises(ValidationError):
+        FinancialStatement.model_validate({**wire, "timeframe": "weekly"})
+
+
+def test_nested_extra_numeric_values_are_coerced_to_decimal() -> None:
+    """CAP-001-E3-S2-implementation-review-v2 IR-003: the extra-field
+    Decimal coercion recurses into nested dicts and lists, not only the
+    top level -- a nested provider numeric must not reach the JSONB
+    payload or the append-only value hash as a `float`."""
+    wire = _load("financial_annual.json")
+    statement = FinancialStatement.model_validate(
+        {**wire, "breakdown": {"assets": {"current": 0.1, "values": [1.5, 2.5]}}}
+    )
+
+    breakdown = statement.model_extra["breakdown"]
+    assert isinstance(breakdown["assets"]["current"], Decimal)
+    assert breakdown["assets"]["current"] == Decimal("0.1")
+    assert all(isinstance(v, Decimal) for v in breakdown["assets"]["values"])
+
+    payload = statement.value_payload()
+    json.dumps(payload)  # must not raise
+    assert payload["breakdown"]["assets"]["current"] == "0.1"
+
+
 def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> None:
     """Payload-contract test: `Decimal` values -- including the arbitrary
     statement line items retained for JSONB storage -- serialize as

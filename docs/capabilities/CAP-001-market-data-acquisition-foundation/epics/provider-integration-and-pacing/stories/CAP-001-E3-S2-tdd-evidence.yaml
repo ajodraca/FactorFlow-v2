@@ -4,7 +4,7 @@ artifact_type: tdd-evidence
 story: CAP-001-E3-S2
 tasks_file: CAP-001-E3-S2-tasks.md
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-16
 
 # RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for the four
 # provider response models (T007/T008), one cycle per model, plus the T010
@@ -173,3 +173,130 @@ post_mutation_verification:
   result: "175 passed; ruff check clean; ruff format clean (after one
     reformat of models.py's CorporateAction.action_type line); mypy:
     Success, no issues found in 26 source files; uv build succeeded"
+
+# Review-rework cycle: implementation-review-v2 (a re-review, not a
+# rework of S2's own prior code -- the trigger was sibling stories'
+# additive changes to the shared src/factorflow/ingestion/massive/__init__.py)
+# returned CHANGES-REQUIRED (HIGH 1, MEDIUM 3, LOW 4). All addressed:
+#
+# - IR-001 (HIGH): test_unix_millis_convert_to_session_date_via_timezone_aware_utc's
+#   original assertions passed under a naive (non-UTC-aware) conversion
+#   because they never forced the process into a non-UTC zone -- on the
+#   UTC host CI now runs on (.github/workflows/validate.yml, added after
+#   v1), naive and UTC-aware conversion coincide. The test now pins the
+#   process's ambient TZ to America/Los_Angeles (deliberately non-UTC)
+#   for its duration via os.environ + time.tzset(), so a regression to a
+#   naive conversion fails regardless of the host's own timezone.
+#   Verified: reverting _millis_to_utc_session_date to a naive conversion
+#   fails this test even when the test process itself runs under TZ=UTC.
+# - IR-002 (MEDIUM): FinancialStatement.statement_type and .timeframe
+#   were unconstrained str fields; constrained to Literal, matching
+#   component-design-market-data-store.md's fundamental_statement_known
+#   CHECK constraint and component-design-massive-client.md section
+#   2.5's two timeframe values, the same treatment CorporateAction.action_type
+#   already receives. New tests:
+#   test_only_the_four_known_statement_types_are_accepted,
+#   test_only_annual_or_quarterly_timeframe_is_accepted.
+# - IR-003 (MEDIUM): _coerce_extra_numeric_fields_to_decimal coerced only
+#   top-level extra fields; now recurses into nested dicts and lists, so
+#   a provider numeric nested inside a compound extra field (e.g.
+#   action_ticker_change.json's ticker_change object) is Decimal, not
+#   float, in both model_extra and value_payload(). New test:
+#   test_nested_extra_numeric_values_are_coerced_to_decimal.
+# - IR-004 (MEDIUM): DailyBar._millis_to_utc_session_date returned
+#   non-numeric input unchanged (falling through to Pydantic's ordinary
+#   date coercion) and applied no magnitude check, so a seconds-scale or
+#   ISO-string t parsed without error. Now rejects any non-numeric input
+#   and any value outside a plausible Unix-milliseconds magnitude bound
+#   (_MIN_PLAUSIBLE_MILLIS/_MAX_PLAUSIBLE_MILLIS, module-level constants
+#   -- an unannotated class-level int on a Pydantic BaseModel is treated
+#   as a private attribute, not a plain constant, which the first attempt
+#   discovered via TypeError). New tests:
+#   test_non_numeric_t_is_rejected_rather_than_coerced,
+#   test_t_expressed_in_seconds_instead_of_milliseconds_is_rejected.
+# - IR-005 (LOW): CorporateAction's docstring now records that a
+#   ticker-change event's own wire keys (date, type) are deliberately
+#   retained in value_payload() alongside the product-named
+#   effective_on/action_type -- redundant hashed bytes, not a DAC-E3-12
+#   boundary violation, since this model's own attributes stay
+#   product-named throughout.
+# - IR-006 (LOW): fiscal_period ownership left as a follow-up item below
+#   rather than resolved unilaterally -- constraint 9 (project-repo edits
+#   are metadata-only) and the review's own remediation menu treat this
+#   as a decision, not an omission to code around.
+# - IR-007 (LOW): DailyBar.value_payload()'s docstring no longer claims a
+#   daily_bar.payload column exists; corrected to say the payload exists
+#   for the append-only value hash, with vwap/transaction_count/is_otc
+#   named as hash-only fields.
+# - IR-008 (LOW): TickerReference and DailyBar docstrings now record why
+#   they leave extra="ignore" (Pydantic's default) rather than matching
+#   FinancialStatement/CorporateAction's extra="allow" -- both endpoints
+#   are fully enumerated by component-design-massive-client.md section
+#   2.5, so there is no endpoint-specific content to retain.
+#
+# Additional mutations, run the same way as the five above (applied,
+# observed caught, reverted, models.py diffed byte-for-byte clean against
+# the pre-mutation copy after each):
+manual_mutations_rework:
+  - id: mutation-6-nested-decimal-coercion-disabled
+    target: _coerce_extra_numeric_fields_to_decimal._coerce_value
+    change: 'the dict branch returns value unchanged instead of recursing'
+    test_command: uv run pytest tests/unit/test_massive_financials.py -q
+    result: "1 failed, 15 passed
+      (test_nested_extra_numeric_values_are_coerced_to_decimal:
+      assert False -- isinstance(0.1, Decimal))"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-7-millis-lower-bound-widened
+    target: _MIN_PLAUSIBLE_MILLIS
+    change: '1_000_000_000_000 -> 1'
+    test_command: uv run pytest tests/unit/test_massive_bars.py::test_t_expressed_in_seconds_instead_of_milliseconds_is_rejected -q
+    result: "1 failed (DID NOT RAISE ValidationError)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-8-timeframe-unconstrained
+    target: FinancialStatement.timeframe
+    change: 'Literal["annual", "quarterly"] -> str'
+    test_command: uv run pytest tests/unit/test_massive_financials.py::test_only_annual_or_quarterly_timeframe_is_accepted -q
+    result: "1 failed (DID NOT RAISE ValidationError)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+rework_test_command: uv run pytest -q -m 'not postgres'
+rework_test_result: "252 passed, 59 deselected (up from 247)"
+rework_test_command_postgres: uv run pytest -q -m postgres
+rework_test_result_postgres: "59 passed"
+
+# Follow-up items surfaced during rework, not resolved by this story per
+# constraint 9 (project-repo edits are metadata-only; this story does
+# not edit capability specs, design content, or acceptance criteria).
+open_items:
+  - id: IR-006-fiscal-period-ownership-undecided
+    description: >-
+      review-v2 IR-006: fundamental_observation.fiscal_period is
+      NOT NULL in component-design-market-data-store.md section 2.3, but
+      no field on FinancialStatement supplies it, and no component
+      merged to date (including CAP-001-E4's task plans, now on main)
+      produces a value for it. Follow-up: either derive fiscal_period on
+      FinancialStatement from timeframe/fiscal_quarter with a covering
+      test, or record in a CAP-001-E4 task plan that it owns deriving
+      this value, so the gap becomes a recorded decision rather than an
+      omission discovered at write time.
+  - id: statement-type-ratio-plural-mismatch
+    description: >-
+      Discovered while implementing IR-002's Literal constraint on
+      FinancialStatement.statement_type, constrained here to the DDL's
+      four values (balance_sheet, income_statement, cash_flow_statement,
+      ratios -- component-design-market-data-store.md section 2.3's
+      fundamental_statement_known CHECK constraint). CAP-001-E3-S1's
+      client.py (on its own unmerged branch,
+      usr/alvaro-de-jodra/CAP-001-E3-S1, as of this story's rework) pairs
+      list_financials_ratios with the label "ratio" (singular), not
+      "ratios". Once S1 merges, this constraint will correctly reject
+      every ratios statement S1's client produces as a
+      ProviderContractViolation -- which is the intended protection this
+      finding asked for, but the actual defect is in S1's client.py, not
+      in this story's models.py. Follow-up: S1 needs "ratio" corrected to
+      "ratios" before or as part of its own next rework pass.
