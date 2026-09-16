@@ -230,26 +230,15 @@ package boundary.
   `observed_on`, `run_id`, or `recorded_at`; those remain writer- and
   run-lifecycle-owned.
 
-**Known limitations, carried forward as accepted warnings from
-implementation review v1** (`CAP-001-E3-S2-implementation-review-v1.md`,
-IR-002 through IR-004) — none blocks a current acceptance criterion, and
-none is fixed by this change:
-
-- `FinancialStatement.statement_type` and `timeframe` accept any string;
-  unlike `CorporateAction.action_type`, they are not constrained to the
-  persistence contract's known values (`fundamental_statement_known`,
-  `quarterly`/`annual`), so an out-of-domain value passes parsing and would
-  fail later as a raw database constraint violation instead of a classifiable
-  `ProviderContractViolation`.
-- Decimal coercion of retained, undeclared provider fields
-  (`FinancialStatement` and `CorporateAction`'s extra line items) is
-  top-level only; a numeric value nested inside a provider-shaped object
-  (e.g. `action_ticker_change.json`'s nested `ticker_change` object) is not
-  recursed into and can reach the JSONB payload and value hash as a `float`.
-- `DailyBar`'s timestamp validator accepts any numeric `t` without checking
-  it is plausibly Unix milliseconds — a provider or SDK change to seconds
-  (or a malformed value) would parse to a wrong `session_date` rather than
-  raising.
+The limitations `implementation-review-v1` carried forward as accepted
+warnings (`FinancialStatement.statement_type`/`timeframe` unconstrained,
+top-level-only `Decimal` coercion of extra fields, and no plausibility
+check on `DailyBar`'s Unix-milliseconds timestamp) were fixed in the
+`CAP-001-E3-S2-implementation-review-v2` rework: `statement_type` and
+`timeframe` are now `Literal`-constrained to the persistence contract's
+known values, the extra-field `Decimal` coercion recurses into nested
+dicts and lists, and `DailyBar`'s timestamp validator rejects non-numeric
+input and anything outside a plausible Unix-milliseconds magnitude.
 
 ## Massive provider failure reasons
 
