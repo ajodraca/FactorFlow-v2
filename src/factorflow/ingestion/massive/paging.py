@@ -37,7 +37,8 @@ def follow_pages(
     """Follow `next_url` across every page of one read, accumulating and
     returning the complete, ordered list of raw result rows.
 
-    `first_page` issues the initial request. `decode` turns a raw
+    `first_page` issues the initial request and must already be a governed
+    callable, acquiring a permit before that request. `decode` turns a raw
     `HTTPResponse` into its parsed JSON envelope (`{"results": [...],
     "next_url": ...}`); this module never validates rows against a
     product model itself -- that is the caller's job, once the complete

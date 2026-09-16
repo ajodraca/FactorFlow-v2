@@ -11,7 +11,7 @@ connection.
 """
 
 import json
-from decimal import Decimal
+from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
@@ -122,26 +122,35 @@ def test_market_status_endpoint_is_never_called() -> None:
 
     Constructing the client alone can never fail this assertion, since
     nothing calls any endpoint at construction time -- it would pass even
-    if every one of the four reads called the forbidden endpoint. A real
-    read is exercised so the assertion actually depends on client
-    behavior (IR-003)."""
+    if every one of the four reads called the forbidden endpoint. All four
+    reads are exercised so the assertion protects the complete acquisition
+    surface (IR-001)."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
         instance = rest_client_cls.return_value
         instance.get_ticker_details.return_value = _FakeResponse(
             {"request_id": "req_ok_001", "results": _load("reference_active.json")}
         )
+        instance.get_aggs.return_value = _FakeResponse({"request_id": "req_ok_001", "results": []})
+        for method in (
+            instance.list_financials_balance_sheets,
+            instance.list_financials_income_statements,
+            instance.list_financials_cash_flow_statements,
+            instance.list_financials_ratios,
+            instance.list_stocks_splits,
+            instance.list_stocks_dividends,
+            instance.vx.list_ipos,
+        ):
+            method.return_value = _FakeResponse({"request_id": "req_ok_001", "results": []})
+        instance.get_ticker_events.return_value = _FakeResponse(
+            {"request_id": "req_ok_001", "results": {"events": []}}
+        )
         client = MassiveClient(settings=_settings(), governor=_governor())
 
         client.fetch_reference("AAPL")
+        client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+        client.fetch_financials("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+        client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
 
     assert not instance.get_market_holidays.called
     assert not instance.get_market_status.called
-
-
-def test_no_declared_field_is_typed_float_in_governor_settings_bridge() -> None:
-    """Sanity guard: the settings bridge this client relies on carries no
-    stray `float`-typed identifier fields that could round provider
-    identifiers -- a smoke check for DAC-E3-S2-3-adjacent regressions in the
-    shared settings surface this component depends on."""
-    settings = _settings()
-    assert not isinstance(settings.requests_per_minute, Decimal)
+    assert not instance.list_tickers.called

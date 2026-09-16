@@ -6,11 +6,9 @@ Component design: `component-design-massive-client.md` section 2.6
 """
 
 import json
-import logging
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 import urllib3
 
 from factorflow.config.settings import MassiveSettings
@@ -58,20 +56,6 @@ def test_credential_is_passed_to_the_sdk_constructor() -> None:
     assert kwargs["api_key"] == _SECRET
 
 
-def test_credential_never_appears_in_a_captured_log_record(
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    """DAC-E3-S1-6 / AC-13: constructing the client emits no log record
-    containing the credential value."""
-    logger = logging.getLogger("factorflow.ingestion.massive.client.test")
-    with caplog.at_level(logging.DEBUG):
-        with patch("factorflow.ingestion.massive.client.RESTClient"):
-            client = MassiveClient(settings=_settings(), governor=_governor())
-            logger.info("constructed client: %s", client)
-
-    assert _SECRET not in caplog.text
-
-
 def test_client_holds_no_module_or_class_level_credential_attribute() -> None:
     """The credential is not cached outside the client (SEC-SEC-002): no
     module-level or class-level attribute on `MassiveClient` itself holds
@@ -100,7 +84,7 @@ def _reference_envelope() -> bytes:
 
 
 def test_credential_is_sent_as_a_bearer_header_never_a_url_parameter() -> None:
-    """AC-13, section 2.6: the real SDK request path (only
+    """TC-COMP-013 / TC-COMP-214 / AC-13, section 2.6: the real SDK request path (only
     `urllib3.PoolManager.request` substituted) carries the credential in an
     `Authorization: Bearer` header. No request URL contains the credential
     or an `apiKey` query parameter, which Massive does accept and this

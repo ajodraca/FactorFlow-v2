@@ -16,6 +16,7 @@ from pydantic import ValidationError
 
 from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive.client import MassiveClient
+from factorflow.ingestion.massive.errors import ProviderContractViolation
 from factorflow.ingestion.massive.models import CorporateAction
 from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
@@ -269,3 +270,44 @@ def test_fetch_corporate_actions_excludes_ticker_events_outside_the_requested_ra
         actions = client.fetch_corporate_actions("AAPL", date(2020, 1, 1), date(2024, 12, 31))
 
     assert actions == []
+
+
+def _client_with_ticker_events(event_rows: list[dict]) -> MassiveClient:
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_stocks_splits.return_value = _FakeResponse(_envelope([]))
+        instance.list_stocks_dividends.return_value = _FakeResponse(_envelope([]))
+        instance.vx.list_ipos.return_value = _FakeResponse(_envelope([]))
+        instance.get_ticker_events.return_value = _FakeResponse(_envelope({"events": event_rows}))
+        return MassiveClient(settings=_settings(), governor=_governor())
+
+
+def test_fetch_corporate_actions_rejects_a_ticker_event_with_a_malformed_date() -> None:
+    event = _load("action_ticker_change.json") | {"date": None}
+    client = _client_with_ticker_events([event])
+
+    with pytest.raises(ProviderContractViolation):
+        client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+
+
+def test_fetch_corporate_actions_rejects_a_ticker_event_without_a_date() -> None:
+    event = _load("action_ticker_change.json")
+    del event["date"]
+    client = _client_with_ticker_events([event])
+
+    with pytest.raises(ProviderContractViolation):
+        client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+
+
+def test_fetch_corporate_actions_includes_ticker_events_on_both_date_boundaries() -> None:
+    event = _load("action_ticker_change.json")
+    client = _client_with_ticker_events(
+        [
+            event | {"date": "2024-01-01T00:00:00Z"},
+            event | {"date": "2024-12-31T00:00:00Z"},
+        ]
+    )
+
+    actions = client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+
+    assert [action.effective_on for action in actions] == [date(2024, 1, 1), date(2024, 12, 31)]

@@ -174,6 +174,19 @@ def test_fetch_reference_raises_provider_contract_violation_when_results_is_miss
             client.fetch_reference("AAPL")
 
 
+def test_fetch_reference_raises_instrument_not_found_when_results_is_empty() -> None:
+    """A present but empty `results` object is the design's 200 unknown-
+    instrument branch, not a malformed response (component design section
+    2.2)."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_ticker_details.return_value = _FakeResponse(_envelope({}))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        with pytest.raises(InstrumentNotFound):
+            client.fetch_reference("NOTREAL")
+
+
 def test_fetch_reference_uses_the_single_ticker_endpoint_only() -> None:
     """TC-COMP-212 / DAC-E3-S1-4: reference reads use the single-ticker
     endpoint (`get_ticker_details`); the list-form endpoint

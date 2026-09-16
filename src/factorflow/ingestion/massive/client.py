@@ -34,6 +34,7 @@ from urllib3 import HTTPResponse
 from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive import models
 from factorflow.ingestion.massive.errors import (
+    InstrumentNotFound,
     classify_error_body,
     is_fatal_for_governor,
     is_rate_limited_body,
@@ -70,7 +71,10 @@ class MassiveClient:
         list form is not this capability's to call (component design
         section 2.5)."""
         envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
-        return self._validate(models.TickerReference, envelope.get("results"))
+        results = envelope.get("results")
+        if results == {} or results == []:
+            raise InstrumentNotFound("The provider does not recognise this instrument.")
+        return self._validate(models.TickerReference, results)
 
     # -- fetch_daily_bars (DAC-E3-S1-2, DAC-E3-S1-3) ----------------------
 
@@ -212,15 +216,12 @@ class MassiveClient:
             lambda: self._rest_client.get_ticker_events(symbol, types="ticker_change", raw=True)
         )
         all_event_rows = (events_envelope.get("results") or {}).get("events") or []
-        start_iso, end_iso = start.isoformat(), end.isoformat()
-        event_rows = [row for row in all_event_rows if start_iso <= row.get("date", "") <= end_iso]
-        actions.extend(
-            self._corporate_actions(
-                action_type="ticker_change",
-                effective_date_field="date",
-                rows=event_rows,
-            )
+        event_actions = self._corporate_actions(
+            action_type="ticker_change",
+            effective_date_field="date",
+            rows=all_event_rows,
         )
+        actions.extend(action for action in event_actions if start <= action.effective_on <= end)
 
         return actions
 
@@ -235,7 +236,7 @@ class MassiveClient:
                 {
                     **row,
                     "action_type": action_type,
-                    "effective_on": row[effective_date_field],
+                    "effective_on": row.get(effective_date_field),
                 },
             )
             for row in rows

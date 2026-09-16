@@ -69,14 +69,12 @@ cycles:
         tests/unit/test_massive_sdk_config.py tests/unit/test_massive_auth.py
       result: "78 passed"
       full_suite_command: uv run pytest -m 'not postgres' -q
-      full_suite_result: "263 passed, 59 deselected, 1 pre-existing
-        unrelated failure (tests/integration/test_api_static_mount.py::test_no_bundle_yet_falls_back_to_a_bare_404,
-        confirmed present on the pre-story baseline via git stash before
-        any code in this story was written -- a stale local frontend
-        build artifact, not a regression from this story)"
+      full_suite_result: "Historical original-coding result; superseded at HEAD by
+        rework_test_result below. The former pre-existing-failure claim does not
+        describe the current component state."
       full_suite_with_postgres_command: uv run pytest
-      full_suite_with_postgres_result: "321 passed, 1 pre-existing
-        unrelated failure (same test as above)"
+      full_suite_with_postgres_result: "Historical original-coding result; superseded
+        by the current full-suite validation recorded in implementation review v2."
       static_checks: "ruff check: All checks passed; ruff format --check:
         100 files already formatted; mypy src: Success, no issues found in
         30 source files (with a scoped [[tool.mypy.overrides]] for the
@@ -186,7 +184,7 @@ manual_mutations:
     reverted_and_reconfirmed_green: true
 
   - id: mutation-9-forbidden-endpoint-call
-    target: client.MassiveClient.fetch_reference
+    target: client.MassiveClient.fetch_financials
     change: 'a spurious self._rest_client.get_market_status() call added
       at the top of the method'
     test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_sdk_config.py -q
@@ -196,9 +194,25 @@ manual_mutations:
     caught: true
     reverted_and_reconfirmed_green: true
 
+  - id: mutation-10-ticker-event-start-boundary
+    target: client.MassiveClient.fetch_corporate_actions
+    change: 'start <= action.effective_on <= end -> start < action.effective_on <= end'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_actions.py::test_fetch_corporate_actions_includes_ticker_events_on_both_date_boundaries -q
+    result: "1 failed (the start-boundary event was excluded)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-11-empty-reference-result
+    target: client.MassiveClient.fetch_reference
+    change: 'results == {} or results == [] -> results == []'
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_reference.py::test_fetch_reference_raises_instrument_not_found_when_results_is_empty -q
+    result: "1 failed (the empty reference result raised ProviderContractViolation)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
 post_mutation_verification:
   description: >-
-    After each of the seven mutations was individually applied, observed
+    After each of the original seven mutations was individually applied, observed
     caught, and reverted, client.py and paging.py were diffed
     byte-for-byte against saved baseline copies (`diff` reporting no
     output, i.e. CLEAN, after every revert) to confirm no mutation was

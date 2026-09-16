@@ -31,7 +31,7 @@ ai_provenance:
 
 **Story**: `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S1.md`
 **Component**: `FactorFlow-v2`
-**Branch**: `usr/alvaro-de-jodra/CAP-001-E2-S4`
+**Branch**: `usr/alvaro-de-jodra/CAP-001-E3-S1`
 **Date**: 2026-09-10
 
 ## Summary
