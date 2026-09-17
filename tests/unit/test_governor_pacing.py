@@ -64,9 +64,9 @@ def test_capacity_n_sends_incur_no_delay_and_the_next_waits_for_refill() -> None
     assert sleeper.calls[0] == pytest.approx(60.0 / capacity)
 
 
-def test_no_virtual_minute_window_exceeds_the_configured_budget() -> None:
-    """No virtual one-minute window issues more than the configured
-    budget, over a sustained run (AC-4).
+def test_virtual_minute_windows_stay_within_the_token_bucket_bound() -> None:
+    """Virtual one-minute windows stay within the standard token-bucket
+    bound over a sustained run (AC-4).
 
     A token bucket that starts full (T006) can, near the very start,
     still show one already-spent burst plus a bit of fresh refill inside
@@ -93,11 +93,30 @@ def test_no_virtual_minute_window_exceeds_the_configured_budget() -> None:
         count_in_window = sum(1 for other in send_times if window_start < other <= t)
         max_allowed = capacity + refill_rate * 60.0
         assert count_in_window <= max_allowed + 1e-9
+        if t >= 60.0:
+            assert count_in_window <= capacity
 
     # Over the whole run's duration, the average rate never exceeds the
     # configured budget once the initial burst is accounted for.
     elapsed = send_times[-1]
     assert len(send_times) <= capacity + refill_rate * elapsed + 1e-9
+
+
+def test_refill_never_exceeds_bucket_capacity() -> None:
+    clock = FakeClock()
+    sleeper = FakeSleeper(clock)
+    capacity = 3
+    governor = _governor(capacity, clock, sleeper)
+
+    for _ in range(capacity):
+        governor.execute(lambda: "ok", _never_classify)
+    clock.advance(120.0)
+    for _ in range(capacity):
+        governor.execute(lambda: "ok", _never_classify)
+
+    assert sleeper.calls == []
+    governor.execute(lambda: "ok", _never_classify)
+    assert sleeper.calls == [pytest.approx(60.0 / capacity)]
 
 
 # --- T006: token-accounting edge cases ----------------------------------

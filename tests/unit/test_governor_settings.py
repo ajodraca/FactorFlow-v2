@@ -52,6 +52,9 @@ def test_from_massive_settings_uses_massive_defaults(
     unchanged."""
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", KNOWN_API_KEY)
     monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
+    monkeypatch.delenv("FACTORFLOW_MASSIVE_MAX_ATTEMPTS", raising=False)
+    monkeypatch.delenv("FACTORFLOW_MASSIVE_BACKOFF_INITIAL_SECONDS", raising=False)
+    monkeypatch.delenv("FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS", raising=False)
     massive_settings = MassiveSettings(_env_file=None)  # type: ignore[call-arg]
 
     governor_settings = GovernorSettings.from_massive_settings(massive_settings)

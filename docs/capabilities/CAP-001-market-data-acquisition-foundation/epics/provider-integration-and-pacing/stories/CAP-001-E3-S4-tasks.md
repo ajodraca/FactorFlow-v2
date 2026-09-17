@@ -2,25 +2,25 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-E3-S4-tasks
 artifact_type: story-tasks
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-13
-last_reworked_review: CAP-001-E3-S4-implementation-review-v1.md
+updated: 2026-09-16
+last_reworked_review: CAP-001-E3-S4-implementation-review-v4.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
-  model: gpt-5
-  tool: Codex
+  model: gpt-5.6
+  tool: Devin
   tool_version: unknown
-  timestamp: 2026-09-11T20:27:10Z
+  timestamp: 2026-09-16T22:27:04Z
   source_artifacts:
     - id: CAP-001-E3-S4
       version: "1"
     - id: CAP-001-component-design-rate-limit-governor
-      version: "6"
+      version: "8"
     - id: CAP-001-component-design-runtime-config
       version: "6"
     - id: CAP-001-system-design
@@ -72,7 +72,7 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 
 ### Mandatory Component Tests
 
-- [x] T002 [P] Implement TC-COMP-230 and the pacing portion of AC-4 in `tests/unit/test_governor_pacing.py`: with a virtual clock and capacity `N`, assert `N` consecutive sends advance virtual time by zero, the `N+1` send blocks until a token refills, and no virtual one-minute window issues more than the configured budget.
+- [x] T002 [P] Implement TC-COMP-230 and the pacing portion of AC-4 in `tests/unit/test_governor_pacing.py`: with a virtual clock and capacity `N`, assert `N` consecutive sends advance virtual time by zero, the `N+1` send blocks until a token refills, refill never accumulates above bucket capacity, a window beginning with a full bucket issues no more than capacity plus one window's refill, and subsequent windows after drawdown issue no more than the configured budget.
 - [x] T003 [P] Implement TC-COMP-200, TC-COMP-201, TC-COMP-203, TC-COMP-226, TC-COMP-227, and TC-COMP-231 in `tests/unit/test_governor_retry.py`: assert repeated `THROTTLED` outcomes leave attempts at zero; a no-delay throttle waits to the next minute boundary with full jitter; a stub `stated_delay_seconds` callback delay is honoured exactly without jitter; and both throttle paths count their waits against and raise after `max_throttle_wait_seconds`.
 - [x] T004 [P] Implement TC-COMP-202, TC-COMP-228, and TC-COMP-229 in `tests/unit/test_governor_retry.py` and `tests/unit/test_governor_backoff.py`: assert retryable timeout/5xx outcomes increment attempts and use jittered exponential delays, no fourth send occurs after the configured limit, and a caller-classified `FATAL` exception is re-raised with neither sleep nor retry.
 
@@ -163,4 +163,4 @@ Implement the synchronous, provider-agnostic governor that paces each request th
 - Per owner resolution, `requests_per_minute` remains required and positive (`ge=1`); there is no unlimited, `None`, or sentinel governor mode. “Unlimited” in DAC-E3-S4-5 refers to the provider tier. The required behavior is zero artificial delay while bucket tokens remain, followed by refill waiting, consistent with component-design-rate-limit-governor.md §3 and §14 OQ2 and component-design-runtime-config.md §2.2.
 - Component-design-rate-limit-governor.md §2.5 requires a provider-stated delay but its §2.3 `Outcome`-only interface provides no channel for it. Per owner resolution, this story adds the optional provider-agnostic `stated_delay_seconds` callback to `execute` while preserving the documented `send` and `classify` signatures and bare `Outcome`. Record this interface gap for the next design revision; do not edit the approved design in this story.
 - The stated-delay path is dead for Massive: CAP-001-E3-S1 passes no callback because the provider has no `Retry-After`. It remains tested with a stub callback for TC-COMP-226.
-- **Recorded deviation (IR-004 rework, review v1).** The no-delay throttle path's jitter is additive over the boundary wait (`boundary + jitter() * boundary`, range `[boundary, 2 * boundary]`), not "full jitter over the computed delay" as component-design-rate-limit-governor.md §2.5 literally states for every jittered delay. This is a deliberate choice: true full jitter over a boundary wait (uniform over `[0, boundary)`) would frequently retry before the provider's per-minute quota actually refills, reintroducing the failure mode §2.5 itself argues the boundary wait exists to avoid. The backoff path (§2.5 row 3) does use full jitter as written. Flagging for the next design revision to either amend §2.5's wording for the boundary case or record this as an approved exception. See `src/factorflow/ingestion/rate_limit.py::_boundary_wait_with_jitter` and its covering tests in `tests/unit/test_governor_retry.py`.
+- **Recorded deviation (IR-005 rework, review v1).** The no-delay throttle path's jitter is additive over the boundary wait (`boundary + jitter() * boundary`, range `[boundary, 2 * boundary]`), not "full jitter over the computed delay" as component-design-rate-limit-governor.md §2.5 literally states for every jittered delay. This is a deliberate choice: true full jitter over a boundary wait (uniform over `[0, boundary)`) would frequently retry before the provider's per-minute quota actually refills, reintroducing the failure mode §2.5 itself argues the boundary wait exists to avoid. The backoff path (§2.5 row 3) does use full jitter as written. Flagging for the next design revision to either amend §2.5's wording for the boundary case or record this as an approved exception. See `src/factorflow/ingestion/rate_limit.py::_boundary_wait_with_jitter` and its covering tests in `tests/unit/test_governor_retry.py`.

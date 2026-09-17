@@ -249,6 +249,27 @@ def test_stated_delay_throttle_wait_exhausts_the_budget_and_raises() -> None:
     assert sleeper.calls == [pytest.approx(10.0), pytest.approx(10.0), pytest.approx(10.0)]
 
 
+def test_zero_stated_delay_throttle_wait_is_bounded() -> None:
+    clock = FakeClock()
+    sleeper = FakeSleeper(clock)
+    governor = _governor(1, clock, sleeper, max_throttle_wait=1.0)
+    send = FlakySender(fail_count=1_000_000)
+
+    def classify(exc: BaseException) -> Outcome:
+        if send.calls > 2:
+            raise AssertionError("zero-delay throttling did not terminate")
+        return Outcome.THROTTLED
+
+    with pytest.raises(ProviderUnavailable):
+        governor.execute(
+            send,
+            classify=classify,
+            stated_delay_seconds=lambda exc: 0.0,
+        )
+
+    assert send.calls == 2
+
+
 # --- TC-COMP-202 / TC-COMP-228 / TC-COMP-229 / DAC-E3-8 -------------------
 
 

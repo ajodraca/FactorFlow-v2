@@ -4,7 +4,7 @@ artifact_type: tdd-evidence
 story: CAP-001-E3-S4
 tasks_file: CAP-001-E3-S4-tasks.md
 created: 2026-09-12
-updated: 2026-09-13
+updated: 2026-09-16
 
 # T010: manual mutation session, refreshed against the post-rework HEAD
 # (baseline: 58052fd, "rework -- address implementation-review-v1
@@ -193,20 +193,57 @@ post_mutation_verification:
 known_limitations:
   - id: pacing-window-bound-tolerates-2x-budget
     description: >-
-      test_no_virtual_minute_window_exceeds_the_configured_budget
-      (tests/unit/test_governor_pacing.py) asserts
-      `count_in_window <= capacity + refill_rate * 60.0`, which at
-      capacity=N tolerates up to 2N sends in a one-minute window --
-      double the configured budget. This reflects a genuine, unresolved
-      conflict between design acceptance criterion 1 ("no more than the
-      configured budget over any one-minute window") and the governor's
-      full-start token bucket (required by T006), which cannot satisfy
-      that literal bound in its first window. Recorded as
-      implementation-review-v1's IR-007 and carried forward, still open,
-      as implementation-review-v2's IR-002. This needs an owner decision
-      -- either the bucket starts empty/documents a first-window
-      exception and the test is strengthened, or design AC 1 is amended
-      to the standard token-bucket bound -- not a coding fix, and it does
-      not block this story's gate.
-    source: CAP-001-E3-S4-implementation-review-v2.md, finding IR-002 (carried from v1 IR-007)
-    status: open, owner decision required
+      Resolved by owner decision DEC-0002 and
+      component-design-rate-limit-governor.md v8. The test now named
+      test_virtual_minute_windows_stay_within_the_token_bucket_bound
+      asserts the standard bound, capacity plus refill over the window,
+      which is the approved contract for a bucket that starts full.
+      CAP-001-E3-S4-tasks.md v2 carries the same requirement.
+    source: specifications-review-report-v5.md, resolved v4 FINDING-1
+    status: resolved
+
+review_v3_rework:
+  blocking_finding: CAP-001-E3-S4-implementation-review-v3.md IR-001
+  red_evidence: >-
+    uv run pytest -q
+    tests/unit/test_governor_retry.py::test_zero_stated_delay_throttle_wait_is_bounded
+    failed because the third zero-delay throttle reached the test's boundedness
+    guard instead of raising ProviderUnavailable.
+  implementation: >-
+    RateLimitGovernor.execute now measures throttle-budget use as monotonic
+    elapsed time from the first throttled outcome, so permit-acquisition waits
+    advance the budget even when the provider states a zero-second delay.
+  green_evidence: >-
+    The same focused command passed, and the governor-specific suite passed
+    24 tests.
+  additional_resolutions:
+    - The pacing test name and leading description now state the approved standard token-bucket bound.
+    - The MassiveSettings defaults test clears all three optional environment overrides.
+    - The task-plan deviation note now points to review v1 IR-005.
+  validation:
+    - "uv run pytest: 307 passed"
+    - "uv run pytest -m 'not postgres': 248 passed, 59 deselected"
+    - "uv run ruff check .: passed"
+    - "uv run ruff format --check .: 96 files already formatted"
+    - "uv run mypy src: passed, 28 source files"
+    - "uv build: source distribution and wheel built"
+
+review_v4_rework:
+  blocking_finding: CAP-001-E3-S4-implementation-review-v4.md IR-001
+  implementation: >-
+    T002 now asserts the steady-state configured-budget bound after drawdown
+    and separately proves that refill cannot accumulate above bucket capacity
+    after an idle interval.
+  mutation_evidence: >-
+    Removing the min(self._capacity, ...) refill ceiling made
+    test_refill_never_exceeds_bucket_capacity fail because the request after
+    the refilled capacity incurred no expected wait. Restoring the ceiling
+    returned all pacing tests to green.
+  validation:
+    - "uv run pytest: 308 passed"
+    - "uv run pytest -m 'not postgres': 249 passed, 59 deselected"
+    - "governor-specific suite: 25 passed"
+    - "uv run ruff check .: passed"
+    - "uv run ruff format --check .: 96 files already formatted"
+    - "uv run mypy src: passed, 28 source files"
+    - "uv build: source distribution and wheel built"
