@@ -204,9 +204,9 @@ shared, application-wide handler still names the right resource per route.
 one per Massive response shape, each named for the observation table it will
 feed: `TickerReference` (`instrument_reference`), `DailyBar` (`daily_bar`),
 `FinancialStatement` (`fundamental_observation`), and `CorporateAction`
-(`corporate_action`). No client calls Massive yet — these models exist so
-that when one does (CAP-001-E3-S1), wire field names never leak past this
-package boundary.
+(`corporate_action`). `MassiveClient` uses these models for its four
+historical reads, so Massive wire field names do not leak past the package
+boundary.
 
 - Every wire field name (`t`, `o`, `h`, `l`, `c`, `filing_date`, `active`,
   `name`, and the rest) appears only inside a `Field(alias=...)`; every
@@ -242,6 +242,31 @@ known values, the extra-field `Decimal` coercion recurses into nested
 dicts and lists, and `DailyBar`'s timestamp validator rejects non-numeric
 input and anything outside a plausible Unix-milliseconds magnitude.
 
+## Massive historical client
+
+`src/factorflow/ingestion/massive/client.py` provides the project-owned
+historical boundary over Massive's official REST SDK. `MassiveClient` exposes
+four product-named reads: `fetch_reference(symbol)`,
+`fetch_daily_bars(symbol, start, end)`, `fetch_financials(symbol, start, end)`,
+and `fetch_corporate_actions(symbol, start, end)`. Each returns the parsed
+models above rather than provider wire shapes.
+
+The client creates one reusable SDK client from `MassiveSettings`, explicitly
+disabling SDK retries, pagination, and request tracing. It passes the runtime
+credential to the SDK for header authentication; it does not put the credential
+in request URLs. Every initial and followed page request passes through
+`RateLimitGovernor`, while `paging.follow_pages()` follows a present
+`next_url` one page at a time and raises if a later page fails rather than
+returning a partial range.
+
+Reference reads use Massive's single-ticker endpoint. Daily-bar requests use
+multiplier `1`, timespan `day`, inclusive ISO date bounds, and unadjusted bars.
+Financial statements are read from the four statement endpoints; corporate
+actions combine splits, dividends, IPOs, and ticker-change events. Ticker
+events have no provider date-range parameter, so the client validates their
+rows and applies the requested inclusive range locally. The client never calls
+Massive's forward-looking market-status endpoint or ticker-list endpoint.
+
 ## Massive provider failure reasons
 
 `src/factorflow/ingestion/massive/errors.py` also defines
@@ -273,9 +298,9 @@ error not in the four-type taxonomy.
 ## Rate limit governor
 
 `src/factorflow/ingestion/rate_limit.py` implements `RateLimitGovernor`, the
-synchronous, provider-agnostic governor every SDK request is meant to be
-submitted through (CAP-001-E3-S1's `massive/client.py` is the intended
-caller; no client calls it yet). It imports no Massive SDK, response type,
+synchronous, provider-agnostic governor that `CAP-001-E3-S1`'s
+`massive/client.py` submits every SDK request through, including followed
+pages. It imports no Massive SDK, response type,
 or wire shape — `send` and `classify` are opaque callables the caller
 supplies, and the governor inspects only the `Outcome` `classify` returns,
 never the raised exception's type or fields.

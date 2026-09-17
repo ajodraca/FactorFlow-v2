@@ -9,17 +9,63 @@ import json
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
 
+from factorflow.config.settings import MassiveSettings
+from factorflow.ingestion.massive.client import MassiveClient
 from factorflow.ingestion.massive.models import FinancialStatement
+from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
 
 def _load(name: str) -> dict:
     return json.loads((FIXTURES / name).read_text())
+
+
+def _settings() -> MassiveSettings:
+    return MassiveSettings.model_validate(
+        {
+            "api_key": "test-secret-key",
+            "requests_per_minute": 60,
+            "max_attempts": 3,
+            "timeout_seconds": 30.0,
+        }
+    )
+
+
+def _governor() -> RateLimitGovernor:
+    return RateLimitGovernor(
+        GovernorSettings(
+            requests_per_minute=60,
+            max_attempts=3,
+            initial_backoff_seconds=0.0,
+            max_throttle_wait_seconds=1.0,
+        ),
+        sleep=lambda _seconds: None,
+    )
+
+
+class _FakeResponse:
+    def __init__(self, payload: dict, status: int = 200) -> None:
+        self.status = status
+        self.data = json.dumps(payload).encode()
+
+
+def _envelope(results: list[dict]) -> dict:
+    return {"request_id": "req_ok_001", "results": results}
+
+
+def _wire_statement(fixture_name: str) -> dict:
+    """The fixture minus `statement_type`, which the real wire never
+    carries -- this component supplies it from which endpoint was
+    called."""
+    wire = _load(fixture_name)
+    wire.pop("statement_type", None)
+    return wire
 
 
 def test_parses_wire_shape_into_product_vocabulary() -> None:
@@ -155,3 +201,57 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
     assert payload["provider_filing_date"] == "2023-11-03"
     for writer_owned in ("observed_on", "run_id", "recorded_at"):
         assert writer_owned not in payload
+
+
+# --- MassiveClient.fetch_financials (CAP-001-E3-S1) ----------------------
+
+
+def test_fetch_financials_returns_a_complete_result_for_a_covered_symbol() -> None:
+    """TC-COMP-003: `fetch_financials` returns the complete parsed result
+    across the four sibling statement endpoints for a covered symbol
+    (AC-3)."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_financials_balance_sheets.return_value = _FakeResponse(
+            _envelope([_wire_statement("financial_annual.json")])
+        )
+        instance.list_financials_income_statements.return_value = _FakeResponse(_envelope([]))
+        instance.list_financials_cash_flow_statements.return_value = _FakeResponse(_envelope([]))
+        instance.list_financials_ratios.return_value = _FakeResponse(_envelope([]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    assert len(statements) == 1
+    assert isinstance(statements[0], FinancialStatement)
+    assert statements[0].statement_type == "balance_sheet"
+    assert statements[0].cik == "0000320193"
+
+
+def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() -> None:
+    """Component design section 2.5: financials are four sibling
+    endpoints under one shape, each constrained by ticker and period so
+    the request does not return the whole corpus."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        for method in (
+            instance.list_financials_balance_sheets,
+            instance.list_financials_income_statements,
+            instance.list_financials_cash_flow_statements,
+            instance.list_financials_ratios,
+        ):
+            method.return_value = _FakeResponse(_envelope([]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    for method in (
+        instance.list_financials_balance_sheets,
+        instance.list_financials_income_statements,
+        instance.list_financials_cash_flow_statements,
+        instance.list_financials_ratios,
+    ):
+        method.assert_called_once()
+        _, kwargs = method.call_args
+        assert kwargs["tickers"] == "AAPL"
+        assert kwargs["raw"] is True
