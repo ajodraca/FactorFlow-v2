@@ -138,7 +138,7 @@ class RateLimitGovernor:
         request is throttled beyond the throttle wait budget.
         """
         attempts = 0
-        throttle_wait_used = 0.0
+        throttle_wait_started_at: float | None = None
 
         while True:
             self._acquire_permit()
@@ -152,9 +152,11 @@ class RateLimitGovernor:
                     raise
 
                 if outcome is Outcome.THROTTLED:
+                    if throttle_wait_started_at is None:
+                        throttle_wait_started_at = self._monotonic()
                     delay = self._throttle_delay(exc, stated_delay_seconds)
                     self._sleep(delay)
-                    throttle_wait_used += delay
+                    throttle_wait_used = self._monotonic() - throttle_wait_started_at
                     if throttle_wait_used > self._settings.max_throttle_wait_seconds:
                         raise ProviderUnavailable(
                             "The provider throttled every attempt until the "
