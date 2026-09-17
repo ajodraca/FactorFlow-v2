@@ -72,12 +72,13 @@ def _instrument_id(connection: psycopg.Connection) -> int:
     return int(row[0])
 
 
-def _insert_values(table: str, instrument_id: int, observed_on: str, value_hash: bytes) -> tuple:
+def _insert_values(
+    instrument_id: int, observed_on: str, value_hash: bytes
+) -> tuple[int, str, bytes]:
     return (instrument_id, observed_on, value_hash)
 
 
 # Implements TC-COMP-005
-# Implements TC-COMP-297
 @pytest.mark.postgres
 def test_all_observation_tables_exist(observation_connection: psycopg.Connection) -> None:
     with observation_connection.cursor() as cursor:
@@ -99,16 +100,29 @@ def test_database_defaults_observed_on_and_keeps_filing_date_descriptive(
 ) -> None:
     instrument_id = _instrument_id(observation_connection)
     with observation_connection.cursor() as cursor:
+        cursor.execute("SET LOCAL TIME ZONE 'Etc/UTC'")
         cursor.execute(
             "INSERT INTO fundamental_observation "
             "(instrument_id, fiscal_period_end, fiscal_period, statement_type, value_hash, "
             "provider_filing_date, payload) "
             "VALUES (%s, DATE '2025-12-31', 'FY', 'income_statement', %s, "
             "DATE '2001-02-03', '{}'::jsonb) "
-            "RETURNING observed_on, provider_filing_date, observed_on = current_date",
+            "RETURNING observed_on, provider_filing_date, "
+            "observed_on = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date",
             (instrument_id, VALID_HASH),
         )
         row = cursor.fetchone()
+        cursor.execute(
+            "SELECT table_name, column_default FROM information_schema.columns "
+            "WHERE table_schema = 'public' AND table_name = ANY(%s) "
+            "AND column_name = 'observed_on' ORDER BY table_name",
+            (list(OBSERVATION_TABLES),),
+        )
+        defaults = dict(cursor.fetchall())
+        cursor.execute(
+            "SELECT (TIMESTAMPTZ '2026-03-10 04:30:00+00' AT TIME ZONE 'America/Chicago')::date"
+        )
+        controlled_chicago_date = cursor.fetchone()
         cursor.execute(
             "SELECT col_description('fundamental_observation'::regclass, ordinal_position) "
             "FROM information_schema.columns "
@@ -120,6 +134,12 @@ def test_database_defaults_observed_on_and_keeps_filing_date_descriptive(
     assert row is not None
     assert row[0] != row[1]
     assert row[2] is True
+    assert defaults == {
+        table: "((CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago'::text))::date"
+        for table in OBSERVATION_TABLES
+    }
+    assert controlled_chicago_date is not None
+    assert str(controlled_chicago_date[0]) == "2026-03-09"
     assert comment is not None
     assert comment[0] == "Descriptive provider field; never the observation as-of date."
 
@@ -135,12 +155,20 @@ def test_value_hash_rejects_non_sha256_lengths(
 ) -> None:
     instrument_id = _instrument_id(observation_connection)
 
-    with pytest.raises(CheckViolation), observation_connection.transaction():
+    with pytest.raises(CheckViolation) as raised, observation_connection.transaction():
         with observation_connection.cursor() as cursor:
             cursor.execute(
                 INSERTS[table],
-                _insert_values(table, instrument_id, "2026-01-10", b"x" * hash_length),
+                _insert_values(instrument_id, "2026-01-10", b"x" * hash_length),
             )
+
+    expected_constraint = {
+        "instrument_reference": "instrument_reference_hash_len",
+        "daily_bar": "daily_bar_hash_len",
+        "fundamental_observation": "fundamental_hash_len",
+        "corporate_action": "corporate_action_hash_len",
+    }
+    assert raised.value.diag.constraint_name == expected_constraint[table]
 
 
 # Implements TC-COMP-154
@@ -170,6 +198,7 @@ def test_daily_bar_uses_exact_numeric_columns(
 # Implements TC-COMP-136
 # Implements TC-COMP-151
 # Implements TC-COMP-152
+# Implements TC-COMP-297
 @pytest.mark.postgres
 @pytest.mark.parametrize("table", OBSERVATION_TABLES)
 def test_identical_refetch_is_noop_and_restatement_coexists(
@@ -180,17 +209,17 @@ def test_identical_refetch_is_noop_and_restatement_coexists(
     with observation_connection.cursor() as cursor:
         cursor.execute(
             INSERTS[table],
-            _insert_values(table, instrument_id, "2026-01-10", VALID_HASH),
+            _insert_values(instrument_id, "2026-01-10", VALID_HASH),
         )
         first_row_count = cursor.rowcount
         cursor.execute(
             INSERTS[table],
-            _insert_values(table, instrument_id, "2026-01-11", VALID_HASH),
+            _insert_values(instrument_id, "2026-01-11", VALID_HASH),
         )
         identical_row_count = cursor.rowcount
         cursor.execute(
             INSERTS[table],
-            _insert_values(table, instrument_id, "2026-01-11", RESTATED_HASH),
+            _insert_values(instrument_id, "2026-01-11", RESTATED_HASH),
         )
         restated_row_count = cursor.rowcount
         cursor.execute(f"SELECT observed_on, value_hash FROM {table} ORDER BY observed_on")

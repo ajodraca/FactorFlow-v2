@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-15
+updated: 2026-09-17
+last_reworked_review: CAP-001-E4-S1-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -138,7 +139,8 @@ Create migration `0002_observations.sql` and its PostgreSQL-backed and static sa
 
 ### Resolved Conflicts
 
-- The story's non-AC Data Changes prose says `observed_on` belongs in each unique constraint, while AC-6 and DAC-E4-S1-2 require an identical re-fetch to write zero rows. Including a date that defaults on every fetch would make an identical value distinct on a later day. The acceptance criteria govern: T003 excludes `observed_on` from every idempotence key and uses the design's matching unique-key shape. DAC-E4-S1-1 still governs the `DEFAULT current_date` column definition. The story's Data Changes prose should be corrected in its next approved revision.
+- The story's non-AC Data Changes prose says `observed_on` belongs in each unique constraint, while AC-6 and DAC-E4-S1-2 require an identical re-fetch to write zero rows. Including a date that defaults on every fetch would make an identical value distinct on a later day. The acceptance criteria govern: T003 excludes `observed_on` from every idempotence key and uses the design's matching unique-key shape. DAC-E4-S1-1 still governs the database default. The story's Data Changes prose should be corrected in its next approved revision.
+- The approved design's `0002` SQL block declares `observed_on date NOT NULL` without a default, while DAC-E4-S1-1 requires FactorFlow's current observation date and the approved owner decision fixes its zone as `America/Chicago`. The migration therefore intentionally uses `DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date`. A verbatim design-drift guard for `0002` is deferred until Doc Sync corrects the approved design block; pinning the known mismatch in a test would preserve rather than detect drift.
 
 ### Open Gaps
 
@@ -147,4 +149,5 @@ Create migration `0002_observations.sql` and its PostgreSQL-backed and static sa
 ### Other Notes
 
 - The scope of the append-only static guard is only the four observation-history tables. The design permits `DELETE` while merging `coverage_segment`; that statement must not be treated as a violation.
+- The guard scans numbered migrations and `src/factorflow/**/*.py`, the repository's two executable SQL locations. Test fixtures intentionally contain prohibited examples and are not query paths; scanning them would make the guard reject its own positive cases. If executable SQL gains another location, that location must be added to `observation_sql_paths()` in the same change.
 - No application writer is introduced in this story. Its later implementation must use `INSERT ... ON CONFLICT DO NOTHING` against the constraints created here.

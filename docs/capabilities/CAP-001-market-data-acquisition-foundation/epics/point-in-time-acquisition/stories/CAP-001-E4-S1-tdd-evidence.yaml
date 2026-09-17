@@ -1,0 +1,168 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E4-S1-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E4-S1
+tasks_file: CAP-001-E4-S1-tasks.md
+created: 2026-09-17
+updated: 2026-09-17
+
+# RED -> GREEN -> MUTATE evidence for the initial schema work and the single
+# review-rework cycle against CAP-001-E4-S1-implementation-review-v1.md.
+# The driver owns the commit; all rework below is recorded against the
+# uncommitted working tree on usr/alvaro-de-jodra/CAP-001-E4-S1.
+
+original_cycle:
+  red:
+    status: reconstructed_not_observed
+    description: >-
+      The original tests and migration were committed together in 64e27ce, so
+      the pre-migration RED required by T004 cannot be recovered from history.
+      This record does not claim that the original RED was observed.
+  green:
+    test_commands:
+      - uv run pytest -m postgres tests/integration/test_observation_append.py
+      - uv run pytest tests/unit/test_sql_is_append_only.py
+    result: >-
+      The implementation-review v1 independently recorded 15 PostgreSQL cases
+      and 3 append-only guard tests passing at reviewed HEAD f554687, before
+      identifying the rework gaps below.
+
+review_rework_cycle:
+  review: CAP-001-E4-S1-implementation-review-v1.md
+  red:
+    tests_executed: true
+    observations:
+      - finding: IR-001
+        command: uv run pytest -m postgres tests/integration/test_observation_append.py -q
+        result: >-
+          1 failed, 14 passed. The strengthened default test found
+          information_schema.columns.column_default was CURRENT_DATE for all
+          four observation tables instead of the America/Chicago expression.
+      - finding: IR-002
+        command: uv run pytest tests/unit/test_sql_is_append_only.py -q
+        result: >-
+          4 failed, 3 passed. The guard missed ON CONFLICT DO UPDATE, UPDATE
+          ONLY, DELETE FROM ONLY, and a quoted schema-qualified target.
+      - finding: IR-003
+        command: >-
+          test -f docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/point-in-time-acquisition/stories/CAP-001-E4-S1-tdd-evidence.yaml
+        result: >-
+          Exit 1 before this artifact was created, reproducing the durable
+          evidence gap.
+  green:
+    tests_executed: true
+    test_commands:
+      - uv run pytest -m postgres tests/integration/test_observation_append.py -q
+      - uv run pytest tests/unit/test_sql_is_append_only.py -q
+    result: >-
+      15 passed and 7 passed. observed_on now has a session-independent
+      America/Chicago default, and the guard detects direct, ONLY,
+      schema-qualified, and ON CONFLICT DO UPDATE mutation forms.
+    commit_hash: uncommitted_by_user_direction
+
+manual_mutations_baseline: uncommitted GREEN review-rework tree
+manual_mutations:
+  - id: mutation-1-observed-on-in-natural-key
+    target: migrations/0002_observations.sql daily_bar_natural_key
+    change: Add observed_on to the daily_bar unique constraint.
+    test_command: >-
+      uv run pytest -m postgres tests/integration/test_observation_append.py::test_identical_refetch_is_noop_and_restatement_coexists -q
+    result: >-
+      1 failed, 3 passed; the daily_bar case observed identical_row_count 1
+      instead of 0.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-remove-value-hash-length-check
+    target: migrations/0002_observations.sql daily_bar_hash_len
+    change: Remove the daily_bar value_hash length constraint.
+    test_command: >-
+      uv run pytest -m postgres tests/integration/test_observation_append.py::test_value_hash_rejects_non_sha256_lengths -q
+    result: >-
+      2 failed, 6 passed; both 31-byte and 33-byte daily_bar hashes were
+      accepted instead of raising CheckViolation.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-introduce-observation-delete
+    target: migrations/0002_observations.sql
+    change: Add DELETE FROM daily_bar.
+    test_command: >-
+      uv run pytest tests/unit/test_sql_is_append_only.py::test_observation_history_sql_is_append_only -q
+    result: >-
+      1 failed; violations contained migrations/0002_observations.sql with
+      DELETE FROM daily_bar.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-restore-session-date-default
+    target: migrations/0002_observations.sql observed_on defaults
+    change: Replace all America/Chicago expressions with current_date.
+    test_command: >-
+      uv run pytest -m postgres tests/integration/test_observation_append.py::test_database_defaults_observed_on_and_keeps_filing_date_descriptive -q
+    result: >-
+      1 failed; all four column defaults were CURRENT_DATE rather than the
+      required America/Chicago expression.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-disable-upsert-detection
+    target: tests/unit/test_sql_is_append_only.py UPSERT_MUTATION_PATTERN
+    change: Match DO NOTHING instead of DO UPDATE.
+    test_command: >-
+      uv run pytest tests/unit/test_sql_is_append_only.py::test_guard_detects_prohibited_observation_mutation -q
+    result: >-
+      1 failed, 4 passed; the observation-table ON CONFLICT DO UPDATE fixture
+      was no longer reported.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-6-disable-only-detection
+    target: tests/unit/test_sql_is_append_only.py MUTATION_PATTERN
+    change: Remove optional ONLY handling from direct UPDATE and DELETE forms.
+    test_command: >-
+      uv run pytest tests/unit/test_sql_is_append_only.py::test_guard_detects_prohibited_observation_mutation -q
+    result: >-
+      2 failed, 3 passed; UPDATE ONLY and DELETE FROM ONLY were no longer
+      reported.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-7-disable-schema-qualification
+    target: tests/unit/test_sql_is_append_only.py qualified table pattern
+    change: Remove optional schema qualification from observation targets.
+    test_command: >-
+      uv run pytest tests/unit/test_sql_is_append_only.py::test_guard_detects_prohibited_observation_mutation -q
+    result: >-
+      1 failed, 4 passed; DELETE FROM "public"."daily_bar" was no longer
+      reported.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  commands:
+    - uv run pytest -m postgres tests/integration/test_observation_append.py -q
+    - uv run pytest tests/unit/test_sql_is_append_only.py -q
+  result: 15 passed and 7 passed after every mutation was reverted.
+
+final_validation:
+  commands:
+    - uv run pytest -m postgres tests/integration/test_observation_append.py
+    - uv run pytest tests/unit/test_sql_is_append_only.py
+    - uv run pytest
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+    - uv build
+  result: >-
+    15 passed; 7 passed; full suite 377 passed with 2 dependency deprecation
+    warnings; ruff check passed; 104 files formatted; mypy found no issues in
+    30 source files; source distribution and wheel built successfully.
+
+known_gap_carried_forward:
+  description: >-
+    IR-008 belongs to Doc Sync because the approved story's Data Changes prose
+    cannot be edited by story-coding. The original pre-T003 RED remains
+    explicitly reconstructed rather than observed; the review-rework RED was
+    directly observed and recorded above.
+  status: no open implementation or changed-line mutation gap
