@@ -7,7 +7,7 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-15
+updated: 2026-09-17
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -98,7 +98,7 @@ Create the pure ingestion hashing module that turns an observation-value diction
 
 **Purpose**: Prove the new pure module meets repository quality gates and resists meaningful hashing regressions.
 
-- [ ] T004 Run from the repository root: `uv run pytest -m 'not postgres' tests/unit/test_hashing.py`, `uv run pytest -m 'not postgres'`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`. Record RED before T003 and GREEN after it; manually mutate sorted-key handling, decimal string conversion, float rejection, and SHA-256 output in turn, confirming a named test fails for each mutation (depends on T003).
+- [x] T004 Run from the repository root: `uv run pytest -m 'not postgres' tests/unit/test_hashing.py`, `uv run pytest -m 'not postgres'`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`. Record RED before T003 and GREEN after it; manually mutate sorted-key handling, decimal string conversion, float rejection, and SHA-256 output in turn, confirming a named test fails for each mutation (depends on T003).
 
 **Checkpoint**: The mapped component tests, additional error-path tests, and all required quality checks pass with RED→GREEN→MUTATE evidence.
 
