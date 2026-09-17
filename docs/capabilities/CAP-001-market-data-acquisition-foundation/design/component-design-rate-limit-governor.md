@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-rate-limit-governor
 artifact_type: component-design
-artifact_version: 6
+artifact_version: 8
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-11
+updated: 2026-09-16
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  model: gpt-5.6
+  tool: Devin
+  tool_version: "unknown"
+  timestamp: 2026-09-16T22:01:57Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -29,9 +29,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-11T00:35:00Z
-  reviewed_revision: sha256:44fe044354a1d0d5ef1271bf7278e558565351229fd29b49907637367317f9b8
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-09-16T22:08:35Z
+  reviewed_revision: sha256:21e573a3da2516241814e1353c8c18747e34fde4b0cd957438db1566f7d954ef
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v5.md"
 ---
 
 # Component: Rate Limit Governor
@@ -39,7 +39,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-001
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-09-05
+**Last Updated:** 2026-09-16
 
 ## 1. Overview
 
@@ -336,7 +336,7 @@ and backoff without sleeping in real time and without any network.
 | Test | File | What it proves |
 |------|------|----------------|
 | Requests are paced to the budget | `tests/unit/test_governor_pacing.py` | Ten requests at a budget of five per minute span at least the expected virtual time (5.14) |
-| A burst does not exceed capacity | `tests/unit/test_governor_pacing.py` | No more than `requests_per_minute` requests issue in any one virtual minute |
+| A burst stays within the token-bucket bound | `tests/unit/test_governor_pacing.py` | A window beginning with a full bucket issues no more than capacity plus one window's refill; subsequent windows after drawdown issue no more than `requests_per_minute` requests |
 | 429 does not consume an attempt | `tests/unit/test_governor_retry.py` | Five consecutive 429 responses then a 200 succeeds with the attempt counter at zero (5.13) |
 | Retry-After is honoured when present | `tests/unit/test_governor_retry.py` | The wait matches the header rather than the boundary. Provider-agnostic path; Massive never exercises it |
 | 429 without Retry-After waits to the boundary | `tests/unit/test_governor_retry.py` | The wait reaches the next minute boundary, not the exponential backoff delay. This is the Massive path (section 2.5) |
@@ -354,8 +354,18 @@ All tests here run without a container and without a network, so they carry no
 
 ## 8. Acceptance Criteria
 
-1. Requests issue at no more than the configured budget over any one-minute
-   window.
+1. Requests issue under a token-bucket admission control sized to the
+   configured budget: the bucket starts full (capacity equal to
+   `requests_per_minute`) and refills continuously at
+   `requests_per_minute / 60` tokens per second. A window that begins with
+   a full bucket may therefore issue up to twice the configured budget --
+   capacity plus one window's refill, the standard token-bucket bound --
+   and every subsequent window, once the bucket has been drawn down, is
+   capped at the configured budget alone. (Amended 2026-09-16, DEC-0002:
+   the original wording ("no more than the configured budget over any
+   one-minute window") was unsatisfiable by a bucket required to start
+   full, discovered across three implementation reviews of CAP-001-E3-S4;
+   see `docs/decision-records.md`.)
 2. A `429` response is retried without incrementing the attempt counter.
 3. A `429` carrying `Retry-After` waits the provider's stated delay, and a `429`
    without one waits to the next minute boundary rather than the backoff delay.
