@@ -95,7 +95,7 @@ Create migration `0002_observations.sql` and its PostgreSQL-backed and static sa
 
 **Purpose**: Demonstrate the migration and safeguards work under the real PostgreSQL test environment and the repository quality gates.
 
-- [ ] T004 Run the story-focused and full validation commands from the repository root: `uv run pytest -m postgres tests/integration/test_observation_append.py`, `uv run pytest tests/unit/test_sql_is_append_only.py`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`; record RED before T003, then GREEN and manual mutation evidence that adding `observed_on` to a unique constraint, removing a `value_hash` length check, or introducing an observation-table `DELETE` makes a named test fail (depends on T003).
+- [x] T004 Run the story-focused and full validation commands from the repository root: `uv run pytest -m postgres tests/integration/test_observation_append.py`, `uv run pytest tests/unit/test_sql_is_append_only.py`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`; record RED before T003, then GREEN and manual mutation evidence that adding `observed_on` to a unique constraint, removing a `value_hash` length check, or introducing an observation-table `DELETE` makes a named test fail (depends on T003).
 
 **Checkpoint**: All mapped tests and quality gates pass, and the changed behavior has RED→GREEN→MUTATE evidence.
 
