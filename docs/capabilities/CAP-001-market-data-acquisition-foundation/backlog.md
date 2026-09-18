@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
-artifact_version: 1
+artifact_version: 2
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-09-18
 ai_provenance:
   agent_id: epic-generation-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-06T03:31:55Z
+  model: gpt-5.6
+  tool: Devin
+  tool_version: "unknown"
+  timestamp: 2026-09-18T16:29:53Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -27,9 +27,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T15:20:03Z
-  reviewed_revision: sha256:ed00937dd9578b7d44b90393f553efcd18f04e5ffdeba9b922b27f862df89046
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v5.md"
+  approved_at: 2026-09-18T19:51:09Z
+  reviewed_revision: sha256:75d01359666551f6efa5ebc53457041f56bcf23cf2b8f0e3d4939198d48398f4
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v9.md"
 ---
 
 # Backlog: Market Data Acquisition Foundation
@@ -38,7 +38,7 @@ approval:
 **Generated:** 2026-09-06
 **Total EPICs:** 7
 **Total Stories:** 36
-**Total Points:** 151
+**Total Points:** 154
 
 ## EPICs
 
@@ -48,7 +48,7 @@ approval:
 | [CAP-001-E2](epics/instrument-list-and-history-depth/CAP-001-E2.md) | N/A | Instrument List and History Depth | M | 4 | 16 |
 | [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | 5 | 20 |
 | [CAP-001-E4](epics/point-in-time-acquisition/CAP-001-E4.md) | N/A | Point-in-Time Acquisition and Re-run Safety | XL | 7 | 32 |
-| [CAP-001-E5](epics/run-lifecycle/CAP-001-E5.md) | N/A | Run Lifecycle: Queueing, Cancellation and Recovery | L | 6 | 28 |
+| [CAP-001-E5](epics/run-lifecycle/CAP-001-E5.md) | N/A | Run Lifecycle: Queueing, Cancellation and Recovery | L | 6 | 31 |
 | [CAP-001-E6](epics/coverage-and-gap-visibility/CAP-001-E6.md) | N/A | Coverage and Gap Visibility | L | 4 | 18 |
 | [CAP-001-E7](epics/failure-diagnosis-and-operability/CAP-001-E7.md) | N/A | Failure Diagnosis and Operational Visibility | M | 4 | 13 |
 
@@ -62,11 +62,11 @@ rather than waiting on another capability. Massive binds at integration in E3
 and E4.
 
 ```
-E1 ──┬── E2 ──┬── E4 ──┬── E6
-     │        │        │
-     ├── E3 ──┘        │
-     │                 │
-     └── E5 ───────────┴── E7
+E1 ──┬── E2 ────────────────┐
+     ├── E3 ────────────────┤
+     └── E4-S1 ── E5-S1 ── E5-S2
+                       ├─────┴── E4 remainder ── E6
+                       └──────── E5 remainder ── E7
 ```
 
 E1 also delivers the application shell and status region that every screen
@@ -77,14 +77,14 @@ need, or each would invent its own.
 
 - **E1** first and alone. Nothing else can start without the schema, migrations, runtime configuration and the application shell.
 - **E2 and E3** are parallelizable once E1 lands, and share no components.
-- **E4** needs E2's instrument list and stated depth, and E3's provider client. It is the largest EPIC and carries the three commitments the system design names unrecoverable if wrong.
-- **E5** needs only E1 and E2, so it can run alongside E3 and E4. E4 consumes its claim contract, which the component design fixes, so the two can be developed against that contract in parallel.
+- **E4** starts with E4-S1 after E1, then its remaining stories need E2's instrument list and stated depth, E3's provider client, E5-S1's schema and E5-S2's claim contract. It is the largest EPIC and carries the three commitments the system design names unrecoverable if wrong.
+- **E5** needs E1, E2 and E4-S1's observation migration. E5-S1 then owns migrations 0003 and 0004 together, avoiding a migration-order cycle with E4-S3; the remaining E5 work can run alongside later E4 stories against the fixed schema and claim contracts.
 - **E6** needs E4's written coverage segments to read, though its read contract is fixed and can be built against in parallel.
 - **E7** needs E5's run records. It supplies the most recent run's outcome to the status region E1 delivers, and owns the error envelope every screen renders, so its error contract is worth settling early even though its run detail screen comes last.
 
 ## Stories
 
-36 stories across the seven EPICs, 151 points. Every story is scoped to the
+36 stories across the seven EPICs, 154 points. Every story is scoped to the
 single writable repository `FactorFlow-v2`, which `project.yaml` declares; the
 twelve component names from the system design are modules within it rather than
 separate repositories, and each story names its module in the description.
@@ -95,10 +95,10 @@ separate repositories, and each story names its module in the description.
 | E2 Instrument List and History Depth | 4 | 16 | 3 Python, 1 TypeScript |
 | E3 Provider Integration and Pacing | 5 | 20 | 5 Python |
 | E4 Point-in-Time Acquisition and Re-run Safety | 7 | 32 | 7 Python |
-| E5 Run Lifecycle: Queueing, Cancellation and Recovery | 6 | 28 | 5 Python, 1 TypeScript |
+| E5 Run Lifecycle: Queueing, Cancellation and Recovery | 6 | 31 | 5 Python, 1 TypeScript |
 | E6 Coverage and Gap Visibility | 4 | 18 | 3 Python, 1 TypeScript |
 | E7 Failure Diagnosis and Operational Visibility | 4 | 13 | 3 Python, 1 TypeScript |
-| **Total** | **36** | **151** | 30 Python, 6 TypeScript |
+| **Total** | **36** | **154** | 30 Python, 6 TypeScript |
 
 No story spans both languages, so none straddles the pytest and vitest boundary.
 
@@ -133,15 +133,15 @@ so a reader reconciling this table against an EPIC file finds what they expect.
 | AC-4 Acquisition volume, 3000 instruments | 3, 5.13, 5.14 | rate-limit-governor, acquisition-runner | E4; E3 (derived) | E3-S4, E4-S5, E4-S7 |
 | AC-5 Point-in-time record | 3, 5.3, 5.4 | observation-writer, massive-client | E3, E4 | E3-S2, E4-S1, E4-S2, E4-S3 |
 | AC-6 Re-run safety | 3 step 16, 4.2 | observation-writer, acquisition-runner | E4 | E4-S1, E4-S2, E4-S3, E4-S4, E4-S6 |
-| AC-7 Coverage visibility | 4.1, 4.2 | coverage-service, ingestion-api, owner-web-app | E6 | E4-S3, E6-S1, E6-S3, E6-S4 |
+| AC-7 Coverage visibility | 4.1, 4.2 | market-data-store, coverage-service, ingestion-api, owner-web-app | E5, E6 | E5-S1, E4-S3, E6-S1, E6-S3, E6-S4 |
 | AC-8 Gap visibility | 4.1, 5.5 | coverage-service | E6 | E6-S2, E6-S3, E6-S4 |
 | AC-9 Honest run outcome | 3 steps 26-27 | run-journal | E5 | E5-S1, E5-S3, E5-S5, E5-S6, E7-S1 |
 | AC-10 Failure diagnosis | 3 step 21, 4.2 | run-journal, ingestion-api, owner-web-app | E7 | E4-S6, E5-S5, E7-S1, E7-S2, E7-S4 |
 | AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E7; E4 (derived) | E3-S3, E3-S5, E4-S6, E7-S1, E7-S4 |
-| AC-12 A failed run leaves no false history | 3 step 17, 5.9 | observation-writer, coverage-service | E4, E6 | E4-S1, E4-S3, E6-S1 |
+| AC-12 A failed run leaves no false history | 3 step 17, 5.9 | market-data-store, observation-writer, coverage-service | E4, E5, E6 | E4-S1, E5-S1, E4-S3, E6-S1 |
 | AC-13 Credential handling | 3 steps 37-39, 5.12 | runtime-config, massive-client, schema-migrator | E1, E3; E7 (derived) | E1-S2, E1-S3, E3-S1, E3-S5, E7-S2 |
 | AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | E1-S3, E1-S4, E1-S6 |
-| AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1 | E1-S1, E1-S2 |
+| AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1, E5 | E1-S1, E1-S2, E5-S1 |
 | AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1; E7 (derived) | E1-S2, E1-S5 |
 | AC-17 Honest empty state | 4.2 | coverage-service, owner-web-app | E6; E1 (derived) | E6-S1, E6-S3, E6-S4, E1-S5 |
 | AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app | E1, E7 | E1-S5, E1-S6, E7-S3 |
