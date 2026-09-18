@@ -10,9 +10,11 @@ data ingestion process, and the owner interface. See
 
 ## Status
 
-Early. The database schema foundation, the instrument-list domain service,
-the instrument and settings API routes, the API's health endpoint and
-application factory, and the owner interface's application shell — its
+Early. The database schema foundation — including append-only, point-in-time
+observation tables for instrument reference data, daily bars, fundamentals,
+and corporate actions — the instrument-list domain service, the instrument
+and settings API routes, the API's health endpoint and application factory,
+and the owner interface's application shell — its
 navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
 consuming the instrument and settings API. The market data ingestion
