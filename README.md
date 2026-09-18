@@ -23,12 +23,12 @@ historical data shapes into the product's own vocabulary — its typed
 error taxonomy — reconstructing which provider failure occurred from the
 SDK's single status-code-discarding exception — a safe failure-reason
 composer built on that taxonomy, its provider-agnostic rate-limit governor,
-and the historical client that wires all of it to Massive's REST SDK are
-also in place, though nothing in the ingestion process calls that client
-yet. The remaining API routes
-(acquisition runs, coverage), the rest of the ingestion process, and the
-Coverage and Runs screens are not yet built; those two destinations still
-render a placeholder. What exists today is described below — everything else
+the deterministic observation-value hashing primitive, and the historical
+client that wires the provider boundary to Massive's REST SDK are also in
+place, though no observation writer or acquisition runner calls them yet. The
+remaining API routes (acquisition runs, coverage), the rest of the ingestion
+process, and the Coverage and Runs screens are not yet built; those two
+destinations still render a placeholder. What exists today is described below — everything else
 in `docs/` is specification for work not yet implemented.
 
 ## Requirements
@@ -75,6 +75,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
+| `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
@@ -200,6 +201,30 @@ Every non-2xx response from these two route modules carries the shared
 including FastAPI's own request-validation `422`s — `app.py`'s
 `_validation_error_handler` derives `resource` from the request path so a
 shared, application-wide handler still names the right resource per route.
+
+## Deterministic observation-value hashing
+
+`src/factorflow/ingestion/hashing.py` exposes two pure functions for the later
+observation writer. `canonical_json(value)` recursively accepts JSON-native
+`None`, booleans, integers, strings, lists, and string-keyed dictionaries,
+plus `Decimal`. It converts each `Decimal` to its exact string form, then emits
+UTF-8 JSON with sorted keys and compact separators. Floats, non-string
+dictionary keys, and every other unsupported type raise `TypeError`; no
+`str()` or `repr()` fallback can silently create a misleading digest.
+
+`value_hash(value)` returns `hashlib.sha256(canonical_json(value)).digest()` as
+32 raw bytes. Equivalent dictionaries therefore hash identically regardless
+of insertion order, while a changed supplied field changes the digest. The
+function hashes every field the caller supplies: the future observation writer
+is responsible for passing only observation values and excluding
+`observed_on`, `run_id`, and `recorded_at`.
+
+The canonical form deliberately renders a `Decimal` as a JSON string. A
+`Decimal("1.10")` and the literal string `"1.10"` therefore have the same
+canonical representation; callers must keep each field's Python type stable.
+Changing the canonical form or digest algorithm after observations have been
+stored is a data-compatibility change, because unchanged values would otherwise
+receive new hashes and be appended again.
 
 ## Massive provider response models
 

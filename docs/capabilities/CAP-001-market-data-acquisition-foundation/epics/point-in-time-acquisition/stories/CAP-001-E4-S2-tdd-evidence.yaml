@@ -1,0 +1,130 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E4-S2-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E4-S2
+tasks_file: CAP-001-E4-S2-tasks.md
+created: 2026-09-17
+updated: 2026-09-17
+
+# Durable RED -> GREEN -> MUTATE evidence for T001-T004. The RED and initial
+# GREEN observations occurred during the prior story-coding stage; this resumed
+# stage re-verified GREEN and performed every mutation below against commit
+# e7e0d10, reverting each mutation before continuing.
+
+cycle:
+  unit: factorflow.ingestion.hashing
+  red:
+    timing: prior story-coding stage, before T003
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py
+    result: >-
+      Collection failed because factorflow.ingestion.hashing did not yet exist
+      (ModuleNotFoundError). This is the T001/T002 checkpoint observed before
+      the implementation was added; it was not re-labelled as a current run.
+    commit: uncommitted (prior story-coding stage)
+  green:
+    timing: resumed story-coding stage on 2026-09-17 (current session)
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py
+    result: 9 passed
+    independent_process_command: >-
+      uv run python -c 'from decimal import Decimal; from
+      factorflow.ingestion.hashing import value_hash;
+      print(value_hash({"b": Decimal("1.10"), "a": 1}).hex())' &&
+      uv run python -c 'from decimal import Decimal; from
+      factorflow.ingestion.hashing import value_hash;
+      print(value_hash({"a": 1, "b": Decimal("1.10")}).hex())'
+    independent_process_result: >-
+      Both processes returned
+      2714464a21c390ddb3e17648a6136144b72389c99d090392fe822e1ed8601d7f.
+    implementation_commit: e7e0d10c8a590c6a31798862fa0e53ee406f17e2
+
+manual_mutations_baseline: e7e0d10c8a590c6a31798862fa0e53ee406f17e2
+manual_mutations:
+  - id: mutation-1-sorted-keys
+    target: factorflow.ingestion.hashing.canonical_json
+    change: sort_keys=True -> sort_keys=False
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py -q
+    result: >-
+      2 failed, 7 passed:
+      test_canonical_json_sorts_nested_keys_and_uses_compact_separators and
+      test_dictionary_insertion_order_does_not_change_value_hash.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-decimal-string-conversion
+    target: factorflow.ingestion.hashing._canonicalize
+    change: return str(value) for Decimal -> return float(value)
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py -q
+    result: >-
+      1 failed, 8 passed:
+      test_nested_decimals_render_as_exact_strings_and_preserve_scale observed
+      numeric 1.1 instead of the exact JSON string "1.10".
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-float-rejection
+    target: factorflow.ingestion.hashing._canonicalize
+    change: raise TypeError for float -> return str(value)
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py -q
+    result: >-
+      1 failed, 8 passed:
+      test_float_value_raises_instead_of_entering_the_digest reported
+      DID NOT RAISE TypeError.
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-sha256-output
+    target: factorflow.ingestion.hashing.value_hash
+    change: hashlib.sha256(...).digest() -> hashlib.sha1(...).digest()
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py -q
+    result: >-
+      1 failed, 8 passed:
+      test_identical_input_returns_the_same_raw_sha256_digest observed a digest
+      different from hashlib.sha256(canonical_json(value)).digest().
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  source_restoration_command: >-
+    git diff --exit-code -- src/factorflow/ingestion/hashing.py &&
+    uv run pytest -m 'not postgres' tests/unit/test_hashing.py -q
+  source_restoration_result: clean implementation diff; 9 passed
+  static_bundle_present: >-
+    src/factorflow/api/static/index.html and built files under
+    src/factorflow/api/static/assets/ were present throughout T004 validation.
+  commands:
+    - command: uv sync --all-extras
+      result: Resolved 44 packages; checked 41 packages
+    - command: uv run pytest -m 'not postgres' tests/unit/test_hashing.py
+      result: 9 passed
+    - command: uv run pytest -m 'not postgres'
+      result: 305 passed, 59 deselected, 2 warnings
+    - command: uv run pytest
+      result: 364 passed, 2 warnings
+    - command: uv run ruff check .
+      result: All checks passed
+    - command: uv run ruff format --check .
+      result: 104 files already formatted
+    - command: uv run mypy src
+      result: Success, no issues found in 31 source files
+    - command: uv build
+      result: >-
+        Successfully built dist/factorflow-0.1.0.tar.gz and
+        dist/factorflow-0.1.0-py3-none-any.whl
+    - command: npm ci
+      result: >-
+        Installed and audited 251 packages; reported the existing 7
+        vulnerabilities (5 moderate, 1 high, 1 critical) and 3 packages with
+        unapproved install scripts already recorded by EXP-20260917-1.
+    - command: npm run build
+      result: Vite built 48 modules successfully
+    - command: npm run test
+      result: 22 test files passed; 105 tests passed
+    - command: npm run test:e2e
+      result: 1 Playwright test passed
+    - command: npm run lint
+      result: Checked 47 files; no fixes applied
+    - command: npm run format
+      result: Checked 47 files; no fixes applied
+    - command: npx tsc --noEmit
+      result: passed with no output
+  completed_at: 2026-09-17T22:26:46Z
