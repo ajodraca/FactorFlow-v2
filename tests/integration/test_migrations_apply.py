@@ -32,11 +32,17 @@ def test_new_migrations_apply_after_0002_without_rewriting_rows(
         conn.commit()
         with conn.cursor() as cur:
             cur.execute(
+                "SELECT instrument_id, symbol, lifecycle, added_at, retired_at "
+                "FROM instrument WHERE instrument_id = %s",
+                (instrument_id,),
+            )
+            instrument_sentinel = cur.fetchone()
+            cur.execute(
                 "SELECT instrument_id, session_date, encode(value_hash, 'hex'), open_price, "
                 "high_price, "
                 "low_price, close_price, volume FROM daily_bar"
             )
-            sentinel = cur.fetchone()
+            daily_bar_sentinel = cur.fetchone()
         assert apply_pending(conn, files) == [3, 4]
         with conn.cursor() as cur:
             cur.execute(
@@ -45,17 +51,29 @@ def test_new_migrations_apply_after_0002_without_rewriting_rows(
             )
             assert cur.fetchall() == [(3, files[2].checksum), (4, files[3].checksum)]
             cur.execute(
+                "SELECT instrument_id, symbol, lifecycle, added_at, retired_at "
+                "FROM instrument WHERE instrument_id = %s",
+                (instrument_id,),
+            )
+            assert cur.fetchone() == instrument_sentinel
+            cur.execute(
                 "SELECT instrument_id, session_date, encode(value_hash, 'hex'), open_price, "
                 "high_price, "
                 "low_price, close_price, volume FROM daily_bar"
             )
-            assert cur.fetchone() == sentinel
+            assert cur.fetchone() == daily_bar_sentinel
         assert apply_pending(conn, files) == []
         with conn.cursor() as cur:
+            cur.execute(
+                "SELECT instrument_id, symbol, lifecycle, added_at, retired_at "
+                "FROM instrument WHERE instrument_id = %s",
+                (instrument_id,),
+            )
+            assert cur.fetchone() == instrument_sentinel
             cur.execute(
                 "SELECT instrument_id, session_date, encode(value_hash, 'hex'), open_price, "
                 "high_price, low_price, close_price, volume FROM daily_bar"
             )
-            assert cur.fetchone() == sentinel
+            assert cur.fetchone() == daily_bar_sentinel
     finally:
         conn.close()
