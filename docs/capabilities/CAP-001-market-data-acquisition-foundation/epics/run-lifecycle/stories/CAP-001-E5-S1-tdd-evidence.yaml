@@ -1,0 +1,77 @@
+story: CAP-001-E5-S1
+cycles:
+  - name: design-sql-fence-helper
+    red:
+      command: uv run pytest tests/unit/test_schema_migrations_match_design.py
+      result: "FAILED during collection: ImportError for sql_block_after_migration_filename"
+    green:
+      command: uv run pytest tests/unit/test_schema_migrations_match_design.py
+      result: "2 passed"
+    tests:
+      - tests/unit/test_schema_migrations_match_design.py
+    staged_diff_review: "REJECTED: required constraint/schema/evidence cases incomplete"
+    spec_drift_verification: "drift_detected: true; missing required task-plan coverage"
+    commit: "not created; precommit review rejected the staged cycle"
+  - name: schema-constraint-strengthening
+    green:
+      command: >-
+        uv run pytest tests/unit/test_run_states.py tests/unit/test_schema_migrations_match_design.py
+        tests/unit/test_migration_filenames.py && uv run pytest -m postgres
+        tests/integration/test_coverage_constraints.py tests/integration/test_run_constraints.py
+        tests/integration/test_migrations_apply.py
+      result: "14 unit tests passed; 3 PostgreSQL integration tests passed"
+    strengthening:
+      - "Added named-constraint checks for unknown coverage type, reversed range, and overlap."
+      - "Added acquisition-run check, index, result-persistence, and migration-sentinel assertions."
+    staged_diff_review: "REJECTED: required constraint/schema/evidence cases incomplete"
+    spec_drift_verification: "drift_detected: true; missing required task-plan coverage"
+    commit: "not created; precommit review rejected the staged cycle"
+evidence_gap:
+  owner_exception:
+    owner_decision_date: "2026-09-19"
+    decision: >-
+      The owner explicitly authorized an exception for unreconstructable historical
+      TDD-cycle commit hashes so this completed S1 work may proceed to final review.
+    affected_cycles:
+      - design-sql-fence-helper
+      - schema-constraint-strengthening
+    missing_evidence: >-
+      Non-empty per-cycle commit hashes required by T013; the inherited staged
+      production artifacts were present before this resume, and no prior coherent-cycle
+      commits were recorded. The pre-production RED evidence for the inherited
+      production artifacts is also unavailable.
+    rationale: >-
+      Git history and the current worktree cannot reconstruct hashes for commits that
+      were never made. No hash, RED result, or other TDD evidence has been fabricated.
+    scope: >-
+      This exception applies only to the listed historical cycles. The final validation
+      and mutation evidence below remains the recorded evidence for the completed state.
+final_precommit_gates:
+  - identifier: review_e5_s1_exception
+    kind: chat-scoped independent pre-commit review
+    date: "2026-09-19"
+    verdict: PASS
+  - identifier: drift_e5_s1_exception
+    kind: chat-scoped independent pre-commit spec-drift check
+    date: "2026-09-19"
+    drift_detected: false
+final_validation:
+  install: "uv sync --all-extras: resolved 44 packages; checked 41 packages"
+  focused_unit: "14 passed"
+  focused_postgres: "3 passed"
+  full_pytest: "397 passed, 2 warnings"
+  lint: "uv run ruff check .: passed"
+  format: "uv run ruff format --check .: 113 files already formatted"
+  type_check: "uv run mypy src: Success, no issues found in 33 source files"
+  build: "uv build: source distribution and wheel built successfully"
+mutations:
+  status: complete; all required mutations killed and restored
+  executed:
+    - "legal state edge: removed requested -> running; test_run_states failed; restored"
+    - "coverage range ordering: changed <= to <; design-drift guard failed; restored"
+    - "coverage overlap exclusion: changed && to =; design-drift guard failed; restored"
+    - "acquisition-state outcome: removed failed; design-drift guard failed; restored"
+    - "active-run predicate: removed cancelling; design-drift guard failed; restored"
+    - "terminal/end-time agreement: inverted end condition; design-drift guard failed; restored"
+    - "acquisition_state migration ownership: renamed table in 0003; design-drift guard failed; restored"
+    - "pre-0003 observation preservation: added DELETE FROM daily_bar to 0003; migration sentinel test failed; restored"
