@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-E5-S1-tasks
 artifact_type: story-tasks
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-18
+updated: 2026-09-19
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
-  model: gpt-5.6
-  tool: Devin
+  model: gpt-5
+  tool: Codex
   tool_version: "unknown"
-  timestamp: 2026-09-18T22:57:23Z
+  timestamp: 2026-09-19T17:30:00Z
   source_artifacts:
     - id: CAP-001-E5-S1
       version: "2"
@@ -36,8 +36,8 @@ ai_provenance:
 
 **Story**: `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S1.md`
 **Component**: `FactorFlow-v2`
-**Branch**: `usr/alvaro-de-jodra/CAP-001-stories`
-**Date**: 2026-09-18
+**Branch**: `usr/alvaro-de-jodra/CAP-001-E5-S1`
+**Date**: 2026-09-19
 
 ## Summary
 
@@ -122,7 +122,7 @@ Create the consecutive coverage-state and run-journal migrations plus the pure r
 
 **Purpose**: Preserve RED, GREEN, mutation, strengthening and refactor evidence, then run every repository quality gate relevant to this schema story.
 
-- [x] T013 Create `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S1-tdd-evidence.yaml`; for each coherent TDD cycle, record the observed RED command before its production task, GREEN afterward, the staged-diff code-review verdict, the staged-diff spec-drift verdict, tests executed and non-empty commit hash before beginning the next cycle. Manually mutate and restore at least: one legal state edge, coverage range ordering, the overlap exclusion, acquisition-state outcome validation, the active-run predicate, terminal/end-time agreement, migration ownership of `acquisition_state`, and preservation of a pre-0003 observation row. Strengthen any surviving test before proceeding (depends throughout on T002 through T012; implements TEST-TDD-001 through TEST-TDD-008 and INV-TDD-004).
+- [x] T013 Create `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S1-tdd-evidence.yaml`; for each coherent TDD cycle with recoverable history, record the observed RED command before its production task, GREEN afterward, the staged-diff code-review verdict, the staged-diff spec-drift verdict, tests executed and non-empty commit hash before beginning the next cycle. For the completed historical `design-sql-fence-helper` and `schema-constraint-strengthening` cycles only, record the missing pre-production RED evidence and commit hashes as unreconstructable, retain the owner exception dated 2026-09-19, and do not fabricate evidence. Manually mutate and restore at least: one legal state edge, coverage range ordering, the overlap exclusion, acquisition-state outcome validation, the active-run predicate, terminal/end-time agreement, migration ownership of `acquisition_state`, and preservation of a pre-0003 observation row. Strengthen any surviving test before proceeding (depends throughout on T002 through T012; implements TEST-TDD-001 through TEST-TDD-008 and INV-TDD-004).
 - [x] T014 Run `uv sync --all-extras`, `uv run pytest tests/unit/test_run_states.py tests/unit/test_schema_migrations_match_design.py tests/unit/test_migration_filenames.py`, `uv run pytest -m postgres tests/integration/test_coverage_constraints.py tests/integration/test_run_constraints.py tests/integration/test_migrations_apply.py`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`; record exact results in the TDD evidence and report PostgreSQL tests as excluded rather than green if the container runtime is unavailable (depends on T013).
 
 **Checkpoint**: All 13 mapped component cases and the four new story-derived schema contracts are exercised, every material mutation is killed or strengthens a test, the full Python suite and quality gates pass, and no unrelated artifact changed.
@@ -188,6 +188,8 @@ Create the consecutive coverage-state and run-journal migrations plus the pure r
 - The current component test specification and coverage matrix predate story v2 and therefore have no dedicated TC-COMP IDs for DAC-E5-S1-8 through DAC-E5-S1-11. This plan sharpens existing TC-COMP-007, TC-COMP-012 and TC-COMP-015 into concrete schema assertions and adds explicit tests for all four derived criteria. The next test-design revision should add direct traceability rows without renumbering or reusing existing TC IDs.
 
 ### Other Notes
+
+- **Owner-approved T013 exception (2026-09-19):** The owner approved the limited revision above for the two named historical cycles. Their RED records and non-empty commit hashes were never created and cannot be reconstructed from Git history or the inherited worktree. The evidence file must name that absence and must not manufacture a substitute. This approval is limited to those cycles; it does not relax the normal evidence requirement for any future cycle or rework.
 
 - TC-COMP-009 is broader than S1: this story provides the persisted state and result evidence, while CAP-001-E5-S3 owns result-derived finalisation. S1 must not add a trigger, cross-table success constraint or finaliser to claim the whole behavior.
 - `last_run_id` in `acquisition_state` deliberately has no foreign key to `acquisition_run`; adding one would create a forward dependency from migration 0003 to migration 0004.
