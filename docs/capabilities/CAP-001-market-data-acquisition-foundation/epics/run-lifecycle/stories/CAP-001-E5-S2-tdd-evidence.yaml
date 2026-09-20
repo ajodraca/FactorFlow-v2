@@ -27,4 +27,27 @@ cycles:
       UUID and the active UUID as queued_behind, supplied depth persisted,
       every active-row field unchanged, and the no-active case returns
       queued_behind=None.
+    commit_hash: 10504d0
+  - name: t003-claim-tests
+    task: T003
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_queue.py
+      result: "FAILED during collection: ModuleNotFoundError: No module named 'factorflow.runs.journal'"
+    tests_executed: true
+    tests:
+      - tests/integration/test_run_queue.py
+    staged_diff_review: >-
+      PASS (in-session review): FIFO test seeds requested_at out of insertion
+      order so ORDER BY requested_at is the only passing implementation;
+      empty-queue and running/cancelling-active polls assert None; the
+      successful-claim test asserts state, started_at, claimed_by and
+      heartbeat_at written atomically and maps the stored snapshot depth (7)
+      while a different stated depth (2) exists; traceability comments cover
+      TC-COMP-237, TC-COMP-260, TC-COMP-261, TC-COMP-262, TC-COMP-263.
+    spec_drift_verification: >-
+      drift_detected: false; staged diff implements T003 exactly: distinct
+      ordered requested_at seeds, claim-then-terminalize predecessor chain,
+      ascending FIFO assertion, empty queue and running/cancelling active rows
+      yield None, one claim atomically writes the four fields and returns the
+      row's UUID and stored depth.
     commit_hash: pending
