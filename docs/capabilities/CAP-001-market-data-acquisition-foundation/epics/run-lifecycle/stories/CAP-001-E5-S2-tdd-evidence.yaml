@@ -130,4 +130,87 @@ cycles:
       psycopg boundaries, bound parameters, one-transaction request, the
       single-statement claim, None on no row, and no current-settings read.
       heartbeat/cancel/finalise are correctly absent (other stories' scope).
+    commit_hash: f073242
+  - name: t007-integration-run
+    task: T007
+    green:
+      command: >-
+        uv run pytest tests/integration/test_run_queue.py
+        tests/unit/test_run_journal.py && uv run pytest
+      result: "16 S2 tests passed in 3.65s; full suite 414 passed, 2 warnings"
+    tests_executed: true
+    note: >-
+      No corrections required; the production journal boundary satisfied every
+      staged test on first integration. The None claim signal is a plain
+      return value consumed unchanged by the runner's configured-wait loop
+      (CAP-001-E4-S5 owns the wait policy).
+    staged_diff_review: "PASS (in-session review): no file diff produced"
+    spec_drift_verification: "drift_detected: false; no file diff produced"
+    commit_hash: "none — run-only task produced no file diff"
+  - name: t008-mutation-strengthening
+    task: T008
+    mutations:
+      - >-
+        FIFO order: ORDER BY requested_at -> DESC in the claim subquery;
+        test_claims_follow_request_order failed; restored.
+      - >-
+        Claim active-state predicate: dropped 'cancelling' from the NOT EXISTS
+        guard; test_claim_returns_none_while_run_active[cancelling] failed
+        (UniqueViolation); restored.
+      - >-
+        SKIP LOCKED removed (plain FOR UPDATE):
+        test_claim_skips_locked_candidate failed with LockNotAvailable under
+        the test's lock_timeout=5000 rather than hanging; restored.
+      - >-
+        Active-row preservation: request_run additionally ran UPDATE
+        heartbeat_at = now() on the active row;
+        test_request_queues_behind_active_run[running] and [cancelling]
+        failed; restored.
+      - >-
+        Returned-depth mapping: claim returned history_depth_years=1 instead
+        of row[1]; test_successful_claim_sets_fields_and_returns_snapshot,
+        test_claim_skips_locked_candidate and
+        test_concurrent_claims_fail_on_unique_index failed; restored.
+      - >-
+        No-row mapping: an empty claim mapped to a zero-UUID ClaimedRun
+        instead of None; test_claim_next_returns_none_when_no_row and the
+        integration None paths (empty queue, running/cancelling active, both
+        contention tests) failed; restored.
+      - >-
+        Request queued_behind predicate: dropped 'cancelling' from
+        _ACTIVE_RUN_SQL; test_request_queues_behind_active_run[cancelling]
+        failed; restored.
+    strengthening: >-
+      none required — every injected mutant was killed by an existing test,
+      so no test needed strengthening.
+    refactor: "none — the implementation is already the design's minimum"
+    staged_diff_review: >-
+      PASS (in-session review): no production or test diff in this task —
+      mutation evidence was produced by temporary edits, each observed failing
+      and each restored (git diff src/ empty afterwards); this entry records
+      executions, mutations, and verdicts only.
+    spec_drift_verification: >-
+      drift_detected: false; mutation set covers exactly the plan's list —
+      FIFO order, active-state predicate (claim guard and request lookup),
+      SKIP LOCKED, active-row preservation, returned-depth and no-row mapping
+      — and all mutants are killed by retained tests.
     commit_hash: pending
+cross_story_verification:
+  none_signal: >-
+    The no-row claim result is a plain None return pinned by
+    tests/unit/test_run_journal.py::test_claim_next_returns_none_when_no_row
+    and the integration None paths. CAP-001-E4-S5's configured-wait loop
+    (tests/integration/test_runner_credential.py,
+    tests/unit/test_ingestion_main.py, poll over
+    settings.run.poll_interval_seconds = 5.0s default) does not exist yet —
+    that story is unimplemented. S2 supplies the stable None signal it will
+    consume; S2 does not duplicate the wait policy.
+final_validation:
+  install: "uv sync --all-extras: resolved 44 packages; checked 41 packages"
+  focused_unit: "uv run pytest tests/unit/test_run_journal.py: 6 passed"
+  focused_postgres: "uv run pytest -m postgres tests/integration/test_run_queue.py: 10 passed"
+  full_pytest: "uv run pytest: 414 passed, 2 warnings (postgres-marked tests ran; docker available)"
+  lint: "uv run ruff check .: all checks passed"
+  format: "uv run ruff format --check .: 116 files already formatted"
+  type_check: "uv run mypy src: Success, no issues found in 34 source files"
+  build: "uv build: factorflow-0.1.0.tar.gz and factorflow-0.1.0-py3-none-any.whl built successfully"

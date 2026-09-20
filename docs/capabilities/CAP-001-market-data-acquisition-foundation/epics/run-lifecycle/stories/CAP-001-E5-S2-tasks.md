@@ -97,7 +97,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Run the public journal boundary against the verified S1 schema and independent PostgreSQL connections after production implementation exists.
 
-- [ ] T007 Run `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` against `src/factorflow/runs/journal.py`; correct any mismatch within those three S2-owned files while preserving the exact SQL claim contract, and confirm the no-row journal signal consumed by CAP-001-E4-S5's configured-wait loop is stable (depends on T006).
+- [x] T007 Run `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` against `src/factorflow/runs/journal.py`; correct any mismatch within those three S2-owned files while preserving the exact SQL claim contract, and confirm the no-row journal signal consumed by CAP-001-E4-S5's configured-wait loop is stable (depends on T006).
 
 **Checkpoint**: The S2 integration and unit suites exercise the production `factorflow.runs.journal` boundary through the same psycopg/PostgreSQL interface the acquisition runner will consume.
 
@@ -107,7 +107,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Prove the implementation resists the principal request/claim mutations and meets repository validation and evidence requirements.
 
-- [ ] T008 Strengthen `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` after manually mutating FIFO order, the active-state predicate, `SKIP LOCKED`, active-row preservation, and returned-depth/no-row mapping; retain tests that kill each mutation. Run the focused RED→GREEN→MUTATE→STRENGTHEN→REFACTOR cycle and record each task's executions, mutations, commit hash, code-review verdict, and spec-drift verdict in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S2-tdd-evidence.yaml` before beginning the next cycle (depends on T007).
+- [x] T008 Strengthen `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` after manually mutating FIFO order, the active-state predicate, `SKIP LOCKED`, active-row preservation, and returned-depth/no-row mapping; retain tests that kill each mutation. Run the focused RED→GREEN→MUTATE→STRENGTHEN→REFACTOR cycle and record each task's executions, mutations, commit hash, code-review verdict, and spec-drift verdict in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S2-tdd-evidence.yaml` before beginning the next cycle (depends on T007).
 
 **Checkpoint**: Targeted PostgreSQL tests distinguish FIFO from reverse selection, reject a second active claim, prove candidate-row contention is non-blocking, fail if queueing alters the active row, and fail if current settings or incorrect no-row mapping replace the persisted claim contract; all required review and TDD evidence is present.
 
