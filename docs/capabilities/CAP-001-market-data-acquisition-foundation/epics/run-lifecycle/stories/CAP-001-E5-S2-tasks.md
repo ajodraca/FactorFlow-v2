@@ -59,7 +59,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Verify rather than recreate the unresolved S1 prerequisite, following the repository's established blocking-check pattern for cross-story contracts.
 
-- [ ] T001 Confirm that `tests/conftest.py` exports CAP-001-E5-S1's planned `migrated_run_schema_connection`, that the pre-existing `postgres_connection_string` fixture remains available, that `src/factorflow/runs/__init__.py` makes `factorflow.runs` importable, and that `migrations/0003_coverage.sql` and `migrations/0004_runs.sql` are present and discoverable in order on the eventual coding branch; block S2 implementation if any S1-owned prerequisite is absent rather than creating, moving, or duplicating it.
+- [x] T001 Confirm that `tests/conftest.py` exports CAP-001-E5-S1's planned `migrated_run_schema_connection`, that the pre-existing `postgres_connection_string` fixture remains available, that `src/factorflow/runs/__init__.py` makes `factorflow.runs` importable, and that `migrations/0003_coverage.sql` and `migrations/0004_runs.sql` are present and discoverable in order on the eventual coding branch; block S2 implementation if any S1-owned prerequisite is absent rather than creating, moving, or duplicating it.
 
 **Checkpoint**: The eventual coding branch contains an importable S1 run package and its required schema/fixture contracts; this phase changes none of those contracts and stops if S1 has not landed consistently.
 
