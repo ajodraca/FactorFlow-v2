@@ -1,0 +1,30 @@
+story: CAP-001-E5-S2
+notes: >-
+  Per-task code-review and spec-drift verdicts were produced by an in-session
+  structured review of each staged diff by the coding agent: the runtime for
+  this execution provides no subagent-dispatch mechanism, so the independent
+  subagent the task plan names was substituted with a checklist review against
+  the loaded constitutions (CONST-SA, CONST-SEC, CONST-TEST) and the approved
+  story/design/task plan. This substitution is recorded transparently here so
+  the adversarial-review gate can weigh it.
+cycles:
+  - name: t002-request-queueing-tests
+    task: T002
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_queue.py
+      result: "FAILED during collection: ModuleNotFoundError: No module named 'factorflow.runs.journal'"
+    tests_executed: true
+    tests:
+      - tests/integration/test_run_queue.py
+    staged_diff_review: >-
+      PASS (in-session review): descriptive naming, bound parameters for all
+      values, type hints on every signature, traceability comments for
+      TC-COMP-023 and TC-COMP-265, one queueing behavior per test, no dead
+      code, no markers.
+    spec_drift_verification: >-
+      drift_detected: false; staged diff implements T002 exactly: parametrized
+      running/cancelling active row, request_run returns a distinct requested
+      UUID and the active UUID as queued_behind, supplied depth persisted,
+      every active-row field unchanged, and the no-active case returns
+      queued_behind=None.
+    commit_hash: pending
