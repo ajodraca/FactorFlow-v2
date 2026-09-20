@@ -102,4 +102,32 @@ cycles:
       parameters, None mapping when the claim returns no row, and proof the
       claim maps the returned row's stored depth without calling
       factorflow.instruments.settings.read_history_depth.
+    commit_hash: b53b1c6
+  - name: t006-journal-implementation
+    task: T006
+    green:
+      command: >-
+        uv run pytest tests/unit/test_run_journal.py &&
+        uv run pytest -m postgres tests/integration/test_run_queue.py
+      result: "6 unit passed; 10 postgres integration passed in 5.35s"
+    tests_executed: true
+    implementation:
+      - src/factorflow/runs/journal.py
+    staged_diff_review: >-
+      PASS (in-session review): ClaimedRun is a frozen dataclass; request_run
+      performs the insert and the active-run lookup in one transaction() with
+      bound parameters and never touches the active row; claim_next executes
+      the design's single UPDATE ... WHERE run_id = (SELECT ... NOT EXISTS ...
+      ORDER BY requested_at LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING run_id,
+      history_depth_years statement verbatim with bound runner_id, maps no row
+      to None, propagates UniqueViolation to the caller, and never reads
+      owner_setting; all signatures typed; functions under 30 lines.
+    spec_drift_verification: >-
+      drift_detected: false; staged diff implements T006 exactly:
+      factorflow.runs.journal exports frozen ClaimedRun,
+      request_run(connection, history_depth_years) -> tuple[UUID, UUID|None],
+      and claim_next(connection, runner_id) -> ClaimedRun|None with typed
+      psycopg boundaries, bound parameters, one-transaction request, the
+      single-statement claim, None on no row, and no current-settings read.
+      heartbeat/cancel/finalise are correctly absent (other stories' scope).
     commit_hash: pending
