@@ -77,4 +77,29 @@ cycles:
       synchronized over distinct candidates so both pass the no-active guard,
       with the partial unique index producing one UniqueViolation loser and
       one active row maximum, plus the retained valid-loser None path.
+    commit_hash: 61b9689
+  - name: t005-unit-boundary-tests
+    task: T005
+    red:
+      command: uv run pytest tests/unit/test_run_journal.py
+      result: "FAILED during collection: ModuleNotFoundError: No module named 'factorflow.runs.journal'"
+    tests_executed: true
+    tests:
+      - tests/unit/test_run_journal.py
+    staged_diff_review: >-
+      PASS (in-session review): deterministic recording fakes at the psycopg
+      cursor/connection boundary; asserts frozen ClaimedRun mapping, exactly
+      one executed statement per claim with bound runner_id, bound
+      history_depth_years on the request insert, both queued_behind shapes,
+      one transaction per operation, None mapping for an empty claim result,
+      SQL contract pins (NOT EXISTS, ORDER BY requested_at, FOR UPDATE SKIP
+      LOCKED, RETURNING run_id + history_depth_years), and no
+      read_history_depth call via monkeypatch plus a vars() import check.
+    spec_drift_verification: >-
+      drift_detected: false; staged diff implements T005 exactly: focused
+      cursor/connection-boundary tests for frozen ClaimedRun mapping,
+      UUID/depth return mapping, bound runner_id and history_depth_years
+      parameters, None mapping when the claim returns no row, and proof the
+      claim maps the returned row's stored depth without calling
+      factorflow.instruments.settings.read_history_depth.
     commit_hash: pending

@@ -77,7 +77,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 ### Additional Unit Tests
 
-- [ ] T005 [P] Create `tests/unit/test_run_journal.py` with focused cursor/connection-boundary tests for frozen `ClaimedRun` mapping, UUID/depth return mapping, bound `runner_id` and `history_depth_years` parameters, and `None` mapping when the claim statement returns no row; assert claim mapping uses the returned row's stored depth and never calls `factorflow.instruments.settings.read_history_depth` (depends on T001).
+- [x] T005 [P] Create `tests/unit/test_run_journal.py` with focused cursor/connection-boundary tests for frozen `ClaimedRun` mapping, UUID/depth return mapping, bound `runner_id` and `history_depth_years` parameters, and `None` mapping when the claim statement returns no row; assert claim mapping uses the returned row's stored depth and never calls `factorflow.instruments.settings.read_history_depth` (depends on T001).
 
 **Checkpoint**: If T001 passes, the tests use S1-owned prerequisites, carry `TC-COMP-*` traceability comments, and are observed RED because `factorflow.runs.journal` does not yet exist. The locked-candidate and unique-index race are separate scenarios so `SKIP LOCKED` and the schema backstop are each proved directly.
 
