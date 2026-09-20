@@ -122,7 +122,7 @@ class MassiveClient:
             ("balance_sheet", self._rest_client.list_financials_balance_sheets),
             ("income_statement", self._rest_client.list_financials_income_statements),
             ("cash_flow_statement", self._rest_client.list_financials_cash_flow_statements),
-            ("ratio", self._rest_client.list_financials_ratios),
+            ("ratios", self._rest_client.list_financials_ratios),
         ):
             rows = follow_pages(
                 first_page=self._financial_page(sdk_method, symbol, start, end),
