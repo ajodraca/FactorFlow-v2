@@ -30,6 +30,6 @@ definition is exported as `APPLIED_MIGRATIONS_DDL` in
 | File | Delivered by | Contents |
 |------|-------------|----------|
 | `0001_extensions_owner_state.sql` | CAP-001-E1-S1 | `btree_gist` extension, `instrument`, `owner_setting` |
-| `0002_observations.sql` | (later E1 story) | Observation tables |
-| `0003_coverage.sql` | (later E1 story) | Coverage tables |
-| `0004_runs.sql` | (later E1 story) | Run journal tables |
+| `0002_observations.sql` | CAP-001-E4-S1 | Observation tables |
+| `0003_coverage.sql` | CAP-001-E5-S1 | Coverage tables |
+| `0004_runs.sql` | CAP-001-E5-S1 | Run journal tables |

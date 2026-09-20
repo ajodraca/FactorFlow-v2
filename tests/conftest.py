@@ -22,6 +22,9 @@ from testcontainers.community.postgres import PostgresContainer
 MIGRATION_0001_PATH = (
     Path(__file__).resolve().parents[1] / "migrations" / "0001_extensions_owner_state.sql"
 )
+MIGRATION_0002_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0002_observations.sql"
+MIGRATION_0003_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0003_coverage.sql"
+MIGRATION_0004_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0004_runs.sql"
 
 
 @pytest.fixture(scope="session")
@@ -104,3 +107,16 @@ def migrated_connection_string(postgres_connection_string: str) -> str:
     finally:
         conn.close()
     return postgres_connection_string
+
+
+@pytest.fixture
+def migrated_run_schema_connection(postgres_connection_string: str) -> Iterator[psycopg.Connection]:
+    """Yield an isolated database migrated through the run-journal schema."""
+    from factorflow.db.migrator import apply_pending, discover
+
+    conn = psycopg.connect(postgres_connection_string)
+    apply_pending(conn, discover(MIGRATION_0001_PATH.parent))
+    try:
+        yield conn
+    finally:
+        conn.close()
