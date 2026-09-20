@@ -228,6 +228,28 @@ def test_fetch_financials_returns_a_complete_result_for_a_covered_symbol() -> No
     assert statements[0].cik == "0000320193"
 
 
+def test_fetch_financials_labels_ratios_rows_with_the_ddl_statement_type() -> None:
+    """A ratios row must parse: the client's label for the ratios endpoint has
+    to be a `fundamental_statement_known` value (`ratios`, plural). Every other
+    test mocks ratios as empty, so a wrong label never reached validation."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        for method in (
+            instance.list_financials_balance_sheets,
+            instance.list_financials_income_statements,
+            instance.list_financials_cash_flow_statements,
+        ):
+            method.return_value = _FakeResponse(_envelope([]))
+        instance.list_financials_ratios.return_value = _FakeResponse(
+            _envelope([_wire_statement("financial_quarterly.json")])
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    assert [s.statement_type for s in statements] == ["ratios"]
+
+
 def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() -> None:
     """Component design section 2.5: financials are four sibling
     endpoints under one shape, each constrained by ticker and period so
