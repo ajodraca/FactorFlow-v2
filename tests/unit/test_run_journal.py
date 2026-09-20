@@ -12,9 +12,9 @@ from contextlib import contextmanager
 from typing import Any
 
 import pytest
-from factorflow.runs.journal import ClaimedRun, claim_next, request_run
 
 from factorflow.runs import journal
+from factorflow.runs.journal import ClaimedRun, claim_next, request_run
 
 
 class _RecordingCursor:

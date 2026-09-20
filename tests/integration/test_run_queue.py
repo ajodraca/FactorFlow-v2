@@ -12,11 +12,11 @@ from uuid import UUID
 
 import psycopg
 import pytest
-from factorflow.runs.journal import ClaimedRun, claim_next, request_run
 from psycopg.types.json import Json
 
 from factorflow.db.migrator import apply_pending, discover
 from factorflow.instruments.settings import HISTORY_DEPTH_KEY
+from factorflow.runs.journal import ClaimedRun, claim_next, request_run
 from tests.conftest import MIGRATION_0004_PATH
 
 _RUN_COLUMN_NAMES = (
