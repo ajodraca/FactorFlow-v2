@@ -16,7 +16,8 @@ and corporate actions, the non-overlapping coverage-segment and
 last-acquisition-state tables, and the acquisition-run and per-instrument
 result journal tables — the instrument-list domain service, the instrument
 and settings API routes, the API's health endpoint and application factory,
-the pure acquisition-run lifecycle primitives, and the owner interface's
+the pure acquisition-run lifecycle primitives, the run journal's request
+and claim operations, and the owner interface's
 application shell — its
 navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
@@ -76,7 +77,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/runs/` | Pure acquisition-run lifecycle primitives. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives and the journal's request/claim boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — and claims the oldest requested run in one statement while none is running or cancelling. See [Run request and claim](#run-request-and-claim) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
@@ -417,6 +418,38 @@ acceptance criterion:
   exercises a multi-wait throttle sequence in which each wait lands on a
   genuinely fresh wall-clock phase, the shape production actually takes
   (v5 IR-006).
+
+## Run request and claim
+
+`src/factorflow/runs/journal.py` is the run journal's request and claim
+boundary over the `acquisition_run` table (migration `0004_runs.sql`).
+Heartbeat, cancellation, and finalisation belong to later run-lifecycle
+stories and do not exist yet.
+
+`request_run(connection, history_depth_years)` always inserts a `requested`
+row — a request is never rejected because a run is active; queueing rather
+than rejection is the rule (AC-23). The supplied depth is snapshotted onto
+the row at request time. The insert and the active-run lookup share one
+transaction, so the returned `(run_id, queued_behind)` pair reports the
+`running` or `cancelling` run this request actually follows — `None` when
+none is active — and the active row itself is never modified.
+
+`claim_next(connection, runner_id)` is one `UPDATE` statement in one
+transaction, with no read-then-write window: a subquery picks the oldest
+`requested` row (`ORDER BY requested_at LIMIT 1`) under a `NOT EXISTS`
+guard that excludes any `running` or `cancelling` run, and `FOR UPDATE
+SKIP LOCKED` lets a contending runner skip a locked candidate rather than
+block on it. A successful claim sets `state`, `started_at`, `claimed_by`,
+and `heartbeat_at` in that same statement and returns a frozen
+`ClaimedRun(run_id, history_depth_years)` carrying the snapshotted depth —
+never a re-read of the current setting. `None` means nothing is claimable;
+the configured wait-and-repoll loop that consumes it belongs to the
+acquisition runner's own story (CAP-001-E4-S5).
+
+The `NOT EXISTS` guard is not the only defence against two active runs:
+`idx_acquisition_run_single_active`, a partial unique index over the
+`running`/`cancelling` states, turns a race that slips past the guard into
+a unique violation instead of a second active run.
 
 ## Running the migrator
 
