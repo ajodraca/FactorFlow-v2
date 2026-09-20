@@ -6,6 +6,7 @@ contention cases, independent connections to the same migrated database
 (`postgres_connection_string`).
 """
 
+import threading
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -14,7 +15,9 @@ import pytest
 from factorflow.runs.journal import ClaimedRun, claim_next, request_run
 from psycopg.types.json import Json
 
+from factorflow.db.migrator import apply_pending, discover
 from factorflow.instruments.settings import HISTORY_DEPTH_KEY
+from tests.conftest import MIGRATION_0004_PATH
 
 _RUN_COLUMN_NAMES = (
     "run_id",
@@ -196,3 +199,115 @@ def test_successful_claim_sets_fields_and_returns_snapshot(
     assert row["started_at"] is not None
     assert row["heartbeat_at"] is not None
     assert row["started_at"] == row["heartbeat_at"]
+
+
+def _migrate(postgres_connection_string: str) -> psycopg.Connection:
+    """Open a connection and bring its fresh database to the run schema."""
+    connection = psycopg.connect(postgres_connection_string)
+    apply_pending(connection, discover(MIGRATION_0004_PATH.parent))
+    return connection
+
+
+def _count_active(connection: psycopg.Connection) -> int:
+    """Return the number of `running` or `cancelling` runs."""
+    with connection.cursor() as cur:
+        cur.execute("SELECT count(*) FROM acquisition_run WHERE state IN ('running', 'cancelling')")
+        row = cur.fetchone()
+        assert row is not None
+        return row[0]
+
+
+def _claim_on_new_connection(
+    connection_string: str,
+    runner_id: str,
+    errors: list[psycopg.errors.UniqueViolation],
+    done: threading.Event,
+) -> None:
+    """Run one claim on its own connection, capturing a UniqueViolation."""
+    connection = psycopg.connect(connection_string)
+    try:
+        claim_next(connection, runner_id)
+    except psycopg.errors.UniqueViolation as exc:
+        errors.append(exc)
+    finally:
+        connection.close()
+        done.set()
+
+
+@pytest.mark.postgres
+# Implements TC-COMP-264
+def test_claim_skips_locked_candidate(postgres_connection_string: str) -> None:
+    base = datetime(2026, 9, 1, tzinfo=UTC)
+    setup = _migrate(postgres_connection_string)
+    try:
+        older = _insert_requested_run(setup, 3, base)
+        newer = _insert_requested_run(setup, 3, base + timedelta(minutes=1))
+        setup.commit()
+
+        locker = psycopg.connect(postgres_connection_string)
+        claimer = psycopg.connect(postgres_connection_string, options="-c lock_timeout=5000")
+        try:
+            with locker.cursor() as cur:
+                cur.execute(
+                    "SELECT run_id FROM acquisition_run WHERE run_id = %s FOR UPDATE",
+                    (older,),
+                )
+
+            # The claim must complete while the oldest candidate's lock is
+            # still held: lock_timeout bounds a regression that blocks.
+            claimed = claim_next(claimer, "runner-2")
+
+            assert claimed == ClaimedRun(run_id=newer, history_depth_years=3)
+            locker.rollback()
+            assert claim_next(claimer, "runner-2") is None
+            assert _fetch_run(claimer, older)["state"] == "requested"
+        finally:
+            locker.close()
+            claimer.close()
+    finally:
+        setup.close()
+
+
+@pytest.mark.postgres
+# Implements TC-COMP-238
+def test_concurrent_claims_fail_on_unique_index(postgres_connection_string: str) -> None:
+    base = datetime(2026, 9, 1, tzinfo=UTC)
+    setup = _migrate(postgres_connection_string)
+    try:
+        first = _insert_requested_run(setup, 3, base)
+        second = _insert_requested_run(setup, 3, base + timedelta(minutes=1))
+        setup.commit()
+
+        winner = psycopg.connect(postgres_connection_string)
+        # A statement already in flight keeps the winner's transaction open, so
+        # its claim stays uncommitted while the competing claim evaluates the
+        # no-active guard against the committed snapshot.
+        winner.execute("SELECT 1")
+        try:
+            claimed = claim_next(winner, "runner-a")
+            assert claimed == ClaimedRun(run_id=first, history_depth_years=3)
+
+            loser_errors: list[psycopg.errors.UniqueViolation] = []
+            loser_done = threading.Event()
+            worker = threading.Thread(
+                target=_claim_on_new_connection,
+                args=(postgres_connection_string, "runner-b", loser_errors, loser_done),
+            )
+            worker.start()
+            # The competing update must be waiting on the winner's pending
+            # unique-index entry, not finishing on any other path.
+            assert loser_done.wait(timeout=1.0) is False
+            winner.commit()
+            worker.join(timeout=10)
+
+            assert loser_done.is_set()
+            assert len(loser_errors) == 1
+            assert _count_active(winner) == 1
+            assert _fetch_run(winner, second)["state"] == "requested"
+            # The valid loser schedule: a claim that observes the committed
+            # winner returns None rather than raising.
+            assert claim_next(winner, "runner-a") is None
+        finally:
+            winner.close()
+    finally:
+        setup.close()

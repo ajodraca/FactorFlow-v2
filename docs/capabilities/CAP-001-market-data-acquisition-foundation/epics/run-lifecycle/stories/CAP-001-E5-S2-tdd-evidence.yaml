@@ -50,4 +50,31 @@ cycles:
       ascending FIFO assertion, empty queue and running/cancelling active rows
       yield None, one claim atomically writes the four fields and returns the
       row's UUID and stored depth.
+    commit_hash: 05643b3
+  - name: t004-contention-tests
+    task: T004
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_queue.py
+      result: "FAILED during collection: ModuleNotFoundError: No module named 'factorflow.runs.journal'"
+    tests_executed: true
+    tests:
+      - tests/integration/test_run_queue.py
+    staged_diff_review: >-
+      PASS (in-session review): two independent connections via
+      postgres_connection_string; the locked-candidate scenario bounds a
+      blocking regression with lock_timeout=5000; the forced race holds the
+      winner's claim uncommitted (open transaction makes the journal's
+      transaction() a savepoint) so the loser provably waits on the pending
+      unique-index entry, raises UniqueViolation after the winner commits,
+      and leaves exactly one active row plus the loser still requested; the
+      post-commit None loser path is asserted; helpers keep functions under
+      30 lines; every connection is closed in finally; traceability comments
+      for TC-COMP-238 and TC-COMP-264.
+    spec_drift_verification: >-
+      drift_detected: false; staged diff implements T004 exactly: (a) a held
+      row lock on the oldest requested row is skipped by a claim on another
+      connection that completes while the lock is held, and (b) two claims
+      synchronized over distinct candidates so both pass the no-active guard,
+      with the partial unique index producing one UniqueViolation loser and
+      one active row maximum, plus the retained valid-loser None path.
     commit_hash: pending
