@@ -274,15 +274,18 @@ rework_test_result_postgres: "59 passed"
 # criteria.
 open_items:
   - id: IR-006-fiscal-period-ownership-decided
-    status: resolved-by-attended-owner-decision
+    status: resolved-by-attended-owner-decision-and-propagated
     decided_on: 2026-09-20
     description: >-
       The owner decided in this attended session that CAP-001-E4's
       observation writer owns deriving fundamental_observation.fiscal_period.
-      CAP-001-E3-S2 must not add fiscal_period to FinancialStatement. Flag for
-      CAP-001-E4-S3 implementation planning: add the derivation and covering
-      writer test before inserting fundamental observations, so the table's
-      NOT NULL fiscal_period contract has an explicit producer.
+      CAP-001-E3-S2 must not add fiscal_period to FinancialStatement. The
+      derivation and covering writer test were propagated into
+      CAP-001-E4-S3-tasks.md before this review. Implementation review v4
+      accepted the content but warned that the edit occurred outside E4-S3's
+      implementation-planning phase (IR-003) and carries provenance that does
+      not match the producing commit (IR-004). Those process/provenance gates
+      remain for E4-S3; the ownership decision itself is complete.
   - id: statement-type-ratio-plural-mismatch
     status: resolved-on-main
     description: >-
@@ -298,9 +301,12 @@ review_v3_rework:
   tests_executed: true
   behavior_change: false
   description: >-
-    Tests and comments only: close review-v3 IR-001 through IR-004, add the
-    DAC-E3-12/T009 package-boundary regression, and preserve all newer E3-S2
-    and sibling-story behavior already integrated on main.
+    Close review-v3 IR-001 through IR-004 with tests and comments, add the
+    DAC-E3-12/T009 package-boundary regression, preserve all newer E3-S2 and
+    sibling-story behavior already integrated on main, and propagate the
+    attended fiscal-period ownership decision into CAP-001-E4-S3-tasks.md.
+    Implementation review v4 accepted the propagation's content but recorded
+    its out-of-phase scope and inaccurate provenance as IR-003 and IR-004.
   initial_green:
     command: >-
       uv run pytest -q tests/unit/test_massive_bars.py
@@ -375,3 +381,70 @@ review_v3_rework:
     next_action: >-
       The delegated refinement produced no commits. The parent will create the
       single implementation-stage commit after this evidence is finalized.
+
+review_v4_doc_sync:
+  source_review: CAP-001-E3-S2-implementation-review-v4.md
+  verdict: PASS-WITH-WARNINGS
+  lifecycle_status: docs-sync
+  warnings:
+    - id: IR-001
+      severity: MEDIUM
+      status: accepted-open
+      disposition: >-
+        Current package exports are compliant, but the supplementary boundary
+        test does not reject every builtin collection containing raw wire
+        dictionaries. No code or test change is made during doc sync.
+    - id: IR-002
+      severity: LOW
+      status: accepted-open
+      disposition: >-
+        The Unix-milliseconds lower bound and regression are correct; the
+        source comment cites section 3 instead of section 2.4a of the ingestion
+        API component design. No source comment is changed during doc sync.
+    - id: IR-003
+      severity: MEDIUM
+      status: accepted-open
+      disposition: >-
+        The fiscal-period ownership decision was propagated into
+        CAP-001-E4-S3-tasks.md outside that story's planning phase. This record
+        now says the propagation occurred; E4-S3 still owns gate reconciliation.
+    - id: IR-004
+      severity: LOW
+      status: accepted-open
+      disposition: >-
+        CAP-001-E4-S3-tasks.md carries AI provenance inconsistent with the
+        commit that produced the revision. Doc sync does not alter the sibling
+        task plan or its provenance.
+    - id: IR-005
+      severity: LOW
+      status: accepted-open
+      disposition: >-
+        Optional-versus-zero behavior is tested, but the two tests do not name
+        TC-COMP-219. No test or task-plan change is made during doc sync.
+  pre_commit_reviews:
+    code_review:
+      subagent_id: 9e165cd5
+      verdict: APPROVED
+      blocking_findings: []
+    spec_drift:
+      subagent_id: 112640a6
+      verdict: CLEAR
+      drift_detected: false
+    commits_produced: []
+    next_action: >-
+      The delegated doc-sync produced no commits. The parent will create the
+      single doc-sync commit after this evidence is finalized.
+  owner_decisions:
+    - decided_on: 2026-09-20
+      decision: >-
+        CAP-001-E4's observation writer derives
+        fundamental_observation.fiscal_period; FinancialStatement must not add
+        a fiscal_period field.
+    - decided_on: 2026-09-21
+      decision: >-
+        Phase 6b automation remains intentionally deferred. Leave this story at
+        docs-sync while automation coding and review remain outstanding.
+  outstanding_gates:
+    - automation-coding
+    - automation-review
+    - CAP-001-E4-S3 planning/provenance reconciliation for IR-003 and IR-004
