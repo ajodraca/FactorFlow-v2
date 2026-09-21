@@ -109,10 +109,21 @@ def test_ipo_maps_to_a_product_named_action() -> None:
     assert action.effective_on == date(2023, 9, 14)
 
 
-def test_only_the_four_known_action_types_are_accepted() -> None:
-    """`corporate_action_type_known` in the DDL constrains `action_type` to
-    `split`, `dividend`, `ticker_change` and `ipo`; an unrecognised value
-    fails validation rather than being written."""
+@pytest.mark.parametrize("action_type", ["split", "dividend", "ticker_change", "ipo"])
+def test_each_known_action_type_is_accepted(action_type: str) -> None:
+    """Review-v3 IR-003: pin every value allowed by the DDL's
+    `corporate_action_type_known` constraint (DAC-E3-S2-4 / T005/T007)."""
+    wire = _load("action_split.json")
+
+    action = CorporateAction.model_validate(
+        {**wire, "action_type": action_type, "effective_on": wire["execution_date"]}
+    )
+
+    assert action.action_type == action_type
+
+
+def test_unknown_action_type_is_rejected() -> None:
+    """Values outside `corporate_action_type_known` fail before writing."""
     wire = _load("action_split.json")
 
     with pytest.raises(ValidationError):
@@ -178,6 +189,23 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
     assert payload["action_type"] == "split"
     for writer_owned in ("observed_on", "run_id", "recorded_at"):
         assert writer_owned not in payload
+
+
+def test_ticker_change_payload_deliberately_retains_provider_keys() -> None:
+    """DAC-E3-12 / T005/T006: pin the deliberate provider-key retention
+    documented by `CorporateAction` (review-v3 IR-004)."""
+    wire = _load("action_ticker_change.json")
+    action = CorporateAction.model_validate(
+        {**wire, "action_type": "ticker_change", "effective_on": wire["date"]}
+    )
+
+    assert set(action.value_payload()) == {
+        "action_type",
+        "date",
+        "effective_on",
+        "ticker_change",
+        "type",
+    }
 
 
 # --- MassiveClient.fetch_corporate_actions (CAP-001-E3-S1) ---------------

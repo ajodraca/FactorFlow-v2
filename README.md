@@ -273,7 +273,37 @@ check on `DailyBar`'s Unix-milliseconds timestamp) were fixed in the
 `timeframe` are now `Literal`-constrained to the persistence contract's
 known values, the extra-field `Decimal` coercion recurses into nested
 dicts and lists, and `DailyBar`'s timestamp validator rejects non-numeric
-input and anything outside a plausible Unix-milliseconds magnitude.
+input and anything outside a plausible Unix-milliseconds magnitude. The
+follow-up also pins the accepted statement/action domains, the September
+2003 lower history bound, the timezone test's non-UTC precondition, and the
+deliberately duplicated ticker-change payload keys with regression tests.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v4** (`CAP-001-E3-S2-implementation-review-v4.md`) — none changes the
+current model behavior or blocks an acceptance criterion:
+
+- The supplementary package-boundary test rejects a bare raw dictionary and
+  Massive SDK exports, but treats arbitrary builtin-typed exports as
+  package-owned. A collection containing raw wire dictionaries can therefore
+  pass that test even though the current 15-name `__all__` exports no such
+  value (IR-001, medium).
+- The `_MIN_PLAUSIBLE_MILLIS` rationale points to section 3 of
+  `component-design-ingestion-api.md`; the September 2003 floor is actually in
+  section 2.4a's `MAX_HISTORY_DEPTH_YEARS` row. The bound and its regression
+  test are correct; only that source-code comment's section citation is stale
+  (IR-002, low).
+- The attended decision that CAP-001-E4's writer derives
+  `fundamental_observation.fiscal_period` was propagated into E4-S3's task plan
+  during this story's coding run, outside E4-S3's planning phase, while this
+  story's evidence originally still described the propagation as pending
+  (IR-003, medium). The propagated plan's AI provenance attributes that revision
+  to an implementation-planning run not represented by the commit history
+  (IR-004, low). Both are process/provenance warnings for the later E4-S3 gate;
+  `FinancialStatement` intentionally has no `fiscal_period` field.
+- The optional-versus-zero behavior is covered for `fiscal_quarter` and
+  `is_otc`, but those tests do not name their mapped `TC-COMP-219` identifier,
+  leaving an automated traceability gap rather than a behavioral coverage gap
+  (IR-005, low).
 
 ## Massive historical client
 

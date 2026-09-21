@@ -66,15 +66,15 @@ def _coerce_extra_numeric_fields_to_decimal(
 
 
 # A plausibility bound on Unix milliseconds for `DailyBar.session_date`,
-# not an attempt at a real calendar range: wide enough to admit any bar
-# this component will ever parse, narrow enough that a value one order of
-# magnitude off (most likely Unix seconds instead of milliseconds) always
-# falls outside it. 2001-09-09 (first `t` >= 10^12 ms) through 2286-11-20
-# (last `t` < 10^13 ms) -- the decade boundaries of `t`'s own digit count,
-# so this needs no revisiting as real dates advance. Module-level rather
-# than a class attribute on `DailyBar`: Pydantic treats an unannotated
-# class-level assignment on a `BaseModel` as a private attribute, not a
-# plain constant.
+# not an attempt at a general calendar range. The lower bound predates the
+# earliest bar available from Massive's deepest plan: Stocks Advanced has
+# 20+ years of history (`docs/constitution/tech-stack.md`, Plan tiers) and
+# `component-design-ingestion-api.md` section 3 pins its current floor to
+# September 2003. The September 2003 regression test keeps that provider
+# coupling explicit. Values one order of magnitude off (most likely Unix
+# seconds instead of milliseconds) fall outside the 10^12..10^13 digit
+# range. These stay module-level because Pydantic treats an unannotated
+# class assignment on a `BaseModel` as a private attribute, not a constant.
 _MIN_PLAUSIBLE_MILLIS = 1_000_000_000_000
 _MAX_PLAUSIBLE_MILLIS = 9_999_999_999_999
 

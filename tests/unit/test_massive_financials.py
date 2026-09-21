@@ -146,13 +146,23 @@ def test_missing_required_field_fails_validation(missing_field: str) -> None:
         FinancialStatement.model_validate(wire)
 
 
-def test_only_the_four_known_statement_types_are_accepted() -> None:
-    """CAP-001-E3-S2-implementation-review-v2 IR-002:
-    `fundamental_statement_known` in the DDL constrains `statement_type`
-    to `balance_sheet`, `income_statement`, `cash_flow_statement` and
-    `ratios`; an unrecognised value fails validation here rather than as
-    a database `CHECK` violation inside the writer's per-instrument
-    transaction."""
+@pytest.mark.parametrize(
+    "statement_type",
+    ["balance_sheet", "income_statement", "cash_flow_statement", "ratios"],
+)
+def test_each_known_statement_type_is_accepted(statement_type: str) -> None:
+    """Review-v3 IR-003: pin every value allowed by the DDL's
+    `fundamental_statement_known` constraint (DAC-E3-S2-4 / T004/T007)."""
+    statement = FinancialStatement.model_validate(
+        {**_load("financial_annual.json"), "statement_type": statement_type}
+    )
+
+    assert statement.statement_type == statement_type
+
+
+def test_unknown_statement_type_is_rejected() -> None:
+    """Review-v2 IR-002: values outside `fundamental_statement_known` fail
+    before the writer's per-instrument transaction."""
     wire = _load("financial_annual.json")
 
     with pytest.raises(ValidationError):

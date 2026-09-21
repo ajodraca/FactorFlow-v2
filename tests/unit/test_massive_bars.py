@@ -6,9 +6,8 @@ bars parse and page`); `component-design-market-data-store.md` section 2.3
 """
 
 import json
-import os
 import time as time_module
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 from unittest.mock import patch
@@ -94,41 +93,40 @@ def test_aliases_map_every_wire_field_to_a_named_attribute() -> None:
     assert bar.transaction_count == 811734
 
 
-def test_unix_millis_convert_to_session_date_via_timezone_aware_utc() -> None:
-    """TC-COMP-216: `t` converts from Unix milliseconds using a
-    timezone-aware UTC conversion to `daily_bar.session_date`
-    (DAC-E3-S2-2). A naive local-time conversion would shift the date near
-    midnight depending on the host's timezone.
-
-    IR-001 (CAP-001-E3-S2-implementation-review-v2): the original
-    assertions here passed even with a naive (non-UTC-aware) conversion,
-    because they compared against `date(2024, 1, 2)` without ever forcing
-    the process into a non-UTC zone -- on a UTC host (as CI now runs,
-    `.github/workflows/validate.yml`, added after v1) naive and
-    UTC-aware conversion coincide, so the defect this test exists to
-    catch is invisible in the one environment that gates every merge.
-    The process's ambient `TZ` is pinned to a deliberately non-UTC zone
-    (`America/Los_Angeles`, UTC-8 in January) for the duration of this
-    test, so a regression to a naive conversion fails here regardless of
-    the host's own timezone."""
-    original_tz = os.environ.get("TZ")
-    os.environ["TZ"] = "America/Los_Angeles"
-    time_module.tzset()
+def test_unix_millis_convert_to_session_date_via_timezone_aware_utc(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-COMP-216 / DAC-E3-S2-2: the non-UTC pin is self-verifying, so
+    missing timezone data fails loudly instead of making this regression
+    test vacuous (CAP-001-E3-S2-implementation-review-v3 IR-001)."""
     try:
-        bar = DailyBar.model_validate({**_load("bar_regular.json"), "t": 1704153600000})
-        assert bar.session_date == date(2024, 1, 2)
+        with monkeypatch.context() as timezone:
+            timezone.setenv("TZ", "America/Los_Angeles")
+            time_module.tzset()
 
-        # One millisecond before midnight UTC must still land on the prior day.
-        bar_before_midnight = DailyBar.model_validate(
-            {**_load("bar_regular.json"), "t": 1704153599999}
-        )
-        assert bar_before_midnight.session_date == date(2024, 1, 1)
+            # Prove the named zone resolved: a silent UTC fallback would yield January 2.
+            assert datetime.fromtimestamp(1704153600).date() == date(2024, 1, 1)
+
+            bar = DailyBar.model_validate({**_load("bar_regular.json"), "t": 1704153600000})
+            assert bar.session_date == date(2024, 1, 2)
+
+            # One millisecond before midnight UTC must still land on the prior day.
+            bar_before_midnight = DailyBar.model_validate(
+                {**_load("bar_regular.json"), "t": 1704153599999}
+            )
+            assert bar_before_midnight.session_date == date(2024, 1, 1)
     finally:
-        if original_tz is None:
-            os.environ.pop("TZ", None)
-        else:
-            os.environ["TZ"] = original_tz
         time_module.tzset()
+
+
+def test_earliest_massive_advanced_bar_is_within_millis_bound() -> None:
+    """DAC-E3-S2-2 / T008: Massive Advanced's September 2003 history floor
+    remains inside the Unix-milliseconds plausibility bound (review-v3 IR-002)."""
+    earliest_advanced_millis = 1_062_374_400_000  # 2003-09-01T00:00:00Z
+
+    bar = DailyBar.model_validate({**_load("bar_regular.json"), "t": earliest_advanced_millis})
+
+    assert bar.session_date == date(2003, 9, 1)
 
 
 def test_non_numeric_t_is_rejected_rather_than_coerced() -> None:
