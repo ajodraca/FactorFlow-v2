@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-18
+updated: 2026-09-21
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
   model: gpt-5.6
   tool: Codex
   tool_version: "unknown"
-  timestamp: 2026-09-18T02:58:04Z
+  timestamp: 2026-09-21T02:24:44Z
   source_artifacts:
     - id: CAP-001-E4-S3
       version: "1"
@@ -35,7 +35,7 @@ ai_provenance:
 **Story**: `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/point-in-time-acquisition/stories/CAP-001-E4-S3.md`
 **Component**: `FactorFlow-v2`
 **Branch**: `usr/alvaro-de-jodra/CAP-001-E4-S3`
-**Date**: 2026-09-18
+**Date**: 2026-09-21
 
 ## Summary
 
@@ -45,7 +45,7 @@ Implement the typed observation writer so one reached instrument's four successf
 
 | AC | Description | Tasks |
 |----|-------------|-------|
-| AC-5 | Persist FactorFlow's observation date, append restatements, and preserve prior values. | T003, T004, T009, T010, T012 |
+| AC-5 | Persist complete fundamental observations with FactorFlow's observation date, append restatements, and preserve prior values. | T002, T003, T004, T009, T010, T012 |
 | AC-6 | Rewriting identical returned values neither duplicates nor mutates history. | T003, T009, T010, T012 |
 | AC-7 | Stamp per-data-type acquisition state in the committed instrument transaction. | T002, T009, T011, T012 |
 | AC-10 | Persist one result row for every successfully reached data type. | T002, T009, T011, T012 |
@@ -76,7 +76,7 @@ Implement the typed observation writer so one reached instrument's four successf
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Create `tests/integration/test_writer_transaction.py` for TC-COMP-007, TC-COMP-010, TC-COMP-012, TC-COMP-138, TC-COMP-139, TC-COMP-162, TC-COMP-165, TC-COMP-166, and TC-COMP-167: assert one successful four-data-type call commits observations, only the actual returned ranges, per-type acquisition state, exactly four result rows, and per-type appended/unchanged counts; install a test-local PostgreSQL trigger that raises during the acquisition-state step and assert observations, coverage, state, and results all roll back. Include a `# Implements TC-COMP-...` traceability comment for every mapped case (depends on T001).
+- [ ] T002 [P] Create `tests/integration/test_writer_transaction.py` for TC-COMP-007, TC-COMP-010, TC-COMP-012, TC-COMP-138, TC-COMP-139, TC-COMP-162, TC-COMP-165, TC-COMP-166, and TC-COMP-167: assert one successful four-data-type call commits observations, only the actual returned ranges, per-type acquisition state, exactly four result rows, and per-type appended/unchanged counts; cover annual and quarterly `FinancialStatement` inputs and assert the persisted NOT NULL `fundamental_observation.fiscal_period` is derived as `FY` from `timeframe="annual"` and as `Q{fiscal_quarter}` from `timeframe="quarterly"`, without requiring a `FinancialStatement.fiscal_period` field; install a test-local PostgreSQL trigger that raises during the acquisition-state step and assert observations, coverage, state, and results all roll back. Include a `# Implements TC-COMP-...` traceability comment for every mapped case (depends on T001).
 - [ ] T003 [P] Create `tests/integration/test_writer_idempotence.py` for TC-COMP-005, TC-COMP-006, and TC-COMP-162: write a controlled `observed_on`, repeat the identical four-type payload, and then change one value; assert the repeat reports zero appended and positive unchanged counts without altering stored rows or coverage, while the restatement appends a second row and preserves the first row's observation date. Include a traceability comment for every mapped case (depends on T001).
 - [ ] T004 [P] Extend `tests/integration/test_writer_transaction.py` with explicit TC-COMP-138, TC-COMP-139, and TC-COMP-165 failure probes at an observation insert, coverage replacement, acquisition-state upsert, and result insert; after each injected database failure, assert no partial observation, intended coverage, state, or result survives and the original exception propagates (depends on T001).
 - [ ] T005 [P] Create `tests/unit/test_coverage_merge.py` and `tests/integration/test_writer_coverage.py` for TC-COMP-163 and TC-COMP-164: cover overlap, enclosure, preceding/following one-day adjacency, unsorted existing segments, and genuinely disjoint ranges in the pure function; then directly attempt an overlapping `coverage_segment` insert and assert PostgreSQL names `coverage_no_overlap`, while a normal writer merge leaves the minimal non-overlapping set. Include matching traceability comments (integration case depends on T001).
@@ -96,7 +96,7 @@ Implement the typed observation writer so one reached instrument's four successf
 
 - [ ] T008 Create `merge_ranges(existing, written)` in `src/factorflow/ingestion/coverage.py`; sort inclusive date ranges, coalesce overlap and one-calendar-day adjacency in either direction, preserve disjoint segments, and return the minimal ordered set (depends on T005 RED evidence).
 - [ ] T009 Create immutable `ObservationBatch`, `ParsedObservations`, and `WriteResult` contracts in `src/factorflow/ingestion/writer.py`: group the four existing provider-model collections with each data type's actual returned coverage range, use the schema data-type names `reference`, `prices`, `fundamentals`, and `corporate_actions`, and expose per-type appended, unchanged, and covered-range results without depending on `runner.py` (depends on T007 RED evidence).
-- [ ] T010 In `src/factorflow/ingestion/writer.py`, implement bound-parameter insert helpers for `instrument_reference`, `daily_bar`, `fundamental_observation`, and `corporate_action`; hash each model's `value_payload()` with `factorflow.ingestion.hashing.value_hash`, pass the caller-supplied FactorFlow `observed_on`, use each table's existing natural key with `ON CONFLICT DO NOTHING`, adapt JSON payloads through psycopg's JSON support, and derive appended versus unchanged counts from returned rows without any observation-table update or delete (depends on T003, T006, T009).
+- [ ] T010 In `src/factorflow/ingestion/writer.py`, implement bound-parameter insert helpers for `instrument_reference`, `daily_bar`, `fundamental_observation`, and `corporate_action`; in the fundamental helper derive the required `fundamental_observation.fiscal_period` value as `FY` when `FinancialStatement.timeframe == "annual"` and as `Q{fiscal_quarter}` when `timeframe == "quarterly"`, using the existing `timeframe` and `fiscal_quarter` inputs and never adding or expecting a `FinancialStatement.fiscal_period` field; hash each model's `value_payload()` with `factorflow.ingestion.hashing.value_hash`, pass the caller-supplied FactorFlow `observed_on`, use each table's existing natural key with `ON CONFLICT DO NOTHING`, adapt JSON payloads through psycopg's JSON support, and derive appended versus unchanged counts from returned rows without any observation-table update or delete (depends on T002, T003, T006, T009).
 
 **Checkpoint**: The pure merge and four idempotent append paths satisfy their focused tests and return typed per-data-type counts and ranges.
 
@@ -128,13 +128,14 @@ Implement the typed observation writer so one reached instrument's four successf
 ### Story Dependencies
 
 - CAP-001-E4-S1 and CAP-001-E4-S2 are merged and supply `migrations/0002_observations.sql`, the four provider persistence shapes, the append-only guard, and `src/factorflow/ingestion/hashing.py`.
+- CAP-001-E3-S2 supplies `FinancialStatement.timeframe` and optional `fiscal_quarter`; by the 2026-09-20 owner decision, E4-S3's writer derives the NOT NULL `fundamental_observation.fiscal_period` from those inputs and must not require E3-S2 to add a `fiscal_period` model field.
 - CAP-001-E5-S1 must be planned, implemented, reviewed, and integrated before E4-S3 story coding starts because T001 and the transaction tests require `migrations/0003_coverage.sql` and `migrations/0004_runs.sql`.
 
 ### Task Dependencies
 
 - T001 waits for CAP-001-E5-S1 and then prepares the shared database fixture.
 - T002 through T007 touch separate test concerns and may be authored in parallel after T001 where marked; every relevant RED must be observed and recorded before its production task.
-- T008 depends on T005; T009 depends on T007; T010 depends on T003, T006, and T009.
+- T008 depends on T005; T009 depends on T007; T010 depends on T002, T003, T006, and T009 so its fiscal-period derivation is test-first as well as append-only.
 - T011 depends on T002 through T004 and T008 through T010.
 - T012 follows the corresponding GREEN implementation and gates each subsequent TDD cycle; T013 depends on all earlier tasks.
 
@@ -166,6 +167,7 @@ Implement the typed observation writer so one reached instrument's four successf
 
 - Apply migrations `0001` through `0004` to a disposable PostgreSQL 16 database; never mock the `coverage_no_overlap` exclusion constraint.
 - Verify a successful four-data-type call commits observations, only actual returned ranges, acquisition state, and exactly four successful result rows in one transaction.
+- In `tests/integration/test_writer_transaction.py`, persist annual and quarterly `FinancialStatement` instances and assert `fundamental_observation.fiscal_period` is respectively `FY` and `Q{fiscal_quarter}`, remains NOT NULL, and is produced without a `FinancialStatement.fiscal_period` model field.
 - Inject failures at observation, coverage, state, and result steps and verify no partial state survives and the original exception propagates.
 - Repeat identical values and then restate one value, verifying per-type counts, unchanged coverage, and immutability of the earlier observation.
 - Exercise pure range merging across overlap, enclosure, both adjacency directions, unsorted input, and disjoint ranges; directly prove PostgreSQL rejects a remaining overlap.
@@ -180,10 +182,12 @@ Implement the typed observation writer so one reached instrument's four successf
 - `component-design-market-data-store.md` §2.4 labels `run_instrument_result` insertion as an acquisition-runner action, while the story and observation-writer transaction contract require per-data-type results inside the atomic writer transaction. The story's narrower acceptance criteria govern: E4-S3 inserts successful `written`/`unchanged` results; later runner/outcome stories supply provider-failure classifications without moving the transaction boundary.
 - `acquisition_state.last_outcome` permits `written`, `not_found`, and `failed`, while `run_instrument_result.outcome` also permits `unchanged`. For a successful re-fetch that appends nothing, the state projection records `written` to mean successfully acquired, while the run result records `unchanged`; the existing DDL constraints and run-journal success rule pin that distinction.
 - Coverage replacement may delete `coverage_segment` rows, but the append-only prohibition covers only `instrument_reference`, `daily_bar`, `fundamental_observation`, and `corporate_action`. Transactional coverage replacement is therefore allowed; observation updates, deletes, and conflict updates remain forbidden.
+- **Owner decision confirmed 2026-09-20:** CAP-001-E4's observation writer owns deriving the NOT NULL `fundamental_observation.fiscal_period` value from the existing `FinancialStatement.timeframe` and `fiscal_quarter` inputs. E3-S2 must not add a `fiscal_period` model field. T002 makes annual and quarterly persistence coverage mandatory, and T010 assigns the derivation to `src/factorflow/ingestion/writer.py` before the fundamental insert.
 
 ### Open Gaps
 
-- None. **Owner decision confirmed 2026-09-18:** `ParsedObservations` is a writer-local typed grouping of the four existing provider-model collections and each data type's actual returned coverage range. This avoids a dependency on the not-yet-implemented runner and is the smallest boundary that can prove coverage reflects returned data. The next revision of `component-design-observation-writer.md` should define this ownership and per-data-type shape explicitly.
+- **Owner decision confirmed 2026-09-18:** `ParsedObservations` is a writer-local typed grouping of the four existing provider-model collections and each data type's actual returned coverage range. This avoids a dependency on the not-yet-implemented runner and is the smallest boundary that can prove coverage reflects returned data. The next revision of `component-design-observation-writer.md` should define this ownership and per-data-type shape explicitly.
+- `component-design-observation-writer.md` does not yet assign ownership of `fundamental_observation.fiscal_period` or document its derivation from `FinancialStatement.timeframe` and `fiscal_quarter`. The 2026-09-20 owner decision above governs E4-S3 implementation; flag this owning design for its next revision so it records the writer-owned `FY`/`Q{fiscal_quarter}` mapping and the prohibition on adding a provider-model `fiscal_period` field.
 
 ### Other Notes
 

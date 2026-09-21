@@ -4,7 +4,7 @@ artifact_type: tdd-evidence
 story: CAP-001-E3-S2
 tasks_file: CAP-001-E3-S2-tasks.md
 created: 2026-09-11
-updated: 2026-09-16
+updated: 2026-09-21
 
 # RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for the four
 # provider response models (T007/T008), one cycle per model, plus the T010
@@ -269,34 +269,109 @@ rework_test_result: "252 passed, 59 deselected (up from 247)"
 rework_test_command_postgres: uv run pytest -q -m postgres
 rework_test_result_postgres: "59 passed"
 
-# Follow-up items surfaced during rework, not resolved by this story per
-# constraint 9 (project-repo edits are metadata-only; this story does
-# not edit capability specs, design content, or acceptance criteria).
+# Follow-up items surfaced during rework and their current dispositions.
+# This story does not edit capability specs, design content, or acceptance
+# criteria.
 open_items:
-  - id: IR-006-fiscal-period-ownership-undecided
+  - id: IR-006-fiscal-period-ownership-decided
+    status: resolved-by-attended-owner-decision
+    decided_on: 2026-09-20
     description: >-
-      review-v2 IR-006: fundamental_observation.fiscal_period is
-      NOT NULL in component-design-market-data-store.md section 2.3, but
-      no field on FinancialStatement supplies it, and no component
-      merged to date (including CAP-001-E4's task plans, now on main)
-      produces a value for it. Follow-up: either derive fiscal_period on
-      FinancialStatement from timeframe/fiscal_quarter with a covering
-      test, or record in a CAP-001-E4 task plan that it owns deriving
-      this value, so the gap becomes a recorded decision rather than an
-      omission discovered at write time.
+      The owner decided in this attended session that CAP-001-E4's
+      observation writer owns deriving fundamental_observation.fiscal_period.
+      CAP-001-E3-S2 must not add fiscal_period to FinancialStatement. Flag for
+      CAP-001-E4-S3 implementation planning: add the derivation and covering
+      writer test before inserting fundamental observations, so the table's
+      NOT NULL fiscal_period contract has an explicit producer.
   - id: statement-type-ratio-plural-mismatch
+    status: resolved-on-main
     description: >-
-      Discovered while implementing IR-002's Literal constraint on
-      FinancialStatement.statement_type, constrained here to the DDL's
-      four values (balance_sheet, income_statement, cash_flow_statement,
-      ratios -- component-design-market-data-store.md section 2.3's
-      fundamental_statement_known CHECK constraint). CAP-001-E3-S1's
-      client.py (on its own unmerged branch,
-      usr/alvaro-de-jodra/CAP-001-E3-S1, as of this story's rework) pairs
-      list_financials_ratios with the label "ratio" (singular), not
-      "ratios". Once S1 merges, this constraint will correctly reject
-      every ratios statement S1's client produces as a
-      ProviderContractViolation -- which is the intended protection this
-      finding asked for, but the actual defect is in S1's client.py, not
-      in this story's models.py. Follow-up: S1 needs "ratio" corrected to
-      "ratios" before or as part of its own next rework pass.
+      The earlier S1 follow-up is resolved by the newer implementation now on
+      main: client.py labels list_financials_ratios results "ratios", matching
+      FinancialStatement and the fundamental_statement_known DDL constraint.
+      test_fetch_financials_labels_ratios_rows_with_the_ddl_statement_type
+      covers the integrated seam.
+
+review_v3_rework:
+  source_review: CAP-001-E3-S2-implementation-review-v3.md
+  commits_produced: []
+  tests_executed: true
+  behavior_change: false
+  description: >-
+    Tests and comments only: close review-v3 IR-001 through IR-004, add the
+    DAC-E3-12/T009 package-boundary regression, and preserve all newer E3-S2
+    and sibling-story behavior already integrated on main.
+  initial_green:
+    command: >-
+      uv run pytest -q tests/unit/test_massive_bars.py
+      tests/unit/test_massive_financials.py tests/unit/test_massive_actions.py
+      tests/unit/test_massive_package_boundary.py
+    result: 70 passed
+  manual_mutations:
+    - id: mutation-9-timezone-pin-unresolvable
+      change: America/Los_Angeles -> No/Such_Zone
+      test: test_unix_millis_convert_to_session_date_via_timezone_aware_utc
+      result: failed at the self-verification assertion (UTC fallback yielded 2024-01-02)
+      caught: true
+      reverted: true
+    - id: mutation-10-history-floor-raised
+      change: _MIN_PLAUSIBLE_MILLIS 1_000_000_000_000 -> 1_100_000_000_000
+      test: test_earliest_massive_advanced_bar_is_within_millis_bound
+      result: failed with ValidationError for the 2003-09-01 bar
+      caught: true
+      reverted: true
+    - id: mutation-11-statement-domain-narrowed
+      change: remove income_statement and cash_flow_statement from the Literal
+      test: test_each_known_statement_type_is_accepted
+      result: 2 failed, 2 passed
+      caught: true
+      reverted: true
+    - id: mutation-12-action-domain-narrowed
+      change: remove ticker_change and ipo from the Literal
+      test: test_each_known_action_type_is_accepted
+      result: 2 failed, 2 passed
+      caught: true
+      reverted: true
+    - id: mutation-13-ticker-change-date-dropped
+      change: remove date from CorporateAction.value_payload()
+      test: test_ticker_change_payload_deliberately_retains_provider_keys
+      result: failed because the exact deliberate key set no longer matched
+      caught: true
+      reverted: true
+    - id: mutation-14-package-model-replaced-by-dict
+      change: replace the CorporateAction package export with a raw dictionary
+      test: tests/unit/test_massive_package_boundary.py
+      result: 2 failed, 1 passed (identity and raw-dictionary guards failed)
+      caught: true
+      reverted: true
+  final_validation:
+    focused_story:
+      command: >-
+        uv run pytest -m 'not postgres' tests/unit/test_massive_reference.py
+        tests/unit/test_massive_bars.py tests/unit/test_massive_financials.py
+        tests/unit/test_massive_actions.py
+        tests/unit/test_massive_package_boundary.py
+      result: 86 passed
+    no_container_suite:
+      command: uv run pytest -q -m 'not postgres'
+      result: 340 passed, 87 deselected, 2 third-party deprecation warnings
+    full_suite:
+      command: uv run pytest -q
+      result: 427 passed, 2 third-party deprecation warnings
+    lint: "uv run ruff check .: passed"
+    format: "uv run ruff format --check .: 117 files already formatted"
+    static_analysis: "uv run mypy src: no issues in 34 source files"
+    build: "uv build: source distribution and wheel built"
+  pre_commit_reviews:
+    code_review:
+      subagent_id: a0018ccc
+      verdict: APPROVED
+      blocking_findings: []
+    spec_drift:
+      subagent_id: 1ef77f5b
+      verdict: CLEAR
+      drift_detected: false
+    commits_produced: []
+    next_action: >-
+      The delegated refinement produced no commits. The parent will create the
+      single implementation-stage commit after this evidence is finalized.

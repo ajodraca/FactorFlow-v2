@@ -7,8 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-16
-last_reworked_review: CAP-001-E3-S2-implementation-review-v2.md
+updated: 2026-09-21
+last_reworked_review: CAP-001-E3-S2-implementation-review-v3.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -158,3 +158,4 @@ Create the Pydantic response models that keep Massive wire names inside the inge
 - `component-design-market-data-store.md` §2.3 is the persistence contract: `CorporateAction` is one product model keyed by `action_type` and `effective_on`, with variant-specific provider content retained in its JSONB payload. This avoids inventing a separate storage schema for the four provider endpoint variants.
 - `component-design-observation-writer.md` §2.3 makes model payload serialization a compatibility surface: decimal values serialize as strings, while hashing and all runtime metadata remain writer-owned.
 - No Massive SDK call, pagination, retry, error classification, database write, or hash implementation belongs to this story.
+- **Attended owner decision, 2026-09-20:** CAP-001-E4's observation writer owns deriving `fundamental_observation.fiscal_period`; E3-S2 must not add that field to `FinancialStatement`. CAP-001-E4-S3 implementation planning must incorporate and test that derivation before its writer inserts fundamentals.
