@@ -29,7 +29,9 @@ SDK's single status-code-discarding exception — a safe failure-reason
 composer built on that taxonomy, its provider-agnostic rate-limit governor,
 the deterministic observation-value hashing primitive, and the historical
 client that wires the provider boundary to Massive's REST SDK are also in
-place, though no observation writer or acquisition runner calls them yet. The
+place. The observation writer — the pure coverage range arithmetic in
+`coverage.py` and the typed writer that commits all four data types atomically in
+`writer.py` — is also in place, though no acquisition runner calls it yet. The
 remaining API routes (acquisition runs, coverage), the rest of the ingestion
 process, and the Coverage and Runs screens are not yet built; those two
 destinations still render a placeholder. What exists today is described below — everything else
@@ -82,6 +84,8 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
+| `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
+| `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), and `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction). See [Observation writer](#observation-writer) |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
@@ -209,7 +213,7 @@ shared, application-wide handler still names the right resource per route.
 
 ## Deterministic observation-value hashing
 
-`src/factorflow/ingestion/hashing.py` exposes two pure functions for the later
+`src/factorflow/ingestion/hashing.py` exposes two pure functions consumed by the
 observation writer. `canonical_json(value)` recursively accepts JSON-native
 `None`, booleans, integers, strings, lists, and string-keyed dictionaries,
 plus `Decimal`. It converts each `Decimal` to its exact string form, then emits
@@ -220,8 +224,8 @@ dictionary keys, and every other unsupported type raise `TypeError`; no
 `value_hash(value)` returns `hashlib.sha256(canonical_json(value)).digest()` as
 32 raw bytes. Equivalent dictionaries therefore hash identically regardless
 of insertion order, while a changed supplied field changes the digest. The
-function hashes every field the caller supplies: the future observation writer
-is responsible for passing only observation values and excluding
+function hashes every field the caller supplies: the observation writer
+(`writer.py`) is responsible for passing only observation values and excluding
 `observed_on`, `run_id`, and `recorded_at`.
 
 The canonical form deliberately renders a `Decimal` as a JSON string. A
@@ -448,6 +452,91 @@ acceptance criterion:
   exercises a multi-wait throttle sequence in which each wait lands on a
   genuinely fresh wall-clock phase, the shape production actually takes
   (v5 IR-006).
+
+## Coverage range arithmetic
+
+`src/factorflow/ingestion/coverage.py` implements `merge_ranges(existing, written)`,
+the pure date-range arithmetic that the observation writer uses to maintain the
+minimal non-overlapping `coverage_segment` set for one instrument and data type.
+
+`merge_ranges` accepts a list of existing `(covered_from, covered_to)` date
+pairs (may be empty or unsorted) and the newly written range. It sorts all
+segments by start date, then makes a single left-to-right sweep: two segments
+are coalesced when one starts no later than one calendar day after the other
+ends, so both overlap and one-day adjacency in either direction produce a merge.
+Disjoint segments — those separated by more than one day — are preserved
+unchanged. The result is the minimal ordered list of non-overlapping segments
+after the written range is absorbed.
+
+The function has no database dependency and carries no side effects, so it can
+be tested against a plain list of tuples (see `tests/unit/test_coverage_merge.py`)
+independently of the writer's transaction path.
+
+## Observation writer
+
+`src/factorflow/ingestion/writer.py` delivers the atomic per-instrument write
+boundary (DAC-E4-4, DAC-E4-5) as three exports:
+
+**`ParsedObservations`** — A frozen dataclass that groups the four provider-model
+collections (`reference`, `prices`, `fundamentals`, `corporate_actions`) with each
+data type's actual returned coverage range (`reference_range`, `prices_range`,
+`fundamentals_range`, `corporate_actions_range`). This is a writer-local boundary:
+it must not depend on the runner module (owner decision 2026-09-18). `ObservationBatch`
+is an alias for the same type.
+
+**`WriteResult`** — A frozen dataclass reporting the outcome of a single
+`write_instrument` call: per-type `appended` and `unchanged` row counts, and the
+covered range for each data type after the merge committed (DAC-E4-S3-1).
+
+**`write_instrument(connection, instrument_id, run_id, observations, observed_on)`** —
+Commits all four data types for one instrument inside the caller's transaction.
+The caller owns the transaction boundary; the function operates on the supplied
+connection and propagates any error so the caller's transaction rolls back.
+
+Write sequence:
+
+1. **Append observations** — four per-type helpers (`_insert_references`,
+   `_insert_daily_bars`, `_insert_fundamentals`, `_insert_corporate_actions`) each
+   use `INSERT ... ON CONFLICT DO NOTHING` against the observation tables' natural
+   keys (DAC-E4-S3-7). `_insert_fundamentals` derives the `NOT NULL`
+   `fiscal_period` column value as `'FY'` from `timeframe="annual"` and as
+   `'Q{fiscal_quarter}'` from `timeframe="quarterly"`, using the existing
+   `FinancialStatement.timeframe` and `fiscal_quarter` fields — no
+   `fiscal_period` model field is required or declared on the model (owner
+   decision 2026-09-20). Each helper returns `(appended, unchanged)` counts.
+2. **Replace coverage** — `_replace_coverage` reads the existing
+   `coverage_segment` rows for one instrument and data type, calls `merge_ranges`,
+   deletes the existing rows, and reinserts the merged set. Coverage replacement
+   is explicitly allowed — only the four observation tables are append-only;
+   `coverage_segment` supports delete and reinsert.
+3. **Upsert acquisition state** — one `INSERT ... ON CONFLICT DO UPDATE` per
+   data type stamps `last_acquired_at = now()`, `last_run_id`, and
+   `last_outcome = 'written'` in `acquisition_state` (DAC-E4-S3-5).
+4. **Insert run results** — one `INSERT` per data type into `run_instrument_result`
+   with `outcome = 'written'` when any rows were appended, or `'unchanged'` when
+   every returned row already existed (DAC-E4-S3-6).
+
+**Transaction boundary deviation (IR-002, accepted):** the function delegates
+the transaction boundary to the caller rather than calling
+`connection.transaction()` internally. DAC-E4-4 is still satisfied because all
+steps execute on the same connection inside the caller's transaction. The
+deviation is documented in the task plan (T011) with rationale: delegating the
+boundary makes `write_instrument` composable within larger caller-managed
+transaction scopes without nested-transaction overhead.
+
+**Known limitations carried forward from implementation review v2
+(`CAP-001-E4-S3-implementation-review-v2.md`)** — neither blocks an acceptance
+criterion:
+
+- TDD evidence mutation probe 3 is a narrative explanation rather than an
+  actual code mutation. The transactional coverage invariant is adequately proven
+  by the four rollback probes; the missing mutation probe does not leave an
+  untested code path (IR-001, medium).
+- The observation-insert failure probe (`test_failure_during_observation_insert_rolls_back_everything`)
+  does not assert against `daily_bar` and `corporate_action` after rollback, even
+  though `_insert_daily_bars` completed before the injected trigger fired.
+  PostgreSQL's all-or-nothing rollback guarantees those rows are gone; the
+  `instrument_reference` assertion already proves the mechanism (IR-002, low).
 
 ## Run request and claim
 
