@@ -145,3 +145,30 @@ def migrated_writer_connection(postgres_connection_string: str) -> Iterator[psyc
         yield conn
     finally:
         conn.close()
+
+
+@pytest.fixture
+def migrated_runner_connection(postgres_connection_string: str) -> Iterator[psycopg.Connection]:
+    """Yield a connection whose database has all CAP-001 migrations applied.
+
+    Applies migrations 0001 through 0004 in numerical order, giving runner
+    tests access to instruments, observations, coverage, and run tables.
+    Each test receives an isolated database inside the shared session
+    container -- no state is shared between runner tests.
+
+    Used by CAP-001-E4-S5 postgres-marked runner integration tests:
+    test_runner_acquires.py, test_runner_depth.py, test_runner_transactions.py,
+    test_runner_isolation.py, test_runner_cancel.py, test_runner_reclaim.py,
+    test_runner_credential.py, test_runner_volume.py.
+    """
+    conn = psycopg.connect(postgres_connection_string)
+    with conn.cursor() as cur:
+        cur.execute(MIGRATION_0001_PATH.read_text())
+        cur.execute(MIGRATION_0002_PATH.read_text())
+        cur.execute(MIGRATION_0003_PATH.read_text())
+        cur.execute(MIGRATION_0004_PATH.read_text())
+    conn.commit()
+    try:
+        yield conn
+    finally:
+        conn.close()
