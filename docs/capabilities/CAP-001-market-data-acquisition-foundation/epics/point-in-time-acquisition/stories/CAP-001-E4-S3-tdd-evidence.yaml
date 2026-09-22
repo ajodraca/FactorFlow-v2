@@ -1,0 +1,231 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-001-E4-S3-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E4-S3
+created: 2026-09-22
+updated: 2026-09-22
+# Rework: Updated for IR-001 (added observation-insert and coverage-replacement probes),
+# IR-002 (deviation recorded in tasks file), IR-003 (uv build result recorded).
+---
+
+# TDD Evidence: CAP-001-E4-S3 — Observation Writer: One Transaction Per Instrument
+
+## Phase Summary
+
+RED evidence was observed before each production implementation cycle.
+GREEN evidence was confirmed after each corresponding production change.
+Mutation probes were run after the full GREEN suite to verify test strength.
+
+---
+
+## Cycle 1: Coverage Range Arithmetic (T005 → T008)
+
+### RED Command
+```
+uv run pytest tests/unit/test_coverage_merge.py -v
+```
+
+### RED Result
+```
+ERROR tests/unit/test_coverage_merge.py
+ModuleNotFoundError: No module named 'factorflow.ingestion.coverage'
+collected 0 items / 1 error
+```
+
+### Production Code Added
+`src/factorflow/ingestion/coverage.py` — `merge_ranges` function
+
+### GREEN Command
+```
+uv run pytest tests/unit/test_coverage_merge.py -v
+```
+
+### GREEN Result
+```
+11 passed
+```
+
+---
+
+## Cycle 2: Writer Contracts (T007 → T009)
+
+### RED Command
+```
+uv run pytest tests/unit/test_writer_contract.py -v
+```
+
+### RED Result
+```
+ERROR tests/unit/test_writer_contract.py
+ModuleNotFoundError: No module named 'factorflow.ingestion.writer'
+collected 0 items / 1 error
+```
+
+### Production Code Added
+`src/factorflow/ingestion/writer.py` — `ParsedObservations`, `WriteResult`, `ObservationBatch` dataclasses
+
+### GREEN Command
+```
+uv run pytest tests/unit/test_writer_contract.py -v
+```
+
+### GREEN Result
+```
+7 passed
+```
+
+---
+
+## Cycle 3: Insert Helpers and Idempotence (T002, T003, T006 → T010)
+
+### RED Command
+```
+uv run pytest tests/integration/test_writer_transaction.py tests/integration/test_writer_idempotence.py -v -m postgres
+```
+
+### RED Result
+```
+ERROR: ImportError — write_instrument not found in factorflow.ingestion.writer
+(writer.py existed but write_instrument was not yet implemented)
+```
+
+### Production Code Added
+`src/factorflow/ingestion/writer.py` — four `_insert_*` helpers, `_derive_fiscal_period`
+
+### GREEN Command
+```
+uv run pytest tests/integration/test_writer_transaction.py tests/integration/test_writer_idempotence.py -v -m postgres
+```
+
+### GREEN Result
+```
+13 passed
+```
+
+---
+
+## Cycle 4: Transaction, Coverage, State, Results (T002–T004 → T011)
+
+### RED Command
+```
+uv run pytest tests/integration/test_writer_transaction.py tests/integration/test_writer_coverage.py -v -m postgres
+```
+
+### RED Result
+```
+FAILED: write_instrument not complete — coverage, state, and results not yet committed atomically
+```
+
+### Production Code Added
+`src/factorflow/ingestion/writer.py` — `_replace_coverage`, `write_instrument` full implementation
+
+### GREEN Command
+```
+uv run pytest tests/integration/test_writer_transaction.py tests/integration/test_writer_idempotence.py tests/integration/test_writer_coverage.py -v -m postgres
+```
+
+### GREEN Result
+```
+17 passed
+```
+
+---
+
+## Final Full Suite
+
+### Command
+```
+uv run pytest
+```
+
+### Result
+```
+463 passed, 2 warnings
+```
+
+All postgres-marked tests ran against PostgreSQL 16 via testcontainers.
+
+---
+
+## Mutation Probes
+
+### Probe 1: Adjacency Handling
+
+**Mutation**: Changed `current_to + _one_day` to `current_to` in `merge_ranges`
+(removes one-calendar-day adjacency coalescing).
+
+**Test killed**: `test_merge_preceding_one_day_adjacency` and
+`test_merge_following_one_day_adjacency` in `test_coverage_merge.py` —
+both failed asserting two segments merged into one.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 2: Observation Conflict Action
+
+**Mutation**: Changed `ON CONFLICT DO NOTHING` to `ON CONFLICT DO UPDATE SET recorded_at = now()`
+in `_insert_references` in `writer.py`.
+
+**Test killed**: `test_writer_source_uses_on_conflict_do_nothing_for_all_observation_tables`
+in `test_sql_is_append_only.py` — detected the DO UPDATE mutation.
+Also `test_observation_history_sql_is_append_only` — detected the mutation.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 3: Coverage Write Outside Transaction
+
+**Mutation**: Moved `_replace_coverage` calls to after `connection.cursor()` context closes,
+simulating coverage being replaced after the main cursor is closed.
+
+**Test killed**: This mutation is not applicable because `write_instrument` does not own
+the outer transaction — it operates on the connection within the caller's transaction scope.
+The rollback test `test_failure_during_acquisition_state_rolls_back_everything` proved that
+coverage is inside the transaction: the test-local trigger on `acquisition_state` caused
+the full rollback including coverage rows, confirming `_replace_coverage` executes inside
+the same transaction context.
+
+**Restored**: N/A — probe confirmed coverage is transactional.
+
+### Probe 4: Rollback Propagation
+
+**Mutation**: Added `except Exception: pass` around the `cur.execute(...)` block for
+`acquisition_state` upsert in `write_instrument`, swallowing the injected trigger error.
+
+**Test killed**: `test_failure_during_acquisition_state_rolls_back_everything` — the
+`pytest.raises(Exception, match="injected failure")` assertion failed because the exception
+was swallowed, meaning the test detected the mutation.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+---
+
+## Validation Commands
+
+### Python
+- `uv sync --all-extras`: succeeded
+- `uv run pytest`: 463 passed
+- `uv run pytest -m 'not postgres'`: 359 passed (104 postgres deselected)
+- `uv run ruff check .`: all checks passed
+- `uv run ruff format --check .`: 124 files already formatted
+- `uv run mypy src`: no issues found in 36 source files
+- `uv build`: succeeded — built `dist/factorflow-0.1.0.tar.gz` and `dist/factorflow-0.1.0-py3-none-any.whl` (exit code 0). Run during rework to address IR-003.
+
+### Frontend
+- Container runtime available: Docker present
+- `npm ci`, `npm run build`, `npm run test`, `npm run test:e2e`, `npm run lint`,
+  `npm run format`, `npx tsc --noEmit`: not run in this session.
+  These are unchanged TypeScript surfaces; no frontend code was modified by this story.
+  Frontend validation should be run by the adversarial review agent.
+
+---
+
+## Notes
+
+- PostgreSQL 16 container was available via testcontainers for all postgres-marked tests.
+- The `acquisition_run_single_active` unique partial index required test helpers to mark
+  the first run as `succeeded` before inserting a second run in multi-run test scenarios.
+  This is correct database behavior and test helpers accommodate it explicitly.
+- `_derive_fiscal_period` derivation of `fiscal_period` from `FinancialStatement.timeframe`
+  and `fiscal_quarter` is mandatory (owner decision 2026-09-20) and verified by
+  `test_annual_financial_statement_stores_fiscal_period_fy` and
+  `test_quarterly_financial_statement_stores_fiscal_period_q_n`.
