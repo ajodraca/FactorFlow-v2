@@ -4,10 +4,11 @@ artifact_id: CAP-001-E4-S5-tasks
 artifact_type: story-tasks
 artifact_version: 1
 status: draft
+last_reworked_review: CAP-001-E4-S5-implementation-review-v1.md
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-16
+updated: 2026-09-22
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.1"

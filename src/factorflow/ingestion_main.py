@@ -19,8 +19,17 @@ from typing import Any
 
 import psycopg
 
-from factorflow.config.settings import ConfigurationError, Settings, configure_logging
-from factorflow.ingestion.runner import AcquisitionRunner, run_polling_loop
+from factorflow.config.settings import (
+    ConfigurationError,
+    Settings,
+    configure_logging,
+    read_provider_credential,
+)
+from factorflow.ingestion.runner import (
+    AcquisitionRunner,
+    CredentialAwareClientFactory,
+    run_polling_loop,
+)
 from factorflow.instruments.service import active_instrument_ids
 from factorflow.runs.journal import ClaimedRun, claim_next
 
@@ -60,6 +69,14 @@ def main() -> int:
 
     connection = psycopg.connect(db_url)
 
+    # CredentialAwareClientFactory: rebuilds the provider client only when the
+    # API key fingerprint changes at claim time (DAC-E4-S5-7, DAC-E1-10, IR-001).
+    # The factory's build_client receives the raw key value so it can construct
+    # a MassiveClient using that exact credential (not the startup-time value).
+    client_factory = CredentialAwareClientFactory(
+        build_client=lambda key_value: _build_client_for_key(key_value, settings)
+    )
+
     def claim_fn() -> tuple[ClaimedRun, list[int]] | None:
         """Claim the next run and snapshot the roster at claim time."""
         claimed = claim_next(connection, runner_id)
@@ -73,11 +90,24 @@ def main() -> int:
         """Execute one claimed run token."""
         claimed, instrument_ids = token
         today = date.today()
+        # Re-read the credential at claim time; rebuild client only when
+        # the key value changes (DAC-E4-S5-7, DAC-E1-10).
+        key = read_provider_credential()
+        key_value = key.get_secret_value()
+        client = client_factory.get_or_rebuild(key_value)
+        # Build a redaction callable from the live key value so provider
+        # error messages containing the credential are scrubbed before
+        # storage (AC-13, IR-003).
+
+        def redact(s: str) -> str:
+            return s.replace(key_value, "[redacted]") if key_value else s
+
         runner = AcquisitionRunner(
             connection=connection,
-            client=_build_client(settings),
+            client=client,
             today=today,
             runner_id=runner_id,
+            redact=redact,
         )
         runner.execute_claimed(
             run_id=claimed.run_id,
@@ -94,19 +124,29 @@ def main() -> int:
     return 0
 
 
-def _build_client(settings: Settings) -> Any:
-    """Construct a MassiveClient from settings.
+def _build_client_for_key(key_value: str, settings: Settings) -> Any:
+    """Construct a MassiveClient using the given credential value.
 
-    Imported here (not at module top) so that the boundary test
-    ``test_ingestion_main_does_not_import_api`` can verify the entrypoint
-    never touches ``factorflow.api`` at import time.
+    Called by ``CredentialAwareClientFactory`` only when the key changes at
+    claim time (DAC-E4-S5-7).  Imported here (not at module top) so that the
+    boundary test ``test_ingestion_main_does_not_import_api`` can verify the
+    entrypoint never touches ``factorflow.api`` at import time.
+
+    ``key_value`` is the raw secret string re-read from the environment.
+    ``settings`` provides all other MassiveSettings (base_url, rate limits,
+    timeouts); only ``api_key`` is overridden with the freshly read value.
     """
+    from pydantic import SecretStr
+
     from factorflow.ingestion.massive.client import MassiveClient
     from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
 
-    governor_settings = GovernorSettings.from_massive_settings(settings.massive)
+    # Rebuild MassiveSettings with the live key, keeping all other settings
+    # from the startup configuration.
+    live_massive = settings.massive.model_copy(update={"api_key": SecretStr(key_value)})
+    governor_settings = GovernorSettings.from_massive_settings(live_massive)
     governor = RateLimitGovernor(governor_settings)
-    return MassiveClient(settings=settings.massive, governor=governor)
+    return MassiveClient(settings=live_massive, governor=governor)
 
 
 if __name__ == "__main__":

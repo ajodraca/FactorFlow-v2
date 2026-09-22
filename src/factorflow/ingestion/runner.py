@@ -41,6 +41,7 @@ from factorflow.ingestion.massive.models import (
     FinancialStatement,
     TickerReference,
 )
+from factorflow.ingestion.outcomes import write_error_results
 from factorflow.ingestion.plan import depth_start_for_run, plan_fetches
 from factorflow.ingestion.writer import ParsedObservations, write_instrument
 from factorflow.runs.journal import (
@@ -57,8 +58,6 @@ __all__ = [
 ]
 
 log = logging.getLogger(__name__)
-
-_DATA_TYPES = ("reference", "prices", "fundamentals", "corporate_actions")
 
 
 # ---------------------------------------------------------------------------
@@ -124,44 +123,6 @@ def _coverage_for_instrument(
 
 
 # ---------------------------------------------------------------------------
-# Per-instrument error result writer
-# ---------------------------------------------------------------------------
-
-
-def _write_error_results(
-    connection: psycopg.Connection,
-    run_id: uuid.UUID,
-    instrument_id: int,
-    outcome: str,
-    reason: str,
-) -> None:
-    """Insert ``run_instrument_result`` rows for all four data types when
-    the provider failed for this instrument.  Also upserts
-    ``acquisition_state`` so the history of this instrument reflects the
-    failure.
-    """
-    with connection.transaction():
-        with connection.cursor() as cur:
-            for data_type in _DATA_TYPES:
-                cur.execute(
-                    "INSERT INTO run_instrument_result "
-                    "(run_id, instrument_id, data_type, outcome, reason) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    (run_id, instrument_id, data_type, outcome, reason),
-                )
-                cur.execute(
-                    "INSERT INTO acquisition_state "
-                    "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
-                    "VALUES (%s, %s, now(), %s, %s) "
-                    "ON CONFLICT (instrument_id, data_type) DO UPDATE "
-                    "SET last_acquired_at = EXCLUDED.last_acquired_at, "
-                    "    last_run_id = EXCLUDED.last_run_id, "
-                    "    last_outcome = EXCLUDED.last_outcome",
-                    (instrument_id, data_type, run_id, outcome),
-                )
-
-
-# ---------------------------------------------------------------------------
 # AcquisitionRunner
 # ---------------------------------------------------------------------------
 
@@ -186,11 +147,16 @@ class AcquisitionRunner:
         client: Any,
         today: date,
         runner_id: str = "test-runner",
+        redact: Callable[[str], str] | None = None,
     ) -> None:
         self._connection = connection
         self._client = client
         self._today = today
         self._runner_id = runner_id
+        # Redaction callable supplied by the entrypoint from runtime-config
+        # (component design section 4, SEC-INP-002, AC-13). Falls back to
+        # identity only in tests that do not inject a credential.
+        self._redact: Callable[[str], str] = redact if redact is not None else (lambda s: s)
 
     def execute_claimed(
         self,
@@ -210,26 +176,15 @@ class AcquisitionRunner:
                 exactly once.
         """
         if depth_years is None:
-            # DAC-E4-13: no stated depth → finalise failed without provider access
+            # DAC-E4-13: no stated depth → finalise failed without provider access.
+            # journal.finalise derives "failed" from zero written results (IR-005).
             log.warning("run=%s has no stated depth; finalising as failed", run_id)
-            with self._connection.transaction():
-                with self._connection.cursor() as cur:
-                    cur.execute(
-                        "UPDATE acquisition_run "
-                        "SET state = 'failed', ended_at = now(), "
-                        "claimed_by = NULL, heartbeat_at = NULL "
-                        "WHERE run_id = %s",
-                        (run_id,),
-                    )
+            finalise(self._connection, run_id)
             return
 
         # Build a minimal ClaimedRun to feed depth_start_for_run
         claimed = ClaimedRun(run_id=run_id, history_depth_years=depth_years)
         depth_start = depth_start_for_run(claimed, self._today)
-
-        # Plain callable that forwards to the identity redact (runner owns no credential)
-        def _no_redact(s: str) -> str:
-            return s
 
         for instrument_id in instrument_ids:
             # --- Top-of-iteration checkpoint (DAC-E4-S5-1) ---
@@ -266,22 +221,22 @@ class AcquisitionRunner:
                 )
             except InstrumentNotFound as exc:
                 reason = compose_failure_reason(
-                    exc, symbol=symbol, data_type="reference", redact=_no_redact
+                    exc, symbol=symbol, data_type="reference", redact=self._redact
                 )
                 log.info("run=%s instrument=%s not_found: %s", run_id, instrument_id, reason)
-                _write_error_results(self._connection, run_id, instrument_id, "not_found", reason)
+                write_error_results(self._connection, run_id, instrument_id, "not_found", reason)
                 continue
             except (ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
                     exc if isinstance(exc, MassiveError) else exc,
                     symbol=symbol,
                     data_type="reference",
-                    redact=_no_redact,
+                    redact=self._redact,
                 )
                 log.warning(
                     "run=%s instrument=%s provider error: %s", run_id, instrument_id, reason
                 )
-                _write_error_results(self._connection, run_id, instrument_id, "failed", reason)
+                write_error_results(self._connection, run_id, instrument_id, "failed", reason)
                 continue
 
             # --- Build ParsedObservations and write in one transaction ---
