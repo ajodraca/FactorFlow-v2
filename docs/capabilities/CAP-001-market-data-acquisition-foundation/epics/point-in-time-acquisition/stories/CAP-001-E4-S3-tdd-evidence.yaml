@@ -5,6 +5,8 @@ artifact_type: tdd-evidence
 story: CAP-001-E4-S3
 created: 2026-09-22
 updated: 2026-09-22
+# Rework: Updated for IR-001 (added observation-insert and coverage-replacement probes),
+# IR-002 (deviation recorded in tasks file), IR-003 (uv build result recorded).
 ---
 
 # TDD Evidence: CAP-001-E4-S3 — Observation Writer: One Transaction Per Instrument
@@ -206,7 +208,7 @@ was swallowed, meaning the test detected the mutation.
 - `uv run ruff check .`: all checks passed
 - `uv run ruff format --check .`: 124 files already formatted
 - `uv run mypy src`: no issues found in 36 source files
-- `uv build`: not run (not required for this story's scope)
+- `uv build`: succeeded — built `dist/factorflow-0.1.0.tar.gz` and `dist/factorflow-0.1.0-py3-none-any.whl` (exit code 0). Run during rework to address IR-003.
 
 ### Frontend
 - Container runtime available: Docker present

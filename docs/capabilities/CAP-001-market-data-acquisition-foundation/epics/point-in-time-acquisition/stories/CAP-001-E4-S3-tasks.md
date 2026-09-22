@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-21
+updated: 2026-09-22
+last_reworked_review: CAP-001-E4-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -107,6 +108,8 @@ Implement the typed observation writer so one reached instrument's four successf
 **Purpose**: Complete the one-instrument transaction by committing coverage, acquisition state, and run results with the observation rows.
 
 - [x] T011 Implement `write_instrument(connection, instrument_id, run_id, observations, observed_on)` in `src/factorflow/ingestion/writer.py` using one `connection.transaction()` context: append all supplied data types, read and replace only that instrument/data type's `coverage_segment` rows using `merge_ranges`, upsert `acquisition_state` with `last_acquired_at = now()`, `last_run_id`, and successful state outcome `written`, and insert one `run_instrument_result` per successfully reached data type with outcome `written` when rows appended or `unchanged` when every returned row already existed. Let every database or hashing error propagate so the context rolls back all work; do not update acquisition-run counters or record provider failures in this story (depends on T002–T004, T008–T010).
+
+  **Implementation deviation (IR-002)**: `write_instrument` does not call `connection.transaction()` internally; it delegates transaction ownership to the caller. This deviation from the task plan's "using one `connection.transaction()` context" wording is intentional and documented in the function docstring ("the caller owns the transaction boundary"). DAC-E4-4 remains satisfied because all operations execute on the same connection inside the caller's transaction, and every test that exercises rollback wraps the call in `with conn.transaction():`. The design rationale is that delegating the transaction boundary makes `write_instrument` composable within larger caller-managed transaction scopes without nested transaction overhead.
 
 **Checkpoint**: Observations, actual coverage, acquisition state, and four successful result rows become visible together after commit or remain wholly absent after any failure.
 

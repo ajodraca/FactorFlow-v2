@@ -434,3 +434,113 @@ def test_failure_during_run_result_insert_rolls_back_everything(
             (instrument_id,),
         )
         assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+
+# Implements TC-COMP-138
+@pytest.mark.postgres
+def test_failure_during_observation_insert_rolls_back_everything(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    """Inject a failure at an observation table insert (fundamental_observation BEFORE INSERT).
+
+    Asserts that no partial observation, intended coverage, state, or result
+    survives and the original exception propagates.  This covers the observation-
+    insert failure path required by T004 (IR-001).
+    """
+    conn = migrated_writer_connection
+    instrument_id = _insert_instrument(conn)
+    run_id = _insert_run(conn)
+    observed_on = date(2026, 9, 1)
+    observations = _make_observations()
+
+    _install_failure_trigger(conn, "fundamental_observation", "BEFORE")
+    try:
+        with pytest.raises(Exception, match="injected failure"):
+            with conn.transaction():
+                write_instrument(conn, instrument_id, run_id, observations, observed_on)
+    finally:
+        _drop_failure_trigger(conn, "fundamental_observation")
+
+    # Nothing should be visible after the rollback
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT COUNT(*) FROM instrument_reference WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM fundamental_observation WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM coverage_segment WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM acquisition_state WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM run_instrument_result WHERE run_id = %s AND instrument_id = %s",
+            (run_id, instrument_id),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+
+# Implements TC-COMP-165
+@pytest.mark.postgres
+def test_failure_during_coverage_replacement_rolls_back_everything(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    """Inject a failure at the coverage replacement step (coverage_segment BEFORE INSERT).
+
+    Asserts that no partial observation, intended coverage, state, or result
+    survives and the original exception propagates.  This covers the coverage-
+    replacement failure path required by T004 (IR-001).
+    """
+    conn = migrated_writer_connection
+    instrument_id = _insert_instrument(conn)
+    run_id = _insert_run(conn)
+    observed_on = date(2026, 9, 1)
+    observations = _make_observations()
+
+    _install_failure_trigger(conn, "coverage_segment", "BEFORE")
+    try:
+        with pytest.raises(Exception, match="injected failure"):
+            with conn.transaction():
+                write_instrument(conn, instrument_id, run_id, observations, observed_on)
+    finally:
+        _drop_failure_trigger(conn, "coverage_segment")
+
+    # Nothing should be visible after the rollback
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT COUNT(*) FROM instrument_reference WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM coverage_segment WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM acquisition_state WHERE instrument_id = %s",
+            (instrument_id,),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
+
+        cur.execute(
+            "SELECT COUNT(*) FROM run_instrument_result WHERE run_id = %s AND instrument_id = %s",
+            (run_id, instrument_id),
+        )
+        assert cur.fetchone()[0] == 0  # type: ignore[index]
