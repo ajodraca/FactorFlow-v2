@@ -17,7 +17,9 @@ last-acquisition-state tables, and the acquisition-run and per-instrument
 result journal tables — the instrument-list domain service, the instrument
 and settings API routes, the API's health endpoint and application factory,
 the pure acquisition-run lifecycle primitives, the run journal's request
-and claim operations, and the owner interface's
+and claim operations, the ingestion range planner — which computes
+per-data-type fetch intervals from a claimed run's snapshotted history depth,
+yielding only the sub-ranges not already covered — and the owner interface's
 application shell — its
 navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
@@ -83,6 +85,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
+| `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
 | `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), and `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction). See [Observation writer](#observation-writer) |
@@ -234,6 +237,41 @@ canonical representation; callers must keep each field's Python type stable.
 Changing the canonical form or digest algorithm after observations have been
 stored is a data-compatibility change, because unchanged values would otherwise
 receive new hashes and be appended again.
+
+## Range planner
+
+`src/factorflow/ingestion/plan.py` computes per-data-type fetch intervals for
+one claimed acquisition run. It is a pure module — no database, journal,
+roster, provider, or owner-setting access belongs here; CAP-001-E4-S5 is the
+caller that supplies the claimed run and per-data-type coverage.
+
+`depth_start_for_run(run, today)` returns `today` minus
+`run.history_depth_years` calendar years. The depth is read from the claimed
+run's own snapshot, not from the current owner setting, so a depth changed
+while a run sits queued does not redefine a run already requested (DAC-E4-8).
+When the calendar subtraction lands on February 29 in a non-leap year, the
+result is clamped to February 28 — the minimal deterministic interpretation of
+"minus N years."
+
+`plan_fetches(data_type, covered, depth_start, today)` returns the
+sub-ranges of `[depth_start, today]` not already covered as a list of
+`FetchRange(data_type, start, end)` frozen dataclasses. The algorithm:
+
+1. Clips every supplied coverage segment to the requested window.
+2. Coalesces overlapping or adjacent clipped segments.
+3. Walks the gaps between consecutive coalesced segments; each gap becomes one `FetchRange`.
+4. Appends a trailing re-fetch from the last covered date to `today` — the last covered day may have been a partial session, and the observation writer's idempotence means re-fetching a day already held writes nothing (AC-6, DAC-E4-9).
+5. Returns an empty list when `depth_start >= today`.
+
+Each call plans one data type independently; `data_type` is a pass-through label on the returned `FetchRange` values. The caller (CAP-001-E4-S5) invokes the function once per data type with the corresponding coverage.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E4-S4-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- The deterministic test `test_data_types_planned_independently` exercises only `prices` and `reference`; `fundamentals` and `corporate_actions` appear only in the Hypothesis property test strategy. Since `data_type` is a pass-through label the behavioral correctness is not in question, but the explicit named-assertion traceability for those two types relies on the property test (IR-001, medium).
+- The coalescing loop uses `list(seg)` and a `type: ignore` comment to work around a mypy limitation on the in-place tuple update pattern; the logic is correct and all checks pass, but the suppression hides potential future type errors in that section (IR-002, medium).
+- Coverage segments with `start == end` (single-day, inclusive) are treated as zero-width and silently dropped by the `s < e` clip guard, causing a harmless re-fetch of that day. This aligns with the re-fetch-is-cheap philosophy but deviates from the component design's statement that inclusive single-day ranges are valid (IR-003, low).
 
 ## Massive provider response models
 
