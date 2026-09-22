@@ -61,7 +61,7 @@ Create the pure ingestion range planner that computes each data type's uncovered
 
 **Purpose**: Add the test-only dependency required to exercise the story's generated-coverage property.
 
-- [ ] T001 Add `hypothesis` to the Python development dependencies in `pyproject.toml` and resolve it into `uv.lock` so the generated-coverage property test runs under `pytest`.
+- [x] T001 Add `hypothesis` to the Python development dependencies in `pyproject.toml` and resolve it into `uv.lock` so the generated-coverage property test runs under `pytest`.
 
 **Checkpoint**: The database-free test environment can generate inclusive coverage intervals without PostgreSQL or an owner-setting dependency.
 
@@ -73,13 +73,13 @@ Create the pure ingestion range planner that computes each data type's uncovered
 
 ### Mandatory Component Tests
 
-- [ ] T002 Create table-driven planner tests in `tests/unit/test_fetch_plan.py` for TC-COMP-003, TC-COMP-006, TC-COMP-022, TC-COMP-140, TC-COMP-141, TC-COMP-142, TC-COMP-143, and TC-COMP-169 through TC-COMP-174; add a `# Implements TC-COMP-...` trace comment for every mapped case.
-- [ ] T003 In `tests/unit/test_fetch_plan.py`, assert exact labelled `FetchRange` sequences for no coverage, an earlier backfill, full coverage with a trailing re-fetch beginning at `covered_to`, and multiple disjoint uncovered gaps; invoke the planner independently with `reference`, `prices`, `fundamentals`, and `corporate_actions` coverage.
+- [x] T002 Create table-driven planner tests in `tests/unit/test_fetch_plan.py` for TC-COMP-003, TC-COMP-006, TC-COMP-022, TC-COMP-140, TC-COMP-141, TC-COMP-142, TC-COMP-143, and TC-COMP-169 through TC-COMP-174; add a `# Implements TC-COMP-...` trace comment for every mapped case.
+- [x] T003 In `tests/unit/test_fetch_plan.py`, assert exact labelled `FetchRange` sequences for no coverage, an earlier backfill, full coverage with a trailing re-fetch beginning at `covered_to`, and multiple disjoint uncovered gaps; invoke the planner independently with `reference`, `prices`, `fundamentals`, and `corporate_actions` coverage.
 
 ### Additional Unit Tests
 
-- [ ] T004 Add depth-snapshot and boundary tests in `tests/unit/test_fetch_plan.py`: derive `depth_start` from a supplied `ClaimedRun.history_depth_years`, never read an owner setting, apply the recorded February-29 clamping rule, and return an empty plan when `depth_start > today`.
-- [ ] T005 Add a Hypothesis property test in `tests/unit/test_fetch_plan.py` which generates valid non-overlapping coverage intervals and proves every yielded range is ordered, remains within the requested window, and neither overlaps held coverage nor spans an interior covered interval, except for the deliberate trailing range beginning at the final `covered_to`.
+- [x] T004 Add depth-snapshot and boundary tests in `tests/unit/test_fetch_plan.py`: derive `depth_start` from a supplied `ClaimedRun.history_depth_years`, never read an owner setting, apply the recorded February-29 clamping rule, and return an empty plan when `depth_start > today`.
+- [x] T005 Add a Hypothesis property test in `tests/unit/test_fetch_plan.py` which generates valid non-overlapping coverage intervals and proves every yielded range is ordered, remains within the requested window, and neither overlaps held coverage nor spans an interior covered interval, except for the deliberate trailing range beginning at the final `covered_to`.
 
 **Checkpoint**: Focused tests make inclusive date boundaries, trailing-day re-fetch, independent data-type planning, and run-snapshot ownership explicit and fail because the planner does not exist.
 
@@ -89,8 +89,8 @@ Create the pure ingestion range planner that computes each data type's uncovered
 
 **Purpose**: Implement the typed, database-free planner that turns one data type's coverage segments and a run snapshot into fetch ranges.
 
-- [ ] T006 Create `FetchRange`, `depth_start_for_run`, and the public `plan_fetches(data_type, covered, depth_start, today)` API in `src/factorflow/ingestion/plan.py`; derive `depth_start` only from a supplied `ClaimedRun.history_depth_years`, apply the recorded February-29 clamping rule, and return no ranges for an inverted requested window.
-- [ ] T007 In `src/factorflow/ingestion/plan.py`, normalize supplied inclusive coverage intervals, intersect them with `[depth_start, today]`, coalesce overlapping or adjacent intervals, emit each missing inclusive interval in order, and retain `covered_to` as the start of the deliberate trailing re-fetch when coverage reaches `today`.
+- [x] T006 Create `FetchRange`, `depth_start_for_run`, and the public `plan_fetches(data_type, covered, depth_start, today)` API in `src/factorflow/ingestion/plan.py`; derive `depth_start` only from a supplied `ClaimedRun.history_depth_years`, apply the recorded February-29 clamping rule, and return no ranges for an inverted requested window.
+- [x] T007 In `src/factorflow/ingestion/plan.py`, normalize supplied inclusive coverage intervals, intersect them with `[depth_start, today]`, coalesce overlapping or adjacent intervals, emit each missing inclusive interval in order, and retain `covered_to` as the start of the deliberate trailing re-fetch when coverage reaches `today`.
 
 **Checkpoint**: The planner is deterministic, has no PostgreSQL or owner-setting dependency, and returns separate, data-type-labelled fetch intervals without re-requesting covered interior dates.
 
@@ -100,7 +100,7 @@ Create the pure ingestion range planner that computes each data type's uncovered
 
 **Purpose**: Define the CAP-001-E4-S5 consumption boundary without adding runner orchestration to this pure-planner story.
 
-- [ ] T008 Document and exercise in `tests/unit/test_fetch_plan.py` the CAP-001-E4-S5 boundary: its claimed run supplies `history_depth_years` to `depth_start_for_run`, then it calls `plan_fetches` once per data type with only that type's coverage; keep `src/factorflow/ingestion/plan.py` free of journal, database, roster, provider, and current-setting access.
+- [x] T008 Document and exercise in `tests/unit/test_fetch_plan.py` the CAP-001-E4-S5 boundary: its claimed run supplies `history_depth_years` to `depth_start_for_run`, then it calls `plan_fetches` once per data type with only that type's coverage; keep `src/factorflow/ingestion/plan.py` free of journal, database, roster, provider, and current-setting access.
 
 **Checkpoint**: CAP-001-E4-S5 can consume one pure, data-type-labelled planner API without duplicating coverage arithmetic or redefining the claimed run's scope.
 
@@ -110,7 +110,7 @@ Create the pure ingestion range planner that computes each data type's uncovered
 
 **Purpose**: Prove the pure planner catches changed range behavior and satisfies the component's Python quality checks.
 
-- [ ] T009 Run `uv run pytest -m 'not postgres' tests/unit/test_fetch_plan.py`, `uv run ruff check .`, `uv run ruff format --check .`, and `uv run mypy src` from the repository root; manually mutate the interior-gap and trailing-range boundary conditions in `src/factorflow/ingestion/plan.py` to prove the tests fail, then restore the minimum passing implementation.
+- [x] T009 Run `uv run pytest -m 'not postgres' tests/unit/test_fetch_plan.py`, `uv run ruff check .`, `uv run ruff format --check .`, and `uv run mypy src` from the repository root; manually mutate the interior-gap and trailing-range boundary conditions in `src/factorflow/ingestion/plan.py` to prove the tests fail, then restore the minimum passing implementation.
 
 **Checkpoint**: The pure planner's mapped tests, generated-coverage property, mutation check, and repository Python static checks pass without a PostgreSQL container.
 
