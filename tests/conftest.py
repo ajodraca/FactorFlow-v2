@@ -120,3 +120,28 @@ def migrated_run_schema_connection(postgres_connection_string: str) -> Iterator[
         yield conn
     finally:
         conn.close()
+
+
+@pytest.fixture
+def migrated_writer_connection(postgres_connection_string: str) -> Iterator[psycopg.Connection]:
+    """Yield a connection whose database has migrations 0001 through 0004 applied.
+
+    Applies each migration in numerical order so that all four schema layers
+    (extensions/state, observations, coverage, and runs) are available for
+    writer transaction tests. Each test receives an isolated database inside
+    the shared session container -- no database state is shared between tests.
+
+    Requires CAP-001-E5-S1 to have landed migrations/0003_coverage.sql and
+    migrations/0004_runs.sql before this fixture is used.
+    """
+    conn = psycopg.connect(postgres_connection_string)
+    with conn.cursor() as cur:
+        cur.execute(MIGRATION_0001_PATH.read_text())
+        cur.execute(MIGRATION_0002_PATH.read_text())
+        cur.execute(MIGRATION_0003_PATH.read_text())
+        cur.execute(MIGRATION_0004_PATH.read_text())
+    conn.commit()
+    try:
+        yield conn
+    finally:
+        conn.close()

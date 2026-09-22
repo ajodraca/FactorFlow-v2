@@ -87,3 +87,35 @@ def test_guard_ignores_mutations_of_non_observation_tables() -> None:
     )
 
     assert prohibited_observation_mutations(sql) == []
+
+
+# Implements TC-COMP-168
+def test_writer_source_uses_on_conflict_do_nothing_for_all_observation_tables() -> None:
+    """Every INSERT into an observation table in writer.py must use ON CONFLICT DO NOTHING.
+
+    This test reads the writer source and asserts that:
+    - Every observation-table INSERT uses ON CONFLICT DO NOTHING
+    - No UPDATE, DELETE, or ON CONFLICT DO UPDATE appears against any observation table
+    """
+    writer_path = REPO_ROOT / "src" / "factorflow" / "ingestion" / "writer.py"
+    writer_source = writer_path.read_text()
+
+    # No mutations allowed against observation tables
+    mutations = prohibited_observation_mutations(writer_source)
+    assert mutations == [], f"prohibited mutations found in writer.py: {mutations}"
+
+    # Every observation-table INSERT must have ON CONFLICT DO NOTHING
+    for table in OBSERVATION_TABLES:
+        insert_into_pattern = re.compile(
+            rf"\binsert\s+into\s+(?:only\s+)?{table}\b",
+            re.IGNORECASE,
+        )
+        if insert_into_pattern.search(writer_source):
+            # Found an INSERT for this table -- verify it uses ON CONFLICT DO NOTHING
+            on_conflict_pattern = re.compile(
+                rf"\binsert\s+into\s+(?:only\s+)?{table}\b[^;]*?\bon\s+conflict\s+do\s+nothing\b",
+                re.IGNORECASE | re.DOTALL,
+            )
+            assert on_conflict_pattern.search(writer_source), (
+                f"INSERT into {table} in writer.py does not use ON CONFLICT DO NOTHING"
+            )
