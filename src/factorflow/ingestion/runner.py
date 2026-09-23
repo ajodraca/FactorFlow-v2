@@ -30,6 +30,7 @@ from typing import Any
 import psycopg
 
 from factorflow.ingestion.massive.errors import (
+    CredentialRejected,
     InstrumentNotFound,
     MassiveError,
     ProviderUnavailable,
@@ -41,9 +42,15 @@ from factorflow.ingestion.massive.models import (
     FinancialStatement,
     TickerReference,
 )
-from factorflow.ingestion.outcomes import write_error_results
+from factorflow.ingestion.outcomes import (
+    InstrumentOutcomeRecord,
+    classify_provider_error,
+)
 from factorflow.ingestion.plan import depth_start_for_run, plan_fetches
-from factorflow.ingestion.writer import ParsedObservations, write_instrument
+from factorflow.ingestion.writer import (
+    ParsedObservations,
+    write_instrument_with_outcomes,
+)
 from factorflow.runs.journal import (
     ClaimedRun,
     cancellation_requested,
@@ -211,35 +218,97 @@ class AcquisitionRunner:
                 )
                 continue
 
-            # --- Fetch all four data types ---
+            # --- Fetch each data type individually (DAC-E4-S6-3, DAC-E4-S6-4, DAC-E4-S6-6) ---
+            # Per-data-type fetch allows distinct outcomes for the same instrument:
+            # e.g. prices=written, fundamentals=not_found (DAC-E4-S6-6).
+            # CredentialRejected is the only error that stops the run (DAC-E3-S3-4).
+            error_outcomes: dict[str, InstrumentOutcomeRecord] = {}
+
+            # Reference fetch
+            reference: list[TickerReference] = []
             try:
                 reference = self._fetch_reference(symbol)
-                prices = self._fetch_prices(symbol, instrument_id, depth_start)
-                fundamentals = self._fetch_financials(symbol, instrument_id, depth_start)
-                corporate_actions = self._fetch_corporate_actions(
-                    symbol, instrument_id, depth_start
-                )
-            except InstrumentNotFound as exc:
+            except CredentialRejected:
+                raise
+            except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
                     exc, symbol=symbol, data_type="reference", redact=self._redact
                 )
-                log.info("run=%s instrument=%s not_found: %s", run_id, instrument_id, reason)
-                write_error_results(self._connection, run_id, instrument_id, "not_found", reason)
-                continue
-            except (ProviderUnavailable, MassiveError) as exc:
+                log.info(
+                    "run=%s instrument=%s data_type=reference error: %s",
+                    run_id,
+                    instrument_id,
+                    reason,
+                )
+                error_outcomes["reference"] = classify_provider_error(
+                    exc, data_type="reference", reason=reason
+                )
+
+            # Prices fetch
+            prices: list[DailyBar] = []
+            try:
+                prices = self._fetch_prices(symbol, instrument_id, depth_start)
+            except CredentialRejected:
+                raise
+            except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
-                    exc if isinstance(exc, MassiveError) else exc,
-                    symbol=symbol,
-                    data_type="reference",
-                    redact=self._redact,
+                    exc, symbol=symbol, data_type="prices", redact=self._redact
                 )
-                log.warning(
-                    "run=%s instrument=%s provider error: %s", run_id, instrument_id, reason
+                log.info(
+                    "run=%s instrument=%s data_type=prices error: %s",
+                    run_id,
+                    instrument_id,
+                    reason,
                 )
-                write_error_results(self._connection, run_id, instrument_id, "failed", reason)
-                continue
+                error_outcomes["prices"] = classify_provider_error(
+                    exc, data_type="prices", reason=reason
+                )
+
+            # Fundamentals fetch
+            fundamentals: list[FinancialStatement] = []
+            try:
+                fundamentals = self._fetch_financials(symbol, instrument_id, depth_start)
+            except CredentialRejected:
+                raise
+            except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
+                reason = compose_failure_reason(
+                    exc, symbol=symbol, data_type="fundamentals", redact=self._redact
+                )
+                log.info(
+                    "run=%s instrument=%s data_type=fundamentals error: %s",
+                    run_id,
+                    instrument_id,
+                    reason,
+                )
+                error_outcomes["fundamentals"] = classify_provider_error(
+                    exc, data_type="fundamentals", reason=reason
+                )
+
+            # Corporate actions fetch
+            corporate_actions: list[CorporateAction] = []
+            try:
+                corporate_actions = self._fetch_corporate_actions(
+                    symbol, instrument_id, depth_start
+                )
+            except CredentialRejected:
+                raise
+            except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
+                reason = compose_failure_reason(
+                    exc, symbol=symbol, data_type="corporate_actions", redact=self._redact
+                )
+                log.info(
+                    "run=%s instrument=%s data_type=corporate_actions error: %s",
+                    run_id,
+                    instrument_id,
+                    reason,
+                )
+                error_outcomes["corporate_actions"] = classify_provider_error(
+                    exc, data_type="corporate_actions", reason=reason
+                )
 
             # --- Build ParsedObservations and write in one transaction ---
+            # Empty lists are passed for data types with error outcomes;
+            # write_instrument_with_outcomes records the error outcome rows instead.
             observations = ParsedObservations(
                 reference=reference,
                 prices=prices,
@@ -251,12 +320,13 @@ class AcquisitionRunner:
                 corporate_actions_range=(depth_start, self._today),
             )
             with self._connection.transaction():
-                write_instrument(
+                write_instrument_with_outcomes(
                     connection=self._connection,
                     instrument_id=instrument_id,
                     run_id=run_id,
                     observations=observations,
                     observed_on=self._today,
+                    error_outcomes=error_outcomes if error_outcomes else None,
                 )
 
         # --- Finalise from written results (DAC-E4-S5-5, DAC-E5-4) ---
