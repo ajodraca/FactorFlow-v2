@@ -4,10 +4,12 @@ artifact_id: CAP-001-E4-S5-tasks
 artifact_type: story-tasks
 artifact_version: 1
 status: draft
+last_reworked_review: CAP-001-E4-S5-implementation-review-v1.md
+docs_synced_review: CAP-001-E4-S5-implementation-review-v2.md
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-16
+updated: 2026-09-22
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.1"
@@ -73,7 +75,7 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 **Purpose**: Establish the ingestion package and PostgreSQL fixture boundary required to exercise the runner against the already-planned journal, writer, roster, and provider seams.
 
-- [ ] T001 Create `src/factorflow/ingestion/__init__.py` and extend `tests/conftest.py` with a `migrated_runner_connection` fixture that applies the prerequisite CAP-001 migrations through the run-journal migration; keep runner database tests `postgres`-marked and isolated per test database.
+- [x] T001 Create `src/factorflow/ingestion/__init__.py` and extend `tests/conftest.py` with a `migrated_runner_connection` fixture that applies the prerequisite CAP-001 migrations through the run-journal migration; keep runner database tests `postgres`-marked and isolated per test database.
 
 **Checkpoint**: Runner tests have an importable ingestion package and a disposable PostgreSQL schema containing active instruments, runs, coverage, and result tables.
 
@@ -85,14 +87,14 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Create `tests/integration/test_runner_acquires.py`, `tests/integration/test_runner_depth.py`, and `tests/integration/test_runner_transactions.py` for TC-COMP-003, TC-COMP-004, TC-COMP-146, TC-COMP-147, and TC-COMP-148; stub the provider boundary, seed a claimed run and active roster, assert the roster is read once, all four data types are sent through the writer for each reached instrument, a missing claimed depth makes no provider or writer call and finalises failed, and a simulated interruption after one committed instrument leaves it durable while a later run fetches only the remaining coverage. Add a `# Implements TC-COMP-...` trace comment for every mapped case.
-- [ ] T003 [P] Create `tests/integration/test_runner_isolation.py`, `tests/integration/test_runner_cancel.py`, and `tests/integration/test_runner_reclaim.py` for TC-COMP-009, TC-COMP-011, TC-COMP-019, TC-COMP-175, TC-COMP-176, TC-COMP-177, TC-COMP-178, TC-COMP-179, TC-COMP-239, TC-COMP-245, and TC-COMP-248; assert heartbeat/cancellation occur together before each instrument, cancellation leaves the next instrument untouched and finalises cancelled, a false heartbeat prevents later writes, typed `InstrumentNotFound` and exhausted provider failures record results then continue, and finalisation is delegated without a caller-selected outcome. Add matching trace comments.
-- [ ] T004 [P] Create `tests/integration/test_runner_credential.py` and `tests/unit/test_ingestion_main.py` for TC-COMP-023, TC-COMP-180, TC-COMP-181, and TC-COMP-301; use a controlled wait function to assert an empty claim sleeps for `settings.run.poll_interval_seconds` then polls again, and assert a changed credential replaces the client before the first fetch while an unchanged one preserves the existing client. Add matching trace comments.
-- [ ] T005 [P] Create `tests/integration/test_runner_volume.py` for TC-COMP-182; execute 3,000 stubbed roster entries, assert one-at-a-time processing with no retained earlier payload collection, and assert each completed instrument becomes observable through its writer/journal result before the next begins. Add a `# Implements TC-COMP-182` trace comment.
+- [x] T002 [P] Create `tests/integration/test_runner_acquires.py`, `tests/integration/test_runner_depth.py`, and `tests/integration/test_runner_transactions.py` for TC-COMP-003, TC-COMP-004, TC-COMP-146, TC-COMP-147, and TC-COMP-148; stub the provider boundary, seed a claimed run and active roster, assert the roster is read once, all four data types are sent through the writer for each reached instrument, a missing claimed depth makes no provider or writer call and finalises failed, and a simulated interruption after one committed instrument leaves it durable while a later run fetches only the remaining coverage. Add a `# Implements TC-COMP-...` trace comment for every mapped case.
+- [x] T003 [P] Create `tests/integration/test_runner_isolation.py`, `tests/integration/test_runner_cancel.py`, and `tests/integration/test_runner_reclaim.py` for TC-COMP-009, TC-COMP-011, TC-COMP-019, TC-COMP-175, TC-COMP-176, TC-COMP-177, TC-COMP-178, TC-COMP-179, TC-COMP-239, TC-COMP-245, and TC-COMP-248; assert heartbeat/cancellation occur together before each instrument, cancellation leaves the next instrument untouched and finalises cancelled, a false heartbeat prevents later writes, typed `InstrumentNotFound` and exhausted provider failures record results then continue, and finalisation is delegated without a caller-selected outcome. Add matching trace comments.
+- [x] T004 [P] Create `tests/integration/test_runner_credential.py` and `tests/unit/test_ingestion_main.py` for TC-COMP-023, TC-COMP-180, TC-COMP-181, and TC-COMP-301; use a controlled wait function to assert an empty claim sleeps for `settings.run.poll_interval_seconds` then polls again, and assert a changed credential replaces the client before the first fetch while an unchanged one preserves the existing client. Add matching trace comments.
+- [x] T005 [P] Create `tests/integration/test_runner_volume.py` for TC-COMP-182; execute 3,000 stubbed roster entries, assert one-at-a-time processing with no retained earlier payload collection, and assert each completed instrument becomes observable through its writer/journal result before the next begins. Add a `# Implements TC-COMP-182` trace comment.
 
 ### Additional Unit Tests
 
-- [ ] T006 [P] Add loop-boundary tests in `tests/unit/test_runner_reason.py` and `tests/unit/test_ingestion_main.py`: provider exception reasons are redacted before the writer/journal sees them, startup loads validated settings and exits non-zero through the entrypoint on configuration failure, and the runner never calls the API process.
+- [x] T006 [P] Add loop-boundary tests in `tests/unit/test_runner_reason.py` and `tests/unit/test_ingestion_main.py`: provider exception reasons are redacted before the writer/journal sees them, startup loads validated settings and exits non-zero through the entrypoint on configuration failure, and the runner never calls the API process.
 
 **Checkpoint**: Tests make the claimed-run lifecycle, one-time roster snapshot, cooperative stop points, client rotation, and constant-per-instrument memory observable and fail because the runner and entrypoint do not exist.
 
@@ -102,9 +104,9 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 **Purpose**: Implement the typed runner state and the sequential claimed-run loop using the existing component contracts rather than direct SQL.
 
-- [ ] T007 Create the runner dependencies and `run_once`/claimed-run execution flow in `src/factorflow/ingestion/runner.py`; call `run-journal.claim_next`, reload and fingerprint the credential at claim time, rebuild `MassiveClient` only when the fingerprint changes, finalise a no-depth claim as failed before roster/provider access, and read `instrument-list-service`'s active roster exactly once after a valid claim.
-- [ ] T008 In `src/factorflow/ingestion/runner.py`, process the fixed roster sequentially: at the top of every iteration call the run-journal heartbeat and cancellation check together, exit without another planner/fetch/write when cancellation is requested or the claim is lost, call `plan_fetches` per data type, fetch the four Massive data types, and pass one instrument's parsed data and actual ranges to `write_instrument` so its transaction remains the boundary.
-- [ ] T009 In `src/factorflow/ingestion/runner.py`, map typed provider errors to the documented `not_found` or `failed` per-data-type result with a redacted reason, continue to the next instrument after a per-instrument failure, and call `run-journal.finalise(run_id)` after normal completion or observed cancellation without supplying a terminal outcome.
+- [x] T007 Create the runner dependencies and `run_once`/claimed-run execution flow in `src/factorflow/ingestion/runner.py`; call `run-journal.claim_next`, reload and fingerprint the credential at claim time, rebuild `MassiveClient` only when the fingerprint changes, finalise a no-depth claim as failed before roster/provider access, and read `instrument-list-service`'s active roster exactly once after a valid claim.
+- [x] T008 In `src/factorflow/ingestion/runner.py`, process the fixed roster sequentially: at the top of every iteration call the run-journal heartbeat and cancellation check together, exit without another planner/fetch/write when cancellation is requested or the claim is lost, call `plan_fetches` per data type, fetch the four Massive data types, and pass one instrument's parsed data and actual ranges to `write_instrument` so its transaction remains the boundary.
+- [x] T009 In `src/factorflow/ingestion/runner.py`, map typed provider errors to the documented `not_found` or `failed` per-data-type result with a redacted reason, continue to the next instrument after a per-instrument failure, and call `run-journal.finalise(run_id)` after normal completion or observed cancellation without supplying a terminal outcome.
 
 **Checkpoint**: The runner owns orchestration only: journal methods own lifecycle transitions, `plan.py` owns missing-range calculation, `massive-client` owns provider interpretation, and `writer.py` owns the one-instrument transaction.
 
@@ -114,7 +116,7 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 **Purpose**: Keep the ingestion container alive and connect validated runtime settings to the runner without crossing into the API process.
 
-- [ ] T010 Create `src/factorflow/ingestion_main.py` to load `Settings`, configure structured/redacted logging, construct the runner's journal, roster, planner, writer, provider-client factory, and wait dependencies, then repeatedly invoke the runner so an empty claim waits exactly `settings.run.poll_interval_seconds` before the next attempt; return a non-zero process status naming the invalid setting on configuration failure.
+- [x] T010 Create `src/factorflow/ingestion_main.py` to load `Settings`, configure structured/redacted logging, construct the runner's journal, roster, planner, writer, provider-client factory, and wait dependencies, then repeatedly invoke the runner so an empty claim waits exactly `settings.run.poll_interval_seconds` before the next attempt; return a non-zero process status naming the invalid setting on configuration failure.
 
 **Checkpoint**: The ingestion container has an independently runnable entrypoint that polls indefinitely, uses only the shared database handoff, and does not import or call application API routes.
 
@@ -124,8 +126,8 @@ Implement the ingestion-container entrypoint and sequential acquisition loop. Th
 
 **Purpose**: Verify the orchestration contract against PostgreSQL, the 3,000-instrument scale scenario, and the repository Python checks.
 
-- [ ] T011 Run the targeted `postgres` runner tests in `tests/integration/test_runner_acquires.py`, `tests/integration/test_runner_depth.py`, `tests/integration/test_runner_isolation.py`, `tests/integration/test_runner_cancel.py`, `tests/integration/test_runner_reclaim.py`, `tests/integration/test_runner_credential.py`, and `tests/integration/test_runner_volume.py`; manually mutate the cancellation/lost-claim guard and client-fingerprint branch in a local uncommitted copy to confirm the tests fail, then restore the implementation before continuing.
-- [ ] T012 Run `uv run pytest -m postgres`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build` from the repository root; record an unavailable container runtime rather than representing a partial test run as successful.
+- [x] T011 Run the targeted `postgres` runner tests in `tests/integration/test_runner_acquires.py`, `tests/integration/test_runner_depth.py`, `tests/integration/test_runner_isolation.py`, `tests/integration/test_runner_cancel.py`, `tests/integration/test_runner_reclaim.py`, `tests/integration/test_runner_credential.py`, and `tests/integration/test_runner_volume.py`; manually mutate the cancellation/lost-claim guard and client-fingerprint branch in a local uncommitted copy to confirm the tests fail, then restore the implementation before continuing.
+- [x] T012 Run `uv run pytest -m postgres`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build` from the repository root; record an unavailable container runtime rather than representing a partial test run as successful.
 
 **Checkpoint**: The complete runner behavior is covered by mapped tests, mutations of the stop and rotation behavior are caught, and the repository validation commands pass.
 
