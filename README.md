@@ -33,10 +33,14 @@ the deterministic observation-value hashing primitive, and the historical
 client that wires the provider boundary to Massive's REST SDK are also in
 place. The observation writer — the pure coverage range arithmetic in
 `coverage.py` and the typed writer that commits all four data types atomically in
-`writer.py` — is also in place, though no acquisition runner calls it yet. The
-remaining API routes (acquisition runs, coverage), the rest of the ingestion
-process, and the Coverage and Runs screens are not yet built; those two
-destinations still render a placeholder. What exists today is described below — everything else
+`writer.py` — is also in place, and the acquisition runner now calls it: it
+claims a run, walks the roster it snapshotted at claim time instrument by
+instrument, checks the claim and cancellation before each one, and finalises
+the run from what was written. `ingestion_main.py` is the ingestion process's
+own entrypoint, separate from the API. The remaining API routes (acquisition
+runs, coverage), full per-instrument outcome classification, and the Coverage
+and Runs screens are not yet built; those two destinations still render a
+placeholder. What exists today is described below — everything else
 in `docs/` is specification for work not yet implemented.
 
 ## Requirements
@@ -81,7 +85,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives and the journal's request/claim boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — and claims the oldest requested run in one statement while none is running or cancelling. See [Run request and claim](#run-request-and-claim) |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives and the journal's request/claim boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written. See [Run request and claim](#run-request-and-claim) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
@@ -89,8 +93,11 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
 | `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), and `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction). See [Observation writer](#observation-writer) |
+| `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
+| `src/factorflow/ingestion/outcomes.py` | The runner's failure path: `write_error_results()` records a `not_found` or `failed` outcome for all four data types of one instrument and upserts its acquisition state, so the runner itself builds no SQL. The success path belongs to `writer.py` |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
+| `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
 | `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` mounts the Instruments and Settings screens (see below) at their destinations, with Coverage and Runs still `ScreenPlaceholder`, plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
@@ -578,10 +585,9 @@ criterion:
 
 ## Run request and claim
 
-`src/factorflow/runs/journal.py` is the run journal's request and claim
-boundary over the `acquisition_run` table (migration `0004_runs.sql`).
-Heartbeat, cancellation, and finalisation belong to later run-lifecycle
-stories and do not exist yet.
+`src/factorflow/runs/journal.py` is the run journal's boundary over the
+`acquisition_run` table (migration `0004_runs.sql`): request, claim,
+heartbeat, cancellation and finalisation.
 
 `request_run(connection, history_depth_years)` always inserts a `requested`
 row — a request is never rejected because a run is active; queueing rather
@@ -599,14 +605,66 @@ SKIP LOCKED` lets a contending runner skip a locked candidate rather than
 block on it. A successful claim sets `state`, `started_at`, `claimed_by`,
 and `heartbeat_at` in that same statement and returns a frozen
 `ClaimedRun(run_id, history_depth_years)` carrying the snapshotted depth —
-never a re-read of the current setting. `None` means nothing is claimable;
-the configured wait-and-repoll loop that consumes it belongs to the
-acquisition runner's own story (CAP-001-E4-S5).
+never a re-read of the current setting. `None` means nothing is claimable, and the
+loop that consumes it waits `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` before
+polling again — see [Acquisition runner](#acquisition-runner).
 
 The `NOT EXISTS` guard is not the only defence against two active runs:
 `idx_acquisition_run_single_active`, a partial unique index over the
 `running`/`cancelling` states, turns a race that slips past the guard into
 a unique violation instead of a second active run.
+
+`heartbeat(connection, run_id, runner_id)` refreshes the claim and returns
+`False` when the row is no longer this runner's to write — the runner's
+signal that the claim was lost, not an error to retry.
+`cancellation_requested(connection, run_id)` reports whether the run has
+moved to `cancelling`.
+
+`finalise(connection, run_id)` never accepts a caller-supplied outcome. It
+derives the terminal state from `run_instrument_result`: `cancelled` when the
+run is `cancelling`, `failed` when no instrument was reached, `succeeded`
+when every named instrument wrote all four data types, and `partial`
+otherwise. The runner therefore cannot record a run as successful; it can
+only write results and let the journal read them.
+
+## Acquisition runner
+
+`src/factorflow/ingestion/runner.py` turns a claimed run into observations,
+one instrument at a time. It is the process that finally calls the
+[observation writer](#observation-writer). It writes nothing directly — every
+insert or update belongs to `writer.py` on the success path and `outcomes.py`
+on the failure path — while reading an instrument's symbol and coverage
+segments through two parameterised queries of its own.
+
+`AcquisitionRunner.execute_claimed(run_id, depth_years, instrument_ids)`
+walks the roster it was handed — snapshotted once at claim time, so an
+instrument added mid-run belongs to the next one. A run whose claimed depth
+is `None` is finalised without a single provider call: no stated depth means
+there is no window to fetch.
+
+Before every instrument, in this order, it refreshes the heartbeat and then
+asks whether cancellation was requested. A lost claim stops the run
+immediately and writes nothing further — another runner now owns it. An
+observed cancellation finalises and stops. Both checks sit at the top of the
+loop rather than around the work, so the longest a cancelled run continues
+is one instrument.
+
+For each instrument it fetches the four data types through
+[`plan_fetches`](#range-planner), which is what keeps a re-run from
+re-fetching covered ground, and hands them to `write_instrument()` in one
+transaction. A provider failure ends that instrument, not the run:
+`InstrumentNotFound` records `not_found`, and `ProviderUnavailable` or any
+other `MassiveError` records `failed`, each with a reason composed by
+`compose_failure_reason` and passed through the entrypoint's redaction
+callable, so a credential that appears in a provider message never reaches
+the database. The next instrument then starts.
+
+When the roster is exhausted the run is finalised from what was written.
+
+`CredentialAwareClientFactory` keeps one provider client and rebuilds it only
+when the credential's value changes, and the entrypoint re-reads the
+credential at each claim — so rotating the key takes effect on the next run
+without restarting the process.
 
 ## Running the migrator
 
@@ -657,6 +715,28 @@ it. An unmatched non-API path falls back to the built `index.html` when a
 bundle is present, and 404s when it is not — the bundle is build output, so a
 fresh clone has none until `npm run build` runs; an unmatched path under
 `/api` always returns the `{"error": {...}}` envelope.
+
+## Running the acquisition runner
+
+The acquisition runner is a separate process from the API and shares only the
+database with it. The container image runs the migrator and the API
+(see [Layout](#layout)); the runner is started on its own:
+
+```bash
+FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
+FACTORFLOW_MASSIVE_API_KEY=... \
+FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
+  uv run python -m factorflow.ingestion_main
+```
+
+It claims the next requested run, executes it, and — when nothing is
+claimable — waits `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` and polls again. In
+normal operation the loop does not exit. A configuration error exits `1`
+naming the offending environment variable, never its value.
+
+Each process identifies its claims as `ingestion-runner-<hostname>`, which is
+what `heartbeat` checks ownership against, so two runners on different hosts
+cannot mistake each other's claims for their own.
 
 ## The status region
 

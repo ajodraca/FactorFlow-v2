@@ -5,6 +5,7 @@ artifact_type: story-tasks
 artifact_version: 1
 status: draft
 last_reworked_review: CAP-001-E4-S5-implementation-review-v1.md
+docs_synced_review: CAP-001-E4-S5-implementation-review-v2.md
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
