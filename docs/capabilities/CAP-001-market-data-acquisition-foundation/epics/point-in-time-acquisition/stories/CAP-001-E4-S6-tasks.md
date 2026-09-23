@@ -124,6 +124,12 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 ## Dependencies & Execution Order
 
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-001-E5-S2 | context | E5-S2 created the base run-journal module, but E4-S5 now delivers the runner seam and argument-free `finalise`; E4-S6 reaches that journal contract transitively through its hard E4-S5 edge. |
+
 ### Task Dependencies
 
 - T001 prepares fixtures required by T002 through T006.
@@ -177,5 +183,5 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 ### Other Notes
 
-- CAP-001-E4-S3 supplies the writer transaction and result-row insertion; CAP-001-E4-S5 supplies iteration and cancellation; CAP-001-E5-S2 supplies run finalisation. This story must not add direct SQL outside the writer, provider retry logic, reason composition, or a row for an instrument the runner never reached.
+- CAP-001-E4-S3 supplies the writer transaction and result-row insertion; CAP-001-E4-S5 supplies iteration, cancellation, and argument-free run finalisation on top of E5-S2's base journal module. This story must not add direct SQL outside the writer, provider retry logic, reason composition, or a row for an instrument the runner never reached.
 - Store provider request IDs only as diagnostic correlation data. The usable credential remains owned by Massive-client/runtime configuration and never enters `outcomes.py` or `writer.py`.
