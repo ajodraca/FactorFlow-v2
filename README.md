@@ -35,12 +35,14 @@ place. The observation writer — the pure coverage range arithmetic in
 `coverage.py` and the typed writer that commits all four data types atomically in
 `writer.py` — is also in place, and the acquisition runner now calls it: it
 claims a run, walks the roster it snapshotted at claim time instrument by
-instrument, checks the claim and cancellation before each one, and finalises
-the run from what was written. `ingestion_main.py` is the ingestion process's
-own entrypoint, separate from the API. The remaining API routes (acquisition
-runs, coverage), full per-instrument outcome classification, and the Coverage
-and Runs screens are not yet built; those two destinations still render a
-placeholder. What exists today is described below — everything else
+instrument, checks the claim and cancellation before each one, fetches each
+of the four data types individually (so one instrument can have distinct
+per-data-type outcomes), classifies each fetch result through
+`outcomes.py`, and finalises the run from what was written.
+`ingestion_main.py` is the ingestion process's own entrypoint, separate from
+the API. The remaining API routes (acquisition runs, coverage), and the
+Coverage and Runs screens are not yet built; those two destinations still
+render a placeholder. What exists today is described below — everything else
 in `docs/` is specification for work not yet implemented.
 
 ## Requirements
@@ -92,9 +94,9 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
-| `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), and `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction). See [Observation writer](#observation-writer) |
+| `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
 | `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
-| `src/factorflow/ingestion/outcomes.py` | The runner's failure path: `write_error_results()` records a `not_found` or `failed` outcome for all four data types of one instrument and upserts its acquisition state, so the runner itself builds no SQL. The success path belongs to `writer.py` |
+| `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
@@ -384,8 +386,10 @@ Massive's forward-looking market-status endpoint or ticker-list endpoint.
 `src/factorflow/ingestion/massive/errors.py` also defines
 `compose_failure_reason`, which turns one of the four typed `MassiveError`
 subclasses into the safe, owner-visible text stored as
-`run_instrument_result.reason` (CAP-001-E4-S6 is the consumer; no caller
-wires it in yet). The composer takes the typed `error`, the `symbol`, the
+`run_instrument_result.reason`. The acquisition runner calls it in the
+per-data-type fetch error handlers, passing the entrypoint's `redact`
+callable, before forwarding the composed reason to `classify_provider_error`
+(CAP-001-E4-S6). The composer takes the typed `error`, the `symbol`, the
 `data_type`, and a caller-supplied `redact` callable — it never reads
 runtime configuration or a credential itself.
 
@@ -569,6 +573,20 @@ deviation is documented in the task plan (T011) with rationale: delegating the
 boundary makes `write_instrument` composable within larger caller-managed
 transaction scopes without nested-transaction overhead.
 
+**`write_instrument_with_outcomes(connection, instrument_id, run_id, observations, observed_on, error_outcomes=None)`** —
+Extends `write_instrument` to accept pre-classified error outcomes for data
+types that failed at the provider layer (`not_found` or `failed`). The
+`error_outcomes` dict maps data-type name (`"reference"`, `"prices"`,
+`"fundamentals"`, `"corporate_actions"`) to `InstrumentOutcomeRecord`
+instances from `outcomes.classify_provider_error`. For data types present in
+`error_outcomes`: no observation rows are inserted, no coverage segment is
+written, `acquisition_state` is upserted with the error outcome, and
+`run_instrument_result` is inserted with the error outcome and reason. For
+data types absent from `error_outcomes`, the normal `write_instrument` logic
+applies (`written`/`unchanged`). This is the function the acquisition runner
+now calls for every instrument (DAC-E4-S6-3, DAC-E4-S6-4, DAC-E4-S6-6,
+DAC-E4-S6-7).
+
 **Known limitations carried forward from implementation review v2
 (`CAP-001-E4-S3-implementation-review-v2.md`)** — neither blocks an acceptance
 criterion:
@@ -582,6 +600,52 @@ criterion:
   though `_insert_daily_bars` completed before the injected trigger fired.
   PostgreSQL's all-or-nothing rollback guarantees those rows are gone; the
   `instrument_reference` assertion already proves the mechanism (IR-002, low).
+
+## Per-instrument outcome classification
+
+`src/factorflow/ingestion/outcomes.py` owns the classification boundary between
+a provider result and a persisted outcome string. It contains no SQL, no retry
+logic, no credential access, and no reason-composition logic.
+
+**`InstrumentOutcomeRecord`** — A frozen dataclass carrying `data_type`,
+`outcome` (one of `"written"`, `"unchanged"`, `"not_found"`, `"failed"`), and
+an optional `reason` string. The reason is the pre-composed, credential-safe
+failure reason from the Massive-client boundary (`compose_failure_reason`); it
+is `None` on success paths.
+
+**`classify_write_result(result: WriteResult) -> dict[str, str]`** — Maps a
+`WriteResult` to a dict with exactly four keys (the four schema data-type
+names). Each data type maps to `"written"` when any rows were appended, or
+`"unchanged"` when every returned row already existed (or none came back). This
+is a pure function: no database access, no side effects.
+
+**`classify_provider_error(error, *, data_type, reason) -> InstrumentOutcomeRecord`** —
+Maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the
+failing data type. `InstrumentNotFound` → `"not_found"`;
+`ProviderUnavailable`/`ProviderContractViolation` → `"failed"`.
+`CredentialRejected` raises `ValueError` — it is a run-level failure that must
+not become a per-data-type outcome row. Any unrecognised type raises `TypeError`.
+The `reason` argument is the already-composed, credential-safe reason string
+from the Massive-client boundary; this module does not re-compose or re-redact it.
+
+**`write_error_results(connection, run_id, instrument_id, outcome, reason)`** —
+Preserved from E4-S5 for the all-at-once fetch phase. Inserts
+`run_instrument_result` rows for all four data types when the provider failed
+before any per-data-type result was classified. This path is used by callers
+that have not yet migrated to the per-data-type fetch seam. Once the runner
+fetches data types individually, `classify_provider_error` +
+`write_instrument_with_outcomes` replace this path for individual failures.
+
+**Classification table:**
+
+| Provider result | `classify_write_result` / `classify_provider_error` output | Run effect |
+|---|---|---|
+| Data returned, rows appended | `written` | counts toward `succeeded` |
+| Data returned, every value already held | `unchanged` | counts toward `succeeded` |
+| Instrument unknown to the provider (`InstrumentNotFound`) | `not_found` | run continues, outcome becomes `partial` |
+| Transport or server error, attempts exhausted (`ProviderUnavailable`, `ProviderContractViolation`) | `failed` | run continues, outcome becomes `partial` |
+| Rate-limit pacing (`429`) | no outcome — absorbed by the governor before classification | no row written |
+| Not reached because the run was cancelled | no row written | no coverage, no failure |
 
 ## Run request and claim
 
@@ -649,15 +713,22 @@ observed cancellation finalises and stops. Both checks sit at the top of the
 loop rather than around the work, so the longest a cancelled run continues
 is one instrument.
 
-For each instrument it fetches the four data types through
+For each instrument it fetches the four data types individually through
 [`plan_fetches`](#range-planner), which is what keeps a re-run from
-re-fetching covered ground, and hands them to `write_instrument()` in one
-transaction. A provider failure ends that instrument, not the run:
-`InstrumentNotFound` records `not_found`, and `ProviderUnavailable` or any
-other `MassiveError` records `failed`, each with a reason composed by
-`compose_failure_reason` and passed through the entrypoint's redaction
-callable, so a credential that appears in a provider message never reaches
-the database. The next instrument then starts.
+re-fetching covered ground. Each data type is fetched in a separate
+try/except block: `CredentialRejected` re-raises and terminates the run,
+while `InstrumentNotFound`, `ProviderUnavailable`, and any other `MassiveError`
+are classified by `classify_provider_error` into a per-data-type
+`InstrumentOutcomeRecord` (`not_found` or `failed`). The reason is composed
+by `compose_failure_reason` and passed through the entrypoint's redaction
+callable before classification, so a credential in a provider message never
+reaches the database. After all four data types are attempted, the runner
+calls `write_instrument_with_outcomes()` in one transaction, passing the
+successfully fetched observations alongside the error outcomes for any
+data types that failed. This allows one instrument to record distinct
+outcomes per data type — for example `written` for prices and `not_found`
+for fundamentals. Provider failures affect the instrument, not the run;
+the next instrument starts immediately after.
 
 When the roster is exhausted the run is finalised from what was written.
 
@@ -665,6 +736,23 @@ When the roster is exhausted the run is finalised from what was written.
 when the credential's value changes, and the entrypoint re-reads the
 credential at each claim — so rotating the key takes effect on the next run
 without restarting the process.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E4-S6-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- `test_rate_limit_does_not_produce_outcome_row` (TC-COMP-145) provides a
+  normal full-success stub client and asserts outcome strings are in the
+  allowed set; it does not inject a 429-equivalent at the fetch boundary to
+  prove the governor absorbs it before classification. A future change
+  introducing a rate-limit error type that bypasses the governor would not be
+  caught by this test (IR-001, medium).
+- `test_appended_rows_persist_written_outcome` (TC-COMP-183 integration) does
+  not assert `corporate_actions`; `test_unchanged_rows_persist_unchanged_outcome`
+  (TC-COMP-184 integration) asserts only `prices` and `fundamentals`. An
+  integration regression silently dropping one data type from
+  `run_instrument_result` insertion would not be caught by these integration
+  tests (IR-002, medium).
 
 ## Running the migrator
 

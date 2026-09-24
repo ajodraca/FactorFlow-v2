@@ -34,6 +34,7 @@ __all__ = [
     "ParsedObservations",
     "WriteResult",
     "write_instrument",
+    "write_instrument_with_outcomes",
 ]
 
 
@@ -445,6 +446,159 @@ def write_instrument(
                 "VALUES (%s, %s, %s, %s)",
                 (run_id, instrument_id, data_type, outcome),
             )
+
+    return WriteResult(
+        reference_appended=ref_appended,
+        reference_unchanged=ref_unchanged,
+        reference_covered_range=ref_covered,
+        prices_appended=prices_appended,
+        prices_unchanged=prices_unchanged,
+        prices_covered_range=prices_covered,
+        fundamentals_appended=fund_appended,
+        fundamentals_unchanged=fund_unchanged,
+        fundamentals_covered_range=fund_covered,
+        corporate_actions_appended=ca_appended,
+        corporate_actions_unchanged=ca_unchanged,
+        corporate_actions_covered_range=ca_covered,
+    )
+
+
+def write_instrument_with_outcomes(
+    connection: psycopg.Connection[Any],
+    instrument_id: int,
+    run_id: uuid.UUID,
+    observations: ParsedObservations,
+    observed_on: date,
+    error_outcomes: dict[str, Any] | None = None,
+) -> WriteResult:
+    """Commit observations for one instrument and persist typed outcome records.
+
+    Extends ``write_instrument`` to accept pre-classified error outcomes for
+    data types that failed at the provider layer (``not_found`` or ``failed``).
+    The ``error_outcomes`` dict maps data-type name to ``InstrumentOutcomeRecord``
+    instances from ``outcomes.classify_provider_error``.
+
+    For data types present in ``error_outcomes``:
+    - No observation rows are inserted (observations must be empty lists for
+      those types, which is enforced by the caller).
+    - No coverage segment is written.
+    - ``acquisition_state`` is upserted with the error outcome.
+    - ``run_instrument_result`` is inserted with the error outcome and reason.
+
+    For data types absent from ``error_outcomes``:
+    - Normal write_instrument logic applies (written / unchanged).
+
+    The caller owns the transaction boundary (``connection.transaction()``).
+    All steps execute inside the caller-provided connection.
+
+    Args:
+        connection: An open psycopg connection.  The caller must commit.
+        instrument_id: The instrument to write for.
+        run_id: The acquisition run this write belongs to.
+        observations: The typed collections and ranges; empty lists for data
+            types with error outcomes.
+        observed_on: FactorFlow's observation date.
+        error_outcomes: Optional mapping of data-type → InstrumentOutcomeRecord
+            for data types that could not be fetched.  ``None`` means no errors.
+
+    Returns:
+        A ``WriteResult`` with per-type appended, unchanged, and covered-range
+        values for data types that were successfully written.
+
+    Raises:
+        Any psycopg or hashing exception -- the caller's transaction rolls back.
+    """
+    _error_outcomes = error_outcomes or {}
+
+    with connection.cursor() as cur:
+        # Step 1: Append observations for successfully fetched data types only
+        ref_appended, ref_unchanged = _insert_references(
+            cur, instrument_id, observations.reference, observed_on
+        )
+        prices_appended, prices_unchanged = _insert_daily_bars(
+            cur, instrument_id, observations.prices, observed_on
+        )
+        fund_appended, fund_unchanged = _insert_fundamentals(
+            cur, instrument_id, observations.fundamentals, observed_on
+        )
+        ca_appended, ca_unchanged = _insert_corporate_actions(
+            cur, instrument_id, observations.corporate_actions, observed_on
+        )
+
+        # Step 2: Coverage — only for data types without errors
+        ref_covered: tuple[date, date] = observations.reference_range
+        prices_covered: tuple[date, date] = observations.prices_range
+        fund_covered: tuple[date, date] = observations.fundamentals_range
+        ca_covered: tuple[date, date] = observations.corporate_actions_range
+
+        if "reference" not in _error_outcomes:
+            ref_covered = _replace_coverage(
+                cur, instrument_id, "reference", observations.reference_range
+            )
+        if "prices" not in _error_outcomes:
+            prices_covered = _replace_coverage(
+                cur, instrument_id, "prices", observations.prices_range
+            )
+        if "fundamentals" not in _error_outcomes:
+            fund_covered = _replace_coverage(
+                cur, instrument_id, "fundamentals", observations.fundamentals_range
+            )
+        if "corporate_actions" not in _error_outcomes:
+            ca_covered = _replace_coverage(
+                cur, instrument_id, "corporate_actions", observations.corporate_actions_range
+            )
+
+        # Step 3: Upsert acquisition_state for all reached data types
+        counts: dict[str, tuple[int, int]] = {
+            "reference": (ref_appended, ref_unchanged),
+            "prices": (prices_appended, prices_unchanged),
+            "fundamentals": (fund_appended, fund_unchanged),
+            "corporate_actions": (ca_appended, ca_unchanged),
+        }
+        for data_type in ("reference", "prices", "fundamentals", "corporate_actions"):
+            if data_type in _error_outcomes:
+                error_outcome = _error_outcomes[data_type].outcome
+                cur.execute(
+                    "INSERT INTO acquisition_state "
+                    "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
+                    "VALUES (%s, %s, now(), %s, %s) "
+                    "ON CONFLICT (instrument_id, data_type) DO UPDATE "
+                    "SET last_acquired_at = EXCLUDED.last_acquired_at, "
+                    "    last_run_id = EXCLUDED.last_run_id, "
+                    "    last_outcome = EXCLUDED.last_outcome",
+                    (instrument_id, data_type, run_id, error_outcome),
+                )
+            else:
+                cur.execute(
+                    "INSERT INTO acquisition_state "
+                    "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
+                    "VALUES (%s, %s, now(), %s, 'written') "
+                    "ON CONFLICT (instrument_id, data_type) DO UPDATE "
+                    "SET last_acquired_at = EXCLUDED.last_acquired_at, "
+                    "    last_run_id = EXCLUDED.last_run_id, "
+                    "    last_outcome = EXCLUDED.last_outcome",
+                    (instrument_id, data_type, run_id),
+                )
+
+        # Step 4: Insert run_instrument_result for all reached data types
+        for data_type in ("reference", "prices", "fundamentals", "corporate_actions"):
+            if data_type in _error_outcomes:
+                rec = _error_outcomes[data_type]
+                cur.execute(
+                    "INSERT INTO run_instrument_result "
+                    "(run_id, instrument_id, data_type, outcome, reason) "
+                    "VALUES (%s, %s, %s, %s, %s)",
+                    (run_id, instrument_id, data_type, rec.outcome, rec.reason),
+                )
+            else:
+                appended, _ = counts[data_type]
+                outcome = "written" if appended > 0 else "unchanged"
+                cur.execute(
+                    "INSERT INTO run_instrument_result "
+                    "(run_id, instrument_id, data_type, outcome) "
+                    "VALUES (%s, %s, %s, %s)",
+                    (run_id, instrument_id, data_type, outcome),
+                )
 
     return WriteResult(
         reference_appended=ref_appended,
