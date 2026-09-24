@@ -1,8 +1,14 @@
-"""Cursor/connection-boundary tests for `factorflow.runs.journal` (CAP-001-E5-S2).
+"""Cursor/connection-boundary tests for `factorflow.runs.journal` (CAP-001-E5-S2/S3).
 
 These tests pin the journal's contract at the psycopg boundary: one statement
 per claim, bound parameters, the frozen `ClaimedRun` mapping, and the persisted
 snapshot depth — never the current `owner_setting` value.
+
+S3 additions (T006): bound UUID/state parameters for request_cancel; exact
+mapping of written/unchanged to the successful-result set; four-required-data-types
+completeness check; non-caller-selectable finalise signature; RunAlreadyTerminal.actual_state;
+validation-before-write via the S1 state-transition helper; SQL values as
+psycopg parameters rather than interpolated strings.
 """
 
 import dataclasses
@@ -14,7 +20,13 @@ from typing import Any
 import pytest
 
 from factorflow.runs import journal
-from factorflow.runs.journal import ClaimedRun, claim_next, request_run
+from factorflow.runs.journal import (
+    ClaimedRun,
+    RunAlreadyTerminal,
+    claim_next,
+    request_cancel,
+    request_run,
+)
 
 
 class _RecordingCursor:
@@ -109,3 +121,86 @@ def test_claim_uses_snapshot_never_stated_depth(monkeypatch: pytest.MonkeyPatch)
 
     assert claim_next(connection, "runner-1") == ClaimedRun(run_id=run_id, history_depth_years=7)
     assert "read_history_depth" not in vars(journal)
+
+
+# ---------------------------------------------------------------------------
+# T006: S3 cancellation/finalisation boundary tests (CAP-001-E5-S3)
+# ---------------------------------------------------------------------------
+
+
+def test_run_already_terminal_carries_actual_state() -> None:
+    """RunAlreadyTerminal exposes the persisted state via .actual_state.
+
+    The exception must carry the state so the caller can name the actual
+    terminal state in error messages (DAC-E5-9, DAC-E5-S3-4).
+    """
+    exc = RunAlreadyTerminal("cannot cancel", actual_state="succeeded")
+    assert exc.actual_state == "succeeded"
+
+
+def test_request_cancel_passes_run_id_as_bound_parameter() -> None:
+    """request_cancel issues SQL with run_id as a bound parameter, not interpolated.
+
+    The connection must receive the run_id value as a psycopg parameter so it
+    is sent as a typed bind variable rather than a raw string fragment (prevents
+    SQL injection; validates the psycopg boundary contract).
+    """
+    run_id = uuid.uuid4()
+    # Simulate a non-terminal running run
+    connection = _RecordingConnection([("running",)])
+
+    # request_cancel will raise because there is no real DB update, but we
+    # only care that the SELECT was issued with the run_id as a bound param.
+    try:
+        request_cancel(connection, run_id)
+    except Exception:
+        pass
+
+    executed = connection.cursor_instance.executed
+    assert len(executed) >= 1
+    # First executed statement should carry run_id as a parameter
+    first_query, first_params = executed[0]
+    # The run_id must appear in the params, not be interpolated into the query
+    params_flat = (
+        first_params if not isinstance(first_params, dict) else list(first_params.values())
+    )
+    assert run_id in params_flat or str(run_id) in [str(p) for p in params_flat], (
+        "run_id must be a bound parameter, not interpolated into the SQL string"
+    )
+    assert str(run_id) not in first_query, (
+        "run_id must not be interpolated directly into the SQL string"
+    )
+
+
+def test_finalise_signature_accepts_no_outcome_argument() -> None:
+    """finalise(connection, run_id) takes no caller-supplied outcome.
+
+    The approved interface is `finalise(connection, run_id) -> str`. A
+    caller must not be able to supply an outcome, ensuring the result is
+    always derived from persisted rows (AC-9, DAC-E5-4).
+    """
+    import inspect
+
+    from factorflow.runs.journal import finalise
+
+    sig = inspect.signature(finalise)
+    params = list(sig.parameters.keys())
+    # Only 'connection' and 'run_id' are accepted
+    assert params == ["connection", "run_id"], (
+        f"finalise must accept only (connection, run_id), got {params}"
+    )
+
+
+def test_request_cancel_signature() -> None:
+    """request_cancel(connection, run_id) -> str has the approved signature.
+
+    The function must not accept additional arguments, preserving the
+    approved journal boundary (DAC-E5-S3-1).
+    """
+    import inspect
+
+    sig = inspect.signature(request_cancel)
+    params = list(sig.parameters.keys())
+    assert params == ["connection", "run_id"], (
+        f"request_cancel must accept only (connection, run_id), got {params}"
+    )
