@@ -281,10 +281,18 @@ def test_instrument_not_found_persists_not_found_outcome(
     rows = _fetch_result_rows(conn, run_id)
     assert len(rows) > 0
 
-    outcomes_for_instrument = [r for r in rows if r["instrument_id"] == instrument_id]
-    assert len(outcomes_for_instrument) > 0
-    for row in outcomes_for_instrument:
-        assert row["outcome"] == "not_found", f"Expected not_found, got {row['outcome']}"
+    outcomes_by_data_type = {
+        r["data_type"]: r["outcome"] for r in rows if r["instrument_id"] == instrument_id
+    }
+    assert outcomes_by_data_type, "no result rows recorded for the instrument"
+    # AC-10 and DAC-E4-S6-6: only the data type that was actually reached and
+    # failed carries the error outcome. The others were never fetched, so they
+    # stay "unchanged" -- requiring "not_found" for all of them would reject the
+    # per-data-type behaviour the story mandates.
+    assert outcomes_by_data_type["reference"] == "not_found"
+    for data_type, outcome in outcomes_by_data_type.items():
+        if data_type != "reference":
+            assert outcome == "unchanged", f"{data_type}: expected unchanged, got {outcome}"
 
     run_state = _fetch_run_state(conn, run_id)
     assert run_state == "partial"
@@ -322,9 +330,16 @@ def test_provider_unavailable_persists_failed_outcome(
     rows = _fetch_result_rows(conn, run_id)
     assert len(rows) > 0
 
-    outcomes_for_instrument = [r for r in rows if r["instrument_id"] == instrument_id]
-    for row in outcomes_for_instrument:
-        assert row["outcome"] == "failed"
+    outcomes_by_data_type = {
+        r["data_type"]: r["outcome"] for r in rows if r["instrument_id"] == instrument_id
+    }
+    assert outcomes_by_data_type, "no result rows recorded for the instrument"
+    # AC-10 and DAC-E4-S6-6: see the note in the not_found case above. Only the
+    # reached data type is "failed"; the unfetched ones stay "unchanged".
+    assert outcomes_by_data_type["reference"] == "failed"
+    for data_type, outcome in outcomes_by_data_type.items():
+        if data_type != "reference":
+            assert outcome == "unchanged", f"{data_type}: expected unchanged, got {outcome}"
 
     run_state = _fetch_run_state(conn, run_id)
     assert run_state == "partial"
