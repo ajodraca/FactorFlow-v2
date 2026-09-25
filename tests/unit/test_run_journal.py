@@ -24,6 +24,7 @@ from factorflow.runs.journal import (
     ClaimedRun,
     RunAlreadyTerminal,
     claim_next,
+    finalise,
     request_cancel,
     request_run,
 )
@@ -189,6 +190,18 @@ def test_finalise_signature_accepts_no_outcome_argument() -> None:
     assert params == ["connection", "run_id"], (
         f"finalise must accept only (connection, run_id), got {params}"
     )
+
+
+def test_finalise_locks_state_before_deriving_outcome() -> None:
+    """finalise locks the run row before its read-then-write transition."""
+    run_id = uuid.uuid4()
+    connection = _RecordingConnection([("running",), (0,)])
+
+    assert finalise(connection, run_id) == "failed"
+
+    state_query, state_params = connection.cursor_instance.executed[0]
+    assert "FOR UPDATE" in state_query
+    assert state_params == (run_id,)
 
 
 def test_request_cancel_signature() -> None:
