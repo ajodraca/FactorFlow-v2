@@ -6,12 +6,14 @@ task plan T017-T020. The factory itself does not bind a socket -- binding is
 (`TestClient`) without opening a port.
 """
 
+import asyncio
 import contextvars
 import logging
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -21,7 +23,15 @@ from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
 from factorflow.api.routes import health, instruments, settings
-from factorflow.config.settings import DatabaseSettings, configure_logging
+from factorflow.config.settings import DatabaseSettings, RunSettings, configure_logging
+from factorflow.runs.reclaim import reclaim_stale_runs
+
+# Owner-confirmed reclaim loop cadence (5 seconds).  Injectable via
+# `_run_reclaim_loop`'s `interval_seconds` parameter in tests; this module-
+# level constant is the production default per the open gap recorded in the
+# task plan (no design artifact has adopted this value yet, so it is kept
+# locally injectable rather than promoted to RunSettings).
+_reclaim_interval_seconds: float = 5.0
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -83,6 +93,59 @@ def _install_request_id_patch() -> None:
     logging.Handler.handle = _stamped_handle  # type: ignore[method-assign]
 
 
+async def _run_reclaim_loop(
+    pool: "ConnectionPool[Any]",
+    stale_after_seconds: float,
+    interval_seconds: float = _reclaim_interval_seconds,
+    wait_fn: Callable[[float], Any] | None = None,
+    dispatch_fn: Callable[..., Any] | None = None,
+    stop_event: asyncio.Event | None = None,
+) -> None:
+    """Run the periodic reclaim sweep in the application container.
+
+    Dispatches the synchronous pool checkout and reclaim work off the event
+    loop via ``asyncio.to_thread`` (or an injected dispatcher double in tests),
+    then waits ``interval_seconds`` before the next sweep.
+
+    Args:
+        pool: The application connection pool (opened before this task starts).
+        stale_after_seconds: Passed to ``reclaim_stale_runs``; comes from
+            ``RunSettings.stale_after_seconds``.
+        interval_seconds: Delay between sweeps (owner-confirmed 5 s).
+            Injectable for tests.
+        wait_fn: Async callable that sleeps for the given number of seconds.
+            Defaults to ``asyncio.sleep``.
+        dispatch_fn: Async callable used to run synchronous work off the event
+            loop.  Signature: ``dispatch_fn(fn, *args) -> awaitable``.
+            Defaults to ``asyncio.to_thread``.
+        stop_event: When set, the loop exits after the current iteration.
+            Used by tests to limit the number of iterations.
+    """
+    _wait = wait_fn if wait_fn is not None else asyncio.sleep
+    _dispatch = dispatch_fn if dispatch_fn is not None else asyncio.to_thread
+
+    def _do_sweep() -> list[Any]:
+        with pool.connection() as conn:
+            reclaimed = reclaim_stale_runs(conn, stale_after_seconds)
+            conn.commit()
+            return reclaimed
+
+    while True:
+        try:
+            await _dispatch(_do_sweep)
+        except Exception:
+            # Log but do not crash the loop; a failed sweep is not fatal.
+            logging.getLogger(__name__).exception("reclaim sweep failed")
+
+        if stop_event is not None and stop_event.is_set():
+            break
+
+        await _wait(interval_seconds)
+
+        if stop_event is not None and stop_event.is_set():
+            break
+
+
 @asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Open the connection pool on startup, close it on shutdown (T018).
@@ -111,9 +174,23 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     pool.open()
     app.state.db_pool = pool
+
+    run_settings = RunSettings()
+    reclaim_task = asyncio.create_task(
+        _run_reclaim_loop(
+            pool=pool,
+            stale_after_seconds=run_settings.stale_after_seconds,
+            interval_seconds=_reclaim_interval_seconds,
+        )
+    )
     try:
         yield
     finally:
+        reclaim_task.cancel()
+        try:
+            await reclaim_task
+        except asyncio.CancelledError:
+            pass
         pool.close()
 
 
