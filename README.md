@@ -46,10 +46,15 @@ whose heartbeat has gone stale and transitions them to `abandoned`, so a
 crashed ingestion process never wedges acquisition permanently; the sweep
 runs as an asyncio background task in the API lifespan, not in the ingestion
 container, so it continues operating when ingestion is stopped or
-crash-looping. The remaining API routes (acquisition runs, coverage), and the
-Coverage and Runs screens are not yet built; those two destinations still
-render a placeholder. What exists today is described below — everything else
-in `docs/` is specification for work not yet implemented.
+crash-looping. The acquisition run API routes — `POST /api/acquisition-runs`,
+`GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and
+`POST /api/acquisition-runs/{id}/cancel` — are also in place, backed by a
+read-only journal query boundary (`src/factorflow/runs/queries.py`) with
+keyset cursor pagination and failure-first result ordering. The remaining API
+route (coverage) and the Coverage and Runs screens are not yet built; those
+two destinations still render a placeholder. What exists today is described
+below — everything else in `docs/` is specification for work not yet
+implemented.
 
 ## Requirements
 
@@ -93,9 +98,9 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, and the stale-claim reclaim sweep. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`. See [Run request and claim](#run-request-and-claim) and [Stale-claim reclaim](#stale-claim-reclaim) |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with optional state filter, and fetching a single run's summary, persisted counts, and paged per-instrument results with failure-first ordering and outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
@@ -228,6 +233,47 @@ Every non-2xx response from these two route modules carries the shared
 including FastAPI's own request-validation `422`s — `app.py`'s
 `_validation_error_handler` derives `resource` from the request path so a
 shared, application-wide handler still names the right resource per route.
+
+## Acquisition run API
+
+`src/factorflow/api/routes/runs.py` and `src/factorflow/runs/queries.py`
+expose the acquisition run lifecycle over HTTP — a thin HTTP surface that
+validates preconditions, delegates mutations to `src/factorflow/runs/journal.py`,
+and delegates reads to `src/factorflow/runs/queries.py`.
+
+| Endpoint | Success | Errors | Behavior |
+|---|---|---|---|
+| `POST /api/acquisition-runs` | `202` `{run_id, state: "requested", queued_behind}` | `409 history_depth_not_set`; `409 no_active_instruments` | Checks history depth first, then the active roster; refuses with `409` before writing any row; always accepts an active-run queue (AC-23, DAC-E5-14, DAC-E5-S5-1) |
+| `GET /api/acquisition-runs` | `200` `{runs, next_cursor}` | `422` malformed or unsupported-version cursor | Lists runs reverse-chronologically by `(requested_at, run_id) DESC`; accepts optional `state` filter, `limit` (default 50, max 500), and keyset `cursor` (DAC-E5-S5-4) |
+| `GET /api/acquisition-runs/{id}` | `200` `{run, counts, results, next_cursor}` | `404` unknown id; `422` malformed cursor | Returns the run summary, persisted instrument counts, and per-instrument per-data-type results paged by instrument; up to `4 * limit` result rows per page; failure-first ordering, optional `outcome` filter (DAC-E5-S5-5) |
+| `POST /api/acquisition-runs/{id}/cancel` | `202` `{state: "cancelling"\|"cancelled"}` | `409 run_already_terminal` with `error.state`; `404` unknown id | Running run → `cancelling`; queued run → `cancelled` directly; terminal run → `409` carrying the actual persisted state (AC-19, AC-26, DAC-E5-S5-2, DAC-E5-S5-3) |
+
+Auth: none; the API is loopback-only by approved design. Request body for start is empty.
+
+Every non-2xx response carries the `{"error": {code, message, resource, request_id}}` envelope.
+The `run_already_terminal` `409` also carries `error.state` with the actual persisted run state;
+all other errors omit the `state` field so existing envelope consumers are unaffected.
+`resource` is `"acquisition-run"` on every S5 error (singular, owner-confirmed in
+`component-design-ingestion-api.md` §2.3).
+
+### Keyset cursor contract (owner-confirmed 2026-09-17)
+
+Both list and detail responses use versioned URL-safe opaque composite cursors:
+clients treat the value as opaque and pass it back as the `cursor` query parameter.
+A malformed or unsupported-version cursor returns `422`. The current cursor version
+is `1`; a new version in a future release will be a different opaque string, and
+clients holding a v1 cursor will receive `422` on their next page request rather
+than silently wrong results.
+
+**Known open gaps, pending design revision** (owner-confirmed, recorded in task plan):
+
+- `component-design-ingestion-api.md` §2.4 does not yet record the depth-first
+  precondition precedence (both absent → `history_depth_not_set`).
+- `component-design-ingestion-api.md` §11 does not yet publish the complete request
+  and response schemas or name the cursor encoding and invalid-version behavior.
+- `component-design-ingestion-api.md` §§2.4a and 11 do not yet state that the
+  detail `limit` counts instruments and that one page may contain up to `4 * limit`
+  data-type rows.
 
 ## Deterministic observation-value hashing
 
