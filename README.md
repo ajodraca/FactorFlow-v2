@@ -40,7 +40,13 @@ of the four data types individually (so one instrument can have distinct
 per-data-type outcomes), classifies each fetch result through
 `outcomes.py`, and finalises the run from what was written.
 `ingestion_main.py` is the ingestion process's own entrypoint, separate from
-the API. The remaining API routes (acquisition runs, coverage), and the
+the API. The application container now also runs a periodic reclaim sweep:
+`src/factorflow/runs/reclaim.py` (`reclaim_stale_runs`) finds claimed runs
+whose heartbeat has gone stale and transitions them to `abandoned`, so a
+crashed ingestion process never wedges acquisition permanently; the sweep
+runs as an asyncio background task in the API lifespan, not in the ingestion
+container, so it continues operating when ingestion is stopped or
+crash-looping. The remaining API routes (acquisition runs, coverage), and the
 Coverage and Runs screens are not yet built; those two destinations still
 render a placeholder. What exists today is described below — everything else
 in `docs/` is specification for work not yet implemented.
@@ -87,14 +93,14 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives and the journal's request, claim, cancellation, and finalisation boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written. See [Run request and claim](#run-request-and-claim) |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, and the stale-claim reclaim sweep. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`. See [Run request and claim](#run-request-and-claim) and [Stale-claim reclaim](#stale-claim-reclaim) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
-| `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
+| `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `RunNotActive` (raised when the run's `acquisition_run` row is not in an active state at the start of a write — prevents a post-reclaim runner from appending data), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction after locking and verifying the run is active), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
 | `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
 | `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
@@ -537,6 +543,14 @@ is an alias for the same type.
 `write_instrument` call: per-type `appended` and `unchanged` row counts, and the
 covered range for each data type after the merge committed (DAC-E4-S3-1).
 
+**`RunNotActive`** — A `RuntimeError` raised by `write_instrument` when the
+`acquisition_run` row identified by `run_id` is not in `running` or
+`cancelling` state at the start of a write. The reclaim sweep transitions a
+stale run's row to `abandoned` (terminal); any subsequent write attempt by
+the original runner is rejected by this exception before any observation,
+coverage, acquisition-state, or `run_instrument_result` row is written
+(DAC-E5-13, DAC-E5-S4-6). Carries `run_id` and `actual_state` attributes.
+
 **`write_instrument(connection, instrument_id, run_id, observations, observed_on)`** —
 Commits all four data types for one instrument inside the caller's transaction.
 The caller owns the transaction boundary; the function operates on the supplied
@@ -544,7 +558,11 @@ connection and propagates any error so the caller's transaction rolls back.
 
 Write sequence:
 
-1. **Append observations** — four per-type helpers (`_insert_references`,
+1. **Lock and verify the run** — `SELECT ... FOR UPDATE` on the
+   `acquisition_run` row for `run_id`. Raises `RunNotActive` when the row is
+   absent or not in `running`/`cancelling`, serialising this write with any
+   concurrent reclaim. No observations are written before this check passes.
+2. **Append observations** — four per-type helpers (`_insert_references`,
    `_insert_daily_bars`, `_insert_fundamentals`, `_insert_corporate_actions`) each
    use `INSERT ... ON CONFLICT DO NOTHING` against the observation tables' natural
    keys (DAC-E4-S3-7). `_insert_fundamentals` derives the `NOT NULL`
@@ -553,15 +571,15 @@ Write sequence:
    `FinancialStatement.timeframe` and `fiscal_quarter` fields — no
    `fiscal_period` model field is required or declared on the model (owner
    decision 2026-09-20). Each helper returns `(appended, unchanged)` counts.
-2. **Replace coverage** — `_replace_coverage` reads the existing
+3. **Replace coverage** — `_replace_coverage` reads the existing
    `coverage_segment` rows for one instrument and data type, calls `merge_ranges`,
    deletes the existing rows, and reinserts the merged set. Coverage replacement
    is explicitly allowed — only the four observation tables are append-only;
    `coverage_segment` supports delete and reinsert.
-3. **Upsert acquisition state** — one `INSERT ... ON CONFLICT DO UPDATE` per
+4. **Upsert acquisition state** — one `INSERT ... ON CONFLICT DO UPDATE` per
    data type stamps `last_acquired_at = now()`, `last_run_id`, and
    `last_outcome = 'written'` in `acquisition_state` (DAC-E4-S3-5).
-4. **Insert run results** — one `INSERT` per data type into `run_instrument_result`
+5. **Insert run results** — one `INSERT` per data type into `run_instrument_result`
    with `outcome = 'written'` when any rows were appended, or `'unchanged'` when
    every returned row already existed (DAC-E4-S3-6).
 
@@ -680,7 +698,9 @@ a unique violation instead of a second active run.
 
 `heartbeat(connection, run_id, runner_id)` refreshes the claim and returns
 `False` when the row is no longer this runner's to write — the runner's
-signal that the claim was lost, not an error to retry.
+signal that the claim was lost (e.g. cleared by the reclaim sweep), not an
+error to retry. A `False` return means the runner must stop and write nothing
+further against this run.
 
 `request_cancel(connection, run_id)` records a cancellation request against
 a run. Two paths, both transactional and guarded by `validate_transition`:
@@ -731,6 +751,52 @@ current acceptance criterion:
 - TDD evidence `commit_hash` fields contain placeholders rather than actual
   Git SHAs; all work was delivered as a single commit rather than per-task
   (IR-003, low).
+
+## Stale-claim reclaim
+
+`src/factorflow/runs/reclaim.py` recovers from a crashed or stopped ingestion
+process without manual datastore intervention (AC-20).
+
+`reclaim_stale_runs(connection, stale_after_seconds)` executes one
+parameterised `UPDATE … RETURNING` that atomically finds every claimed
+`running` or `cancelling` run whose `heartbeat_at` is strictly older than
+`stale_after_seconds` seconds ago (using `make_interval(secs => ...)` against
+PostgreSQL's `now()`), transitions each to `abandoned`, sets `ended_at =
+now()`, and clears `claimed_by` and `heartbeat_at`. Returns the list of
+reclaimed `run_id` values (empty when nothing is stale). The caller owns
+commit control; this function does not commit.
+
+The sweep is idempotent: a second call finds the already-abandoned rows no
+longer match the `running`/`cancelling` state predicate and returns an empty
+list. Two concurrent sweepers cannot double-reclaim the same row: PostgreSQL's
+per-row update lock serialises them, and the second transaction finds the row
+already `abandoned`.
+
+The reclaim sweeper runs in the **application container**, not the ingestion
+container. A sweep that only ran inside the ingestion process could not
+recover from the ingestion container being stopped or crash-looping — the
+exact failure mode this mechanism exists to resolve. See
+[Running the API](#running-the-api) for the lifespan-managed reclaim loop in
+`app.py`.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E5-S4-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- `test_reclaim_does_not_touch_coverage_or_results` does not insert an
+  `acquisition_state` row to verify it is unchanged after reclaim, even though
+  the task plan included it in the snapshot assertion. The reclaim SQL provably
+  touches only `acquisition_run`; the gap is between the task plan's claimed
+  coverage and the actual test scope (IR-001, medium).
+- `test_heartbeat_false_after_reclaim_and_write_rejected` uses
+  `pytest.raises((RunNotActive, Exception))` rather than
+  `pytest.raises(RunNotActive)`, so any exception would pass the assertion; the
+  critical behavior (heartbeat returns `False`, 0 result rows) is still verified
+  (IR-002, medium).
+- Commit `6d047c4` message states "add reclaim_stale_runs and heartbeat" and
+  mentions updating `journal.py`, but only `reclaim.py` was created by this
+  story — `heartbeat()` was already present on the integration branch from a
+  prior story (IR-003, low).
 
 ## Acquisition runner
 
@@ -844,6 +910,15 @@ it. An unmatched non-API path falls back to the built `index.html` when a
 bundle is present, and 404s when it is not — the bundle is build output, so a
 fresh clone has none until `npm run build` runs; an unmatched path under
 `/api` always returns the `{"error": {...}}` envelope.
+
+The API lifespan also manages a reclaim sweep: an asyncio background task
+calls `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds, using
+`FACTORFLOW_RUN_STALE_AFTER_SECONDS` (default 900). The task is created after
+the pool opens and cancelled before the pool closes, so no sweep runs against
+a closed pool. Because the sweep lives in the application container rather
+than the ingestion container, it continues operating when ingestion is stopped
+or crash-looping — the property that makes AC-20 hold for a crash-looping
+ingestion container.
 
 ## Running the acquisition runner
 
