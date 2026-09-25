@@ -179,6 +179,10 @@ _CANCELLATION_SQL = """
 SELECT state FROM acquisition_run WHERE run_id = %s
 """
 
+_READ_STATE_FOR_FINALISE_SQL = """
+SELECT state FROM acquisition_run WHERE run_id = %s FOR UPDATE
+"""
+
 _FINALISE_SQL_COUNTS = """
 SELECT
     count(*) FILTER (WHERE outcome IN ('written', 'unchanged')) AS wrote,
@@ -259,11 +263,12 @@ def finalise(connection: psycopg.Connection, run_id: UUID) -> str:
     with connection.transaction():
         with connection.cursor() as cursor:
             # Check for cancellation first (rule 1)
-            cursor.execute(_CANCELLATION_SQL, (run_id,))
+            cursor.execute(_READ_STATE_FOR_FINALISE_SQL, (run_id,))
             state_row = cursor.fetchone()
             current_state = str(state_row[0]) if state_row else "running"
 
             if current_state == "cancelling":
+                validate_transition(current_state, "cancelled")
                 cursor.execute(_FINALISE_UPDATE_SQL, {"state": "cancelled", "run_id": run_id})
                 return "cancelled"
 
@@ -274,6 +279,7 @@ def finalise(connection: psycopg.Connection, run_id: UUID) -> str:
 
             if wrote == 0:
                 # No successful result exists — failed (DAC-E5-S3-7)
+                validate_transition(current_state, "failed")
                 cursor.execute(_FINALISE_UPDATE_SQL, {"state": "failed", "run_id": run_id})
                 return "failed"
 
@@ -295,9 +301,11 @@ def finalise(connection: psycopg.Connection, run_id: UUID) -> str:
                 non_success_row = cursor.fetchone()
                 non_success = int(non_success_row[0]) if non_success_row else 0
                 if non_success == 0:
+                    validate_transition(current_state, "succeeded")
                     cursor.execute(_FINALISE_UPDATE_SQL, {"state": "succeeded", "run_id": run_id})
                     return "succeeded"
 
             # Anything else is partial (DAC-E5-S3-6)
+            validate_transition(current_state, "partial")
             cursor.execute(_FINALISE_UPDATE_SQL, {"state": "partial", "run_id": run_id})
             return "partial"

@@ -11,6 +11,7 @@ import psycopg
 import pytest
 
 from factorflow.runs.journal import finalise
+from factorflow.runs.states import IllegalRunTransition
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -28,6 +29,20 @@ def _insert_claimed_run(conn: psycopg.Connection) -> uuid.UUID:
             "(run_id, state, history_depth_years, requested_at, started_at, "
             "claimed_by, heartbeat_at) "
             "VALUES (%s, 'running', 1, now(), now(), 'test-runner', now())",
+            (run_id,),
+        )
+    conn.commit()
+    return run_id
+
+
+def _insert_requested_run(conn: psycopg.Connection) -> uuid.UUID:
+    """Persist an unclaimed requested run."""
+    run_id = uuid.uuid4()
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO acquisition_run "
+            "(run_id, state, history_depth_years, requested_at) "
+            "VALUES (%s, 'requested', 1, now())",
             (run_id,),
         )
     conn.commit()
@@ -92,6 +107,20 @@ def _fetch_ended_at(conn: psycopg.Connection, run_id: uuid.UUID) -> object:
 # ---------------------------------------------------------------------------
 # T004: TC-COMP-239, TC-COMP-240, TC-COMP-270
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.postgres
+def test_finalise_rejects_illegal_transition_from_requested(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    """A caller cannot bypass the lifecycle by finalising an unclaimed run."""
+    conn = migrated_run_schema_connection
+    run_id = _insert_requested_run(conn)
+
+    with pytest.raises(IllegalRunTransition):
+        finalise(conn, run_id)
+
+    assert _fetch_run_state(conn, run_id) == "requested"
 
 
 @pytest.mark.postgres
