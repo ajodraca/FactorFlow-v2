@@ -29,13 +29,38 @@ from factorflow.ingestion.massive.models import (
     TickerReference,
 )
 
+_ACTIVE_RUN_STATES = frozenset({"running", "cancelling"})
+
+_LOCK_RUN_SQL = """
+SELECT state FROM acquisition_run WHERE run_id = %s FOR UPDATE
+"""
+
 __all__ = [
     "ObservationBatch",
     "ParsedObservations",
+    "RunNotActive",
     "WriteResult",
     "write_instrument",
     "write_instrument_with_outcomes",
 ]
+
+
+class RunNotActive(RuntimeError):
+    """Raised when ``write_instrument`` finds the run is not in an active state.
+
+    A reclaimed run's ``acquisition_run`` row is transitioned to ``abandoned``
+    (terminal) by the reclaim sweeper. Any subsequent write attempt by the
+    original runner is rejected by this exception before any observation,
+    coverage, acquisition_state, or run_instrument_result row is written
+    (DAC-E5-13, DAC-E5-S4-6).
+    """
+
+    def __init__(self, run_id: uuid.UUID, actual_state: str) -> None:
+        super().__init__(
+            f"write_instrument rejected: run {run_id!r} is not active (state={actual_state!r})"
+        )
+        self.run_id = run_id
+        self.actual_state = actual_state
 
 
 # ---------------------------------------------------------------------------
@@ -391,6 +416,17 @@ def write_instrument(
         Any psycopg or hashing exception -- the caller's transaction rolls back.
     """
     with connection.cursor() as cur:
+        # Step 0: Lock and verify the run is still active (DAC-E5-S4-6).
+        # Reclaim sets the row to 'abandoned' (terminal); locking it here
+        # serialises this write with any concurrent reclaim and rejects a
+        # post-reclaim write before any observation, coverage,
+        # acquisition_state, or run_instrument_result row is written.
+        cur.execute(_LOCK_RUN_SQL, (run_id,))
+        run_row = cur.fetchone()
+        if run_row is None or str(run_row[0]) not in _ACTIVE_RUN_STATES:
+            actual = str(run_row[0]) if run_row is not None else "missing"
+            raise RunNotActive(run_id, actual)
+
         # Step 1: Append observations
         ref_appended, ref_unchanged = _insert_references(
             cur, instrument_id, observations.reference, observed_on

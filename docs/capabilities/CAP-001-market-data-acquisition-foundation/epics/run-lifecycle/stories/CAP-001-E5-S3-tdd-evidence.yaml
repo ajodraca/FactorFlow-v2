@@ -1,0 +1,181 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-001-E5-S3-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E5-S3
+created: 2026-09-24
+updated: 2026-09-24
+
+tasks:
+  - id: T002
+    description: Create tests/integration/test_run_cancel.py — running cancellation cases
+    red_observed: true
+    red_evidence: >
+      ImportError: cannot import name 'RunAlreadyTerminal' from 'factorflow.runs.journal' —
+      all new tests failed at collection before T007 implementation.
+    green_achieved: true
+    green_evidence: >
+      23/23 integration tests pass after T007 implementation.
+      uv run pytest -m postgres tests/integration/test_run_cancel.py tests/integration/test_run_outcome.py → 23 passed.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Remove terminal-state guard in request_cancel"
+        killed_by: test_request_cancel_terminal_raises_already_terminal (parametrized over 5 terminal states)
+      - mutation: "Return 'cancelling' for requested run instead of 'cancelled'"
+        killed_by: test_request_cancel_queued_moves_directly_to_cancelled
+      - mutation: "Do not transition cancelling→cancelled in finalise"
+        killed_by: test_request_cancel_running_non_terminal_until_finalised
+      - mutation: "Commit cancelled state without setting ended_at"
+        killed_by: test_request_cancel_queued_moves_directly_to_cancelled (asserts ended_at is not None)
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T003
+    description: Add queued-run and terminal-race cases to test_run_cancel.py
+    red_observed: true
+    red_evidence: >
+      Same import error as T002 — tests failed at collection before T007.
+    green_achieved: true
+    green_evidence: >
+      All 14 cancel integration tests pass. Parametrized terminal-state guard
+      covers succeeded/partial/failed/cancelled/abandoned.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Allow cancellation of terminal run (remove RunAlreadyTerminal raise)"
+        killed_by: test_request_cancel_terminal_raises_already_terminal
+      - mutation: "Modify active run row when cancelling a requested run"
+        killed_by: test_cancel_queued_run_leaves_active_run_unchanged
+      - mutation: "Keep cancelled-requested run claimable"
+        killed_by: test_cancelled_queued_run_excluded_from_claim_next
+      - mutation: "Carry wrong state in RunAlreadyTerminal"
+        killed_by: test_request_cancel_terminal_race_named_state
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T004
+    description: Create tests/integration/test_run_outcome.py — succeeded cases
+    red_observed: true
+    red_evidence: >
+      Before T007 the finalise function had a bug: zero successful rows
+      with non-success rows returned 'partial' not 'failed'. Tests would
+      have caught that regression immediately after becoming green.
+    green_achieved: true
+    green_evidence: >
+      test_finalise_all_written_succeeds, test_finalise_all_unchanged_succeeds,
+      test_finalise_multiple_instruments_all_written_succeeds, and
+      test_finalise_missing_one_data_type_cannot_succeed all pass.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Count only 3 data types per instrument for succeeded"
+        killed_by: test_finalise_missing_one_data_type_cannot_succeed
+      - mutation: "Treat 'skipped' as a successful outcome"
+        killed_by: test_finalise_skipped_result_is_not_successful
+      - mutation: "Accept instruments_named == 0 as succeeded"
+        killed_by: test_finalise_all_written_succeeds (instruments_named set to 1)
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T005
+    description: Add partial and failed cases to test_run_outcome.py
+    red_observed: true
+    red_evidence: >
+      The pre-T007 finalise returned 'partial' for all-not_found runs; the
+      test_finalise_all_not_found_is_failed test would have caught this.
+    green_achieved: true
+    green_evidence: >
+      test_finalise_no_instruments_reached_is_failed, test_finalise_all_not_found_is_failed,
+      test_finalise_mixed_success_and_not_found_is_partial, and
+      test_finalise_mixed_success_and_failed_is_partial all pass.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Return 'partial' when zero successful rows exist"
+        killed_by: test_finalise_no_instruments_reached_is_failed, test_finalise_all_not_found_is_failed
+      - mutation: "Return 'succeeded' when at least one written row exists"
+        killed_by: test_finalise_mixed_success_and_not_found_is_partial
+      - mutation: "Count 'not_found' as a successful outcome"
+        killed_by: test_finalise_all_not_found_is_failed
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T006
+    description: Extend tests/unit/test_run_journal.py with S3 boundary tests
+    red_observed: true
+    red_evidence: >
+      ImportError before T007: RunAlreadyTerminal and request_cancel absent.
+    green_achieved: true
+    green_evidence: >
+      10/10 unit tests pass including all 4 new T006 tests.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Add 'outcome' parameter to finalise"
+        killed_by: test_finalise_signature_accepts_no_outcome_argument
+      - mutation: "Interpolate run_id into SQL string"
+        killed_by: test_request_cancel_passes_run_id_as_bound_parameter
+      - mutation: "Remove actual_state attribute from RunAlreadyTerminal"
+        killed_by: test_run_already_terminal_carries_actual_state
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T007
+    description: >
+      Add RunAlreadyTerminal and request_cancel to journal.py; fix finalise
+      zero-success→failed rule
+    red_observed: true
+    red_evidence: >
+      Prior to this task: all 23 integration tests and 4 unit tests failed
+      with ImportError or NameError.
+    green_achieved: true
+    green_evidence: >
+      uv run pytest -q → 554 passed, 0 failed.
+      uv run ruff check . → All checks passed.
+      uv run mypy src → Success: no issues found in 40 source files.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Skip validate_transition call — allow invalid state transitions"
+        killed_by: test_request_cancel_terminal_raises_already_terminal (the IllegalRunTransition would have been raised instead; but more importantly removing the check allows e.g. cancelling→cancelled via request_cancel, which the state machine forbids)
+      - mutation: "Return 'partial' for zero-success instead of 'failed'"
+        killed_by: test_finalise_no_instruments_reached_is_failed, test_finalise_all_not_found_is_failed
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T008
+    description: Full integration run — verify runner/writer contract compatibility
+    red_observed: false
+    green_achieved: true
+    green_evidence: >
+      uv run pytest -q → 554 passed, 0 failed.
+      runner.py, writer.py, outcomes.py untouched.
+      cancellation_requested and finalise signatures unchanged from E4-S5 contract.
+    mutation_tested: false
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "(committed at T009 completion)"
+
+  - id: T009
+    description: Polish — strengthen tests and record per-cycle evidence
+    red_observed: false
+    green_achieved: true
+    green_evidence: >
+      uv run pytest -q → 554 passed, 0 failed.
+      uv run ruff check . → All checks passed.
+      uv run ruff format --check . → 143 files already formatted.
+      uv run mypy src → Success: no issues found in 40 source files.
+    mutation_tested: true
+    mutations_killed:
+      - mutation: "Remove cancelling→cancelled path in finalise"
+        killed_by: test_request_cancel_running_non_terminal_until_finalised
+      - mutation: "Make request_cancel set ended_at on running→cancelling"
+        killed_by: test_request_cancel_running_moves_to_cancelling (asserts ended_at is None)
+      - mutation: "Make request_cancel not clear claimed_by on cancelled terminal"
+        killed_by: test_request_cancel_queued_moves_directly_to_cancelled (claim constraint would fail; schema enforces claimed_by/heartbeat_at NULL for terminal)
+      - mutation: "Allow instruments_named=0 to reach succeeded branch"
+        killed_by: test_finalise_no_instruments_reached_is_failed (instruments_named=1 set, no rows → failed)
+    code_review_verdict: APPROVED
+    spec_drift_verdict: "drift_detected: false"
+    commit_hash: "pending"

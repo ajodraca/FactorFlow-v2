@@ -14,15 +14,29 @@ outcome from written results without accepting a caller-supplied outcome (AC-9).
 
 CAP-001-E4-S5 adds heartbeat, cancellation_requested, and finalise to support
 the acquisition runner's between-instruments contract.  CAP-001-E5-S3 owns
-cooperative cancellation and CAP-001-E5-S4 owns the heartbeat/reclaim sweep; this
-implementation is the minimal interface required by the E4-S5 runner loop and will
-be extended by those stories without changing the function signatures here.
+cooperative cancellation (`request_cancel`) and CAP-001-E5-S4 owns the
+heartbeat/reclaim sweep.
 """
 
 from dataclasses import dataclass
 from uuid import UUID
 
 import psycopg
+
+from factorflow.runs.states import validate_transition
+
+
+class RunAlreadyTerminal(Exception):
+    """Raised when a cancellation is attempted against a run that has already ended.
+
+    Carries the persisted terminal state so the caller can report the actual
+    outcome rather than a generic error (DAC-E5-9, DAC-E5-S3-4).
+    """
+
+    def __init__(self, message: str, *, actual_state: str) -> None:
+        super().__init__(message)
+        self.actual_state = actual_state
+
 
 _REQUEST_SQL = """
 INSERT INTO acquisition_run (state, history_depth_years)
@@ -91,6 +105,66 @@ def claim_next(connection: psycopg.Connection, runner_id: str) -> ClaimedRun | N
     if row is None:
         return None
     return ClaimedRun(run_id=row[0], history_depth_years=row[1])
+
+
+_READ_STATE_FOR_CANCEL_SQL = """
+SELECT state FROM acquisition_run WHERE run_id = %s FOR UPDATE
+"""
+
+_CANCEL_RUNNING_SQL = """
+UPDATE acquisition_run
+   SET state = 'cancelling',
+       cancel_requested_at = now()
+ WHERE run_id = %s
+"""
+
+_CANCEL_REQUESTED_SQL = """
+UPDATE acquisition_run
+   SET state = 'cancelled',
+       cancel_requested_at = now(),
+       ended_at = now()
+ WHERE run_id = %s
+"""
+
+_TERMINAL_STATES = frozenset({"succeeded", "partial", "failed", "cancelled", "abandoned"})
+
+
+def request_cancel(connection: psycopg.Connection, run_id: UUID) -> str:
+    """Record a cancellation request against a run (section 2.2, CAP-001-E5-S3).
+
+    Two paths, both transactional:
+    - `running` → `cancelling`: records cooperative intent without ending the run.
+      The runner observes this between instruments and calls `finalise`.
+    - `requested` → `cancelled`: direct state transition; the run never starts.
+    - terminal states: raises `RunAlreadyTerminal` carrying the actual state;
+      the row is not modified (DAC-E5-9, DAC-E5-S3-4).
+
+    Returns the new state string.
+    """
+    with connection.transaction():
+        with connection.cursor() as cursor:
+            cursor.execute(_READ_STATE_FOR_CANCEL_SQL, (run_id,))
+            row = cursor.fetchone()
+            if row is None:
+                raise KeyError(f"run {run_id!r} not found")
+            current_state = str(row[0])
+
+            if current_state in _TERMINAL_STATES:
+                raise RunAlreadyTerminal(
+                    f"run {run_id!r} is already terminal: {current_state!r}",
+                    actual_state=current_state,
+                )
+
+            next_state = "cancelling" if current_state == "running" else "cancelled"
+            validate_transition(current_state, next_state)
+
+            if current_state == "running":
+                cursor.execute(_CANCEL_RUNNING_SQL, (run_id,))
+                return "cancelling"
+            else:
+                # requested → cancelled
+                cursor.execute(_CANCEL_REQUESTED_SQL, (run_id,))
+                return "cancelled"
 
 
 _HEARTBEAT_SQL = """
@@ -175,12 +249,12 @@ def finalise(connection: psycopg.Connection, run_id: UUID) -> str:
     Never accepts a caller-supplied outcome. Derives the state from
     `run_instrument_result` using the rule:
     1. State is `cancelling` → `cancelled`.
-    2. No instrument reached → `failed`.
-    3. All named instruments wrote all four data types → `succeeded`.
+    2. Zero successful (`written`/`unchanged`) rows → `failed`.
+    3. All named instruments wrote all four required data types → `succeeded`.
     4. Anything else → `partial`.
 
     Clears claim fields (claimed_by, heartbeat_at) and sets ended_at.
-    Returns the recorded terminal state (AC-9, DAC-E5-4).
+    Returns the recorded terminal state (AC-9, DAC-E5-4, DAC-E5-5).
     """
     with connection.transaction():
         with connection.cursor() as cursor:
@@ -197,26 +271,33 @@ def finalise(connection: psycopg.Connection, run_id: UUID) -> str:
             cursor.execute(_FINALISE_SQL_COUNTS, {"run_id": run_id})
             counts_row = cursor.fetchone()
             wrote = int(counts_row[0]) if counts_row else 0
-            did_not = int(counts_row[1]) if counts_row else 0
-            reached = int(counts_row[2]) if counts_row else 0
 
-            if reached == 0:
-                # No instrument was reached — failed
+            if wrote == 0:
+                # No successful result exists — failed (DAC-E5-S3-7)
                 cursor.execute(_FINALISE_UPDATE_SQL, {"state": "failed", "run_id": run_id})
                 return "failed"
 
-            # Check if all named instruments have all four data types
+            # At least one successful row exists; check for complete success
             cursor.execute(_INSTRUMENTS_NAMED_SQL, (run_id,))
             named_row = cursor.fetchone()
             instruments_named = int(named_row[0]) if named_row and named_row[0] else 0
 
-            if instruments_named > 0 and did_not == 0 and reached == instruments_named:
-                # Every named instrument has written/unchanged for all 4 data types
-                # wrote must equal instruments_named * 4
-                if wrote == instruments_named * 4:
+            # succeeded requires exactly four successful rows per named instrument
+            # and no non-successful rows at all (DAC-E5-S3-5)
+            if instruments_named > 0 and wrote == instruments_named * 4:
+                # Verify no non-successful rows exist (not_found, failed, skipped)
+                cursor.execute(
+                    "SELECT count(*) FROM run_instrument_result "
+                    "WHERE run_id = %(run_id)s "
+                    "AND outcome NOT IN ('written', 'unchanged')",
+                    {"run_id": run_id},
+                )
+                non_success_row = cursor.fetchone()
+                non_success = int(non_success_row[0]) if non_success_row else 0
+                if non_success == 0:
                     cursor.execute(_FINALISE_UPDATE_SQL, {"state": "succeeded", "run_id": run_id})
                     return "succeeded"
 
-            # Anything else is partial
+            # Anything else is partial (DAC-E5-S3-6)
             cursor.execute(_FINALISE_UPDATE_SQL, {"state": "partial", "run_id": run_id})
             return "partial"
