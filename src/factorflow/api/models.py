@@ -2,12 +2,14 @@
 
 Component design: `component-design-ingestion-api.md` sections 2.1, 11.
 `HealthResponse` is CAP-001-E1-S6's contribution; the instrument and
-settings models below are CAP-001-E2-S3's. Later stories add request and
-response models for the remaining endpoints in section 11's table.
+settings models below are CAP-001-E2-S3's. The run models below are
+CAP-001-E5-S5's, covering `POST/GET /api/acquisition-runs` and the
+cancel endpoint.
 """
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, field_validator
 
@@ -142,3 +144,104 @@ class SetHistoryDepthRequest(BaseModel):
                 f"and {MAX_HISTORY_DEPTH_YEARS}, got {years!r}"
             )
         return years
+
+
+# ---------------------------------------------------------------------------
+# Run models — CAP-001-E5-S5
+# Owner-confirmed top-level keys: run, runs, counts, results, next_cursor
+# Owner-confirmed result fields: instrument_id, data_type, outcome, reason,
+#   attempts, completed_at (design section 11, open-gap resolution 2026-09-17)
+# ---------------------------------------------------------------------------
+
+RunState = Literal[
+    "requested",
+    "running",
+    "cancelling",
+    "succeeded",
+    "partial",
+    "failed",
+    "cancelled",
+    "abandoned",
+]
+
+ResultOutcome = Literal[
+    "written",
+    "unchanged",
+    "not_found",
+    "failed",
+    "skipped",
+]
+
+
+class RunStartResponse(BaseModel):
+    """202 body for `POST /api/acquisition-runs` (DAC-E5-15).
+
+    `queued_behind` is null when the run queued behind nothing; it carries
+    the active run's id when a run is already in progress (AC-23).
+    """
+
+    run_id: UUID
+    state: Literal["requested"]
+    queued_behind: UUID | None
+
+
+class CancelRunResponse(BaseModel):
+    """202 body for `POST /api/acquisition-runs/{id}/cancel` (AC-19, AC-26)."""
+
+    state: Literal["cancelling", "cancelled"]
+
+
+class RunSummary(BaseModel):
+    """One run in the list response (owner-confirmed fields 2026-09-17)."""
+
+    run_id: UUID
+    state: RunState
+    history_depth_years: int
+    requested_at: datetime
+    started_at: datetime | None = None
+    ended_at: datetime | None = None
+    instruments_named: int
+    instruments_written: int
+    instruments_failed: int
+    failure_reason: str | None = None
+
+
+class RunCounts(BaseModel):
+    """Persisted aggregate counts for a run detail response."""
+
+    instruments_named: int
+    instruments_written: int
+    instruments_failed: int
+
+
+class ResultRow(BaseModel):
+    """One per-instrument per-data-type result (owner-confirmed 2026-09-17)."""
+
+    instrument_id: int
+    data_type: Literal["reference", "prices", "fundamentals", "corporate_actions"]
+    outcome: ResultOutcome
+    reason: str | None = None
+    attempts: int
+    completed_at: datetime
+
+
+class RunListResponse(BaseModel):
+    """`GET /api/acquisition-runs` response (DAC-E5-S5-4).
+
+    `next_cursor` is null on the last page.
+    """
+
+    runs: list[RunSummary]
+    next_cursor: str | None
+
+
+class RunDetailResponse(BaseModel):
+    """`GET /api/acquisition-runs/{id}` response (DAC-E5-S5-5).
+
+    `next_cursor` is null on the last instrument page.
+    """
+
+    run: RunSummary
+    counts: RunCounts
+    results: list[ResultRow]
+    next_cursor: str | None = None

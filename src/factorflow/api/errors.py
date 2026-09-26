@@ -25,6 +25,11 @@ class ErrorDetail(BaseModel):
     message: str
     resource: str | None = None
     request_id: str
+    state: str | None = None
+    """The actual persisted run state; present only for `run_already_terminal`
+    responses (component-design-ingestion-api.md §§2.4, 10, 11). Excluded from
+    the serialised body when absent so existing envelope consumers are not
+    affected by an extra null field (T007 precedence resolution)."""
 
 
 class ErrorEnvelope(BaseModel):
@@ -37,12 +42,31 @@ def error_response(
     message: str,
     request_id: str,
     resource: str | None = None,
+    state: str | None = None,
 ) -> JSONResponse:
-    """Build the standard error envelope response (section 2.3)."""
-    envelope = ErrorEnvelope(
-        error=ErrorDetail(code=code, message=message, resource=resource, request_id=request_id)
+    """Build the standard error envelope response (section 2.3).
+
+    `state` is populated only for `run_already_terminal` responses and is
+    excluded from the serialised body on all other errors (T007): the field
+    is omitted rather than sent as null so existing envelope consumers do not
+    encounter an unexpected key.
+    """
+    detail = ErrorDetail(
+        code=code,
+        message=message,
+        resource=resource,
+        request_id=request_id,
+        state=state,
     )
-    return JSONResponse(status_code=status_code, content=envelope.model_dump())
+    # Exclude `state` when absent — use exclude_none only for the `state`
+    # field.  We cannot use envelope.model_dump(exclude_none=True) globally
+    # because `resource` is also Optional and is legitimately returned as
+    # null on some errors.  Build the detail dict manually instead.
+    detail_dict = detail.model_dump(exclude={"state"})
+    if state is not None:
+        detail_dict["state"] = state
+    content = {"error": detail_dict}
+    return JSONResponse(status_code=status_code, content=content)
 
 
 async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:

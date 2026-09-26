@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-10
-updated: 2026-09-10
+updated: 2026-09-21
+last_reworked_review: CAP-001-E3-S1-implementation-review-v2.md
+docs_synced_review: CAP-001-E3-S1-implementation-review-v4.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -30,7 +32,7 @@ ai_provenance:
 
 **Story**: `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S1.md`
 **Component**: `FactorFlow-v2`
-**Branch**: `usr/alvaro-de-jodra/CAP-001-E2-S4`
+**Branch**: `usr/alvaro-de-jodra/CAP-001-E3-S1`
 **Date**: 2026-09-10
 
 ## Summary
@@ -58,8 +60,8 @@ Implement the project-owned Massive boundary for reference data, daily bars, fin
 
 **Purpose**: Add the approved Massive SDK and establish the package locations for the S1 client and pager.
 
-- [ ] T001 Add the approved `massive` SDK dependency to `pyproject.toml` and resolve it in `uv.lock`; use the official package named by `docs/constitution/tech-stack.md`, without adding a vendor-neutral provider abstraction.
-- [ ] T002 [P] Create `src/factorflow/ingestion/__init__.py` and `src/factorflow/ingestion/massive/__init__.py` as package markers for the component-design placement.
+- [x] T001 Add the approved `massive` SDK dependency to `pyproject.toml` and resolve it in `uv.lock`; use the official package named by `docs/constitution/tech-stack.md`, without adding a vendor-neutral provider abstraction.
+- [x] T002 [P] Create `src/factorflow/ingestion/__init__.py` and `src/factorflow/ingestion/massive/__init__.py` as package markers for the component-design placement.
 
 **Checkpoint**: `uv sync --all-extras` resolves the SDK, and the `factorflow.ingestion.massive` package imports without an implementation module.
 
@@ -71,15 +73,15 @@ Implement the project-owned Massive boundary for reference data, daily bars, fin
 
 ### Mandatory Component Tests
 
-- [ ] T003 [P] Implement TC-COMP-003, TC-COMP-204, TC-COMP-205, and TC-COMP-212 in `tests/unit/test_massive_reference.py`: substitute the SDK single-ticker read, assert product-shaped reference output retains CIK/composite FIGI/share-class FIGI and a delisted instrument’s `active` and `delisted_utc`, and assert the list-form endpoint is not used.
-- [ ] T004 [P] Implement TC-COMP-003, TC-COMP-210, and TC-COMP-211 in `tests/unit/test_massive_bars.py`: assert the daily aggregate request uses multiplier `1`, timespan `day`, and inclusive `YYYY-MM-DD` range values; supply two recorded pages and assert all rows are returned in order.
-- [ ] T005 [P] Implement the TC-COMP-003 financial and corporate-action read coverage in `tests/unit/test_massive_financials.py` and `tests/unit/test_massive_actions.py`, using the parsed model fixtures supplied by CAP-001-E3-S2 and asserting each public read returns the corresponding complete result for a covered symbol.
-- [ ] T006 [P] Implement TC-COMP-195 and TC-COMP-208 in `tests/unit/test_massive_client_interface.py`: assert `MassiveClient` exposes the four named operations with the specified symbol/date-range signatures and no generic provider-path operation.
-- [ ] T007 [P] Implement TC-COMP-013, TC-COMP-209, TC-COMP-213, and TC-COMP-214 in `tests/unit/test_massive_sdk_config.py` and `tests/unit/test_massive_auth.py`: inspect the substituted `RESTClient` construction for `retries=0`, `pagination=False`, explicit connect/read timeouts, and `trace=False`; assert the runtime credential is passed to the SDK without appearing in captured records, URLs, or an `apiKey` query parameter; assert no market-status request is made.
+- [x] T003 [P] Implement TC-COMP-003, TC-COMP-204, TC-COMP-205, and TC-COMP-212 in `tests/unit/test_massive_reference.py`: substitute the SDK single-ticker read, assert product-shaped reference output retains CIK/composite FIGI/share-class FIGI and a delisted instrument’s `active` and `delisted_utc`, and assert the list-form endpoint is not used.
+- [x] T004 [P] Implement TC-COMP-003, TC-COMP-210, and TC-COMP-211 in `tests/unit/test_massive_bars.py`: assert the daily aggregate request uses multiplier `1`, timespan `day`, and inclusive `YYYY-MM-DD` range values; supply two recorded pages and assert all rows are returned in order.
+- [x] T005 [P] Implement the TC-COMP-003 financial and corporate-action read coverage in `tests/unit/test_massive_financials.py` and `tests/unit/test_massive_actions.py`, using the parsed model fixtures supplied by CAP-001-E3-S2 and asserting each public read returns the corresponding complete result for a covered symbol.
+- [x] T006 [P] Implement TC-COMP-195 and TC-COMP-208 in `tests/unit/test_massive_client_interface.py`: assert `MassiveClient` exposes the four named operations with the specified symbol/date-range signatures and no generic provider-path operation.
+- [x] T007 [P] Implement TC-COMP-013, TC-COMP-209, TC-COMP-213, and TC-COMP-214 in `tests/unit/test_massive_sdk_config.py` and `tests/unit/test_massive_auth.py`: inspect the substituted `RESTClient` construction for `retries=0`, `pagination=False`, explicit connect/read timeouts, and `trace=False`; assert the runtime credential is passed to the SDK without appearing in captured records, URLs, or an `apiKey` query parameter; assert no market-status request is made.
 
 ### Additional Unit Tests
 
-- [ ] T008 [P] Add a failure-path test in `tests/unit/test_massive_bars.py` in which a later page request fails; assert the method raises instead of returning the earlier page as a complete range (component-design-massive-client.md §8 acceptance criterion 12).
+- [x] T008 [P] Add a failure-path test in `tests/unit/test_massive_bars.py` in which a later page request fails; assert the method raises instead of returning the earlier page as a complete range (component-design-massive-client.md §8 acceptance criterion 12).
 
 **Checkpoint**: The seven mandatory mapped TC IDs are represented by the six test files above, the page-failure test is present, and the new tests are observed RED before T009 begins. Tests carry their TC IDs in traceability comments.
 
@@ -89,8 +91,8 @@ Implement the project-owned Massive boundary for reference data, daily bars, fin
 
 **Purpose**: Implement the pager and the four product-named read operations against the established models, taxonomy, and governor contracts.
 
-- [ ] T009 Create `src/factorflow/ingestion/massive/client.py` implementing `MassiveClient`, construct its one reusable `massive.RESTClient` from `MassiveSettings`, and implement `fetch_reference`, `fetch_daily_bars`, `fetch_financials`, and `fetch_corporate_actions` with the provider paths and result mapping in `component-design-massive-client.md` §§2.3 and 2.5. Use the single-ticker reference read, explicit daily-bar request parameters, header-based SDK authentication, and the `models.py` types from CAP-001-E3-S2.
-- [ ] T010 Create `src/factorflow/ingestion/massive/paging.py` to follow only present `next_url` values one page at a time, accumulating one operation’s complete result and acquiring a governor permit before every page request; do not return partial results when a later page fails.
+- [x] T009 Create `src/factorflow/ingestion/massive/client.py` implementing `MassiveClient`, construct its one reusable `massive.RESTClient` from `MassiveSettings`, and implement `fetch_reference`, `fetch_daily_bars`, `fetch_financials`, and `fetch_corporate_actions` with the provider paths and result mapping in `component-design-massive-client.md` §§2.3 and 2.5. Use the single-ticker reference read, explicit daily-bar request parameters, header-based SDK authentication, and the `models.py` types from CAP-001-E3-S2.
+- [x] T010 Create `src/factorflow/ingestion/massive/paging.py` to follow only present `next_url` values one page at a time, accumulating one operation’s complete result and acquiring a governor permit before every page request; do not return partial results when a later page fails.
 
 **Checkpoint**: All four reads return the product-shaped model types, ranges are complete only after the final page, and no code path invokes the market-status or ticker-list endpoints.
 
@@ -100,7 +102,7 @@ Implement the project-owned Massive boundary for reference data, daily bars, fin
 
 **Purpose**: Wire the client’s SDK calls through the approved retry/pacing and failure-taxonomy seams without expanding their ownership.
 
-- [ ] T011 Update `src/factorflow/ingestion/massive/client.py` to submit each initial and paged SDK request through `RateLimitGovernor.execute` from `src/factorflow/ingestion/rate_limit.py`, using the `Outcome` contract in `component-design-rate-limit-governor.md` §2.3 and the classification functions from `src/factorflow/ingestion/massive/errors.py` delivered by CAP-001-E3-S3. Do not implement governor or taxonomy behavior in this story.
+- [x] T011 Update `src/factorflow/ingestion/massive/client.py` to submit each initial and paged SDK request through `RateLimitGovernor.execute` from `src/factorflow/ingestion/rate_limit.py`, using the `Outcome` contract in `component-design-rate-limit-governor.md` §2.3 and the classification functions from `src/factorflow/ingestion/massive/errors.py` delivered by CAP-001-E3-S3. Do not implement governor or taxonomy behavior in this story.
 
 **Checkpoint**: Every SDK request, including a `next_url` page, reaches the existing governor seam exactly once; typed errors and retry policy remain owned by E3-S3 and E3-S4.
 
@@ -110,7 +112,7 @@ Implement the project-owned Massive boundary for reference data, daily bars, fin
 
 **Purpose**: Verify the complete component change and record the required TDD mutation evidence without adding behavior.
 
-- [ ] T012 Run the S1 unit-test files in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, `tests/unit/test_massive_actions.py`, `tests/unit/test_massive_client_interface.py`, `tests/unit/test_massive_sdk_config.py`, and `tests/unit/test_massive_auth.py`; then perform and document manual mutations for SDK-default overrides, daily range parameters, paging continuation, forbidden endpoints, and credential redaction in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S1-tdd-evidence.yaml` before marking implementation tasks complete.
+- [x] T012 Run the S1 unit-test files in `tests/unit/test_massive_reference.py`, `tests/unit/test_massive_bars.py`, `tests/unit/test_massive_financials.py`, `tests/unit/test_massive_actions.py`, `tests/unit/test_massive_client_interface.py`, `tests/unit/test_massive_sdk_config.py`, and `tests/unit/test_massive_auth.py`; then perform and document manual mutations for SDK-default overrides, daily range parameters, paging continuation, forbidden endpoints, and credential redaction in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/provider-integration-and-pacing/stories/CAP-001-E3-S1-tdd-evidence.yaml` before marking implementation tasks complete.
 
 **Checkpoint**: Mandatory tests are green, manual mutations are killed or strengthened, and build/lint/format/type validation passes.
 

@@ -1,0 +1,246 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S3-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E3-S3
+tasks_file: CAP-001-E3-S3-tasks.md
+created: 2026-09-11
+updated: 2026-09-12
+
+# RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for the
+# provider error taxonomy (errors.py), one cycle spanning T002-T010
+# because the taxonomy and its classification functions are one
+# indivisible unit under test, plus the T012 manual-mutation session run
+# against the finished module before marking implementation tasks
+# complete.
+
+cycles:
+  - unit: "MassiveError taxonomy + classify_error_body/is_rate_limited_body/is_fatal_for_governor/wrap_validation_error"
+    red:
+      description: >-
+        tests/unit/test_massive_errors.py and
+        tests/unit/test_massive_error_classification.py written in full
+        (TC-COMP-011, 196-199, 207, 220-225, plus additional classifier
+        boundary tests) against the Phase 1 placeholder errors.py, which
+        declared no names at all.
+      commit: 4783790
+      test_command: uv run pytest tests/unit/test_massive_errors.py tests/unit/test_massive_error_classification.py -q
+      result: "2 errors during collection (ImportError: cannot import
+        name 'CredentialRejected' from
+        'factorflow.ingestion.massive.errors')"
+    green:
+      description: >-
+        Implemented MassiveError and its four subclasses
+        (InstrumentNotFound, CredentialRejected, ProviderUnavailable,
+        ProviderContractViolation); classify_error_body and
+        is_rate_limited_body, which parse only the four documented safe
+        envelope fields (status, message, error, request_id) and discard
+        everything else; is_fatal_for_governor, a boolean label per type
+        for the future governor-classifier seam without importing
+        Outcome; and wrap_validation_error, which converts an S2
+        ValidationError from a successful response into
+        ProviderContractViolation carrying only a safe summary.
+      commit: 43c3526
+      test_command: uv run pytest tests/unit/test_massive_errors.py tests/unit/test_massive_error_classification.py -q
+      result: "25 passed"
+      full_suite_command: uv run pytest -m 'not postgres' -q
+      full_suite_result: "206 passed, 59 deselected"
+      static_checks: "ruff check: All checks passed; ruff format --check:
+        89 files already formatted; mypy src: Success, no issues found in
+        27 source files"
+
+  - unit: "__init__.py re-exports (T010)"
+    description: >-
+      Re-exported the five MassiveError types and the four classification
+      primitives from factorflow.ingestion.massive, alongside the
+      existing S2 model exports, without exposing the Massive SDK's
+      BadResponse type.
+    commit: 18051ee
+    test_command: uv run pytest -m 'not postgres' -q
+    result: "206 passed, 59 deselected"
+    static_checks: "ruff check: All checks passed; ruff format --check:
+      89 files already formatted; mypy src: Success, no issues found in
+      27 source files"
+
+# T012: manual mutation session, run against the committed errors.py
+# (commit 18051ee) after the GREEN cycle above, one mutation at a time,
+# each reverted and the suite re-confirmed byte-identical before the next.
+manual_mutations_baseline_commit: 18051ee
+manual_mutations:
+  - id: mutation-1-not-found-status-constant
+    target: errors._NOT_FOUND_STATUS
+    change: '"NOT_FOUND" -> "FOUND"'
+    test_command: uv run pytest tests/unit/test_massive_error_classification.py tests/unit/test_massive_errors.py -q
+    result: "25 passed -- NOT CAUGHT on first attempt. The only fixture
+      exercising status == NOT_FOUND (error_not_found.json) also carries
+      the documented not-found message text, so the message-based fallback
+      path silently absorbed the mutation."
+    caught: false
+    strengthened: >-
+      Added a new fixture, error_not_found_status_only.json, with
+      status: "NOT_FOUND" paired with an unrelated message ("Resource
+      missing."), and a new test,
+      test_status_not_found_alone_classifies_even_with_an_unrelated_message,
+      asserting the status field alone drives classification independent
+      of message text. Re-ran with the mutation still applied.
+    retest_command: uv run pytest tests/unit/test_massive_error_classification.py -q -k unrelated_message
+    retest_result: "1 failed (AssertionError: assert False -- classified
+      as ProviderUnavailable instead of InstrumentNotFound)"
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-api-key-markers
+    target: errors._API_KEY_ERROR_MARKERS
+    change: '("api key", "authorization header") -> ("this marker never matches anything",)'
+    test_command: uv run pytest tests/unit/test_massive_error_classification.py tests/unit/test_massive_errors.py -q
+    result: "3 failed, 23 passed (test_unknown_api_key_classifies_as_credential_rejected,
+      test_malformed_authorization_header_classifies_as_credential_rejected,
+      test_error_field_is_accepted_for_credential_rejection: all
+      misclassified as ProviderUnavailable)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-malformed-body-fallback
+    target: errors._safe_fields
+    change: >-
+      the except (JSONDecodeError, UnicodeDecodeError) branch returned
+      {"status": "NOT_FOUND", ...} instead of None, so an unparseable
+      body would have silently become InstrumentNotFound -- exactly the
+      false negative AC-12 exists to prevent.
+    test_command: uv run pytest tests/unit/test_massive_error_classification.py tests/unit/test_massive_errors.py -q
+    result: "1 failed, 25 passed
+      (test_malformed_json_classifies_as_provider_unavailable_never_not_found:
+      AssertionError -- classified as InstrumentNotFound instead of
+      ProviderUnavailable)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-validation-error-wrapping
+    target: errors.wrap_validation_error
+    change: 'return ProviderContractViolation(...) -> return ProviderUnavailable(...)'
+    test_command: uv run pytest tests/unit/test_massive_error_classification.py tests/unit/test_massive_errors.py -q
+    result: "1 failed, 25 passed
+      (test_validation_error_from_a_successful_response_wraps_to_contract_violation:
+      AssertionError -- result was ProviderUnavailable, not
+      ProviderContractViolation)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-request-id-key
+    target: errors._safe_fields
+    change: 'parsed.get("request_id") -> parsed.get("requestId")'
+    test_command: uv run pytest tests/unit/test_massive_error_classification.py tests/unit/test_massive_errors.py -q
+    result: "3 failed, 23 passed (test_request_id_is_populated_when_present,
+      test_every_taxonomy_type_carries_request_id_uniformly,
+      test_not_found_failure_retains_safe_request_id_bearing_reason: all
+      asserted provider_request_id is None instead of the fixture's ID)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-6-rate-limit-short-circuit
+    target: errors.is_rate_limited_body
+    change: 'return _RATE_LIMIT_MARKER in reason.lower() -> return False and _RATE_LIMIT_MARKER in reason.lower()'
+    test_command: uv run pytest tests/unit/test_massive_error_classification.py tests/unit/test_massive_errors.py -q
+    result: "1 failed, 25 passed
+      (test_rate_limited_body_is_identified_without_constructing_any_massive_error:
+      AssertionError -- assert False is True)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  description: >-
+    After all six mutations were individually applied, observed caught
+    (mutation-1 only after the STRENGTHEN step added a fixture and a
+    test), and reverted, errors.py was diffed byte-for-byte against the
+    baseline commit (18051ee) via `git diff` (empty output) to confirm no
+    mutation was left in place, then the full suite and static checks
+    were re-run.
+  commands:
+    - uv run pytest -m 'not postgres' -q
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+    - uv build
+  result: "207 passed, 59 deselected (206 baseline + 1 strengthened test
+    added during mutation-1); ruff check: All checks passed; ruff format
+    --check: 89 files already formatted; mypy: Success, no issues found
+    in 27 source files; uv build succeeded"
+
+# Rework cycle, driven by CAP-001-E3-S3-implementation-review-v1.md.
+# Appended at doc-sync time per that review's IR-002 (v2), which found
+# this file was not updated when the rework commit landed. The RED
+# observations and mutation reproductions below were independently
+# confirmed by the v2 adversarial review rather than captured live during
+# the rework itself; recorded here as the durable record the task plan's
+# Validation Plan requires.
+rework_cycle:
+  trigger: CAP-001-E3-S3-implementation-review-v1.md (verdict CHANGES-REQUIRED)
+  baseline_commit: 18051ee
+  rework_commit: 5d10e86
+  red:
+    description: >-
+      v1/IR-001 (HIGH): test_every_taxonomy_type_carries_request_id_uniformly
+      did not exercise the ProviderUnavailable path's request-ID
+      propagation. v1/IR-003 (MEDIUM): the non-dict-JSON guard in
+      _safe_fields (`if not isinstance(parsed, dict): return None`) had no
+      regression test. Both were reproduced as RED before the rework
+      strengthened the suite: against the pre-rework test file, deleting
+      `provider_request_id=request_id` from the ProviderUnavailable branch
+      of classify_error_body survived all 26 tests, and removing the
+      isinstance(parsed, dict) guard likewise survived all 26 tests.
+    reproduced_by: CAP-001-E3-S3-implementation-review-v2.md, Independent Mutation Probing
+  green:
+    description: >-
+      test_massive_errors.py strengthened to classify
+      error_missing_message_and_error.json and assert both
+      isinstance(result, ProviderUnavailable) and
+      provider_request_id == "req_missing_001" (closes v1/IR-001).
+      test_massive_error_classification.py gained
+      test_non_object_json_classifies_as_provider_unavailable_not_a_crash,
+      parametrized over [1, 2], null, "text", 42 (closes v1/IR-003). Also
+      in this commit: v1/IR-002's TC-ID relabelling, v1/IR-004's narrowing
+      of is_rate_limited_body's reason lookup to the `error` field only
+      (errors.py:147, the one production change in this cycle), and
+      v1/IR-005's fixture comment correction.
+    commit: 5d10e86
+    test_command: uv run pytest -m 'not postgres' tests/unit/test_massive_errors.py tests/unit/test_massive_error_classification.py -q
+    result: "30 passed (26 at v1-reviewed HEAD + 4 from the parametrized non-object-JSON test)"
+    full_suite_command: uv run pytest -m 'not postgres' -q
+    full_suite_result: "211 passed, 59 deselected"
+    full_suite_with_postgres_command: uv run pytest
+    full_suite_with_postgres_result: "270 passed"
+    static_checks: "ruff check: All checks passed; ruff format --check:
+      89 files already formatted; mypy src: Success, no issues found in
+      27 source files; uv build succeeded"
+  mutate_reproduced:
+    description: >-
+      The v1 surviving mutations were re-applied against the reworked
+      commit (5d10e86) to confirm the rework's new/strengthened tests now
+      kill them, via the same copy-and-shadow technique as the baseline
+      cycle's manual mutations.
+    mutations:
+      - id: rework-mutation-1-provider-unavailable-request-id
+        target: errors.classify_error_body (ProviderUnavailable branch, errors.py:183-186)
+        change: 'drop provider_request_id=request_id'
+        result: "1 failed, 29 passed (test_every_taxonomy_type_carries_request_id_uniformly)"
+        caught: true
+      - id: rework-mutation-2-non-dict-guard
+        target: errors._safe_fields (errors.py:121-122)
+        change: 'remove if not isinstance(parsed, dict): return None'
+        result: "4 failed, 26 passed (all four parameter cases of test_non_object_json_classifies_as_provider_unavailable_not_a_crash)"
+        caught: true
+  known_gap_carried_forward:
+    description: >-
+      Independent mutation probing at the reworked HEAD found one further
+      surviving mutation, not part of the rework's own scope: replacing
+      _str_or_none's `return value if isinstance(value, str) else None`
+      with `return value` leaves all 30 tests passing. Recorded as
+      CAP-001-E3-S3-implementation-review-v2.md IR-001 (MEDIUM) and
+      accepted downstream at doc sync -- the implementation is correct as
+      shipped (confirmed directly: a non-string `message` still classifies
+      as ProviderUnavailable with provider_request_id=None against the
+      real module), but the coercion is unpinned by any test.
+    mutation_id: rework-mutation-3-str-or-none-coercion
+    target: 'errors._str_or_none (errors.py:124-125)'
+    change: 'return value if isinstance(value, str) else None -> return value'
+    result: "30 passed -- SURVIVED"
+    caught: false
+    status: open, accepted as a documentation-recorded warning (IR-001 v2); no production or test change made at doc sync

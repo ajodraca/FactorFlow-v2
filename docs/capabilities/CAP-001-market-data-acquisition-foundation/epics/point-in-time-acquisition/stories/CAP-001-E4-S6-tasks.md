@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-20
+updated: 2026-09-24
+docs_synced_review: CAP-001-E4-S6-implementation-review-v3.md
+last_reworked_review: CAP-001-E4-S6-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -66,7 +68,7 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 **Purpose**: Establish test seams for the writer-result, typed-provider-error, safe-reason, runner, writer, and run-journal contracts without duplicating their behavior.
 
-- [ ] T001 Add shared outcome fixtures in `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py` for `WriteResult`, `InstrumentNotFound`, `ProviderUnavailable`, `ProviderContractViolation`, and the credential-safe reason composer exported by `src/factorflow/ingestion/massive/errors.py`; import the contracts delivered by CAP-001-E3-S3, CAP-001-E3-S5, CAP-001-E4-S3, CAP-001-E4-S5, and CAP-001-E5-S2 rather than defining local lookalikes.
+- [x] T001 Add shared outcome fixtures in `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py` for `WriteResult`, `InstrumentNotFound`, `ProviderUnavailable`, `ProviderContractViolation`, and the credential-safe reason composer exported by `src/factorflow/ingestion/massive/errors.py`; import the contracts delivered by CAP-001-E3-S3, CAP-001-E3-S5, CAP-001-E4-S3, CAP-001-E4-S5, and CAP-001-E5-S2 rather than defining local lookalikes.
 
 **Checkpoint**: Unit tests can classify committed writer counts and typed provider failures, and integration tests can observe the exact rows and final run state those classifications produce.
 
@@ -78,14 +80,14 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 ### Mandatory Component Tests
 
-- [ ] T002 Implement TC-COMP-183 and TC-COMP-184 in `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py`; assert positive appended counts classify as `written`, positive unchanged counts with no append classify as `unchanged`, the corresponding rows are persisted per data type, and `run-journal.finalise` treats both outcomes as successful. Add `# Implements TC-COMP-183` and `# Implements TC-COMP-184` trace comments.
-- [ ] T003 Implement TC-COMP-185, TC-COMP-186, and TC-COMP-188 in `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py`; assert `InstrumentNotFound` maps only the reached failing data type to `not_found`, `ProviderUnavailable` maps it to `failed`, later roster entries still run, finalisation becomes `partial`, and one instrument can persist `written` prices alongside `not_found` fundamentals. Add a trace comment for every TC.
-- [ ] T004 [P] Implement TC-COMP-145 and TC-COMP-187 in `tests/integration/test_runner_outcomes.py`; exercise the typed governor/runner boundary to prove `429` is handled as pacing before classification, and seed cancellation before a later roster entry to prove no `run_instrument_result` row exists for the untouched instrument. Add `# Implements TC-COMP-145` and `# Implements TC-COMP-187` trace comments.
-- [ ] T005 Implement TC-COMP-189 in `tests/integration/test_runner_outcomes.py`; compose a safe reason from a typed provider error carrying a request ID and credential-bearing diagnostic text, persist it through the writer transaction, and assert the stored value retains the request ID while containing no credential substring. Add a `# Implements TC-COMP-189` trace comment.
+- [x] T002 Implement TC-COMP-183 and TC-COMP-184 in `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py`; assert positive appended counts classify as `written`, positive unchanged counts with no append classify as `unchanged`, the corresponding rows are persisted per data type, and `run-journal.finalise` treats both outcomes as successful. Add `# Implements TC-COMP-183` and `# Implements TC-COMP-184` trace comments.
+- [x] T003 Implement TC-COMP-185, TC-COMP-186, and TC-COMP-188 in `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py`; assert `InstrumentNotFound` maps only the reached failing data type to `not_found`, `ProviderUnavailable` maps it to `failed`, later roster entries still run, finalisation becomes `partial`, and one instrument can persist `written` prices alongside `not_found` fundamentals. Add a trace comment for every TC.
+- [x] T004 [P] Implement TC-COMP-145 and TC-COMP-187 in `tests/integration/test_runner_outcomes.py`; exercise the typed governor/runner boundary to prove `429` is handled as pacing before classification, and seed cancellation before a later roster entry to prove no `run_instrument_result` row exists for the untouched instrument. Add `# Implements TC-COMP-145` and `# Implements TC-COMP-187` trace comments.
+- [x] T005 Implement TC-COMP-189 in `tests/integration/test_runner_outcomes.py`; compose a safe reason from a typed provider error carrying a request ID and credential-bearing diagnostic text, persist it through the writer transaction, and assert the stored value retains the request ID while containing no credential substring. Add a `# Implements TC-COMP-189` trace comment.
 
 ### Additional Unit Tests
 
-- [ ] T006 Add empty `WriteResult`, mixed per-data-type result, and unsupported-error tests in `tests/unit/test_outcomes.py`; distinguish an empty provider response from an all-unchanged response, preserve the supplied schema data type on every result, keep `CredentialRejected` on the run-level failure path, and reject an unrecognized classification input rather than silently producing a database outcome.
+- [x] T006 Add empty `WriteResult`, mixed per-data-type result, and unsupported-error tests in `tests/unit/test_outcomes.py`; distinguish an empty provider response from an all-unchanged response, preserve the supplied schema data type on every result, keep `CredentialRejected` on the run-level failure path, and reject an unrecognized classification input rather than silently producing a database outcome.
 
 **Checkpoint**: The mapped tests have been executed and observed RED because `outcomes.py` does not yet define the mapping or the runner/writer integration does not yet persist it; the failure evidence is recorded before production changes begin.
 
@@ -95,8 +97,8 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 **Purpose**: Add a narrow, typed classification boundary that converts writer results and typed provider errors into writer-facing per-data-type results.
 
-- [ ] T007 Create the outcome enum/data model and pure `WriteResult` classification in `src/factorflow/ingestion/outcomes.py`; map appended values to `written`, all-held returned values to `unchanged`, distinguish an empty provider response, and preserve the four schema data-type names used by `run_instrument_result`.
-- [ ] T008 In `src/factorflow/ingestion/outcomes.py`, map `InstrumentNotFound` to `not_found` and `ProviderUnavailable`/`ProviderContractViolation` to `failed`; accept the already composed credential-safe reason from the Massive-client boundary without reformatting or re-redacting it, reject `CredentialRejected` as a per-data-type outcome, and expose typed result records for `writer.py` to persist.
+- [x] T007 Create the outcome enum/data model and pure `WriteResult` classification in `src/factorflow/ingestion/outcomes.py`; map appended values to `written`, all-held returned values to `unchanged`, distinguish an empty provider response, and preserve the four schema data-type names used by `run_instrument_result`.
+- [x] T008 In `src/factorflow/ingestion/outcomes.py`, map `InstrumentNotFound` to `not_found` and `ProviderUnavailable`/`ProviderContractViolation` to `failed`; accept the already composed credential-safe reason from the Massive-client boundary without reformatting or re-redacting it, reject `CredentialRejected` as a per-data-type outcome, and expose typed result records for `writer.py` to persist.
 
 **Checkpoint**: The outcome module has no SQL, provider URL construction, retry loop, credential access, or reason-composition ownership; it only validates and classifies values passed across existing component contracts.
 
@@ -106,8 +108,8 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 **Purpose**: Connect classification to the planned runner and writer without moving their transaction, cancellation, rate-limit, or secret-ownership responsibilities.
 
-- [ ] T009 Update `src/factorflow/ingestion/runner.py` to pass each reached data type's `WriteResult` or typed provider failure through `outcomes.py`, provide only the credential-safe reason returned by the Massive-client boundary, and pass the resulting records into `src/factorflow/ingestion/writer.py`; retain the rules that `429` never reaches classification, `CredentialRejected` fails the run, and cancellation or a lost claim produces no result for later instruments.
-- [ ] T010 Update `src/factorflow/ingestion/writer.py` to consume the typed outcome records when inserting `run_instrument_result`, including the safe reason and only reached data types, inside its existing `connection.transaction()` boundary; preserve one row per `(run_id, instrument_id, data_type)` and the schema's `written`, `unchanged`, `not_found`, and `failed` values.
+- [x] T009 Update `src/factorflow/ingestion/runner.py` to pass each reached data type's `WriteResult` or typed provider failure through `outcomes.py`, provide only the credential-safe reason returned by the Massive-client boundary, and pass the resulting records into `src/factorflow/ingestion/writer.py`; retain the rules that `429` never reaches classification, `CredentialRejected` fails the run, and cancellation or a lost claim produces no result for later instruments.
+- [x] T010 Update `src/factorflow/ingestion/writer.py` to consume the typed outcome records when inserting `run_instrument_result`, including the safe reason and only reached data types, inside its existing `connection.transaction()` boundary; preserve one row per `(run_id, instrument_id, data_type)` and the schema's `written`, `unchanged`, `not_found`, and `failed` values.
 
 **Checkpoint**: Reached data types commit distinct result rows with observations and coverage, while untouched instruments and pacing events produce no classification row and run finalisation derives the correct terminal state from persisted outcomes.
 
@@ -117,12 +119,18 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 **Purpose**: Verify the mappings, transaction boundary, and credential-safety behavior, then run the repository validation suite.
 
-- [ ] T011 Run `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py`; perform manual mutations of the `written`/`unchanged`, `not_found`/`failed`, `429`, cancellation, and safe-reason paths, strengthen any test that does not catch its mutation, and record RED, GREEN, mutation, review-contract, and commit evidence in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/point-in-time-acquisition/stories/CAP-001-E4-S6-tdd-evidence.yaml`.
-- [ ] T012 Run `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build` from the repository root; report an unavailable PostgreSQL container as an excluded validation rather than presenting `uv run pytest -m 'not postgres'` as the full suite.
+- [x] T011 Run `tests/unit/test_outcomes.py` and `tests/integration/test_runner_outcomes.py`; perform manual mutations of the `written`/`unchanged`, `not_found`/`failed`, `429`, cancellation, and safe-reason paths, strengthen any test that does not catch its mutation, and record RED, GREEN, mutation, review-contract, and commit evidence in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/point-in-time-acquisition/stories/CAP-001-E4-S6-tdd-evidence.yaml`.
+- [x] T012 Run `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build` from the repository root; report an unavailable PostgreSQL container as an excluded validation rather than presenting `uv run pytest -m 'not postgres'` as the full suite.
 
 **Checkpoint**: Every mapped behavior is green, the required mutations are killed, evidence is current, and all available constitution-defined validation passes without misreporting exclusions.
 
 ## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-001-E5-S2 | context | E5-S2 created the base run-journal module, but E4-S5 now delivers the runner seam and argument-free `finalise`; E4-S6 reaches that journal contract transitively through its hard E4-S5 edge. |
 
 ### Task Dependencies
 
@@ -177,5 +185,5 @@ Implement the typed per-data-type outcome classifier used by the acquisition run
 
 ### Other Notes
 
-- CAP-001-E4-S3 supplies the writer transaction and result-row insertion; CAP-001-E4-S5 supplies iteration and cancellation; CAP-001-E5-S2 supplies run finalisation. This story must not add direct SQL outside the writer, provider retry logic, reason composition, or a row for an instrument the runner never reached.
+- CAP-001-E4-S3 supplies the writer transaction and result-row insertion; CAP-001-E4-S5 supplies iteration, cancellation, and argument-free run finalisation on top of E5-S2's base journal module. This story must not add direct SQL outside the writer, provider retry logic, reason composition, or a row for an instrument the runner never reached.
 - Store provider request IDs only as diagnostic correlation data. The usable credential remains owned by Massive-client/runtime configuration and never enters `outcomes.py` or `writer.py`.

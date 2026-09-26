@@ -38,6 +38,15 @@ def test_real_migration_versions_are_contiguous_from_one() -> None:
     assert versions == list(range(1, len(versions) + 1))
 
 
+def test_e5_real_migration_inventory_is_contiguous_through_four() -> None:
+    assert [path.name for path in _real_migration_files()] == [
+        "0001_extensions_owner_state.sql",
+        "0002_observations.sql",
+        "0003_coverage.sql",
+        "0004_runs.sql",
+    ]
+
+
 def test_no_real_migration_file_contains_begin_or_commit() -> None:
     for path in _real_migration_files():
         text = path.read_text(encoding="utf-8")

@@ -1,0 +1,345 @@
+"""Pydantic response models for Massive's four historical data shapes.
+
+Component design: `component-design-massive-client.md` sections 2.3, 2.5;
+`component-design-market-data-store.md` section 2.3 (the persistence
+contract these models are named for).
+
+Massive's wire field names -- `t`, `o`, `h`, `l`, `c`, `filing_date` and the
+rest -- stay inside this module. Every `Field(alias=...)` below is the one
+place a wire name is allowed to appear (DAC-E3-12); every attribute name is
+the product's own vocabulary, and that is what a caller of `massive-client`
+sees.
+
+None of these models owns `observed_on`, `run_id`, or `recorded_at`. Those
+belong to the observation writer and the run lifecycle (CAP-001-E4); a
+provider-parsed value earns no as-of date just by being parsed.
+"""
+
+from datetime import UTC, date, datetime
+from decimal import Decimal
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+__all__ = [
+    "CorporateAction",
+    "DailyBar",
+    "FinancialStatement",
+    "TickerReference",
+]
+
+
+def _coerce_extra_numeric_fields_to_decimal(
+    known_fields: set[str], data: dict[str, Any]
+) -> dict[str, Any]:
+    """Convert every field not already declared on the model from `int` or
+    `float` to `Decimal`, via `str()` rather than a direct `float`
+    conversion, so no binary rounding enters a value that will be recorded
+    permanently (DAC-E3-S2-3). Shared by every model here that retains
+    provider-specific, undeclared line items in its JSONB payload.
+
+    Recurses into nested dicts and lists (CAP-001-E3-S2-implementation-
+    review-v2 IR-003): a provider numeric nested inside a compound extra
+    field -- `action_ticker_change.json`'s `ticker_change` object is a
+    recorded example -- would otherwise reach the JSONB payload and the
+    append-only value hash as a `float`, which the observation writer's
+    own design names as the case where equal values can hash differently
+    across runs."""
+
+    def _coerce_value(value: Any) -> Any:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int | float):
+            return Decimal(str(value))
+        if isinstance(value, dict):
+            return {key: _coerce_value(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [_coerce_value(item) for item in value]
+        return value
+
+    coerced = dict(data)
+    for key, value in data.items():
+        if key in known_fields:
+            continue
+        coerced[key] = _coerce_value(value)
+    return coerced
+
+
+# A plausibility bound on Unix milliseconds for `DailyBar.session_date`,
+# not an attempt at a general calendar range. The lower bound predates the
+# earliest bar available from Massive's deepest plan: Stocks Advanced has
+# 20+ years of history (`docs/constitution/tech-stack.md`, Plan tiers) and
+# `component-design-ingestion-api.md` section 3 pins its current floor to
+# September 2003. The September 2003 regression test keeps that provider
+# coupling explicit. Values one order of magnitude off (most likely Unix
+# seconds instead of milliseconds) fall outside the 10^12..10^13 digit
+# range. These stay module-level because Pydantic treats an unannotated
+# class assignment on a `BaseModel` as a private attribute, not a constant.
+_MIN_PLAUSIBLE_MILLIS = 1_000_000_000_000
+_MAX_PLAUSIBLE_MILLIS = 9_999_999_999_999
+
+
+class TickerReference(BaseModel):
+    """Massive's ticker-reference read, named for `instrument_reference`.
+
+    Source: `component-design-massive-client.md` section 2.5, `GET
+    /v3/reference/tickers/{ticker}`.
+
+    `cik`, `composite_figi` and `share_class_figi` are required: AC-3 rests
+    instrument identity on them rather than on the ticker, so a response
+    missing one of them is not a usable reference record. `is_active` and
+    `company_name` are required for the same reason -- an unnamed record
+    with no known activity state is not a reference. `list_date`,
+    `delisted_utc`, `primary_exchange`, `security_type` and `currency_name`
+    are optional: `delisted_utc` in particular is genuinely absent for an
+    active instrument, which is the property the component design's testing
+    section relies on (section 7, "a delisted instrument's `list_date` and
+    `delisted_utc` survive").
+
+    Undeclared provider fields are silently ignored, not retained
+    (`extra="ignore"`, Pydantic's default -- unlike `FinancialStatement`
+    and `CorporateAction`, which set `extra="allow"`; CAP-001-E3-S2-
+    implementation-review-v2 IR-008). This is deliberate, not an
+    oversight: `component-design-massive-client.md` section 2.5 fully
+    enumerates this endpoint's response fields, so there is no
+    endpoint-specific content to retain the way the other two models'
+    variant-specific line items are. A future provider field would vanish
+    without signal under this setting; that is accepted here because the
+    response shape is closed by contract, not because the risk does not
+    exist.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    cik: str = Field(alias="cik")
+    composite_figi: str = Field(alias="composite_figi")
+    share_class_figi: str = Field(alias="share_class_figi")
+    is_active: bool = Field(alias="active")
+    company_name: str = Field(alias="name")
+    list_date: date | None = Field(alias="list_date", default=None)
+    delisted_utc: datetime | None = Field(alias="delisted_utc", default=None)
+    primary_exchange: str | None = Field(alias="primary_exchange", default=None)
+    security_type: str | None = Field(alias="type", default=None)
+    currency_name: str | None = Field(alias="currency_name", default=None)
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for `instrument_reference`'s
+        `payload` column, and for the append-only hash CAP-001-E4 computes
+        over it. This model owns no `observed_on`, `run_id` or
+        `recorded_at`, so none can appear here."""
+        return self.model_dump(mode="json")
+
+
+class DailyBar(BaseModel):
+    """A daily aggregate bar, named for `daily_bar`.
+
+    Source: `component-design-massive-client.md` section 2.5, `GET
+    /v2/aggs/ticker/{ticker}/range/1/day/{from}/{to}`.
+
+    Every field Massive's daily-aggregate response documents is required
+    (DAC-E3-S2-1): `t`, `o`, `h`, `l`, `c`, `v`, `vw` and `n` are all
+    present on every bar the endpoint returns, so a response missing one of
+    them is not a usable bar (DAC-E3-S2-4). `otc` is the one genuinely
+    optional field -- most sessions are not OTC, and its absence must
+    remain `None`, distinguishable from an explicit `False`
+    (DAC-E3-S2-5).
+
+    `t` is Unix milliseconds and is converted to `session_date` through a
+    timezone-aware UTC conversion (DAC-E3-S2-2): a naive local-time
+    conversion would shift the date near midnight depending on the host's
+    timezone, which would silently corrupt the `daily_bar` natural key.
+
+    Undeclared provider fields are silently ignored, not retained
+    (`extra="ignore"`, Pydantic's default; CAP-001-E3-S2-implementation-
+    review-v2 IR-008). Deliberate: section 2.5 fully enumerates this
+    endpoint's response fields, unlike `FinancialStatement` and
+    `CorporateAction`, which retain endpoint-specific extras and so set
+    `extra="allow"`. A future provider field would vanish without signal
+    under this setting.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    session_date: date = Field(alias="t")
+    open_price: Decimal = Field(alias="o")
+    high_price: Decimal = Field(alias="h")
+    low_price: Decimal = Field(alias="l")
+    close_price: Decimal = Field(alias="c")
+    volume: Decimal = Field(alias="v")
+    vwap: Decimal = Field(alias="vw")
+    transaction_count: int = Field(alias="n")
+    is_otc: bool | None = Field(alias="otc", default=None)
+
+    @field_validator("session_date", mode="before")
+    @classmethod
+    def _millis_to_utc_session_date(cls, value: Any) -> Any:
+        """Convert Unix milliseconds to a UTC calendar date before Pydantic's
+        own `date` coercion runs, so the conversion is always
+        timezone-aware UTC rather than the host's local timezone.
+
+        Rejects anything that is not plausibly milliseconds (CAP-001-E3-S2-
+        implementation-review-v2 IR-004), rather than silently accepting a
+        non-numeric value through Pydantic's ordinary `date` coercion or an
+        out-of-magnitude number (Unix seconds, for one) as a wrong date: a
+        provider or SDK change in `t`'s unit is exactly the "shape that
+        parses cleanly and means something different" the component design
+        names as the residual risk a `ValidationError` -- mapped to
+        `ProviderContractViolation` by `errors.py` -- exists to catch."""
+        if not isinstance(value, int | float) or isinstance(value, bool):
+            raise ValueError(f"t must be a Unix-milliseconds number, got {value!r}")
+        if not (_MIN_PLAUSIBLE_MILLIS <= value <= _MAX_PLAUSIBLE_MILLIS):
+            raise ValueError(f"t is not plausibly Unix milliseconds: {value!r}")
+        return datetime.fromtimestamp(value / 1000, tz=UTC).date()
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for the append-only value
+        hash CAP-001-E4 computes over `daily_bar`. `daily_bar` itself has
+        no `payload` column (component-design-market-data-store.md
+        section 2.3 -- the only one of the four observation tables
+        without one); `vwap`, `transaction_count` and `is_otc` are carried
+        here for hashing only, not for a `daily_bar` column. This model
+        owns no `observed_on`, `run_id` or `recorded_at`, so none can
+        appear here."""
+        return self.model_dump(mode="json")
+
+
+class FinancialStatement(BaseModel):
+    """A company financial statement, named for `fundamental_observation`.
+
+    Source: `component-design-massive-client.md` section 2.5, the four
+    sibling `GET /stocks/financials/v1/...` endpoints (balance sheets,
+    income statements, cash-flow statements and ratios).
+
+    `cik`, `tickers`, `fiscal_period_end`, `provider_filing_date`,
+    `fiscal_year` and `timeframe` are all required: the component design
+    states each result carries them, so a response missing one is not a
+    usable statement (DAC-E3-S2-4). `fiscal_quarter` is optional --
+    `timeframe` distinguishes `annual` from `quarterly` filings, and an
+    annual filing carries no quarter; its absence must remain `None`, not
+    a substituted value (DAC-E3-S2-5).
+
+    `statement_type` discriminates which of the four sibling endpoints a
+    record came from (`fundamental_observation.statement_type`, part of
+    its natural key). Massive does not return it on the wire -- it is
+    known from which endpoint was called -- so this is the one field the
+    caller (CAP-001-E3-S1's client) supplies rather than one carried by
+    the response body; it remains required because the persistence
+    contract requires it, and is constrained to the four values
+    `fundamental_statement_known` accepts (CAP-001-E3-S2-implementation-
+    review-v2 IR-002), the same treatment `CorporateAction.action_type`
+    already receives, so an out-of-domain value fails here as a
+    `ProviderContractViolation` rather than as a database `CHECK`
+    violation inside the writer's per-instrument transaction. `timeframe`
+    is constrained the same way, to the two values
+    `component-design-massive-client.md` section 2.5 names.
+
+    `provider_filing_date` is **descriptive only** (C5, AC-5): it is the
+    most recent filing including the period and conflates restatements of
+    the same period, so it must never be read or used as the observation
+    date. `observed_on` belongs to the observation writer alone
+    (CAP-001-E4) and is not a field of this model.
+
+    Every statement-specific line item (total assets, a given ratio, and
+    so on) varies by `statement_type` and is not enumerated by the
+    component design, so this model accepts them as additional data
+    rather than declaring one field per possible line item. They are
+    coerced to `Decimal` (DAC-E3-S2-3) and retained verbatim in
+    `value_payload()` for the writer's JSONB payload and hash.
+    """
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    cik: str = Field(alias="cik")
+    tickers: list[str] = Field(alias="tickers")
+    fiscal_period_end: date = Field(alias="period_end")
+    provider_filing_date: date = Field(alias="filing_date")
+    fiscal_year: int = Field(alias="fiscal_year")
+    fiscal_quarter: int | None = Field(alias="fiscal_quarter", default=None)
+    timeframe: Literal["annual", "quarterly"] = Field(alias="timeframe")
+    statement_type: Literal[
+        "balance_sheet", "income_statement", "cash_flow_statement", "ratios"
+    ] = Field(alias="statement_type")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_statement_values_to_decimal(cls, data: Any) -> Any:
+        """Convert every extra (statement-specific) numeric line item to
+        `Decimal` via its string representation, never via `float`
+        directly, so no binary rounding enters a value that will be
+        recorded permanently."""
+        if not isinstance(data, dict):
+            return data
+        return _coerce_extra_numeric_fields_to_decimal(set(cls.model_fields), data)
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for
+        `fundamental_observation`'s `payload` column, and for the
+        append-only hash CAP-001-E4 computes over it. This model owns no
+        `observed_on`, `run_id` or `recorded_at`, so none can appear
+        here."""
+        return self.model_dump(mode="json")
+
+
+class CorporateAction(BaseModel):
+    """One corporate action -- a split, dividend, ticker change, or IPO --
+    named for `corporate_action`.
+
+    Source: `component-design-massive-client.md` section 2.5, the four
+    corporate-action endpoints (`GET /stocks/v1/splits`,
+    `GET /stocks/v1/dividends`, `GET /vX/reference/ipos` and
+    `GET /vX/reference/tickers/{id}/events`).
+
+    Per the component design's Notes, `CorporateAction` is **one** product
+    model keyed by `action_type` and `effective_on` -- `corporate_action`'s
+    natural key -- rather than four separate storage shapes for the four
+    provider endpoint variants. Each endpoint names its own effective date
+    differently (a split's `execution_date`, a dividend's
+    `ex_dividend_date`, a ticker event's `date`, an IPO's `listing_date`)
+    and none of the four responses names an `action_type` field at all --
+    it is known from which endpoint was called. Both are therefore
+    supplied by the caller (CAP-001-E3-S1's client) alongside the raw
+    response, the same pattern `FinancialStatement.statement_type` uses,
+    rather than aliased from one wire key that does not exist across all
+    four shapes.
+
+    `action_type` is constrained to the DDL's four known values
+    (`corporate_action_type_known`); an unrecognised value fails
+    validation rather than being written. Every other, endpoint-specific
+    field (`split_from`, `cash_amount`, `historical_adjustment_factor`,
+    and so on) is retained as additional data, coerced to `Decimal`
+    (DAC-E3-S2-3) and carried into `value_payload()` for the writer's
+    JSONB payload and hash.
+
+    Deliberately retained (CAP-001-E3-S2-implementation-review-v2 IR-005):
+    a ticker-change event's own wire keys, `date` and `type`, ride into
+    `value_payload()` alongside the product-named `effective_on` and
+    `action_type` the caller supplies for the same values -- provider key
+    names inside the JSONB payload are sanctioned by this story's task
+    plan Notes, and DAC-E3-12 (wire names stay inside this component) is
+    about not exposing them through this model's own attributes, which
+    remain `action_type`/`effective_on` throughout. The duplication is
+    redundant bytes in the hashed payload, not a boundary violation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    action_type: Literal["split", "dividend", "ticker_change", "ipo"] = Field(alias="action_type")
+    effective_on: date = Field(alias="effective_on")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_action_values_to_decimal(cls, data: Any) -> Any:
+        """Convert every extra (endpoint-specific) numeric field to
+        `Decimal` via its string representation, never via `float`
+        directly, so no binary rounding enters a value that will be
+        recorded permanently."""
+        if not isinstance(data, dict):
+            return data
+        return _coerce_extra_numeric_fields_to_decimal(set(cls.model_fields), data)
+
+    def value_payload(self) -> dict[str, Any]:
+        """A JSON-round-trippable value payload for `corporate_action`'s
+        `payload` column, and for the append-only hash CAP-001-E4 computes
+        over it. This model owns no `observed_on`, `run_id` or
+        `recorded_at`, so none can appear here."""
+        return self.model_dump(mode="json")
