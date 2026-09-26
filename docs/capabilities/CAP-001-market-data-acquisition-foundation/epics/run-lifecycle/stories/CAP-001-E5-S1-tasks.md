@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-25
 ai_provenance:
   agent_id: implementation-planning-agent
-  agent_version: "1.0"
-  model: gpt-5.6
-  tool: Codex
+  agent_version: "1.1"
+  model: claude-sonnet-4-6
+  tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-09-11T23:05:00Z
+  timestamp: 2026-09-25T00:00:00Z
   source_artifacts:
     - id: CAP-001-E5-S1
       version: "1"
@@ -110,6 +110,14 @@ Create the forward-only coverage and run-journal migrations and the small, expli
 ---
 
 ## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+Every other story ID cited by this plan must either be a hard edge in the
+capability's `dependencies.yaml` or appear here as `reverse`, `soft`, or
+`context`. A newly discovered hard dependency must be added to the graph.
+
+None. CAP-001-E1-S1 and CAP-001-E1-S2 are hard graph edges in `dependencies.yaml` (schema baseline and migrator); they are not cited by ID in the plan body and require no table row. No other story IDs are referenced in this plan.
 
 ### Task Dependencies
 
