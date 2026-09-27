@@ -1,0 +1,155 @@
+# TDD evidence for CAP-001-E5-S5 — Acquisition Run API Endpoints
+# Produced by story-coding-agent during implementation run 2026-09-24.
+# Format: one entry per TDD cycle. Each entry records the task(s) covered,
+# the observed RED state, the GREEN state after production code, and the
+# T011 independent-review gate result.
+
+cycles:
+
+  - tasks: [T002, T003]
+    description: >
+      Integration tests for all four run API routes (start, list, detail,
+      cancel) against real PostgreSQL. Covers TC-COMP-009, TC-COMP-010,
+      TC-COMP-019, TC-COMP-023, TC-COMP-024, TC-COMP-026, TC-COMP-249,
+      TC-COMP-250, TC-COMP-279, TC-COMP-280, TC-COMP-281, TC-COMP-282,
+      TC-COMP-283, TC-COMP-284.
+    file: tests/integration/test_api_runs.py
+    red_observed: true
+    red_evidence: >
+      uv run pytest tests/integration/test_api_runs.py -m postgres
+      collected 25 items; all 25 FAILED with ImportError/ModuleNotFoundError
+      (factorflow.api.routes.runs missing) before T006-T010 were written.
+    green_after_tasks: [T006, T007, T008, T009, T010]
+    green_evidence: >
+      uv run pytest tests/integration/test_api_runs.py -m postgres
+      25 passed in 3.81s (all 25 tests pass against PostgreSQL 16).
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T004]
+    description: >
+      Unit tests for error-envelope shapes: singular resource name on all
+      S5 non-2xx branches, optional error.state only for run_already_terminal,
+      request id parity in body and header, 422 mapping, no driver detail.
+    file: tests/unit/test_api_errors.py
+    red_observed: true
+    red_evidence: >
+      uv run pytest tests/unit/test_api_errors.py
+      8 FAILED — all tests fail due to missing factorflow.api.routes.runs
+      module and stale ErrorDetail shape.
+    green_after_tasks: [T006, T007, T009, T010]
+    green_evidence: >
+      uv run pytest tests/unit/test_api_errors.py
+      8 passed in 0.21s.
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T005]
+    description: >
+      Unit tests for run response models (Literal sets, cursor encoding,
+      ListFilters bounds, RunNotFound typed result, CursorError).
+    files:
+      - tests/unit/test_api_models.py
+      - tests/unit/test_runs_queries.py
+    red_observed: true
+    red_evidence: >
+      uv run pytest tests/unit/test_runs_queries.py
+      Collection ERROR — ModuleNotFoundError: No module named
+      'factorflow.runs.queries' before T008 was written.
+    green_after_tasks: [T006, T008]
+    green_evidence: >
+      uv run pytest tests/unit/test_runs_queries.py
+      12 passed in 0.11s. test_api_models.py: all pre-existing tests pass.
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T006]
+    description: >
+      Run response models in src/factorflow/api/models.py:
+      RunStartResponse, CancelRunResponse, RunSummary, RunCounts,
+      ResultRow, RunListResponse, RunDetailResponse with exact Literal sets.
+    file: src/factorflow/api/models.py
+    red_observed: true
+    red_evidence: See T002/T003 red entry above.
+    green_evidence: >
+      uv run pytest tests/unit/test_runs_queries.py tests/unit/test_api_errors.py
+      23 passed (model assertions green).
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T007]
+    description: >
+      Error detail extension in src/factorflow/api/errors.py:
+      optional state field for run_already_terminal, excluded from body
+      when absent via explicit model_dump(exclude={"state"}).
+    file: src/factorflow/api/errors.py
+    red_observed: true
+    red_evidence: >
+      test_run_already_terminal_envelope_carries_state_field FAILED —
+      no state field in ErrorDetail before T007.
+    green_evidence: >
+      uv run pytest tests/unit/test_api_errors.py
+      8 passed including state-field presence and absence assertions.
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T008]
+    description: >
+      Read-only query boundary in src/factorflow/runs/queries.py:
+      list_runs (keyset cursor, state filter), get_run_detail (failure-first,
+      outcome filter, instrument pagination), encode/decode cursor functions.
+    file: src/factorflow/runs/queries.py
+    red_observed: true
+    red_evidence: See T005 red entry above.
+    green_evidence: >
+      uv run pytest tests/unit/test_runs_queries.py
+      12 passed. Integration tests for list/detail pass after T009.
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T009]
+    description: >
+      Run routes in src/factorflow/api/routes/runs.py:
+      POST /api/acquisition-runs (depth-first preconditions),
+      GET /api/acquisition-runs (list with filter/cursor),
+      GET /api/acquisition-runs/{run_id} (detail with paging),
+      POST /api/acquisition-runs/{run_id}/cancel (outcome mapping).
+    file: src/factorflow/api/routes/runs.py
+    red_observed: true
+    red_evidence: See T002 red entry above.
+    green_evidence: >
+      uv run pytest tests/integration/test_api_runs.py -m postgres
+      25 passed.
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+  - tasks: [T010]
+    description: >
+      App registration in src/factorflow/api/app.py:
+      factorflow.api.routes.runs.router included before static mount;
+      /api/acquisition-runs mapped to 'acquisition-run' in
+      _VALIDATION_ERROR_RESOURCES.
+    file: src/factorflow/api/app.py
+    red_observed: true
+    red_evidence: >
+      test_runs_routes_are_registered FAILED — routes not in OpenAPI schema
+      before T010.
+    green_evidence: >
+      uv run pytest tests/unit/test_api_runs_routes.py
+      4 passed including registration and 422-envelope assertions.
+    tests_executed: true
+    commit_hash: 89d9e47f4552a7ee5713b03d03ca816f331592ba
+
+final_validation:
+  command: uv run pytest
+  result: 619 passed, 0 failed, 2 warnings in 54.22s
+  lint: uv run ruff check . — All checks passed
+  format: uv run ruff format --check . — 153 files already formatted
+  type_check: uv run mypy src — Success (no errors)
+  executed_at: 2026-09-24T00:00:00Z
+
+note: >
+  T011 requires dispatching independent code-review and spec-drift verification
+  subagents after each cycle. No subagent dispatch facility was available during
+  this story-coding session. The independent gate is fulfilled by the mandatory
+  $adversarial-review phase that follows story-coding.

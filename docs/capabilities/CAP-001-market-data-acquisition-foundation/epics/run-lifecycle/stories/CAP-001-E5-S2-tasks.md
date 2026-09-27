@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-17
+updated: 2026-09-24
+docs_synced_review: CAP-001-E5-S2-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -59,7 +60,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Verify rather than recreate the unresolved S1 prerequisite, following the repository's established blocking-check pattern for cross-story contracts.
 
-- [ ] T001 Confirm that `tests/conftest.py` exports CAP-001-E5-S1's planned `migrated_run_schema_connection`, that the pre-existing `postgres_connection_string` fixture remains available, that `src/factorflow/runs/__init__.py` makes `factorflow.runs` importable, and that `migrations/0003_coverage.sql` and `migrations/0004_runs.sql` are present and discoverable in order on the eventual coding branch; block S2 implementation if any S1-owned prerequisite is absent rather than creating, moving, or duplicating it.
+- [x] T001 Confirm that `tests/conftest.py` exports CAP-001-E5-S1's planned `migrated_run_schema_connection`, that the pre-existing `postgres_connection_string` fixture remains available, that `src/factorflow/runs/__init__.py` makes `factorflow.runs` importable, and that `migrations/0003_coverage.sql` and `migrations/0004_runs.sql` are present and discoverable in order on the eventual coding branch; block S2 implementation if any S1-owned prerequisite is absent rather than creating, moving, or duplicating it.
 
 **Checkpoint**: The eventual coding branch contains an importable S1 run package and its required schema/fixture contracts; this phase changes none of those contracts and stops if S1 has not landed consistently.
 
@@ -71,13 +72,13 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 ### Mandatory Component Tests
 
-- [ ] T002 Create `tests/integration/test_run_queue.py` request tests for TC-COMP-023 and TC-COMP-265 using the S1-provided `migrated_run_schema_connection`: parameterize an existing `running` or `cancelling` row, call `request_run`, and assert the new UUID identifies a distinct row that remains `requested`, stores the supplied depth, reports the active UUID as `queued_behind`, and leaves every active-row field unchanged; also assert a request made with no active row returns `queued_behind=None`. Add `# Implements TC-COMP-023, TC-COMP-265` traceability comments (depends on T001).
-- [ ] T003 Add claim tests to `tests/integration/test_run_queue.py` for TC-COMP-237 and TC-COMP-260 through TC-COMP-263: seed requested rows with distinct ordered `requested_at` values; claim and terminalize each predecessor before the next claim; assert ascending FIFO order; assert an empty queue and either a `running` or `cancelling` active row make `claim_next` return `None`; and assert one successful call atomically writes `running`, `started_at`, `claimed_by`, and `heartbeat_at` while returning the row's UUID and stored depth. Add a traceability comment for every listed TC-ID (depends on T001, T002).
-- [ ] T004 Add separate-connection contention tests to `tests/integration/test_run_queue.py` for TC-COMP-238 and TC-COMP-264 using the pre-existing `postgres_connection_string` fixture from `tests/conftest.py`: (a) hold a row lock on the oldest of two requested rows and prove a claim on another connection completes by skipping that candidate while the lock remains held, and (b) synchronize two claims over distinct requested candidates so both can pass the no-active guard, then assert the partial unique index permits one active row and makes the racing second update raise `psycopg.errors.UniqueViolation`; separately retain coverage for the valid loser path that returns `None` after observing the winner. Add `# Implements TC-COMP-238, TC-COMP-264` traceability comments (depends on T001–T003).
+- [x] T002 Create `tests/integration/test_run_queue.py` request tests for TC-COMP-023 and TC-COMP-265 using the S1-provided `migrated_run_schema_connection`: parameterize an existing `running` or `cancelling` row, call `request_run`, and assert the new UUID identifies a distinct row that remains `requested`, stores the supplied depth, reports the active UUID as `queued_behind`, and leaves every active-row field unchanged; also assert a request made with no active row returns `queued_behind=None`. Add `# Implements TC-COMP-023, TC-COMP-265` traceability comments (depends on T001).
+- [x] T003 Add claim tests to `tests/integration/test_run_queue.py` for TC-COMP-237 and TC-COMP-260 through TC-COMP-263: seed requested rows with distinct ordered `requested_at` values; claim and terminalize each predecessor before the next claim; assert ascending FIFO order; assert an empty queue and either a `running` or `cancelling` active row make `claim_next` return `None`; and assert one successful call atomically writes `running`, `started_at`, `claimed_by`, and `heartbeat_at` while returning the row's UUID and stored depth. Add a traceability comment for every listed TC-ID (depends on T001, T002).
+- [x] T004 Add separate-connection contention tests to `tests/integration/test_run_queue.py` for TC-COMP-238 and TC-COMP-264 using the pre-existing `postgres_connection_string` fixture from `tests/conftest.py`: (a) hold a row lock on the oldest of two requested rows and prove a claim on another connection completes by skipping that candidate while the lock remains held, and (b) synchronize two claims over distinct requested candidates so both can pass the no-active guard, then assert the partial unique index permits one active row and makes the racing second update raise `psycopg.errors.UniqueViolation`; separately retain coverage for the valid loser path that returns `None` after observing the winner. Add `# Implements TC-COMP-238, TC-COMP-264` traceability comments (depends on T001–T003).
 
 ### Additional Unit Tests
 
-- [ ] T005 [P] Create `tests/unit/test_run_journal.py` with focused cursor/connection-boundary tests for frozen `ClaimedRun` mapping, UUID/depth return mapping, bound `runner_id` and `history_depth_years` parameters, and `None` mapping when the claim statement returns no row; assert claim mapping uses the returned row's stored depth and never calls `factorflow.instruments.settings.read_history_depth` (depends on T001).
+- [x] T005 [P] Create `tests/unit/test_run_journal.py` with focused cursor/connection-boundary tests for frozen `ClaimedRun` mapping, UUID/depth return mapping, bound `runner_id` and `history_depth_years` parameters, and `None` mapping when the claim statement returns no row; assert claim mapping uses the returned row's stored depth and never calls `factorflow.instruments.settings.read_history_depth` (depends on T001).
 
 **Checkpoint**: If T001 passes, the tests use S1-owned prerequisites, carry `TC-COMP-*` traceability comments, and are observed RED because `factorflow.runs.journal` does not yet exist. The locked-candidate and unique-index race are separate scenarios so `SKIP LOCKED` and the schema backstop are each proved directly.
 
@@ -87,7 +88,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Add the typed run-journal boundary and the transactional request and single-statement claim operations consumed by the acquisition runner.
 
-- [ ] T006 Create `src/factorflow/runs/journal.py` in the `factorflow.runs` package verified by T001: define frozen `ClaimedRun`, `request_run(connection, history_depth_years) -> tuple[UUID, UUID | None]`, and `claim_next(connection, runner_id) -> ClaimedRun | None` with typed psycopg boundaries and bound parameters. In one transaction, `request_run` inserts a `requested` row with the supplied depth and returns its UUID plus the existing `running`/`cancelling` UUID, if any, without changing that active row. `claim_next` executes the design's one `UPDATE ... WHERE run_id = (SELECT ... NOT EXISTS ... ORDER BY requested_at ... FOR UPDATE SKIP LOCKED) RETURNING run_id, history_depth_years` statement, maps no row to `None`, and never reads current settings (depends on T001–T005).
+- [x] T006 Create `src/factorflow/runs/journal.py` in the `factorflow.runs` package verified by T001: define frozen `ClaimedRun`, `request_run(connection, history_depth_years) -> tuple[UUID, UUID | None]`, and `claim_next(connection, runner_id) -> ClaimedRun | None` with typed psycopg boundaries and bound parameters. In one transaction, `request_run` inserts a `requested` row with the supplied depth and returns its UUID plus the existing `running`/`cancelling` UUID, if any, without changing that active row. `claim_next` executes the design's one `UPDATE ... WHERE run_id = (SELECT ... NOT EXISTS ... ORDER BY requested_at ... FOR UPDATE SKIP LOCKED) RETURNING run_id, history_depth_years` statement, maps no row to `None`, and never reads current settings (depends on T001–T005).
 
 **Checkpoint**: All S2-owned behavior is implemented without a read-then-write claim window; queueing leaves the existing active run untouched, and the returned claim depth is the persisted snapshot.
 
@@ -97,7 +98,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Run the public journal boundary against the verified S1 schema and independent PostgreSQL connections after production implementation exists.
 
-- [ ] T007 Run `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` against `src/factorflow/runs/journal.py`; correct any mismatch within those three S2-owned files while preserving the exact SQL claim contract, and confirm the no-row journal signal consumed by CAP-001-E4-S5's configured-wait loop is stable (depends on T006).
+- [x] T007 Run `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` against `src/factorflow/runs/journal.py`; correct any mismatch within those three S2-owned files while preserving the exact SQL claim contract, and confirm the no-row journal signal consumed by CAP-001-E4-S5's configured-wait loop is stable (depends on T006).
 
 **Checkpoint**: The S2 integration and unit suites exercise the production `factorflow.runs.journal` boundary through the same psycopg/PostgreSQL interface the acquisition runner will consume.
 
@@ -107,7 +108,7 @@ Implement the request and claim portion of `run-journal`: insert every valid req
 
 **Purpose**: Prove the implementation resists the principal request/claim mutations and meets repository validation and evidence requirements.
 
-- [ ] T008 Strengthen `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` after manually mutating FIFO order, the active-state predicate, `SKIP LOCKED`, active-row preservation, and returned-depth/no-row mapping; retain tests that kill each mutation. Run the focused RED→GREEN→MUTATE→STRENGTHEN→REFACTOR cycle and record each task's executions, mutations, commit hash, code-review verdict, and spec-drift verdict in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S2-tdd-evidence.yaml` before beginning the next cycle (depends on T007).
+- [x] T008 Strengthen `tests/integration/test_run_queue.py` and `tests/unit/test_run_journal.py` after manually mutating FIFO order, the active-state predicate, `SKIP LOCKED`, active-row preservation, and returned-depth/no-row mapping; retain tests that kill each mutation. Run the focused RED→GREEN→MUTATE→STRENGTHEN→REFACTOR cycle and record each task's executions, mutations, commit hash, code-review verdict, and spec-drift verdict in `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S2-tdd-evidence.yaml` before beginning the next cycle (depends on T007).
 
 **Checkpoint**: Targeted PostgreSQL tests distinguish FIFO from reverse selection, reject a second active claim, prove candidate-row contention is non-blocking, fail if queueing alters the active row, and fail if current settings or incorrect no-row mapping replace the persisted claim contract; all required review and TDD evidence is present.
 

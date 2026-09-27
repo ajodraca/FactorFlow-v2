@@ -10,16 +10,51 @@ data ingestion process, and the owner interface. See
 
 ## Status
 
-Early. The database schema foundation, the instrument-list domain service,
-the instrument and settings API routes, the API's health endpoint and
-application factory, and the owner interface's application shell — its
+Early. The database schema foundation — including append-only, point-in-time
+observation tables for instrument reference data, daily bars, fundamentals,
+and corporate actions, the non-overlapping coverage-segment and
+last-acquisition-state tables, and the acquisition-run and per-instrument
+result journal tables — the instrument-list domain service, the instrument
+and settings API routes, the API's health endpoint and application factory,
+the pure acquisition-run lifecycle primitives, the run journal's request
+and claim operations, the ingestion range planner — which computes
+per-data-type fetch intervals from a claimed run's snapshotted history depth,
+yielding only the sub-ranges not already covered — and the owner interface's
+application shell — its
 navigation rail, routing, and status region — are in place. The Instruments
 and Settings screens are also built, rendering inside that shell and
-consuming the instrument and settings API. The remaining API routes
-(acquisition runs, coverage), the ingestion process, and the Coverage and
-Runs screens are not yet built; those two destinations still render a
-placeholder. What exists today is described below — everything else in
-`docs/` is specification for work not yet implemented.
+consuming the instrument and settings API. The market data ingestion
+process's Massive provider response models — parsing the provider's four
+historical data shapes into the product's own vocabulary — its typed
+error taxonomy — reconstructing which provider failure occurred from the
+SDK's single status-code-discarding exception — a safe failure-reason
+composer built on that taxonomy, its provider-agnostic rate-limit governor,
+the deterministic observation-value hashing primitive, and the historical
+client that wires the provider boundary to Massive's REST SDK are also in
+place. The observation writer — the pure coverage range arithmetic in
+`coverage.py` and the typed writer that commits all four data types atomically in
+`writer.py` — is also in place, and the acquisition runner now calls it: it
+claims a run, walks the roster it snapshotted at claim time instrument by
+instrument, checks the claim and cancellation before each one, fetches each
+of the four data types individually (so one instrument can have distinct
+per-data-type outcomes), classifies each fetch result through
+`outcomes.py`, and finalises the run from what was written.
+`ingestion_main.py` is the ingestion process's own entrypoint, separate from
+the API. The application container now also runs a periodic reclaim sweep:
+`src/factorflow/runs/reclaim.py` (`reclaim_stale_runs`) finds claimed runs
+whose heartbeat has gone stale and transitions them to `abandoned`, so a
+crashed ingestion process never wedges acquisition permanently; the sweep
+runs as an asyncio background task in the API lifespan, not in the ingestion
+container, so it continues operating when ingestion is stopped or
+crash-looping. The acquisition run API routes — `POST /api/acquisition-runs`,
+`GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and
+`POST /api/acquisition-runs/{id}/cancel` — are also in place, backed by a
+read-only journal query boundary (`src/factorflow/runs/queries.py`) with
+keyset cursor pagination and failure-first result ordering. The remaining API
+route (coverage) and the Coverage and Runs screens are not yet built; those
+two destinations still render a placeholder. What exists today is described
+below — everything else in `docs/` is specification for work not yet
+implemented.
 
 ## Requirements
 
@@ -63,9 +98,19 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with optional state filter, and fetching a single run's summary, persisted counts, and paged per-instrument results with failure-first ordering and outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) and [Acquisition run API](#acquisition-run-api) |
+| `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
+| `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
+| `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
+| `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
+| `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `RunNotActive` (raised when the run's `acquisition_run` row is not in an active state at the start of a write — prevents a post-reclaim runner from appending data), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction after locking and verifying the run is active), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
+| `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
+| `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
+| `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
 | `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` mounts the Instruments and Settings screens (see below) at their destinations, with Coverage and Runs still `ScreenPlaceholder`, plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
@@ -189,6 +234,679 @@ including FastAPI's own request-validation `422`s — `app.py`'s
 `_validation_error_handler` derives `resource` from the request path so a
 shared, application-wide handler still names the right resource per route.
 
+## Acquisition run API
+
+`src/factorflow/api/routes/runs.py` and `src/factorflow/runs/queries.py`
+expose the acquisition run lifecycle over HTTP — a thin HTTP surface that
+validates preconditions, delegates mutations to `src/factorflow/runs/journal.py`,
+and delegates reads to `src/factorflow/runs/queries.py`.
+
+| Endpoint | Success | Errors | Behavior |
+|---|---|---|---|
+| `POST /api/acquisition-runs` | `202` `{run_id, state: "requested", queued_behind}` | `409 history_depth_not_set`; `409 no_active_instruments` | Checks history depth first, then the active roster; refuses with `409` before writing any row; always accepts an active-run queue (AC-23, DAC-E5-14, DAC-E5-S5-1) |
+| `GET /api/acquisition-runs` | `200` `{runs, next_cursor}` | `422` malformed or unsupported-version cursor | Lists runs reverse-chronologically by `(requested_at, run_id) DESC`; accepts optional `state` filter, `limit` (default 50, max 500), and keyset `cursor` (DAC-E5-S5-4) |
+| `GET /api/acquisition-runs/{id}` | `200` `{run, counts, results, next_cursor}` | `404` unknown id; `422` malformed cursor | Returns the run summary, persisted instrument counts, and per-instrument per-data-type results paged by instrument; up to `4 * limit` result rows per page; failure-first ordering, optional `outcome` filter (DAC-E5-S5-5) |
+| `POST /api/acquisition-runs/{id}/cancel` | `202` `{state: "cancelling"\|"cancelled"}` | `409 run_already_terminal` with `error.state`; `404` unknown id | Running run → `cancelling`; queued run → `cancelled` directly; terminal run → `409` carrying the actual persisted state (AC-19, AC-26, DAC-E5-S5-2, DAC-E5-S5-3) |
+
+Auth: none; the API is loopback-only by approved design. Request body for start is empty.
+
+Every non-2xx response carries the `{"error": {code, message, resource, request_id}}` envelope.
+The `run_already_terminal` `409` also carries `error.state` with the actual persisted run state;
+all other errors omit the `state` field so existing envelope consumers are unaffected.
+`resource` is `"acquisition-run"` on every S5 error (singular, owner-confirmed in
+`component-design-ingestion-api.md` §2.3).
+
+### Keyset cursor contract (owner-confirmed 2026-09-17)
+
+Both list and detail responses use versioned URL-safe opaque composite cursors:
+clients treat the value as opaque and pass it back as the `cursor` query parameter.
+A malformed or unsupported-version cursor returns `422`. The current cursor version
+is `1`; a new version in a future release will be a different opaque string, and
+clients holding a v1 cursor will receive `422` on their next page request rather
+than silently wrong results.
+
+**Known open gaps, pending design revision** (owner-confirmed, recorded in task plan):
+
+- `component-design-ingestion-api.md` §2.4 does not yet record the depth-first
+  precondition precedence (both absent → `history_depth_not_set`).
+- `component-design-ingestion-api.md` §11 does not yet publish the complete request
+  and response schemas or name the cursor encoding and invalid-version behavior.
+- `component-design-ingestion-api.md` §§2.4a and 11 do not yet state that the
+  detail `limit` counts instruments and that one page may contain up to `4 * limit`
+  data-type rows.
+
+## Deterministic observation-value hashing
+
+`src/factorflow/ingestion/hashing.py` exposes two pure functions consumed by the
+observation writer. `canonical_json(value)` recursively accepts JSON-native
+`None`, booleans, integers, strings, lists, and string-keyed dictionaries,
+plus `Decimal`. It converts each `Decimal` to its exact string form, then emits
+UTF-8 JSON with sorted keys and compact separators. Floats, non-string
+dictionary keys, and every other unsupported type raise `TypeError`; no
+`str()` or `repr()` fallback can silently create a misleading digest.
+
+`value_hash(value)` returns `hashlib.sha256(canonical_json(value)).digest()` as
+32 raw bytes. Equivalent dictionaries therefore hash identically regardless
+of insertion order, while a changed supplied field changes the digest. The
+function hashes every field the caller supplies: the observation writer
+(`writer.py`) is responsible for passing only observation values and excluding
+`observed_on`, `run_id`, and `recorded_at`.
+
+The canonical form deliberately renders a `Decimal` as a JSON string. A
+`Decimal("1.10")` and the literal string `"1.10"` therefore have the same
+canonical representation; callers must keep each field's Python type stable.
+Changing the canonical form or digest algorithm after observations have been
+stored is a data-compatibility change, because unchanged values would otherwise
+receive new hashes and be appended again.
+
+## Range planner
+
+`src/factorflow/ingestion/plan.py` computes per-data-type fetch intervals for
+one claimed acquisition run. It is a pure module — no database, journal,
+roster, provider, or owner-setting access belongs here; CAP-001-E4-S5 is the
+caller that supplies the claimed run and per-data-type coverage.
+
+`depth_start_for_run(run, today)` returns `today` minus
+`run.history_depth_years` calendar years. The depth is read from the claimed
+run's own snapshot, not from the current owner setting, so a depth changed
+while a run sits queued does not redefine a run already requested (DAC-E4-8).
+When the calendar subtraction lands on February 29 in a non-leap year, the
+result is clamped to February 28 — the minimal deterministic interpretation of
+"minus N years."
+
+`plan_fetches(data_type, covered, depth_start, today)` returns the
+sub-ranges of `[depth_start, today]` not already covered as a list of
+`FetchRange(data_type, start, end)` frozen dataclasses. The algorithm:
+
+1. Clips every supplied coverage segment to the requested window.
+2. Coalesces overlapping or adjacent clipped segments.
+3. Walks the gaps between consecutive coalesced segments; each gap becomes one `FetchRange`.
+4. Appends a trailing re-fetch from the last covered date to `today` — the last covered day may have been a partial session, and the observation writer's idempotence means re-fetching a day already held writes nothing (AC-6, DAC-E4-9).
+5. Returns an empty list when `depth_start >= today`.
+
+Each call plans one data type independently; `data_type` is a pass-through label on the returned `FetchRange` values. The caller (CAP-001-E4-S5) invokes the function once per data type with the corresponding coverage.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E4-S4-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- The deterministic test `test_data_types_planned_independently` exercises only `prices` and `reference`; `fundamentals` and `corporate_actions` appear only in the Hypothesis property test strategy. Since `data_type` is a pass-through label the behavioral correctness is not in question, but the explicit named-assertion traceability for those two types relies on the property test (IR-001, medium).
+- The coalescing loop uses `list(seg)` and a `type: ignore` comment to work around a mypy limitation on the in-place tuple update pattern; the logic is correct and all checks pass, but the suppression hides potential future type errors in that section (IR-002, medium).
+- Coverage segments with `start == end` (single-day, inclusive) are treated as zero-width and silently dropped by the `s < e` clip guard, causing a harmless re-fetch of that day. This aligns with the re-fetch-is-cheap philosophy but deviates from the component design's statement that inclusive single-day ranges are valid (IR-003, low).
+
+## Massive provider response models
+
+`src/factorflow/ingestion/massive/models.py` defines four Pydantic v2 models,
+one per Massive response shape, each named for the observation table it will
+feed: `TickerReference` (`instrument_reference`), `DailyBar` (`daily_bar`),
+`FinancialStatement` (`fundamental_observation`), and `CorporateAction`
+(`corporate_action`). `MassiveClient` uses these models for its four
+historical reads, so Massive wire field names do not leak past the package
+boundary.
+
+- Every wire field name (`t`, `o`, `h`, `l`, `c`, `filing_date`, `active`,
+  `name`, and the rest) appears only inside a `Field(alias=...)`; every
+  public attribute is the product's own vocabulary.
+- Every monetary or ratio value is `Decimal`, never `float`, so no binary
+  rounding enters a value bound for append-only history. `DailyBar.session_date`
+  converts from Massive's Unix-millisecond `t` through a timezone-aware UTC
+  conversion, not the host's local timezone.
+- `FinancialStatement.provider_filing_date` (aliased from `filing_date`) is
+  documented as descriptive only — the provider's most recent filing date,
+  which conflates restatements of the same period. It must never be read as
+  the observation date; `observed_on` belongs solely to the observation
+  writer (CAP-001-E4), which no model here declares.
+- A field genuinely absent on the wire (e.g. `TickerReference.delisted_utc`,
+  `DailyBar.is_otc`, `FinancialStatement.fiscal_quarter`) parses to `None`,
+  never to a substituted zero or `False`.
+- A response missing a field the model requires raises Pydantic
+  `ValidationError`; CAP-001-E3-S3 maps that to `ProviderContractViolation`
+  rather than passing a partial record on.
+- Each model's `value_payload()` returns a JSON-round-trippable dict — every
+  `Decimal` serializes as a string — for the observation writer's JSONB
+  payload column and its append-only value hash. No model declares
+  `observed_on`, `run_id`, or `recorded_at`; those remain writer- and
+  run-lifecycle-owned.
+
+The limitations `implementation-review-v1` carried forward as accepted
+warnings (`FinancialStatement.statement_type`/`timeframe` unconstrained,
+top-level-only `Decimal` coercion of extra fields, and no plausibility
+check on `DailyBar`'s Unix-milliseconds timestamp) were fixed in the
+`CAP-001-E3-S2-implementation-review-v2` rework: `statement_type` and
+`timeframe` are now `Literal`-constrained to the persistence contract's
+known values, the extra-field `Decimal` coercion recurses into nested
+dicts and lists, and `DailyBar`'s timestamp validator rejects non-numeric
+input and anything outside a plausible Unix-milliseconds magnitude. The
+follow-up also pins the accepted statement/action domains, the September
+2003 lower history bound, the timezone test's non-UTC precondition, and the
+deliberately duplicated ticker-change payload keys with regression tests.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v4** (`CAP-001-E3-S2-implementation-review-v4.md`) — none changes the
+current model behavior or blocks an acceptance criterion:
+
+- The supplementary package-boundary test rejects a bare raw dictionary and
+  Massive SDK exports, but treats arbitrary builtin-typed exports as
+  package-owned. A collection containing raw wire dictionaries can therefore
+  pass that test even though the current 15-name `__all__` exports no such
+  value (IR-001, medium).
+- The `_MIN_PLAUSIBLE_MILLIS` rationale points to section 3 of
+  `component-design-ingestion-api.md`; the September 2003 floor is actually in
+  section 2.4a's `MAX_HISTORY_DEPTH_YEARS` row. The bound and its regression
+  test are correct; only that source-code comment's section citation is stale
+  (IR-002, low).
+- The attended decision that CAP-001-E4's writer derives
+  `fundamental_observation.fiscal_period` was propagated into E4-S3's task plan
+  during this story's coding run, outside E4-S3's planning phase, while this
+  story's evidence originally still described the propagation as pending
+  (IR-003, medium). The propagated plan's AI provenance attributes that revision
+  to an implementation-planning run not represented by the commit history
+  (IR-004, low). Both are process/provenance warnings for the later E4-S3 gate;
+  `FinancialStatement` intentionally has no `fiscal_period` field.
+- The optional-versus-zero behavior is covered for `fiscal_quarter` and
+  `is_otc`, but those tests do not name their mapped `TC-COMP-219` identifier,
+  leaving an automated traceability gap rather than a behavioral coverage gap
+  (IR-005, low).
+
+## Massive historical client
+
+`src/factorflow/ingestion/massive/client.py` provides the project-owned
+historical boundary over Massive's official REST SDK. `MassiveClient` exposes
+four product-named reads: `fetch_reference(symbol)`,
+`fetch_daily_bars(symbol, start, end)`, `fetch_financials(symbol, start, end)`,
+and `fetch_corporate_actions(symbol, start, end)`. Each returns the parsed
+models above rather than provider wire shapes.
+
+The client creates one reusable SDK client from `MassiveSettings`, explicitly
+disabling SDK retries, pagination, and request tracing. It passes the runtime
+credential to the SDK for header authentication; it does not put the credential
+in request URLs. Every initial and followed page request passes through
+`RateLimitGovernor`, while `paging.follow_pages()` follows a present
+`next_url` one page at a time and raises if a later page fails rather than
+returning a partial range.
+
+Reference reads use Massive's single-ticker endpoint. Daily-bar requests use
+multiplier `1`, timespan `day`, inclusive ISO date bounds, and unadjusted bars.
+Financial statements are read from the four statement endpoints; corporate
+actions combine splits, dividends, IPOs, and ticker-change events. Ticker
+events have no provider date-range parameter, so the client validates their
+rows and applies the requested inclusive range locally. The client never calls
+Massive's forward-looking market-status endpoint or ticker-list endpoint.
+
+## Massive provider failure reasons
+
+`src/factorflow/ingestion/massive/errors.py` also defines
+`compose_failure_reason`, which turns one of the four typed `MassiveError`
+subclasses into the safe, owner-visible text stored as
+`run_instrument_result.reason`. The acquisition runner calls it in the
+per-data-type fetch error handlers, passing the entrypoint's `redact`
+callable, before forwarding the composed reason to `classify_provider_error`
+(CAP-001-E4-S6). The composer takes the typed `error`, the `symbol`, the
+`data_type`, and a caller-supplied `redact` callable — it never reads
+runtime configuration or a credential itself.
+
+The stable fields — error kind, `symbol`, `data_type`, and the provider's
+`request_id` (`request_id=unavailable` when the provider did not return one,
+rather than fabricating or silently omitting it) — are composed first and are
+never truncated or redacted, since they never carry provider-supplied free
+text. Only the variable segment — the error's own diagnostic message — is
+passed through `redact` before being bounded to
+`MAX_FAILURE_REASON_VARIABLE_TEXT` (500 characters), so a credential anywhere
+in the raw text, including near the truncation boundary, is removed before
+the cut is made rather than after; a truncated segment ends with the
+`…[truncated]` marker.
+
+`CredentialRejected` is the one exception: its variable segment is always a
+fixed description ("the provider rejected the configured credential"),
+never the error's own message even redacted, because the reason must not
+depend on redaction catching every way a credential could appear in
+provider-echoed text. `compose_failure_reason` raises `TypeError` for any
+error not in the four-type taxonomy.
+
+## Rate limit governor
+
+`src/factorflow/ingestion/rate_limit.py` implements `RateLimitGovernor`, the
+synchronous, provider-agnostic governor that `CAP-001-E3-S1`'s
+`massive/client.py` submits every SDK request through, including followed
+pages. It imports no Massive SDK, response type,
+or wire shape — `send` and `classify` are opaque callables the caller
+supplies, and the governor inspects only the `Outcome` `classify` returns,
+never the raised exception's type or fields.
+
+`execute(send, classify, stated_delay_seconds=None)` calls `send()` under a
+token bucket sized to `GovernorSettings.requests_per_minute`. The bucket starts
+full, never refills above that capacity, refills continuously, and consumes one
+permit per send. A one-minute window overlapping the initial full bucket may
+issue up to capacity plus one window's refill; after drawdown, each subsequent
+one-minute window is capped at the configured budget. The classified outcome
+then follows a distinct, bounded path:
+
+| Outcome | Attempt counter | Wait | Then |
+|---|---|---|---|
+| `THROTTLED`, provider stated a delay | unchanged | the stated delay, no jitter | retry |
+| `THROTTLED`, no stated delay (the Massive case) | unchanged | to the next minute boundary, plus jitter | retry |
+| `RETRYABLE` (timeout or 5xx) | plus one | `initial_backoff_seconds × 2^(attempts−1)`, full jitter | retry while attempts remain |
+| `OK` | unchanged | none | return |
+| `FATAL` (404, 401, not retryable) | unchanged | none | re-raise |
+
+Two limits terminate the loop, both configured through
+`GovernorSettings.from_massive_settings()` (built from `MassiveSettings`
+without either settings class importing the other, `MassiveSettings`
+imported only under `TYPE_CHECKING`). `max_attempts` (default 3) bounds the
+`RETRYABLE` path. Once the first `THROTTLED` outcome occurs,
+`max_throttle_wait_seconds` bounds monotonic elapsed time until a later
+throttle check, including permit-acquisition waits, sender time, retry
+backoff, and throttle sleeps. This elapsed-time accounting means a
+provider-stated zero-second delay cannot retry forever. A `429` still never
+consumes an attempt; persistent throttling raises `ProviderUnavailable` once
+the elapsed throttle budget is exceeded. Because the check follows the wait
+that crosses the limit, the budget is soft and may be exceeded by that final
+wait.
+
+The no-delay throttle wait is anchored to a wall-clock `now` collaborator
+(default `time.time`), not to `monotonic()` or any instant fixed at
+governor construction, so the wait tracks the provider's actual per-minute
+window regardless of how long the governor instance has been alive. Its
+jitter is applied additively on top of the boundary wait
+(`boundary + jitter() × boundary`, range `[boundary, 2 × boundary]`) rather
+than the literal "full jitter over the computed delay" that
+`component-design-rate-limit-governor.md` §2.5 states for every jittered
+delay — a deliberate, recorded deviation: true full jitter here
+(`[0, boundary)`) would often fire before the provider's per-minute quota
+refills, defeating the reason the boundary wait exists. The backoff path
+(retryable failures) does use full jitter as written. See
+`_boundary_wait_with_jitter`'s docstring and the task plan's Notes.
+
+**Known limitations, carried forward as accepted warnings from
+implementation review v5**
+(`CAP-001-E3-S4-implementation-review-v5.md`) — none blocks a current
+acceptance criterion:
+
+- The `except BaseException` classification boundary (`execute`, per the
+  design-mandated `Callable[[BaseException], Outcome]` signature) hands
+  `KeyboardInterrupt` and `SystemExit` to the caller's `classify` along with
+  every other exception. No test covers either type, and a classifier that
+  defaults an unrecognised exception to `RETRYABLE` or `THROTTLED` would
+  make the governor sleep through a cancellation signal — for the no-delay
+  throttle path, now a genuine up-to-120-second wall-clock wait (v5 IR-003).
+- `GovernorSettings` is a plain frozen dataclass with no construction-time
+  validation, so a direct literal construction with `requests_per_minute=0`
+  succeeds and only fails later, obscurely, with `ZeroDivisionError` inside
+  permit acquisition. Every production caller goes through
+  `from_massive_settings()`, where `MassiveSettings`'s `Field(ge=1)` already
+  enforces positivity, so this affects only direct construction, which
+  today only the tests do (v5 IR-007).
+- The backoff cap on the first retry is `initial_backoff_seconds × 2**0`,
+  i.e. `initial_backoff_seconds` itself — one doubling below component
+  design section 2.5 row 3's literal wording ("initial delay times two to
+  the power of attempts"). The implementation is the conventional reading
+  and the bound holds; the wording gap is flagged for the next design
+  revision (v5 IR-005).
+- `ProviderUnavailable` is raised with only a message string on exhaustion;
+  the attempt count is interpolated into prose rather than carried as a
+  structured field, and the module emits no log records naming the attempt
+  index, delay, or status code (component design section 4's expectation).
+  Whether governor logging and a structured exhaustion failure belong to
+  CAP-001-E5 or a later story is an open owner decision (v2 IR-009).
+- The test double clock used for the throttle-boundary tests never
+  advances the injected wall-clock `now` source during a sleep, so no test
+  exercises a multi-wait throttle sequence in which each wait lands on a
+  genuinely fresh wall-clock phase, the shape production actually takes
+  (v5 IR-006).
+
+## Coverage range arithmetic
+
+`src/factorflow/ingestion/coverage.py` implements `merge_ranges(existing, written)`,
+the pure date-range arithmetic that the observation writer uses to maintain the
+minimal non-overlapping `coverage_segment` set for one instrument and data type.
+
+`merge_ranges` accepts a list of existing `(covered_from, covered_to)` date
+pairs (may be empty or unsorted) and the newly written range. It sorts all
+segments by start date, then makes a single left-to-right sweep: two segments
+are coalesced when one starts no later than one calendar day after the other
+ends, so both overlap and one-day adjacency in either direction produce a merge.
+Disjoint segments — those separated by more than one day — are preserved
+unchanged. The result is the minimal ordered list of non-overlapping segments
+after the written range is absorbed.
+
+The function has no database dependency and carries no side effects, so it can
+be tested against a plain list of tuples (see `tests/unit/test_coverage_merge.py`)
+independently of the writer's transaction path.
+
+## Observation writer
+
+`src/factorflow/ingestion/writer.py` delivers the atomic per-instrument write
+boundary (DAC-E4-4, DAC-E4-5) as three exports:
+
+**`ParsedObservations`** — A frozen dataclass that groups the four provider-model
+collections (`reference`, `prices`, `fundamentals`, `corporate_actions`) with each
+data type's actual returned coverage range (`reference_range`, `prices_range`,
+`fundamentals_range`, `corporate_actions_range`). This is a writer-local boundary:
+it must not depend on the runner module (owner decision 2026-09-18). `ObservationBatch`
+is an alias for the same type.
+
+**`WriteResult`** — A frozen dataclass reporting the outcome of a single
+`write_instrument` call: per-type `appended` and `unchanged` row counts, and the
+covered range for each data type after the merge committed (DAC-E4-S3-1).
+
+**`RunNotActive`** — A `RuntimeError` raised by `write_instrument` when the
+`acquisition_run` row identified by `run_id` is not in `running` or
+`cancelling` state at the start of a write. The reclaim sweep transitions a
+stale run's row to `abandoned` (terminal); any subsequent write attempt by
+the original runner is rejected by this exception before any observation,
+coverage, acquisition-state, or `run_instrument_result` row is written
+(DAC-E5-13, DAC-E5-S4-6). Carries `run_id` and `actual_state` attributes.
+
+**`write_instrument(connection, instrument_id, run_id, observations, observed_on)`** —
+Commits all four data types for one instrument inside the caller's transaction.
+The caller owns the transaction boundary; the function operates on the supplied
+connection and propagates any error so the caller's transaction rolls back.
+
+Write sequence:
+
+1. **Lock and verify the run** — `SELECT ... FOR UPDATE` on the
+   `acquisition_run` row for `run_id`. Raises `RunNotActive` when the row is
+   absent or not in `running`/`cancelling`, serialising this write with any
+   concurrent reclaim. No observations are written before this check passes.
+2. **Append observations** — four per-type helpers (`_insert_references`,
+   `_insert_daily_bars`, `_insert_fundamentals`, `_insert_corporate_actions`) each
+   use `INSERT ... ON CONFLICT DO NOTHING` against the observation tables' natural
+   keys (DAC-E4-S3-7). `_insert_fundamentals` derives the `NOT NULL`
+   `fiscal_period` column value as `'FY'` from `timeframe="annual"` and as
+   `'Q{fiscal_quarter}'` from `timeframe="quarterly"`, using the existing
+   `FinancialStatement.timeframe` and `fiscal_quarter` fields — no
+   `fiscal_period` model field is required or declared on the model (owner
+   decision 2026-09-20). Each helper returns `(appended, unchanged)` counts.
+3. **Replace coverage** — `_replace_coverage` reads the existing
+   `coverage_segment` rows for one instrument and data type, calls `merge_ranges`,
+   deletes the existing rows, and reinserts the merged set. Coverage replacement
+   is explicitly allowed — only the four observation tables are append-only;
+   `coverage_segment` supports delete and reinsert.
+4. **Upsert acquisition state** — one `INSERT ... ON CONFLICT DO UPDATE` per
+   data type stamps `last_acquired_at = now()`, `last_run_id`, and
+   `last_outcome = 'written'` in `acquisition_state` (DAC-E4-S3-5).
+5. **Insert run results** — one `INSERT` per data type into `run_instrument_result`
+   with `outcome = 'written'` when any rows were appended, or `'unchanged'` when
+   every returned row already existed (DAC-E4-S3-6).
+
+**Transaction boundary deviation (IR-002, accepted):** the function delegates
+the transaction boundary to the caller rather than calling
+`connection.transaction()` internally. DAC-E4-4 is still satisfied because all
+steps execute on the same connection inside the caller's transaction. The
+deviation is documented in the task plan (T011) with rationale: delegating the
+boundary makes `write_instrument` composable within larger caller-managed
+transaction scopes without nested-transaction overhead.
+
+**`write_instrument_with_outcomes(connection, instrument_id, run_id, observations, observed_on, error_outcomes=None)`** —
+Extends `write_instrument` to accept pre-classified error outcomes for data
+types that failed at the provider layer (`not_found` or `failed`). The
+`error_outcomes` dict maps data-type name (`"reference"`, `"prices"`,
+`"fundamentals"`, `"corporate_actions"`) to `InstrumentOutcomeRecord`
+instances from `outcomes.classify_provider_error`. For data types present in
+`error_outcomes`: no observation rows are inserted, no coverage segment is
+written, `acquisition_state` is upserted with the error outcome, and
+`run_instrument_result` is inserted with the error outcome and reason. For
+data types absent from `error_outcomes`, the normal `write_instrument` logic
+applies (`written`/`unchanged`). This is the function the acquisition runner
+now calls for every instrument (DAC-E4-S6-3, DAC-E4-S6-4, DAC-E4-S6-6,
+DAC-E4-S6-7).
+
+**Known limitations carried forward from implementation review v2
+(`CAP-001-E4-S3-implementation-review-v2.md`)** — neither blocks an acceptance
+criterion:
+
+- TDD evidence mutation probe 3 is a narrative explanation rather than an
+  actual code mutation. The transactional coverage invariant is adequately proven
+  by the four rollback probes; the missing mutation probe does not leave an
+  untested code path (IR-001, medium).
+- The observation-insert failure probe (`test_failure_during_observation_insert_rolls_back_everything`)
+  does not assert against `daily_bar` and `corporate_action` after rollback, even
+  though `_insert_daily_bars` completed before the injected trigger fired.
+  PostgreSQL's all-or-nothing rollback guarantees those rows are gone; the
+  `instrument_reference` assertion already proves the mechanism (IR-002, low).
+
+## Per-instrument outcome classification
+
+`src/factorflow/ingestion/outcomes.py` owns the classification boundary between
+a provider result and a persisted outcome string. It contains no SQL, no retry
+logic, no credential access, and no reason-composition logic.
+
+**`InstrumentOutcomeRecord`** — A frozen dataclass carrying `data_type`,
+`outcome` (one of `"written"`, `"unchanged"`, `"not_found"`, `"failed"`), and
+an optional `reason` string. The reason is the pre-composed, credential-safe
+failure reason from the Massive-client boundary (`compose_failure_reason`); it
+is `None` on success paths.
+
+**`classify_write_result(result: WriteResult) -> dict[str, str]`** — Maps a
+`WriteResult` to a dict with exactly four keys (the four schema data-type
+names). Each data type maps to `"written"` when any rows were appended, or
+`"unchanged"` when every returned row already existed (or none came back). This
+is a pure function: no database access, no side effects.
+
+**`classify_provider_error(error, *, data_type, reason) -> InstrumentOutcomeRecord`** —
+Maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the
+failing data type. `InstrumentNotFound` → `"not_found"`;
+`ProviderUnavailable`/`ProviderContractViolation` → `"failed"`.
+`CredentialRejected` raises `ValueError` — it is a run-level failure that must
+not become a per-data-type outcome row. Any unrecognised type raises `TypeError`.
+The `reason` argument is the already-composed, credential-safe reason string
+from the Massive-client boundary; this module does not re-compose or re-redact it.
+
+**`write_error_results(connection, run_id, instrument_id, outcome, reason)`** —
+Preserved from E4-S5 for the all-at-once fetch phase. Inserts
+`run_instrument_result` rows for all four data types when the provider failed
+before any per-data-type result was classified. This path is used by callers
+that have not yet migrated to the per-data-type fetch seam. Once the runner
+fetches data types individually, `classify_provider_error` +
+`write_instrument_with_outcomes` replace this path for individual failures.
+
+**Classification table:**
+
+| Provider result | `classify_write_result` / `classify_provider_error` output | Run effect |
+|---|---|---|
+| Data returned, rows appended | `written` | counts toward `succeeded` |
+| Data returned, every value already held | `unchanged` | counts toward `succeeded` |
+| Instrument unknown to the provider (`InstrumentNotFound`) | `not_found` | run continues, outcome becomes `partial` |
+| Transport or server error, attempts exhausted (`ProviderUnavailable`, `ProviderContractViolation`) | `failed` | run continues, outcome becomes `partial` |
+| Rate-limit pacing (`429`) | no outcome — absorbed by the governor before classification | no row written |
+| Not reached because the run was cancelled | no row written | no coverage, no failure |
+
+## Run request and claim
+
+`src/factorflow/runs/journal.py` is the run journal's boundary over the
+`acquisition_run` table (migration `0004_runs.sql`): request, claim,
+heartbeat, cancellation request, cancellation observation, and finalisation.
+
+`request_run(connection, history_depth_years)` always inserts a `requested`
+row — a request is never rejected because a run is active; queueing rather
+than rejection is the rule (AC-23). The supplied depth is snapshotted onto
+the row at request time. The insert and the active-run lookup share one
+transaction, so the returned `(run_id, queued_behind)` pair reports the
+`running` or `cancelling` run this request actually follows — `None` when
+none is active — and the active row itself is never modified.
+
+`claim_next(connection, runner_id)` is one `UPDATE` statement in one
+transaction, with no read-then-write window: a subquery picks the oldest
+`requested` row (`ORDER BY requested_at LIMIT 1`) under a `NOT EXISTS`
+guard that excludes any `running` or `cancelling` run, and `FOR UPDATE
+SKIP LOCKED` lets a contending runner skip a locked candidate rather than
+block on it. A successful claim sets `state`, `started_at`, `claimed_by`,
+and `heartbeat_at` in that same statement and returns a frozen
+`ClaimedRun(run_id, history_depth_years)` carrying the snapshotted depth —
+never a re-read of the current setting. `None` means nothing is claimable, and the
+loop that consumes it waits `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` before
+polling again — see [Acquisition runner](#acquisition-runner).
+
+The `NOT EXISTS` guard is not the only defence against two active runs:
+`idx_acquisition_run_single_active`, a partial unique index over the
+`running`/`cancelling` states, turns a race that slips past the guard into
+a unique violation instead of a second active run.
+
+`heartbeat(connection, run_id, runner_id)` refreshes the claim and returns
+`False` when the row is no longer this runner's to write — the runner's
+signal that the claim was lost (e.g. cleared by the reclaim sweep), not an
+error to retry. A `False` return means the runner must stop and write nothing
+further against this run.
+
+`request_cancel(connection, run_id)` records a cancellation request against
+a run. Two paths, both transactional and guarded by `validate_transition`:
+
+- `running` → `cancelling`: records cooperative intent without ending the run.
+  `cancel_requested_at` is set; `ended_at` is not. The runner observes this
+  between instruments by calling `cancellation_requested`, then calls `finalise`
+  to complete the transition.
+- `requested` → `cancelled`: direct state transition; the run is cancelled
+  immediately, `cancel_requested_at` and `ended_at` are both set, and the run
+  is never started or made claimable.
+
+When the run has already reached a terminal state (`succeeded`, `partial`,
+`failed`, `cancelled`, or `abandoned`), `request_cancel` raises
+`RunAlreadyTerminal`, carrying the persisted state in its `actual_state`
+attribute so the caller can report the actual outcome rather than a generic
+error. The row is not modified (AC-26, DAC-E5-6, DAC-E5-8, DAC-E5-9).
+
+`cancellation_requested(connection, run_id)` reports whether the run has
+moved to `cancelling`. The runner calls this between instruments alongside
+`heartbeat`.
+
+`finalise(connection, run_id)` never accepts a caller-supplied outcome. It
+derives the terminal state from `run_instrument_result` using the rule:
+
+1. State is `cancelling` → `cancelled` (DAC-E5-7).
+2. Zero successful (`written`/`unchanged`) rows → `failed` (DAC-E5-S3-7).
+3. All named instruments wrote all four required data types and no non-success rows exist → `succeeded` (DAC-E5-5, DAC-E5-S3-5).
+4. Anything else → `partial` (DAC-E5-S3-6).
+
+Clears claim fields (`claimed_by`, `heartbeat_at`) and sets `ended_at` in
+every terminal transition. The runner therefore cannot record a run as
+successful; it can only write results and let the journal read them.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E5-S3-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- `finalise` does not call `validate_transition` before writing a terminal
+  state, unlike `request_cancel`. In the single-runner architecture, only a
+  claimed run calls `finalise`, so the risk is bounded to future callers that
+  bypass the runner contract (IR-001, medium).
+- `finalise` reads the current state with a plain `SELECT` rather than
+  `SELECT ... FOR UPDATE`. The `UPDATE` in `_FINALISE_UPDATE_SQL` acquires a
+  row lock implicitly, but the read-then-write window permits a TOCTOU race if
+  two transactions call `finalise` concurrently on the same run — not expected
+  in the single-runner architecture (IR-002, medium).
+- TDD evidence `commit_hash` fields contain placeholders rather than actual
+  Git SHAs; all work was delivered as a single commit rather than per-task
+  (IR-003, low).
+
+## Stale-claim reclaim
+
+`src/factorflow/runs/reclaim.py` recovers from a crashed or stopped ingestion
+process without manual datastore intervention (AC-20).
+
+`reclaim_stale_runs(connection, stale_after_seconds)` executes one
+parameterised `UPDATE … RETURNING` that atomically finds every claimed
+`running` or `cancelling` run whose `heartbeat_at` is strictly older than
+`stale_after_seconds` seconds ago (using `make_interval(secs => ...)` against
+PostgreSQL's `now()`), transitions each to `abandoned`, sets `ended_at =
+now()`, and clears `claimed_by` and `heartbeat_at`. Returns the list of
+reclaimed `run_id` values (empty when nothing is stale). The caller owns
+commit control; this function does not commit.
+
+The sweep is idempotent: a second call finds the already-abandoned rows no
+longer match the `running`/`cancelling` state predicate and returns an empty
+list. Two concurrent sweepers cannot double-reclaim the same row: PostgreSQL's
+per-row update lock serialises them, and the second transaction finds the row
+already `abandoned`.
+
+The reclaim sweeper runs in the **application container**, not the ingestion
+container. A sweep that only ran inside the ingestion process could not
+recover from the ingestion container being stopped or crash-looping — the
+exact failure mode this mechanism exists to resolve. See
+[Running the API](#running-the-api) for the lifespan-managed reclaim loop in
+`app.py`.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E5-S4-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- `test_reclaim_does_not_touch_coverage_or_results` does not insert an
+  `acquisition_state` row to verify it is unchanged after reclaim, even though
+  the task plan included it in the snapshot assertion. The reclaim SQL provably
+  touches only `acquisition_run`; the gap is between the task plan's claimed
+  coverage and the actual test scope (IR-001, medium).
+- `test_heartbeat_false_after_reclaim_and_write_rejected` uses
+  `pytest.raises((RunNotActive, Exception))` rather than
+  `pytest.raises(RunNotActive)`, so any exception would pass the assertion; the
+  critical behavior (heartbeat returns `False`, 0 result rows) is still verified
+  (IR-002, medium).
+- Commit `6d047c4` message states "add reclaim_stale_runs and heartbeat" and
+  mentions updating `journal.py`, but only `reclaim.py` was created by this
+  story — `heartbeat()` was already present on the integration branch from a
+  prior story (IR-003, low).
+
+## Acquisition runner
+
+`src/factorflow/ingestion/runner.py` turns a claimed run into observations,
+one instrument at a time. It is the process that finally calls the
+[observation writer](#observation-writer). It writes nothing directly — every
+insert or update belongs to `writer.py` on the success path and `outcomes.py`
+on the failure path — while reading an instrument's symbol and coverage
+segments through two parameterised queries of its own.
+
+`AcquisitionRunner.execute_claimed(run_id, depth_years, instrument_ids)`
+walks the roster it was handed — snapshotted once at claim time, so an
+instrument added mid-run belongs to the next one. A run whose claimed depth
+is `None` is finalised without a single provider call: no stated depth means
+there is no window to fetch.
+
+Before every instrument, in this order, it refreshes the heartbeat and then
+asks whether cancellation was requested. A lost claim stops the run
+immediately and writes nothing further — another runner now owns it. An
+observed cancellation finalises and stops. Both checks sit at the top of the
+loop rather than around the work, so the longest a cancelled run continues
+is one instrument.
+
+For each instrument it fetches the four data types individually through
+[`plan_fetches`](#range-planner), which is what keeps a re-run from
+re-fetching covered ground. Each data type is fetched in a separate
+try/except block: `CredentialRejected` re-raises and terminates the run,
+while `InstrumentNotFound`, `ProviderUnavailable`, and any other `MassiveError`
+are classified by `classify_provider_error` into a per-data-type
+`InstrumentOutcomeRecord` (`not_found` or `failed`). The reason is composed
+by `compose_failure_reason` and passed through the entrypoint's redaction
+callable before classification, so a credential in a provider message never
+reaches the database. After all four data types are attempted, the runner
+calls `write_instrument_with_outcomes()` in one transaction, passing the
+successfully fetched observations alongside the error outcomes for any
+data types that failed. This allows one instrument to record distinct
+outcomes per data type — for example `written` for prices and `not_found`
+for fundamentals. Provider failures affect the instrument, not the run;
+the next instrument starts immediately after.
+
+When the roster is exhausted the run is finalised from what was written.
+
+`CredentialAwareClientFactory` keeps one provider client and rebuilds it only
+when the credential's value changes, and the entrypoint re-reads the
+credential at each claim — so rotating the key takes effect on the next run
+without restarting the process.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v1** (`CAP-001-E4-S6-implementation-review-v1.md`) — none blocks a
+current acceptance criterion:
+
+- `test_rate_limit_does_not_produce_outcome_row` (TC-COMP-145) provides a
+  normal full-success stub client and asserts outcome strings are in the
+  allowed set; it does not inject a 429-equivalent at the fetch boundary to
+  prove the governor absorbs it before classification. A future change
+  introducing a rate-limit error type that bypasses the governor would not be
+  caught by this test (IR-001, medium).
+- `test_appended_rows_persist_written_outcome` (TC-COMP-183 integration) does
+  not assert `corporate_actions`; `test_unchanged_rows_persist_unchanged_outcome`
+  (TC-COMP-184 integration) asserts only `prices` and `fundamentals`. An
+  integration regression silently dropping one data type from
+  `run_instrument_result` insertion would not be caught by these integration
+  tests (IR-002, medium).
+
 ## Running the migrator
 
 The application container runs the schema migrator before it starts serving,
@@ -238,6 +956,37 @@ it. An unmatched non-API path falls back to the built `index.html` when a
 bundle is present, and 404s when it is not — the bundle is build output, so a
 fresh clone has none until `npm run build` runs; an unmatched path under
 `/api` always returns the `{"error": {...}}` envelope.
+
+The API lifespan also manages a reclaim sweep: an asyncio background task
+calls `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds, using
+`FACTORFLOW_RUN_STALE_AFTER_SECONDS` (default 900). The task is created after
+the pool opens and cancelled before the pool closes, so no sweep runs against
+a closed pool. Because the sweep lives in the application container rather
+than the ingestion container, it continues operating when ingestion is stopped
+or crash-looping — the property that makes AC-20 hold for a crash-looping
+ingestion container.
+
+## Running the acquisition runner
+
+The acquisition runner is a separate process from the API and shares only the
+database with it. The container image runs the migrator and the API
+(see [Layout](#layout)); the runner is started on its own:
+
+```bash
+FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
+FACTORFLOW_MASSIVE_API_KEY=... \
+FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
+  uv run python -m factorflow.ingestion_main
+```
+
+It claims the next requested run, executes it, and — when nothing is
+claimable — waits `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` and polls again. In
+normal operation the loop does not exit. A configuration error exits `1`
+naming the offending environment variable, never its value.
+
+Each process identifies its claims as `ingestion-runner-<hostname>`, which is
+what `heartbeat` checks ownership against, so two runners on different hosts
+cannot mistake each other's claims for their own.
 
 ## The status region
 

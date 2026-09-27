@@ -7,14 +7,15 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-21
+docs_synced_review: CAP-001-E4-S2-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
-  model: gpt-5.6
+  model: gpt-5
   tool: Codex
   tool_version: "unknown"
-  timestamp: 2026-09-11T22:10:00Z
+  timestamp: 2026-09-16T04:00:28Z
   source_artifacts:
     - id: CAP-001-E4-S2
       version: "1"
@@ -66,11 +67,11 @@ Create the pure ingestion hashing module that turns an observation-value diction
 
 ### Mandatory Component Tests
 
-- [ ] T001 Create `tests/unit/test_hashing.py` for TC-COMP-005, TC-COMP-006, TC-COMP-137, and TC-COMP-157 through TC-COMP-161. Include `# Implements TC-COMP-…` traceability comments; assert dictionary insertion order does not change `value_hash`; assert canonical bytes use sorted keys and `(',', ':')` separators; assert nested `Decimal('1.10')` serializes as the JSON string `"1.10"` and differs from `Decimal('1.1')`; assert a changed field changes the digest; assert identical input produces the same `bytes` digest of length 32; and assert floats plus unsupported objects raise rather than being coerced. Keep every test marked `not postgres` by leaving it unmarked.
+- [x] T001 Create `tests/unit/test_hashing.py` for TC-COMP-005, TC-COMP-006, TC-COMP-137, and TC-COMP-157 through TC-COMP-161. Include `# Implements TC-COMP-…` traceability comments; assert dictionary insertion order does not change `value_hash`; assert canonical bytes use sorted keys and `(',', ':')` separators; assert nested `Decimal('1.10')` serializes as the JSON string `"1.10"` and differs from `Decimal('1.1')`; assert a changed field changes the digest; assert identical input produces the same `bytes` digest of length 32; and assert floats plus unsupported objects raise rather than being coerced. Keep every test marked `not postgres` by leaving it unmarked.
 
 ### Additional Unit Tests
 
-- [ ] T002 [P] Extend `tests/unit/test_hashing.py` with focused error-path tests for unsupported values nested in dictionaries and lists, confirming the exception is raised before a digest is returned and no fallback to an object representation occurs. These tests sharpen DAC-E4-S2-3 beyond the generic component-test steps.
+- [x] T002 [P] Extend `tests/unit/test_hashing.py` with focused error-path tests for unsupported values nested in dictionaries and lists, confirming the exception is raised before a digest is returned and no fallback to an object representation occurs. These tests sharpen DAC-E4-S2-3 beyond the generic component-test steps.
 
 **Checkpoint**: `uv run pytest -m 'not postgres' tests/unit/test_hashing.py` fails because `factorflow.ingestion.hashing` does not yet exist.
 
@@ -80,7 +81,7 @@ Create the pure ingestion hashing module that turns an observation-value diction
 
 **Purpose**: Add the single canonicalization path and SHA-256 fingerprint used by the later observation writer.
 
-- [ ] T003 Create `src/factorflow/ingestion/__init__.py` as the ingestion package marker and `src/factorflow/ingestion/hashing.py` with `canonical_json(value: dict[str, Any]) -> bytes` and `value_hash(value: dict[str, Any]) -> bytes`. Canonicalize recursively to JSON with sorted keys and `(',', ':')`, preserve `Decimal` as its exact string form, reject floats and every unsupported value with an exception, encode UTF-8, and return `hashlib.sha256(canonical_json(value)).digest()` as raw 32-byte `bytes`; do not include `observed_on`, `run_id`, or `recorded_at` in the value passed to this module (depends on T001, T002).
+- [x] T003 Create `src/factorflow/ingestion/__init__.py` as the ingestion package marker and `src/factorflow/ingestion/hashing.py` with `canonical_json(value: dict[str, Any]) -> bytes` and `value_hash(value: dict[str, Any]) -> bytes`. Canonicalize recursively to JSON with sorted keys and `(',', ':')`, preserve `Decimal` as its exact string form, reject floats and every unsupported value with an exception, encode UTF-8, and return `hashlib.sha256(canonical_json(value)).digest()` as raw 32-byte `bytes`; do not include `observed_on`, `run_id`, or `recorded_at` in the value passed to this module (depends on T001, T002).
 
 **Checkpoint**: The pure functions make the mandatory tests pass and return the same raw SHA-256 digest in independent process invocations for equivalent values.
 
@@ -98,7 +99,7 @@ Create the pure ingestion hashing module that turns an observation-value diction
 
 **Purpose**: Prove the new pure module meets repository quality gates and resists meaningful hashing regressions.
 
-- [ ] T004 Run from the repository root: `uv run pytest -m 'not postgres' tests/unit/test_hashing.py`, `uv run pytest -m 'not postgres'`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`. Record RED before T003 and GREEN after it; manually mutate sorted-key handling, decimal string conversion, float rejection, and SHA-256 output in turn, confirming a named test fails for each mutation (depends on T003).
+- [x] T004 Run from the repository root: `uv run pytest -m 'not postgres' tests/unit/test_hashing.py`, `uv run pytest -m 'not postgres'`, `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build`. Record RED before T003 and GREEN after it; manually mutate sorted-key handling, decimal string conversion, float rejection, and SHA-256 output in turn, confirming a named test fails for each mutation (depends on T003).
 
 **Checkpoint**: The mapped component tests, additional error-path tests, and all required quality checks pass with RED→GREEN→MUTATE evidence.
 

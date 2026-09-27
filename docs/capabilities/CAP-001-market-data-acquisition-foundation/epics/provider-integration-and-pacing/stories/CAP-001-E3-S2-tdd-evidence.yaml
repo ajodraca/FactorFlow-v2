@@ -1,0 +1,450 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S2-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E3-S2
+tasks_file: CAP-001-E3-S2-tasks.md
+created: 2026-09-11
+updated: 2026-09-21
+
+# RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for the four
+# provider response models (T007/T008), one cycle per model, plus the T010
+# manual-mutation session run against the finished models.py before marking
+# implementation tasks complete.
+
+cycles:
+  - model: TickerReference
+    red:
+      description: >-
+        tests/unit/test_massive_reference.py written against a
+        placeholder TickerReference(BaseModel) with no fields.
+      commit: 20d1842
+      result: failing (Pydantic accepted any input; field/attribute
+        assertions failed)
+    green:
+      description: >-
+        Implemented TickerReference with aliased fields (cik,
+        composite_figi, share_class_figi, is_active, company_name,
+        list_date, delisted_utc, primary_exchange, security_type,
+        currency_name) and value_payload().
+      commit: 20d1842
+      test_command: uv run pytest tests/unit/test_massive_reference.py -q
+      result: "10 passed"
+
+  - model: DailyBar
+    red:
+      description: >-
+        tests/unit/test_massive_bars.py extended with TC-COMP-206/215/216
+        and payload-contract tests; bar_regular.json and bar_otc.json
+        fixtures added. Run before implementation, against the
+        placeholder DailyBar(BaseModel) with no fields.
+      test_command: uv run pytest tests/unit/test_massive_bars.py -q
+      result: "12 failed, 2 passed (AttributeError: 'DailyBar' object has
+        no attribute '<field>' / 'value_payload')"
+    green:
+      description: >-
+        Implemented DailyBar: aliases t/o/h/l/c/v/vw/n/otc to
+        session_date/open_price/high_price/low_price/close_price/volume/
+        vwap/transaction_count/is_otc; a field_validator converts Unix
+        milliseconds to a UTC calendar date before Pydantic's date
+        coercion; value_payload() dumps Decimals as strings. Also fixed a
+        test-only bug (date.fromtimestamp() does not accept a tz kwarg)
+        without weakening the assertion's intent.
+      commit: 7393560
+      test_command: uv run pytest tests/unit/test_massive_bars.py
+        tests/unit/test_massive_reference.py -q
+      result: "24 passed"
+
+  - model: FinancialStatement
+    red:
+      description: >-
+        tests/unit/test_massive_financials.py written (TC-COMP-005, 217,
+        218, 219) against a placeholder FinancialStatement(BaseModel)
+        with no fields; financial_annual.json and financial_quarterly.json
+        fixtures added.
+      test_command: uv run pytest tests/unit/test_massive_financials.py -q
+      result: "12 failed, 1 passed (AttributeError: 'FinancialStatement'
+        object has no attribute '<field>' / 'value_payload')"
+    green:
+      description: >-
+        Implemented FinancialStatement: period_end/filing_date aliased to
+        fiscal_period_end/provider_filing_date (descriptive only, never an
+        as-of date per AC-5/C5); cik, tickers, fiscal_year, timeframe and
+        statement_type required; fiscal_quarter optional (absent on
+        annual filings); a model_validator(mode="before") coerces every
+        extra statement-specific line item to Decimal via str().
+      commit: 883700d
+      test_command: uv run pytest tests/unit/test_massive_financials.py -q
+      result: "13 passed"
+
+  - model: CorporateAction
+    red:
+      description: >-
+        tests/unit/test_massive_actions.py written against a placeholder
+        CorporateAction(BaseModel) with no fields; action_split.json,
+        action_dividend.json, action_ticker_change.json and
+        action_ipo.json fixtures added.
+      test_command: uv run pytest tests/unit/test_massive_actions.py -q
+      result: "10 failed, 1 passed (AttributeError: 'CorporateAction'
+        object has no attribute '<field>' / 'value_payload')"
+    green:
+      description: >-
+        Implemented CorporateAction as one model keyed by action_type
+        (Literal of the DDL's four known values) and effective_on, both
+        supplied by the caller since no single provider endpoint names
+        either consistently; endpoint-specific fields retained as extra
+        payload data via the shared _coerce_extra_numeric_fields_to_decimal
+        helper (factored out of FinancialStatement's identical validator).
+        One self-authored test assertion was corrected in the same
+        commit (it contradicted the design's own intent to retain
+        variant-specific provider fields such as execution_date in the
+        payload).
+      commit: 2099be9
+      test_command: uv run pytest tests/unit -q
+      result: "175 passed"
+
+# T010: manual mutation session, run against the committed models.py
+# (commit 2099be9) after all four GREEN cycles above, one mutation at a
+# time, each reverted and the suite re-confirmed green before the next.
+manual_mutations_baseline_commit: 2099be9
+manual_mutations:
+  - id: mutation-1-bar-alias
+    target: DailyBar.open_price
+    change: 'alias="o" -> alias="open"'
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "5 failed, 9 passed (Field required: 'open'; missing input
+      'o' left unconsumed)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-2-timestamp-conversion
+    target: DailyBar._millis_to_utc_session_date
+    change: >-
+      datetime.fromtimestamp(value / 1000, tz=UTC).date() ->
+      datetime.fromtimestamp(value / 1000).date() (dropped the UTC
+      timezone, so the conversion uses host-local time)
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "2 failed, 12 passed (session_date computed as 2024-01-01
+      instead of 2024-01-02 on this host's local timezone)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-3-decimal-annotation
+    target: DailyBar.open_price
+    change: 'Decimal -> float'
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "3 failed, 11 passed (test_no_field_is_typed_float failed;
+      value_payload emitted 187.15 as a JSON number, not the string
+      '187.15')"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-4-required-field
+    target: TickerReference.cik
+    change: 'str (required) -> str | None = None (optional)'
+    test_command: uv run pytest tests/unit/test_massive_reference.py -q
+    result: "1 failed, 9 passed
+      (test_missing_required_field_fails_validation[cik]: DID NOT RAISE
+      ValidationError)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-5-optional-field
+    target: DailyBar.is_otc
+    change: 'bool | None = None -> bool = False'
+    test_command: uv run pytest tests/unit/test_massive_bars.py -q
+    result: "1 failed, 13 passed
+      (test_otc_flag_is_optional_and_absence_is_not_false: assert False
+      is None)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+post_mutation_verification:
+  description: >-
+    After all five mutations were individually applied, observed caught,
+    and reverted, models.py was diffed byte-for-byte against the
+    baseline commit (2099be9) to confirm no mutation was left in place,
+    then the full suite and static checks were re-run.
+  commands:
+    - uv run pytest tests/unit -q
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run mypy src
+    - uv build
+  result: "175 passed; ruff check clean; ruff format clean (after one
+    reformat of models.py's CorporateAction.action_type line); mypy:
+    Success, no issues found in 26 source files; uv build succeeded"
+
+# Review-rework cycle: implementation-review-v2 (a re-review, not a
+# rework of S2's own prior code -- the trigger was sibling stories'
+# additive changes to the shared src/factorflow/ingestion/massive/__init__.py)
+# returned CHANGES-REQUIRED (HIGH 1, MEDIUM 3, LOW 4). All addressed:
+#
+# - IR-001 (HIGH): test_unix_millis_convert_to_session_date_via_timezone_aware_utc's
+#   original assertions passed under a naive (non-UTC-aware) conversion
+#   because they never forced the process into a non-UTC zone -- on the
+#   UTC host CI now runs on (.github/workflows/validate.yml, added after
+#   v1), naive and UTC-aware conversion coincide. The test now pins the
+#   process's ambient TZ to America/Los_Angeles (deliberately non-UTC)
+#   for its duration via os.environ + time.tzset(), so a regression to a
+#   naive conversion fails regardless of the host's own timezone.
+#   Verified: reverting _millis_to_utc_session_date to a naive conversion
+#   fails this test even when the test process itself runs under TZ=UTC.
+# - IR-002 (MEDIUM): FinancialStatement.statement_type and .timeframe
+#   were unconstrained str fields; constrained to Literal, matching
+#   component-design-market-data-store.md's fundamental_statement_known
+#   CHECK constraint and component-design-massive-client.md section
+#   2.5's two timeframe values, the same treatment CorporateAction.action_type
+#   already receives. New tests:
+#   test_only_the_four_known_statement_types_are_accepted,
+#   test_only_annual_or_quarterly_timeframe_is_accepted.
+# - IR-003 (MEDIUM): _coerce_extra_numeric_fields_to_decimal coerced only
+#   top-level extra fields; now recurses into nested dicts and lists, so
+#   a provider numeric nested inside a compound extra field (e.g.
+#   action_ticker_change.json's ticker_change object) is Decimal, not
+#   float, in both model_extra and value_payload(). New test:
+#   test_nested_extra_numeric_values_are_coerced_to_decimal.
+# - IR-004 (MEDIUM): DailyBar._millis_to_utc_session_date returned
+#   non-numeric input unchanged (falling through to Pydantic's ordinary
+#   date coercion) and applied no magnitude check, so a seconds-scale or
+#   ISO-string t parsed without error. Now rejects any non-numeric input
+#   and any value outside a plausible Unix-milliseconds magnitude bound
+#   (_MIN_PLAUSIBLE_MILLIS/_MAX_PLAUSIBLE_MILLIS, module-level constants
+#   -- an unannotated class-level int on a Pydantic BaseModel is treated
+#   as a private attribute, not a plain constant, which the first attempt
+#   discovered via TypeError). New tests:
+#   test_non_numeric_t_is_rejected_rather_than_coerced,
+#   test_t_expressed_in_seconds_instead_of_milliseconds_is_rejected.
+# - IR-005 (LOW): CorporateAction's docstring now records that a
+#   ticker-change event's own wire keys (date, type) are deliberately
+#   retained in value_payload() alongside the product-named
+#   effective_on/action_type -- redundant hashed bytes, not a DAC-E3-12
+#   boundary violation, since this model's own attributes stay
+#   product-named throughout.
+# - IR-006 (LOW): fiscal_period ownership left as a follow-up item below
+#   rather than resolved unilaterally -- constraint 9 (project-repo edits
+#   are metadata-only) and the review's own remediation menu treat this
+#   as a decision, not an omission to code around.
+# - IR-007 (LOW): DailyBar.value_payload()'s docstring no longer claims a
+#   daily_bar.payload column exists; corrected to say the payload exists
+#   for the append-only value hash, with vwap/transaction_count/is_otc
+#   named as hash-only fields.
+# - IR-008 (LOW): TickerReference and DailyBar docstrings now record why
+#   they leave extra="ignore" (Pydantic's default) rather than matching
+#   FinancialStatement/CorporateAction's extra="allow" -- both endpoints
+#   are fully enumerated by component-design-massive-client.md section
+#   2.5, so there is no endpoint-specific content to retain.
+#
+# Additional mutations, run the same way as the five above (applied,
+# observed caught, reverted, models.py diffed byte-for-byte clean against
+# the pre-mutation copy after each):
+manual_mutations_rework:
+  - id: mutation-6-nested-decimal-coercion-disabled
+    target: _coerce_extra_numeric_fields_to_decimal._coerce_value
+    change: 'the dict branch returns value unchanged instead of recursing'
+    test_command: uv run pytest tests/unit/test_massive_financials.py -q
+    result: "1 failed, 15 passed
+      (test_nested_extra_numeric_values_are_coerced_to_decimal:
+      assert False -- isinstance(0.1, Decimal))"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-7-millis-lower-bound-widened
+    target: _MIN_PLAUSIBLE_MILLIS
+    change: '1_000_000_000_000 -> 1'
+    test_command: uv run pytest tests/unit/test_massive_bars.py::test_t_expressed_in_seconds_instead_of_milliseconds_is_rejected -q
+    result: "1 failed (DID NOT RAISE ValidationError)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+  - id: mutation-8-timeframe-unconstrained
+    target: FinancialStatement.timeframe
+    change: 'Literal["annual", "quarterly"] -> str'
+    test_command: uv run pytest tests/unit/test_massive_financials.py::test_only_annual_or_quarterly_timeframe_is_accepted -q
+    result: "1 failed (DID NOT RAISE ValidationError)"
+    caught: true
+    reverted_and_reconfirmed_green: true
+
+rework_test_command: uv run pytest -q -m 'not postgres'
+rework_test_result: "252 passed, 59 deselected (up from 247)"
+rework_test_command_postgres: uv run pytest -q -m postgres
+rework_test_result_postgres: "59 passed"
+
+# Follow-up items surfaced during rework and their current dispositions.
+# This story does not edit capability specs, design content, or acceptance
+# criteria.
+open_items:
+  - id: IR-006-fiscal-period-ownership-decided
+    status: resolved-by-attended-owner-decision-and-propagated
+    decided_on: 2026-09-20
+    description: >-
+      The owner decided in this attended session that CAP-001-E4's
+      observation writer owns deriving fundamental_observation.fiscal_period.
+      CAP-001-E3-S2 must not add fiscal_period to FinancialStatement. The
+      derivation and covering writer test were propagated into
+      CAP-001-E4-S3-tasks.md before this review. Implementation review v4
+      accepted the content but warned that the edit occurred outside E4-S3's
+      implementation-planning phase (IR-003) and carries provenance that does
+      not match the producing commit (IR-004). Those process/provenance gates
+      remain for E4-S3; the ownership decision itself is complete.
+  - id: statement-type-ratio-plural-mismatch
+    status: resolved-on-main
+    description: >-
+      The earlier S1 follow-up is resolved by the newer implementation now on
+      main: client.py labels list_financials_ratios results "ratios", matching
+      FinancialStatement and the fundamental_statement_known DDL constraint.
+      test_fetch_financials_labels_ratios_rows_with_the_ddl_statement_type
+      covers the integrated seam.
+
+review_v3_rework:
+  source_review: CAP-001-E3-S2-implementation-review-v3.md
+  commits_produced: []
+  tests_executed: true
+  behavior_change: false
+  description: >-
+    Close review-v3 IR-001 through IR-004 with tests and comments, add the
+    DAC-E3-12/T009 package-boundary regression, preserve all newer E3-S2 and
+    sibling-story behavior already integrated on main, and propagate the
+    attended fiscal-period ownership decision into CAP-001-E4-S3-tasks.md.
+    Implementation review v4 accepted the propagation's content but recorded
+    its out-of-phase scope and inaccurate provenance as IR-003 and IR-004.
+  initial_green:
+    command: >-
+      uv run pytest -q tests/unit/test_massive_bars.py
+      tests/unit/test_massive_financials.py tests/unit/test_massive_actions.py
+      tests/unit/test_massive_package_boundary.py
+    result: 70 passed
+  manual_mutations:
+    - id: mutation-9-timezone-pin-unresolvable
+      change: America/Los_Angeles -> No/Such_Zone
+      test: test_unix_millis_convert_to_session_date_via_timezone_aware_utc
+      result: failed at the self-verification assertion (UTC fallback yielded 2024-01-02)
+      caught: true
+      reverted: true
+    - id: mutation-10-history-floor-raised
+      change: _MIN_PLAUSIBLE_MILLIS 1_000_000_000_000 -> 1_100_000_000_000
+      test: test_earliest_massive_advanced_bar_is_within_millis_bound
+      result: failed with ValidationError for the 2003-09-01 bar
+      caught: true
+      reverted: true
+    - id: mutation-11-statement-domain-narrowed
+      change: remove income_statement and cash_flow_statement from the Literal
+      test: test_each_known_statement_type_is_accepted
+      result: 2 failed, 2 passed
+      caught: true
+      reverted: true
+    - id: mutation-12-action-domain-narrowed
+      change: remove ticker_change and ipo from the Literal
+      test: test_each_known_action_type_is_accepted
+      result: 2 failed, 2 passed
+      caught: true
+      reverted: true
+    - id: mutation-13-ticker-change-date-dropped
+      change: remove date from CorporateAction.value_payload()
+      test: test_ticker_change_payload_deliberately_retains_provider_keys
+      result: failed because the exact deliberate key set no longer matched
+      caught: true
+      reverted: true
+    - id: mutation-14-package-model-replaced-by-dict
+      change: replace the CorporateAction package export with a raw dictionary
+      test: tests/unit/test_massive_package_boundary.py
+      result: 2 failed, 1 passed (identity and raw-dictionary guards failed)
+      caught: true
+      reverted: true
+  final_validation:
+    focused_story:
+      command: >-
+        uv run pytest -m 'not postgres' tests/unit/test_massive_reference.py
+        tests/unit/test_massive_bars.py tests/unit/test_massive_financials.py
+        tests/unit/test_massive_actions.py
+        tests/unit/test_massive_package_boundary.py
+      result: 86 passed
+    no_container_suite:
+      command: uv run pytest -q -m 'not postgres'
+      result: 340 passed, 87 deselected, 2 third-party deprecation warnings
+    full_suite:
+      command: uv run pytest -q
+      result: 427 passed, 2 third-party deprecation warnings
+    lint: "uv run ruff check .: passed"
+    format: "uv run ruff format --check .: 117 files already formatted"
+    static_analysis: "uv run mypy src: no issues in 34 source files"
+    build: "uv build: source distribution and wheel built"
+  pre_commit_reviews:
+    code_review:
+      subagent_id: a0018ccc
+      verdict: APPROVED
+      blocking_findings: []
+    spec_drift:
+      subagent_id: 1ef77f5b
+      verdict: CLEAR
+      drift_detected: false
+    commits_produced: []
+    next_action: >-
+      The delegated refinement produced no commits. The parent will create the
+      single implementation-stage commit after this evidence is finalized.
+
+review_v4_doc_sync:
+  source_review: CAP-001-E3-S2-implementation-review-v4.md
+  verdict: PASS-WITH-WARNINGS
+  lifecycle_status: docs-sync
+  warnings:
+    - id: IR-001
+      severity: MEDIUM
+      status: accepted-open
+      disposition: >-
+        Current package exports are compliant, but the supplementary boundary
+        test does not reject every builtin collection containing raw wire
+        dictionaries. No code or test change is made during doc sync.
+    - id: IR-002
+      severity: LOW
+      status: accepted-open
+      disposition: >-
+        The Unix-milliseconds lower bound and regression are correct; the
+        source comment cites section 3 instead of section 2.4a of the ingestion
+        API component design. No source comment is changed during doc sync.
+    - id: IR-003
+      severity: MEDIUM
+      status: accepted-open
+      disposition: >-
+        The fiscal-period ownership decision was propagated into
+        CAP-001-E4-S3-tasks.md outside that story's planning phase. This record
+        now says the propagation occurred; E4-S3 still owns gate reconciliation.
+    - id: IR-004
+      severity: LOW
+      status: accepted-open
+      disposition: >-
+        CAP-001-E4-S3-tasks.md carries AI provenance inconsistent with the
+        commit that produced the revision. Doc sync does not alter the sibling
+        task plan or its provenance.
+    - id: IR-005
+      severity: LOW
+      status: accepted-open
+      disposition: >-
+        Optional-versus-zero behavior is tested, but the two tests do not name
+        TC-COMP-219. No test or task-plan change is made during doc sync.
+  pre_commit_reviews:
+    code_review:
+      subagent_id: 9e165cd5
+      verdict: APPROVED
+      blocking_findings: []
+    spec_drift:
+      subagent_id: 112640a6
+      verdict: CLEAR
+      drift_detected: false
+    commits_produced: []
+    next_action: >-
+      The delegated doc-sync produced no commits. The parent will create the
+      single doc-sync commit after this evidence is finalized.
+  owner_decisions:
+    - decided_on: 2026-09-20
+      decision: >-
+        CAP-001-E4's observation writer derives
+        fundamental_observation.fiscal_period; FinancialStatement must not add
+        a fiscal_period field.
+    - decided_on: 2026-09-21
+      decision: >-
+        Phase 6b automation remains intentionally deferred. Leave this story at
+        docs-sync while automation coding and review remain outstanding.
+  outstanding_gates:
+    - automation-coding
+    - automation-review
+    - CAP-001-E4-S3 planning/provenance reconciliation for IR-003 and IR-004

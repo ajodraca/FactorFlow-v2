@@ -13,8 +13,9 @@ from factorflow.api.app import create_app
 
 
 @pytest.fixture
-def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+def client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestClient:
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setattr(app_module, "_STATIC_DIR", tmp_path)
     app = create_app()
     with TestClient(app) as test_client:
         yield test_client
@@ -24,10 +25,8 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 def client_with_bundle(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestClient:
     """A client whose static directory holds a real fixture bundle.
 
-    IR-004: no frontend bundle exists on this branch (task plan Notes), so
-    the default `client` fixture's static directory holds only `.gitkeep`
-    and can never exercise the mount or the SPA fallback -- a test built on
-    it can pass with the mount removed entirely. This fixture points
+    The default `client` fixture uses an empty static directory and cannot
+    exercise the mount or SPA fallback with real files. This fixture points
     `_STATIC_DIR` at a directory this test controls, with both an
     `index.html` (the SPA-fallback target) and a second file at a nested
     path (`assets/app.js`, standing in for a real Vite build's hashed
@@ -75,7 +74,7 @@ def test_unmatched_non_api_path_falls_back_to_index(client_with_bundle: TestClie
 
 
 def test_no_bundle_yet_falls_back_to_a_bare_404(client: TestClient) -> None:
-    """No frontend bundle exists on this branch yet (task plan Notes).
+    """The controlled static directory contains no frontend bundle.
 
     Separate from the fallback behavior itself (covered above with a real
     fixture bundle): confirms the *absence* of a bundle degrades to a plain

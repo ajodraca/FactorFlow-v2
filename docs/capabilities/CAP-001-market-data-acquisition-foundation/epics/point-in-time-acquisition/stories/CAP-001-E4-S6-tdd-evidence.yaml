@@ -1,0 +1,172 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-001-E4-S6-tdd-evidence
+artifact_type: tdd-evidence
+story: CAP-001-E4-S6
+created: 2026-09-23
+updated: 2026-09-23
+---
+
+# TDD Evidence: CAP-001-E4-S6 — Per-Instrument Outcome Classification
+
+## Phase Summary
+
+RED evidence was observed before each production implementation cycle.
+GREEN evidence was confirmed after each corresponding production change.
+Mutation probes were run after the full GREEN suite to verify test strength.
+
+---
+
+## Cycle 1: Outcome Classification Unit Tests (T001–T006 → T007–T008)
+
+### RED Command
+```
+uv run pytest tests/unit/test_outcomes.py -q
+```
+
+### RED Result
+```
+FFFFFFFFFF.F                                                             [100%]
+ImportError: cannot import name 'classify_write_result' from
+'factorflow.ingestion.outcomes' (11 failures, 1 pass — only
+test_safe_reason_retains_request_id_excludes_credential passed because
+it uses compose_failure_reason from errors.py which already existed)
+```
+
+### Production Code Added
+`src/factorflow/ingestion/outcomes.py` — rewrote module to add:
+- `InstrumentOutcomeRecord` dataclass
+- `classify_write_result` mapping WriteResult → per-data-type outcome dict
+- `classify_provider_error` mapping MassiveError → InstrumentOutcomeRecord
+- Preserved `write_error_results` from E4-S5
+
+### GREEN Command
+```
+uv run pytest tests/unit/test_outcomes.py -q
+```
+
+### GREEN Result
+```
+............                                                             [100%]
+12 passed in 0.04s
+```
+
+---
+
+## Cycle 2: Integration with Runner and Writer (T009–T010 → GREEN)
+
+### Pre-condition
+Unit tests (382 non-postgres) confirmed no regressions from runner and writer
+changes before verifying the full non-postgres suite.
+
+### Command
+```
+uv run pytest -m 'not postgres' -q --ignore=tests/unit/test_fetch_plan.py
+```
+
+### Result
+```
+382 passed, 128 deselected, 2 warnings in 12.81s
+```
+
+Note: `test_fetch_plan.py` excluded — requires `hypothesis` module not installed
+in this environment. This exclusion is pre-existing and unrelated to this story.
+
+---
+
+## Mutation Probes
+
+### Probe 1: written vs unchanged mapping
+
+**Mutation**: Changed `"written" if result.reference_appended > 0 else "unchanged"` to
+always return `"unchanged"` for reference in `classify_write_result`.
+
+**Test killed**: `test_written_outcome_when_rows_appended` — asserted `outcomes["reference"] == "written"` but got `"unchanged"`.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 2: not_found vs failed mapping
+
+**Mutation**: Changed `classify_provider_error` to return `"failed"` for both
+`InstrumentNotFound` and `ProviderUnavailable`.
+
+**Test killed**: `test_not_found_maps_to_not_found_outcome` — asserted `record.outcome == "not_found"` but got `"failed"`.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 3: CredentialRejected rejection guard
+
+**Mutation**: Removed the `if isinstance(error, CredentialRejected): raise ValueError(...)` guard
+from `classify_provider_error`.
+
+**Test killed**: `test_credential_rejected_is_rejected_as_per_data_type_outcome` — the `pytest.raises(ValueError)` assertion failed because no exception was raised.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 4: reason field populated
+
+**Mutation**: Changed `InstrumentOutcomeRecord(data_type=..., outcome=..., reason=reason)` to
+`InstrumentOutcomeRecord(data_type=..., outcome=..., reason=None)` in `classify_provider_error`.
+
+**Test killed**: `test_not_found_maps_to_not_found_outcome` — asserted `record.reason == reason` but got `None`.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 5: empty WriteResult classification
+
+**Mutation**: Changed `"written" if result.prices_appended > 0 else "unchanged"` to
+`"written" if result.prices_appended >= 0 else "unchanged"` (always written).
+
+**Test killed**: `test_empty_write_result_classifies_all_unchanged` — asserted `outcomes["prices"] == "unchanged"` but got `"written"`.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+### Probe 6: safe reason credential exclusion
+
+**Mutation**: Removed the `redact` call in `compose_failure_reason` (passed raw message).
+
+**Test killed**: `test_safe_reason_retains_request_id_excludes_credential` — asserted `credential not in reason` but credential was present.
+
+**Restored**: Change reverted; GREEN confirmed.
+
+---
+
+## Validation Commands
+
+### Python
+- `uv run pytest -m 'not postgres' --ignore=tests/unit/test_fetch_plan.py`: 382 passed
+- `uv run ruff check .`: all checks passed
+- `uv run ruff format --check .`: 141 files already formatted
+- `uv run mypy src`: Success, no issues found in 40 source files
+- `uv build`: succeeded — built `dist/factorflow-0.1.0.tar.gz` and `dist/factorflow-0.1.0-py3-none-any.whl`
+
+### Postgres exclusion
+- Docker container runtime was unavailable in this environment.
+- `uv run pytest -m postgres` was attempted; all postgres-marked tests failed with
+  `DockerException: Error while fetching server API version` (Docker not running).
+- This is an environment constraint, not a regression. The non-postgres suite
+  (382 tests) covers all pure-classification and mock-boundary behaviors.
+- Per the validation plan: "report an unavailable PostgreSQL container as an
+  excluded validation rather than presenting `uv run pytest -m 'not postgres'`
+  as the full suite."
+
+### Frontend
+- No frontend code was modified. Frontend validation not run.
+
+---
+
+## Notes
+
+- `write_error_results` is preserved in `outcomes.py` for backward compatibility;
+  it handles bulk error cases where all data types fail during the all-at-once
+  reference fetch phase. It is no longer called by the runner directly — the
+  runner now uses per-data-type try/except and `classify_provider_error` +
+  `write_instrument_with_outcomes`.
+- `write_instrument` is preserved in `writer.py` and remains the non-outcome-aware
+  path. `write_instrument_with_outcomes` extends it to accept optional `error_outcomes`
+  for per-data-type error cases (TC-COMP-188: prices=written, fundamentals=not_found).
+- The runner's per-data-type fetch loop raises `CredentialRejected` immediately
+  (bypassing the per-type handler) to preserve the run-level failure path.
+- `hypothesis` module is not installed in this environment; `test_fetch_plan.py`
+  was excluded from all validation runs. This is a pre-existing environment gap
+  unrelated to this story.
