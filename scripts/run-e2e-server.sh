@@ -38,12 +38,25 @@ docker run -d --name "$CONTAINER_NAME" \
   -p "${DB_PORT}:5432" \
   postgres:16 >/dev/null
 
+# The image briefly starts an init-only server on its Unix socket before the
+# final server begins accepting TCP connections.  Probing the default socket
+# can therefore report ready too early and race the migration below.  Query the
+# real database over TCP instead, which also verifies its credentials.
+DATABASE_READY=false
 for _ in $(seq 1 60); do
-  if docker exec "$CONTAINER_NAME" pg_isready -U postgres >/dev/null 2>&1; then
+  if docker exec -e PGPASSWORD=postgres "$CONTAINER_NAME" \
+    psql --host=127.0.0.1 --username=postgres --dbname=factorflow \
+    --no-password --tuples-only --command='SELECT 1' >/dev/null 2>&1; then
+    DATABASE_READY=true
     break
   fi
   sleep 1
 done
+
+if [[ "$DATABASE_READY" != true ]]; then
+  echo "PostgreSQL did not become ready within 60 seconds" >&2
+  exit 1
+fi
 
 export FACTORFLOW_DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:${DB_PORT}/factorflow"
 export FACTORFLOW_MASSIVE_API_KEY="${FACTORFLOW_MASSIVE_API_KEY:-e2e-test-key}"

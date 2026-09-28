@@ -27,6 +27,24 @@ MIGRATION_0003_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0003
 MIGRATION_0004_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0004_runs.sql"
 
 
+def count_backend_connections(conn: psycopg.Connection, dbname: str) -> int:
+    """Return the number of backend connections for ``dbname`` visible from ``conn``.
+
+    Queries ``pg_stat_activity`` over the admin connection so volume tests can
+    sample connection count without opening a new connection themselves.  The
+    admin connection is excluded from the count via ``pid <> pg_backend_pid()``.
+
+    Used by T001 / T002 in CAP-001-E4-S7 (DAC-E4-S7-3).
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FROM pg_stat_activity WHERE datname = %s AND pid <> pg_backend_pid()",
+            (dbname,),
+        )
+        row = cur.fetchone()
+    return int(row[0]) if row else 0
+
+
 @pytest.fixture(scope="session")
 def postgres_container() -> Iterator[PostgresContainer]:
     """Start one PostgreSQL 16 container for the whole test session."""
@@ -38,6 +56,25 @@ def postgres_container() -> Iterator[PostgresContainer]:
 def _postgres_admin_connection_string(postgres_container: PostgresContainer) -> str:
     """The connection string for the container's default (admin) database."""
     return postgres_container.get_connection_url(driver=None)
+
+
+@pytest.fixture(scope="session")
+def postgres_admin_connection(
+    _postgres_admin_connection_string: str,
+) -> Iterator[psycopg.Connection]:
+    """A persistent admin connection to the container's default database.
+
+    Used by volume tests to sample backend connection counts via
+    ``pg_stat_activity`` without opening additional connections themselves.
+    Scoped to the session so the admin connection is opened once and reused.
+
+    Used by CAP-001-E4-S7 T001/T002 (DAC-E4-S7-3).
+    """
+    conn = psycopg.connect(_postgres_admin_connection_string)
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 
 @pytest.fixture
@@ -170,5 +207,34 @@ def migrated_runner_connection(postgres_connection_string: str) -> Iterator[psyc
     conn.commit()
     try:
         yield conn
+    finally:
+        conn.close()
+
+
+@pytest.fixture
+def runner_volume_context(
+    postgres_connection_string: str,
+    postgres_admin_connection: psycopg.Connection,
+) -> Iterator[tuple[psycopg.Connection, psycopg.Connection, str]]:
+    """Yield (test_conn, admin_conn, dbname) for volume and resume tests.
+
+    Provides an isolated database with all four migrations applied, an admin
+    connection for sampling ``pg_stat_activity``, and the database name so
+    tests can probe connection counts keyed to this specific database.
+
+    Used by CAP-001-E4-S7 T002/T003 (DAC-E4-S7-1, DAC-E4-S7-3, DAC-E4-S7-2).
+    """
+    # Extract database name from the connection string (last path component)
+    dbname = postgres_connection_string.rsplit("/", 1)[-1]
+
+    conn = psycopg.connect(postgres_connection_string)
+    with conn.cursor() as cur:
+        cur.execute(MIGRATION_0001_PATH.read_text())
+        cur.execute(MIGRATION_0002_PATH.read_text())
+        cur.execute(MIGRATION_0003_PATH.read_text())
+        cur.execute(MIGRATION_0004_PATH.read_text())
+    conn.commit()
+    try:
+        yield conn, postgres_admin_connection, dbname
     finally:
         conn.close()

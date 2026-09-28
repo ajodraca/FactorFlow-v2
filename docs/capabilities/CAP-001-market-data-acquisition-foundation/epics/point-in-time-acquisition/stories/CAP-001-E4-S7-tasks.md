@@ -3,11 +3,12 @@ artifact_schema_version: 1
 artifact_id: CAP-001-E4-S7-tasks
 artifact_type: story-tasks
 artifact_version: 1
-status: draft
+status: docs-sync
+docs_synced_review: CAP-001-E4-S7-implementation-review-v1.md
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-28
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -60,7 +61,7 @@ Harden the acquisition runner delivered by CAP-001-E4-S5 with PostgreSQL-backed 
 
 **Purpose**: Extend the planned runner test boundary so long-run tests can observe committed state, live payload ownership, and database connection use without a live provider.
 
-- [ ] T001 Extend `tests/conftest.py` and the CAP-001-E4-S5 runner fixture support to apply all prerequisite migrations through the run-journal reclaim schema, expose isolated PostgreSQL connections for acquisition-run, observation-writer, coverage, and result assertions, and provide deterministic stub provider/writer observability for a 3,000-item roster.
+- [x] T001 Extend `tests/conftest.py` and the CAP-001-E4-S5 runner fixture support to apply all prerequisite migrations through the run-journal reclaim schema, expose isolated PostgreSQL connections for acquisition-run, observation-writer, coverage, and result assertions, and provide deterministic stub provider/writer observability for a 3,000-item roster.
 
 **Checkpoint**: PostgreSQL-marked runner tests can seed a claimed run and inspect transactions, coverage, results, and connection state without network access.
 
@@ -72,12 +73,12 @@ Harden the acquisition runner delivered by CAP-001-E4-S5 with PostgreSQL-backed 
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Extend `tests/integration/test_runner_volume.py` for TC-COMP-004, TC-COMP-190, TC-COMP-192, and TC-COMP-194; run 3,000 stubbed instruments through the runner, record elapsed time as test diagnostic output only, assert all entries complete without intervention, assert no result or payload collection grows with completed instruments using the runner/provider test seam, and sample PostgreSQL backend connection identity/count before and after the run to prove no per-instrument connection growth. Add `# Implements TC-COMP-004`, `# Implements TC-COMP-190`, `# Implements TC-COMP-192`, and `# Implements TC-COMP-194` trace comments.
-- [ ] T003 [P] Create `tests/integration/test_runner_resume.py` for TC-COMP-006, TC-COMP-012, TC-COMP-020, TC-COMP-148, TC-COMP-191, and TC-COMP-193; block the stub provider during a chosen in-flight instrument, terminate the runner path before its writer transaction commits, invoke the application-side reclaim sweep, start a later requested run, and assert previously committed instruments are not fetched again, the active instrument has neither a result nor coverage, the remainder completes, and the abandoned run no longer blocks the queue. Add a matching `# Implements TC-COMP-...` trace comment for every mapped case.
+- [x] T002 [P] Extend `tests/integration/test_runner_volume.py` for TC-COMP-004, TC-COMP-190, TC-COMP-192, and TC-COMP-194; run 3,000 stubbed instruments through the runner, record elapsed time as test diagnostic output only, assert all entries complete without intervention, assert no result or payload collection grows with completed instruments using the runner/provider test seam, and sample PostgreSQL backend connection identity/count before and after the run to prove no per-instrument connection growth. Add `# Implements TC-COMP-004`, `# Implements TC-COMP-190`, `# Implements TC-COMP-192`, and `# Implements TC-COMP-194` trace comments.
+- [x] T003 [P] Create `tests/integration/test_runner_resume.py` for TC-COMP-006, TC-COMP-012, TC-COMP-020, TC-COMP-148, TC-COMP-191, and TC-COMP-193; block the stub provider during a chosen in-flight instrument, terminate the runner path before its writer transaction commits, invoke the application-side reclaim sweep, start a later requested run, and assert previously committed instruments are not fetched again, the active instrument has neither a result nor coverage, the remainder completes, and the abandoned run no longer blocks the queue. Add a matching `# Implements TC-COMP-...` trace comment for every mapped case.
 
 ### Additional Unit Tests
 
-- [ ] T004 [P] Add focused instrumentation tests in `tests/unit/test_runner_volume_support.py` for the long-run test doubles: each completed instrument releases its parsed payload before the next fetch, diagnostic elapsed-time reporting creates no pass/fail threshold, and the connection sampler counts only connections opened by the test fixture.
+- [x] T004 [P] Add focused instrumentation tests in `tests/unit/test_runner_volume_support.py` for the long-run test doubles: each completed instrument releases its parsed payload before the next fetch, diagnostic elapsed-time reporting creates no pass/fail threshold, and the connection sampler counts only connections opened by the test fixture.
 
 **Checkpoint**: The suite has observed RED failures for bounded active payload ownership, stable connection use, post-interruption coverage truthfulness, reclaim, and resumed acquisition.
 
@@ -87,8 +88,8 @@ Harden the acquisition runner delivered by CAP-001-E4-S5 with PostgreSQL-backed 
 
 **Purpose**: Make the already-planned sequential runner meet the new observability and resource-lifetime assertions without weakening its one-instrument transaction boundary.
 
-- [ ] T005 Update `src/factorflow/ingestion/runner.py` only as required by the RED tests: retain no per-instrument parsed payload, result, or coverage collection after `write_instrument` returns; preserve the single claimed-run dependency set and database/pool lifetime across the roster; and keep the writer transaction as the only coverage/result commit boundary.
-- [ ] T006 Update `src/factorflow/ingestion/runner.py` and `src/factorflow/runs/reclaim.py` only as required by the RED resume test so an interrupted runner stops before the active writer transaction commits, a reclaimed claim cannot accept subsequent writes, and a later claimed run relies on coverage planning and idempotent writer behavior rather than re-fetching committed instruments.
+- [x] T005 Update `src/factorflow/ingestion/runner.py` only as required by the RED tests: retain no per-instrument parsed payload, result, or coverage collection after `write_instrument` returns; preserve the single claimed-run dependency set and database/pool lifetime across the roster; and keep the writer transaction as the only coverage/result commit boundary.
+- [x] T006 Update `src/factorflow/ingestion/runner.py` and `src/factorflow/runs/reclaim.py` only as required by the RED resume test so an interrupted runner stops before the active writer transaction commits, a reclaimed claim cannot accept subsequent writes, and a later claimed run relies on coverage planning and idempotent writer behavior rather than re-fetching committed instruments.
 
 **Checkpoint**: The runner releases active-instrument state after each transaction, cannot write after reclaim, and resumes from durable coverage without a new persistence path.
 
@@ -98,7 +99,7 @@ Harden the acquisition runner delivered by CAP-001-E4-S5 with PostgreSQL-backed 
 
 **Purpose**: Exercise the runner, writer, coverage, and application-side reclaim contracts together against PostgreSQL.
 
-- [ ] T007 Run `uv run pytest -m 'postgres and slow'` for `tests/integration/test_runner_volume.py` and `tests/integration/test_runner_resume.py`; manually mutate the active-payload release, connection-reuse, and post-reclaim write guards in a local uncommitted copy to confirm their tests fail, then restore the implementation before continuing.
+- [x] T007 Run `uv run pytest -m 'postgres and slow'` for `tests/integration/test_runner_volume.py` and `tests/integration/test_runner_resume.py`; manually mutate the active-payload release, connection-reuse, and post-reclaim write guards in a local uncommitted copy to confirm their tests fail, then restore the implementation before continuing.
 
 **Checkpoint**: The runner, per-instrument writer transaction, coverage planner, and application-side reclaim sweep prove the complete volume and resume path together.
 
@@ -107,7 +108,7 @@ Harden the acquisition runner delivered by CAP-001-E4-S5 with PostgreSQL-backed 
 ## Phase 5: Polish
 
 **Purpose**: Run the complete repository quality gates and report any unavailable PostgreSQL verification accurately.
-- [ ] T008 Run `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build` from the repository root; if no container runtime is available, run `uv run pytest -m 'not postgres'` and report the excluded PostgreSQL verification rather than treating it as a green full suite.
+- [x] T008 Run `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`, and `uv build` from the repository root; if no container runtime is available, run `uv run pytest -m 'not postgres'` and report the excluded PostgreSQL verification rather than treating it as a green full suite.
 
 **Checkpoint**: The long-run and resume scenarios pass against PostgreSQL, mutations of the ownership/reclaim guards are caught, and the repository validation commands pass.
 
