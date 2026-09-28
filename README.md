@@ -1091,13 +1091,20 @@ freshly created database inside one shared session container, so tests do
 not observe each other's tables.
 
 ```bash
-uv run pytest                      # full suite
-uv run pytest -m postgres          # database-backed tests only
-uv run pytest -m 'not postgres'    # no container runtime required
+uv run pytest                          # full suite
+uv run pytest -m postgres              # database-backed tests only
+uv run pytest -m 'not postgres'        # no container runtime required
+uv run pytest -m 'postgres and slow'   # long-running volume and resume tests only (~160 s)
+uv run pytest -m 'postgres and not slow'  # database tests excluding the long-running suite
 ```
 
 Without a container runtime, run the `not postgres` variant and report the
 exclusion — a partial run is not a green suite.
+
+Tests marked `slow` are the volume and resumability suite (`test_runner_volume.py`,
+`test_runner_resume.py`) introduced in CAP-001-E4-S7. They require Docker and take
+around 160 seconds to run a 3000-instrument scenario against PostgreSQL. They are
+included in `uv run pytest -m postgres` and in the full suite.
 
 The interface suite is Vitest with React Testing Library, run from the
 repository root:
