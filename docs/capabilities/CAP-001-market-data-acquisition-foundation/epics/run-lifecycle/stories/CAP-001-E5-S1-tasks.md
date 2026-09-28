@@ -137,7 +137,12 @@ Every other story ID cited by this plan must either be a hard edge in the
 capability's `dependencies.yaml` or appear here as `reverse`, `soft`, or
 `context`. A newly discovered hard dependency must be added to the graph.
 
-None. CAP-001-E1-S1 and CAP-001-E1-S2 are hard graph edges in `dependencies.yaml` (schema baseline and migrator); they are not cited by ID in the plan body and require no table row. No other story IDs are referenced in this plan.
+CAP-001-E1-S1 and CAP-001-E1-S2 are hard graph edges in `dependencies.yaml` (schema baseline and migrator) and require no row.
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-001-E4-S1 | soft | T001 confirms `migrations/0002_observations.sql` is present and blocks rather than recreating it, and T012 attributes that file to E4-S1 in the migrations README. This story reads what E4-S1 produced; it does not require E4-S1 to be scheduled ahead of it, which is why the graph carries no edge. |
+| CAP-001-E5-S3 | reverse | T003 and the traceability note leave the result-derived finalisation half of TC-COMP-009 to E5-S3. `dependencies.yaml` records `CAP-001-E5-S3: [CAP-001-E4-S6, CAP-001-E5-S1]`, so E5-S3 depends on this story, not the other way round. |
 
 ### Task Dependencies
 
