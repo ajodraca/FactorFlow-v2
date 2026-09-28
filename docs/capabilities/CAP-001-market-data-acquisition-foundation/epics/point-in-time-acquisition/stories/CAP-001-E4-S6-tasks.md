@@ -29,7 +29,7 @@ ai_provenance:
     - id: CAP-001-component-design-massive-client
       version: "7"
     - id: CAP-001-component-design-rate-limit-governor
-      version: "6"
+      version: "8"
     - id: CAP-001-component-design-run-journal
       version: "6"
   invoking_user: ajodraca
