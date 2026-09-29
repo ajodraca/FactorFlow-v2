@@ -197,15 +197,16 @@ tests pass.
 - [ ] T018 Write `src/factorflow/coverage/service.py` — the public read API:
   - Declare the four pinned dataclasses exactly as in component-design section 2.4: `Presence(StrEnum)`, `GapDetection(frozen dataclass)`, `InstrumentCoverage(frozen dataclass)`, `CoverageView(frozen dataclass)`.
   - Load `coverage.sql` and `never_acquired.sql` at import.
+  - Import `read_history_depth` from `src/factorflow/instruments/settings.py` (delivered by CAP-001-E5-S1).
   - Implement `read_coverage(conn, *, symbol: str | None = None, lifecycle: str | None = None, from_date: date | None = None, to_date: date | None = None, cursor: str | None = None, limit: int = 50) -> CoverageView`:
     1. Execute `never_acquired.sql`; if `True`, return `CoverageView(never_acquired=True, gap_detection=GapDetection(available=False, reason=None, missing_days=None), instruments=[], next_cursor=None)`.
-    2. Read `owner_setting` via `read_history_depth` from `src/factorflow/instruments/settings.py`.
-    3. Execute `coverage.sql` with bound parameters; assemble `InstrumentCoverage` rows with `Presence` derivation and `depth_shortfall_years`.
+    2. Read `owner_setting` via `read_history_depth`.
+    3. Execute `coverage.sql` with bound parameters; reads `coverage_segment` (written by CAP-001-E4-S3) and `acquisition_state` (written by CAP-001-E5-S1); assemble `InstrumentCoverage` rows with `Presence` derivation and `depth_shortfall_years`.
     4. Derive `depth_shortfall_years`: `ceil((stated_depth_days - actual_days) / 365)` rounded up, or `None` when actual days ≥ stated depth days. (PROVISIONAL — see Open Gaps.)
     5. Call `check_availability`; if false, attach `GapDetection(available=False, reason="fewer_than_two_instruments_with_data", missing_days=None)` to the view.
-    6. If available, sum gap counts across instruments via `gaps.sql`; attach `GapDetection(available=True, reason=None, missing_days=total)`.
+    6. If available, sum gap counts across instruments via `gaps.sql`; queries `daily_bar` (written by CAP-001-E4-S1); attach `GapDetection(available=True, reason=None, missing_days=total)`.
     7. Return `CoverageView` with `next_cursor` derived from the last symbol on the page (keyset cursor).
-  - Implement `read_gap_dates(conn, instrument_id: int, from_date: date | None = None, to_date: date | None = None) -> list[date]`: delegates to `gaps.py`.
+  - Implement `read_gap_dates(conn, instrument_id: int, from_date: date | None = None, to_date: date | None = None) -> list[date]`: delegates to `gaps.py`. Used by row expansion (CAP-001-E6-S2, CAP-001-E6-S3).
   - `Presence` derivation rules (from component design 2.4 and DAC-E6-S1-1):
     - A data type has at least one `coverage_segment` row → `PRESENT`.
     - A data type has at least one `acquisition_state` row with `last_outcome` in (`not_found`, `failed`) and no segment → `ABSENT`.
