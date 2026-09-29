@@ -453,7 +453,7 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
 
 ### Open Gaps
 
-1. **PROVISIONAL — awaiting owner confirmation (2026-09-29): meaning of `CoverageView.gap_detection.missing_days`.**
+1. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): meaning of `CoverageView.gap_detection.missing_days`.**
    - Undefined: design 2.4 types it `int | None` and calls the view-level object "the
      whole-view availability", but never says what the count covers.
    - Adopted: when available, the total missing days across **all** instruments the
@@ -464,7 +464,7 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
      The S3 response example exposes only `available` / `reason` at view level, so
      the value has no consumer yet.
    - Absorb in: the next revision of component-design-coverage-service.md section 2.4.
-2. **PROVISIONAL — awaiting owner confirmation (2026-09-29): per-instrument availability.**
+2. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): per-instrument availability.**
    - Undefined: `InstrumentCoverage.gaps` is a full `GapDetection`, but only one
      availability predicate is defined: ≥ 2 instruments with bars "in the range"
      (design 2.3, system design step 43).
@@ -477,14 +477,14 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
      instrument then reports 0 while the view is available. Only a per-instrument
      predicate would remove this, which is a design change.
    - Absorb in: section 2.3/2.4.
-3. **PROVISIONAL — awaiting owner confirmation (2026-09-29): instruments with no prices coverage.**
+3. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): instruments with no prices coverage.**
    - Undefined: the `missing_days` value for an instrument with no `prices` segment.
    - Adopted: `missing_days = None` with `available` following the view.
      `read_gap_dates` returns `None`.
    - Derivation: DAC-E6-S2-4 says no gaps are "computed" for non-price data. STD-UI-4
      reserves zero for a measured zero.
    - Absorb in: section 2.4.
-4. **PROVISIONAL — awaiting owner confirmation (2026-09-29): `read_gap_dates` identity and return shape.**
+4. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): `read_gap_dates` identity and return shape.**
    - Undefined: design section 11 says only "Instrument, date range → the specific
      missing dates".
    - Adopted:

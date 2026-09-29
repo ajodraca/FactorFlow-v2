@@ -80,7 +80,7 @@ coverage arithmetic, SQL or service change is added here.
 **Purpose**: None required. The route, model and wiring files already exist or are created
 in Phases 3–4. `fastapi`, `pydantic` and `psycopg` are already declared in
 `pyproject.toml`. No new dependency, migration, SQL file or package-data entry is
-needed. S3 ships no `.sql`; the package-data entry belongs to CAP-001-E6-S2 T001.
+needed. S3 ships no `.sql`; the package-data entry belongs to CAP-001-E6-S1 T002 (CAP-001-E6-S2 T001 is conditional).
 
 **Checkpoint**: `uv sync --all-extras` succeeds on the branch after CAP-001-E6-S1 and CAP-001-E6-S2 have landed.
 
@@ -400,7 +400,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
        delivered.
   - Then, inside `with request.app.state.db_pool.connection() as conn:`:
     - `view = read_coverage(conn, symbol=symbol, lifecycle=lifecycle, from_date=from_date, to_date=to_date, cursor=cursor, limit=limit)`.
-      This is S1's signature (CAP-001-E6-S1-tasks T018). Pass omitted bounds as `None`:
+      This is S1's signature (CAP-001-E6-S1-tasks T012). Pass omitted bounds as `None`:
       the service resolves "everything acquired" (ingestion-api design 2.4a,
       coverage-service design 2.3).
     - If `expand_symbol`: `gap_dates = read_gap_dates(conn, expand_symbol, from_date=from_date, to_date=to_date)`,
@@ -573,6 +573,7 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
    - The UX sentence should be corrected at the next UX-design revision. CAP-001-E6-S4
      must fetch on expansion.
 3. **`read_gap_dates` signature: CAP-001-E6-S1-tasks vs CAP-001-E6-S2-tasks.**
+   *Resolved 2026-09-29: the revised S1-tasks no longer declares `read_gap_dates`; S2's signature stands.*
    - S1-tasks T018 declares `read_gap_dates(conn, instrument_id: int, …) -> list[date]`.
      S2-tasks T017 declares `read_gap_dates(conn, symbol: str, *, from_date, to_date) -> list[date] | None`.
    - The approved stories give gap detection to S2 (S2 Description), so S2's interface
@@ -580,6 +581,7 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
    - It is also the only one the API can call: the public `InstrumentCoverage` exposes
      `symbol` and no `instrument_id`.
 4. **Reason on the never-acquired branch.**
+   *Resolved 2026-09-29: revised S1-tasks T012 returns `"fewer_than_two_instruments_with_data"` on this branch.*
    - CAP-001-E6-S1-tasks T018 step 1 returns `GapDetection(available=False, reason=None, …)`
      when nothing has been acquired.
    - DAC-E6-S3-1 (story AC) and DAC-E6-4 (epic AC) require unavailability to carry a
@@ -593,7 +595,7 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
 
 ### Open Gaps
 
-1. **PROVISIONAL — awaiting owner confirmation (2026-09-29): the HTTP shape of gap-date expansion.**
+1. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): the HTTP shape of gap-date expansion.**
    - Undefined:
      - DAC-E6-S3-2 requires dates to be available through expansion.
      - coverage-service section 11 declares `read_gap_dates` as backing row expansion.
@@ -620,7 +622,7 @@ From `docs/constitution/tech-stack.md` → Validation Commands:
        `DELETE /api/instruments/{symbol}`.
    - Absorb in: ingestion-api section 11 and system design 4.2 at their next revision.
      CAP-001-E6-S4 consumes this contract.
-2. **PROVISIONAL — awaiting owner confirmation (2026-09-29): "gap counts absent" is `gap_count: null`, not an omitted key.**
+2. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): "gap counts absent" is `gap_count: null`, not an omitted key.**
    - Undefined: DAC-E6-S3-1 says "absent rather than zero" but not how absence is
      encoded in JSON.
    - Adopted: the key is always present, with the value `null`, both when detection is

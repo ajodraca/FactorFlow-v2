@@ -689,7 +689,7 @@ capability's `dependencies.yaml` or appear here as `reverse`, `soft`, or
 | CAP-001-E1-S5 | hard | T015 imports `formatTimestamp` from `web/src/app/status-region.tsx`, which commit `163fb18` added under CAP-001-E1-S5. The story is implemented (`docs-sync`). **New edge added to `dependencies.yaml`.** |
 | CAP-001-E2-S4 | hard | T014 imports `LifecycleBadge` from `web/src/screens/instruments/badges.tsx`. T003 reuses `requestJson` and `ApiError` in `web/src/api/client.ts`. Both were added in commit `bfcc2cd` under CAP-001-E2-S4. The story is implemented (`docs-sync`). **New edge added to `dependencies.yaml`.** |
 | CAP-001-E5-S6 | hard | T018 composes the Start control from `web/src/screens/runs/run-controls.tsx`, which CAP-001-E5-S6 "delivers … the Start action" (its story Description, and its tasks T008). DAC-E6-S4-4 requires the never-acquired state to offer that action. E5-S6 is `todo` and not yet implemented. **New edge added to `dependencies.yaml`.** It adds no cycle, because E5-S6 depends on E1-S4 and E5-S5 only. |
-| CAP-001-E6-S1 | context | It produces `never_acquired`, presence and `depth_shortfall_years` (CAP-001-E6-S1-tasks T018, including its PROVISIONAL ceiling rounding). S4 consumes them only through S3's HTTP body, and S1 is transitive through S3. |
+| CAP-001-E6-S1 | context | It produces `never_acquired`, presence and `depth_shortfall_years` (CAP-001-E6-S1-tasks T012, including its PROVISIONAL ceiling rounding). S4 consumes them only through S3's HTTP body, and S1 is transitive through S3. |
 | CAP-001-E6-S2 | context | Its `read_gap_dates` `None`-versus-`[]` semantics (CAP-001-E6-S2-tasks PROVISIONAL item 4) define `expanded.gap_dates`, which S4 renders. It is consumed only through S3 and is transitive. |
 
 ### Task Dependencies
@@ -821,7 +821,7 @@ The story's own Validation section adds nothing beyond these commands.
 
 ### Open Gaps
 
-1. **PROVISIONAL — awaiting owner confirmation (2026-09-29): the expansion request.**
+1. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): the expansion request.**
    - Undefined:
      - The HTTP shape for gap dates is itself provisional (CAP-001-E6-S3-tasks
        Open Gap 1: optional `expand=<symbol>` on `GET /api/coverage`, with the response
@@ -850,7 +850,7 @@ The story's own Validation section adds nothing beyond these commands.
      because that pattern grows the DOM without bound, against design AC 18.
    - Absorb in: the design-system `data-table` spec or STD-UI-30's conformance record,
      as OQ 2 already routes.
-3. **PROVISIONAL — awaiting owner confirmation (2026-09-29): what "uniform depth shortfall" means, and its copy.**
+3. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): what "uniform depth shortfall" means, and its copy.**
    - Undefined:
      - DAC-E6-S4-6 does not say how the screen recognises a uniform shortfall.
      - The API exposes no plan or whole-view signal.
@@ -872,7 +872,7 @@ The story's own Validation section adds nothing beyond these commands.
        stale when the plan changes.
    - Absorb in: ux-design 1.1 (Depth column) and coverage-service section 2.4, if a
      view-level field is later preferred.
-4. **PROVISIONAL — awaiting owner confirmation (2026-09-29): when expansion fetches.**
+4. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): when expansion fetches.**
    - Undefined: whether every expansion fetches, and whether results are reused.
    - Adopted:
      - Fetch only when the view is available and `gap_count > 0`.
@@ -886,7 +886,7 @@ The story's own Validation section adds nothing beyond these commands.
        `None` for unavailable or no prices.
      - The design names coverage as the most expensive read.
    - Absorb in: owner-web-app section 5.
-5. **PROVISIONAL — awaiting owner confirmation (2026-09-29): the "extended interval" in the no-polling test.**
+5. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): the "extended interval" in the no-polling test.**
    - Undefined: the story says "asserted with fake timers over an extended interval"
      and gives no length.
    - Adopted: 10 minutes of fake time (T007), plus a 15 s real-time browser check
@@ -898,7 +898,7 @@ The story's own Validation section adds nothing beyond these commands.
      - 15 s exceeds the 10 s Runs cadence while staying well inside Playwright's 30 s
        per-test timeout.
    - Absorb in: owner-web-app section 7.
-6. **PROVISIONAL — awaiting owner confirmation (2026-09-29): copy that no artifact words.**
+6. **CONFIRMED by owner (2026-09-29; adopted provisionally, then confirmed): copy that no artifact words.**
    - Undefined: exact wording, where UX gives only the substance.
    - Adopted (the constants in T013, plus the toolbar labels in T018):
      - `OUTAGE_SENTENCE`, the STD-UI-18 statement that ux-design 1.1 places "once, below
