@@ -22,7 +22,7 @@ from psycopg_pool import ConnectionPool
 from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
-from factorflow.api.routes import health, instruments, runs, settings
+from factorflow.api.routes import coverage, health, instruments, runs, settings
 from factorflow.config.settings import DatabaseSettings, RunSettings, configure_logging
 from factorflow.runs.reclaim import reclaim_stale_runs
 
@@ -309,6 +309,7 @@ def create_app() -> FastAPI:
     app.include_router(instruments.router)
     app.include_router(settings.router)
     app.include_router(runs.router)
+    app.include_router(coverage.router)
 
     _add_request_id_middleware(app)
     _add_static_mount(app)

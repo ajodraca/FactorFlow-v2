@@ -103,7 +103,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
 
 ### Mandatory Component Tests
 
-- [ ] T001 Create the scaffolding in `tests/integration/test_api_coverage.py`. No test functions yet.
+- [x] T001 Create the scaffolding in `tests/integration/test_api_coverage.py`. No test functions yet.
   - Module docstring citing the story, ingestion-api design sections 2.4a, 7 and 11,
     and the TC list below. Set `pytestmark = pytest.mark.postgres`.
   - Fixture `coverage_env(postgres_connection_string, monkeypatch)`. Follow the
@@ -132,7 +132,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - `DATA_TYPES = {"reference", "prices", "fundamentals", "corporate_actions"}`
     - `UNAVAILABLE = "fewer_than_two_instruments_with_data"` (coverage-service design 2.4)
 
-- [ ] T002 Implement TC-COMP-007 (coverage visibility, AC-7) in `tests/integration/test_api_coverage.py`
+- [x] T002 Implement TC-COMP-007 (coverage visibility, AC-7) in `tests/integration/test_api_coverage.py`
   - Arrange:
     - A and B each have `reference` and `prices` segments over 2024-01-02..2024-01-05,
       and bars on all four days.
@@ -153,7 +153,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
       - `datetime.fromisoformat(row["last_acquired_at"]) == datetime(2024,1,5,22,14,3,tzinfo=UTC)`;
       - `row["lifecycle"] == "active"`.
 
-- [ ] T003 Implement TC-COMP-008 (gap visibility, AC-8) in `tests/integration/test_api_coverage.py`
+- [x] T003 Implement TC-COMP-008 (gap visibility, AC-8) in `tests/integration/test_api_coverage.py`
   - Arrange: A, B and C all have `prices` segments over 2024-01-02..2024-01-05. A and B
     have bars on all four days. C lacks 2024-01-04.
   - Assert on `GET /api/coverage`:
@@ -166,7 +166,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - `body["expanded"] == {"symbol": "C…", "gap_dates": ["2024-01-04"]}`, using C's
       normalised symbol.
 
-- [ ] T004 Implement TC-COMP-017 (honest empty state, AC-17) in `tests/integration/test_api_coverage.py`
+- [x] T004 Implement TC-COMP-017 (honest empty state, AC-17) in `tests/integration/test_api_coverage.py`
   - Case (a), empty store: migrated, no rows.
     - `GET /api/coverage` returns `200` with `never_acquired is True`, `instruments == []`
       and `next_cursor is None`.
@@ -178,7 +178,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - Returns `200` with `never_acquired is False` and `instruments == []`. The two
       responses must differ.
 
-- [ ] T005 Implement TC-COMP-054 (unavailable with reason; counts absent, not zero, DAC-E6-S3-1) in `tests/integration/test_api_coverage.py`
+- [x] T005 Implement TC-COMP-054 (unavailable with reason; counts absent, not zero, DAC-E6-S3-1) in `tests/integration/test_api_coverage.py`
   - Arrange: only A has bars and a `prices` segment, over 2024-01-02..2024-01-05, with
     2024-01-03 missing. B has a `fundamentals` segment only, so two rows are returned
     but only one instrument holds bars.
@@ -190,7 +190,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
   - Assert on `GET /api/coverage?expand=A`: `body["expanded"]["gap_dates"] is None`,
     **not** `[]`. S2's `read_gap_dates` returns `None` when unavailable.
 
-- [ ] T006 Implement TC-COMP-055 (dates behind expansion, not in collapsed rows, DAC-E6-S3-2) in `tests/integration/test_api_coverage.py`
+- [x] T006 Implement TC-COMP-055 (dates behind expansion, not in collapsed rows, DAC-E6-S3-2) in `tests/integration/test_api_coverage.py`
   - Arrange: A has bars on 2024-01-02..05. B lacks 01-03 and 01-05. Both are covered
     01-02..01-05.
   - Default read:
@@ -204,7 +204,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - the rows are still free of date lists.
   - The "bounded at 3000" half is T011.
 
-- [ ] T007 Implement TC-COMP-057 (lifecycle filter; default includes retired, DAC-E6-S3-4) in `tests/integration/test_api_coverage.py`
+- [x] T007 Implement TC-COMP-057 (lifecycle filter; default includes retired, DAC-E6-S3-4) in `tests/integration/test_api_coverage.py`
   - Arrange:
     - Seed `AAPL` and `MSFT` as active, each with a `prices` segment over
       2024-01-02..01-05 and bars.
@@ -218,7 +218,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - `lifecycle=retired` returns only MSFT (retired explicitly selected).
     - `lifecycle=archived` returns `422` with the envelope `error.code == "validation_error"`.
 
-- [ ] T008 Implement TC-COMP-058 (inverted range, DAC-E6-S3-5) in `tests/integration/test_api_coverage.py`
+- [x] T008 Implement TC-COMP-058 (inverted range, DAC-E6-S3-5) in `tests/integration/test_api_coverage.py`
   - Arrange: seed the TC-COMP-008 data.
   - `from=2024-01-05&to=2024-01-02` returns `422`, with:
     - `error.code == "validation_error"`;
@@ -229,7 +229,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
   - `from=2024-13-01` returns `422`, a malformed date rejected by the query model
     (ingestion-api AC 12).
 
-- [ ] T009 Implement TC-COMP-036, functional half (filters, bounds, cursor, DAC-E6-10), in `tests/integration/test_api_coverage.py`
+- [x] T009 Implement TC-COMP-036, functional half (filters, bounds, cursor, DAC-E6-10), in `tests/integration/test_api_coverage.py`
   - Symbol filter: seed `AAL`, `AAPL` and `MSFT` with segments.
     - `symbol=AA` returns `["AAL", "AAPL"]`.
     - Follow the `symbol` prefix semantics of S1's `coverage.sql` (`%(symbol_prefix)s`)
@@ -245,7 +245,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - The union of symbols is the five, ascending, each exactly once.
     - The last page has `next_cursor is None`.
 
-- [ ] T010 [P] Implement TC-COMP-056 (limit beyond the canonical bound → 422, DAC-E6-S3-3) in `tests/integration/test_api_pagination.py`
+- [x] T010 [P] Implement TC-COMP-056 (limit beyond the canonical bound → 422, DAC-E6-S3-3) in `tests/integration/test_api_pagination.py`
   - This is the file ingestion-api design section 7 names for "Page size defaults and
     caps". Create it with its own fully-migrated `TestClient` fixture, the same shape as
     T001, and the `postgres` mark.
@@ -262,7 +262,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
   - Import `DEFAULT_PAGE_SIZE` / `MAX_PAGE_SIZE` from `factorflow.api.bounds` rather
     than hard-coding 50 and 500.
 
-- [ ] T011 Implement TC-COMP-036 / TC-COMP-055 volume half (3000 instruments) in `tests/integration/test_api_coverage.py`, marked `@pytest.mark.slow` as well as `postgres`
+- [x] T011 Implement TC-COMP-036 / TC-COMP-055 volume half (3000 instruments) in `tests/integration/test_api_coverage.py`, marked `@pytest.mark.slow` as well as `postgres`
   - Seed 3000 active instruments in one statement: `INSERT … SELECT 'S' || lpad(g::text, 4, '0') FROM generate_series(1, 3000) g`.
   - Seed one `prices` segment each over 2024-01-02..2024-01-05, in one `INSERT … SELECT`.
   - Seed bars on those four days for the first three instruments only, so detection is
@@ -276,7 +276,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
 
 ### Additional Unit Tests
 
-- [ ] T012 Add edge-case integration tests to `tests/integration/test_api_coverage.py`
+- [x] T012 Add edge-case integration tests to `tests/integration/test_api_coverage.py`
   - **Omitting the range covers everything** (ingestion-api design section 7 "Coverage
     without a range covers everything", section 2.4a, AC-8):
     - Arrange: A and B have `prices` segments over 2022-03-14..2024-01-04. Both have
@@ -297,7 +297,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     - `expand=$$$` returns `422` `validation_error`.
     - `expand=aapl` returns `200`, with `expanded.symbol == "AAPL"` (normalised).
 
-- [ ] T013 [P] Add route unit tests in `tests/unit/test_api_coverage_routes.py`. They need no container.
+- [x] T013 [P] Add route unit tests in `tests/unit/test_api_coverage_routes.py`. They need no container.
   - Follow the `_FakePool` / `_client` precedent in `tests/unit/test_api_runs_routes.py`
     (`TestClient(app, raise_server_exceptions=False)`, no lifespan).
   - Monkeypatch `factorflow.api.routes.coverage.read_coverage` and
@@ -338,7 +338,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
 
 **Purpose**: Add the response models and the thin route that make Phase 2 pass.
 
-- [ ] T014 Add the coverage response models to `src/factorflow/api/models.py`, appended in a
+- [x] T014 Add the coverage response models to `src/factorflow/api/models.py`, appended in a
   `# Coverage models — CAP-001-E6-S3` section after the run models. They follow the
   file's existing style.
   - `CoverageDataTypes(BaseModel)`: `reference`, `prices`, `fundamentals` and
@@ -372,7 +372,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
     CAP-001-E6-S3's coverage models.
   - Import `date` next to the existing `datetime` import.
 
-- [ ] T015 Create `src/factorflow/api/routes/coverage.py` (depends on T014). Follow the structure of `routes/runs.py` and `routes/instruments.py`.
+- [x] T015 Create `src/factorflow/api/routes/coverage.py` (depends on T014). Follow the structure of `routes/runs.py` and `routes/instruments.py`.
   - Module docstring: cite ingestion-api design sections 2.4a, 3 and 11; the story;
     "thin surface over `coverage-service`"; "auth: none, loopback only"; and "no
     provider import".
@@ -435,7 +435,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
 
 **Purpose**: Register the route on the application.
 
-- [ ] T016 Wire the router in `src/factorflow/api/app.py`, the application factory
+- [x] T016 Wire the router in `src/factorflow/api/app.py`, the application factory
   CAP-001-E1-S6 delivered (depends on T015).
   - Add `coverage` to the `from factorflow.api.routes import …` line.
   - Add `app.include_router(coverage.router)` after `runs.router` in `create_app()`,
@@ -453,7 +453,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
 
 **Purpose**: Traceability comments and clean validation.
 
-- [ ] T017 [P] In `src/factorflow/api/routes/coverage.py`, put the PROVISIONAL decisions in
+- [x] T017 [P] In `src/factorflow/api/routes/coverage.py`, put the PROVISIONAL decisions in
   the handler docstring, citing this plan's Open Gaps 1–2. This follows the precedent in
   `routes/runs.py` and `runs/queries.py` for owner-confirmed contract choices:
   - the `expand` / `expanded` contract;
@@ -461,7 +461,7 @@ Date literals used below are real weekdays: 2024-01-02 (Tue) to 2024-01-05 (Fri)
 
   Add a one-line comment above the inverted-range check that cites DAC-E6-S3-5.
   Add one above the `lifecycle` default that cites DAC-E6-S3-4 and AC-21.
-- [ ] T018 Run the validation commands:
+- [x] T018 Run the validation commands:
   - `uv run ruff format --check .`
   - `uv run ruff check .`
   - `uv run mypy src`
