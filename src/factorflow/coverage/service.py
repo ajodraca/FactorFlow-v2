@@ -10,9 +10,9 @@ loaded at import and executed with bound parameters only. This module issues
 no ``INSERT``, ``UPDATE`` or ``DELETE``.
 
 Satisfies AC-7, AC-12, AC-17, AC-21, DAC-E2-6, DAC-E6-1, DAC-E6-7 and
-DAC-E6-S1-1 through DAC-E6-S1-7 (CAP-001-E6-S1). Gap detection is
-CAP-001-E6-S2's; until it lands, populated reads carry a "not computed"
-placeholder in their gap fields (see ``read_coverage``).
+DAC-E6-S1-1 through DAC-E6-S1-7 (CAP-001-E6-S1). The gap fields and
+``read_gap_dates`` come from ``gaps.py`` (CAP-001-E6-S2: AC-8, DAC-E6-2 through
+DAC-E6-6, DAC-E6-S2-1 through DAC-E6-S2-6).
 """
 
 import math
@@ -24,14 +24,17 @@ from typing import Final
 
 import psycopg
 
+from factorflow.coverage import gaps
+from factorflow.coverage.gaps import UNAVAILABLE_REASON as UNAVAILABLE_REASON
+from factorflow.instruments.service import InstrumentNotFound
 from factorflow.instruments.settings import read_history_depth
 from factorflow.instruments.symbols import normalise
 
 _SQL_DIR = Path(__file__).parent / "sql"
 _COVERAGE_SQL: Final = (_SQL_DIR / "coverage.sql").read_text()
 _NEVER_ACQUIRED_SQL: Final = (_SQL_DIR / "never_acquired.sql").read_text()
+_GAP_INSTRUMENT_SQL: Final = (_SQL_DIR / "gap_instrument.sql").read_text()
 
-UNAVAILABLE_REASON: Final = "fewer_than_two_instruments_with_data"
 DATA_TYPES: Final = ("reference", "prices", "fundamentals", "corporate_actions")
 LIFECYCLES: Final = frozenset({"active", "retired"})
 MAX_LIMIT: Final = 500
@@ -72,6 +75,7 @@ class CoverageView:
 
 
 _NOT_COMPUTED: Final = GapDetection(available=True, reason=None, missing_days=None)
+_UNAVAILABLE: Final = GapDetection(available=False, reason=UNAVAILABLE_REASON, missing_days=None)
 
 
 def _depth_shortfall_years(
@@ -124,10 +128,19 @@ def read_coverage(
       met or no depth is stated, never zero.
     - ``covered_from`` / ``covered_to`` are the instrument's ``prices`` range,
       ``None`` without a prices segment; per-type presence is reported apart.
-    - On a populated read every gap field is the "not computed" placeholder
-      ``GapDetection(available=True, reason=None, missing_days=None)``, which
-      CAP-001-E6-S2 replaces. The never-acquired branch reports detection as
-      unavailable with ``UNAVAILABLE_REASON``.
+    - The never-acquired branch reports detection as unavailable with
+      ``UNAVAILABLE_REASON``.
+
+    Gaps are detected once per request over the caller's bounds, an omitted
+    bound meaning everything acquired (design 2.3). Owner-confirmed choices
+    (2026-09-29, CAP-001-E6-S2-tasks Open Gaps 1-3):
+
+    - ``gap_detection.missing_days`` is the total missing days across every
+      instrument the statement returns for the resolved range, not only this
+      page; ``None`` when unavailable.
+    - Every instrument inherits the whole-view availability.
+    - An instrument without ``prices`` coverage has no gaps computed:
+      ``missing_days`` is ``None`` while ``available`` follows the view.
     """
     if from_date is not None and to_date is not None and from_date > to_date:
         raise ValueError(f"from_date {from_date} is after to_date {to_date}")
@@ -143,9 +156,7 @@ def read_coverage(
         if row[0]:
             return CoverageView(
                 never_acquired=True,
-                gap_detection=GapDetection(
-                    available=False, reason=UNAVAILABLE_REASON, missing_days=None
-                ),
+                gap_detection=_UNAVAILABLE,
                 instruments=[],
                 next_cursor=None,
             )
@@ -170,7 +181,13 @@ def read_coverage(
     for result_row in rows:
         by_instrument.setdefault(result_row[0], []).append(result_row)
 
-    instruments = [_instrument_coverage(group, stated_years) for group in by_instrument.values()]
+    gap_result = gaps.detect_gaps(conn, from_date=from_date, to_date=to_date)
+    instruments = [
+        _instrument_coverage(
+            group, stated_years, gap_result.available, gap_result.missing.get(instrument_id, [])
+        )
+        for instrument_id, group in by_instrument.items()
+    ]
     next_cursor = None
     if len(instruments) > limit:
         instruments = instruments[:limit]
@@ -178,14 +195,54 @@ def read_coverage(
 
     return CoverageView(
         never_acquired=False,
-        gap_detection=_NOT_COMPUTED,
+        gap_detection=GapDetection(
+            available=True,
+            reason=None,
+            missing_days=sum(len(dates) for dates in gap_result.missing.values()),
+        )
+        if gap_result.available
+        else _UNAVAILABLE,
         instruments=instruments,
         next_cursor=next_cursor,
     )
 
 
+def read_gap_dates(
+    conn: psycopg.Connection,
+    symbol: str,
+    *,
+    from_date: date | None = None,
+    to_date: date | None = None,
+) -> list[date] | None:
+    """The specific missing dates behind one instrument's gap count (design section 11).
+
+    Owner-confirmed choices (2026-09-29, CAP-001-E6-S2-tasks Open Gap 4): keyed by
+    the normalised ``symbol``; returns ``None`` when gaps are not computed
+    (detection unavailable, or no ``prices`` coverage), ``[]`` when computed and
+    none are missing, and never ``[]`` for unavailability (DAC-E6-4). Raises
+    ``InstrumentNotFound`` for an unknown symbol and ``ValueError`` when
+    ``from_date > to_date``.
+    """
+    normalised_symbol = normalise(symbol)
+    with conn.cursor() as cur:
+        cur.execute(_GAP_INSTRUMENT_SQL, {"symbol": normalised_symbol})
+        row = cur.fetchone()
+    if row is None:
+        raise InstrumentNotFound(normalised_symbol)
+    instrument_id, has_prices = row
+    if not has_prices:
+        return None
+    result = gaps.detect_gaps(conn, from_date=from_date, to_date=to_date)
+    if not result.available:
+        return None
+    return result.missing.get(instrument_id, [])
+
+
 def _instrument_coverage(
-    rows: list[tuple[object, ...]], stated_years: int | None
+    rows: list[tuple[object, ...]],
+    stated_years: int | None,
+    gaps_available: bool,
+    missing: list[date],
 ) -> InstrumentCoverage:
     _, symbol, lifecycle = rows[0][:3]
     by_type = {row[3]: row for row in rows}
@@ -206,6 +263,12 @@ def _instrument_coverage(
     covered_from, covered_to, acquired_from, acquired_to = (
         value if isinstance(value, date) else None for value in prices[4:8]
     )
+    if not gaps_available:
+        instrument_gaps = _UNAVAILABLE
+    elif presence["prices"] is not Presence.PRESENT:
+        instrument_gaps = _NOT_COMPUTED
+    else:
+        instrument_gaps = GapDetection(available=True, reason=None, missing_days=len(missing))
     return InstrumentCoverage(
         symbol=str(symbol),
         lifecycle=str(lifecycle),
@@ -214,5 +277,5 @@ def _instrument_coverage(
         covered_to=covered_to,
         last_acquired_at=max(acquired_at, default=None),
         depth_shortfall_years=_depth_shortfall_years(acquired_from, acquired_to, stated_years),
-        gaps=_NOT_COMPUTED,
+        gaps=instrument_gaps,
     )

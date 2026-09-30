@@ -76,7 +76,7 @@ here; that is CAP-001-E6-S3.
 
 **Purpose**: Make sure the `.sql` files this story adds ship inside the installed package.
 
-- [ ] T001 Add package data for the coverage SQL files in `pyproject.toml`, **only if
+- [x] T001 Add package data for the coverage SQL files in `pyproject.toml`, **only if
   CAP-001-E6-S1 has not already added it**: a `[tool.setuptools.package-data]` table
   with `factorflow = ["coverage/sql/*.sql"]`. Why: `[tool.setuptools.packages.find]`
   alone does not ship non-Python files, and the repo has no `MANIFEST.in` and no SCM
@@ -118,11 +118,11 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
 
 ### Mandatory Component Tests
 
-- [ ] T002 Create `tests/integration/test_coverage_gaps.py` with the module docstring
+- [x] T002 Create `tests/integration/test_coverage_gaps.py` with the module docstring
   (story, design 2.3, the TC list below), `pytestmark = pytest.mark.postgres`, and the
   three seed helpers above. No test functions yet (scaffolding for T003–T011).
 
-- [ ] T003 Implement TC-COMP-008 (Gap visibility, AC-8) in `tests/integration/test_coverage_gaps.py`
+- [x] T003 Implement TC-COMP-008 (Gap visibility, AC-8) in `tests/integration/test_coverage_gaps.py`
   - Arrange: A, B, C all have `prices` segments 2024-01-02..2024-01-05. A and B have
     bars on all four days. C lacks 2024-01-04.
   - Act: `read_coverage(conn)` with no bounds.
@@ -131,7 +131,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     `read_gap_dates(conn, "C") == [date(2024, 1, 4)]`. This matches design section 7:
     "three instruments, one missing a session the other two have, produces exactly one gap".
 
-- [ ] T004 Implement TC-COMP-028 (trading-day set is the union across instruments, DAC-E6-2) and TC-COMP-048 (own-dates check avoided, DAC-E6-S2-1) in `tests/integration/test_coverage_gaps.py`
+- [x] T004 Implement TC-COMP-028 (trading-day set is the union across instruments, DAC-E6-2) and TC-COMP-048 (own-dates check avoided, DAC-E6-S2-1) in `tests/integration/test_coverage_gaps.py`
   - TC-COMP-028: A, B, C are covered 2024-01-02..2024-01-04. A has bars on 01-02 and
     01-03. B has bars on 01-03 and 01-04. C has bars on all three days. Assert
     `gaps.detect_gaps(conn)` gives `missing == {A: [01-04], B: [01-02]}` and C is
@@ -142,7 +142,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     own, so a self-referential check would give zero. Assert B's dates `== [01-03]`
     and `missing_days == 1`, asserted **not** 0.
 
-- [ ] T005 Implement TC-COMP-029 (gap only inside own covered range, DAC-E6-3) and TC-COMP-049 (date before first acquisition is outside coverage, DAC-E6-S2-2) in `tests/integration/test_coverage_gaps.py`
+- [x] T005 Implement TC-COMP-029 (gap only inside own covered range, DAC-E6-3) and TC-COMP-049 (date before first acquisition is outside coverage, DAC-E6-S2-2) in `tests/integration/test_coverage_gaps.py`
   - TC-COMP-029: A is covered 01-02..01-05 with bars on all four days. B is covered
     01-03..01-04 with bars on both days. Assert B has no gaps: 01-02 and 01-05 are
     trading days but fall outside B's range. Then delete B's 01-04 bar. Assert
@@ -152,7 +152,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     `read_gap_dates(conn, "B") == []` and B's `missing_days == 0`, even though 01-02
     and 01-03 are trading days with no B bar.
 
-- [ ] T006 Implement TC-COMP-030 (unavailable below two instruments, with a reason, DAC-E6-4) and TC-COMP-050 (predicate inside the statement → no rows, DAC-E6-S2-3) in `tests/integration/test_coverage_gaps.py`
+- [x] T006 Implement TC-COMP-030 (unavailable below two instruments, with a reason, DAC-E6-4) and TC-COMP-050 (predicate inside the statement → no rows, DAC-E6-S2-3) in `tests/integration/test_coverage_gaps.py`
   - TC-COMP-030 (one instrument): only A has bars and a segment, 01-02..01-05, with
     01-03 missing. Assert `view.gap_detection.available is False` and
     `reason == "fewer_than_two_instruments_with_data"`. Assert
@@ -166,7 +166,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     statement with `to_date=01-24` returns B × {01-02, 01-03, 01-04, 01-05} and nothing
     for A. Also assert `detect_gaps(conn, from_date=01-02, to_date=01-05).available is False`.
 
-- [ ] T007 Implement TC-COMP-031 (prices only, DAC-E6-5) and TC-COMP-051 (no gaps for fundamentals / corporate actions, DAC-E6-S2-4) in `tests/integration/test_coverage_gaps.py`
+- [x] T007 Implement TC-COMP-031 (prices only, DAC-E6-5) and TC-COMP-051 (no gaps for fundamentals / corporate actions, DAC-E6-S2-4) in `tests/integration/test_coverage_gaps.py`
   - TC-COMP-031: A and B have `prices` segments 01-02..01-05 and bars on all days.
     A also has a `fundamentals` segment 2023-01-01..2024-12-31. Give B extra bars
     01-08..01-10 and widen B's prices segment to 01-10. Assert A reports no gaps for
@@ -178,7 +178,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     `InstrumentCoverage.gaps.missing_days is None` (not computed, not measured zero).
     Assert `read_gap_dates(conn, "F") is None`. See Open Gaps, PROVISIONAL item 3.
 
-- [ ] T008 Implement TC-COMP-032 (market-wide outage not claimed, DAC-E6-6) and TC-COMP-052 (a day missing for everyone yields no gap, DAC-E6-S2-5) in `tests/integration/test_coverage_gaps.py`
+- [x] T008 Implement TC-COMP-032 (market-wide outage not claimed, DAC-E6-6) and TC-COMP-052 (a day missing for everyone yields no gap, DAC-E6-S2-5) in `tests/integration/test_coverage_gaps.py`
   - A and B are both covered 01-02..01-05, and **both** lack 01-03, a weekday.
   - TC-COMP-032, service level: `view.gap_detection.available is True`. Both
     instruments' `missing_days == 0`. No response field names 01-03.
@@ -186,7 +186,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     in no instrument's list in `detect_gaps(conn).missing`. Add a comment that this
     documents the stated limit (design section 3, STD-UI-18) and is not a defect.
 
-- [ ] T009 Implement TC-COMP-053 (count for collapsed row, dates for expansion, DAC-E6-S2-6) in `tests/integration/test_coverage_gaps.py`
+- [x] T009 Implement TC-COMP-053 (count for collapsed row, dates for expansion, DAC-E6-S2-6) in `tests/integration/test_coverage_gaps.py`
   - Arrange: A has bars on 01-02..01-05. B lacks 01-03 and 01-05. Both are covered
     01-02..01-05.
   - Assert B's `InstrumentCoverage.gaps.missing_days == 2`. Assert
@@ -198,7 +198,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
 
 ### Additional Unit Tests
 
-- [ ] T010 [P] Add a drift guard in `tests/unit/test_coverage_gaps_sql_matches_design.py`
+- [x] T010 [P] Add a drift guard in `tests/unit/test_coverage_gaps_sql_matches_design.py`
   following the precedent of `tests/unit/test_migration_0001_matches_design.py`.
   Compare `src/factorflow/coverage/sql/gaps.sql` byte-for-byte to
   `sql_block_under_heading("### 2.3", path=<REPO_ROOT>/docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-coverage-service.md)`
@@ -208,7 +208,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
   properties (DAC-E6-2, DAC-E6-3, DAC-E6-S2-3) against silent edits. Needs no
   container.
 
-- [ ] T011 Add edge-case integration tests to `tests/integration/test_coverage_gaps.py`:
+- [x] T011 Add edge-case integration tests to `tests/integration/test_coverage_gaps.py`:
   - **Default range is everything acquired** (design 2.3, owner decision 2026-09-05;
     ingestion-api 2.4a). A and B are covered 2022-03-14..2024-01-04. Both have bars
     on {2022-03-14, 2022-03-15, 2022-03-16, 2024-01-02, 2024-01-03, 2024-01-04}, except
@@ -244,13 +244,13 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
 > (see Resolved Conflicts). If S1's implementation has already created either file,
 > bring it into line with the tasks below rather than creating a second copy.
 
-- [ ] T012 [P] Create `src/factorflow/coverage/sql/gaps.sql` as a **byte-for-byte copy**
+- [x] T012 [P] Create `src/factorflow/coverage/sql/gaps.sql` as a **byte-for-byte copy**
   of the `sql` block in component-design-coverage-service.md section 2.3. Include its
   first line, the comment `-- src/factorflow/coverage/sql/gaps.sql`, and the trailing
   newline. Keep the named parameters `%(from_date)s` / `%(to_date)s`. Do not add an
   instrument filter, lifecycle filter or `LIMIT`. T010 enforces the exact copy.
 
-- [ ] T013 [P] Create `src/factorflow/coverage/sql/gap_range.sql`. It is one
+- [x] T013 [P] Create `src/factorflow/coverage/sql/gap_range.sql`. It is one
   read-only statement that returns exactly one row
   `(from_date date, to_date date, available boolean)`:
   - `from_date = coalesce(%(from_date)s::date, min(covered_from))` and
@@ -268,12 +268,12 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     delivered by CAP-001-E5-S1) and `daily_bar` (migration 0002, delivered by
     CAP-001-E4-S1).
 
-- [ ] T014 [P] Create `src/factorflow/coverage/sql/gap_instrument.sql`. It is one
+- [x] T014 [P] Create `src/factorflow/coverage/sql/gap_instrument.sql`. It is one
   read-only statement: `SELECT i.instrument_id, EXISTS (SELECT 1 FROM coverage_segment cs WHERE cs.instrument_id = i.instrument_id AND cs.data_type = 'prices') AS has_prices FROM instrument i WHERE i.symbol = %(symbol)s;`
   The unique index `idx_instrument_symbol` guarantees at most one row. Used by
   `read_gap_dates` (T017).
 
-- [ ] T015 Create `src/factorflow/coverage/gaps.py` (depends on T012, T013):
+- [x] T015 Create `src/factorflow/coverage/gaps.py` (depends on T012, T013):
   - At import, load `GAPS_SQL` and `GAP_RANGE_SQL` from `Path(__file__).parent / "sql"`.
     Expose `GAPS_SQL` at module level, because T006 executes it directly.
   - `UNAVAILABLE_REASON: Final = "fewer_than_two_instruments_with_data"` is the
@@ -303,7 +303,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
 
 **Purpose**: Wire gap results into the coverage read that CAP-001-E6-S1 delivers, and add the expansion read.
 
-- [ ] T016 Wire gap detection into `read_coverage` in `src/factorflow/coverage/service.py`
+- [x] T016 Wire gap detection into `read_coverage` in `src/factorflow/coverage/service.py`
   (S1's module). Change only the gap fields:
   - After S1 assembles the page rows, call
     `gaps.detect_gaps(conn, from_date=from_date, to_date=to_date)` **once per
@@ -324,7 +324,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
     change is additive and does not change the pinned public dataclasses.
   - Leave S1's never-acquired short-circuit, filters, cursor and depth logic untouched.
 
-- [ ] T017 Add `read_gap_dates` to `src/factorflow/coverage/service.py` (depends on T014, T015, T016). The design section 11 API names it: "Instrument, date range → the specific missing dates".
+- [x] T017 Add `read_gap_dates` to `src/factorflow/coverage/service.py` (depends on T014, T015, T016). The design section 11 API names it: "Instrument, date range → the specific missing dates".
   - Signature: `read_gap_dates(conn: psycopg.Connection, symbol: str, *, from_date: date | None = None, to_date: date | None = None) -> list[date] | None`.
   - Normalise `symbol` with `factorflow.instruments.symbols.normalise`, following
     the `retire_symbol` precedent. Both that module and `InstrumentNotFound` were
@@ -346,7 +346,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
 
 **Purpose**: Traceability comments, documentation and clean validation.
 
-- [ ] T018 [P] Add a module docstring to `src/factorflow/coverage/gaps.py`. It cites
+- [x] T018 [P] Add a module docstring to `src/factorflow/coverage/gaps.py`. It cites
   component design 2.2, 2.3 and 3, and AC-8, DAC-E6-2…6, DAC-E6-S2-1…6. It states
   both limits in plain words: unavailable below two instruments, and a market-wide
   outage is undetectable. Add a one-line code comment above the default-range
@@ -354,7 +354,7 @@ weekdays (2024-01-02 Tue … 2024-01-05 Fri) is enough.
   PROVISIONAL choices in the `read_coverage` and `read_gap_dates` docstrings, citing
   this plan's Open Gaps, as the existing `runs/queries.py` does for its
   owner-confirmed cursor contract.
-- [ ] T019 Run `uv run ruff format --check .`, `uv run ruff check .`, `uv run mypy src`, `uv run pytest -m 'not postgres'` and `uv run pytest -m postgres`. Fix issues only in files this story touches. Then run `uv build` and confirm that `unzip -l dist/factorflow-*.whl` lists `factorflow/coverage/sql/gaps.sql`, `gap_range.sql` and `gap_instrument.sql`.
+- [x] T019 Run `uv run ruff format --check .`, `uv run ruff check .`, `uv run mypy src`, `uv run pytest -m 'not postgres'` and `uv run pytest -m postgres`. Fix issues only in files this story touches. Then run `uv build` and confirm that `unzip -l dist/factorflow-*.whl` lists `factorflow/coverage/sql/gaps.sql`, `gap_range.sql` and `gap_instrument.sql`.
 
 **Checkpoint**: All acceptance criteria satisfied. Every validation command exits 0. The wheel carries the SQL files.
 
