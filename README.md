@@ -50,9 +50,12 @@ crash-looping. The acquisition run API routes — `POST /api/acquisition-runs`,
 `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and
 `POST /api/acquisition-runs/{id}/cancel` — are also in place, backed by a
 read-only journal query boundary (`src/factorflow/runs/queries.py`) with
-keyset cursor pagination and failure-first result ordering. The remaining API
-route (coverage) and the Coverage and Runs screens are not yet built; those
-two destinations still render a placeholder. What exists today is described
+keyset cursor pagination and failure-first result ordering. The coverage
+read — `src/factorflow/coverage/service.py`, deriving per-instrument
+coverage at read time from the rows actually written — is in place, without
+gap detection yet. The remaining API route (coverage) and the Coverage and
+Runs screens are not yet built; those two destinations still render a
+placeholder. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
@@ -100,6 +103,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
 | `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with optional state filter, and fetching a single run's summary, persisted counts, and paged per-instrument results with failure-first ordering and outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
+| `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time; `sql/coverage.sql` and `sql/never_acquired.sql` are its statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Not yet exposed over HTTP. See [Coverage read](#coverage-read) |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
@@ -572,6 +576,69 @@ after the written range is absorbed.
 The function has no database dependency and carries no side effects, so it can
 be tested against a plain list of tuples (see `tests/unit/test_coverage_merge.py`)
 independently of the writer's transaction path.
+
+## Coverage read
+
+`src/factorflow/coverage/service.py` reports what the store actually holds,
+per instrument (CAP-001-E6-S1). Nothing is stored as a summary: every read
+derives coverage from `coverage_segment`, the observation tables,
+`acquisition_state`, `owner_setting` and `instrument`, so no range can read
+as complete that was not written. The module issues no `INSERT`, `UPDATE`
+or `DELETE`, and binds every value as a parameter.
+
+`read_coverage(conn, *, symbol=None, lifecycle=None, from_date=None,
+to_date=None, cursor=None, limit=50)` returns a `CoverageView`:
+
+- `never_acquired` comes from its own query (`never_acquired.sql`) over the
+  four observation tables, so a filter that matches nothing on a populated
+  store is not reported as never acquired. When it is `True`, `instruments`
+  is empty and `gap_detection` is unavailable with reason
+  `fewer_than_two_instruments_with_data`.
+- `instruments` holds one `InstrumentCoverage` per instrument in symbol
+  order, retired instruments included. `presence` maps each of `reference`,
+  `prices`, `fundamentals` and `corporate_actions` to `present` (a segment
+  exists), `absent` (acquisition recorded an outcome but no segment exists)
+  or `unknown` (never attempted). `covered_from` / `covered_to` are the
+  instrument's `prices` range, `None` without a prices segment.
+  `last_acquired_at` is the latest `acquisition_state` timestamp across the
+  data types — never a run's intent. `depth_shortfall_years` is
+  `ceil((stated × 365 − covered days) / 365)` against the owner's stated
+  history depth, and `None` — never zero — when the depth is met or unset.
+- `from_date` / `to_date` narrow `covered_from` / `covered_to` to the
+  segments overlapping them; an omitted bound applies no predicate.
+  `presence` and `depth_shortfall_years` ignore the bounds and describe
+  everything acquired (decision DEC-0003, not yet owner-reviewed).
+- `symbol` is a prefix filter and `cursor` the previous page's last symbol;
+  both are normalised as `list_instruments` normalises them. `next_cursor`
+  is set only when more instruments follow: one row beyond `limit` is
+  fetched as a lookahead, so an exactly full final page carries no cursor.
+
+`ValueError` is raised when `from_date > to_date`, `lifecycle` is not
+`active` or `retired`, or `limit` is outside 1..500. A database error
+propagates rather than being rendered as empty coverage.
+
+Gap detection is not implemented yet (CAP-001-E6-S2). Until it lands, every
+gap field on a populated read — `CoverageView.gap_detection` and each
+`InstrumentCoverage.gaps` — is the "not computed" placeholder
+`GapDetection(available=True, reason=None, missing_days=None)`.
+
+**Known limitations, carried forward as accepted warnings from implementation
+review v2** (`CAP-001-E6-S1-implementation-review-v2.md`) — none blocks a
+current acceptance criterion:
+
+- On a bounded read one row mixes a window-scoped range with
+  acquisition-scoped `presence` and `depth_shortfall_years`: a narrow window
+  can show a short range with no shortfall, and a type `present` with no
+  data inside the range. The component design does not yet state which
+  should yield; DEC-0003 awaits owner review before the coverage route and
+  screen consume it (IR-001, medium).
+- DEC-0003 is cited from `coverage.sql`, `service.py` and
+  `tests/integration/test_coverage_reads.py`, but is recorded only in the
+  harness repository, not in this one (IR-002, low).
+- `_` and `%` in the `symbol` prefix are not escaped, so they act as `LIKE`
+  wildcards (`A_L` matches `AAL`). No injection is possible; the same holds
+  for `list_instruments`, and a shared escaping helper is deferred to its
+  own change (IR-003, low).
 
 ## Observation writer
 
@@ -1105,6 +1172,8 @@ Tests marked `slow` are the volume and resumability suite (`test_runner_volume.p
 `test_runner_resume.py`) introduced in CAP-001-E4-S7. They require Docker and take
 around 160 seconds to run a 3000-instrument scenario against PostgreSQL. They are
 included in `uv run pytest -m postgres` and in the full suite.
+`test_coverage_volume.py` (CAP-001-E6-S1), which pages coverage across 3000
+instruments, is also marked `slow`.
 
 The interface suite is Vitest with React Testing Library, run from the
 repository root:
