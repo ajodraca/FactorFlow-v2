@@ -1,11 +1,13 @@
 """Integration tests: coverage reads at 3000 instruments (CAP-001-E6-S1).
 
 - TC-COMP-036 (DAC-E6-10), TC-COMP-047 (DAC-E6-S1-7): symbol filter, lifecycle
-  filter and cursor paging stay correct at AC-4's 3000 instruments.
+  filter, date bounds and cursor paging stay correct at AC-4's 3000 instruments.
 
 Correctness only. No elapsed-time bound is asserted: no latency target exists
 (coverage-service OQ 3) and the suite configures no timeout (task plan Open Gaps 4).
 """
+
+from datetime import date
 
 import psycopg
 import pytest
@@ -59,6 +61,19 @@ def _all_pages(conn: psycopg.Connection, **filters: str) -> list[list[str]]:
             return pages
 
 
+def _all_ranges(
+    conn: psycopg.Connection, **bounds: date
+) -> dict[str, tuple[date | None, date | None]]:
+    ranges: dict[str, tuple[date | None, date | None]] = {}
+    cursor: str | None = None
+    while True:
+        view = read_coverage(conn, cursor=cursor, **bounds)  # type: ignore[arg-type]
+        ranges.update({row.symbol: (row.covered_from, row.covered_to) for row in view.instruments})
+        cursor = view.next_cursor
+        if cursor is None:
+            return ranges
+
+
 # Implements TC-COMP-036
 # Implements TC-COMP-047
 def test_paging_and_filters_at_3000_instruments(
@@ -78,3 +93,11 @@ def test_paging_and_filters_at_3000_instruments(
 
     retired = [s for page in _all_pages(conn, lifecycle="retired") for s in page]
     assert retired == [f"S{n:04d}" for n in range(10, SCALE + 1, 10)]
+
+    inside = _all_ranges(conn, from_date=date(2024, 6, 1), to_date=date(2024, 6, 30))
+    assert list(inside) == expected
+    assert set(inside.values()) == {(date(2024, 1, 1), date(2024, 12, 31))}
+
+    outside = _all_ranges(conn, from_date=date(2025, 1, 1))
+    assert list(outside) == expected
+    assert set(outside.values()) == {(None, None)}

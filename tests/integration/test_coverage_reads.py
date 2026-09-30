@@ -6,7 +6,9 @@
 - TC-COMP-045 (DAC-E6-S1-5): last acquired comes from ``acquisition_state``,
   including failed attempts, and never from a run's intent.
 
-Also covers the functional half of DAC-E6-S1-7 (filters and cursor paging) and
+Also covers the functional half of DAC-E6-S1-7 (filters, date bounds and cursor
+paging; date bounds narrow the covered range only, never presence or the depth
+shortfall, per DEC-0003) and
 the input-validation and error-propagation rules of component design sections 4
 and 8 (SEC-INP-001, OPS-ERR-001).
 """
@@ -19,6 +21,7 @@ import psycopg
 import pytest
 
 from factorflow.coverage.service import Presence, read_coverage
+from factorflow.instruments.settings import write_history_depth
 
 pytestmark = pytest.mark.postgres
 
@@ -135,7 +138,15 @@ def test_last_acquired_includes_failed_attempts_and_ignores_run_intent(
     _state(conn, b, "corporate_actions", "failed", failed_at)
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO acquisition_run (state, history_depth_years) VALUES ('requested', 5)"
+            "INSERT INTO acquisition_run (state, history_depth_years) "
+            "VALUES ('requested', 5) RETURNING run_id"
+        )
+        run = cur.fetchone()
+        assert run is not None
+        cur.execute(
+            "INSERT INTO run_instrument_result (run_id, instrument_id, data_type, outcome, "
+            "completed_at) VALUES (%s, %s, 'prices', 'written', %s)",
+            (run[0], d, datetime(2024, 3, 1, 12, tzinfo=UTC)),
         )
     conn.commit()
 
@@ -199,6 +210,91 @@ def test_cursor_paging_returns_every_instrument_once(
 
     assert [len(page) for page in pages] == [2, 2, 1]
     assert [s for page in pages for s in page] == ["AAA", "BBB", "CCC", "DDD", "EEE"]
+
+
+def test_cursor_is_normalised_like_the_symbol_filter(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    ids = [_instrument(conn, s) for s in ("AAA", "BBB", "CCC")]
+    _bars(conn, ids[0], [date(2024, 1, 2)])
+    conn.commit()
+
+    view = read_coverage(conn, cursor=" aaa ", limit=5)
+
+    assert [r.symbol for r in view.instruments] == ["BBB", "CCC"]
+
+
+def test_date_bounds_select_overlapping_segments(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    a = _instrument(conn, "AAA")
+    b = _instrument(conn, "BBB")
+    c = _instrument(conn, "CCC")
+    for instrument_id in (a, b, c):
+        _bars(conn, instrument_id, [date(2024, 1, 2)])
+    _segment(conn, a, "prices", date(2020, 1, 2), date(2020, 12, 31))
+    _segment(conn, a, "prices", date(2024, 1, 2), date(2024, 6, 28))
+    _segment(conn, b, "prices", date(2024, 1, 2), date(2024, 6, 28))
+    _segment(conn, c, "prices", date(2020, 1, 2), date(2020, 12, 31))
+    conn.commit()
+
+    def ranges(**bounds: date) -> dict[str, tuple[date | None, date | None]]:
+        view = read_coverage(conn, **bounds)  # type: ignore[arg-type]
+        return {r.symbol: (r.covered_from, r.covered_to) for r in view.instruments}
+
+    assert ranges() == {
+        "AAA": (date(2020, 1, 2), date(2024, 6, 28)),
+        "BBB": (date(2024, 1, 2), date(2024, 6, 28)),
+        "CCC": (date(2020, 1, 2), date(2020, 12, 31)),
+    }
+    assert ranges(from_date=date(2024, 1, 1), to_date=date(2024, 12, 31)) == {
+        "AAA": (date(2024, 1, 2), date(2024, 6, 28)),
+        "BBB": (date(2024, 1, 2), date(2024, 6, 28)),
+        "CCC": (None, None),
+    }
+    assert ranges(to_date=date(2020, 12, 31)) == {
+        "AAA": (date(2020, 1, 2), date(2020, 12, 31)),
+        "BBB": (None, None),
+        "CCC": (date(2020, 1, 2), date(2020, 12, 31)),
+    }
+    assert ranges(from_date=date(2020, 12, 31)) == {
+        "AAA": (date(2020, 1, 2), date(2024, 6, 28)),
+        "BBB": (date(2024, 1, 2), date(2024, 6, 28)),
+        "CCC": (date(2020, 1, 2), date(2020, 12, 31)),
+    }
+    assert ranges(from_date=date(2024, 6, 29)) == {
+        "AAA": (None, None),
+        "BBB": (None, None),
+        "CCC": (None, None),
+    }
+
+
+def test_date_bounds_do_not_change_presence_or_depth_shortfall(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    a = _instrument(conn, "AAA")
+    _bars(conn, a, [date(2024, 1, 2)])
+    _segment(conn, a, "prices", date(2015, 1, 2), date(2019, 12, 31))
+    _segment(conn, a, "prices", date(2024, 1, 2), date(2024, 1, 31))
+    _segment(conn, a, "fundamentals", date(2016, 3, 31), date(2016, 3, 31))
+    _state(conn, a, "fundamentals", "written", datetime(2024, 2, 1, tzinfo=UTC))
+    conn.commit()
+    write_history_depth(conn, 5)
+
+    (unbounded,) = read_coverage(conn).instruments
+    (bounded,) = read_coverage(
+        conn, from_date=date(2024, 1, 1), to_date=date(2024, 12, 31)
+    ).instruments
+
+    assert unbounded.depth_shortfall_years is None
+    assert (bounded.covered_from, bounded.covered_to) == (date(2024, 1, 2), date(2024, 1, 31))
+    assert bounded.depth_shortfall_years is None
+    assert bounded.presence == unbounded.presence
+    assert bounded.presence["prices"] is Presence.PRESENT
+    assert bounded.presence["fundamentals"] is Presence.PRESENT
 
 
 @pytest.mark.parametrize(

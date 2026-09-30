@@ -105,7 +105,17 @@ def read_coverage(
     (OPS-ERR-001). ``never_acquired`` comes from its own query over every
     observation table, so a filter matching nothing on a populated store is
     not reported as never acquired (AC-17, DAC-E6-S1-2). ``next_cursor`` is the
-    page's last symbol when more instruments follow it, otherwise ``None``.
+    page's last symbol when more instruments follow it, otherwise ``None``: one
+    row beyond ``limit`` is fetched as a lookahead, so an exactly full final page
+    carries no cursor and no empty trailing page is produced (a deviation from
+    the plan's "page is full" wording in T012 step 6). ``symbol`` and ``cursor``
+    are both normalised, as ``list_instruments`` does.
+
+    ``from_date`` / ``to_date`` narrow ``covered_from`` / ``covered_to`` to the
+    segments overlapping them; an omitted bound applies no predicate (design
+    2.3). ``presence`` and ``depth_shortfall_years`` describe what was acquired,
+    so they are computed from every segment regardless of the bounds (DEC-0003,
+    design 2.4 and AC 7).
 
     Owner-confirmed choices (2026-09-29, CAP-001-E6-S1-tasks Open Gaps 1-3):
 
@@ -150,7 +160,7 @@ def read_coverage(
                 "lifecycle": lifecycle,
                 "from_date": from_date,
                 "to_date": to_date,
-                "cursor_symbol": cursor,
+                "cursor_symbol": normalise(cursor) if cursor is not None else None,
                 "limit": limit + 1,
             },
         )
@@ -182,8 +192,8 @@ def _instrument_coverage(
     presence: dict[str, Presence] = {}
     acquired_at: list[datetime] = []
     for data_type in DATA_TYPES:
-        _, _, _, _, seg_from, _, outcome, last_acquired_at = by_type[data_type]
-        if seg_from is not None:
+        _, _, _, _, _, _, acquired_from, _, outcome, last_acquired_at = by_type[data_type]
+        if acquired_from is not None:
             presence[data_type] = Presence.PRESENT
         elif outcome is not None:
             presence[data_type] = Presence.ABSENT
@@ -193,8 +203,9 @@ def _instrument_coverage(
             acquired_at.append(last_acquired_at)
 
     prices = by_type["prices"]
-    covered_from = prices[4] if isinstance(prices[4], date) else None
-    covered_to = prices[5] if isinstance(prices[5], date) else None
+    covered_from, covered_to, acquired_from, acquired_to = (
+        value if isinstance(value, date) else None for value in prices[4:8]
+    )
     return InstrumentCoverage(
         symbol=str(symbol),
         lifecycle=str(lifecycle),
@@ -202,6 +213,6 @@ def _instrument_coverage(
         covered_from=covered_from,
         covered_to=covered_to,
         last_acquired_at=max(acquired_at, default=None),
-        depth_shortfall_years=_depth_shortfall_years(covered_from, covered_to, stated_years),
+        depth_shortfall_years=_depth_shortfall_years(acquired_from, acquired_to, stated_years),
         gaps=_NOT_COMPUTED,
     )
