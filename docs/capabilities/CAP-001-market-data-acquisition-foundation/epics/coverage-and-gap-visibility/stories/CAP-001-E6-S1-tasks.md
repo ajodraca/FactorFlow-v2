@@ -83,10 +83,10 @@ and wheel contents), T014–T015 (docstrings, validation).
 **Purpose**: Create the `coverage` package and make sure its `.sql` files ship in
 the installed package.
 
-- [ ] T001 Create `src/factorflow/coverage/__init__.py` (empty module marker). The
+- [x] T001 Create `src/factorflow/coverage/__init__.py` (empty module marker). The
   `sql/` directory is created by T010/T011 when the first `.sql` file is written; no
   `.gitkeep` is needed.
-- [ ] T002 [P] Add package data for the coverage SQL files in `pyproject.toml`: a
+- [x] T002 [P] Add package data for the coverage SQL files in `pyproject.toml`: a
   `[tool.setuptools.package-data]` table with `factorflow = ["coverage/sql/*.sql"]`.
   Why: `[tool.setuptools.packages.find]` alone does not ship non-Python files, the
   repo has no `MANIFEST.in` and no SCM plugin, and the `Dockerfile` runs
@@ -123,7 +123,7 @@ pins is the never-acquired branch (T004), which S2 leaves untouched.
 
 ### Mandatory Component Tests
 
-- [ ] T003 [P] Implement TC-COMP-007 (AC-7), TC-COMP-027 (DAC-E6-1), TC-COMP-012 (AC-12) and TC-COMP-045 (DAC-E6-S1-5) in `tests/integration/test_coverage_reads.py`
+- [x] T003 [P] Implement TC-COMP-007 (AC-7), TC-COMP-027 (DAC-E6-1), TC-COMP-012 (AC-12) and TC-COMP-045 (DAC-E6-S1-5) in `tests/integration/test_coverage_reads.py`
   - Written rows only (TC-COMP-027, TC-COMP-007): instrument A has `daily_bar`
     rows but no `coverage_segment`; instrument B has both, with a `prices` segment
     2024-01-02..2024-01-05. Assert A's `covered_from` / `covered_to` are `None` and
@@ -153,7 +153,7 @@ pins is the never-acquired branch (T004), which S2 leaves untouched.
     raises `ValueError`; on a closed connection `read_coverage` raises a
     `psycopg.Error` subclass rather than returning an empty view.
 
-- [ ] T004 [P] Implement TC-COMP-017 (AC-17), TC-COMP-033 (DAC-E6-7) and TC-COMP-042 (DAC-E6-S1-2) in `tests/integration/test_coverage_empty.py`
+- [x] T004 [P] Implement TC-COMP-017 (AC-17), TC-COMP-033 (DAC-E6-7) and TC-COMP-042 (DAC-E6-S1-2) in `tests/integration/test_coverage_empty.py`
   - Empty store: `read_coverage(conn)` returns `never_acquired is True`,
     `instruments == []`, `next_cursor is None`, and
     `gap_detection == GapDetection(available=False, reason="fewer_than_two_instruments_with_data", missing_days=None)`.
@@ -169,7 +169,7 @@ pins is the never-acquired branch (T004), which S2 leaves untouched.
     whose only observation is one `fundamental_observation` row reports
     `never_acquired is False`.
 
-- [ ] T005 [P] Implement TC-COMP-037 (DAC-E6-11) and TC-COMP-041 (DAC-E6-S1-1) in `tests/unit/test_coverage_shapes.py`
+- [x] T005 [P] Implement TC-COMP-037 (DAC-E6-11) and TC-COMP-041 (DAC-E6-S1-1) in `tests/unit/test_coverage_shapes.py`
   - `Presence` has exactly the three values `present`, `absent`, `unknown`, and is a
     `StrEnum`.
   - `GapDetection`, `InstrumentCoverage` and `CoverageView` are frozen dataclasses
@@ -179,14 +179,14 @@ pins is the never-acquired branch (T004), which S2 leaves untouched.
     (design section 7 "Shortfall is absent, not zero").
   - No container needed.
 
-- [ ] T006 [P] Implement TC-COMP-021 (AC-21), TC-COMP-034 (DAC-E6-8), TC-COMP-044 (DAC-E6-S1-4) and TC-COMP-104 (DAC-E2-6) in `tests/integration/test_coverage_retired.py`
+- [x] T006 [P] Implement TC-COMP-021 (AC-21), TC-COMP-034 (DAC-E6-8), TC-COMP-044 (DAC-E6-S1-4) and TC-COMP-104 (DAC-E2-6) in `tests/integration/test_coverage_retired.py`
   - Arrange one active and one retired instrument (`lifecycle='retired'`,
     `retired_at` set), both with `prices` segments and bars.
   - Assert both appear in an unfiltered read; the retired one has
     `lifecycle == "retired"` and its retained `covered_from` / `covered_to`; the
     active one has `lifecycle == "active"`.
 
-- [ ] T007 [P] Implement TC-COMP-035 (DAC-E6-9), TC-COMP-043 (DAC-E6-S1-3), and the covered-range half of TC-COMP-038 (DAC-E6-12) / TC-COMP-046 (DAC-E6-S1-6) in `tests/integration/test_coverage_depth.py`
+- [x] T007 [P] Implement TC-COMP-035 (DAC-E6-9), TC-COMP-043 (DAC-E6-S1-3), and the covered-range half of TC-COMP-038 (DAC-E6-12) / TC-COMP-046 (DAC-E6-S1-6) in `tests/integration/test_coverage_depth.py`
   - Depth (TC-COMP-035, TC-COMP-043; story Testing): set the stated depth to 5 years
     with `write_history_depth`. Instrument A is covered for 3 years: assert
     `depth_shortfall_years == 2`. Instrument B meets 5 years: assert
@@ -204,7 +204,7 @@ pins is the never-acquired branch (T004), which S2 leaves untouched.
     `tests/integration/test_coverage_gaps.py`, but that file is created by
     CAP-001-E6-S2 T002. It lives here so that S1 does not create an S2-owned file.
 
-- [ ] T008 [P] Implement TC-COMP-036 (DAC-E6-10) and TC-COMP-047 (DAC-E6-S1-7) in `tests/integration/test_coverage_volume.py`
+- [x] T008 [P] Implement TC-COMP-036 (DAC-E6-10) and TC-COMP-047 (DAC-E6-S1-7) in `tests/integration/test_coverage_volume.py`
   - Mark `postgres` and `slow` (precedent: `tests/integration/test_runner_volume.py`).
   - Arrange 3000 instruments with `prices` segments and one year of bars, seeded with
     set-based `INSERT … SELECT generate_series(…)` rather than row-by-row inserts.
@@ -216,7 +216,7 @@ pins is the never-acquired branch (T004), which S2 leaves untouched.
 
 ### Additional Unit Tests
 
-- [ ] T009 [P] Add unit tests for the depth-shortfall helper and the never-acquired
+- [x] T009 [P] Add unit tests for the depth-shortfall helper and the never-acquired
   gap state in `tests/unit/test_coverage_shapes.py` (append):
   - `_depth_shortfall_years(covered_from, covered_to, stated_years)` follows the
     PROVISIONAL ceiling rule in Open Gaps: 3 of 5 years → 2; exactly 5 → `None`;
@@ -237,7 +237,7 @@ errors.
 
 **Purpose**: Write the coverage SQL files and `service.py` that make Phase 2 pass.
 
-- [ ] T010 [P] Write `src/factorflow/coverage/sql/coverage.sql` — the per-instrument
+- [x] T010 [P] Write `src/factorflow/coverage/sql/coverage.sql` — the per-instrument
   coverage page:
   - Selects from `instrument` (`instrument_id`, `symbol`, `lifecycle`), left-joined
     to `coverage_segment` aggregated per instrument and data type
@@ -254,13 +254,13 @@ errors.
     `%(lifecycle)s`, `%(from_date)s`, `%(to_date)s` (segments overlapping the bounds
     only), `%(cursor_symbol)s`, `%(limit)s`. Bound parameters only; no DML (design
     AC 8).
-- [ ] T011 [P] Write `src/factorflow/coverage/sql/never_acquired.sql` — the separate
+- [x] T011 [P] Write `src/factorflow/coverage/sql/never_acquired.sql` — the separate
   existence check over **every** observation table in migration 0002:
   `SELECT NOT (EXISTS (SELECT 1 FROM daily_bar) OR EXISTS (SELECT 1 FROM fundamental_observation) OR EXISTS (SELECT 1 FROM corporate_action) OR EXISTS (SELECT 1 FROM instrument_reference)) AS never_acquired;`
   DAC-E6-7 defines never-acquired as "the absence of any observation row in the
   store", so checking `daily_bar` alone would be wrong. Kept separate from the
   coverage query per design section 2.5 and DAC-E6-S1-2.
-- [ ] T012 Write `src/factorflow/coverage/service.py` — the public read API
+- [x] T012 Write `src/factorflow/coverage/service.py` — the public read API
   (depends on T010, T011):
   - Declare the four pinned dataclasses exactly as in design section 2.4:
     `Presence(StrEnum)`, `GapDetection`, `InstrumentCoverage`, `CoverageView`
@@ -320,7 +320,7 @@ every Phase 2 test passes under `uv run pytest -m postgres` and
 **Purpose**: Confirm the package is importable by the S3 API route and ships its
 SQL. No HTTP surface is introduced here.
 
-- [ ] T013 Confirm `python -c "from factorflow.coverage.service import read_coverage, CoverageView"`
+- [x] T013 Confirm `python -c "from factorflow.coverage.service import read_coverage, CoverageView"`
   succeeds without changes to `src/factorflow/__init__.py` (it has no `__all__`
   export list, so none is expected). Then run `uv build` and confirm that
   `unzip -l dist/factorflow-*.whl` lists `factorflow/coverage/sql/coverage.sql` and
@@ -334,13 +334,13 @@ SQL. No HTTP surface is introduced here.
 
 **Purpose**: Validation passes cleanly; docstrings match design intent.
 
-- [ ] T014 [P] Add a module docstring to `src/factorflow/coverage/service.py` citing
+- [x] T014 [P] Add a module docstring to `src/factorflow/coverage/service.py` citing
   component design sections 2.2, 2.4 and 2.5 and the ACs it satisfies (AC-7, AC-12,
   AC-17, AC-21, DAC-E6-1, DAC-E6-7, DAC-E6-S1-1…7). Put the PROVISIONAL choices
   (depth rounding, prices range, gap placeholder) in the `read_coverage` docstring,
   citing this plan's Open Gaps, as `src/factorflow/runs/queries.py` does for its
   owner-confirmed cursor contract.
-- [ ] T015 Run `uv run ruff format --check .`, `uv run ruff check .`,
+- [x] T015 Run `uv run ruff format --check .`, `uv run ruff check .`,
   `uv run mypy src`, `uv run pytest -m 'not postgres'` and `uv run pytest -m postgres`.
   Fix issues only in files this story touches.
 
