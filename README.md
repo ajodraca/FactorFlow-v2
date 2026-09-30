@@ -52,8 +52,9 @@ crash-looping. The acquisition run API routes — `POST /api/acquisition-runs`,
 read-only journal query boundary (`src/factorflow/runs/queries.py`) with
 keyset cursor pagination and failure-first result ordering. The coverage
 read — `src/factorflow/coverage/service.py`, deriving per-instrument
-coverage at read time from the rows actually written — is in place, without
-gap detection yet. The remaining API route (coverage) and the Coverage and
+coverage at read time from the rows actually written — is in place, with gap
+detection in daily prices (`src/factorflow/coverage/gaps.py`). The remaining
+API route (coverage) and the Coverage and
 Runs screens are not yet built; those two destinations still render a
 placeholder. What exists today is described
 below — everything else in `docs/` is specification for work not yet
@@ -103,7 +104,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
 | `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with optional state filter, and fetching a single run's summary, persisted counts, and paged per-instrument results with failure-first ordering and outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
-| `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time; `sql/coverage.sql` and `sql/never_acquired.sql` are its statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Not yet exposed over HTTP. See [Coverage read](#coverage-read) |
+| `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time, and `read_gap_dates`, one instrument's missing dates; `gaps.py` derives the trading-day set and each instrument's missing days (`detect_gaps`). `sql/coverage.sql`, `sql/never_acquired.sql`, `sql/gap_instrument.sql`, `sql/gap_range.sql` and `sql/gaps.sql` are their statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Not yet exposed over HTTP. See [Coverage read](#coverage-read) and [Gap detection](#gap-detection) |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api) and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
@@ -617,10 +618,9 @@ to_date=None, cursor=None, limit=50)` returns a `CoverageView`:
 `active` or `retired`, or `limit` is outside 1..500. A database error
 propagates rather than being rendered as empty coverage.
 
-Gap detection is not implemented yet (CAP-001-E6-S2). Until it lands, every
-gap field on a populated read — `CoverageView.gap_detection` and each
-`InstrumentCoverage.gaps` — is the "not computed" placeholder
-`GapDetection(available=True, reason=None, missing_days=None)`.
+The gap fields — `CoverageView.gap_detection` and each
+`InstrumentCoverage.gaps` — are filled by gap detection; see
+[Gap detection](#gap-detection).
 
 **Known limitations, carried forward as accepted warnings from implementation
 review v2** (`CAP-001-E6-S1-implementation-review-v2.md`) — none blocks a
@@ -639,6 +639,72 @@ current acceptance criterion:
   wildcards (`A_L` matches `AAL`). No injection is possible; the same holds
   for `list_instruments`, and a shared escaping helper is deferred to its
   own change (IR-003, low).
+
+## Gap detection
+
+`src/factorflow/coverage/gaps.py` finds missing trading days in daily prices
+(CAP-001-E6-S2). The provider supplies no historical trading calendar, so a
+trading day is any date on which *any* instrument has a `daily_bar` in the
+range. A gap is a trading day inside an instrument's own `prices` covered
+range for which that instrument has no bar. Only `prices` are checked:
+fundamentals and corporate actions carry no per-day expectation.
+
+`detect_gaps(conn, *, from_date=None, to_date=None)` returns a `GapResult`
+with `available`, the resolved `from_date` / `to_date`, and `missing`, a map
+from `instrument_id` to its missing dates in ascending order, holding only
+instruments with at least one gap. It runs two statements:
+
+- `sql/gap_range.sql` resolves an omitted bound to the widest `prices`
+  coverage across all instruments — everything acquired, not a trailing
+  window — and reports whether at least two instruments hold bars in the
+  range. When fewer do, detection is unavailable and `sql/gaps.sql` is not
+  run.
+- `sql/gaps.sql` is the component design's statement (section 2.3), copied
+  verbatim; `tests/unit/test_coverage_gaps_sql_matches_design.py` fails if
+  the two drift apart. It evaluates the same availability predicate inside
+  the statement, so it returns no rows when detection is unavailable.
+
+`read_coverage` runs detection once per request over the caller's bounds:
+
+- `gap_detection` is unavailable with reason
+  `fewer_than_two_instruments_with_data` and `missing_days=None` — never
+  zero — when detection is unavailable. Otherwise its `missing_days` is the
+  total across every instrument in the resolved range, not only the
+  returned page.
+- Each instrument's `gaps` inherits the view's unavailability. When
+  available, an instrument without `prices` coverage has no gaps computed
+  (`missing_days=None`), and every other instrument carries its own count.
+  `InstrumentCoverage` exposes the count only, never the dates.
+
+`read_gap_dates(conn, symbol, *, from_date=None, to_date=None)` returns the
+dates behind one instrument's count, keyed by the normalised symbol. It
+returns `None` when gaps are not computed — detection unavailable, or no
+`prices` coverage — and `[]` only when they are computed and none are
+missing. An unknown symbol raises `InstrumentNotFound`. An inverted range
+raises `ValueError`, from `read_coverage` always and from `read_gap_dates`
+once the instrument is found to hold `prices` coverage.
+
+`UNAVAILABLE_REASON` is defined in `gaps.py` and re-exported from
+`service.py` under the same name. Database errors propagate.
+
+Two limits are stated rather than hidden: detection needs at least two
+instruments with bars in the range, and a market-wide outage is
+undetectable — a day every instrument lacks never enters the trading-day
+set, so it is nobody's gap.
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E6-S2-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- The view-level `gap_detection.missing_days` total on an available read is
+  implemented but asserted by no test (IR-001, medium).
+- The task plan's per-criterion `-k "008 or …"` validation selectors select
+  no tests, because TC traceability is carried in `# Implements TC-COMP-…`
+  comments rather than test names; run the whole
+  `tests/integration/test_coverage_gaps.py` instead (IR-002, medium).
+- `read_gap_dates`'s `from_date` / `to_date` are exercised by no test
+  (IR-005, low). Three further low findings concern test-assertion strength
+  only (IR-003, IR-004, IR-006).
 
 ## Observation writer
 
