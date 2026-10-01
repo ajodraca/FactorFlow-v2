@@ -4,10 +4,11 @@ Component design: `component-design-ingestion-api.md` sections 2.1, 11.
 `HealthResponse` is CAP-001-E1-S6's contribution; the instrument and
 settings models below are CAP-001-E2-S3's. The run models below are
 CAP-001-E5-S5's, covering `POST/GET /api/acquisition-runs` and the
-cancel endpoint.
+cancel endpoint. The coverage models below are CAP-001-E6-S3's, covering
+`GET /api/coverage`.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
@@ -245,3 +246,71 @@ class RunDetailResponse(BaseModel):
     counts: RunCounts
     results: list[ResultRow]
     next_cursor: str | None = None
+
+
+# ---------------------------------------------------------------------------
+# Coverage models — CAP-001-E6-S3
+# Field names from the story's API contract (component design section 11).
+# ---------------------------------------------------------------------------
+
+PresenceState = Literal["present", "absent", "unknown"]
+
+
+class CoverageDataTypes(BaseModel):
+    """Per-data-type presence; the four keys `coverage_data_type_known` names."""
+
+    reference: PresenceState
+    prices: PresenceState
+    fundamentals: PresenceState
+    corporate_actions: PresenceState
+
+
+class CoverageInstrument(BaseModel):
+    """One collapsed row of `GET /api/coverage` (CAP-001-E6-S3, AC-7, AC-8).
+
+    `gap_count` is `null`, never `0`, when gaps are unavailable or not
+    computed (DAC-E6-S3-1, STD-UI-4); the key is always present (task plan
+    Open Gap 2). `depth_short_by_years` is `null` when the depth is met
+    (coverage-service design 2.4). No gap dates ride on a row (Open Gap 1).
+    """
+
+    symbol: str
+    lifecycle: Literal["active", "retired"]
+    data_types: CoverageDataTypes
+    covered_from: date | None
+    covered_to: date | None
+    last_acquired_at: datetime | None
+    gap_count: int | None
+    depth_short_by_years: int | None
+
+
+class CoverageGapDetection(BaseModel):
+    """Whole-view gap-detection availability, with the reason when unavailable."""
+
+    available: bool
+    reason: str | None
+
+
+class CoverageExpansion(BaseModel):
+    """One instrument's specific gap dates, returned only for `expand` (Open Gap 1).
+
+    `gap_dates` is `null` when gaps are not computed and `[]` when computed with
+    none missing.
+    """
+
+    symbol: str
+    gap_dates: list[date] | None
+
+
+class CoverageResponse(BaseModel):
+    """`GET /api/coverage`'s `200` body (CAP-001-E6-S3, component design section 11).
+
+    `expanded` is excluded from the body unless `expand` was requested, so the
+    default body carries exactly the story's four top-level keys (Open Gap 1).
+    """
+
+    instruments: list[CoverageInstrument]
+    never_acquired: bool
+    gap_detection: CoverageGapDetection
+    next_cursor: str | None
+    expanded: CoverageExpansion | None = None
