@@ -18,6 +18,7 @@ vi.mock("../api/client", async () => {
       nextCursor: null,
     }),
     getHistoryDepth: vi.fn().mockResolvedValue({ years: null, updatedAt: null }),
+    listAcquisitionRuns: vi.fn().mockResolvedValue({ runs: [], nextCursor: null }),
   };
 });
 
@@ -93,6 +94,30 @@ describe("Routes — declares exactly five routes", () => {
     expect(storyOwnedRoutes.sort()).toEqual(
       ["/coverage", "/instruments", "/runs", "/runs/:runId", "/settings"].sort(),
     );
+  });
+});
+
+// T010 (CAP-001-E5-S6): the real Runs screen replaces the placeholder at
+// /runs inside the shell, with Runs the active rail item (DAC-E5-S6-4).
+describe("Routes — Runs renders its real screen inside the shell (CAP-001-E5-S6)", () => {
+  it("renders the Runs screen, not the placeholder, with Runs active", async () => {
+    render(
+      <MemoryRouter initialEntries={["/runs"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const main = screen.getByRole("main");
+    expect(
+      await within(main).findByRole("heading", { level: 1, name: "Runs" }),
+    ).toBeInTheDocument();
+    expect(
+      await within(main).findByText("No acquisition run has been requested yet."),
+    ).toBeInTheDocument();
+
+    const nav = screen.getByRole("navigation");
+    expect(within(nav).getByText("Runs").closest("a")).toHaveAttribute("aria-current", "page");
   });
 });
 

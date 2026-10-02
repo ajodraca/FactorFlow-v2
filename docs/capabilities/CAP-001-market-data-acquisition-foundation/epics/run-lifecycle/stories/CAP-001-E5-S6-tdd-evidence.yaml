@@ -1,0 +1,138 @@
+# TDD evidence for CAP-001-E5-S6 — Runs Screen and Run Controls
+# Produced by story-coding during supervised run run-20261002T022520Z, unit u001.
+# One entry per TDD cycle (T020; INV-TDD-002, TEST-TDD-008). Each cycle's diff
+# was captured as an immutable patch and reviewed by two independent subagents
+# (code review, spec drift) before the next cycle began.
+#
+# Commit granularity follows decision DEC-0006: every cycle lands in the single
+# story-coding stage commit on usr/alvaro-de-jodra/CAP-001-E5-S6-run-20261002T022520Z
+# (the commit whose message carries "Decision-Id: DEC-0006"). A commit cannot
+# contain its own hash, so commit_hash names that commit by reference.
+
+story: CAP-001-E5-S6
+decisions: [DEC-0004, DEC-0005, DEC-0006]
+
+cycles:
+  - name: run-contract-and-client
+    tasks: [T001, T002, T008, T011]
+    red:
+      command: npx vitest run src/api/client.runs.test.ts
+      result: "12 failed (listAcquisitionRuns/startAcquisitionRun/cancelAcquisitionRun not exported; ApiError has no code/state)"
+    green:
+      command: npx vitest run src/api/client.runs.test.ts && npx tsc --noEmit
+      result: "12 passed; tsc clean"
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: true
+      detail: "T002: AcquisitionRunPage, RunStartResult, RunCancelResult docstrings did not cite src/factorflow/api/models.py"
+      resolution: "Citations added; confirmed resolved by the cycle 2 spec-drift verifier"
+    tests_executed: true
+    commit_hash: stage commit (see header)
+
+  - name: outcome-badge
+    tasks: [T003, T012]
+    red:
+      command: npx vitest run src/screens/runs/outcome-badge.test.tsx
+      result: "failed to collect: ./outcome-badge does not exist"
+    green:
+      command: npx vitest run src/screens/runs/outcome-badge.test.tsx
+      result: "21 passed"
+    code_review_verdict: APPROVED-WITH-NOTES
+    code_review_notes:
+      - "isRunState/isNonTerminalRunState untested in this cycle; covered by cycles 4-5 consumers"
+    spec_drift:
+      drift_detected: false
+    tests_executed: true
+    commit_hash: stage commit (see header)
+
+  - name: start-run-control
+    tasks: [T006, T009, T013]
+    red:
+      command: npx vitest run src/screens/coverage src/screens/runs/run-controls.test.tsx
+      result: "failed to collect: ../runs/run-controls and ./run-controls do not exist"
+    green:
+      command: npx vitest run src/screens/coverage src/screens/runs
+      result: "34 passed"
+    notes:
+      - "The tests' location probe first used <output>, whose implicit role is status, colliding with the queued notice; changed to <div>. The queued notice renders in <output> (implicit role=status) per biome a11y/useSemanticElements."
+    code_review_verdict: APPROVED-WITH-NOTES
+    code_review_notes:
+      - "setBusy(false) after navigate is a benign no-op after unmount in React 18"
+    spec_drift:
+      drift_detected: false
+    tests_executed: true
+    commit_hash: stage commit (see header)
+
+  - name: cancel-run-control
+    tasks: [T007, T014]
+    red:
+      command: npx vitest run src/screens/runs/cancel.test.tsx
+      result: "failed to collect: ./cancel-run does not exist"
+    green:
+      command: npx vitest run src/screens/runs/cancel.test.tsx
+      result: "16 passed"
+    code_review_verdict: APPROVED-WITH-NOTES
+    code_review_notes:
+      - "Confirm button has no busy affordance of its own; the dialog carries aria-busy, as T014 specifies. Not changed."
+    spec_drift:
+      drift_detected: false
+    tests_executed: true
+    commit_hash: stage commit (see header)
+
+  - name: runs-screen-polling-and-route
+    tasks: [T004, T005, T010, T015, T016, T017]
+    red:
+      command: npx vitest run src/screens/runs/runs-screen src/app/routes.test.tsx
+      result: "runs-screen tests failed to collect (./index missing); routes Runs case failed: no heading Runs"
+    green:
+      command: npm run test
+      result: "184 passed (29 files); no act() warnings"
+    deviation:
+      task: T005
+      plan: "vi.useFakeTimers({ shouldAdvanceTime: true })"
+      implemented: "vi.useFakeTimers() with act + advanceTimersByTimeAsync"
+      reason: "With shouldAdvanceTime, real milliseconds leaked into the fake clock and the poll fired before the 9 999 ms assertion (observed 2 calls). Pure fake timers make the exact 10 000 ms boundary deterministic; both reviewers judged that it proves the same behaviour."
+    flake_observed: "One full-suite run failed instruments/empty-states.test.tsx (focus assertion, file untouched by this story); it passed 3/3 in isolation and in two further full runs."
+    code_review_verdict: APPROVED-WITH-NOTES
+    code_review_notes:
+      - "A failed poll replaces populated rows with the error alert (contract-legal; owner-web-app AC 17)"
+      - "'Not yet loaded' shows in error/empty states"
+    spec_drift:
+      drift_detected: true
+      detail: "Out of scope: aria-busy added to the cancel dialog's confirm button (T014 file) in this cycle"
+      resolution: "Reverted; the dialog-level aria-busy T014 specifies is unchanged"
+    tests_executed: true
+    commit_hash: stage commit (see header)
+
+  - name: e2e-and-mutation
+    tasks: [T018, T019]
+    red:
+      note: "T018 depends on T016, so the e2e spec was written after the route existed; no RED is claimed for it."
+    green:
+      command: npm run test:e2e
+      result: "2 passed (runs-start-cancel, instruments-add-retire) against real PostgreSQL 16"
+    mutations:
+      harness: "logs/runs/run-20261002T022520Z/s6-mutate.py in the ai-agents checkout (apply, run vitest on src/screens/runs and src/screens/coverage, restore)"
+      status: "all killed; no strengthening needed"
+      executed:
+        - "poll condition drops cancelling: KILLED (1 failed)"
+        - "poll condition includes succeeded: KILLED (5 failed)"
+        - "poll cadence 9 000 ms: KILLED (3 failed)"
+        - "poll cadence 11 000 ms: KILLED (4 failed)"
+        - "RUN_STATE_TIER partial -> good: KILLED (4 failed)"
+        - "RUN_STATE_TIER cancelled -> critical: KILLED (4 failed)"
+        - "RUN_STATE_TIER abandoned -> critical: KILLED (4 failed)"
+        - "blocked Start gains disabled: KILLED (2 failed)"
+        - "blocked reason order swapped: KILLED (1 failed)"
+        - "row gains onClick: KILLED (1 failed)"
+        - "run-id Link becomes a span (well-formed mutant): KILLED (5 failed)"
+        - "queued-versus-running dialog branch removed: KILLED (3 failed)"
+        - "409 branch renders Cancelled: KILLED (1 failed)"
+        - "queued 202 navigates away: KILLED (2 failed)"
+    code_review_verdict: APPROVED-WITH-NOTES
+    code_review_notes:
+      - "Harness counts a non-compiling mutant as killed; the one such mutant was re-run well-formed"
+    spec_drift:
+      drift_detected: false
+    tests_executed: true
+    commit_hash: stage commit (see header)

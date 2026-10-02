@@ -8,12 +8,17 @@
  */
 
 import type {
+  AcquisitionRun,
+  AcquisitionRunPage,
   AddInstrumentsResult,
   HealthResponse,
   HistoryDepth,
   Instrument,
   InstrumentLifecycle,
   InstrumentListResult,
+  RunCancelResult,
+  RunStartResult,
+  RunState,
   SymbolOutcome,
 } from "./types";
 
@@ -47,11 +52,25 @@ export class ApiUnreachableError extends Error {
  */
 export class ApiError extends Error {
   readonly requestId: string;
+  /** The envelope's machine-readable `error.code`, or `null` when absent. */
+  readonly code: string | null;
+  /**
+   * The envelope's `error.state`: the run's actual persisted state, present
+   * only on `run_already_terminal` (component design `ingestion-api`
+   * section 10). `null` otherwise.
+   */
+  readonly state: string | null;
 
-  constructor(message: string, requestId: string) {
+  constructor(
+    message: string,
+    requestId: string,
+    details: { code?: string | null; state?: string | null } = {},
+  ) {
     super(message);
     this.name = "ApiError";
     this.requestId = requestId;
+    this.code = details.code ?? null;
+    this.state = details.state ?? null;
   }
 }
 
@@ -63,20 +82,30 @@ export class ApiError extends Error {
 async function toApiError(response: Response): Promise<ApiError> {
   let requestId = "unknown";
   let message = `request failed with status ${response.status}`;
+  let code: string | null = null;
+  let state: string | null = null;
   try {
-    const body = (await response.json()) as { error?: { message?: string; request_id?: string } };
+    const body = (await response.json()) as {
+      error?: { message?: unknown; request_id?: unknown; code?: unknown; state?: unknown };
+    };
     if (typeof body.error?.message === "string") {
       message = body.error.message;
     }
     if (typeof body.error?.request_id === "string") {
       requestId = body.error.request_id;
     }
+    if (typeof body.error?.code === "string") {
+      code = body.error.code;
+    }
+    if (typeof body.error?.state === "string") {
+      state = body.error.state;
+    }
   } catch {
     // Body did not parse as JSON at all — the generic message and unknown
     // request id above stand, rather than the caller ever seeing a thrown
     // parse error in place of the request's own failure.
   }
-  return new ApiError(message, requestId);
+  return new ApiError(message, requestId, { code, state });
 }
 
 /**
@@ -279,4 +308,91 @@ export async function setHistoryDepth(years: number): Promise<HistoryDepth> {
     },
   );
   return toHistoryDepth(body);
+}
+
+/** `GET /api/acquisition-runs` filters (component design `ingestion-api` section 2.3). */
+export interface RunListFilters {
+  state?: RunState;
+  limit?: number;
+  cursor?: string;
+}
+
+interface WireRun {
+  run_id: string;
+  state: RunState;
+  history_depth_years: number;
+  requested_at: string;
+  started_at: string | null;
+  ended_at: string | null;
+  instruments_named: number;
+  instruments_written: number;
+  instruments_failed: number;
+  failure_reason: string | null;
+}
+
+function toAcquisitionRun(row: WireRun): AcquisitionRun {
+  return {
+    runId: row.run_id,
+    state: row.state,
+    historyDepthYears: row.history_depth_years,
+    requestedAt: row.requested_at,
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+    instrumentsNamed: row.instruments_named,
+    instrumentsWritten: row.instruments_written,
+    instrumentsFailed: row.instruments_failed,
+    failureReason: row.failure_reason,
+  };
+}
+
+/**
+ * `GET /api/acquisition-runs` (CAP-001-E5-S5; DAC-E5-S5-4), newest first.
+ * Only the filters that are present become query parameters.
+ */
+export async function listAcquisitionRuns(
+  filters: RunListFilters = {},
+): Promise<AcquisitionRunPage> {
+  const query = new URLSearchParams();
+  if (filters.state) {
+    query.set("state", filters.state);
+  }
+  if (filters.limit !== undefined) {
+    query.set("limit", String(filters.limit));
+  }
+  if (filters.cursor) {
+    query.set("cursor", filters.cursor);
+  }
+  const queryString = query.toString();
+
+  const body = await requestJson<{ runs: WireRun[]; next_cursor: string | null }>(
+    `/api/acquisition-runs${queryString ? `?${queryString}` : ""}`,
+  );
+  return { runs: body.runs.map(toAcquisitionRun), nextCursor: body.next_cursor };
+}
+
+/**
+ * `POST /api/acquisition-runs` (CAP-001-E5-S5; AC-23, AC-24). The endpoint
+ * takes an empty body, so none is sent. Rejects with `ApiError` on `409`
+ * (`history_depth_not_set` or `no_active_instruments`).
+ */
+export async function startAcquisitionRun(): Promise<RunStartResult> {
+  const body = await requestJson<{
+    run_id: string;
+    state: "requested";
+    queued_behind: string | null;
+  }>("/api/acquisition-runs", { method: "POST" });
+  return { runId: body.run_id, state: body.state, queuedBehind: body.queued_behind };
+}
+
+/**
+ * `POST /api/acquisition-runs/{id}/cancel` (CAP-001-E5-S5; AC-19, AC-26).
+ * Rejects with `ApiError` on `409` `run_already_terminal`, whose `state`
+ * carries the run's actual outcome (DAC-E5-9), or on `404`.
+ */
+export async function cancelAcquisitionRun(runId: string): Promise<RunCancelResult> {
+  const body = await requestJson<{ state: "cancelling" | "cancelled" }>(
+    `/api/acquisition-runs/${encodeURIComponent(runId)}/cancel`,
+    { method: "POST" },
+  );
+  return { state: body.state };
 }
