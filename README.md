@@ -57,8 +57,10 @@ detection in daily prices (`src/factorflow/coverage/gaps.py`), and is served
 over HTTP by `GET /api/coverage` (`src/factorflow/api/routes/coverage.py`).
 The Runs screen is also built: it lists run history with each outcome's
 severity tier, polls while a run is in progress, and carries the reusable
-Start and Cancel run controls. The Coverage screen is not yet built; that
-destination still renders a placeholder. What exists today is described
+Start and Cancel run controls. The Coverage screen is also built: it shows
+each instrument's per-data-type presence, covered range, gap count and
+depth shortfall from `GET /api/coverage`, with gap dates behind row
+expansion, and it never polls. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
@@ -119,15 +121,16 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
-| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, which stays the health `most_recent_run` placeholder); `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
-| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` mounts the Instruments, Runs and Settings screens (see below) at their destinations, with Coverage still `ScreenPlaceholder`, plus a `/runs/:runId` placeholder, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
+| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, which stays the health `most_recent_run` placeholder), and the coverage shapes `PresenceState`, `CoverageDataType`, `CoverageRow`, `CoverageGapDetection`, `CoverageView`, `CoverageExpansion`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, `fetchCoverage()`, `fetchCoverageGapDates()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
+| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom. The shell is exactly the viewport's height (`h-screen`) and the main region scrolls on its own (`overflow-auto`), so a screen's content scrolls within `main` rather than the page; `routes.tsx` mounts the Coverage, Instruments, Runs and Settings screens (see below) at their destinations, plus a `/runs/:runId` placeholder, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
+| `web/src/screens/coverage/` | The Coverage screen. `index.tsx` composes the screen's `ScreenState`, toolbar, plan-limit note and cursor-stack pager; `coverage-table.tsx` renders the expandable table and fetches gap dates on expansion; `badges.tsx` renders the presence, gaps-unknown and depth-shortfall badges; `cells.tsx` renders missing, measured and inapplicable values, session dates and Chicago timestamps; `uniform-shortfall.ts` decides when every loaded row shares one shortfall; `copy.ts` holds every user-visible sentence. See [Coverage screen](#coverage-screen) |
 | `web/src/screens/instruments/` | The Instruments screen: one table with a lifecycle column (never two tables), single-symbol and bulk (`textarea`) add, and retirement through a `dialog` `confirm`. `index.tsx` composes the screen's `ScreenState`; `instrument-table.tsx` holds server-side search/filter and keyset "Load more" paging; `add-field.tsx` and `bulk-add.tsx` (with `parse-bulk-symbols.ts`) add instruments; `retire-dialog.tsx` confirms retirement; `start-action.tsx` renders the acquisition-run trigger `blocked` when history depth is unset; `badges.tsx` renders the active/retired lifecycle badge. See [Instruments and Settings screens](#instruments-and-settings-screens) |
 | `web/src/screens/runs/` | The Runs screen and the reusable run controls. `index.tsx` composes the screen's `ScreenState` and its 10-second poll (`RUNS_POLL_INTERVAL_MS`); `run-table.tsx` renders the `history` table, whose run-id link is the only way into a run; `outcome-badge.tsx` maps each run state to its tier, word and icon (`RUN_STATE_TIER`, `RUN_STATE_LABEL`, `OutcomeBadge`); `run-controls.tsx` exports `StartRunControl`; `cancel-run.tsx` exports `CancelRunControl`, which no screen mounts yet. See [Runs screen](#runs-screen) |
 | `web/src/screens/settings/` | The Settings screen: `index.tsx` composes the layout; `history-depth-form.tsx` reads and writes the history-depth setting with STD-UI-19-shaped validation errors; `credential-status.tsx` reports provider credential presence only, never the value, with a distinct icon/shape per state. See [Instruments and Settings screens](#instruments-and-settings-screens) |
 | `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
-| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh` |
+| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh`. `fixtures/` holds plain SQL seeds that a spec applies itself; Playwright does not collect them |
 | `docs/` | Constitution, capability specifications, and designs |
 
 ## Configuration
@@ -1385,6 +1388,122 @@ Known gaps, recorded in
 - `CancelRunControl` is reachable only through its tests until
   CAP-001-E7-S4 mounts it (IR-003).
 
+## Coverage screen
+
+`web/src/screens/coverage/` renders at `/coverage` inside the shell and
+reads `GET /api/coverage` through `fetchCoverage()`. It produces the
+`loading`, `empty-never-populated`, `empty-no-match`, `populated` and
+`error` variants of `ScreenState<T>`; the shell owns `unreachable`. A row
+with some data types absent is an ordinary populated row, and gap
+detection being unavailable shows in the Gaps column, never as a
+screen-wide state.
+
+The table has one row per instrument and eleven columns — Symbol,
+Lifecycle, Reference, Prices, Fundamentals, Corporate actions, Covered
+from, Covered to, Gaps, Depth, Last acquired. `fetchCoverage()` sends only
+`symbol`, `lifecycle` and `cursor`. With no `from` or `to` the read covers
+everything acquired, and the API's default page of 50 applies. A retired
+instrument stays in the table, muted and with the Instruments screen's
+lifecycle badge, and keeps its range and presence.
+
+Every status is a word plus a shape, so none depends on colour
+(`badges.tsx`):
+
+| Status | Reads | Shape |
+|---|---|---|
+| Present | Present | check mark |
+| Absent | Absent | em dash |
+| Unknown (presence, or Gaps when detection is unavailable) | Unknown | question mark, on the hatched `pattern-indeterminate` background |
+| Short of stated depth | Short by *n* year(s) | warning triangle |
+
+`cells.tsx` keeps three kinds of empty cell apart. A missing value is an em
+dash read out as *No data*, a measured count shows its number (zero
+included), and a cell that does not apply is blank with a *Not applicable*
+label for assistive technology. Covered-from, covered-to and gap dates are
+session dates. They are shown exactly as the API sends them (`YYYY-MM-DD`)
+and never pass through `Date`, which would move them by the viewer's zone.
+*Last acquired* is an instant, shown in `America/Chicago` through the status
+region's `formatTimestamp`. The Depth column shows the shortfall marker only
+for a positive `depth_short_by_years`; `null` and `0` leave it blank.
+`tailwind.config.js` exposes the `value-missing` and `value-indeterminate`
+token pairs and the `pattern-indeterminate` background for these cells; the
+tokens themselves already existed in `design-system/theme.css`.
+
+The Gaps cell, per `GapsCell`:
+
+| Gap detection | `gap_count` | Cell |
+|---|---|---|
+| unavailable | any, even a number | *Unknown* badge |
+| available | `null` | blank, *Not applicable* (no daily prices covered) |
+| available | a number | the count |
+
+When detection is available a sentence below the table says it cannot see
+a market-wide provider outage. When detection is unavailable, that line
+gives the reason sentence instead (*Gap detection needs at least two
+instruments holding data in this range.* for
+`fewer_than_two_instruments_with_data`). An unrecognised reason code is
+shown as text rather than dropped.
+
+**Gap dates sit behind expansion.** Each row's symbol cell holds a
+disclosure button (`aria-expanded`, `aria-controls`). Opening it fetches
+that instrument's dates once, through `fetchCoverageGapDates()`, which
+requests `GET /api/coverage?symbol=<s>&limit=1&expand=<s>` and reads only
+`expanded`. A body without `expanded` is an error, never an empty list.
+The fetch is made only when detection is available and the count is
+positive. Otherwise the expansion answers locally with the reason sentence,
+*Gap detection applies to daily prices only…*, or *No missing trading days
+in the covered range.* Dates are cached by symbol and listed in ascending
+order. A failed fetch shows the error with its request id and a *Retry*.
+The cache is cleared, and every open row is collapsed, after each
+successful load of the page — a refresh, a filter change or a page change.
+
+**No polling.** Coverage is fetched on mount, on a filter or page change,
+and on *Refresh*, *Retry* or *Reset filter* — never on a timer. A
+refresh keeps the current rows rendered, dimmed and `aria-busy`. The
+toolbar holds a symbol filter (debounced 250 ms, server-side), a lifecycle
+select, `StartRunControl` (its preconditions read from
+`getHistoryDepth()` and `listInstruments()` as the Runs screen reads them),
+*Refresh*, a *Last updated* time, and a polite count of the instruments
+shown. Paging is over the API's keyset cursor with *Previous page* and
+*Next page*. Pages replace each other rather than accumulate, so the DOM
+stays bounded at 3000 instruments, and the table scrolls in its own
+container while the page does not. This is pagination, not the
+virtualisation STD-UI-30 asks for.
+
+No data ever acquired reads *No data has been acquired yet.* with no table.
+A filter that matches nothing reads *No instrument matches this filter.*
+and offers *Reset filter*. When two or more loaded rows with a covered
+range all share the same positive shortfall, a note above the table names
+it as the provider plan's history limit rather than missing data
+(`uniform-shortfall.ts`). The note judges only the loaded page.
+
+The `expand` request, the plan-limit rule, when an expansion fetches, and
+the screen's non-UX-verbatim copy are owner-confirmed choices pending
+absorption into their designs, recorded as Open Gaps 1, 3, 4 and 6 in
+`CAP-001-E6-S4-tasks.md`. Open Gaps 7–9 there record the Start control's
+inputs, the expansion's content and the loading text; each is cited by
+number in the module docstrings.
+
+Known gaps, recorded in
+`docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/coverage-and-gap-visibility/stories/CAP-001-E6-S4-implementation-review-v1.md`:
+
+- The gaps-column *Unknown* deliberately shares the presence *Unknown*
+  badge (`GapsUnknownBadge` delegates to it), since both mean the check
+  could not run. So TC-COMP-065 proves six statuses pairwise distinct
+  rather than the seven its task named, and asserts the seventh equal to
+  presence *Unknown* (IR-001).
+- An expansion whose `gap_dates` comes back `null` on an available view
+  shows *Gap detection is unavailable (no reason given).*, which
+  contradicts the view. The branch is close to unreachable and untested
+  (IR-002).
+- *Refresh* collapses every open row as well as clearing the date cache
+  (IR-003).
+- The test labelled TC-COMP-022 implements the story's depth-shortfall
+  rendering, not the component test specification's backfill behaviour
+  (IR-004).
+- The planned manual keyboard and greyscale passes have not been done
+  (IR-005).
+
 ## Testing
 
 Integration tests run against a real PostgreSQL 16 instance started by
@@ -1430,6 +1549,9 @@ API and PostgreSQL container: `scripts/run-e2e-server.sh` (Playwright's
 interface bundle, and runs the API process on `127.0.0.1:8123` (or
 `FACTORFLOW_API_PORT`), tearing both down after the run; `posttest:e2e`
 removes the container by name as a backstop against a hard-killed teardown.
+`coverage-expansion.spec.ts` applies `fixtures/coverage-seed.sql` itself, by
+`docker exec … psql` into that container (`factorflow-e2e-postgres`), before
+its test runs. The seed is idempotent.
 Needs Docker and Playwright's browsers installed (`npx playwright install`).
 
 ## Validation

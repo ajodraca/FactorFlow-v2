@@ -27,6 +27,13 @@ export default {
         "status-serious-muted": "hsl(var(--status-serious-muted) / <alpha-value>)",
         "status-critical": "hsl(var(--status-critical) / <alpha-value>)",
         "status-critical-muted": "hsl(var(--status-critical-muted) / <alpha-value>)",
+        "value-missing": "hsl(var(--value-missing) / <alpha-value>)",
+        "value-missing-muted": "hsl(var(--value-missing-muted) / <alpha-value>)",
+        "value-indeterminate": "hsl(var(--value-indeterminate) / <alpha-value>)",
+        "value-indeterminate-muted": "hsl(var(--value-indeterminate-muted) / <alpha-value>)",
+      },
+      backgroundImage: {
+        "pattern-indeterminate": "var(--pattern-indeterminate)",
       },
       spacing: {
         1: "var(--space-1)",

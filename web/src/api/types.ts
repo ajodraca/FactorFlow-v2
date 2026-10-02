@@ -126,6 +126,73 @@ export interface HistoryDepth {
 }
 
 /**
+ * One data type's presence in a coverage row (component design
+ * `ingestion-api` section 11). `unknown` is the check not running, never a
+ * milder `absent` (STD-UI-14).
+ */
+export type PresenceState = "present" | "absent" | "unknown";
+
+/**
+ * The four data types coverage reports on, exactly the values of the
+ * `coverage_data_type_known` check in `migrations/0003_coverage.sql`
+ * (component design `ingestion-api` section 11).
+ */
+export type CoverageDataType = "reference" | "prices" | "fundamentals" | "corporate_actions";
+
+/**
+ * One collapsed row of `GET /api/coverage` (`CoverageInstrument`; component
+ * design `ingestion-api` section 11), mapped from snake_case. Session dates
+ * stay the wire's `YYYY-MM-DD` strings and are never parsed into `Date`
+ * (STD-UI-5). `gapCount` and `depthShortByYears` keep the wire's `null`
+ * apart from a measured `0` (STD-UI-4). Gap dates never ride on a row: they
+ * arrive through `CoverageExpansion` (CAP-001-E6-S4-tasks Open Gaps 1–2).
+ */
+export interface CoverageRow {
+  symbol: string;
+  lifecycle: InstrumentLifecycle;
+  dataTypes: Record<CoverageDataType, PresenceState>;
+  coveredFrom: string | null;
+  coveredTo: string | null;
+  lastAcquiredAt: string | null;
+  gapCount: number | null;
+  depthShortByYears: number | null;
+}
+
+/**
+ * Whole-view gap-detection availability, with the reason code when it is
+ * unavailable (component design `ingestion-api` section 11;
+ * CAP-001-E6-S4-tasks Open Gaps 1–2).
+ */
+export interface CoverageGapDetection {
+  available: boolean;
+  reason: string | null;
+}
+
+/**
+ * `GET /api/coverage`'s `200` body (`CoverageResponse`; component design
+ * `ingestion-api` section 11), mapped from snake_case. Pages are keyset
+ * pages that replace each other; `nextCursor` is `null` on the last
+ * (CAP-001-E6-S4-tasks Open Gaps 1–2).
+ */
+export interface CoverageView {
+  rows: CoverageRow[];
+  neverAcquired: boolean;
+  gapDetection: CoverageGapDetection;
+  nextCursor: string | null;
+}
+
+/**
+ * One instrument's gap dates, from `GET /api/coverage`'s `expanded` key
+ * (component design `ingestion-api` section 11; CAP-001-E6-S4-tasks Open
+ * Gaps 1–2). `null` means not computed; `[]` means computed with nothing
+ * missing (CAP-001-E6-S2 PROVISIONAL item 4).
+ */
+export interface CoverageExpansion {
+  symbol: string;
+  gapDates: string[] | null;
+}
+
+/**
  * The eight acquisition-run states (component design `ingestion-api`
  * section 11; `RunState` in `src/factorflow/api/models.py`), exactly the
  * wire values. Three are non-terminal (`requested`, `running`,

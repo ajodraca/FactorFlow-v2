@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-29
-updated: 2026-09-29
+updated: 2026-10-02
+docs_synced_review: CAP-001-E6-S4-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -99,7 +100,7 @@ same amount, one sentence says this is a plan limit, not a data gap (DAC-E6-S4-6
 **Purpose**: Expose the theme tokens this screen needs to Tailwind. Add the typed
 coverage contract to the fetch layer.
 
-- [ ] T001 [P] Add the data-vintage tokens to `tailwind.config.js`. Add nothing else.
+- [x] T001 [P] Add the data-vintage tokens to `tailwind.config.js`. Add nothing else.
   - The tokens already exist in `design-system/theme.css` lines 84–100.
   - Under `theme.extend.colors`, add these four entries, in the file's existing
     `hsl(var(--x) / <alpha-value>)` form:
@@ -113,7 +114,7 @@ coverage contract to the fetch layer.
     selected, never introduced.
   - Traces to: DAC-E6-S4-1, DAC-E6-S4-3 and DAC-E6-S4-7 (ux-design 1.1 Token Usage;
     badge spec section 6).
-- [ ] T002 Add the coverage contract to `web/src/api/types.ts`.
+- [x] T002 Add the coverage contract to `web/src/api/types.ts`.
   - Append the types after `HistoryDepth`, in the file's style. Each carries a docstring
     that cites ingestion-api section 11 and this plan's Open Gaps 1–2:
     - `export type PresenceState = "present" | "absent" | "unknown";`
@@ -134,7 +135,7 @@ coverage contract to the fetch layer.
     - `export interface CoverageExpansion { symbol: string; gapDates: string[] | null }`
       Here `null` means not computed, and `[]` means computed with nothing missing
       (CAP-001-E6-S2 PROVISIONAL item 4).
-- [ ] T003 Add two calls to `web/src/api/client.ts`, after `listInstruments` (depends on T002).
+- [x] T003 Add two calls to `web/src/api/client.ts`, after `listInstruments` (depends on T002).
   - Both reuse the private `requestJson`, so a transport failure becomes
     `ApiUnreachableError` and a non-2xx response becomes `ApiError`. Both map snake_case
     to camelCase at the boundary, following the `listInstruments` precedent.
@@ -181,7 +182,7 @@ Every test uses the fixture builder from T004.
 
 ### Mandatory Component Tests
 
-- [ ] T004 Create the shared fixture builder in `web/src/screens/coverage/test-fixtures.ts`. It exports no test cases.
+- [x] T004 Create the shared fixture builder in `web/src/screens/coverage/test-fixtures.ts`. It exports no test cases.
   - `row(overrides?: Partial<CoverageRow>): CoverageRow`. By default it returns:
     - symbol `AAPL`, lifecycle `active`, and all four data types `present`;
     - `coveredFrom: "2024-01-02"` and `coveredTo: "2024-01-05"`;
@@ -192,7 +193,7 @@ Every test uses the fixture builder from T004.
     - `gapDetection: { available: true, reason: null }`.
   - `UNAVAILABLE_REASON = "fewer_than_two_instruments_with_data"`, the wire code in
     coverage-service 2.4 and CAP-001-E6-S3-tasks T001.
-- [ ] T005 Create `web/src/screens/coverage/coverage.test.tsx`, the file owner-web-app section 7 names. Render `<CoverageScreen />` inside a `MemoryRouter`. Add one `describe` per TC:
+- [x] T005 Create `web/src/screens/coverage/coverage.test.tsx`, the file owner-web-app section 7 names. Render `<CoverageScreen />` inside a `MemoryRouter`. Add one `describe` per TC:
   - **TC-COMP-007 (AC-7)**: `fetchCoverage` resolves `view()`.
     - The row's `th[scope=row]` contains `AAPL`.
     - The row has four presence badges, found with `getAllByTestId("presence-badge")`.
@@ -244,7 +245,7 @@ Every test uses the fixture builder from T004.
     - Mixed case: `3`, `3` and `null`. The note is absent.
     - Single-row case: `3`. The note is absent (Open Gap 3).
 
-- [ ] T006 [P] Create `web/src/screens/coverage/coverage-table.test.tsx`
+- [x] T006 [P] Create `web/src/screens/coverage/coverage-table.test.tsx`
   - **TC-COMP-008 (AC-8)**:
     - Arrange: resolve `view({ rows: [row({ symbol: "CVA", gapCount: 0 }), row({ symbol: "CVC", gapCount: 2 })] })`.
       `fetchCoverageGapDates` resolves `{ symbol: "CVC", gapDates: ["2024-01-03", "2024-01-04"] }`.
@@ -292,7 +293,7 @@ Every test uses the fixture builder from T004.
   - **Additional, inapplicable expansion**: a row with `gapCount: null` on an available
     view shows `GAPS_INAPPLICABLE` (T013), and makes no call.
 
-- [ ] T007 [P] Implement TC-COMP-039 (DAC-E6-13: no auto-poll, last-updated shown) in `web/src/screens/coverage/coverage.polling.test.tsx`
+- [x] T007 [P] Implement TC-COMP-039 (DAC-E6-13: no auto-poll, last-updated shown) in `web/src/screens/coverage/coverage.polling.test.tsx`
   - Call `vi.useFakeTimers({ shouldAdvanceTime: true })` and
     `vi.setSystemTime(new Date("2026-09-06T15:00:00Z"))`.
   - Render `<CoverageScreen />`, and flush the mount fetch with
@@ -312,7 +313,7 @@ Every test uses the fixture builder from T004.
       section 4).
   - Restore real timers in `afterEach`.
 
-- [ ] T008 [P] Create `web/src/screens/coverage/cells.test.tsx`
+- [x] T008 [P] Create `web/src/screens/coverage/cells.test.tsx`
   - **TC-COMP-059 (DAC-E6-S4-1)**: render the cell components directly.
     - `<MissingValue />`:
       - The visible text is `—` (U+2014), with `aria-hidden="true"` on the glyph.
@@ -338,7 +339,7 @@ Every test uses the fixture builder from T004.
       `2026-09-05 17:14:03 America/Chicago` (CDT).
     - `"2026-01-15T06:30:00Z"` renders `2026-01-15 00:30:00 America/Chicago` (CST).
 
-- [ ] T009 [P] Create `web/src/screens/coverage/badges.test.tsx`
+- [x] T009 [P] Create `web/src/screens/coverage/badges.test.tsx`
   - **TC-COMP-061 (DAC-E6-S4-3)**: render `<PresenceBadge state="present" | "absent" | "unknown" />`.
     - The `data-variant` values are `coverage-present`, `coverage-absent` and
       `coverage-unknown`.
@@ -363,7 +364,7 @@ Every test uses the fixture builder from T004.
 
 ### Additional Unit Tests
 
-- [ ] T010 [P] Add the gaps-cell decision table to `web/src/screens/coverage/cells.test.tsx`. It supports DAC-E6-4, DAC-E6-S4-1 and CAP-001-E6-S3-tasks Open Gap 4.
+- [x] T010 [P] Add the gaps-cell decision table to `web/src/screens/coverage/cells.test.tsx`. It supports DAC-E6-4, DAC-E6-S4-1 and CAP-001-E6-S3-tasks Open Gap 4.
   - `<GapsCell gapCount={3} available />` renders `CountValue` `3`.
   - `gapCount={0} available` renders `CountValue` `0`, a measured zero.
   - `gapCount={null} available` renders `Inapplicable`. The instrument has no prices
@@ -376,7 +377,7 @@ Every test uses the fixture builder from T004.
   - `reasonSentence("something_new")` returns
     *Gap detection is unavailable (something_new).*, so an unknown code is shown as
     text and never dropped.
-- [ ] T011 [P] Create `web/src/screens/coverage/uniform-shortfall.test.ts` for the pure function in T012. It supports DAC-E6-S4-6 and AC-22.
+- [x] T011 [P] Create `web/src/screens/coverage/uniform-shortfall.test.ts` for the pure function in T012. It supports DAC-E6-S4-6 and AC-22.
   - Two or more rows, each with a non-null `coveredFrom` and the same
     `depthShortByYears` `n > 0`, return `n`.
   - An empty list returns `null`, and so does a single row.
@@ -384,7 +385,7 @@ Every test uses the fixture builder from T004.
     values.
   - Rows with `coveredFrom: null` (nothing covered) are ignored. If fewer than two
     covered rows remain, the result is `null`.
-- [ ] T012 [P] Create `web/src/api/client.coverage.test.ts`. It stubs `fetch` with `vi.stubGlobal`, following `web/src/test-setup.ts`. It supports AC-7 and AC-8.
+- [x] T012 [P] Create `web/src/api/client.coverage.test.ts`. It stubs `fetch` with `vi.stubGlobal`, following `web/src/test-setup.ts`. It supports AC-7 and AC-8.
   - `fetchCoverage({ symbol: "AA", lifecycle: "retired", cursor: "X" })` requests
     `/api/coverage?symbol=AA&lifecycle=retired&cursor=X`.
     - The request carries no `limit`, `from` or `to`.
@@ -413,7 +414,7 @@ suites stay green.
 
 **Purpose**: Build the presentational pieces and the screen that make Phase 2 pass.
 
-- [ ] T013 [P] Create `web/src/screens/coverage/copy.ts`. It holds every user-visible sentence as an exported constant, so the tests and components share one source.
+- [x] T013 [P] Create `web/src/screens/coverage/copy.ts`. It holds every user-visible sentence as an exported constant, so the tests and components share one source.
   - Verbatim from ux-design 1.1:
     - `NEVER_ACQUIRED = "No data has been acquired yet."`
     - `NO_MATCH = "No instrument matches this filter."`
@@ -430,7 +431,7 @@ suites stay green.
     - `planLimitNote(years: number): string`, which returns
       `` `Every instrument shown is short of the stated history depth by ${years} ${years === 1 ? "year" : "years"}. A shortfall shared by every instrument is the provider plan's history limit, not missing data.` ``
     - `shortBy(years)`, which returns *Short by 1 year* or *Short by n years*.
-- [ ] T014 [P] Create `web/src/screens/coverage/badges.tsx` (depends on T001, T013). Follow the structure of `screens/instruments/badges.tsx`: a `data-testid`, a `data-variant`, a text label, and an `aria-hidden` shape icon that is never a colour alone (STD-UI-8).
+- [x] T014 [P] Create `web/src/screens/coverage/badges.tsx` (depends on T001, T013). Follow the structure of `screens/instruments/badges.tsx`: a `data-testid`, a `data-variant`, a text label, and an `aria-hidden` shape icon that is never a colour alone (STD-UI-8).
   - `PresenceBadge({ state })`, with `data-testid="presence-badge"`:
     - `present`: variant `coverage-present`, a check-mark `polyline` icon, the label
       *Present*, and `bg-status-good-muted text-status-good`.
@@ -451,7 +452,7 @@ suites stay green.
       depth"; AC-22).
   - Reuse `LifecycleBadge` from `../instruments/badges`. Do not add a second lifecycle
     badge (AC-21: `badge` `secondary`).
-- [ ] T015 [P] Create `web/src/screens/coverage/cells.tsx` (depends on T013, T014).
+- [x] T015 [P] Create `web/src/screens/coverage/cells.tsx` (depends on T013, T014).
   - `MissingValue`, `CountValue`, `Inapplicable`, `SessionDate`, `Timestamp` and
     `GapsCell` behave exactly as T008 and T010 specify.
   - `formatSessionDate(value: string): string` returns `value` unchanged. Its docstring
@@ -461,8 +462,8 @@ suites stay green.
     formatter.
   - Numbers and dates use `font-numeric`, and the dense body uses `text-sm`
     (ux-design 1.1 Token Usage).
-- [ ] T016 Create `web/src/screens/coverage/uniform-shortfall.ts` with `export function uniformShortfallYears(rows: CoverageRow[]): number | null`, behaving exactly as T011 specifies. Its docstring cites DAC-E6-S4-6, coverage-service design section 3 ("the fix is a sentence on the coverage screen naming the plan") and Open Gap 3.
-- [ ] T017 Create `web/src/screens/coverage/coverage-table.tsx` (depends on T003, T014–T016).
+- [x] T016 Create `web/src/screens/coverage/uniform-shortfall.ts` with `export function uniformShortfallYears(rows: CoverageRow[]): number | null`, behaving exactly as T011 specifies. Its docstring cites DAC-E6-S4-6, coverage-service design section 3 ("the fix is a sentence on the coverage screen naming the plan") and Open Gap 3.
+- [x] T017 Create `web/src/screens/coverage/coverage-table.tsx` (depends on T003, T014–T016).
   - Props:
     - `rows: CoverageRow[]` and `gapDetection: CoverageGapDetection`;
     - `refreshing: boolean` and `refreshToken: number`. The expansion cache clears when
@@ -513,7 +514,7 @@ suites stay green.
     - `reasonSentence(gapDetection.reason)` when it is unavailable.
     - Both are `text-xs text-muted-foreground` (STD-UI-18; ux-design 1.1 "once, below
       the table, not per row").
-- [ ] T018 Create `web/src/screens/coverage/index.tsx`, the default export `CoverageScreen` (depends on T017).
+- [x] T018 Create `web/src/screens/coverage/index.tsx`, the default export `CoverageScreen` (depends on T017).
   - Follow the structure of `screens/instruments/index.tsx`. Keep a
     `ScreenState<CoverageView>` from `../../api/types` and use these kinds:
     - `loading`;
@@ -583,7 +584,7 @@ suites stay green.
 **Purpose**: Route the screen inside the shell and make the page itself stop scrolling.
 Prove expansion end to end against the real API.
 
-- [ ] T019 Wire the route in `web/src/app/routes.tsx`.
+- [x] T019 Wire the route in `web/src/app/routes.tsx`.
   - Import `CoverageScreen from "../screens/coverage"`.
   - Replace `<ScreenPlaceholder label="Coverage" />` on `/coverage` with
     `<CoverageScreen />`.
@@ -591,14 +592,14 @@ Prove expansion end to end against the real API.
     If E5-S6 has already replaced it by merge time, delete the unused function so
     `noUnusedLocals` passes.
   - Leave the other routes untouched. `routes.test.tsx`'s route list is unchanged.
-- [ ] T020 Bound the shell's height in `web/src/app/shell.tsx`, so tables scroll inside their own container instead of the page (DAC-E6-S4-5; owner-web-app OQ 4, "the tables scroll horizontally inside their own container rather than the page doing so").
+- [x] T020 Bound the shell's height in `web/src/app/shell.tsx`, so tables scroll inside their own container instead of the page (DAC-E6-S4-5; owner-web-app OQ 4, "the tables scroll horizontally inside their own container rather than the page doing so").
   - On the root `div`, change `min-h-screen` to `h-screen`.
   - Change `<main className="flex-1 p-5">` to `<main className="flex min-w-0 flex-1 flex-col overflow-auto p-5">`.
   - Change nothing else. The rail and the status-region structure asserted by
     `shell.layout.test.tsx` are unchanged.
   - Other screens now scroll within `main` rather than the page. Note this in the
     commit message, because the shell belongs to CAP-001-E1-S4.
-- [ ] T021 Run the existing shell suites unmodified.
+- [x] T021 Run the existing shell suites unmodified.
   - The suites are `web/src/app/shell*.test.tsx`, `status-region*.test.tsx` and
     `routes.test.tsx`. Every one of them renders `/coverage`.
   - `test-setup.ts`'s default `fetch` stub answers every URL with a health body. The
@@ -607,7 +608,7 @@ Prove expansion end to end against the real API.
   - If any of these tests fails or emits an `act(...)` warning, fix it in the Coverage
     screen, for example with its cancellation guard. **Do not edit CAP-001-E1-S4/S5 test
     files.**
-- [ ] T022 Create the end-to-end seed `tests/e2e/fixtures/coverage-seed.sql`, a plain SQL script. It has no `.spec.ts` suffix, so Playwright never collects it.
+- [x] T022 Create the end-to-end seed `tests/e2e/fixtures/coverage-seed.sql`, a plain SQL script. It has no `.spec.ts` suffix, so Playwright never collects it.
   - Insert active instruments `CVA`, `CVB` and `CVC`. The symbols are unique to this
     spec and do not collide with `instruments-add-retire.spec.ts`'s `AAPL`.
   - For each instrument, insert `reference` and `prices` `coverage_segment` rows over
@@ -620,7 +621,7 @@ Prove expansion end to end against the real API.
   - Insert `acquisition_state` rows for `prices` with `last_outcome='written'`,
     `last_acquired_at='2024-01-05T22:14:03Z'` and `last_run_id=gen_random_uuid()`.
   - The columns follow `migrations/0001`–`0003`.
-- [ ] T023 Create `tests/e2e/coverage-expansion.spec.ts`, the story's "`@playwright/test` for expansion to gap dates" (depends on T019, T022). It runs against the real API and PostgreSQL from `playwright.config.ts`.
+- [x] T023 Create `tests/e2e/coverage-expansion.spec.ts`, the story's "`@playwright/test` for expansion to gap dates" (depends on T019, T022). It runs against the real API and PostgreSQL from `playwright.config.ts`.
   - `test.beforeAll` applies the seed with Node's `execFileSync`:
     - `execFileSync("docker", ["exec", "-i", "-e", "PGPASSWORD=postgres", "factorflow-e2e-postgres", "psql", "--host=127.0.0.1", "--username=postgres", "--dbname=factorflow", "-v", "ON_ERROR_STOP=1"], { input: readFileSync(seedPath) })`
     - The container name and credentials are the constants in
@@ -653,7 +654,7 @@ Prove expansion end to end against the real API.
 
 **Purpose**: Traceability, provisional-decision markers and clean validation.
 
-- [ ] T024 [P] Add provenance comments.
+- [x] T024 [P] Add provenance comments.
   - In the docstrings of `web/src/screens/coverage/index.tsx`, `coverage-table.tsx`,
     `copy.ts` and `uniform-shortfall.ts`, cite each PROVISIONAL decision by this plan's
     Open Gap number. This follows the precedent in `screens/instruments/start-action.tsx`
@@ -662,7 +663,7 @@ Prove expansion end to end against the real API.
     2.3".
   - Put one above the expansion fetch: "Fetch on expansion: DAC-E6-14 governs over
     ux-design 1.1; see Resolved Conflict 1".
-- [ ] T025 Run the validation commands from the repository root, and fix issues only in the files this story touches:
+- [x] T025 Run the validation commands from the repository root, and fix issues only in the files this story touches:
   - `npm run format`
   - `npm run lint`
   - `npx tsc --noEmit`
