@@ -1,13 +1,9 @@
 import type { JSX } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import CoverageScreen from "../screens/coverage";
 import InstrumentsScreen from "../screens/instruments";
 import RunsScreen from "../screens/runs";
 import SettingsScreen from "../screens/settings";
-
-/** Placeholder screen content until each destination's own story delivers it. */
-function ScreenPlaceholder({ label }: { label: string }): JSX.Element {
-  return <div>{label}</div>;
-}
 
 function RunDetailPlaceholder(): JSX.Element {
   return <div>Run detail</div>;
@@ -28,7 +24,7 @@ export function AppRoutes(): JSX.Element {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/coverage" replace />} />
-      <Route path="/coverage" element={<ScreenPlaceholder label="Coverage" />} />
+      <Route path="/coverage" element={<CoverageScreen />} />
       <Route path="/instruments" element={<InstrumentsScreen />} />
       <Route path="/runs" element={<RunsScreen />} />
       <Route path="/runs/:runId" element={<RunDetailPlaceholder />} />

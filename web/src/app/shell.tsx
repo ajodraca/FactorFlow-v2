@@ -51,7 +51,7 @@ function MainRegion(): JSX.Element {
 export function Shell(): JSX.Element {
   return (
     <HealthProvider>
-      <div className="flex min-h-screen bg-background text-foreground text-base">
+      <div className="flex h-screen bg-background text-foreground text-base">
         <div data-testid="nav-rail" className="flex w-7 flex-col border-border border-r">
           <nav aria-label="Primary" className="flex flex-1 flex-col gap-2 p-5">
             {DESTINATIONS.map(({ label, to }) => (
@@ -62,7 +62,7 @@ export function Shell(): JSX.Element {
           </nav>
           <StatusRegion />
         </div>
-        <main className="flex-1 p-5">
+        <main className="flex min-w-0 flex-1 flex-col overflow-auto p-5">
           <MainRegion />
         </main>
       </div>

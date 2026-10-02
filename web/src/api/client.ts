@@ -11,11 +11,17 @@ import type {
   AcquisitionRun,
   AcquisitionRunPage,
   AddInstrumentsResult,
+  CoverageDataType,
+  CoverageExpansion,
+  CoverageGapDetection,
+  CoverageRow,
+  CoverageView,
   HealthResponse,
   HistoryDepth,
   Instrument,
   InstrumentLifecycle,
   InstrumentListResult,
+  PresenceState,
   RunCancelResult,
   RunStartResult,
   RunState,
@@ -279,6 +285,88 @@ export async function listInstruments(
     retiredCount: body.retired_count,
     nextCursor: body.next_cursor,
   };
+}
+
+/** `GET /api/coverage` filters (component design `ingestion-api` section 2.4a). */
+export interface CoverageFilters {
+  symbol?: string;
+  lifecycle?: InstrumentLifecycle;
+  cursor?: string;
+}
+
+interface WireCoverageInstrument {
+  symbol: string;
+  lifecycle: InstrumentLifecycle;
+  data_types: Record<CoverageDataType, PresenceState>;
+  covered_from: string | null;
+  covered_to: string | null;
+  last_acquired_at: string | null;
+  gap_count: number | null;
+  depth_short_by_years: number | null;
+}
+
+/**
+ * `GET /api/coverage` (CAP-001-E6-S3; AC-7, AC-8). Only the filters that
+ * are present become query parameters. No `limit`, `from` or `to` is sent:
+ * the API's default page size applies, and with both bounds omitted the
+ * service covers everything acquired (ingestion-api 2.4a; coverage-service
+ * 2.3). `null` and `0` are copied through unchanged, never coerced.
+ */
+export async function fetchCoverage(filters: CoverageFilters = {}): Promise<CoverageView> {
+  const query = new URLSearchParams();
+  if (filters.symbol) {
+    query.set("symbol", filters.symbol);
+  }
+  if (filters.lifecycle) {
+    query.set("lifecycle", filters.lifecycle);
+  }
+  if (filters.cursor) {
+    query.set("cursor", filters.cursor);
+  }
+  const queryString = query.toString();
+
+  const body = await requestJson<{
+    instruments: WireCoverageInstrument[];
+    never_acquired: boolean;
+    gap_detection: CoverageGapDetection;
+    next_cursor: string | null;
+  }>(`/api/coverage${queryString ? `?${queryString}` : ""}`);
+
+  return {
+    rows: body.instruments.map(
+      (row): CoverageRow => ({
+        symbol: row.symbol,
+        lifecycle: row.lifecycle,
+        dataTypes: row.data_types,
+        coveredFrom: row.covered_from,
+        coveredTo: row.covered_to,
+        lastAcquiredAt: row.last_acquired_at,
+        gapCount: row.gap_count,
+        depthShortByYears: row.depth_short_by_years,
+      }),
+    ),
+    neverAcquired: body.never_acquired,
+    gapDetection: { available: body.gap_detection.available, reason: body.gap_detection.reason },
+    nextCursor: body.next_cursor,
+  };
+}
+
+/**
+ * One instrument's gap dates, through `GET /api/coverage`'s provisional
+ * `expand` parameter (CAP-001-E6-S4-tasks Open Gap 1). The page is narrowed
+ * to that one symbol to keep the incidental coverage read small; only the
+ * body's `expanded` key is read. A body without it rejects rather than
+ * returning an empty list, which would read as "no gaps".
+ */
+export async function fetchCoverageGapDates(symbol: string): Promise<CoverageExpansion> {
+  const query = new URLSearchParams({ symbol, limit: "1", expand: symbol });
+  const body = await requestJson<{
+    expanded?: { symbol: string; gap_dates: string[] | null };
+  }>(`/api/coverage?${query.toString()}`);
+  if (body.expanded === undefined || body.expanded === null) {
+    throw new ApiError(`GET /api/coverage returned no gap dates for ${symbol}`, "unknown");
+  }
+  return { symbol: body.expanded.symbol, gapDates: body.expanded.gap_dates };
 }
 
 function toHistoryDepth(body: { years: number | null; updated_at: string | null }): HistoryDepth {
