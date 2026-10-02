@@ -55,8 +55,10 @@ read — `src/factorflow/coverage/service.py`, deriving per-instrument
 coverage at read time from the rows actually written — is in place, with gap
 detection in daily prices (`src/factorflow/coverage/gaps.py`), and is served
 over HTTP by `GET /api/coverage` (`src/factorflow/api/routes/coverage.py`).
-The Coverage and Runs screens are not yet built; those two destinations
-still render a placeholder. What exists today is described
+The Runs screen is also built: it lists run history with each outcome's
+severity tier, polls while a run is in progress, and carries the reusable
+Start and Cancel run controls. The Coverage screen is not yet built; that
+destination still renders a placeholder. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
@@ -117,9 +119,10 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
-| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. Same-origin only — the bundle is served by the API process, so every path is relative |
-| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` mounts the Instruments and Settings screens (see below) at their destinations, with Coverage and Runs still `ScreenPlaceholder`, plus a `/runs/:runId` child, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
+| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, which stays the health `most_recent_run` placeholder); `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
+| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom; `routes.tsx` mounts the Instruments, Runs and Settings screens (see below) at their destinations, with Coverage still `ScreenPlaceholder`, plus a `/runs/:runId` placeholder, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
 | `web/src/screens/instruments/` | The Instruments screen: one table with a lifecycle column (never two tables), single-symbol and bulk (`textarea`) add, and retirement through a `dialog` `confirm`. `index.tsx` composes the screen's `ScreenState`; `instrument-table.tsx` holds server-side search/filter and keyset "Load more" paging; `add-field.tsx` and `bulk-add.tsx` (with `parse-bulk-symbols.ts`) add instruments; `retire-dialog.tsx` confirms retirement; `start-action.tsx` renders the acquisition-run trigger `blocked` when history depth is unset; `badges.tsx` renders the active/retired lifecycle badge. See [Instruments and Settings screens](#instruments-and-settings-screens) |
+| `web/src/screens/runs/` | The Runs screen and the reusable run controls. `index.tsx` composes the screen's `ScreenState` and its 10-second poll (`RUNS_POLL_INTERVAL_MS`); `run-table.tsx` renders the `history` table, whose run-id link is the only way into a run; `outcome-badge.tsx` maps each run state to its tier, word and icon (`RUN_STATE_TIER`, `RUN_STATE_LABEL`, `OutcomeBadge`); `run-controls.tsx` exports `StartRunControl`; `cancel-run.tsx` exports `CancelRunControl`, which no screen mounts yet. See [Runs screen](#runs-screen) |
 | `web/src/screens/settings/` | The Settings screen: `index.tsx` composes the layout; `history-depth-form.tsx` reads and writes the history-depth setting with STD-UI-19-shaped validation errors; `credential-status.tsx` reports provider credential presence only, never the value, with a distinct icon/shape per state. See [Instruments and Settings screens](#instruments-and-settings-screens) |
 | `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
@@ -1298,6 +1301,89 @@ is reported distinctly from an unset value. Provider credential presence
 a cross, or a dashed circle for present/missing/unknown — never the value
 itself, each state carrying its own text label so the distinction survives in
 greyscale.
+
+## Runs screen
+
+`web/src/screens/runs/` renders at `/runs` inside the shell and reads
+`GET /api/acquisition-runs` through `listAcquisitionRuns()`. It produces the
+`loading`, `empty-never-populated`, `empty-no-match`, `populated` and `error`
+variants of `ScreenState<T>`; the shell owns `unreachable`.
+
+The list is a `history` table — Run, Outcome, Requested, Started, Ended,
+Instruments written, Instruments failed — newest first, with any run that
+has not finished pinned to the top and marked in progress. The history
+variant allows no row target, so the run id in the first column is a real
+link to `/runs/<runId>` (middle-click and open-in-new-tab work); that
+destination is still a placeholder. Timestamps use the status region's
+`America/Chicago` format, and a missing start or end time shows an em dash
+read out as *Not recorded*. An *Outcome* select filters server-side by
+state. Having no run ever reads differently from a filter that matches
+nothing, and only the second offers *Reset filter*. When the API reports
+more pages, the screen says *Showing the 50 most recent runs.* rather than
+paging further.
+
+Each outcome is a badge with a word and an icon, one shape per tier, so the
+tiers stay distinct without colour (`outcome-badge.tsx`):
+
+| State | Tier |
+|---|---|
+| `requested`, `cancelled` | neutral |
+| `running` | active |
+| `cancelling`, `partial` | warning |
+| `succeeded` | good |
+| `abandoned` | serious |
+| `failed` | critical |
+
+A partial run therefore never reads as a success, and a cancelled one never
+as a failure. An abandoned run also carries a sentence saying its process
+stopped, that coverage already written is kept, and that a new run
+continues. `tailwind.config.js` exposes the `status-neutral`,
+`status-active` and `status-serious` token pairs for these tiers; the
+tokens themselves already existed in `design-system/theme.css`.
+
+While the latest response holds a `requested`, `running` or `cancelling`
+run, the screen schedules another request 10 seconds after each answer
+(`RUNS_POLL_INTERVAL_MS`). When every run is terminal it schedules nothing,
+so a quiet system makes no requests. The timer is cleared on unmount and on
+a filter change. During a poll the rows stay rendered, with the table
+`aria-busy`.
+
+**`StartRunControl`** (`run-controls.tsx`) needs nothing but a Router
+ancestor, so other screens can mount it; the Runs screen supplies its
+preconditions from `getHistoryDepth()` and `listInstruments()`. Unset
+history depth or zero active instruments renders the button `blocked`,
+never `disabled`. It stays focusable, and each reason is linked through
+`aria-describedby`, depth first when both hold. A read that failed leaves
+the precondition unknown, and the button is not blocked on the client. A
+`409` `history_depth_not_set` or `no_active_instruments` from the server
+sets the same blocked rendering from `ApiError.code`, never from the API's
+own message. A new set of precondition values clears it. After a `202`
+the control calls `onStarted` (the Runs screen reloads), then navigates to
+the new run's detail. When the run is queued behind an active one it
+stays put, says *A run is in progress. This will start when it finishes.*,
+and leaves the action available.
+
+**`CancelRunControl`** (`cancel-run.tsx`) is offered only for a `requested`
+or `running` run. It opens a `dialog` `confirm` — never `destructive` —
+whose copy differs for a queued run and for a running one. Initial focus
+is on *Cancel*, focus is trapped, and Escape closes the dialog without a
+request. The dialog stays open and busy until the request answers. The
+result is shown as an outcome badge and the action is withdrawn, so a
+`cancelling` run is never presented as cancelled. A `409`
+`run_already_terminal` shows *This run had already completed.* with the
+run's actual outcome. No screen mounts this control yet: the design places
+cancellation on Run detail, which CAP-001-E7-S4 builds.
+
+Known gaps, recorded in
+`docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S6-implementation-review-v1.md`:
+
+- A poll that fails replaces the rows with the error state and stops
+  polling until *Retry* or a filter change, and no test covers that path
+  (IR-001).
+- The toolbar reads *Not yet loaded* in every state other than `populated`,
+  including after a failed poll or an empty filtered answer (IR-002).
+- `CancelRunControl` is reachable only through its tests until
+  CAP-001-E7-S4 mounts it (IR-003).
 
 ## Testing
 
