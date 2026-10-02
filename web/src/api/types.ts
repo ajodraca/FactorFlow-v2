@@ -124,3 +124,70 @@ export interface HistoryDepth {
   years: number | null;
   updatedAt: string | null;
 }
+
+/**
+ * The eight acquisition-run states (component design `ingestion-api`
+ * section 11; `RunState` in `src/factorflow/api/models.py`), exactly the
+ * wire values. Three are non-terminal (`requested`, `running`,
+ * `cancelling`); the other five are outcomes.
+ */
+export type RunState =
+  | "requested"
+  | "running"
+  | "cancelling"
+  | "succeeded"
+  | "partial"
+  | "failed"
+  | "cancelled"
+  | "abandoned";
+
+/**
+ * One run in `GET /api/acquisition-runs` (`RunSummary` in
+ * `src/factorflow/api/models.py`; component design `ingestion-api` section
+ * 11), mapped from snake_case. Named `AcquisitionRun` rather than reusing
+ * `RunSummary`, which is the health placeholder CAP-001-E7-S3 owns.
+ */
+export interface AcquisitionRun {
+  runId: string;
+  state: RunState;
+  historyDepthYears: number;
+  requestedAt: string;
+  startedAt: string | null;
+  endedAt: string | null;
+  instrumentsNamed: number;
+  instrumentsWritten: number;
+  instrumentsFailed: number;
+  failureReason: string | null;
+}
+
+/**
+ * `GET /api/acquisition-runs`'s `200` body (`RunListResponse` in
+ * `src/factorflow/api/models.py`; component design `ingestion-api` section
+ * 11), mapped from snake_case. `nextCursor`
+ * is `null` on the last page.
+ */
+export interface AcquisitionRunPage {
+  runs: AcquisitionRun[];
+  nextCursor: string | null;
+}
+
+/**
+ * `POST /api/acquisition-runs`'s `202` body (`RunStartResponse` in
+ * `src/factorflow/api/models.py`; component design `ingestion-api` section
+ * 11). `queuedBehind` carries the active
+ * run's id when the new run is queued behind it (AC-23), else `null`.
+ */
+export interface RunStartResult {
+  runId: string;
+  state: "requested";
+  queuedBehind: string | null;
+}
+
+/**
+ * `POST /api/acquisition-runs/{id}/cancel`'s `202` body
+ * (`CancelRunResponse` in `src/factorflow/api/models.py`; component design
+ * `ingestion-api` section 11).
+ */
+export interface RunCancelResult {
+  state: "cancelling" | "cancelled";
+}

@@ -97,7 +97,7 @@ Revision 2 (2026-10-01) re-validates the 2026-09-11 plan against the code merged
 **Purpose**: Expose the missing tier tokens to Tailwind and add the run types to the fetch
 layer. Neither task adds behaviour.
 
-- [ ] T001 [P] Add the three missing STD-UI-12 tier colour pairs to `tailwind.config.js`, under `theme.extend.colors`. Add nothing else.
+- [x] T001 [P] Add the three missing STD-UI-12 tier colour pairs to `tailwind.config.js`, under `theme.extend.colors`. Add nothing else.
   - Add `status-neutral`, `status-neutral-muted`, `status-active`, `status-active-muted`,
     `status-serious` and `status-serious-muted`.
   - Use the file's existing `hsl(var(--x) / <alpha-value>)` form.
@@ -105,7 +105,7 @@ layer. Neither task adds behaviour.
     counterparts. Tailwind currently exposes only `good`, `warning` and `critical`.
   - Tokens are selected, never introduced (STD-UI-29).
   - Traces to: DAC-E5-16 and DAC-E5-S6-2.
-- [ ] T002 [P] Append the run contract to `web/src/api/types.ts`, after `HistoryDepth`, in the file's docstring style. Each type cites ingestion-api section 11 and `src/factorflow/api/models.py`.
+- [x] T002 [P] Append the run contract to `web/src/api/types.ts`, after `HistoryDepth`, in the file's docstring style. Each type cites ingestion-api section 11 and `src/factorflow/api/models.py`.
   - `export type RunState = "requested" | "running" | "cancelling" | "succeeded" | "partial" | "failed" | "cancelled" | "abandoned";`
     These are exactly the eight values of `models.RunState`.
   - `export interface AcquisitionRun`, mapped from the wire `RunSummary` model, with these
@@ -152,7 +152,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
 
 ### Mandatory Component Tests
 
-- [ ] T003 [P] Create `web/src/screens/runs/outcome-badge.test.tsx`, the file owner-web-app section 7 names. It implements TC-COMP-251 (DAC-E5-16), TC-COMP-286 (DAC-E5-S6-2), and the presentation half of TC-COMP-009 (AC-9).
+- [x] T003 [P] Create `web/src/screens/runs/outcome-badge.test.tsx`, the file owner-web-app section 7 names. It implements TC-COMP-251 (DAC-E5-16), TC-COMP-286 (DAC-E5-S6-2), and the presentation half of TC-COMP-009 (AC-9).
   - Use `it.each` over all eight states to render `<OutcomeBadge state={s} />` and assert
     `data-variant` exactly:
     - `requested` → `status-neutral`
@@ -174,7 +174,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
   - TC-COMP-009's persisted-outcome half belongs to CAP-001-E5-S1 and CAP-001-E5-S3, as
     `CAP-001-E5-S1-tasks` T003 records. This file covers only the interface half: the outcome
     is shown as recorded, never upgraded.
-- [ ] T004 [P] Create `web/src/screens/runs/runs-screen.test.tsx`. It implements TC-COMP-252 (DAC-E5-17), TC-COMP-288 (DAC-E5-S6-4), TC-COMP-291 (DAC-E5-S6-7), and the list half of TC-COMP-009 (AC-9).
+- [x] T004 [P] Create `web/src/screens/runs/runs-screen.test.tsx`. It implements TC-COMP-252 (DAC-E5-17), TC-COMP-288 (DAC-E5-S6-4), TC-COMP-291 (DAC-E5-S6-7), and the list half of TC-COMP-009 (AC-9).
   - Render `<RunsScreen />`. Mock these calls:
     - `listAcquisitionRuns`;
     - `getHistoryDepth`, resolving `{ years: 5, updatedAt: null }`;
@@ -219,7 +219,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
     - A `role="alert"` reads *Loading runs failed: boom (request req-7)* and offers *Retry*.
   - **Additional, truncation disclosure** (Open Gap 5): with `nextCursor: "c1"`, the text
     *Showing the 50 most recent runs.* is present. With `nextCursor: null` it is absent.
-- [ ] T005 [P] Create `web/src/screens/runs/runs-screen.polling.test.tsx`. It implements TC-COMP-285 (DAC-E5-S6-1) with fake timers, following the `coverage.polling.test.tsx` structure that CAP-001-E6-S4 plans.
+- [x] T005 [P] Create `web/src/screens/runs/runs-screen.polling.test.tsx`. It implements TC-COMP-285 (DAC-E5-S6-1) with fake timers, following the `coverage.polling.test.tsx` structure that CAP-001-E6-S4 plans.
   - Set up timers with `vi.useFakeTimers({ shouldAdvanceTime: true })`, then call
     `vi.setSystemTime(new Date("2026-09-06T15:00:00Z"))`.
   - Response 1 contains a `running` run. After the mount fetch:
@@ -235,7 +235,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
   - While a poll is in flight, the previous rows stay rendered and the table has
     `aria-busy="true"`. They never collapse to a loading message (owner-web-app section 5).
   - Restore real timers in `afterEach`.
-- [ ] T006 [P] Create `web/src/screens/coverage/start-run.test.tsx`, the file owner-web-app section 7 names for "Start is blocked, not disabled" and "Queued run notice renders". It implements TC-COMP-024 (AC-24), TC-COMP-287 (DAC-E5-S6-3) and TC-COMP-023 (AC-23, the interface half).
+- [x] T006 [P] Create `web/src/screens/coverage/start-run.test.tsx`, the file owner-web-app section 7 names for "Start is blocked, not disabled" and "Queued run notice renders". It implements TC-COMP-024 (AC-24), TC-COMP-287 (DAC-E5-S6-3) and TC-COMP-023 (AC-23, the interface half).
   - Render `<StartRunControl … />` imported from `../runs/run-controls`, **standalone** in a
     `MemoryRouter`, with no Runs-screen provider, parent or state. This proves the control can
     be composed on Coverage.
@@ -266,7 +266,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
     - A second click calls `startAcquisitionRun` again.
   - TC-COMP-023's queue-persistence half belongs to CAP-001-E5-S2 and CAP-001-E5-S5 (both
     implemented).
-- [ ] T007 [P] Create `web/src/screens/runs/cancel.test.tsx`, the file owner-web-app section 7 names. It implements TC-COMP-289 (DAC-E5-S6-5) and TC-COMP-290 (DAC-E5-S6-6).
+- [x] T007 [P] Create `web/src/screens/runs/cancel.test.tsx`, the file owner-web-app section 7 names. It implements TC-COMP-289 (DAC-E5-S6-5) and TC-COMP-290 (DAC-E5-S6-6).
   - Render `<CancelRunControl runId="r-1" state=… />`. Mock `cancelAcquisitionRun`.
   - **TC-COMP-289**:
     - With `state="running"`, click *Cancel run*. The `dialog` has `data-variant="confirm"`,
@@ -296,7 +296,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
 
 ### Additional Unit Tests
 
-- [ ] T008 [P] Create `web/src/api/client.runs.test.ts`. It is a new file, separate from CAP-001-E6-S4's `client.coverage.test.ts`, so the two stories never edit one test file. Stub `fetch` with `vi.stubGlobal`.
+- [x] T008 [P] Create `web/src/api/client.runs.test.ts`. It is a new file, separate from CAP-001-E6-S4's `client.coverage.test.ts`, so the two stories never edit one test file. Stub `fetch` with `vi.stubGlobal`.
   - **`ApiError` extension**:
     - `new ApiError("m", "r")` still works, and gives `code === null` and `state === null`.
     - A `409` body `{"error":{"code":"run_already_terminal","message":"m","resource":"acquisition-run","request_id":"r","state":"failed"}}`
@@ -318,7 +318,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
     - It maps `{state:"cancelling"}`.
   - A thrown `fetch` rejects with `ApiUnreachableError`.
   - Supports AC-23, AC-24 and DAC-E5-S6-6.
-- [ ] T009 [P] Create `web/src/screens/runs/run-controls.test.tsx` for `StartRunControl` behaviour beyond T006.
+- [x] T009 [P] Create `web/src/screens/runs/run-controls.test.tsx` for `StartRunControl` behaviour beyond T006.
   - **Post-202 routing** (ux 1.1 and section 2; Resolved Conflict 1): when
     `startAcquisitionRun` resolves with `queuedBehind: null`:
     - `onStarted` is called exactly once with the result, before navigation;
@@ -344,7 +344,7 @@ Test conventions. These follow the precedents in `web/src/app/routes.test.tsx` a
   - **No double submit**: two rapid clicks while the first call is pending produce one call.
     The button has `aria-busy="true"` while pending and never gets `disabled`.
   - Supports AC-23, AC-24 and DAC-E5-S6-3.
-- [ ] T010 Update `web/src/app/routes.test.tsx`.
+- [x] T010 Update `web/src/app/routes.test.tsx`.
   - Add `listAcquisitionRuns: vi.fn().mockResolvedValue({ runs: [], nextCursor: null })` to
     the existing `vi.mock("../api/client")` factory.
   - Add a case: inside `<Shell />` at `/runs`, the real Runs screen renders an `h1` *Runs*,
@@ -364,7 +364,7 @@ and never real waits.
 **Purpose**: Implement the client calls, the tier mapping, both controls and the screen until
 Phase 2 is green.
 
-- [ ] T011 Implement the client half in `web/src/api/client.ts` (makes T008 pass; depends on T002).
+- [x] T011 Implement the client half in `web/src/api/client.ts` (makes T008 pass; depends on T002).
   - Extend `ApiError` **additively**:
     - add `readonly code: string | null` and `readonly state: string | null`;
     - give the constructor an optional third parameter,
@@ -382,7 +382,7 @@ Phase 2 is green.
       Send `POST` with no body and no `Content-Type`, because the endpoint takes an empty body.
     - `export async function cancelAcquisitionRun(runId: string): Promise<RunCancelResult>`.
       Use `encodeURIComponent(runId)`.
-- [ ] T012 [P] Create `web/src/screens/runs/outcome-badge.tsx` (makes T003 pass; depends on T001, T002).
+- [x] T012 [P] Create `web/src/screens/runs/outcome-badge.tsx` (makes T003 pass; depends on T001, T002).
   - `export const RUN_STATE_TIER: Record<RunState, "neutral" | "active" | "good" | "warning" | "serious" | "critical">`
     holds the ux-design section 5 and run-journal section 10 table, verbatim.
   - `export const RUN_STATE_LABEL: Record<RunState, string>` holds the visible words
@@ -396,7 +396,7 @@ Phase 2 is green.
     - It shows an `aria-hidden` `svg` with a per-tier `data-icon` shape, then the label.
     - Classes are `bg-status-<tier>-muted text-status-<tier>`, following the `LifecycleBadge`
       structure in `screens/instruments/badges.tsx`.
-- [ ] T013 Create `web/src/screens/runs/run-controls.tsx`, which exports `StartRunControl` (makes T006 and T009 pass; depends on T011). The interface is pinned in Open Gap 2:
+- [x] T013 Create `web/src/screens/runs/run-controls.tsx`, which exports `StartRunControl` (makes T006 and T009 pass; depends on T011). The interface is pinned in Open Gap 2:
   ```ts
   export interface StartRunControlProps {
     /** `null`: no depth stated, renders blocked. `undefined`: not known, not blocked client-side. */
@@ -430,7 +430,7 @@ Phase 2 is green.
     precondition props change. Any other failure renders the STD-UI-19 alert (Open Gap 10).
   - The control reads no Runs-screen state, context or route parameter. It needs only a Router
     ancestor, for `useNavigate`.
-- [ ] T014 [P] Create `web/src/screens/runs/cancel-run.tsx`, which exports `CancelRunControl` (makes T007 pass; depends on T011, T012). The interface is pinned in Open Gap 3:
+- [x] T014 [P] Create `web/src/screens/runs/cancel-run.tsx`, which exports `CancelRunControl` (makes T007 pass; depends on T011, T012). The interface is pinned in Open Gap 3:
   ```ts
   export interface CancelRunControlProps {
     runId: string;
@@ -460,7 +460,7 @@ Phase 2 is green.
     Hide the trigger and call `onSettled(error.state)`.
   - On any other failure, render the STD-UI-19 alert inside the dialog: *Cancelling run
     {runId} failed: {message} (request {requestId})*.
-- [ ] T015 Create `web/src/screens/runs/run-table.tsx` and `web/src/screens/runs/index.tsx` (makes T004 and T005 pass; depends on T012, T013).
+- [x] T015 Create `web/src/screens/runs/run-table.tsx` and `web/src/screens/runs/index.tsx` (makes T004 and T005 pass; depends on T012, T013).
   - **`run-table.tsx`** exports `RunTable({ runs, busy }: { runs: AcquisitionRun[]; busy: boolean })`,
     a `data-table` `history`-style table.
     - It has `aria-busy={busy}` and `th[scope=col]` headers, in this order: Run, Outcome,
@@ -525,13 +525,13 @@ clean.
 **Purpose**: Route the screen inside the shell, keep the existing suite green, and prove
 start-then-cancel against the real API.
 
-- [ ] T016 Wire the route in `web/src/app/routes.tsx`, inside the CAP-001-E1-S4 shell (makes T010 pass; depends on T015).
+- [x] T016 Wire the route in `web/src/app/routes.tsx`, inside the CAP-001-E1-S4 shell (makes T010 pass; depends on T015).
   - Import `RunsScreen from "../screens/runs"` and replace `<ScreenPlaceholder label="Runs" />`
     on `/runs` with `<RunsScreen />`.
   - **Keep `ScreenPlaceholder`**, because `/coverage` still uses it until CAP-001-E6-S4 lands.
     Whichever of the two stories merges last deletes it if it is unused (`noUnusedLocals`).
   - Leave `/runs/:runId` → `RunDetailPlaceholder` untouched. CAP-001-E7-S4 owns it.
-- [ ] T017 Run the full `npm run test` and fix regressions caused only by `/runs` now fetching (depends on T016).
+- [x] T017 Run the full `npm run test` and fix regressions caused only by `/runs` now fetching (depends on T016).
   - `web/src/app/shell.status-region.test.tsx` and `shell.unreachable.test.tsx` navigate to
     `/runs`. The global `fetch` stub in `web/src/test-setup.ts` answers every URL with the
     health body, so the Runs screen will settle into its `error` state there.
@@ -539,7 +539,7 @@ start-then-cancel against the real API.
     `listAcquisitionRuns`, `getHistoryDepth` and `listInstruments` mocks to that file's own
     `vi.mock` factory, as `routes.test.tsx` already does.
   - Do not edit `test-setup.ts` or change any assertion's meaning.
-- [ ] T018 Create `tests/e2e/runs-start-cancel.spec.ts` against the existing Playwright setup: `playwright.config.ts` and `scripts/run-e2e-server.sh`, which provide the real API and PostgreSQL (depends on T016). The name and shape are in Open Gap 8.
+- [x] T018 Create `tests/e2e/runs-start-cancel.spec.ts` against the existing Playwright setup: `playwright.config.ts` and `scripts/run-e2e-server.sh`, which provide the real API and PostgreSQL (depends on T016). The name and shape are in Open Gap 8.
   - Arrange through Playwright's `request` fixture:
     - `PUT /api/settings/history-depth` with `{ "years": 1 }`;
     - `POST /api/instruments` with `{ "symbols": ["MSFT"] }`, accepting `201` or `409`
@@ -570,7 +570,7 @@ is reported as excluded rather than green.
 
 **Purpose**: Prove that the tests kill the regressions that matter, and record TDD evidence.
 
-- [ ] T019 Mutation-check the suite (depends on T017–T018).
+- [x] T019 Mutation-check the suite (depends on T017–T018).
   - By hand, mutate each of the following in turn and confirm that a test fails:
     - the poll condition (include a terminal state, or drop `cancelling`);
     - the poll cadence (9 000 or 11 000 ms);
@@ -583,7 +583,7 @@ is reported as excluded rather than green.
     - the queued 202 navigating away.
   - Strengthen any test a mutation survives. Record each mutation as RED→GREEN→MUTATE→STRENGTHEN
     in the evidence file.
-- [ ] T020 After each TDD cycle in T003–T019, not once at the end:
+- [x] T020 After each TDD cycle in T003–T019, not once at the end:
   - stage only that cycle's diff;
   - dispatch an independent code-review subagent and an independent spec-drift subagent
     against it;
