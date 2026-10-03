@@ -51,13 +51,14 @@ def _seed_result(
     instrument_id: int,
     data_type: str,
     outcome: str,
+    reason: str | None = None,
 ) -> None:
     """Persist one per-data-type outcome for the supplied run and instrument."""
     with connection.cursor() as cursor:
         cursor.execute(
             "INSERT INTO run_instrument_result "
-            "(run_id, instrument_id, data_type, outcome) VALUES (%s, %s, %s, %s)",
-            (run_id, instrument_id, data_type, outcome),
+            "(run_id, instrument_id, data_type, outcome, reason) VALUES (%s, %s, %s, %s, %s)",
+            (run_id, instrument_id, data_type, outcome, reason),
         )
     connection.commit()
 
@@ -118,3 +119,68 @@ def test_run_detail_outcome_counts_cover_the_whole_run(
     assert zero_default_detail.outcome_counts.not_found == 0
     assert zero_default_detail.outcome_counts.failed == 0
     assert zero_default_detail.outcome_counts.skipped == 0
+
+
+@pytest.mark.postgres
+def test_detail_rows_name_instruments_and_keep_not_found_distinct(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    # Implements TC-COMP-010
+    # Implements TC-COMP-011
+    """Failed and not-found rows retain owner-readable instrument identity."""
+    connection = migrated_run_schema_connection
+    run_id = _seed_run(connection)
+    aapl_id = _seed_instrument(connection, "AAPL")
+    zzzz_id = _seed_instrument(connection, "ZZZZ")
+    _seed_result(connection, run_id, aapl_id, "prices", "written")
+    _seed_result(
+        connection,
+        run_id,
+        aapl_id,
+        "reference",
+        "failed",
+        "provider unavailable",
+    )
+    for data_type in ("prices", "reference", "fundamentals", "corporate_actions"):
+        _seed_result(connection, run_id, zzzz_id, data_type, "not_found")
+
+    detail = get_run_detail(connection, run_id, DetailFilters(limit=10))
+
+    assert isinstance(detail, RunDetail)
+    failed = next(result for result in detail.results if result.outcome == "failed")
+    assert failed.symbol == "AAPL"
+    assert failed.instrument_id == aapl_id
+    assert failed.data_type == "reference"
+    assert failed.reason == "provider unavailable"
+    zzzz_results = [result for result in detail.results if result.instrument_id == zzzz_id]
+    assert {result.outcome for result in zzzz_results} == {"not_found"}
+    assert {result.data_type for result in zzzz_results} == {
+        "prices",
+        "reference",
+        "fundamentals",
+        "corporate_actions",
+    }
+    assert detail.outcome_counts.not_found == 4
+    assert detail.outcome_counts.failed == 1
+
+    not_found_detail = get_run_detail(
+        connection,
+        run_id,
+        DetailFilters(limit=10, outcome="not_found"),
+    )
+
+    assert isinstance(not_found_detail, RunDetail)
+    assert {result.symbol for result in not_found_detail.results} == {"ZZZZ"}
+    assert {result.outcome for result in not_found_detail.results} == {"not_found"}
+    assert len(not_found_detail.results) == 4
+
+    failed_detail = get_run_detail(
+        connection,
+        run_id,
+        DetailFilters(limit=10, outcome="failed"),
+    )
+
+    assert isinstance(failed_detail, RunDetail)
+    assert [
+        (result.symbol, result.data_type, result.outcome) for result in failed_detail.results
+    ] == [("AAPL", "reference", "failed")]
