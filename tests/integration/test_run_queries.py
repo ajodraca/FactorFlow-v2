@@ -184,3 +184,48 @@ def test_detail_rows_name_instruments_and_keep_not_found_distinct(
     assert [
         (result.symbol, result.data_type, result.outcome) for result in failed_detail.results
     ] == [("AAPL", "reference", "failed")]
+
+
+@pytest.mark.postgres
+def test_detail_keeps_all_data_types_for_an_instrument_on_one_page(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    # Implements TC-COMP-066
+    # Implements TC-COMP-080
+    """A paged unfiltered result keeps an instrument's outcomes together."""
+    connection = migrated_run_schema_connection
+    run_id = _seed_run(connection)
+    aapl_id = _seed_instrument(connection, "AAPL")
+    msft_id = _seed_instrument(connection, "MSFT")
+    outcomes = {
+        "prices": "written",
+        "fundamentals": "not_found",
+        "reference": "unchanged",
+        "corporate_actions": "failed",
+    }
+    for data_type, outcome in outcomes.items():
+        _seed_result(connection, run_id, aapl_id, data_type, outcome)
+    _seed_result(connection, run_id, msft_id, "prices", "written")
+
+    first_page = get_run_detail(connection, run_id, DetailFilters(limit=1))
+
+    assert isinstance(first_page, RunDetail)
+    pages = [first_page]
+    while pages[-1].next_cursor is not None:
+        pages.append(
+            get_run_detail(
+                connection,
+                run_id,
+                DetailFilters(limit=1, cursor=pages[-1].next_cursor),
+            )
+        )
+
+    aapl_page = next(page for page in pages if any(r.instrument_id == aapl_id for r in page.results))
+    assert [result.instrument_id for result in aapl_page.results] == [aapl_id] * 4
+    assert {result.data_type: result.outcome for result in aapl_page.results} == outcomes
+    assert ("prices", "written") in [
+        (result.data_type, result.outcome) for result in aapl_page.results
+    ]
+    assert ("fundamentals", "not_found") in [
+        (result.data_type, result.outcome) for result in aapl_page.results
+    ]
