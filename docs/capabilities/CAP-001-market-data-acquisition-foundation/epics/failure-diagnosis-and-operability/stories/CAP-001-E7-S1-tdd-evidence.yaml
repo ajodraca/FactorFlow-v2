@@ -34,3 +34,30 @@ cycles:
         whole-run row-count, all-five-outcome, zero-default contract.
     tests_executed: true
     commit_hash: 1eaa3cbd994c9e262b0f03c13eea77faeb58ed79
+  - name: result-row-identity-red
+    tasks: [T003]
+    status: red-observed
+    diff_sha256: fef7a7b001946608168079283bac7afee25f2393d263b3e1a7e64ce148466a02
+    red:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_rows_name_instruments_and_keep_not_found_distinct -q
+      result: >-
+        1 failed: ResultRow has no symbol, observed at
+        tests/integration/test_run_queries.py:151 before T011.
+    green:
+      status: pending
+      reason: T011 supplies the planned symbol mapping and outcome counts.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the staged T003 diff after confirming it
+      covers AAPL's failed row, all four ZZZZ not_found rows, both outcome
+      filters, and separate outcome counts.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the staged test conforms to T003 and
+        DEC-0007/DEC-0008: row-scoped counts remain distinct and symbol is
+        asserted as the owner-readable identity.
+    tests_executed: true
+    commit_hash: e873728d015b5c0754f37f53e3d91a918d7c8cc1
