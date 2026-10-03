@@ -61,3 +61,26 @@ cycles:
         asserted as the owner-readable identity.
     tests_executed: true
     commit_hash: e873728d015b5c0754f37f53e3d91a918d7c8cc1
+  - name: result-page-grouping-characterization
+    tasks: [T004]
+    status: green-on-arrival
+    diff_sha256: eef705647f1e1e3208749463409941d128c99c0325531947df08c0cba021f967
+    red:
+      status: not-applicable
+      reason: T004 is a required brownfield characterization cycle.
+    green:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_keeps_all_data_types_for_an_instrument_on_one_page -q
+      result: 1 passed; existing paging behavior is characterized.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the focused T004 diff and confirmed the
+      limit=1 traversal keeps all four AAPL data-type rows contiguous.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test matches T004's exact outcomes,
+        second instrument, cursor traversal, and trace IDs.
+    tests_executed: true
+    commit_hash: 21c702ae6b869b922a0cd55638c010954f9e056c
