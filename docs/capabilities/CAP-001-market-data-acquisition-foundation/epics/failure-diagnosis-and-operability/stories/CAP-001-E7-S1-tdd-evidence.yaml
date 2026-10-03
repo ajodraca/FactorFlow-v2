@@ -109,3 +109,26 @@ cycles:
         to T010.
     tests_executed: true
     commit_hash: bb1c22bbd4d0d4717b914e7d54ad9bb14f1fd5b7
+  - name: volume-paging-red
+    tasks: [T006]
+    status: red-observed
+    diff_sha256: 59dff7375ec8a3a6664a67a04ef56c86796c5554e0fd76075d30f6a666b8d9a0
+    red:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_pages_a_three_thousand_instrument_run -q
+      result: 1 failed: RunDetail has no outcome_counts at the final count-invariance assertion.
+    green:
+      status: pending
+      reason: T011 supplies the planned whole-run SQL counts.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved exact 3000x4 fixture, full unfiltered and
+      filtered traversal, no split/duplicate rows, and count invariance coverage.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the volume, failure-first, paging, filter,
+        and diagnostic-only timing checks conform to T006.
+    tests_executed: true
+    commit_hash: 816e2cba5ef875ab4b65e713798da515c57ab21d
