@@ -12,6 +12,11 @@ from datetime import UTC, datetime
 import psycopg
 import pytest
 
+from factorflow.ingestion.massive.errors import (
+    InstrumentNotFound,
+    ProviderUnavailable,
+    compose_failure_reason,
+)
 from factorflow.runs.queries import DetailFilters, RunDetail, get_run_detail
 
 
@@ -229,3 +234,60 @@ def test_detail_keeps_all_data_types_for_an_instrument_on_one_page(
     assert ("fundamentals", "not_found") in [
         (result.data_type, result.outcome) for result in aapl_page.results
     ]
+
+
+@pytest.mark.postgres
+def test_detail_returns_pre_redacted_composed_failure_reasons(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    # Implements TC-COMP-068
+    # Implements TC-COMP-082
+    """Stored, composed reasons preserve safe diagnosis fields without a secret."""
+    secret = "synthetic-credential-like-value"
+    connection = migrated_run_schema_connection
+    run_id = _seed_run(connection)
+    unavailable_run_id = _seed_run(connection)
+    msft_id = _seed_instrument(connection, "MSFT")
+    not_found_reason = compose_failure_reason(
+        InstrumentNotFound(
+            f"not found key={secret}", provider_request_id="req-e7s1-001"
+        ),
+        symbol="MSFT",
+        data_type="fundamentals",
+        redact=lambda text: text.replace(secret, "[redacted]"),
+    )
+    unavailable_reason = compose_failure_reason(
+        ProviderUnavailable(
+            f"provider unavailable key={secret}", provider_request_id="req-e7s1-001"
+        ),
+        symbol="MSFT",
+        data_type="fundamentals",
+        redact=lambda text: text.replace(secret, "[redacted]"),
+    )
+    _seed_result(
+        connection, run_id, msft_id, "fundamentals", "not_found", not_found_reason
+    )
+    _seed_result(
+        connection,
+        unavailable_run_id,
+        msft_id,
+        "fundamentals",
+        "failed",
+        unavailable_reason,
+    )
+
+    detail = get_run_detail(connection, run_id, DetailFilters(limit=10))
+    unavailable_detail = get_run_detail(connection, unavailable_run_id, DetailFilters(limit=10))
+
+    assert isinstance(detail, RunDetail)
+    assert isinstance(unavailable_detail, RunDetail)
+    assert detail.results[0].reason == not_found_reason
+    assert unavailable_detail.results[0].reason == unavailable_reason
+    for result in (*detail.results, *unavailable_detail.results):
+        assert result.reason is not None
+        assert "symbol=MSFT" in result.reason
+        assert "data_type=fundamentals" in result.reason
+        assert "request_id=req-e7s1-001" in result.reason
+        assert secret not in repr(result)
+    assert secret not in repr(detail)
+    assert secret not in repr(unavailable_detail)
