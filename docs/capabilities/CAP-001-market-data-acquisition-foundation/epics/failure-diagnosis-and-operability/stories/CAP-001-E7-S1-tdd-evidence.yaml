@@ -84,3 +84,28 @@ cycles:
         second instrument, cursor traversal, and trace IDs.
     tests_executed: true
     commit_hash: 21c702ae6b869b922a0cd55638c010954f9e056c
+  - name: redacted-failure-reasons-characterization
+    tasks: [T005]
+    status: green-on-arrival
+    diff_sha256: f6ae8ec4b175cdc0fa141140c8344fdda16aa4b6efdb14d676f0f1654c471922
+    red:
+      status: not-applicable
+      reason: T005 characterizes the existing write-side redaction boundary.
+    green:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_returns_pre_redacted_composed_failure_reasons -q
+      result: 1 passed; composed, stored reasons are returned unchanged.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed both typed composer failures retain their
+      exact safe fields and the synthetic credential is absent from rows and
+      detail representations.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test conforms to T005, DAC-E7-3, and
+        DAC-E7-S1-5; the serialized API assertion remains correctly deferred
+        to T010.
+    tests_executed: true
+    commit_hash: bb1c22bbd4d0d4717b914e7d54ad9bb14f1fd5b7
