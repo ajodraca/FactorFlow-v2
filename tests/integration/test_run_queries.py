@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from time import perf_counter
 
 import psycopg
 import pytest
@@ -291,3 +292,146 @@ def test_detail_returns_pre_redacted_composed_failure_reasons(
         assert secret not in repr(result)
     assert secret not in repr(detail)
     assert secret not in repr(unavailable_detail)
+
+
+@pytest.mark.postgres
+def test_detail_pages_a_three_thousand_instrument_run(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    # Implements TC-COMP-075
+    # Implements TC-COMP-078
+    """A large run pages whole instruments and preserves run-wide counts."""
+    connection = migrated_run_schema_connection
+    run_id = _seed_run(connection)
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE acquisition_run SET instruments_named = %s, instruments_written = %s, "
+            "instruments_failed = %s WHERE run_id = %s",
+            (3000, 2400, 600, run_id),
+        )
+        cursor.execute(
+            "INSERT INTO instrument (symbol, lifecycle) "
+            "SELECT 'S' || lpad(n::text, 4, '0'), 'active' "
+            "FROM generate_series(1, 3000) AS n"
+        )
+        cursor.execute(
+            "INSERT INTO run_instrument_result (run_id, instrument_id, data_type, outcome) "
+            "SELECT %s, i.instrument_id, types.data_type, "
+            "CASE "
+            "WHEN types.data_type = 'reference' AND substring(i.symbol, 2)::int %% 10 = 0 "
+            "THEN 'failed' "
+            "WHEN types.data_type = 'fundamentals' AND substring(i.symbol, 2)::int %% 10 = 1 "
+            "THEN 'not_found' "
+            "ELSE 'written' END "
+            "FROM instrument i CROSS JOIN "
+            "(VALUES ('reference'), ('prices'), ('fundamentals'), ('corporate_actions')) "
+            "AS types(data_type) "
+            "WHERE i.symbol LIKE 'S%%'",
+            (run_id,),
+        )
+        cursor.execute(
+            "SELECT instrument_id FROM instrument "
+            "WHERE symbol LIKE 'S%' AND substring(symbol, 2)::int % 10 = 0 "
+            "ORDER BY instrument_id"
+        )
+        failed_instrument_ids = {int(row[0]) for row in cursor.fetchall()}
+        cursor.execute(
+            "SELECT instrument_id FROM instrument "
+            "WHERE symbol LIKE 'S%' AND substring(symbol, 2)::int % 10 IN (0, 1) "
+            "ORDER BY instrument_id"
+        )
+        failure_first_ids = {int(row[0]) for row in cursor.fetchall()}
+        cursor.execute(
+            "SELECT instrument_id FROM instrument "
+            "WHERE symbol LIKE 'S%' AND substring(symbol, 2)::int % 10 = 1 "
+            "ORDER BY instrument_id"
+        )
+        not_found_instrument_ids = {int(row[0]) for row in cursor.fetchall()}
+    connection.commit()
+
+    started = perf_counter()
+    first_page = get_run_detail(connection, run_id, DetailFilters())
+    assert isinstance(first_page, RunDetail)
+    assert len({result.instrument_id for result in first_page.results}) == 50
+    assert len(first_page.results) <= 200
+    assert first_page.next_cursor is not None
+
+    # Full traversal uses a fresh cursor chain at the task-plan maximum of
+    # 500 instruments; the default-size page above proves the default contract.
+    full_pages: list[RunDetail] = []
+    cursor: str | None = None
+    while True:
+        page = get_run_detail(connection, run_id, DetailFilters(limit=500, cursor=cursor))
+        assert isinstance(page, RunDetail)
+        full_pages.append(page)
+        if page.next_cursor is None:
+            break
+        cursor = page.next_cursor
+
+    raw_instrument_ids = [
+        result.instrument_id for page in full_pages for result in page.results
+    ]
+    returned_ids = list(dict.fromkeys(raw_instrument_ids))
+    assert len(full_pages) == 6
+    assert len(raw_instrument_ids) == 12000
+    assert len(returned_ids) == 3000
+    assert len(set(returned_ids)) == 3000
+    for page in full_pages:
+        page_ids = [result.instrument_id for result in page.results]
+        assert all(page_ids.count(instrument_id) == 4 for instrument_id in set(page_ids))
+
+    has_failure = [instrument_id in failure_first_ids for instrument_id in returned_ids]
+    assert has_failure == sorted(has_failure, reverse=True)
+
+    def filtered_pages(outcome: str) -> list[RunDetail]:
+        pages: list[RunDetail] = []
+        next_cursor: str | None = None
+        while True:
+            page = get_run_detail(
+                connection,
+                run_id,
+                DetailFilters(limit=500, outcome=outcome, cursor=next_cursor),
+            )
+            assert isinstance(page, RunDetail)
+            pages.append(page)
+            if page.next_cursor is None:
+                return pages
+            next_cursor = page.next_cursor
+
+    pages_by_outcome = {
+        outcome: filtered_pages(outcome)
+        for outcome in ("failed", "not_found", "written", "unchanged", "skipped")
+    }
+    for outcome, pages in pages_by_outcome.items():
+        assert all(result.outcome == outcome for page in pages for result in page.results)
+
+    failed_results = [
+        result for page in pages_by_outcome["failed"] for result in page.results
+    ]
+    assert {result.outcome for result in failed_results} == {"failed"}
+    assert {result.instrument_id for result in failed_results} == failed_instrument_ids
+    assert all(result.data_type == "reference" for result in failed_results)
+    assert len(failed_results) == len(failed_instrument_ids)
+
+    not_found_results = [
+        result for page in pages_by_outcome["not_found"] for result in page.results
+    ]
+    assert {result.instrument_id for result in not_found_results} == not_found_instrument_ids
+    assert all(result.data_type == "fundamentals" for result in not_found_results)
+    assert len(not_found_results) == len(not_found_instrument_ids)
+
+    written_results = [
+        result for page in pages_by_outcome["written"] for result in page.results
+    ]
+    assert {result.instrument_id for result in written_results} == set(returned_ids)
+    assert len(written_results) == 11400
+    assert not [result for page in pages_by_outcome["unchanged"] for result in page.results]
+    assert not [result for page in pages_by_outcome["skipped"] for result in page.results]
+
+    all_counts = [first_page.outcome_counts, *[page.outcome_counts for page in full_pages]]
+    filtered_counts = [
+        page.outcome_counts for pages in pages_by_outcome.values() for page in pages
+    ]
+    assert all(counts == all_counts[0] for counts in all_counts + filtered_counts)
+    assert sum(vars(all_counts[0]).values()) == 12000
+    print(f"T006 traversal diagnostic: {perf_counter() - started:.3f}s")
