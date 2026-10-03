@@ -1,0 +1,36 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S1-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S1
+tasks_file: CAP-001-E7-S1-tasks.md
+decisions: [DEC-0007, DEC-0008, DEC-0021]
+created: 2026-10-03
+updated: 2026-10-03
+
+cycles:
+  - name: counts-red
+    tasks: [T002]
+    status: red-observed
+    diff_sha256: ecd4e67941525b0f6032dd36fd4b296b3ebf8d250f67cc33fa7b0c5ef92f46ff
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_queries.py -q
+      result: >-
+        1 failed: RunDetail has no outcome_counts, observed at
+        test_run_queries.py:99.
+    green:
+      status: pending
+      reason: T011 supplies the planned counts implementation after all of its
+        required RED evidence is recorded.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the staged diff after confirming mixed
+      per-data-type rows distinguish row counts from instrument counts,
+      limit=1 proves page independence, and a second run proves zero defaults.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test conforms to T002 and DEC-0007's
+        whole-run row-count, all-five-outcome, zero-default contract.
+    tests_executed: true
+    commit_hash: 1eaa3cbd994c9e262b0f03c13eea77faeb58ed79
