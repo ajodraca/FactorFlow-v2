@@ -132,3 +132,27 @@ cycles:
         and diagnostic-only timing checks conform to T006.
     tests_executed: true
     commit_hash: 816e2cba5ef875ab4b65e713798da515c57ab21d
+  - name: run-state-validation-red
+    tasks: [T007]
+    status: red-observed
+    diff_sha256: b7fe0c821e353ac23a110b96acaa125d8a91cb702ea07c8d4da324e47adb3728
+    red:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_run_history_orders_and_validates_state_filters -q
+      result: 1 failed: ListFilters(state="bogus") did not raise ValueError before T011.
+    green:
+      status: pending
+      reason: T011 supplies the required RUN_STATES membership validation.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the tied timestamp straddles a limit-2
+      cursor boundary, list order is exact, and active states are checked
+      sequentially under DEC-0021.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the staged T007 test conforms to the
+        task and DEC-0021's one-active-run interpretation.
+    tests_executed: true
+    commit_hash: 8d7b800306392ebd72d7e83904dbc9ae8ad7bf90

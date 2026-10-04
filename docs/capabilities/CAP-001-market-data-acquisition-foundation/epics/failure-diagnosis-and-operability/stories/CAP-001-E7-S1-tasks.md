@@ -126,7 +126,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
   - `outcome_counts` is identical on every page and under every outcome filter, and sums to 12000.
 
   Time is printed as a diagnostic only, never asserted (ingestion-api §14 Q5). Observe RED on the `outcome_counts` assertions before T011 (depends on T005; traces to DAC-E7-10, DAC-E7-S1-1, DAC-E7-S1-2).
-- [ ] T007 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-081`. Seed runs across all eight states, including two with an identical `requested_at`. Assert:
+- [x] T007 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-081`. Seed runs across all eight states, including two with an identical `requested_at`. Assert:
   - `list_runs` returns them in `(requested_at, run_id) DESC` order.
   - `ListFilters(state="failed")` returns only `failed` runs.
   - Cursor traversal at `limit=2` has no gaps or duplicates across the tie.
