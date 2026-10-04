@@ -12,6 +12,7 @@ import logging
 import re
 from contextlib import contextmanager
 
+import httpx
 import pytest
 from fastapi import APIRouter, FastAPI
 from fastapi.testclient import TestClient
@@ -431,3 +432,63 @@ def test_framework_http_error_code_does_not_change_with_detail_wording(
         codes.append(resp.json()["error"]["code"])
 
     assert codes == ["method_not_allowed", "method_not_allowed"]
+
+
+# ---------------------------------------------------------------------------
+# CAP-001-E7-S2: no credential value reaches an error response
+# ---------------------------------------------------------------------------
+
+_SECRET = "synthetic-credential-e7s2-4f1c9a"
+
+
+def _assert_secret_absent(resp: httpx.Response) -> None:
+    assert _SECRET not in resp.text
+    for name, value in resp.headers.items():
+        assert _SECRET not in value, name
+
+
+@pytest.mark.parametrize(
+    "exc",
+    [
+        pytest.param(RuntimeError(f"auth failed apiKey={_SECRET}"), id="unhandled-500"),
+        pytest.param(
+            StarletteHTTPException(status_code=400, detail=f"bad key {_SECRET}"),
+            id="http-exception-detail",
+        ),
+    ],
+)
+def test_raised_credential_never_reaches_the_response(
+    monkeypatch: pytest.MonkeyPatch, exc: Exception
+) -> None:
+    # Implements TC-COMP-086
+    # Implements TC-COMP-069
+    """A credential carried by an exception's text or detail is not echoed."""
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", _SECRET)
+    app = _app_with_probe(monkeypatch, exc)
+
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+
+    assert resp.status_code >= 400
+    _assert_secret_absent(resp)
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "body"),
+    [
+        pytest.param("PUT", "/api/settings/history-depth", {"years": _SECRET}, id="body-field"),
+        pytest.param("GET", f"/api/instruments?limit={_SECRET}", None, id="query-parameter"),
+    ],
+)
+def test_submitted_credential_never_reaches_a_validation_error(
+    monkeypatch: pytest.MonkeyPatch, method: str, path: str, body: dict[str, str] | None
+) -> None:
+    # Implements TC-COMP-086
+    # Implements TC-COMP-069
+    """A credential submitted as input is not echoed by the `422` envelope."""
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", _SECRET)
+    client = _app_with_pool(monkeypatch)
+
+    resp = client.request(method, path, json=body)
+
+    assert resp.status_code == 422
+    _assert_secret_absent(resp)
