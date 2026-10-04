@@ -20,14 +20,16 @@ from factorflow.runs.queries import ListFilters, get_most_recent_run, list_runs
 _BASE_TIME = datetime(2026, 9, 5, 22, 0, 0, tzinfo=UTC)
 
 
-def _seed(conn: psycopg.Connection, state: str, requested_at: datetime) -> UUID:
+def _seed(
+    conn: psycopg.Connection, state: str, requested_at: datetime, run_id: UUID | None = None
+) -> UUID:
     """Insert a `requested` or terminal run that satisfies the DDL checks."""
     ended_at = None if state == "requested" else requested_at + timedelta(minutes=1)
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO acquisition_run (state, history_depth_years, requested_at, ended_at) "
-            "VALUES (%s, 5, %s, %s) RETURNING run_id",
-            (state, requested_at, ended_at),
+            "INSERT INTO acquisition_run (run_id, state, history_depth_years, requested_at, "
+            "ended_at) VALUES (COALESCE(%s, gen_random_uuid()), %s, 5, %s, %s) RETURNING run_id",
+            (run_id, state, requested_at, ended_at),
         )
         row = cur.fetchone()
     conn.commit()
@@ -79,22 +81,33 @@ def test_most_recent_run_query_uses_the_recent_index(
     ), nodes
 
 
+_LOWER_RUN_ID = UUID("00000000-0000-4000-8000-000000000001")
+_HIGHER_RUN_ID = UUID("ffffffff-ffff-4fff-bfff-ffffffffffff")
+
+
 # Implements TC-COMP-089
 @pytest.mark.postgres
+@pytest.mark.parametrize(
+    "insertion_order",
+    [(_LOWER_RUN_ID, _HIGHER_RUN_ID), (_HIGHER_RUN_ID, _LOWER_RUN_ID)],
+    ids=["lower-first", "higher-first"],
+)
 def test_most_recent_run_breaks_ties_like_the_runs_list(
-    migrated_run_schema_connection: psycopg.Connection,
+    migrated_run_schema_connection: psycopg.Connection, insertion_order: tuple[UUID, UUID]
 ) -> None:
     """Open Gap 1 (DEC-0012): two runs with the same `requested_at` resolve to
-    the greater `run_id`, the same run the Runs list puts first.
+    the greater `run_id`, the same run the Runs list puts first. Both
+    insertion orders are seeded, so physical row order cannot satisfy the
+    test without the `run_id` tie-breaker.
     """
     conn = migrated_run_schema_connection
-    first = _seed(conn, "succeeded", _BASE_TIME)
-    second = _seed(conn, "failed", _BASE_TIME)
+    for run_id in insertion_order:
+        _seed(conn, "succeeded", _BASE_TIME, run_id=run_id)
 
     latest = get_most_recent_run(conn)
 
     assert latest is not None
-    assert latest.run_id == max(first, second)
+    assert latest.run_id == _HIGHER_RUN_ID
     assert latest.run_id == list_runs(conn, ListFilters(limit=1)).rows[0].run_id
 
 

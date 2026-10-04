@@ -50,24 +50,36 @@ def reachable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(health, "probe_schema_version", Mock(return_value=4))
 
 
+class _ConnectionFailingOnRelease(_FakeConnection):
+    def __exit__(self, *exc_info: object) -> None:
+        raise psycopg.OperationalError("connection lost while being returned")
+
+
+class _PoolFailingOnRelease:
+    def connection(self, timeout: float | None = None) -> _ConnectionFailingOnRelease:
+        return _ConnectionFailingOnRelease()
+
+
+_ROW = RunRow(
+    run_id=_RUN_ID,
+    state="failed",
+    history_depth_years=5,
+    requested_at=_REQUESTED_AT,
+    started_at=_STARTED_AT,
+    ended_at=_ENDED_AT,
+    instruments_named=3,
+    instruments_written=1,
+    instruments_failed=2,
+    failure_reason="provider_error",
+)
+
+
 @pytest.mark.usefixtures("reachable")
 def test_get_health_maps_the_most_recent_run(monkeypatch: pytest.MonkeyPatch) -> None:
     """Only `run_id`, `state` and `ended_at` are taken from the row, and
     `ended_at` is the row's end, not another timestamp.
     """
-    row = RunRow(
-        run_id=_RUN_ID,
-        state="failed",
-        history_depth_years=5,
-        requested_at=_REQUESTED_AT,
-        started_at=_STARTED_AT,
-        ended_at=_ENDED_AT,
-        instruments_named=3,
-        instruments_written=1,
-        instruments_failed=2,
-        failure_reason="provider_error",
-    )
-    monkeypatch.setattr(health, "get_most_recent_run", Mock(return_value=row))
+    monkeypatch.setattr(health, "get_most_recent_run", Mock(return_value=_ROW))
 
     response = health.get_health(_fake_request(_FakePool()))
 
@@ -107,6 +119,23 @@ def test_get_health_degrades_to_unreachable_when_the_run_read_fails(
     )
 
     response = health.get_health(_fake_request(_FakePool()))
+
+    assert response.database == "unreachable"
+    assert response.schema_version is None
+    assert response.most_recent_run is None
+
+
+@pytest.mark.usefixtures("reachable")
+def test_get_health_discards_a_run_read_before_the_connection_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """DEC-0014: both reads succeed but the connection fails as it is
+    released, so the run already read must not be reported beside
+    `unreachable` (T014: the `except` branch's reset).
+    """
+    monkeypatch.setattr(health, "get_most_recent_run", Mock(return_value=_ROW))
+
+    response = health.get_health(_fake_request(_PoolFailingOnRelease()))
 
     assert response.database == "unreachable"
     assert response.schema_version is None

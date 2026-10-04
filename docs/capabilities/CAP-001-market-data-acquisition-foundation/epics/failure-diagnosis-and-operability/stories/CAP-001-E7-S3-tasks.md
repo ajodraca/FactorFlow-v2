@@ -212,7 +212,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 **Purpose**: Kill mutants on the changed behaviour, run full validation, and keep the per-cycle evidence chain.
 
-- [ ] T014 After T002–T013 are green and their T015 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines and strengthen tests until every mutant is killed:
+- [x] T014 After T002–T013 are green and their T015 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines and strengthen tests until every mutant is killed:
   - In `_MOST_RECENT_RUN_SQL`: `DESC` → `ASC`, drop the `run_id` tie-breaker, drop `LIMIT 1`, or add `WHERE ended_at IS NOT NULL` / a terminal-state filter.
   - In `get_health`: keep `most_recent_run = None` hardcoded, omit the reset in the `except` branch, or map `requested_at`/`started_at` into `ended_at`.
   - In `MostRecentRun`: loosen `state` to `str`.

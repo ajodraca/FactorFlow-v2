@@ -306,4 +306,57 @@ cycles:
         Independent reviewer found T013's four bullets exactly, with no
         consumer, test or fixture touched.
     tests_executed: true
+    commit_hash: 32aa449ca68d53ca5daf65c413e126f5c0ec72f2
+  - name: mutation-and-final-validation
+    tasks: [T014]
+    status: green
+    diff_sha256: fbfb4c7f3cabadc0324124fc9cc538ac8fe66ba9a49268961c8531b98b4e2a47
+    red:
+      status: mutation-checks-killed
+      method: >-
+        Each mutant was applied to the source, the five S3 test files were run
+        with -x, and the source was restored from a copy. Two mutants survived
+        the first pass and the tests were strengthened: "drop the run_id
+        tie-breaker" (two tied runs could pass by physical row order, so the
+        tie test now seeds fixed low and high run ids in both insertion
+        orders) and "omit the reset in the except branch" (unobservable when
+        the run read itself raises, so a new unit test makes the pooled
+        connection fail on release after both reads succeeded).
+      results:
+        - DESC to ASC - killed by test_health_reports_a_newer_non_terminal_run[requested]
+        - drop run_id tie-breaker - killed by test_most_recent_run_breaks_ties_like_the_runs_list[lower-first]
+        - drop LIMIT 1 - killed by test_most_recent_run_query_uses_the_recent_index
+        - WHERE ended_at IS NOT NULL - killed by test_health_reports_a_newer_non_terminal_run[requested]
+        - terminal-state filter - killed by test_health_reports_a_newer_non_terminal_run[requested]
+        - hardcode most_recent_run None - killed by test_health_reports_the_most_recent_terminal_run
+        - omit reset in except - killed by test_get_health_discards_a_run_read_before_the_connection_failed
+        - map requested_at into ended_at - killed by test_health_reports_the_most_recent_terminal_run
+        - map started_at into ended_at - killed by test_health_reports_the_most_recent_terminal_run
+        - loosen state to str - killed by test_most_recent_run_rejects_an_unknown_state
+    green:
+      commands:
+        - uv run pytest -q (784 passed, 2 warnings; PostgreSQL available)
+        - uv run ruff check . (passed)
+        - uv run ruff format --check . (173 files already formatted)
+        - uv run mypy src (no issues in 47 source files)
+        - uv build (wheel built)
+        - npx tsc --noEmit (clean); npm run lint (clean); npm run format (no fixes)
+        - npm run test (36 files, 222 tests passed)
+        - npm run build (built)
+      result: >-
+        All mutants killed and sources restored; the T001 baseline stays green
+        and test_health_reachable_database passes with only its T009 setup
+        change.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed both strengthenings are legitimate and
+      realistic, the mutant list covers T014 exactly, and found no defect in
+      the whole S3 change set.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the strengthened tests within DEC-0012 and
+        DEC-0014, and the whole implementation conforming to AC-18, DAC-E7-8
+        and DAC-E7-S3-1 to 4.
+    tests_executed: true
     commit_hash: pending
