@@ -20,6 +20,10 @@ export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 30_000,
   fullyParallel: false,
+  // One worker: every spec shares the one e2e database, and a seeded running
+  // run in one file would otherwise queue another file's start
+  // (CAP-001-E7-S4-tasks Other Notes, "E2E seeding").
+  workers: 1,
   retries: 0,
   reporter: "line",
   use: {

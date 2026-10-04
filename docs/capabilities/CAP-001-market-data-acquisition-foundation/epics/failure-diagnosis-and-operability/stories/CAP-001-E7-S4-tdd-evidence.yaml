@@ -136,3 +136,39 @@ cycles:
         ingestion-api section 11; comment wording only.
     tests_executed: true
     commit_hash: c9b21488badd3480cea686452066ae752cfdf4ed
+  - name: run-detail-screen-red
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T014]
+    status: red-observed
+    diff_sha256: 1ccae5bac61ce906eaa2fa34cd35a7cfb35db9a46136c1097f7993d532730e52
+    deviation: >-
+      T002-T010 specify one screen that T022-T024 build, and T014 its route,
+      so they form one RED cycle. The shared harness observes navigation with
+      a location probe rather than a second /runs/:other route, which would
+      never match behind /runs/:runId.
+    red:
+      command: npx vitest run web/src/app/routes.test.tsx web/src/screens/runs/
+      result: >-
+        run-detail.test.tsx, run-detail.reason.test.tsx and
+        run-detail.polling.test.tsx fail to resolve ./detail; the new T014
+        routes case fails (no heading "Run run-123"); 82 other tests pass,
+        including every pre-existing routes.test.tsx case with the planned
+        getAcquisitionRun mock added.
+    green:
+      status: pending
+      reason: T022-T025 add the summary, the roster, the screen and the route.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer (re-dispatched after the first reviewer's tool
+      call was rejected) traced every assertion to the planned T022-T024
+      design and the landed seams, found none vacuous, racy or impossible,
+      confirmed the fake-timer pattern and the reason test's real-mapping
+      path, and that existing routes cases are byte-identical.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found all fourteen TC trace comments and every
+        T002-T010 and T014 bullet asserted with verbatim copy; additions are
+        authorised by T020, T022-T024 and P5; the location probe meets the
+        harness's intent.
+    tests_executed: true
+    commit_hash: f156ed7b3048a9d152cfe39720baa1dcb24d7248
