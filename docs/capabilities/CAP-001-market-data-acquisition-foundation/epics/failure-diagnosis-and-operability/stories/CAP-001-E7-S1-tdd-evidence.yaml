@@ -175,3 +175,22 @@ cycles:
       evidence: Independent reviewer found the unit contract conforms to T008.
     tests_executed: true
     commit_hash: fbf9927b73b92960e438ea24d587f58e226260d2
+  - name: api-model-contract-red
+    tasks: [T009]
+    status: red-observed
+    diff_sha256: a291d4a7e9e6a96cabf8d459518969e4064e4e632a20b7cc6afac0617d1adb27
+    red:
+      command: uv run pytest tests/unit/test_api_models.py -q
+      result: collection failed because T012 has not yet exported OutcomeCounts.
+    green:
+      status: pending
+      reason: T012 introduces the API OutcomeCounts model and additive fields.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact field sets, annotations, and
+      requiredness for OutcomeCounts, RunCounts, and ResultRow.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the test conforms to T009 only.
+    tests_executed: true
+    commit_hash: d3fe41226edf968643432d966703232c7e785458
