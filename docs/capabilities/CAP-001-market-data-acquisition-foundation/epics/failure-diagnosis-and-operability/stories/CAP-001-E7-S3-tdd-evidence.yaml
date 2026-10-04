@@ -89,4 +89,31 @@ cycles:
         trace comments, the non-terminal parametrisation, both AC-18
         directions in fresh databases, and DEC-0012's ordering.
     tests_executed: true
+    commit_hash: 69fd9845af630cc1cd1d293a66c34f3dd461cbb8
+  - name: most-recent-run-query-red
+    tasks: [T006]
+    status: red-observed
+    diff_sha256: 057f3819be34a9a794004404c016ece0ce146e8f37686654cfbe92bd7335be0d
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_most_recent.py
+      result: >-
+        Collection error: ImportError, cannot import name
+        'get_most_recent_run' from 'factorflow.runs.queries'; neither the
+        function nor _MOST_RECENT_RUN_SQL exists yet.
+    green:
+      status: pending
+      reason: T010 adds the read and its statement.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed DDL-valid seeding, a non-vacuous
+      recursive EXPLAIN walk with no planner setting, that Python UUID order
+      matches PostgreSQL's uuid order for the tie case, and the list_runs
+      parity check.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found all four T006 parts, the TC-COMP-091 and
+        TC-COMP-089 trace comments and DEC-0012's tie-breaker, with nothing
+        unspecified.
+    tests_executed: true
     commit_hash: pending

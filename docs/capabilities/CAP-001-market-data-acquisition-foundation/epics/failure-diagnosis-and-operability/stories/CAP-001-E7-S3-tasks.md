@@ -127,7 +127,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - the answer comes from `GET /api/health` alone, with no request to `/api/acquisition-runs`. Assert this with a single request on the client.
 
   Observe RED (depends on T004; traces to AC-18).
-- [ ] T006 Create `tests/integration/test_run_most_recent.py`, kept separate from CAP-001-E7-S1's planned `tests/integration/test_run_queries.py` so the two stories do not collide. Add `# Implements TC-COMP-091` and `# Implements TC-COMP-089`. Use `migrated_run_schema_connection` and call `factorflow.runs.queries` directly, with no HTTP.
+- [x] T006 Create `tests/integration/test_run_most_recent.py`, kept separate from CAP-001-E7-S1's planned `tests/integration/test_run_queries.py` so the two stories do not collide. Add `# Implements TC-COMP-091` and `# Implements TC-COMP-089`. Use `migrated_run_schema_connection` and call `factorflow.runs.queries` directly, with no HTTP.
   - **Index (DAC-E7-S3-4).** Seed 1000 terminal `succeeded` runs with distinct `requested_at` values using one `INSERT … SELECT … FROM generate_series(1, 1000)`, then run `ANALYZE acquisition_run`. Execute `EXPLAIN (FORMAT JSON)` with `queries._MOST_RECENT_RUN_SQL`, the exact statement the read executes. Walk the plan tree recursively and assert:
     - some node is an `Index Scan` or `Index Only Scan` with `"Index Name": "idx_acquisition_run_recent"`;
     - no node is a `Seq Scan` on `acquisition_run`.
