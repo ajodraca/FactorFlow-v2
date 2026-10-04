@@ -79,7 +79,7 @@ No migration is added. No other health field changes, and the route still never 
 
 **Purpose**: Confirm that the producers this delta reads and modifies have landed, and record a characterization baseline before any change (TEST-TDD-007).
 
-- [ ] T001 Before you edit any file, verify these exist as described:
+- [x] T001 Before you edit any file, verify these exist as described:
   - CAP-001-E1-S6's `src/factorflow/api/routes/health.py` (`get_health`, `probe_schema_version`, `probe_database_reachable`, the `with pool.connection() as conn:` block, and the `except psycopg.Error` fallback) and `HealthResponse` in `src/factorflow/api/models.py`.
   - CAP-001-E5-S5's `src/factorflow/runs/queries.py`: `RunRow`, `_row_to_run`, `_LIST_SQL_BASE`, `_LIST_ORDER = " ORDER BY requested_at DESC, run_id DESC"`, `list_runs` and `ListFilters`. Also its `RunState` literal in `src/factorflow/api/models.py`.
   - CAP-001-E5-S1's `idx_acquisition_run_recent ON acquisition_run (requested_at DESC)` and the `acquisition_run_terminal_has_end` and `acquisition_run_claim_agrees` checks in `migrations/0004_runs.sql`, plus the `migrated_run_schema_connection` fixture in `tests/conftest.py`.
@@ -101,7 +101,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 ### Mandatory Component Tests
 
-- [ ] T002 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-088` and `test_health_most_recent_run_null_when_no_run_recorded`. Use `migrated_health_client` with an empty `acquisition_run`, and assert:
+- [x] T002 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-088` and `test_health_most_recent_run_null_when_no_run_recorded`. Use `migrated_health_client` with an empty `acquisition_run`, and assert:
   - `database == "reachable"`;
   - `schema_version` equals the highest version `discover(...)` returns;
   - the `most_recent_run` key is present and its value `is None`. A reachable store with no run is `null`, not an unreachable or failed answer.
@@ -155,7 +155,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - When it raises `psycopg.OperationalError`, `get_health` does not raise. It returns `database == "unreachable"`, `schema_version is None` and `most_recent_run is None`. This is the same fallback shape the existing version-query branch produces (Open Gap 3).
 
   Observe RED (depends on T001; traces to AC-18, DAC-E7-S3-1).
-- [ ] T009 [P] In `tests/integration/test_api_health.py`, update the setup of the existing `test_health_reachable_database`. It currently creates only `APPLIED_MIGRATIONS_DDL` and two synthetic rows, so `acquisition_run` does not exist. Once T012 reads that table, the existing `except psycopg.Error` branch would report the database as `unreachable`. Give the test the real schema with `apply_pending(conn, discover(...))`, and assert `schema_version` equals the highest discovered version instead of the literal `2`. Keep every other assertion (`status`, `database == "reachable"`, `credential_present is True`, `most_recent_run is None` on an empty run table). The test keeps DAC-E1-S6-1's intent, the highest applied version, and its precondition now matches production, where the migrator always runs before the API binds (AC-16). Leave `test_health_unreachable_database` and `test_health_most_recent_run_is_null` unchanged. The latter runs against an unmigrated database and stays green through the unreachable path. This passes both before and after T012, so record it as a characterization precondition change (depends on T001; traces to DAC-E7-S3-1).
+- [x] T009 [P] In `tests/integration/test_api_health.py`, update the setup of the existing `test_health_reachable_database`. It currently creates only `APPLIED_MIGRATIONS_DDL` and two synthetic rows, so `acquisition_run` does not exist. Once T012 reads that table, the existing `except psycopg.Error` branch would report the database as `unreachable`. Give the test the real schema with `apply_pending(conn, discover(...))`, and assert `schema_version` equals the highest discovered version instead of the literal `2`. Keep every other assertion (`status`, `database == "reachable"`, `credential_present is True`, `most_recent_run is None` on an empty run table). The test keeps DAC-E1-S6-1's intent, the highest applied version, and its precondition now matches production, where the migrator always runs before the API binds (AC-16). Leave `test_health_unreachable_database` and `test_health_most_recent_run_is_null` unchanged. The latter runs against an unmigrated database and stays green through the unreachable path. This passes both before and after T012, so record it as a characterization precondition change (depends on T001; traces to DAC-E7-S3-1).
 
 **Checkpoint**: All six mapped TC-IDs (TC-COMP-018, 073, 088, 089, 090, 091) carry `# Implements` trace comments. RED is observed and recorded for T003–T008. T002 and T009 are recorded as characterization. Every pre-existing health and model test is untouched except T009's setup change.
 

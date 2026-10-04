@@ -1,0 +1,62 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S3-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S3
+tasks_file: CAP-001-E7-S3-tasks.md
+decisions: [DEC-0012, DEC-0013, DEC-0014]
+created: 2026-10-04
+updated: 2026-10-04
+
+baseline:
+  task: T001
+  base_commit: 9e8bac9f3f5923b47457167002e7dbc33e1132ac
+  seams_verified: >-
+    health.py get_health, probe_schema_version, probe_database_reachable, the
+    pool.connection() block and the except psycopg.Error fallback;
+    HealthResponse.most_recent_run typed None = None; queries.py RunRow,
+    _row_to_run, _LIST_SQL_BASE, _LIST_ORDER (requested_at DESC, run_id
+    DESC), list_runs and ListFilters; RunState in api/models.py;
+    idx_acquisition_run_recent, acquisition_run_terminal_has_end and
+    acquisition_run_claim_agrees in migrations/0004_runs.sql; the
+    migrated_run_schema_connection fixture; RunState and RunSummary = null in
+    web/src/api/types.ts. All match the plan, verified before any edit.
+  commands:
+    - >-
+      uv run pytest tests/unit/test_health_database_probe.py
+      tests/unit/test_health_route_unreachable.py
+      tests/unit/test_health_schema_version.py tests/unit/test_api_models.py
+      tests/unit/test_api_no_secrets.py (12 passed)
+    - uv run pytest -m postgres tests/integration/test_api_health.py (3 passed)
+    - npx tsc --noEmit (clean)
+    - npm run test (36 files, 222 tests passed)
+  result: Green against the integration branch head, the S3 story branch base.
+
+cycles:
+  - name: health-null-characterization
+    tasks: [T009, T002]
+    status: characterization
+    diff_sha256: 50fde0488f0e03b4cae2ee1419f7ae48edac1c1e445f45e786f663c544e09a81
+    red:
+      status: green-on-arrival
+      reason: >-
+        T009 is a precondition change (the real migrator replaces two
+        synthetic applied_migrations rows) and T002 characterizes the
+        existing null answer; neither has a RED by design.
+    green:
+      command: uv run pytest -m postgres tests/integration/test_api_health.py
+      result: 4 passed against unmodified production code.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the fixture's migration commits and
+      TestClient lifespan, that T009 keeps every original assertion, that the
+      two other existing tests are untouched, and that T002's assertions are
+      non-vacuous on a fresh per-test database.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the change matches T009, T002, the Phase 2
+        migrated_health_client preamble and TC-COMP-088, with no unspecified
+        assertion.
+    tests_executed: true
+    commit_hash: pending
