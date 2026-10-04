@@ -236,3 +236,22 @@ cycles:
       evidence: Independent reviewer found T011 conforms to DEC-0007/0008 and its task.
     tests_executed: true
     commit_hash: 05a8b688398f1e2c0a9bb1abccbcda22ddcffd24
+  - name: api-models-green
+    tasks: [T012]
+    status: green
+    diff_sha256: 5f95a008e8bb9a220b25cfad3851cfd0a4ee871d0fe0ffe7352aa3b2f638ff86
+    red:
+      status: satisfied-by-prior-cycle
+      evidence: T009 recorded the pre-T012 model-import RED.
+    green:
+      command: uv run pytest tests/unit/test_api_models.py -q
+      result: 7 passed.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed precise Pydantic field order, types,
+      requiredness, and additive compatibility.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the source model conforms to T012.
+    tests_executed: true
+    commit_hash: 0e7e5e9679cc0503de258a29ef7a49fadf628ff5

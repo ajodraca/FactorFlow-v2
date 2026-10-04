@@ -181,7 +181,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 **Purpose**: Surface the new read data through the existing `GET` endpoints. The additions are additive fields (ingestion-api §6), and the existing route enforces the enumerations.
 
-- [ ] T012 Update `src/factorflow/api/models.py`. Add an `OutcomeCounts(BaseModel)` with the five `int` fields, and add a required `results_by_outcome: OutcomeCounts` to `RunCounts`, keeping the three persisted fields. Add `symbol: str` to `ResultRow`, keeping every owner-confirmed field and its type. Extend the E5-S5 comment block to name the CAP-001-E7-S1 additions (depends on RED from T009 and T010; satisfies AC-10, DAC-E7-S1-2).
+- [x] T012 Update `src/factorflow/api/models.py`. Add an `OutcomeCounts(BaseModel)` with the five `int` fields, and add a required `results_by_outcome: OutcomeCounts` to `RunCounts`, keeping the three persisted fields. Add `symbol: str` to `ResultRow`, keeping every owner-confirmed field and its type. Extend the E5-S5 comment block to name the CAP-001-E7-S1 additions (depends on RED from T009 and T010; satisfies AC-10, DAC-E7-S1-2).
 - [ ] T013 Update `src/factorflow/api/routes/runs.py`:
   - Type `list_runs_route`'s `state` as `RunState | None` and `get_run`'s `outcome` as `ResultOutcome | None`, importing both from `factorflow.api.models`. An unknown value then returns the existing `422` validation envelope with `resource: "acquisition-run"` through `_VALIDATION_ERROR_RESOURCES` in `src/factorflow/api/app.py`, which is unchanged.
   - Build `RunCounts.results_by_outcome` from `detail.outcome_counts`.
