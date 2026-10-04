@@ -6,7 +6,7 @@ story: CAP-001-E7-S1
 tasks_file: CAP-001-E7-S1-tasks.md
 decisions: [DEC-0007, DEC-0008, DEC-0021]
 created: 2026-10-03
-updated: 2026-10-03
+updated: 2026-10-04
 
 cycles:
   - name: counts-red
@@ -276,3 +276,72 @@ cycles:
       evidence: Independent reviewer found the routes conform to T013 only.
     tests_executed: true
     commit_hash: 41246ca7dea6b69de63afc2ecceacad6e8a61cb4
+  - name: mutation-and-final-validation
+    tasks: [T014, T015]
+    status: green
+    diff_sha256: 18557a173157e456e1a7ad8c781f5fa5451766fac1daf677fc746d5b4408b3b7
+    red:
+      status: mutation-checks-killed
+      results:
+        - >-
+          Changing the skipped zero default from 0 to 1 made
+          test_run_detail_outcome_counts_cover_the_whole_run fail (1 != 0).
+        - >-
+          Changing the counts GROUP BY outcome to GROUP BY run_id made the
+          same test fail with PostgreSQL GroupingError.
+        - >-
+          Adding outcome = 'failed' to the counts statement made the same
+          test fail (written count 0 != 5).
+        - >-
+          Adding LIMIT 1 to the counts statement made the same test fail
+          (written count 0 != 5), killing page/cursor-scope leakage.
+        - >-
+          Replacing the result symbol mapping with "wrong" made
+          test_detail_rows_name_instruments_and_keep_not_found_distinct fail
+          ("wrong" != "AAPL").
+        - >-
+          Accepting "bogus" in the RUN_STATES check made
+          test_run_history_orders_and_validates_state_filters fail because
+          ValueError was not raised.
+        - >-
+          Accepting "bogus" in the RESULT_OUTCOMES check made
+          test_run_and_result_filter_enumerations_match_the_contract fail
+          because ValueError was not raised.
+        - >-
+          Replacing the route RunState and ResultOutcome annotations with str
+          made test_api_run_filters_reject_unknown_enumerations fail with the
+          unhandled query-filter ValueError instead of the shared 422 envelope.
+    green:
+      commands:
+        - >-
+          uv run pytest -m postgres tests/integration/test_run_queries.py
+          tests/integration/test_api_runs.py (34 passed, 2 warnings)
+        - >-
+          uv run pytest tests/unit/test_runs_queries.py
+          tests/unit/test_api_models.py tests/unit/test_api_runs_routes.py
+          (24 passed, 2 warnings)
+        - uv run pytest -m 'not postgres' (465 passed, 257 deselected, 2 warnings)
+        - uv run pytest -q (722 passed, 2 warnings)
+        - uv run ruff check . (passed)
+        - uv run ruff format --check . (171 files already formatted)
+        - uv run mypy src (Success: no issues found in 47 source files)
+        - uv build (source distribution and wheel built successfully)
+      result: >-
+        All mutants were restored after their focused failures. Ruff's
+        behavior-preserving reformat of test_run_queries.py is the only T014
+        committed code diff; the T001 characterization surfaces remain green.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Fresh no-history reviewer approved the formatting-only staged diff and
+      the complete S1 range, finding whole-run filter/cursor-independent
+      counts, additive symbol output, retained paging/cursor behavior, and
+      typed-route shared 422 validation correct.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Fresh no-history reviewer found the implementation and mapped tests
+        conform to the story, run-journal and ingestion-api designs, and
+        DEC-0007, DEC-0008, and DEC-0021; the staged Ruff reflow introduces no
+        behavior or contract drift.
+    tests_executed: true
+    commit_hash: bf970a1160564238e4f9af5ca3a80ce9f8ed8f85
