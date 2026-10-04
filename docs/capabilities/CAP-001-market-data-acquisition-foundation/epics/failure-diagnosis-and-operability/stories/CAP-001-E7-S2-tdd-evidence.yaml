@@ -180,3 +180,31 @@ cycles:
         TC-COMP-086 and the plan's TC-COMP-069 error-response facet.
     tests_executed: true
     commit_hash: 2cc5d760b2e281a608b86a4af89de64f145457df
+  - name: validation-field-naming-red
+    tasks: [T007]
+    status: red-observed
+    diff_sha256: 2dd8e0d930cad6bd50284c2ce04df5ccbfebb9305f9c09a4c42fa3a6c1cbb7f9
+    red:
+      command: uv run pytest tests/unit/test_api_errors.py -q -k names_the_field
+      result: >-
+        3 failed, each only on the field assertion: years, body and limit are
+        absent from "The request did not match the expected shape."
+    characterization:
+      result: >-
+        Envelope, validation_error code and resource (settings, settings,
+        acquisition-run) already held in all three cases.
+    green:
+      status: pending
+      reason: T010 names loc-derived fields in the message (DEC-0011).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the three planned cases and a genuine
+      RED; field-in-message is discriminating for years and limit and
+      acceptable for body; input/ctx/msg exclusion is covered by T006.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test matches T007, DAC-E7-S2-5,
+        DEC-0011, ingestion-api section 8 item 12 and TC-COMP-087.
+    tests_executed: true
+    commit_hash: 9d51a59afcc7ae4fdbc4afe40338df68b080b934

@@ -130,7 +130,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
   - (d) `GET /api/instruments?limit=` + `SECRET` → `422`.
 
   Assert `SECRET` appears in neither `response.text` nor any response header value. Observe RED on (b), whose detail is echoed today. (a), (c) and (d) are characterization (depends on T005; traces to DAC-E7-S2-4).
-- [ ] T007 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-087`. For `PUT /api/settings/history-depth` with `{"years": "x"}`, the same route with no body, and `GET /api/acquisition-runs?limit=0`, assert the body is the shared envelope with no top-level `detail`, `code == "validation_error"`, `resource` from `_resource_for_path` (`settings`, `settings`, `acquisition-run`), and `message` naming the offending field (`years`, `body` for the missing body, `limit`). Observe RED on the field naming (depends on T006; traces to DAC-E7-S2-5, AC-10).
+- [x] T007 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-087`. For `PUT /api/settings/history-depth` with `{"years": "x"}`, the same route with no body, and `GET /api/acquisition-runs?limit=0`, assert the body is the shared envelope with no top-level `detail`, `code == "validation_error"`, `resource` from `_resource_for_path` (`settings`, `settings`, `acquisition-run`), and `message` naming the offending field (`years`, `body` for the missing body, `limit`). Observe RED on the field naming (depends on T006; traces to DAC-E7-S2-5, AC-10).
 
 ### Additional Unit Tests
 
