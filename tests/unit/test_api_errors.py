@@ -233,3 +233,83 @@ def test_500_does_not_expose_driver_detail(
     text = resp.text
     assert "psycopg" not in text
     assert "connection refused" not in text
+
+
+# ---------------------------------------------------------------------------
+# CAP-001-E7-S2: one envelope on every handled error type
+# ---------------------------------------------------------------------------
+
+
+def _client_for_envelope_matrix(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    from factorflow.runs.queries import RunNotFound
+
+    monkeypatch.setattr(
+        "factorflow.api.routes.runs.get_run_detail",
+        lambda _conn, run_id, _filters: RunNotFound(run_id=run_id),
+    )
+    monkeypatch.setattr(
+        "factorflow.api.routes.runs.read_history_depth",
+        lambda _conn: None,
+    )
+    monkeypatch.setattr(
+        "factorflow.api.routes.runs.active_instrument_ids",
+        lambda _conn: [1],
+    )
+    return _app_with_pool(monkeypatch)
+
+
+_ENVELOPE_MATRIX = [
+    pytest.param("GET", "/api/does-not-exist", None, 404, "not_found", id="unmatched-api-path"),
+    pytest.param(
+        "GET",
+        "/api/acquisition-runs/0f2f1c2e-9a44-4f0f-9f1e-2b7b0d0f1a55",
+        None,
+        404,
+        "not_found",
+        id="run-not-found",
+    ),
+    pytest.param(
+        "POST", "/api/acquisition-runs", None, 409, "history_depth_not_set", id="depth-not-set"
+    ),
+    pytest.param(
+        "PUT",
+        "/api/settings/history-depth",
+        {"years": "x"},
+        422,
+        "validation_error",
+        id="body-validation",
+    ),
+    pytest.param(
+        "GET", "/api/instruments?limit=501", None, 422, "validation_error", id="query-validation"
+    ),
+    pytest.param("DELETE", "/api/health", None, 405, "method_not_allowed", id="method-not-allowed"),
+]
+
+
+@pytest.mark.parametrize(("method", "path", "body", "status", "code"), _ENVELOPE_MATRIX)
+def test_every_handled_error_returns_the_full_envelope(
+    monkeypatch: pytest.MonkeyPatch,
+    method: str,
+    path: str,
+    body: dict[str, str] | None,
+    status: int,
+    code: str,
+) -> None:
+    # Implements TC-COMP-070
+    # Implements TC-COMP-010
+    """Every handled non-2xx response carries the one shared envelope with
+    all four fields, and the body's request id is the header's."""
+    client = _client_for_envelope_matrix(monkeypatch)
+
+    resp = client.request(method, path, json=body)
+
+    assert resp.status_code == status
+    payload = resp.json()
+    assert list(payload) == ["error"]
+    assert "detail" not in payload
+    error = payload["error"]
+    assert error["code"] == code
+    for field in ("code", "message", "resource", "request_id"):
+        assert isinstance(error[field], str) and error[field], field
+    assert "state" not in error
+    assert error["request_id"] == resp.headers["X-Request-Id"]
