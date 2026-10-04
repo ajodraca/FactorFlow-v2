@@ -108,7 +108,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 ### Mandatory Component Tests
 
-- [ ] T002 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-070` and `# Implements TC-COMP-010`. Parametrise over every handled error type: unmatched `GET /api/does-not-exist` (404), `GET /api/acquisition-runs/{uuid}` with the run absent (404 `not_found`), `POST /api/acquisition-runs` without depth (409 `history_depth_not_set`), `PUT /api/settings/history-depth` with `{"years": "x"}` (422), `GET /api/instruments?limit=501` (422), and `DELETE /api/health` (405). For each, assert:
+- [x] T002 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-070` and `# Implements TC-COMP-010`. Parametrise over every handled error type: unmatched `GET /api/does-not-exist` (404), `GET /api/acquisition-runs/{uuid}` with the run absent (404 `not_found`), `POST /api/acquisition-runs` without depth (409 `history_depth_not_set`), `PUT /api/settings/history-depth` with `{"years": "x"}` (422), `GET /api/instruments?limit=501` (422), and `DELETE /api/health` (405). For each, assert:
   - the body's only top-level key is `"error"`, and there is no top-level `"detail"`;
   - `error` carries `code`, `message`, `resource` and `request_id`, each a non-empty string (`state` remains permitted only on `run_already_terminal`, per the existing test);
   - `error.request_id` equals the `X-Request-Id` header.

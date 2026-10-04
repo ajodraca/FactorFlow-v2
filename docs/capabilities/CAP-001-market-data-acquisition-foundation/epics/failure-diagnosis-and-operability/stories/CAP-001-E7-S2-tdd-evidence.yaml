@@ -28,4 +28,34 @@ baseline:
     tests/unit/test_api_runs_routes.py tests/unit/test_api_coverage_routes.py
   result: 27 passed, 2 warnings, against the unmodified base commit.
 
-cycles: []
+cycles:
+  - name: envelope-matrix-red
+    tasks: [T002]
+    status: red-observed
+    diff_sha256: 608ceff81c3259d5177c31e8553aaa89af2d086ae5ba829d25eabe3850e97cce
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k
+        every_handled_error_returns_the_full_envelope
+      result: >-
+        2 failed: unmatched-api-path (resource is null) and
+        method-not-allowed (body is Starlette's {"detail": ...}).
+    characterization:
+      result: >-
+        4 passed on arrival: run-not-found, depth-not-set, body-validation
+        and query-validation already return the full envelope.
+    green:
+      status: pending
+      reason: T010 supplies the 405 handler and the unmatched-path resource.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed all six planned cases, that the
+      top-level-key and non-empty-resource assertions detect both gaps, and
+      that the helpers reuse _app_with_pool without database access.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test conforms to T002, ingestion-api
+        section 2.5, DEC-0009 and DEC-0010, with no unspecified assertion.
+    tests_executed: true
+    commit_hash: 003ffa2c5a35d775588d5448c1e1ba5da696f9cd
