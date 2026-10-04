@@ -120,3 +120,35 @@ cycles:
         realization of the plan's mechanics.
     tests_executed: true
     commit_hash: 28f36aa3d324204355bfb228fe149779cc20b2ea
+  - name: stable-codes-red
+    tasks: [T005]
+    status: red-observed
+    diff_sha256: 8f84d196f2f8e9bdfe7033d71418af7b5dc744eacc0717a680bbc8a69ef6787a
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k
+        "snake_case or detail_wording"
+      result: >-
+        2 failed: the matrix's method-not-allowed case and
+        test_framework_http_error_code_does_not_change_with_detail_wording
+        (KeyError 'error'; both 405 probes return Starlette's {"detail": ...}).
+    characterization:
+      result: >-
+        6 passed on arrival: the other matrix codes and the 500's
+        internal_error are already literal snake_case.
+    green:
+      status: pending
+      reason: T010 supplies the framework HTTP error handler (DEC-0009).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the regex and literal checks, that the
+      wording probes isolate the detail-independence property, and no
+      flakiness or meaningful duplication.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the tests match T005, DAC-E7-S2-1,
+        DEC-0009 and TC-COMP-083; separate probe apps are equivalent to two
+        routes in one.
+    tests_executed: true
+    commit_hash: ffde384d598ab750bc419a9741c618288d9a4309
