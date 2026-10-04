@@ -540,3 +540,75 @@ def test_validation_error_uses_the_envelope_and_names_the_field(
     assert error["code"] == "validation_error"
     assert error["resource"] == resource
     assert field in error["message"]
+
+
+# ---------------------------------------------------------------------------
+# CAP-001-E7-S2: the framework HTTP error handler
+# ---------------------------------------------------------------------------
+
+
+def test_405_keeps_the_allow_header(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The handler copies the exception's headers. A probe supplies `Allow`:
+    `DELETE /api/health` reaches the `StaticFiles` mount at `/`, whose `405`
+    carries no headers to keep."""
+    exc = StarletteHTTPException(status_code=405, headers={"Allow": "GET"})
+    app = _app_with_probe(monkeypatch, exc)
+
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+
+    assert resp.status_code == 405
+    assert resp.headers.get("Allow") == "GET"
+    assert resp.json()["error"]["code"] == "method_not_allowed"
+
+
+def test_raised_404_still_goes_through_the_not_found_handler(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=404, detail="gone"))
+
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+
+    assert resp.status_code == 404
+    error = resp.json()["error"]
+    assert error["code"] == "not_found"
+    assert error["message"] == "No resource exists at this path."
+
+
+def test_status_outside_http_status_yields_http_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=599, detail="odd"))
+
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+
+    assert resp.status_code == 599
+    assert resp.json()["error"]["code"] == "http_error"
+
+
+def test_framework_error_message_is_built_from_the_phrase_not_the_detail(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    detail = "a detail the owner must never see"
+    app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=405, detail=detail))
+
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+
+    message = resp.json()["error"]["message"]
+    assert "method not allowed" in message.lower()
+    assert detail not in message
+
+
+@pytest.mark.parametrize(
+    ("path", "resource"),
+    [
+        pytest.param("/api/health", "health", id="last-segment"),
+        pytest.param("/api/settings/history-depth", "settings", id="mapped-prefix"),
+    ],
+)
+def test_framework_error_resource_comes_from_the_path(
+    monkeypatch: pytest.MonkeyPatch, path: str, resource: str
+) -> None:
+    client = _app_with_pool(monkeypatch)
+
+    resp = client.delete(path)
+
+    assert resp.status_code == 405
+    assert resp.json()["error"]["resource"] == resource
