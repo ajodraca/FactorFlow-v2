@@ -152,3 +152,31 @@ cycles:
         routes in one.
     tests_executed: true
     commit_hash: ffde384d598ab750bc419a9741c618288d9a4309
+  - name: credential-free-errors-red
+    tasks: [T006]
+    status: red-observed
+    diff_sha256: c6e8aa5c14cbc1aae14354d431fa9f1862bc7d238e6a5f2a6e0e1f74e789a78e
+    red:
+      command: uv run pytest tests/unit/test_api_errors.py -q -k credential
+      result: >-
+        1 failed: http-exception-detail, whose body is Starlette's
+        {"detail": "bad key <secret>"}.
+    characterization:
+      result: >-
+        3 passed on arrival: the unhandled 500, the body-field 422 and the
+        query-parameter 422 already omit the credential.
+    green:
+      status: pending
+      reason: T010's framework HTTP error handler never echoes the detail.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed body-text and every-header checks and the
+      RED on the echoed detail. Non-blocking nit: status_code >= 400 is looser
+      than the exact 500/400; carried to T011's mutation pass.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the four cases match T006, DAC-E7-S2-4,
+        TC-COMP-086 and the plan's TC-COMP-069 error-response facet.
+    tests_executed: true
+    commit_hash: 2cc5d760b2e281a608b86a4af89de64f145457df
