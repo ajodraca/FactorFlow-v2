@@ -59,3 +59,29 @@ cycles:
         section 2.5, DEC-0009 and DEC-0010, with no unspecified assertion.
     tests_executed: true
     commit_hash: 003ffa2c5a35d775588d5448c1e1ba5da696f9cd
+  - name: internal-error-body-red
+    tasks: [T003]
+    status: red-observed
+    diff_sha256: aca7a3eb75b04c8c0d976bc5a0725c8a094e765c48578a698c282392b146d92c
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k
+        500_body_is_only_the_internal_error_code_and_request_id
+      result: >-
+        1 failed: the 500 response has no X-Request-Id header; its body also
+        carries message and resource: null beside code and request_id.
+    green:
+      status: pending
+      reason: T009 reduces the body; T010's middleware adds the header.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact-body equality catches the extra
+      keys, the header assertion catches the missing header, the front-of-
+      router probe is reachable, and exc_info formatting proves the log detail.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test matches T003, DAC-E7-7,
+        DAC-E7-S2-2, ingestion-api sections 2.3 and 4, and TC-COMP-072/084.
+    tests_executed: true
+    commit_hash: 7b5722c0d25e9ecf2e6d22ce4dcc564ace60749c

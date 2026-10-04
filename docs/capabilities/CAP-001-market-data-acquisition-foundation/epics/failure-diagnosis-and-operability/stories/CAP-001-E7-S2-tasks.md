@@ -114,7 +114,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
   - `error.request_id` equals the `X-Request-Id` header.
 
   Observe RED for the 405 case (Starlette's default `{"detail": …}` body) and for the unmatched path (`resource` is `null`). The other cases are characterization (depends on T001; traces to DAC-E7-5, AC-10).
-- [ ] T003 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-072` and `# Implements TC-COMP-084`. Through a probe route raising `RuntimeError("psycopg.OperationalError: connection to 127.0.0.1:5432 failed")`, assert:
+- [x] T003 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-072` and `# Implements TC-COMP-084`. Through a probe route raising `RuntimeError("psycopg.OperationalError: connection to 127.0.0.1:5432 failed")`, assert:
   - status `500` and a body exactly equal to `{"error": {"code": "internal_error", "request_id": <id>}}`, with no `message` and no `resource` key;
   - `<id>` equals the `X-Request-Id` header, which is present;
   - the body contains none of `Traceback`, `RuntimeError`, `psycopg`, `5432`;
