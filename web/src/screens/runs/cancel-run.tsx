@@ -133,7 +133,7 @@ function CancelRunDialog({
  * After a `202`, once the `state` prop has moved past `requested`/`running`,
  * the control renders nothing: its owner has observed the newer state and
  * shows it, so the control's own badge would be stale (CAP-001-E7-S4;
- * DEC-0018). On Runs the prop never advances, so nothing changes there. A
+ * DEC-0018). Where the prop never advances, nothing changes. A
  * `409`'s message stays, because the owner cannot tell it apart.
  */
 export function CancelRunControl({

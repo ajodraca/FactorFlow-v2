@@ -3,11 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import CoverageScreen from "../screens/coverage";
 import InstrumentsScreen from "../screens/instruments";
 import RunsScreen from "../screens/runs";
+import RunDetailScreen from "../screens/runs/detail";
 import SettingsScreen from "../screens/settings";
-
-function RunDetailPlaceholder(): JSX.Element {
-  return <div>Run detail</div>;
-}
 
 function NotFound(): JSX.Element {
   return <p>Not found</p>;
@@ -27,7 +24,7 @@ export function AppRoutes(): JSX.Element {
       <Route path="/coverage" element={<CoverageScreen />} />
       <Route path="/instruments" element={<InstrumentsScreen />} />
       <Route path="/runs" element={<RunsScreen />} />
-      <Route path="/runs/:runId" element={<RunDetailPlaceholder />} />
+      <Route path="/runs/:runId" element={<RunDetailScreen />} />
       <Route path="/settings" element={<SettingsScreen />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

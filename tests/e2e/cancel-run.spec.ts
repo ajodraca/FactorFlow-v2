@@ -88,7 +88,8 @@ test("a cancel that races completion says the run had already completed (DAC-E7-
   await page.getByRole("button", { name: "Stop run" }).click();
 
   await expect(page.getByText("This run had already completed.")).toBeVisible();
-  await expect(summaryBadge(page)).toHaveText("Succeeded");
+  // The summary's badge and, per DEC-0018, the control's actual outcome.
+  await expect(summaryBadge(page)).toHaveText(["Succeeded", "Succeeded"]);
   await expect(page.getByText("Cancelling")).toHaveCount(0);
   await expect(page.getByText("Cancelled")).toHaveCount(0);
 });

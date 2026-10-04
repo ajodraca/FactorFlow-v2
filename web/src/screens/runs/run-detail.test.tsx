@@ -469,8 +469,13 @@ describe("Cancelling from Run detail (AC-19, AC-26, DAC-E7-S4-3)", () => {
     await user.click(screen.getByRole("button", { name: "Stop run" }));
 
     expect(await screen.findByText("This run had already completed.")).toBeInTheDocument();
+    // The summary's badge and, per DEC-0018, the control's actual outcome.
     await waitFor(() =>
-      expect(within(summary()).getByTestId("outcome-badge")).toHaveTextContent("Succeeded"),
+      expect(
+        within(summary())
+          .getAllByTestId("outcome-badge")
+          .map((badge) => badge.textContent),
+      ).toEqual(["Succeeded", "Succeeded"]),
     );
     expect(screen.getByText("This run had already completed.")).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent(/Cancelled/);

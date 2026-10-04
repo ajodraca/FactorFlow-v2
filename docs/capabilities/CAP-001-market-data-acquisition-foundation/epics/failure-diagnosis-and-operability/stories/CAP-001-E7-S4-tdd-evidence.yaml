@@ -172,3 +172,40 @@ cycles:
         harness's intent.
     tests_executed: true
     commit_hash: f156ed7b3048a9d152cfe39720baa1dcb24d7248
+  - name: run-detail-e2e-red
+    tasks: [T016, T017]
+    status: red-observed
+    diff_sha256: 0d98832a917029802dd56be707d9bb166861537e984014bd0965535c5e7cc297
+    deviation: >-
+      playwright.config.ts gains workers: 1. The plan's Other Notes assume the
+      specs share one database and run serially in file order, but
+      fullyParallel: false only serializes within a file; the first run put
+      run-detail.spec.ts on a second worker beside cancel-run.spec.ts.
+    red:
+      command: >-
+        npx playwright test tests/e2e/cancel-run.spec.ts
+        tests/e2e/run-detail.spec.ts, then each later cancel-run test alone
+        with -g (serial mode skips them after the first failure)
+      result: >-
+        All four fail at their first screen interaction against the real API
+        and PostgreSQL: the queued, running and races tests time out clicking
+        Cancel run (the placeholder renders); run-detail.spec expects 2
+        Show data types buttons and gets 0. Every seeding statement ran.
+    green:
+      status: pending
+      reason: T022-T025 mount the screen on /runs/:runId.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the seeding is DDL-valid, the CTE yields
+      only the uuid, the cleanup vacates the single-active slot, the poll
+      wait can only match a later poll, the five Not found badges are four
+      rows plus the collapsed badge, and workers: 1 is necessary. Low: the
+      cleanup leaves a requested run if test 1 fails mid-way.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found every T016 and T017 bullet, the exact
+        docker/psql arguments and verbatim reason copy, and judged workers: 1
+        authorised by the Other Notes' serial-order invariant.
+    tests_executed: true
+    commit_hash: 4244ae902fba227e62d98ddfce6cca3f1835a623
