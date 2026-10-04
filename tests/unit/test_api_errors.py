@@ -9,11 +9,13 @@ FastAPI-generated 422 mapping, and exception-to-HTTP mapping without driver text
 from __future__ import annotations
 
 import logging
+import re
 from contextlib import contextmanager
 
 import pytest
 from fastapi import APIRouter, FastAPI
 from fastapi.testclient import TestClient
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from factorflow.api.app import create_app
 from factorflow.runs.journal import RunAlreadyTerminal
@@ -375,3 +377,57 @@ def test_500_body_is_only_the_internal_error_code_and_request_id(
         r.exc_info and _DRIVER_TEXT in logging.Formatter().formatException(r.exc_info)
         for r in error_records
     )
+
+
+# ---------------------------------------------------------------------------
+# CAP-001-E7-S2: codes are stable snake_case, independent of wording
+# ---------------------------------------------------------------------------
+
+_SNAKE_CASE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
+
+
+@pytest.mark.parametrize(("method", "path", "body", "status", "code"), _ENVELOPE_MATRIX)
+def test_handled_error_codes_are_literal_snake_case(
+    monkeypatch: pytest.MonkeyPatch,
+    method: str,
+    path: str,
+    body: dict[str, str] | None,
+    status: int,
+    code: str,
+) -> None:
+    # Implements TC-COMP-083
+    """Every code the envelope matrix produces is its expected snake_case literal."""
+    client = _client_for_envelope_matrix(monkeypatch)
+
+    resp = client.request(method, path, json=body)
+
+    assert resp.status_code == status
+    assert _SNAKE_CASE.match(code)
+    assert resp.json()["error"]["code"] == code
+
+
+def test_internal_error_code_is_literal_snake_case(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Implements TC-COMP-083
+    app = _app_with_probe(monkeypatch, RuntimeError(_DRIVER_TEXT))
+
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+
+    assert resp.status_code == 500
+    code = resp.json()["error"]["code"]
+    assert _SNAKE_CASE.match(code)
+    assert code == "internal_error"
+
+
+def test_framework_http_error_code_does_not_change_with_detail_wording(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Implements TC-COMP-083
+    """Two `HTTPException`s of one status with different detail text share one code."""
+    codes = []
+    for detail in ("wording one", "completely different wording"):
+        app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=405, detail=detail))
+        resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+        assert resp.status_code == 405
+        codes.append(resp.json()["error"]["code"])
+
+    assert codes == ["method_not_allowed", "method_not_allowed"]
