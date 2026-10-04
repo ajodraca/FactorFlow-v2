@@ -85,3 +85,38 @@ cycles:
         DAC-E7-S2-2, ingestion-api sections 2.3 and 4, and TC-COMP-072/084.
     tests_executed: true
     commit_hash: 7b5722c0d25e9ecf2e6d22ce4dcc564ace60749c
+  - name: error-request-id-correlation-red
+    tasks: [T004]
+    status: red-observed
+    diff_sha256: c088090d5f29e1659877d0f664963c8a48d8528264dd43be77acfccddda001c1
+    red:
+      command: uv run pytest tests/unit/test_api_request_id.py -q
+      result: >-
+        2 failed: unhandled-500 (no X-Request-Id header; the unhandled-
+        exception record carries no request_id) and
+        test_two_error_requests_get_different_request_ids (KeyError on the
+        500's missing header).
+    characterization:
+      result: >-
+        unmatched-404 and validation-422 passed on arrival; both existing
+        tests passed unchanged.
+    deviation: >-
+      A sibling probe_client fixture with the same setup replaces literal
+      reuse of the client fixture, because the plan's shared mechanics require
+      raise_server_exceptions=False for a raising probe; client is unchanged.
+    green:
+      status: pending
+      reason: T009's extra request id and T010's middleware catch supply it.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the sibling fixture is justified, the
+      unhandled-record assertion is non-vacuous, and the 404/422 per-record
+      loop is trivially true because neither handler logs.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the tests match T004, DAC-E7-6,
+        DAC-E7-S2-3 and TC-COMP-071/085; the fixture is the minimal faithful
+        realization of the plan's mechanics.
+    tests_executed: true
+    commit_hash: 28f36aa3d324204355bfb228fe149779cc20b2ea
