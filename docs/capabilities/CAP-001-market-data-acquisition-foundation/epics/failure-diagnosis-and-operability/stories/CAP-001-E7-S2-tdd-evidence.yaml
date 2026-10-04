@@ -1,0 +1,31 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S2-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S2
+tasks_file: CAP-001-E7-S2-tasks.md
+decisions: [DEC-0009, DEC-0010, DEC-0011]
+created: 2026-10-04
+updated: 2026-10-04
+
+baseline:
+  task: T001
+  base_commit: 2c28d53493f43b311defea80a9bbcb95eba1a92e
+  seams_verified: >-
+    errors.py ErrorDetail, ErrorEnvelope, error_response(status_code, code,
+    message, request_id, resource=None, state=None) and internal_error_handler;
+    app.py _request_id_var, _install_request_id_patch,
+    _add_request_id_middleware, not_found_handler inside _add_static_mount,
+    _VALIDATION_ERROR_RESOURCES, _resource_for_path, _validation_error_handler
+    and the two add_exception_handler calls in create_app all match the plan,
+    verified before any file was edited.
+  command: >-
+    uv run pytest -m 'not postgres' tests/unit/test_api_errors.py
+    tests/unit/test_api_request_id.py
+    tests/unit/test_api_request_id_redaction_composition.py
+    tests/unit/test_api_no_secrets.py
+    tests/unit/test_api_instruments_error_mapping.py
+    tests/unit/test_api_runs_routes.py tests/unit/test_api_coverage_routes.py
+  result: 27 passed, 2 warnings, against the unmodified base commit.
+
+cycles: []
