@@ -148,7 +148,7 @@ class SetHistoryDepthRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Run models — CAP-001-E5-S5
+# Run models — CAP-001-E5-S5, CAP-001-E7-S1
 # Owner-confirmed top-level keys: run, runs, counts, results, next_cursor
 # Owner-confirmed result fields: instrument_id, data_type, outcome, reason,
 #   attempts, completed_at (design section 11, open-gap resolution 2026-09-17)
@@ -207,12 +207,23 @@ class RunSummary(BaseModel):
     failure_reason: str | None = None
 
 
+class OutcomeCounts(BaseModel):
+    """Whole-run counts for each per-data-type result outcome."""
+
+    written: int
+    unchanged: int
+    not_found: int
+    failed: int
+    skipped: int
+
+
 class RunCounts(BaseModel):
-    """Persisted aggregate counts for a run detail response."""
+    """Persisted instrument counts and computed result-outcome counts."""
 
     instruments_named: int
     instruments_written: int
     instruments_failed: int
+    results_by_outcome: OutcomeCounts
 
 
 class ResultRow(BaseModel):
@@ -224,6 +235,7 @@ class ResultRow(BaseModel):
     reason: str | None = None
     attempts: int
     completed_at: datetime
+    symbol: str
 
 
 class RunListResponse(BaseModel):

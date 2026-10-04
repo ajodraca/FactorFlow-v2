@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-02
-updated: 2026-10-02
+updated: 2026-10-04
+last_reworked_review: CAP-001-E7-S1-implementation-review-v1.md
+docs_synced_review: CAP-001-E7-S1-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -99,6 +101,15 @@ Every other criterion is already met by the E5-S5 code. This plan pins those cri
 
 **Checkpoint**: The E5-S5 read path and its tests are green, unmodified, and recorded as the baseline every later task must preserve.
 
+### IR-001 Owner Waiver
+
+`DEC-0022` records the owner's revision-bound approval for IR-001 through
+`2026-10-11T23:59:59Z`. The pre-edit T001 baseline remains unavailable and T001
+therefore remains unchecked. The green commands recorded in the final T014
+cycle are post-coding regression confirmation only; they are not presented as
+historical baseline evidence. This waiver applies only to the review finding
+and does not waive acceptance criteria, validation, or any other task.
+
 ---
 
 ## Phase 2: Tests (TDD)
@@ -109,16 +120,16 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 ### Mandatory Component Tests
 
-- [ ] T002 Create `tests/integration/test_run_queries.py` with the shared seed helpers and `# Implements TC-COMP-079`. Seed one terminal `partial` run with a known mix of every outcome across several instruments and data types: for example 5 `written`, 2 `unchanged`, 3 `not_found`, 4 `failed` and 1 `skipped`. Call `get_run_detail(conn, run_id, DetailFilters(limit=1))`. Assert three things:
+- [x] T002 Create `tests/integration/test_run_queries.py` with the shared seed helpers and `# Implements TC-COMP-079`. Seed one terminal `partial` run with a known mix of every outcome across several instruments and data types: for example 5 `written`, 2 `unchanged`, 3 `not_found`, 4 `failed` and 1 `skipped`. Call `get_run_detail(conn, run_id, DetailFilters(limit=1))`. Assert three things:
   - `detail.outcome_counts` equals exactly those five numbers, with every key present and absent outcomes reported as `0`, not omitted.
   - The counts equal the totals of the whole run although only one instrument's rows are on the page, so they did not come from paging.
   - The persisted `detail.run.instruments_named/written/failed` are unchanged.
 
   Observe RED (`outcome_counts` does not exist yet) before T011 (depends on T001; traces to DAC-E7-S1-2, AC-11).
-- [ ] T003 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-010` and `# Implements TC-COMP-011`. For a `partial` run with instrument `AAPL` (`prices` `written`, `reference` `failed` with a reason) and instrument `ZZZZ` (all four data types `not_found`), assert that every failed row in `detail.results` carries the instrument's `symbol`, `instrument_id`, `data_type` and non-null `reason`. For `ZZZZ`, assert `outcome == "not_found"`, never `"failed"`. `DetailFilters(outcome="not_found")` must return only `ZZZZ`'s rows, and `outcome="failed"` only `AAPL`'s `reference` row. `outcome_counts` must report `not_found` and `failed` separately. Observe RED on `symbol` before T011 (depends on T002; traces to AC-10, AC-11).
-- [ ] T004 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-066` and `# Implements TC-COMP-080`. Seed one instrument with `prices` `written`, `fundamentals` `not_found`, `reference` `unchanged` and `corporate_actions` `failed`, plus enough other instruments that it is not alone on the page. With `limit=1`, page through the run. Assert that the instrument's four rows arrive on the same page, contiguous, with four distinct `data_type` values and each data type's own outcome. Also assert that the `written`-prices / `not_found`-fundamentals pair returns both rows. These pass against E5-S5 code (characterization, TEST-TDD-007); record them as such and do not fabricate a RED (depends on T003; traces to DAC-E7-1, DAC-E7-S1-3).
-- [ ] T005 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-068` and `# Implements TC-COMP-082`. Build each stored reason through the real write-side composer: `compose_failure_reason(InstrumentNotFound("not found key=<SECRET>", provider_request_id="req-e7s1-001"), symbol="MSFT", data_type="fundamentals", redact=lambda s: s.replace(SECRET, "[redacted]"))`, and the same for a `ProviderUnavailable`. `SECRET` is a synthetic credential-like constant. Store each reason in `run_instrument_result.reason` and read it back with `get_run_detail`. Assert that the returned reason contains `symbol=MSFT`, `data_type=fundamentals` and `request_id=req-e7s1-001`. Also assert that `SECRET` appears nowhere in any returned `ResultRow`, in `repr(detail)`, or in the serialized API body built in T010. These pass against existing code (characterization) (depends on T004; traces to DAC-E7-3, DAC-E7-S1-5).
-- [ ] T006 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-075` and `# Implements TC-COMP-078`. Seed a terminal `partial` run of exactly 3000 instruments × four data types (12000 rows), some with a `failed` or `not_found` data type, using `generate_series`. Assert:
+- [x] T003 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-010` and `# Implements TC-COMP-011`. For a `partial` run with instrument `AAPL` (`prices` `written`, `reference` `failed` with a reason) and instrument `ZZZZ` (all four data types `not_found`), assert that every failed row in `detail.results` carries the instrument's `symbol`, `instrument_id`, `data_type` and non-null `reason`. For `ZZZZ`, assert `outcome == "not_found"`, never `"failed"`. `DetailFilters(outcome="not_found")` must return only `ZZZZ`'s rows, and `outcome="failed"` only `AAPL`'s `reference` row. `outcome_counts` must report `not_found` and `failed` separately. Observe RED on `symbol` before T011 (depends on T002; traces to AC-10, AC-11).
+- [x] T004 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-066` and `# Implements TC-COMP-080`. Seed one instrument with `prices` `written`, `fundamentals` `not_found`, `reference` `unchanged` and `corporate_actions` `failed`, plus enough other instruments that it is not alone on the page. With `limit=1`, page through the run. Assert that the instrument's four rows arrive on the same page, contiguous, with four distinct `data_type` values and each data type's own outcome. Also assert that the `written`-prices / `not_found`-fundamentals pair returns both rows. These pass against E5-S5 code (characterization, TEST-TDD-007); record them as such and do not fabricate a RED (depends on T003; traces to DAC-E7-1, DAC-E7-S1-3).
+- [x] T005 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-068` and `# Implements TC-COMP-082`. Build each stored reason through the real write-side composer: `compose_failure_reason(InstrumentNotFound("not found key=<SECRET>", provider_request_id="req-e7s1-001"), symbol="MSFT", data_type="fundamentals", redact=lambda s: s.replace(SECRET, "[redacted]"))`, and the same for a `ProviderUnavailable`. `SECRET` is a synthetic credential-like constant. Store each reason in `run_instrument_result.reason` and read it back with `get_run_detail`. Assert that the returned reason contains `symbol=MSFT`, `data_type=fundamentals` and `request_id=req-e7s1-001`. Also assert that `SECRET` appears nowhere in any returned `ResultRow`, in `repr(detail)`, or in the serialized API body built in T010. These pass against existing code (characterization) (depends on T004; traces to DAC-E7-3, DAC-E7-S1-5).
+- [x] T006 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-075` and `# Implements TC-COMP-078`. Seed a terminal `partial` run of exactly 3000 instruments × four data types (12000 rows), some with a `failed` or `not_found` data type, using `generate_series`. Assert:
   - The default `DetailFilters()` returns exactly 50 instruments (≤ 200 rows) and a non-null `next_cursor`.
   - Traversal at `limit=500` takes 6 pages and yields all 3000 instrument ids, with no duplicates, no omissions, and no instrument split across pages.
   - Failure-first order holds across page boundaries.
@@ -126,7 +137,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
   - `outcome_counts` is identical on every page and under every outcome filter, and sums to 12000.
 
   Time is printed as a diagnostic only, never asserted (ingestion-api §14 Q5). Observe RED on the `outcome_counts` assertions before T011 (depends on T005; traces to DAC-E7-10, DAC-E7-S1-1, DAC-E7-S1-2).
-- [ ] T007 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-081`. Seed runs across all eight states, including two with an identical `requested_at`. Assert:
+- [x] T007 In `tests/integration/test_run_queries.py`, add `# Implements TC-COMP-081`. Seed runs across all eight states, including two with an identical `requested_at`. Assert:
   - `list_runs` returns them in `(requested_at, run_id) DESC` order.
   - `ListFilters(state="failed")` returns only `failed` runs.
   - Cursor traversal at `limit=2` has no gaps or duplicates across the tie.
@@ -136,7 +147,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 ### Additional Unit Tests
 
-- [ ] T008 [P] Extend `tests/unit/test_runs_queries.py`, keeping every existing test unchanged:
+- [x] T008 [P] Extend `tests/unit/test_runs_queries.py`, keeping every existing test unchanged:
   - `RESULT_OUTCOMES` equals `{"written", "unchanged", "not_found", "failed", "skipped"}`, which matches both `typing.get_args(factorflow.api.models.ResultOutcome)` and the `run_result_outcome_known` check in `migrations/0004_runs.sql`. Extract the check with the existing `tests/unit/design_sql.py` helper if it applies; otherwise use a literal parse of the migration file.
   - `ListFilters(state=s)` is accepted for every member of `RUN_STATES` and raises `ValueError` for `"bogus"`, `""` and `"FAILED"`.
   - `DetailFilters(outcome=o)` is accepted for every member of `RESULT_OUTCOMES` and raises `ValueError` otherwise.
@@ -144,8 +155,8 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
   - `OutcomeCounts` has exactly the five outcome fields as `int`.
 
   Observe RED before T011 (depends on T001; traces to DAC-E7-10, DAC-E7-S1-4, DAC-E7-S1-2).
-- [ ] T009 [P] Extend `tests/unit/test_api_models.py`. Assert that the new `OutcomeCounts` model has exactly the fields `written`, `unchanged`, `not_found`, `failed` and `skipped`, all `int`. `RunCounts` keeps `instruments_named`, `instruments_written` and `instruments_failed`, and adds a required `results_by_outcome: OutcomeCounts`. `ResultRow` keeps every owner-confirmed field (`instrument_id`, `data_type`, `outcome`, `reason`, `attempts`, `completed_at`) and adds `symbol: str`. No new field is credential-shaped. Observe RED before T012 (depends on T001; traces to DAC-E7-S1-2, AC-10).
-- [ ] T010 [P] Add separately named `postgres` cases to `tests/integration/test_api_runs.py` without modifying the existing ones:
+- [x] T009 [P] Extend `tests/unit/test_api_models.py`. Assert that the new `OutcomeCounts` model has exactly the fields `written`, `unchanged`, `not_found`, `failed` and `skipped`, all `int`. `RunCounts` keeps `instruments_named`, `instruments_written` and `instruments_failed`, and adds a required `results_by_outcome: OutcomeCounts`. `ResultRow` keeps every owner-confirmed field (`instrument_id`, `data_type`, `outcome`, `reason`, `attempts`, `completed_at`) and adds `symbol: str`. No new field is credential-shaped. Observe RED before T012 (depends on T001; traces to DAC-E7-S1-2, AC-10).
+- [x] T010 [P] Add separately named `postgres` cases to `tests/integration/test_api_runs.py` without modifying the existing ones:
   - `GET /api/acquisition-runs/{id}` returns `counts.results_by_outcome` with all five keys and SQL-computed values, plus the unchanged persisted `instruments_*` counts.
   - Every element of `results` carries `symbol`.
   - `?outcome=not_found` returns only `not_found` rows, while `counts.results_by_outcome` is unchanged by the filter.
@@ -162,7 +173,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 **Purpose**: Add the minimum to the run-journal read boundary that makes T002–T008 green, without changing the E5-S5 ordering, cursor or paging contract (TEST-TDD-003).
 
-- [ ] T011 Update `src/factorflow/runs/queries.py`:
+- [x] T011 Update `src/factorflow/runs/queries.py`:
   - **Outcome constant.** Add `RESULT_OUTCOMES: frozenset[str]`, the five values pinned by `run_result_outcome_known` in `migrations/0004_runs.sql`. Cite the DDL in a comment.
   - **Filter validation.** In `ListFilters.__post_init__`, reject a non-`None` `state` not in `factorflow.runs.states.RUN_STATES`. In `DetailFilters.__post_init__`, reject a non-`None` `outcome` not in `RESULT_OUTCOMES`. Both raise `ValueError`, matching the existing `limit` check. Cite run-journal §4 (SEC-INP-002).
   - **Counts type.** Add a frozen `OutcomeCounts` dataclass with `written`, `unchanged`, `not_found`, `failed` and `skipped` as `int`.
@@ -181,8 +192,8 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 **Purpose**: Surface the new read data through the existing `GET` endpoints. The additions are additive fields (ingestion-api §6), and the existing route enforces the enumerations.
 
-- [ ] T012 Update `src/factorflow/api/models.py`. Add an `OutcomeCounts(BaseModel)` with the five `int` fields, and add a required `results_by_outcome: OutcomeCounts` to `RunCounts`, keeping the three persisted fields. Add `symbol: str` to `ResultRow`, keeping every owner-confirmed field and its type. Extend the E5-S5 comment block to name the CAP-001-E7-S1 additions (depends on RED from T009 and T010; satisfies AC-10, DAC-E7-S1-2).
-- [ ] T013 Update `src/factorflow/api/routes/runs.py`:
+- [x] T012 Update `src/factorflow/api/models.py`. Add an `OutcomeCounts(BaseModel)` with the five `int` fields, and add a required `results_by_outcome: OutcomeCounts` to `RunCounts`, keeping the three persisted fields. Add `symbol: str` to `ResultRow`, keeping every owner-confirmed field and its type. Extend the E5-S5 comment block to name the CAP-001-E7-S1 additions (depends on RED from T009 and T010; satisfies AC-10, DAC-E7-S1-2).
+- [x] T013 Update `src/factorflow/api/routes/runs.py`:
   - Type `list_runs_route`'s `state` as `RunState | None` and `get_run`'s `outcome` as `ResultOutcome | None`, importing both from `factorflow.api.models`. An unknown value then returns the existing `422` validation envelope with `resource: "acquisition-run"` through `_VALIDATION_ERROR_RESOURCES` in `src/factorflow/api/app.py`, which is unchanged.
   - Build `RunCounts.results_by_outcome` from `detail.outcome_counts`.
   - Pass `symbol=r.symbol` into each `ResultRow`.
@@ -198,8 +209,8 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 **Purpose**: Kill mutants on the changed behaviour, refactor safely, run full validation, and keep the per-cycle evidence chain.
 
-- [ ] T014 After T002–T013 are green and their T015 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Mutate the counts `GROUP BY` and the zero-default, any leak of the outcome filter or cursor into the counts statement, the `symbol` mapping (e.g. swapping instruments), the `RUN_STATES` and `RESULT_OUTCOMES` membership checks, and the route `Literal` types. Strengthen tests until every mutant is killed. Do behaviour-preserving refactoring under TEST-TDD-004, keep the T001 characterization baseline green (TEST-TDD-007), verify the TEST-TDD-001 to TEST-TDD-008 chain, and run every command in the Validation Plan (depends on T002–T013; verifies all story criteria).
-- [ ] T015 Run this after **each** TDD cycle in T002–T014, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S1-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record characterization cycles (T004, T005 and the characterization parts of T006/T007) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
+- [x] T014 After T002–T013 are green and their T015 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Mutate the counts `GROUP BY` and the zero-default, any leak of the outcome filter or cursor into the counts statement, the `symbol` mapping (e.g. swapping instruments), the `RUN_STATES` and `RESULT_OUTCOMES` membership checks, and the route `Literal` types. Strengthen tests until every mutant is killed. Do behaviour-preserving refactoring under TEST-TDD-004, keep the T001 characterization baseline green (TEST-TDD-007), verify the TEST-TDD-001 to TEST-TDD-008 chain, and run every command in the Validation Plan (depends on T002–T013; verifies all story criteria).
+- [x] T015 Run this after **each** TDD cycle in T002–T014, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S1-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record characterization cycles (T004, T005 and the characterization parts of T006/T007) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
 
 **Checkpoint**: All acceptance criteria are satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 

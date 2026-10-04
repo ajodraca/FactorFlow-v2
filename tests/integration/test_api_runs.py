@@ -16,6 +16,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
+from factorflow.ingestion.massive.errors import ProviderUnavailable, compose_failure_reason
 
 # ---------------------------------------------------------------------------
 # Shared fixture
@@ -690,3 +691,110 @@ def test_get_run_detail_response_shape(
     assert "run" in body
     assert "counts" in body
     assert "results" in body
+
+
+@pytest.mark.postgres
+def test_api_detail_includes_sql_outcome_counts_and_symbols(
+    runs_client: TestClient, postgres_connection_string: str
+) -> None:
+    """CAP-001-E7-S1: detail exposes additive row counts and row symbols."""
+    conn = psycopg.connect(postgres_connection_string)
+    try:
+        run_id = _seed_run(conn, "partial")
+        aapl_id = _seed_instrument(conn, "AAPL")
+        zzzz_id = _seed_instrument(conn, "ZZZZ")
+        _seed_result(conn, run_id, aapl_id, "prices", "written")
+        _seed_result(conn, run_id, aapl_id, "reference", "failed", "timeout")
+        for data_type in ("prices", "reference", "fundamentals", "corporate_actions"):
+            _seed_result(conn, run_id, zzzz_id, data_type, "not_found")
+        conn.execute(
+            "UPDATE acquisition_run SET instruments_named = 2, instruments_written = 1, "
+            "instruments_failed = 1 WHERE run_id = %s",
+            (run_id,),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = runs_client.get(f"/api/acquisition-runs/{run_id}?limit=1")
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["counts"] == {
+        "instruments_named": 2,
+        "instruments_written": 1,
+        "instruments_failed": 1,
+        "results_by_outcome": {
+            "written": 1,
+            "unchanged": 0,
+            "not_found": 4,
+            "failed": 1,
+            "skipped": 0,
+        },
+    }
+    assert {result["symbol"] for result in body["results"]} == {"AAPL"}
+
+
+@pytest.mark.postgres
+def test_api_detail_outcome_filter_preserves_counts_and_redacts_reason(
+    runs_client: TestClient, postgres_connection_string: str
+) -> None:
+    """CAP-001-E7-S1: a filtered detail view retains whole-run safe counts."""
+    secret = "synthetic-credential-like-value"
+    conn = psycopg.connect(postgres_connection_string)
+    try:
+        run_id = _seed_run(conn, "partial")
+        aapl_id = _seed_instrument(conn, "AAPL")
+        zzzz_id = _seed_instrument(conn, "ZZZZ")
+        reason = compose_failure_reason(
+            ProviderUnavailable(
+                f"provider unavailable key={secret}", provider_request_id="req-e7s1-001"
+            ),
+            symbol="AAPL",
+            data_type="reference",
+            redact=lambda text: text.replace(secret, "[redacted]"),
+        )
+        _seed_result(conn, run_id, aapl_id, "reference", "failed", reason)
+        _seed_result(conn, run_id, zzzz_id, "fundamentals", "not_found")
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = runs_client.get(f"/api/acquisition-runs/{run_id}?outcome=not_found")
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert {result["outcome"] for result in body["results"]} == {"not_found"}
+    assert body["counts"]["results_by_outcome"] == {
+        "written": 0,
+        "unchanged": 0,
+        "not_found": 1,
+        "failed": 1,
+        "skipped": 0,
+    }
+    unfiltered_response = runs_client.get(f"/api/acquisition-runs/{run_id}")
+    assert unfiltered_response.status_code == 200, unfiltered_response.text
+    assert (
+        unfiltered_response.json()["counts"]["results_by_outcome"]
+        == body["counts"]["results_by_outcome"]
+    )
+    assert secret not in unfiltered_response.text
+
+
+@pytest.mark.postgres
+def test_api_run_filters_reject_unknown_enumerations(
+    runs_client: TestClient,
+) -> None:
+    """CAP-001-E7-S1: invalid read filters use the shared 422 envelope."""
+    for path in (
+        "/api/acquisition-runs?state=bogus",
+        f"/api/acquisition-runs/{uuid.uuid4()}?outcome=bogus",
+    ):
+        response = runs_client.get(path)
+
+        assert response.status_code == 422, response.text
+        error = response.json()["error"]
+        assert set(error) == {"code", "message", "resource", "request_id"}
+        assert error["code"] == "validation_error"
+        assert error["resource"] == "acquisition-run"
+        assert error["request_id"]

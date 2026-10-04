@@ -7,18 +7,27 @@ not-found.
 
 from __future__ import annotations
 
+import re
 import uuid
+from dataclasses import fields
 from datetime import UTC, datetime
+from pathlib import Path
+from typing import get_args, get_type_hints
 
 import pytest
 
+from factorflow.api.models import ResultOutcome
 from factorflow.runs.queries import (
+    RESULT_OUTCOMES,
     CursorError,
+    DetailFilters,
     ListFilters,
+    OutcomeCounts,
     RunNotFound,
     decode_cursor,
     encode_cursor,
 )
+from factorflow.runs.states import RUN_STATES
 
 # ---------------------------------------------------------------------------
 # Cursor encoding / decoding
@@ -103,6 +112,54 @@ def test_list_filters_over_max_rejected() -> None:
 def test_list_filters_zero_limit_rejected() -> None:
     with pytest.raises((ValueError, Exception)):
         ListFilters(limit=0)
+
+
+def test_run_and_result_filter_enumerations_match_the_contract() -> None:
+    """T008: read filters accept only the schema and API enumeration values."""
+    migration = (Path(__file__).resolve().parents[2] / "migrations" / "0004_runs.sql").read_text()
+    expected_outcomes = {"written", "unchanged", "not_found", "failed", "skipped"}
+
+    assert RESULT_OUTCOMES == expected_outcomes
+    assert set(get_args(ResultOutcome)) == expected_outcomes
+    check = re.search(
+        r"CONSTRAINT run_result_outcome_known\s+CHECK \(outcome IN \((.*?)\)\)",
+        migration,
+        re.DOTALL,
+    )
+    assert check is not None
+    assert set(re.findall(r"'([^']+)'", check.group(1))) == expected_outcomes
+
+    for state in RUN_STATES:
+        assert ListFilters(state=state).state == state
+    for invalid_state in ("bogus", "", "FAILED"):
+        with pytest.raises(ValueError):
+            ListFilters(state=invalid_state)
+    assert ListFilters(state=None).state is None
+
+    for outcome in RESULT_OUTCOMES:
+        assert DetailFilters(outcome=outcome).outcome == outcome
+    for invalid_outcome in ("bogus", "", "FAILED"):
+        with pytest.raises(ValueError):
+            DetailFilters(outcome=invalid_outcome)
+    assert DetailFilters(outcome=None).outcome is None
+
+
+def test_outcome_counts_has_exactly_five_integer_fields() -> None:
+    """T008: query-level counts preserve all schema outcome categories."""
+    assert [field.name for field in fields(OutcomeCounts)] == [
+        "written",
+        "unchanged",
+        "not_found",
+        "failed",
+        "skipped",
+    ]
+    assert get_type_hints(OutcomeCounts) == {
+        "written": int,
+        "unchanged": int,
+        "not_found": int,
+        "failed": int,
+        "skipped": int,
+    }
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,362 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S1-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S1
+tasks_file: CAP-001-E7-S1-tasks.md
+decisions: [DEC-0007, DEC-0008, DEC-0021, DEC-0022]
+created: 2026-10-03
+updated: 2026-10-04
+
+owner_waiver:
+  decision_id: DEC-0022
+  finding: IR-001
+  review: CAP-001-E7-S1-implementation-review-v1.md
+  expires_at: 2026-10-11T23:59:59Z
+  scope: >-
+    Only the unavailable pre-edit T001 characterization baseline is waived.
+    T001 remains unchecked; its recorded green commands are post-coding
+    regression confirmation, never a reconstructed historical baseline.
+
+cycles:
+  - name: counts-red
+    tasks: [T002]
+    status: red-observed
+    diff_sha256: ecd4e67941525b0f6032dd36fd4b296b3ebf8d250f67cc33fa7b0c5ef92f46ff
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_queries.py -q
+      result: >-
+        1 failed: RunDetail has no outcome_counts, observed at
+        test_run_queries.py:99.
+    green:
+      status: pending
+      reason: T011 supplies the planned counts implementation after all of its
+        required RED evidence is recorded.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the staged diff after confirming mixed
+      per-data-type rows distinguish row counts from instrument counts,
+      limit=1 proves page independence, and a second run proves zero defaults.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test conforms to T002 and DEC-0007's
+        whole-run row-count, all-five-outcome, zero-default contract.
+    tests_executed: true
+    commit_hash: 1eaa3cbd994c9e262b0f03c13eea77faeb58ed79
+  - name: result-row-identity-red
+    tasks: [T003]
+    status: red-observed
+    diff_sha256: fef7a7b001946608168079283bac7afee25f2393d263b3e1a7e64ce148466a02
+    red:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_rows_name_instruments_and_keep_not_found_distinct -q
+      result: >-
+        1 failed: ResultRow has no symbol, observed at
+        tests/integration/test_run_queries.py:151 before T011.
+    green:
+      status: pending
+      reason: T011 supplies the planned symbol mapping and outcome counts.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the staged T003 diff after confirming it
+      covers AAPL's failed row, all four ZZZZ not_found rows, both outcome
+      filters, and separate outcome counts.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the staged test conforms to T003 and
+        DEC-0007/DEC-0008: row-scoped counts remain distinct and symbol is
+        asserted as the owner-readable identity.
+    tests_executed: true
+    commit_hash: e873728d015b5c0754f37f53e3d91a918d7c8cc1
+  - name: result-page-grouping-characterization
+    tasks: [T004]
+    status: green-on-arrival
+    diff_sha256: eef705647f1e1e3208749463409941d128c99c0325531947df08c0cba021f967
+    red:
+      status: not-applicable
+      reason: T004 is a required brownfield characterization cycle.
+    green:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_keeps_all_data_types_for_an_instrument_on_one_page -q
+      result: 1 passed; existing paging behavior is characterized.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the focused T004 diff and confirmed the
+      limit=1 traversal keeps all four AAPL data-type rows contiguous.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test matches T004's exact outcomes,
+        second instrument, cursor traversal, and trace IDs.
+    tests_executed: true
+    commit_hash: 21c702ae6b869b922a0cd55638c010954f9e056c
+  - name: redacted-failure-reasons-characterization
+    tasks: [T005]
+    status: green-on-arrival
+    diff_sha256: f6ae8ec4b175cdc0fa141140c8344fdda16aa4b6efdb14d676f0f1654c471922
+    red:
+      status: not-applicable
+      reason: T005 characterizes the existing write-side redaction boundary.
+    green:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_returns_pre_redacted_composed_failure_reasons -q
+      result: 1 passed; composed, stored reasons are returned unchanged.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed both typed composer failures retain their
+      exact safe fields and the synthetic credential is absent from rows and
+      detail representations.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test conforms to T005, DAC-E7-3, and
+        DAC-E7-S1-5; the serialized API assertion remains correctly deferred
+        to T010.
+    tests_executed: true
+    commit_hash: bb1c22bbd4d0d4717b914e7d54ad9bb14f1fd5b7
+  - name: volume-paging-red
+    tasks: [T006]
+    status: red-observed
+    diff_sha256: 59dff7375ec8a3a6664a67a04ef56c86796c5554e0fd76075d30f6a666b8d9a0
+    red:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_detail_pages_a_three_thousand_instrument_run -q
+      result: 1 failed: RunDetail has no outcome_counts at the final count-invariance assertion.
+    green:
+      status: pending
+      reason: T011 supplies the planned whole-run SQL counts.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved exact 3000x4 fixture, full unfiltered and
+      filtered traversal, no split/duplicate rows, and count invariance coverage.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the volume, failure-first, paging, filter,
+        and diagnostic-only timing checks conform to T006.
+    tests_executed: true
+    commit_hash: 816e2cba5ef875ab4b65e713798da515c57ab21d
+  - name: run-state-validation-red
+    tasks: [T007]
+    status: red-observed
+    diff_sha256: b7fe0c821e353ac23a110b96acaa125d8a91cb702ea07c8d4da324e47adb3728
+    red:
+      command: >-
+        uv run pytest -m postgres
+        tests/integration/test_run_queries.py::test_run_history_orders_and_validates_state_filters -q
+      result: 1 failed: ListFilters(state="bogus") did not raise ValueError before T011.
+    green:
+      status: pending
+      reason: T011 supplies the required RUN_STATES membership validation.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the tied timestamp straddles a limit-2
+      cursor boundary, list order is exact, and active states are checked
+      sequentially under DEC-0021.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the staged T007 test conforms to the
+        task and DEC-0021's one-active-run interpretation.
+    tests_executed: true
+    commit_hash: 8d7b800306392ebd72d7e83904dbc9ae8ad7bf90
+  - name: query-filter-validation-red
+    tasks: [T008]
+    status: red-observed
+    diff_sha256: 96464d4f844ba17f06ca8d6b5676bcf7d9721fd1e67e59e7c3a44f38c1ea845f
+    red:
+      command: uv run pytest tests/unit/test_runs_queries.py -q
+      result: collection failed because T011 has not yet exported OutcomeCounts.
+    green:
+      status: pending
+      reason: T011 introduces OutcomeCounts, RESULT_OUTCOMES, and filter validation.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact DDL parsing, resolved type hints,
+      all enumeration values, invalid values, and None behavior.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the unit contract conforms to T008.
+    tests_executed: true
+    commit_hash: fbf9927b73b92960e438ea24d587f58e226260d2
+  - name: api-model-contract-red
+    tasks: [T009]
+    status: red-observed
+    diff_sha256: a291d4a7e9e6a96cabf8d459518969e4064e4e632a20b7cc6afac0617d1adb27
+    red:
+      command: uv run pytest tests/unit/test_api_models.py -q
+      result: collection failed because T012 has not yet exported OutcomeCounts.
+    green:
+      status: pending
+      reason: T012 introduces the API OutcomeCounts model and additive fields.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact field sets, annotations, and
+      requiredness for OutcomeCounts, RunCounts, and ResultRow.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the test conforms to T009 only.
+    tests_executed: true
+    commit_hash: d3fe41226edf968643432d966703232c7e785458
+  - name: run-detail-api-red
+    tasks: [T010]
+    status: red-observed
+    diff_sha256: a14400996ac29b0687048d412ee38932adba9227b79583ffc095e782fd919249
+    red:
+      command: >-
+        uv run pytest -m postgres tests/integration/test_api_runs.py -k
+        'includes_sql_outcome_counts or outcome_filter_preserves_counts or reject_unknown_enumerations' -q
+      result: 3 failed: missing results_by_outcome in two responses; bogus state returned 200.
+    green:
+      status: pending
+      reason: T012/T013 expose query counts/symbols and validate route enumerations.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact counts, symbols, filter invariance,
+      unfiltered serialization redaction, and complete shared 422 envelopes.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the three API cases conform to T010.
+    tests_executed: true
+    commit_hash: 7e1daf1e3ea8b0d99e0ffe256debfbca347947a9
+  - name: query-counts-symbols-green
+    tasks: [T011]
+    status: green
+    diff_sha256: 43859ff61317b88135870f4065e0d48e87b7064865f421ee786e8e7ca418af11
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: T002, T003, T006, T007, and T008 recorded their RED outcomes.
+    green:
+      command: >-
+        uv run pytest -m postgres tests/integration/test_run_queries.py -q &&
+        uv run pytest tests/unit/test_runs_queries.py -q
+      result: 6 PostgreSQL and 13 unit tests passed.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed bound whole-run counts, zero defaults,
+      existing-symbol mapping, and SEC-INP-002 enumeration validation.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found T011 conforms to DEC-0007/0008 and its task.
+    tests_executed: true
+    commit_hash: 05a8b688398f1e2c0a9bb1abccbcda22ddcffd24
+  - name: api-models-green
+    tasks: [T012]
+    status: green
+    diff_sha256: 5f95a008e8bb9a220b25cfad3851cfd0a4ee871d0fe0ffe7352aa3b2f638ff86
+    red:
+      status: satisfied-by-prior-cycle
+      evidence: T009 recorded the pre-T012 model-import RED.
+    green:
+      command: uv run pytest tests/unit/test_api_models.py -q
+      result: 7 passed.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed precise Pydantic field order, types,
+      requiredness, and additive compatibility.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the source model conforms to T012.
+    tests_executed: true
+    commit_hash: 0e7e5e9679cc0503de258a29ef7a49fadf628ff5
+  - name: run-detail-route-green
+    tasks: [T013]
+    status: green
+    diff_sha256: 9b4a48cfc2ef2e4f9ffef9722bebe47152f6f59376f09b089b6c597d31eda56a
+    red:
+      status: satisfied-by-prior-cycle
+      evidence: T010 recorded missing response additions and invalid-enum REDs.
+    green:
+      command: >-
+        uv run pytest -m postgres tests/integration/test_api_runs.py -k
+        'includes_sql_outcome_counts or outcome_filter_preserves_counts or reject_unknown_enumerations' -q
+      result: 3 passed.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed literal validation, five-count mapping,
+      symbol mapping, and preservation of existing route contracts.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the routes conform to T013 only.
+    tests_executed: true
+    commit_hash: 41246ca7dea6b69de63afc2ecceacad6e8a61cb4
+  - name: mutation-and-final-validation
+    tasks: [T014, T015]
+    status: green
+    diff_sha256: 18557a173157e456e1a7ad8c781f5fa5451766fac1daf677fc746d5b4408b3b7
+    red:
+      status: mutation-checks-killed
+      results:
+        - >-
+          Changing the skipped zero default from 0 to 1 made
+          test_run_detail_outcome_counts_cover_the_whole_run fail (1 != 0).
+        - >-
+          Changing the counts GROUP BY outcome to GROUP BY run_id made the
+          same test fail with PostgreSQL GroupingError.
+        - >-
+          Adding outcome = 'failed' to the counts statement made the same
+          test fail (written count 0 != 5).
+        - >-
+          Adding LIMIT 1 to the counts statement made the same test fail
+          (written count 0 != 5), killing page/cursor-scope leakage.
+        - >-
+          Replacing the result symbol mapping with "wrong" made
+          test_detail_rows_name_instruments_and_keep_not_found_distinct fail
+          ("wrong" != "AAPL").
+        - >-
+          Accepting "bogus" in the RUN_STATES check made
+          test_run_history_orders_and_validates_state_filters fail because
+          ValueError was not raised.
+        - >-
+          Accepting "bogus" in the RESULT_OUTCOMES check made
+          test_run_and_result_filter_enumerations_match_the_contract fail
+          because ValueError was not raised.
+        - >-
+          Replacing the route RunState and ResultOutcome annotations with str
+          made test_api_run_filters_reject_unknown_enumerations fail with the
+          unhandled query-filter ValueError instead of the shared 422 envelope.
+    green:
+      commands:
+        - >-
+          uv run pytest -m postgres tests/integration/test_run_queries.py
+          tests/integration/test_api_runs.py (34 passed, 2 warnings)
+        - >-
+          uv run pytest tests/unit/test_runs_queries.py
+          tests/unit/test_api_models.py tests/unit/test_api_runs_routes.py
+          (24 passed, 2 warnings)
+        - uv run pytest -m 'not postgres' (465 passed, 257 deselected, 2 warnings)
+        - uv run pytest -q (722 passed, 2 warnings)
+        - >-
+          T001 regression confirmation after coding: uv run pytest
+          tests/unit/test_runs_queries.py tests/unit/test_api_runs_routes.py
+          (17 passed, 2 warnings); uv run pytest -m postgres
+          tests/integration/test_api_runs.py (28 passed, 2 warnings)
+        - uv run ruff check . (passed)
+        - uv run ruff format --check . (171 files already formatted)
+        - uv run mypy src (Success: no issues found in 47 source files)
+        - uv build (source distribution and wheel built successfully)
+      result: >-
+        All mutants were restored after their focused failures. Ruff's
+        behavior-preserving reformat of test_run_queries.py is the only T014
+        committed code diff; the T001 characterization surfaces remain green.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Fresh no-history reviewer approved the formatting-only staged diff and
+      the complete S1 range, finding whole-run filter/cursor-independent
+      counts, additive symbol output, retained paging/cursor behavior, and
+      typed-route shared 422 validation correct.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Fresh no-history reviewer found the implementation and mapped tests
+        conform to the story, run-journal and ingestion-api designs, and
+        DEC-0007, DEC-0008, and DEC-0021; the staged Ruff reflow introduces no
+        behavior or contract drift.
+    tests_executed: true
+    commit_hash: bf970a1160564238e4f9af5ca3a80ce9f8ed8f85

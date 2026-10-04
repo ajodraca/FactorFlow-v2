@@ -28,11 +28,14 @@ from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from factorflow.api.errors import error_response
 from factorflow.api.models import (
     CancelRunResponse,
+    OutcomeCounts,
+    ResultOutcome,
     ResultRow,
     RunCounts,
     RunDetailResponse,
     RunListResponse,
     RunStartResponse,
+    RunState,
     RunSummary,
 )
 from factorflow.instruments.service import active_instrument_ids
@@ -50,6 +53,8 @@ from factorflow.runs.queries import (
 router = APIRouter()
 
 _RESOURCE = "acquisition-run"
+_STATE_QUERY = Query(default=None)
+_OUTCOME_QUERY = Query(default=None)
 
 
 def _request_id(request: Request) -> str:
@@ -107,7 +112,7 @@ def start_run(request: Request) -> JSONResponse:
 @router.get("/api/acquisition-runs", response_model=None)
 def list_runs_route(
     request: Request,
-    state: str | None = Query(default=None),
+    state: RunState | None = _STATE_QUERY,
     limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),
     cursor: str | None = Query(default=None),
 ) -> JSONResponse:
@@ -170,7 +175,7 @@ def list_runs_route(
 def get_run(
     run_id: UUID,
     request: Request,
-    outcome: str | None = Query(default=None),
+    outcome: ResultOutcome | None = _OUTCOME_QUERY,
     limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),
     cursor: str | None = Query(default=None),
 ) -> JSONResponse:
@@ -230,6 +235,13 @@ def get_run(
         instruments_named=detail.run.instruments_named,
         instruments_written=detail.run.instruments_written,
         instruments_failed=detail.run.instruments_failed,
+        results_by_outcome=OutcomeCounts(
+            written=detail.outcome_counts.written,
+            unchanged=detail.outcome_counts.unchanged,
+            not_found=detail.outcome_counts.not_found,
+            failed=detail.outcome_counts.failed,
+            skipped=detail.outcome_counts.skipped,
+        ),
     )
     result_rows = [
         ResultRow(
@@ -239,6 +251,7 @@ def get_run(
             reason=r.reason,
             attempts=r.attempts,
             completed_at=r.completed_at,
+            symbol=r.symbol,
         )
         for r in detail.results
     ]
