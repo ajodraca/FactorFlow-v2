@@ -109,7 +109,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with an enum-validated state filter, and fetching a single run's summary, persisted and whole-run outcome counts, and paged per-instrument results with owner-readable symbols, failure-first ordering, and an enum-validated outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time, and `read_gap_dates`, one instrument's missing dates; `gaps.py` derives the trading-day set and each instrument's missing days (`detect_gaps`). `sql/coverage.sql`, `sql/never_acquired.sql`, `sql/gap_instrument.sql`, `sql/gap_range.sql` and `sql/gaps.sql` are their statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Exposed over HTTP by `src/factorflow/api/routes/coverage.py`. See [Coverage read](#coverage-read), [Gap detection](#gap-detection) and [Coverage API](#coverage-api) |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions and request-validation `422`s), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
@@ -243,7 +243,9 @@ Every non-2xx response from these two route modules carries the shared
 `{"error": {code, message, resource, request_id}}` envelope (`errors.py`),
 including FastAPI's own request-validation `422`s — `app.py`'s
 `_validation_error_handler` derives `resource` from the request path so a
-shared, application-wide handler still names the right resource per route.
+shared, application-wide handler still names the right resource per route,
+and names the offending fields in the message. See
+[Error envelope and request correlation](#error-envelope-and-request-correlation).
 
 ## Acquisition run API
 
@@ -261,7 +263,9 @@ and delegates reads to `src/factorflow/runs/queries.py`.
 
 Auth: none; the API is loopback-only by approved design. Request body for start is empty.
 
-Every non-2xx response carries the `{"error": {code, message, resource, request_id}}` envelope.
+Every non-2xx response carries the `{"error": {code, message, resource, request_id}}` envelope,
+except a `500`, which carries only `code` and `request_id` (see
+[Error envelope and request correlation](#error-envelope-and-request-correlation)).
 The `run_already_terminal` `409` also carries `error.state` with the actual persisted run state;
 all other errors omit the `state` field so existing envelope consumers are unaffected.
 `resource` is `"acquisition-run"` on every S5 error (singular, owner-confirmed in
@@ -1187,6 +1191,70 @@ a closed pool. Because the sweep lives in the application container rather
 than the ingestion container, it continues operating when ingestion is stopped
 or crash-looping — the property that makes AC-20 hold for a crash-looping
 ingestion container.
+
+### Error envelope and request correlation
+
+Every request gets a fresh UUID from `app.py`'s request-id middleware. It is
+returned as the `X-Request-Id` header on every response, error or not, and is
+bound for the request's duration so every log record emitted while handling
+it carries the same id. Every non-2xx response under `/api` carries it as
+`error.request_id`, so a failure the owner sees can be found in the container
+log (DAC-E7-6, DAC-E7-S2-3).
+
+| Failure | Status and `code` | `message` | `resource` |
+|---|---|---|---|
+| A route's own error (`errors.py` `error_response`) | as the route chooses, e.g. `409 run_already_terminal` | the route's fixed sentence | the route's resource |
+| Unmatched path under `/api` | `404 not_found` | `No resource exists at this path.` | from the path, see below |
+| Request validation (`_validation_error_handler`) | `422 validation_error` | `The request did not match the expected shape`, then a colon and each offending field in backticks, e.g. ``: `years`.`` | from the path |
+| Any other framework `HTTPException`, e.g. a `405` (`_http_error_handler`) | the exception's status; `code` is the snake_case of its reason phrase (`method_not_allowed`), or `http_error` for a status outside `HTTPStatus` | `The request could not be completed: <reason phrase>.` | from the path |
+| Unhandled exception (`internal_error_handler`) | `500 internal_error` | none | none |
+
+A `500` body is exactly `{"error": {"code": "internal_error", "request_id":
+"…"}}` — no message, no resource, no stack trace or driver text (DAC-E7-7).
+The exception itself is logged server-side on the `factorflow.api` logger as
+`unhandled exception during request handling`, at `ERROR`, carrying the same
+request id as the body and header. The middleware converts the exception into
+that response itself, while the id is still bound; the `Exception` handler
+registered in `create_app` is a backstop.
+
+Codes never depend on message wording (DAC-E7-S2-1), and no response echoes a
+submitted or raised value (DAC-E7-S2-4): a framework exception's `detail` is
+never returned, and a `422` names fields from `loc` only — never the error's
+`input`, `ctx` or `msg`. In a field name the leading transport segment
+(`body`, `query`, `path`, `header`, `cookie`) is dropped, except that `body`
+alone is kept when the body itself is missing; names are de-duplicated in
+first-seen order. Headers a framework exception carries, such as `Allow`, are
+kept on the response.
+
+`resource` for unmatched paths, validation errors and framework errors comes
+from `_resource_for_path`: `instruments`, `settings` or `acquisition-run` when
+the path is, or is under, `/api/instruments`, `/api/settings/history-depth` or
+`/api/acquisition-runs`; otherwise the path's **last** segment
+(`/api/does-not-exist` → `does-not-exist`); otherwise `request`.
+
+These rules are DEC-0009 (framework error code and message), DEC-0010
+(`resource` from the path) and DEC-0011 (`loc`-only field naming), all
+owner-upheld and pending absorption into `component-design-ingestion-api.md`
+§§2.3 and 2.5.
+
+The interface's `toApiError` (`web/src/api/client.ts`) still reads a `500`:
+the body has no `message`, so the `ApiError` falls back to
+`request failed with status 500` and keeps the body's `code` and `requestId`.
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E7-S2-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- Because the middleware turns every exception escaping a route into the
+  `500`, the exception no longer reaches Starlette's `ServerErrorMiddleware`,
+  so `TestClient(app)` with the default `raise_server_exceptions=True` now
+  receives a `500` instead of re-raising. Every existing error-path test passes
+  `raise_server_exceptions=False`, so nothing relied on the re-raise; a new
+  test cannot rely on it either, and should assert on the `500` and its log
+  record instead (IR-001, low).
+- `_resource_for_path`'s docstring says it falls back to the path's "first
+  segment"; the code returns the last, as described above. The docstring is to
+  be corrected when the component design absorbs DEC-0010 (IR-002, low).
 
 ## Running the acquisition runner
 
