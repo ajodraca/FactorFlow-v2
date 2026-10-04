@@ -317,3 +317,57 @@ cycles:
         and ingestion-api sections 2.3, 2.5 and 8 item 12.
     tests_executed: true
     commit_hash: c121afac8e72b6d0bc809757f062f7e1e4fdb495
+  - name: mutation-and-final-validation
+    tasks: [T011]
+    status: green
+    diff_sha256: 165f41e94f9504b6f5a5620bf3ff4bb7d28cd620451eb61b3d7723a188cf18b8
+    red:
+      status: mutation-checks-killed
+      method: >-
+        Each mutant was applied to the source, tests/unit/test_api_errors.py
+        and tests/unit/test_api_request_id.py were run with -x, and the source
+        was restored. Two mutants survived the first pass and the tests were
+        strengthened: "drop the extra request id" (the middleware now logs
+        while the id is bound, so a direct handler test was added) and "remove
+        a loc prefix strip" (years is a substring of body.years, so T007 now
+        requires the backticked whole name). T006's raised-credential test now
+        asserts the exact 500/400 status, per the T006 review nit.
+      results:
+        - 500 re-adds message - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - 500 re-adds resource - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - drop the middleware except branch - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - drop the extra request id - killed by test_internal_error_handler_stamps_the_record_without_a_bound_id
+        - drop the header on the 500 - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - echo exc.detail into the message - killed by test_raised_credential_never_reaches_the_response[http-exception-detail]
+        - echo input into the 422 message - killed by test_submitted_credential_never_reaches_a_validation_error[body-field]
+        - derive the code from exc.detail - killed by test_framework_http_error_code_does_not_change_with_detail_wording
+        - drop the Allow header copy - killed by test_405_keeps_the_allow_header
+        - restore resource=None in not_found_handler - killed by test_every_handled_error_returns_the_full_envelope[unmatched-api-path]
+        - remove a loc prefix strip - killed by test_validation_error_uses_the_envelope_and_names_the_field[body-field]
+    green:
+      commands:
+        - uv run pytest -q (755 passed, 2 warnings; PostgreSQL available)
+        - uv run pytest -m 'not postgres' (498 passed, 257 deselected)
+        - uv run ruff check . (passed)
+        - uv run ruff format --check . (171 files already formatted)
+        - uv run mypy src (no issues in 47 source files)
+        - uv build (wheel built)
+        - npm test (36 files, 222 tests passed)
+        - npm run build (built)
+      result: >-
+        All mutants killed and restored. web/src/api/client.ts toApiError
+        still reads error.request_id and error.code from a 500 and falls back
+        when message is absent.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the three strengthenings, that the direct
+      handler test is the right probe for the masked path, toApiError
+      compatibility, and the whole S2 change set against every contract.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the strengthened tests and the whole
+        implementation conform to the story ACs, DEC-0009/0010/0011 and the
+        design.
+    tests_executed: true
+    commit_hash: ce92028fe6eecea9d43dfda61c6d7af77d6d646e

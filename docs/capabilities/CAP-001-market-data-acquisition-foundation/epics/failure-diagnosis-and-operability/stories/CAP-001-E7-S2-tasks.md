@@ -191,7 +191,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 **Purpose**: Kill mutants on the changed behaviour, run full validation, and keep the per-cycle evidence chain.
 
-- [ ] T011 After T002–T010 are green and their T012 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Mutate:
+- [x] T011 After T002–T010 are green and their T012 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Mutate:
   - re-adding `message` or `resource` to the `500`;
   - dropping the middleware `except` branch, the `extra` request id, or the header on the `500`;
   - echoing `exc.detail` or `input` into any message;
@@ -201,7 +201,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
   - removing a `loc` prefix strip.
 
   Strengthen tests until every mutant is killed. Then run the full constitution validation set below. Confirm that `web/src/api/client.ts`'s `toApiError` still reads `error.request_id` and `error.code` from a `500`, and that `npm test` (`vitest run`, `package.json`) and `npm run build` stay green (traces to every AC).
-- [ ] T012 Run this after **each** TDD cycle in T002–T011, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S2-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record characterization cases (the already-green parts of T002, T006 and T007) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
+- [x] T012 Run this after **each** TDD cycle in T002–T011, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S2-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record characterization cases (the already-green parts of T002, T006 and T007) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
 
 **Checkpoint**: All acceptance criteria are satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 
