@@ -8,9 +8,11 @@ FastAPI-generated 422 mapping, and exception-to-HTTP mapping without driver text
 
 from __future__ import annotations
 
+import logging
 from contextlib import contextmanager
 
 import pytest
+from fastapi import APIRouter, FastAPI
 from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
@@ -313,3 +315,63 @@ def test_every_handled_error_returns_the_full_envelope(
         assert isinstance(error[field], str) and error[field], field
     assert "state" not in error
     assert error["request_id"] == resp.headers["X-Request-Id"]
+
+
+# ---------------------------------------------------------------------------
+# CAP-001-E7-S2: a 500 returns the internal-error code and request id only
+# ---------------------------------------------------------------------------
+
+
+def _app_with_probe(monkeypatch: pytest.MonkeyPatch, exc: Exception) -> FastAPI:
+    """An application whose `GET /api/probe` raises `exc`.
+
+    The probe's routes go at the front of the router: a route appended after
+    `create_app()` sits behind the `StaticFiles` mount at `/` and is never
+    reached.
+    """
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    app = create_app()
+    probe = APIRouter()
+
+    @probe.get("/api/probe")
+    def _raise() -> None:
+        raise exc
+
+    app.router.routes[0:0] = probe.routes
+    return app
+
+
+_DRIVER_TEXT = "psycopg.OperationalError: connection to 127.0.0.1:5432 failed"
+
+
+def test_500_body_is_only_the_internal_error_code_and_request_id(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    # Implements TC-COMP-072
+    # Implements TC-COMP-084
+    """A `500` carries `code` and `request_id` only, matching the header, with
+    no driver text in the body and the driver detail in the log."""
+    app = _app_with_probe(monkeypatch, RuntimeError(_DRIVER_TEXT))
+
+    with (
+        TestClient(app, raise_server_exceptions=False) as client,
+        caplog.at_level(logging.INFO),
+    ):
+        caplog.clear()
+        resp = client.get("/api/probe")
+
+    assert resp.status_code == 500
+    request_id = resp.headers.get("X-Request-Id")
+    assert request_id
+    assert resp.json() == {"error": {"code": "internal_error", "request_id": request_id}}
+    for forbidden in ("Traceback", "RuntimeError", "psycopg", "5432"):
+        assert forbidden not in resp.text
+
+    error_records = [
+        r for r in caplog.records if r.name == "factorflow.api" and r.levelno == logging.ERROR
+    ]
+    assert error_records
+    assert any(
+        r.exc_info and _DRIVER_TEXT in logging.Formatter().formatException(r.exc_info)
+        for r in error_records
+    )
