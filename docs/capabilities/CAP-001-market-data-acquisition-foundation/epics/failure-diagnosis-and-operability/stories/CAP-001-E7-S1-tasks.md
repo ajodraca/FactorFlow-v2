@@ -162,7 +162,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 **Purpose**: Add the minimum to the run-journal read boundary that makes T002–T008 green, without changing the E5-S5 ordering, cursor or paging contract (TEST-TDD-003).
 
-- [ ] T011 Update `src/factorflow/runs/queries.py`:
+- [x] T011 Update `src/factorflow/runs/queries.py`:
   - **Outcome constant.** Add `RESULT_OUTCOMES: frozenset[str]`, the five values pinned by `run_result_outcome_known` in `migrations/0004_runs.sql`. Cite the DDL in a comment.
   - **Filter validation.** In `ListFilters.__post_init__`, reject a non-`None` `state` not in `factorflow.runs.states.RUN_STATES`. In `DetailFilters.__post_init__`, reject a non-`None` `outcome` not in `RESULT_OUTCOMES`. Both raise `ValueError`, matching the existing `limit` check. Cite run-journal §4 (SEC-INP-002).
   - **Counts type.** Add a frozen `OutcomeCounts` dataclass with `written`, `unchanged`, `not_found`, `failed` and `skipped` as `int`.

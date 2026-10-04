@@ -215,3 +215,24 @@ cycles:
       evidence: Independent reviewer found the three API cases conform to T010.
     tests_executed: true
     commit_hash: 7e1daf1e3ea8b0d99e0ffe256debfbca347947a9
+  - name: query-counts-symbols-green
+    tasks: [T011]
+    status: green
+    diff_sha256: 43859ff61317b88135870f4065e0d48e87b7064865f421ee786e8e7ca418af11
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: T002, T003, T006, T007, and T008 recorded their RED outcomes.
+    green:
+      command: >-
+        uv run pytest -m postgres tests/integration/test_run_queries.py -q &&
+        uv run pytest tests/unit/test_runs_queries.py -q
+      result: 6 PostgreSQL and 13 unit tests passed.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed bound whole-run counts, zero defaults,
+      existing-symbol mapping, and SEC-INP-002 enumeration validation.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found T011 conforms to DEC-0007/0008 and its task.
+    tests_executed: true
+    commit_hash: 05a8b688398f1e2c0a9bb1abccbcda22ddcffd24
