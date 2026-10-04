@@ -29,21 +29,21 @@ class HealthResponse(BaseModel):
     itself.
 
     `most_recent_run`'s real shape belongs to CAP-001-E7-S3 (component
-    design section 11, story notes); this story hardcodes the field to
-    `None`. IR-006: an earlier version typed it `RunSummary | None` with
-    `RunSummary = Any`, which collapses to `Any` -- `mypy --strict` would
-    not flag a future assignment of a wrong shape, defeating the point of
-    naming it at all. Typing it `None` exactly expresses the current
-    contract precisely and forces CAP-001-E7-S3 to widen the type as a
-    deliberate, reviewable change rather than one silently already
-    permitted.
+    design section 11, story notes), which has now widened it from `None`
+    to `MostRecentRun | None`. IR-006: an earlier version typed it
+    `RunSummary | None` with `RunSummary = Any`, which collapses to `Any` --
+    `mypy --strict` would not flag a future assignment of a wrong shape,
+    defeating the point of naming it at all. Typing it `None` exactly kept
+    the contract precise until CAP-001-E7-S3 widened it as a deliberate,
+    reviewable change. `MostRecentRun` is defined after `RunState`, below,
+    so the annotation is a forward reference resolved by `model_rebuild()`.
     """
 
     status: Literal["ok"]
     database: Literal["reachable", "unreachable"]
     credential_present: bool
     schema_version: int | None
-    most_recent_run: None = None
+    most_recent_run: "MostRecentRun | None" = None
 
 
 class AddInstrumentsRequest(BaseModel):
@@ -164,6 +164,22 @@ RunState = Literal[
     "cancelled",
     "abandoned",
 ]
+
+
+class MostRecentRun(BaseModel):
+    """`GET /api/health`'s `most_recent_run` (CAP-001-E7-S3 API contract).
+
+    `ended_at` is `null` for `requested`, `running` and `cancelling`: the
+    `acquisition_run_terminal_has_end` check in `migrations/0004_runs.sql`
+    sets it exactly for terminal states (DAC-E7-S3-2).
+    """
+
+    run_id: UUID
+    state: RunState
+    ended_at: datetime | None
+
+
+HealthResponse.model_rebuild()
 
 ResultOutcome = Literal[
     "written",

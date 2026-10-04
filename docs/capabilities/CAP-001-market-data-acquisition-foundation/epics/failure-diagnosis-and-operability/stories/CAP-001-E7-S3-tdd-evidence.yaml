@@ -203,4 +203,38 @@ cycles:
         Independent reviewer found the constant, function, comment and
         docstring exactly as T010 and DEC-0012 specify, with no other hunk.
     tests_executed: true
+    commit_hash: bfefb9882d897140d42738fe6dd77d7e74009d6b
+  - name: most-recent-run-model-green
+    tasks: [T011]
+    status: green
+    diff_sha256: 89e2e9f5d9b160a4866cc2a6693a41d17d4302d4e9f45f695e716f5335e2c0f2
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: most-recent-run-model-red (T007) recorded the ImportError.
+    green:
+      commands:
+        - uv run pytest tests/unit/test_api_models.py tests/unit/test_api_no_secrets.py (21 passed)
+        - >-
+          uv run pytest -m 'not postgres' (511 passed, 3 failed: the three
+          T008 cases, still RED until T012)
+        - uv run ruff check src (passed); uv run mypy src (no issues in 47 files)
+      result: >-
+        MostRecentRun has exactly run_id, state and ended_at;
+        HealthResponse.most_recent_run is MostRecentRun | None and still
+        serializes null.
+    deviation: >-
+      MostRecentRun sits after RunState, below HealthResponse, as the plan
+      places it, so the field annotation is a string forward reference and
+      HealthResponse.model_rebuild() runs right after MostRecentRun.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the forward reference is needed and is
+      resolved before FastAPI uses the response model, the three fields and
+      RunState typing, and the DDL claim in the docstring.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the model, the widening and the rewritten
+        IR-006 paragraph exactly as T011 specifies, with no extra field.
+    tests_executed: true
     commit_hash: pending

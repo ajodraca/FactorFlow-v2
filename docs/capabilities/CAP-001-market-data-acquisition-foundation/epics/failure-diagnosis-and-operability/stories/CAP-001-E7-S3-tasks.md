@@ -172,7 +172,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - Extend the module docstring's "This module owns" list with the CAP-001-E7-S3 addition.
 
   Leave `list_runs`, `get_run_detail`, the cursors and `RunRow` unchanged (depends on RED from T006; satisfies DAC-E7-S3-2, DAC-E7-S3-4, AC-18).
-- [ ] T011 [P] Update `src/factorflow/api/models.py`:
+- [x] T011 [P] Update `src/factorflow/api/models.py`:
   - Add `class MostRecentRun(BaseModel)` with `run_id: UUID`, `state: RunState` and `ended_at: datetime | None`, and a docstring citing the story's API contract and the `acquisition_run_terminal_has_end` DDL as the reason `ended_at` is null for a non-terminal run. Place it after `RunState`, which it references.
   - Change `HealthResponse.most_recent_run` from `None = None` to `MostRecentRun | None = None`.
   - Rewrite the IR-006 paragraph of the `HealthResponse` docstring to record that CAP-001-E7-S3 has now widened the type, and drop "this story hardcodes the field to `None`".
