@@ -145,4 +145,30 @@ cycles:
         Independent reviewer mapped all five T007 bullets one to one, with
         test_api_no_secrets.py untouched.
     tests_executed: true
+    commit_hash: 834e10b6002b7196f04be113e7dae29193850e7e
+  - name: health-route-mapping-red
+    tasks: [T008]
+    status: red-observed
+    diff_sha256: 69b5c8c570bbd0d1f1e62572b1e48a4ce99ecc923ef143827f50733b3d99739b
+    red:
+      command: uv run pytest tests/unit/test_health_most_recent_run.py
+      result: >-
+        3 failed: AttributeError, module factorflow.api.routes.health has no
+        attribute 'get_most_recent_run'.
+    green:
+      status: pending
+      reason: T012 imports the read and wires it into get_health.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed distinct timestamps plus exact dump
+      equality catch a wrong ended_at mapping, the OperationalError side
+      effect exercises the except branch, and the fakes fit the planned
+      T012 block. Noted that a dropped most_recent_run reset in the except
+      branch is not independently observable; carried to T014.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped T008's three assertions and the fake
+        request pattern exactly, consistent with DEC-0014.
+    tests_executed: true
     commit_hash: pending

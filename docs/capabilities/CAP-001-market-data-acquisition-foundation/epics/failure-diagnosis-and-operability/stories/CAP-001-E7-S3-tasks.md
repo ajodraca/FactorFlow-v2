@@ -149,7 +149,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - `HealthResponse(..., most_recent_run=None)` still serializes `null` (DAC-E1-S6-3).
 
   `tests/unit/test_api_no_secrets.py` must keep passing over the new model without modification. Observe RED (depends on T001; traces to DAC-E7-S3-3).
-- [ ] T008 [P] Create `tests/unit/test_health_most_recent_run.py`. Follow the `_fake_request` and fake-pool pattern in `tests/unit/test_health_route_unreachable.py`, monkeypatch `health.probe_database_reachable` to `True`, and stub `health.probe_schema_version` and `health.get_most_recent_run`. Assert:
+- [x] T008 [P] Create `tests/unit/test_health_most_recent_run.py`. Follow the `_fake_request` and fake-pool pattern in `tests/unit/test_health_route_unreachable.py`, monkeypatch `health.probe_database_reachable` to `True`, and stub `health.probe_schema_version` and `health.get_most_recent_run`. Assert:
   - When `get_most_recent_run` returns a `RunRow` in `failed` with an `ended_at`, `get_health(...)` returns `most_recent_run` with that `run_id`, `state` and `ended_at`, not some other `RunRow` field.
   - When it returns `None`, `most_recent_run is None` and `database == "reachable"`.
   - When it raises `psycopg.OperationalError`, `get_health` does not raise. It returns `database == "unreachable"`, `schema_version is None` and `most_recent_run is None`. This is the same fallback shape the existing version-query branch produces (Open Gap 3).
