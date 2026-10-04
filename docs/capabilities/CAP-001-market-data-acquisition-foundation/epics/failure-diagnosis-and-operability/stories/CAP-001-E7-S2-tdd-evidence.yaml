@@ -246,3 +246,35 @@ cycles:
         behaviour.
     tests_executed: true
     commit_hash: a7b3262af77f846942b5afc9c0a6898ed0a37c92
+  - name: internal-error-handler-green
+    tasks: [T009]
+    status: green-partial
+    diff_sha256: 894449be50ccbcd38e0396f9cd297f9db9f33449aea04e9c60b70a29fa0cc891
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: T003 and T004 recorded the extra 500 keys and the unstamped record.
+    green:
+      command: >-
+        uv run pytest -m 'not postgres' tests/unit/test_api_errors.py
+        tests/unit/test_api_request_id.py tests/unit/test_api_coverage_routes.py -q
+      result: >-
+        33 passed, 16 failed. A probe 500 now returns exactly
+        {"error": {"code": "internal_error", "request_id": id}} and the
+        unhandled-exception record carries request_id == id; every
+        pre-existing test passes, including
+        test_database_failure_is_an_internal_error. The 16 remaining failures
+        are T010's (X-Request-Id on the 500, framework HTTP errors, field
+        naming, unmatched-path resource). mypy and ruff clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the exact body, the explicit extra request
+      id, correct composition with _stamped_handle, and unchanged
+      error_response; the "unknown" fallback matches the other handlers.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the handler conforms to T009, DAC-E7-7,
+        DAC-E7-S2-2, DAC-E7-S2-3, the Resolved Conflicts and ingestion-api
+        sections 2.3 and 4.
+    tests_executed: true
+    commit_hash: b0ee0c2688b2799ce57cbc7828b1e6d6fcef2cb6

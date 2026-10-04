@@ -151,7 +151,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 **Purpose**: Reduce the `500` to its specified shape and make its log record findable, without touching the envelope that route-composed errors use (TEST-TDD-003).
 
-- [ ] T009 Update `src/factorflow/api/errors.py`:
+- [x] T009 Update `src/factorflow/api/errors.py`:
   - **Body.** `internal_error_handler` returns `JSONResponse(status_code=500, content={"error": {"code": "internal_error", "request_id": request_id}})` directly, with no `message` and no `resource` (ingestion-api §2.3 and §4, DAC-E7-7; Resolved Conflicts 1 and 2).
   - **Log record.** Keep `_LOGGER.error("unhandled exception during request handling", exc_info=exc)` and add `extra={"request_id": request_id}` when `request.state` carries one. The handler is then correct even when Starlette's `ServerErrorMiddleware` invokes it after `_request_id_var` was reset. `_stamped_handle` sets the attribute only when it is absent, so the two compose.
   - **Unchanged.** `ErrorDetail`, `ErrorEnvelope` and `error_response` keep their signature, the `state` exclusion and the `resource`-may-be-null behaviour that CAP-001-E5-S5 and every route depend on.
