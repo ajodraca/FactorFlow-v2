@@ -232,7 +232,9 @@ def test_detail_keeps_all_data_types_for_an_instrument_on_one_page(
             )
         )
 
-    aapl_page = next(page for page in pages if any(r.instrument_id == aapl_id for r in page.results))
+    aapl_page = next(
+        page for page in pages if any(r.instrument_id == aapl_id for r in page.results)
+    )
     assert [result.instrument_id for result in aapl_page.results] == [aapl_id] * 4
     assert {result.data_type: result.outcome for result in aapl_page.results} == outcomes
     assert ("prices", "written") in [
@@ -256,9 +258,7 @@ def test_detail_returns_pre_redacted_composed_failure_reasons(
     unavailable_run_id = _seed_run(connection)
     msft_id = _seed_instrument(connection, "MSFT")
     not_found_reason = compose_failure_reason(
-        InstrumentNotFound(
-            f"not found key={secret}", provider_request_id="req-e7s1-001"
-        ),
+        InstrumentNotFound(f"not found key={secret}", provider_request_id="req-e7s1-001"),
         symbol="MSFT",
         data_type="fundamentals",
         redact=lambda text: text.replace(secret, "[redacted]"),
@@ -271,9 +271,7 @@ def test_detail_returns_pre_redacted_composed_failure_reasons(
         data_type="fundamentals",
         redact=lambda text: text.replace(secret, "[redacted]"),
     )
-    _seed_result(
-        connection, run_id, msft_id, "fundamentals", "not_found", not_found_reason
-    )
+    _seed_result(connection, run_id, msft_id, "fundamentals", "not_found", not_found_reason)
     _seed_result(
         connection,
         unavailable_run_id,
@@ -374,9 +372,7 @@ def test_detail_pages_a_three_thousand_instrument_run(
             break
         cursor = page.next_cursor
 
-    raw_instrument_ids = [
-        result.instrument_id for page in full_pages for result in page.results
-    ]
+    raw_instrument_ids = [result.instrument_id for page in full_pages for result in page.results]
     returned_ids = list(dict.fromkeys(raw_instrument_ids))
     assert len(full_pages) == 6
     assert len(raw_instrument_ids) == 12000
@@ -411,9 +407,7 @@ def test_detail_pages_a_three_thousand_instrument_run(
     for outcome, pages in pages_by_outcome.items():
         assert all(result.outcome == outcome for page in pages for result in page.results)
 
-    failed_results = [
-        result for page in pages_by_outcome["failed"] for result in page.results
-    ]
+    failed_results = [result for page in pages_by_outcome["failed"] for result in page.results]
     assert {result.outcome for result in failed_results} == {"failed"}
     assert {result.instrument_id for result in failed_results} == failed_instrument_ids
     assert all(result.data_type == "reference" for result in failed_results)
@@ -426,18 +420,14 @@ def test_detail_pages_a_three_thousand_instrument_run(
     assert all(result.data_type == "fundamentals" for result in not_found_results)
     assert len(not_found_results) == len(not_found_instrument_ids)
 
-    written_results = [
-        result for page in pages_by_outcome["written"] for result in page.results
-    ]
+    written_results = [result for page in pages_by_outcome["written"] for result in page.results]
     assert {result.instrument_id for result in written_results} == set(returned_ids)
     assert len(written_results) == 11400
     assert not [result for page in pages_by_outcome["unchanged"] for result in page.results]
     assert not [result for page in pages_by_outcome["skipped"] for result in page.results]
 
     all_counts = [first_page.outcome_counts, *[page.outcome_counts for page in full_pages]]
-    filtered_counts = [
-        page.outcome_counts for pages in pages_by_outcome.values() for page in pages
-    ]
+    filtered_counts = [page.outcome_counts for pages in pages_by_outcome.values() for page in pages]
     assert all(counts == all_counts[0] for counts in all_counts + filtered_counts)
     assert sum(vars(all_counts[0]).values()) == 12000
     print(f"T006 traversal diagnostic: {perf_counter() - started:.3f}s")
@@ -506,8 +496,8 @@ def test_run_history_orders_and_validates_state_filters(
     expected_ids = [
         run_id
         for _, run_id in sorted(
+            (
                 (
-                    (
                     requested_at_by_state[state],
                     run_id,
                 )
