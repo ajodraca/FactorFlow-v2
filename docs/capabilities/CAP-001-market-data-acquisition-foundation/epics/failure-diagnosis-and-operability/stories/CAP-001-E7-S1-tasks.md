@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-02
-updated: 2026-10-02
+updated: 2026-10-04
+last_reworked_review: CAP-001-E7-S1-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -98,6 +99,15 @@ Every other criterion is already met by the E5-S5 code. This plan pins those cri
 - [ ] T001 Before you edit any file, verify that these have landed: CAP-001-E5-S5's `src/factorflow/runs/queries.py` (`list_runs`, `get_run_detail`, `ListFilters`, `DetailFilters`, `ResultRow`, `RunDetail`, `CursorError`), `src/factorflow/api/routes/runs.py`, `src/factorflow/api/models.py` (`RunCounts`, `ResultRow`, `RunState`, `ResultOutcome`), and `tests/integration/test_api_runs.py`. Also verify CAP-001-E5-S1's `migrations/0004_runs.sql` and the `migrated_run_schema_connection` fixture in `tests/conftest.py`, CAP-001-E5-S1's `RUN_STATES` in `src/factorflow/runs/states.py`, CAP-001-E4-S6's per-data-type outcome writes into `run_instrument_result`, and CAP-001-E3-S5's `compose_failure_reason` and `InstrumentNotFound(…, provider_request_id=…)` in `src/factorflow/ingestion/massive/errors.py`. Then run `uv run pytest tests/unit/test_runs_queries.py tests/unit/test_api_runs_routes.py` and `uv run pytest -m postgres tests/integration/test_api_runs.py`, and record them green as the characterization baseline. Stop if any seam differs from this plan's description (prerequisite infrastructure, traces to AC-10).
 
 **Checkpoint**: The E5-S5 read path and its tests are green, unmodified, and recorded as the baseline every later task must preserve.
+
+### IR-001 Owner Waiver
+
+`DEC-0022` records the owner's revision-bound approval for IR-001 through
+`2026-10-11T23:59:59Z`. The pre-edit T001 baseline remains unavailable and T001
+therefore remains unchecked. The green commands recorded in the final T014
+cycle are post-coding regression confirmation only; they are not presented as
+historical baseline evidence. This waiver applies only to the review finding
+and does not waive acceptance criteria, validation, or any other task.
 
 ---
 
