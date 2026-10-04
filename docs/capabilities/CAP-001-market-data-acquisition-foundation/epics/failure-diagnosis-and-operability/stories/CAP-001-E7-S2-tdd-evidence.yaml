@@ -278,3 +278,42 @@ cycles:
         sections 2.3 and 4.
     tests_executed: true
     commit_hash: b0ee0c2688b2799ce57cbc7828b1e6d6fcef2cb6
+  - name: envelope-wiring-green
+    tasks: [T010]
+    status: green
+    diff_sha256: aeda4a51792b7872c953d0fca472d97b20488cbfbb6a34d86f8ab5d936b1a79f
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: T002, T004, T005, T006, T007 and T008 recorded their RED outcomes.
+    green:
+      commands:
+        - >-
+          uv run pytest -m 'not postgres' tests/unit/test_api_errors.py
+          tests/unit/test_api_request_id.py (42 passed)
+        - uv run pytest -m 'not postgres' (497 passed, 257 deselected)
+        - uv run ruff check . (passed); uv run ruff format --check . (171 files)
+        - uv run mypy src (no issues in 47 source files)
+      result: >-
+        Every T002-T008 case is green through create_app(); every existing API
+        unit test passes unmodified.
+    test_correction: >-
+      T003's log assertion read r.exc_info through formatException. The
+      redaction patch (factorflow.config.redaction) pre-formats the traceback
+      into a scrubbed exc_text and clears exc_info, so that assertion could
+      never pass under the lifespan's configure_logging(); in T003's RED it
+      was never reached because the header assertion failed first. It now
+      checks the driver text in logging.Formatter().format(record), which
+      proves the same property through the redaction path.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the middleware catch sees only unhandled
+      exceptions, the 404 status handler keeps precedence, _validation_fields
+      and _http_error_handler follow the plan, and the test correction is a
+      legitimate mechanism fix rather than a weakening.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the change matches T010, DEC-0009/0010/0011
+        and ingestion-api sections 2.3, 2.5 and 8 item 12.
+    tests_executed: true
+    commit_hash: c121afac8e72b6d0bc809757f062f7e1e4fdb495

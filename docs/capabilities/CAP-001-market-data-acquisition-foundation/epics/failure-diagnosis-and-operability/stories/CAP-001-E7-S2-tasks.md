@@ -167,7 +167,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 **Purpose**: Wire the remaining envelope coverage and the `500` correlation into the application factory and middleware.
 
-- [ ] T010 Update `src/factorflow/api/app.py`:
+- [x] T010 Update `src/factorflow/api/app.py`:
   - **Middleware.** In `_add_request_id_middleware`, wrap `await call_next(request)` in `try/except Exception as exc`, and on an exception build the response with `internal_error_handler(request, exc)` while `_request_id_var` is still bound. Keep the `finally` reset. Set `X-Request-Id` on every response, the `500` included. Keep `app.add_exception_handler(Exception, internal_error_handler)` as the backstop. Planning verified that this Starlette (1.6.0) re-raises app exceptions from `call_next` (DAC-E7-6, DAC-E7-S2-3).
   - **Framework HTTP errors.** Add `_http_error_handler(request, exc: starlette.exceptions.HTTPException)` beside `_validation_error_handler` and register it in `create_app` with `app.add_exception_handler(StarletteHTTPException, _http_error_handler)`. The status-specific `404` handler keeps precedence. The handler returns `error_response`:
     - `code`: snake_case of `http.HTTPStatus(exc.status_code).phrase`, or `"http_error"` when the status is not in `HTTPStatus`;
