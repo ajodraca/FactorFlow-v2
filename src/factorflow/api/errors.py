@@ -9,6 +9,10 @@ findable in the container log.
 SEC-ERR-001 (section 2.3): a `500` returns `code: "internal_error"` and the
 request id only. The driver exception's own message is never returned to the
 client; it is logged server-side instead.
+
+CAP-001-E7-S2: the `500` body is exactly `{"error": {"code", "request_id"}}`,
+with no `message` and no `resource` (DAC-E7-7), and its log record carries the
+same request id as the response (DAC-E7-S2-3).
 """
 
 import logging
@@ -72,16 +76,17 @@ def error_response(
 async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Map an unhandled exception to `500` with no driver detail in the body.
 
-    The actual exception is logged server-side, with the request id already
-    bound into the logging context by the request-id middleware, so it is
-    findable in the log without ever crossing into the response body
-    (SEC-ERR-001).
+    The body is the internal-error code and the request id only (CAP-001-E7-S2,
+    DAC-E7-7). The actual exception is logged server-side with the request id
+    passed explicitly, so the record carries it even when Starlette's
+    `ServerErrorMiddleware` runs this handler after the request-id middleware
+    has unbound it (DAC-E7-S2-3). It is findable in the log without ever
+    crossing into the response body (SEC-ERR-001).
     """
-    request_id = getattr(request.state, "request_id", "unknown")
-    _LOGGER.error("unhandled exception during request handling", exc_info=exc)
-    return error_response(
+    request_id = getattr(request.state, "request_id", None)
+    extra = {"request_id": request_id} if request_id is not None else None
+    _LOGGER.error("unhandled exception during request handling", exc_info=exc, extra=extra)
+    return JSONResponse(
         status_code=500,
-        code="internal_error",
-        message="An internal error occurred. Check the server log for the request id above.",
-        request_id=request_id,
+        content={"error": {"code": "internal_error", "request_id": request_id or "unknown"}},
     )
