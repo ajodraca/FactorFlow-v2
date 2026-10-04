@@ -165,7 +165,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 **Purpose**: Add the most-recent-run read and the response model, without changing the E5-S5 list/detail contract (TEST-TDD-003).
 
-- [ ] T010 Update `src/factorflow/runs/queries.py`:
+- [x] T010 Update `src/factorflow/runs/queries.py`:
   - Add `_MOST_RECENT_RUN_SQL = _LIST_SQL_BASE + _LIST_ORDER + " LIMIT 1"`. It has no `WHERE` clause and no state filter: a non-terminal run is reported, never skipped (DAC-E7-S3-2).
   - Add `get_most_recent_run(connection: psycopg.Connection) -> RunRow | None`. It executes that constant with no parameters and maps the row through the existing `_row_to_run`.
   - In a comment, cite `idx_acquisition_run_recent` (`migrations/0004_runs.sql`), DAC-E7-S3-4 and TC-COMP-091, and say that the order deliberately repeats `list_runs`' so health and the Runs list agree (Open Gap 1).

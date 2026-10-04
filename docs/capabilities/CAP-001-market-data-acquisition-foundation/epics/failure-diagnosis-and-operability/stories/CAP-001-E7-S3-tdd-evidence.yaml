@@ -171,4 +171,36 @@ cycles:
         Independent reviewer mapped T008's three assertions and the fake
         request pattern exactly, consistent with DEC-0014.
     tests_executed: true
+    commit_hash: 2c905c3a3fe135170b7fbc45cb436ba70acd42aa
+  - name: most-recent-run-query-green
+    tasks: [T010]
+    status: green
+    diff_sha256: 57aeb4e15440def6676fc1fb70016a1662d64a55d66b7605b47ad716f2b1e73f
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: most-recent-run-query-red (T006) recorded the ImportError.
+    green:
+      commands:
+        - uv run pytest -m postgres tests/integration/test_run_most_recent.py (4 passed)
+        - >-
+          uv run pytest tests/unit/test_runs_queries.py
+          tests/integration/test_api_runs.py tests/unit/test_api_no_secrets.py
+          (42 passed)
+        - uv run ruff check src (passed); uv run mypy src (no issues in 47 files)
+      result: >-
+        The shipped statement's plan on 1000 analysed runs uses
+        idx_acquisition_run_recent with no Seq Scan and no planner setting;
+        ties, non-terminal and empty cases pass; list_runs, get_run_detail,
+        the cursors and RunRow are unchanged.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the shared fragments keep column order
+      and ordering aligned with list_runs, the empty-table path, the
+      context-managed cursor convention and the comment's accuracy.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the constant, function, comment and
+        docstring exactly as T010 and DEC-0012 specify, with no other hunk.
+    tests_executed: true
     commit_hash: pending
