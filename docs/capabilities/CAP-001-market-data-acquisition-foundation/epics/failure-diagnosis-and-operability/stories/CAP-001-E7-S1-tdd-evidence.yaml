@@ -322,6 +322,11 @@ cycles:
           (24 passed, 2 warnings)
         - uv run pytest -m 'not postgres' (465 passed, 257 deselected, 2 warnings)
         - uv run pytest -q (722 passed, 2 warnings)
+        - >-
+          T001 regression confirmation after coding: uv run pytest
+          tests/unit/test_runs_queries.py tests/unit/test_api_runs_routes.py
+          (17 passed, 2 warnings); uv run pytest -m postgres
+          tests/integration/test_api_runs.py (28 passed, 2 warnings)
         - uv run ruff check . (passed)
         - uv run ruff format --check . (171 files already formatted)
         - uv run mypy src (Success: no issues found in 47 source files)
