@@ -101,3 +101,38 @@ cycles:
         no-argument default checks pin values T019 and T020 specify.
     tests_executed: true
     commit_hash: 7a2dbb77aa2577057a1cdfc0eb8209e951388b91
+  - name: detail-read-badge-controls-green
+    tasks: [T018, T019, T020, T021]
+    status: green
+    diff_sha256: 286ab6163431fb53f3c271b84395ec328a3b7ff959e78a1e900bd5ee51e0769e
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: detail-read-badge-controls-red (T011-T013) recorded the 11 failures.
+    green:
+      commands:
+        - npm run test (38 files, 245 tests passed)
+        - npx tsc --noEmit (clean); npm run lint (78 files, no fixes)
+      result: >-
+        Every T011-T013 case passes and every pre-existing case passes
+        unmodified; StartRunControl's default label and CancelRunControl's
+        Runs-screen behaviour are unchanged.
+    deviation: >-
+      A biome --write pass reordered imports in two unrelated test files
+      (build-output.test.tsx, status-region.a11y.test.tsx); both were
+      restored before staging, so the cycle touches only its six files.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the field-by-field mapping matches
+      RunDetailResponse with nothing passed through, the GREEN is minimal,
+      and Runs and Coverage are unaffected. Low: the CancelRunControl
+      docstring says "On Runs the prop never advances", though Runs does not
+      mount the control; reworded when the screen mounts it.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T018-T021 implemented as specified with
+        the change-nothing-else constraints holding. Low: some T018 type
+        comments cite ResultRow or the DDL rather than RunDetailResponse and
+        ingestion-api section 11; comment wording only.
+    tests_executed: true
+    commit_hash: c9b21488badd3480cea686452066ae752cfdf4ed
