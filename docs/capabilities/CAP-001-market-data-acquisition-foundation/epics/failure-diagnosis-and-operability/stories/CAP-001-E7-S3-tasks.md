@@ -141,7 +141,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 ### Additional Unit Tests
 
-- [ ] T007 [P] Extend `tests/unit/test_api_models.py`, keeping the existing tests unchanged:
+- [x] T007 [P] Extend `tests/unit/test_api_models.py`, keeping the existing tests unchanged:
   - `MostRecentRun.model_fields` is exactly `{"run_id", "state", "ended_at"}`.
   - `state` accepts every `typing.get_args(RunState)` value and rejects `"bogus"` with `ValidationError`.
   - `ended_at=None` serializes as JSON `null` and is present, not omitted.

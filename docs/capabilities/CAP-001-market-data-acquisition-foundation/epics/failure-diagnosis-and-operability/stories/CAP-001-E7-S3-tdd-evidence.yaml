@@ -116,4 +116,33 @@ cycles:
         TC-COMP-089 trace comments and DEC-0012's tie-breaker, with nothing
         unspecified.
     tests_executed: true
+    commit_hash: d674772cce20db76e5a527aea116cadd7b5539eb
+  - name: most-recent-run-model-red
+    tasks: [T007]
+    status: red-observed
+    diff_sha256: 8cf266fa2ff32bc8f83e151abddc3f0da9626e21a68b14f7838e67efd9119c13
+    red:
+      command: uv run pytest tests/unit/test_api_models.py
+      result: >-
+        12 failed, 8 passed: every new MostRecentRun case fails with
+        ImportError (cannot import name 'MostRecentRun'); the 7 existing
+        tests pass unchanged.
+    characterization:
+      result: >-
+        test_health_response_still_serializes_a_null_most_recent_run passed
+        on arrival; it pins DAC-E1-S6-3 across the widening.
+    green:
+      status: pending
+      reason: T011 adds MostRecentRun and widens HealthResponse.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the per-test import keeps existing tests
+      collectable, the RED count is consistent, the existing tests are
+      untouched, and the constructions match the planned T011 model.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped all five T007 bullets one to one, with
+        test_api_no_secrets.py untouched.
+    tests_executed: true
     commit_hash: pending

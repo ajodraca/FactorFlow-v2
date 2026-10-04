@@ -4,8 +4,9 @@ CAP-001-E2-S3 adds request-model validation tests (task plan T015, T018, T019).
 """
 
 import json
-from datetime import datetime
-from typing import Literal, get_type_hints
+from datetime import UTC, datetime
+from typing import Literal, get_args, get_type_hints
+from uuid import UUID
 
 import pytest
 from pydantic import ValidationError
@@ -19,6 +20,7 @@ from factorflow.api.models import (
     ResultOutcome,
     ResultRow,
     RunCounts,
+    RunState,
     SetHistoryDepthRequest,
 )
 
@@ -143,3 +145,73 @@ def test_history_depth_response_serializes_absent_years_as_json_null() -> None:
 
     assert "years" in payload
     assert payload["years"] is None
+
+
+# CAP-001-E7-S3 task plan T007. `MostRecentRun` is imported per test so the
+# RED for this story's model does not break collection of the tests above.
+
+_RUN_ID = UUID("6f1c2a52-9a9e-4a8b-8d2e-2b9f3f0b7c11")
+_ENDED_AT = datetime(2026, 9, 5, 22, 14, 3, tzinfo=UTC)
+
+
+def test_most_recent_run_has_exactly_three_fields() -> None:
+    from factorflow.api.models import MostRecentRun
+
+    assert set(MostRecentRun.model_fields) == {"run_id", "state", "ended_at"}
+
+
+@pytest.mark.parametrize("state", get_args(RunState))
+def test_most_recent_run_accepts_every_run_state(state: str) -> None:
+    from factorflow.api.models import MostRecentRun
+
+    assert MostRecentRun(run_id=_RUN_ID, state=state, ended_at=None).state == state
+
+
+def test_most_recent_run_rejects_an_unknown_state() -> None:
+    from factorflow.api.models import MostRecentRun
+
+    with pytest.raises(ValidationError):
+        MostRecentRun(run_id=_RUN_ID, state="bogus", ended_at=None)
+
+
+def test_most_recent_run_serializes_absent_end_as_json_null() -> None:
+    from factorflow.api.models import MostRecentRun
+
+    payload = json.loads(
+        MostRecentRun(run_id=_RUN_ID, state="running", ended_at=None).model_dump_json()
+    )
+
+    assert "ended_at" in payload
+    assert payload["ended_at"] is None
+
+
+def test_health_response_round_trips_a_most_recent_run() -> None:
+    from factorflow.api.models import MostRecentRun
+
+    model = HealthResponse(
+        status="ok",
+        database="reachable",
+        credential_present=False,
+        schema_version=4,
+        most_recent_run=MostRecentRun(run_id=_RUN_ID, state="failed", ended_at=_ENDED_AT),
+    )
+
+    payload = json.loads(model.model_dump_json())
+
+    assert set(payload["most_recent_run"]) == {"run_id", "state", "ended_at"}
+    assert payload["most_recent_run"]["run_id"] == str(_RUN_ID)
+    assert payload["most_recent_run"]["state"] == "failed"
+    assert datetime.fromisoformat(payload["most_recent_run"]["ended_at"]) == _ENDED_AT
+    assert HealthResponse.model_validate_json(model.model_dump_json()) == model
+
+
+def test_health_response_still_serializes_a_null_most_recent_run() -> None:
+    """DAC-E1-S6-3 holds after the widening."""
+    model = HealthResponse(
+        status="ok", database="reachable", credential_present=True, schema_version=4
+    )
+
+    payload = json.loads(model.model_dump_json())
+
+    assert "most_recent_run" in payload
+    assert payload["most_recent_run"] is None
