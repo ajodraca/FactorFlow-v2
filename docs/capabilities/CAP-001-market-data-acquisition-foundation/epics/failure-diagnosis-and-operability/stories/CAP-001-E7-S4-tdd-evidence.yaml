@@ -1,0 +1,61 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S4-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S4
+tasks_file: CAP-001-E7-S4-tasks.md
+decisions: [DEC-0015, DEC-0016, DEC-0017, DEC-0018, DEC-0019]
+created: 2026-10-04
+updated: 2026-10-04
+
+baseline:
+  task: T001
+  base_commit: 25aa48fbfb00853c738b39d7118b375d376a1325
+  seams_verified: >-
+    E7-S1 on the wire: OutcomeCounts, RunCounts.results_by_outcome and
+    ResultRow.symbol in src/factorflow/api/models.py, ResultOutcome query
+    on GET /api/acquisition-runs/{id}; DEFAULT_PAGE_SIZE = 50 in
+    api/bounds.py; CancelRunControl({runId, state, onSettled}) in
+    cancel-run.tsx; StartRunControl in run-controls.tsx; OutcomeBadge,
+    RUN_STATE_TIER, RUN_STATE_LABEL, ABANDONED_EXPLANATION, isRunState,
+    isNonTerminalRunState and the private TierIcon / TIER_CLASSES in
+    outcome-badge.tsx; RunState, AcquisitionRun, RunCancelResult,
+    RunStartResult in api/types.ts; requestJson, toApiError, ApiError,
+    toAcquisitionRun, WireRun, startAcquisitionRun, cancelAcquisitionRun in
+    api/client.ts; formatTimestamp in app/status-region.tsx; the
+    /runs/:runId route with RunDetailPlaceholder in app/routes.tsx and
+    TC-COMP-330 in routes.test.tsx. All match the plan, verified before any
+    edit.
+  commands:
+    - npm run test (36 files, 222 tests passed)
+    - npx tsc --noEmit (clean)
+    - npm run lint (75 files, no fixes)
+  result: Green against the integration branch head, the S4 story branch base.
+
+cycles:
+  - name: render-characterization
+    tasks: [T015]
+    status: characterization
+    diff_sha256: 80bea9ed56d5bba1352fc27c3d56f30e98813969a5cbee75cb2ccdbf2aceb751
+    red:
+      status: green-on-arrival
+      reason: >-
+        T015 characterizes the existing absence of dangerouslySetInnerHTML
+        under web/src; it has no RED by design (TEST-TDD-007).
+    green:
+      command: npx vitest run web/src/api/render.test.tsx
+      result: 1 passed against unmodified production code (67 files scanned).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the recursive walk covers every .ts and
+      .tsx under web/src, the non-empty guard and offender list make it
+      non-vacuous, the self-exclusion works, and it follows the
+      routes.test.tsx readFileSync pattern; biome and tsc clean.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T015 implemented exactly, tracing only to
+        DAC-E7-S4-5 and leaving TC-COMP-096 to T006, with the story status
+        change the only other edit.
+    tests_executed: true
+    commit_hash: 0cf8125a90cf74473d910bebe2c630019db9e240

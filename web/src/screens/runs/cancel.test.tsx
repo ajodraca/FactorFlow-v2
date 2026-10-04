@@ -188,3 +188,50 @@ describe("Cancel is not offered when it cannot apply", () => {
     },
   );
 });
+
+// CAP-001-E7-S4 T013 (AC-19, DAC-E7-S4-3; DEC-0018, Open Gap P4): once the
+// owning screen has observed a newer state, the control's own badge would be
+// stale.
+describe("CancelRunControl — after its owner observes a newer state (CAP-001-E7-S4)", () => {
+  function renderWithRerender(state: RunState) {
+    const view = render(<CancelRunControl runId="r-1" state={state} />);
+    return (next: RunState) => view.rerender(<CancelRunControl runId="r-1" state={next} />);
+  }
+
+  it("renders nothing after a 202 once the state prop moves past running", async () => {
+    const user = userEvent.setup();
+    cancelMock.mockResolvedValue({ state: "cancelling" });
+    const rerender = renderWithRerender("running");
+
+    await user.click(screen.getByRole("button", { name: "Cancel run" }));
+    await user.click(screen.getByRole("button", { name: "Stop run" }));
+    expect(await screen.findByTestId("outcome-badge")).toHaveTextContent("Cancelling");
+
+    rerender("cancelling");
+    expect(screen.queryByTestId("outcome-badge")).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("Cancelling");
+
+    rerender("cancelled");
+    expect(screen.queryByTestId("outcome-badge")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel run" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the 409 message and the actual outcome when the state prop turns terminal", async () => {
+    const user = userEvent.setup();
+    cancelMock.mockRejectedValue(
+      new ApiError("Run already reached a terminal state.", "req-3", {
+        code: "run_already_terminal",
+        state: "succeeded",
+      }),
+    );
+    const rerender = renderWithRerender("running");
+
+    await user.click(screen.getByRole("button", { name: "Cancel run" }));
+    await user.click(screen.getByRole("button", { name: "Stop run" }));
+    expect(await screen.findByText("This run had already completed.")).toBeInTheDocument();
+
+    rerender("succeeded");
+    expect(screen.getByText("This run had already completed.")).toBeInTheDocument();
+    expect(screen.getByTestId("outcome-badge")).toHaveTextContent("Succeeded");
+  });
+});
