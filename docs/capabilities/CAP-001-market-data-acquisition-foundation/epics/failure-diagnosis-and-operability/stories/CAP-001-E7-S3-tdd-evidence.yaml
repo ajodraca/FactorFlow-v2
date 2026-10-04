@@ -59,4 +59,34 @@ cycles:
         migrated_health_client preamble and TC-COMP-088, with no unspecified
         assertion.
     tests_executed: true
+    commit_hash: f7df176b2c604cee6f5a0431e125254c39124be0
+  - name: health-most-recent-run-red
+    tasks: [T003, T004, T005]
+    status: red-observed
+    diff_sha256: 4bc9779389e894d447c25ce4b30613a0a1e1ef757e98110724a81d16a2231198
+    deviation: >-
+      T003-T005 run serially on one file against the same missing behaviour
+      (the hardcoded null), so they form one RED cycle rather than three.
+    red:
+      command: uv run pytest -m postgres tests/integration/test_api_health.py
+      result: >-
+        6 failed, 4 passed: every new case fails because most_recent_run is
+        null (5 x "assert None is not None", 1 x TypeError iterating None in
+        T003's key-set check); the four existing cases still pass.
+    green:
+      status: pending
+      reason: T010-T012 supply the read, the model and the route wiring.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the seeding is DDL-valid (terminal end,
+      claim agreement, single active row), the assertions are non-vacuous,
+      the RED is the expected failure mode, and the httpx request hook on
+      TestClient genuinely proves a single /api/health request.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T003-T005 implemented exactly, including
+        trace comments, the non-terminal parametrisation, both AC-18
+        directions in fresh databases, and DEC-0012's ordering.
+    tests_executed: true
     commit_hash: pending

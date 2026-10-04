@@ -107,7 +107,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - the `most_recent_run` key is present and its value `is None`. A reachable store with no run is `null`, not an unreachable or failed answer.
 
   This passes against unmodified code, so record it as characterization (TEST-TDD-007) and do not fabricate a RED. It must stay green through T012 (depends on T001; traces to DAC-E7-S3-1).
-- [ ] T003 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-090` and `# Implements TC-COMP-073`. Seed one terminal `partial` run with a fixed `requested_at` and `ended_at`. `GET /api/health` and assert:
+- [x] T003 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-090` and `# Implements TC-COMP-073`. Seed one terminal `partial` run with a fixed `requested_at` and `ended_at`. `GET /api/health` and assert:
   - the body's key set is exactly `{"status", "database", "credential_present", "schema_version", "most_recent_run"}`;
   - the four E1 fields still hold (`status == "ok"`, `database == "reachable"`, `credential_present` is a `bool` matching the environment, `schema_version` is the highest migration);
   - `most_recent_run`'s key set is exactly `{"run_id", "state", "ended_at"}`;
@@ -115,13 +115,13 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - `datetime.fromisoformat(ended_at)` equals the seeded `ended_at` as an aware datetime. Compare values, not the string form; zone rendering is the interface's concern (ingestion-api §10).
 
   Observe RED: today the field is `None` (depends on T002; traces to DAC-E7-S3-3, DAC-E7-8).
-- [ ] T004 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-089`, parametrised over the three non-terminal states `requested`, `running` and `cancelling`. Seed an older terminal `failed` run, then a newer run in the parametrised state with a later `requested_at`. Assert:
+- [x] T004 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-089`, parametrised over the three non-terminal states `requested`, `running` and `cancelling`. Seed an older terminal `failed` run, then a newer run in the parametrised state with a later `requested_at`. Assert:
   - `most_recent_run.run_id` is the newer run;
   - `state` is the parametrised state;
   - `ended_at is None` (the `acquisition_run_terminal_has_end` DDL makes a non-terminal run's end timestamp null).
 
   It must never report the older `failed` run. Observe RED (depends on T003; traces to DAC-E7-S3-2).
-- [ ] T005 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-018`. Cover AC-18's question, "did the most recent run fail?", in both directions:
+- [x] T005 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-018`. Cover AC-18's question, "did the most recent run fail?", in both directions:
   - an older `succeeded` and a newer `failed` run report `state == "failed"`;
   - in a fresh database, an older `failed` and a newer `succeeded` run report `state == "succeeded"`, so a past failure is not sticky;
   - the answer comes from `GET /api/health` alone, with no request to `/api/acquisition-runs`. Assert this with a single request on the client.
