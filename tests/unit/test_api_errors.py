@@ -8,17 +8,19 @@ FastAPI-generated 422 mapping, and exception-to-HTTP mapping without driver text
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from contextlib import contextmanager
 
 import httpx
 import pytest
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.testclient import TestClient
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from factorflow.api.app import create_app
+from factorflow.api.errors import internal_error_handler
 from factorflow.runs.journal import RunAlreadyTerminal
 
 
@@ -448,17 +450,18 @@ def _assert_secret_absent(resp: httpx.Response) -> None:
 
 
 @pytest.mark.parametrize(
-    "exc",
+    ("exc", "status"),
     [
-        pytest.param(RuntimeError(f"auth failed apiKey={_SECRET}"), id="unhandled-500"),
+        pytest.param(RuntimeError(f"auth failed apiKey={_SECRET}"), 500, id="unhandled-500"),
         pytest.param(
             StarletteHTTPException(status_code=400, detail=f"bad key {_SECRET}"),
+            400,
             id="http-exception-detail",
         ),
     ],
 )
 def test_raised_credential_never_reaches_the_response(
-    monkeypatch: pytest.MonkeyPatch, exc: Exception
+    monkeypatch: pytest.MonkeyPatch, exc: Exception, status: int
 ) -> None:
     # Implements TC-COMP-086
     # Implements TC-COMP-069
@@ -468,7 +471,7 @@ def test_raised_credential_never_reaches_the_response(
 
     resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
 
-    assert resp.status_code >= 400
+    assert resp.status_code == status
     _assert_secret_absent(resp)
 
 
@@ -539,7 +542,7 @@ def test_validation_error_uses_the_envelope_and_names_the_field(
     error = payload["error"]
     assert error["code"] == "validation_error"
     assert error["resource"] == resource
-    assert field in error["message"]
+    assert f"`{field}`" in error["message"]
 
 
 # ---------------------------------------------------------------------------
@@ -612,3 +615,19 @@ def test_framework_error_resource_comes_from_the_path(
 
     assert resp.status_code == 405
     assert resp.json()["error"]["resource"] == resource
+
+
+def test_internal_error_handler_stamps_the_record_without_a_bound_id(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Run as Starlette's `ServerErrorMiddleware` runs it, after the request-id
+    middleware has unbound the id, the handler still stamps its record."""
+    request = Request({"type": "http", "method": "GET", "path": "/api/probe", "headers": []})
+    request.state.request_id = "bound-by-middleware"
+
+    with caplog.at_level(logging.ERROR, logger="factorflow.api"):
+        resp = asyncio.run(internal_error_handler(request, RuntimeError(_DRIVER_TEXT)))
+
+    assert resp.status_code == 500
+    records = [r for r in caplog.records if r.name == "factorflow.api"]
+    assert [getattr(r, "request_id", None) for r in records] == ["bound-by-middleware"]
