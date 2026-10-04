@@ -187,7 +187,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 **Purpose**: Serve the read through `GET /api/health` and keep the interface's type mirror true to the wire.
 
-- [ ] T012 Update `src/factorflow/api/routes/health.py`:
+- [x] T012 Update `src/factorflow/api/routes/health.py`:
   - Import `get_most_recent_run` from `factorflow.runs.queries` and `MostRecentRun` from `factorflow.api.models`.
   - In `get_health`, initialise `most_recent_run: MostRecentRun | None = None`.
   - Inside the existing `with pool.connection() as conn:` block, after `probe_schema_version(conn)`, call `get_most_recent_run(conn)`. When it returns a row, build `MostRecentRun(run_id=row.run_id, state=row.state, ended_at=row.ended_at)`.

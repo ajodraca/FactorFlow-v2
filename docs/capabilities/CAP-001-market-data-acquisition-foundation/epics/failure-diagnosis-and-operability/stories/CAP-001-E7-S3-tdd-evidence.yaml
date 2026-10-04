@@ -237,4 +237,43 @@ cycles:
         Independent reviewer found the model, the widening and the rewritten
         IR-006 paragraph exactly as T011 specifies, with no extra field.
     tests_executed: true
+    commit_hash: cb4771de029a04cc3707663aa5b1bd87312af1ed
+  - name: health-route-wiring-green
+    tasks: [T012]
+    status: green
+    diff_sha256: 2b13ab3cd5e49f6bd83d2684fc46aa089ca779623ee0c31141f285e0cef9745d
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: >-
+        health-most-recent-run-red (T003-T005) and health-route-mapping-red
+        (T008) recorded their RED outcomes.
+    green:
+      commands:
+        - >-
+          uv run pytest tests/unit/test_health_most_recent_run.py
+          tests/unit/test_health_route_unreachable.py
+          tests/unit/test_health_database_probe.py
+          tests/unit/test_health_schema_version.py (7 passed)
+        - >-
+          uv run pytest -m postgres tests/integration/test_api_health.py
+          tests/integration/test_run_most_recent.py (14 passed)
+        - uv run ruff check src (passed); uv run mypy src (no issues in 47 files)
+      result: >-
+        T002-T009 are green through create_app() against PostgreSQL;
+        test_health_route_unreachable.py passes unmodified.
+    deviation: >-
+      state=row.state carries "# type: ignore[arg-type]": RunRow.state is a
+      str and MostRecentRun.state is the RunState literal, validated by
+      Pydantic at runtime, the convention routes/runs.py already uses.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the read shares the gated connection
+      block, the except branch resets all three fields, the type ignore
+      follows runs.py, and the only new import is the run-journal boundary.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found every T012 bullet and DEC-0014's fallback,
+        with the probe, timeout and log line unchanged.
+    tests_executed: true
     commit_hash: pending
