@@ -4,6 +4,8 @@ CAP-001-E2-S3 adds request-model validation tests (task plan T015, T018, T019).
 """
 
 import json
+from datetime import datetime
+from typing import Literal, get_type_hints
 
 import pytest
 from pydantic import ValidationError
@@ -13,8 +15,72 @@ from factorflow.api.models import (
     AddInstrumentsRequest,
     HealthResponse,
     HistoryDepthResponse,
+    OutcomeCounts,
+    ResultOutcome,
+    ResultRow,
+    RunCounts,
     SetHistoryDepthRequest,
 )
+
+
+def test_run_detail_models_include_outcome_counts_and_symbols() -> None:
+    """T009: new run-detail fields are additive and credential-free."""
+    assert list(OutcomeCounts.model_fields) == [
+        "written",
+        "unchanged",
+        "not_found",
+        "failed",
+        "skipped",
+    ]
+    assert {name: field.annotation for name, field in OutcomeCounts.model_fields.items()} == {
+        "written": int,
+        "unchanged": int,
+        "not_found": int,
+        "failed": int,
+        "skipped": int,
+    }
+    assert all(field.is_required() for field in OutcomeCounts.model_fields.values())
+    assert list(RunCounts.model_fields) == [
+        "instruments_named",
+        "instruments_written",
+        "instruments_failed",
+        "results_by_outcome",
+    ]
+    assert RunCounts.model_fields["results_by_outcome"].annotation is OutcomeCounts
+    assert RunCounts.model_fields["results_by_outcome"].is_required()
+    assert get_type_hints(RunCounts) == {
+        "instruments_named": int,
+        "instruments_written": int,
+        "instruments_failed": int,
+        "results_by_outcome": OutcomeCounts,
+    }
+    assert all(field.is_required() for field in RunCounts.model_fields.values())
+    assert list(ResultRow.model_fields) == [
+        "instrument_id",
+        "data_type",
+        "outcome",
+        "reason",
+        "attempts",
+        "completed_at",
+        "symbol",
+    ]
+    assert ResultRow.model_fields["symbol"].annotation is str
+    assert get_type_hints(ResultRow) == {
+        "instrument_id": int,
+        "data_type": Literal["reference", "prices", "fundamentals", "corporate_actions"],
+        "outcome": ResultOutcome,
+        "reason": str | None,
+        "attempts": int,
+        "completed_at": datetime,
+        "symbol": str,
+    }
+    assert ResultRow.model_fields["symbol"].is_required()
+    assert ResultRow.model_fields["reason"].is_required() is False
+    assert all(
+        ResultRow.model_fields[name].is_required()
+        for name in ("instrument_id", "data_type", "outcome", "attempts", "completed_at")
+    )
+    assert not any("secret" in field.lower() for field in ResultRow.model_fields)
 
 
 def test_health_response_serializes_credential_present_as_json_boolean() -> None:
