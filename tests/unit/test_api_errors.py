@@ -492,3 +492,51 @@ def test_submitted_credential_never_reaches_a_validation_error(
 
     assert resp.status_code == 422
     _assert_secret_absent(resp)
+
+
+# ---------------------------------------------------------------------------
+# CAP-001-E7-S2: Pydantic validation failures use the envelope and name the field
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "body", "resource", "field"),
+    [
+        pytest.param(
+            "PUT",
+            "/api/settings/history-depth",
+            {"years": "x"},
+            "settings",
+            "years",
+            id="body-field",
+        ),
+        pytest.param(
+            "PUT", "/api/settings/history-depth", None, "settings", "body", id="missing-body"
+        ),
+        pytest.param(
+            "GET", "/api/acquisition-runs?limit=0", None, "acquisition-run", "limit", id="query"
+        ),
+    ],
+)
+def test_validation_error_uses_the_envelope_and_names_the_field(
+    monkeypatch: pytest.MonkeyPatch,
+    method: str,
+    path: str,
+    body: dict[str, str] | None,
+    resource: str,
+    field: str,
+) -> None:
+    # Implements TC-COMP-087
+    """A Pydantic failure returns `validation_error` in the shared envelope,
+    with the resource for its path and the offending field named."""
+    client = _app_with_pool(monkeypatch)
+
+    resp = client.request(method, path, json=body)
+
+    assert resp.status_code == 422
+    payload = resp.json()
+    assert "detail" not in payload
+    error = payload["error"]
+    assert error["code"] == "validation_error"
+    assert error["resource"] == resource
+    assert field in error["message"]
