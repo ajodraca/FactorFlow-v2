@@ -134,7 +134,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 ### Additional Unit Tests
 
-- [ ] T008 In `tests/unit/test_api_errors.py`, add implementation-level cases for the framework HTTP error handler:
+- [x] T008 In `tests/unit/test_api_errors.py`, add implementation-level cases for the framework HTTP error handler:
   - `405` keeps Starlette's `Allow` response header;
   - an `HTTPException(status_code=404)` raised from a probe route still goes through `not_found_handler` (`code: not_found`), because the status-specific handler takes precedence;
   - a status code absent from `http.HTTPStatus` (e.g. `599`) yields `code: "http_error"`;

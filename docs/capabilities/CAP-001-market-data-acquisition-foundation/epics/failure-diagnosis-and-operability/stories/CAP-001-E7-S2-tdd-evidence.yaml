@@ -208,3 +208,41 @@ cycles:
         DEC-0011, ingestion-api section 8 item 12 and TC-COMP-087.
     tests_executed: true
     commit_hash: 9d51a59afcc7ae4fdbc4afe40338df68b080b934
+  - name: framework-http-handler-red
+    tasks: [T008]
+    status: red-observed
+    diff_sha256: dcd6c8ce647e59ea805909ce61d4c37a76428ced4984299d650698a8ddc34780
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k "allow_header or
+        not_found_handler or http_error or phrase_not or comes_from_the_path"
+      result: >-
+        5 new cases failed with KeyError 'error' (Starlette's default
+        {"detail": ...} body): Allow header, 599 http_error, phrase-not-detail
+        message, and both resource-from-path cases.
+    characterization:
+      result: >-
+        test_raised_404_still_goes_through_the_not_found_handler passed on
+        arrival: the status-specific 404 handler already takes precedence.
+    deviation: >-
+      The plan's "405 keeps Starlette's Allow header" cannot be exercised by
+      DELETE /api/health: the tracked static directory always mounts
+      StaticFiles at /, which answers that request with HTTPException(405)
+      and no headers (starlette/staticfiles.py:114). The test supplies Allow
+      through a probe HTTPException(405, headers={"Allow": "GET"}) so the
+      handler's exc.headers copy is what is asserted.
+    green:
+      status: pending
+      reason: T010 adds _http_error_handler (DEC-0009, DEC-0010).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer found the probe deviation forced by StaticFiles,
+      documented in the test, and the other four cases faithful to T008.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found all five bullets covered per T008,
+        DEC-0009, DEC-0010, DAC-E7-S2-1 and DAC-E7-S2-4, with no added
+        behaviour.
+    tests_executed: true
+    commit_hash: a7b3262af77f846942b5afc9c0a6898ed0a37c92
