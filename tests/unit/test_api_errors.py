@@ -374,10 +374,10 @@ def test_500_body_is_only_the_internal_error_code_and_request_id(
         r for r in caplog.records if r.name == "factorflow.api" and r.levelno == logging.ERROR
     ]
     assert error_records
-    assert any(
-        r.exc_info and _DRIVER_TEXT in logging.Formatter().formatException(r.exc_info)
-        for r in error_records
-    )
+    # The redaction patch (`factorflow.config.redaction`) pre-formats the
+    # traceback into a scrubbed `exc_text` and clears `exc_info`, so the
+    # record is read the way a formatter would read it.
+    assert any(_DRIVER_TEXT in logging.Formatter().format(r) for r in error_records)
 
 
 # ---------------------------------------------------------------------------
