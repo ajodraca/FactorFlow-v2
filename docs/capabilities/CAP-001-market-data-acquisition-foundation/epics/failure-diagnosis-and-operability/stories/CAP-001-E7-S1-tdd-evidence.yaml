@@ -255,3 +255,24 @@ cycles:
       evidence: Independent reviewer found the source model conforms to T012.
     tests_executed: true
     commit_hash: 0e7e5e9679cc0503de258a29ef7a49fadf628ff5
+  - name: run-detail-route-green
+    tasks: [T013]
+    status: green
+    diff_sha256: 9b4a48cfc2ef2e4f9ffef9722bebe47152f6f59376f09b089b6c597d31eda56a
+    red:
+      status: satisfied-by-prior-cycle
+      evidence: T010 recorded missing response additions and invalid-enum REDs.
+    green:
+      command: >-
+        uv run pytest -m postgres tests/integration/test_api_runs.py -k
+        'includes_sql_outcome_counts or outcome_filter_preserves_counts or reject_unknown_enumerations' -q
+      result: 3 passed.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed literal validation, five-count mapping,
+      symbol mapping, and preservation of existing route contracts.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the routes conform to T013 only.
+    tests_executed: true
+    commit_hash: 41246ca7dea6b69de63afc2ecceacad6e8a61cb4
