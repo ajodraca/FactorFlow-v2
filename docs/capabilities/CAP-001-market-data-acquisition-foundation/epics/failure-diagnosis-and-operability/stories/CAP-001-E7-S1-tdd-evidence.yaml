@@ -156,3 +156,22 @@ cycles:
         task and DEC-0021's one-active-run interpretation.
     tests_executed: true
     commit_hash: 8d7b800306392ebd72d7e83904dbc9ae8ad7bf90
+  - name: query-filter-validation-red
+    tasks: [T008]
+    status: red-observed
+    diff_sha256: 96464d4f844ba17f06ca8d6b5676bcf7d9721fd1e67e59e7c3a44f38c1ea845f
+    red:
+      command: uv run pytest tests/unit/test_runs_queries.py -q
+      result: collection failed because T011 has not yet exported OutcomeCounts.
+    green:
+      status: pending
+      reason: T011 introduces OutcomeCounts, RESULT_OUTCOMES, and filter validation.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact DDL parsing, resolved type hints,
+      all enumeration values, invalid values, and None behavior.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the unit contract conforms to T008.
+    tests_executed: true
+    commit_hash: fbf9927b73b92960e438ea24d587f58e226260d2

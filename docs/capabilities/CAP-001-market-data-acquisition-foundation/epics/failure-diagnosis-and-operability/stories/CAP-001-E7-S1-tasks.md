@@ -136,7 +136,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
 ### Additional Unit Tests
 
-- [ ] T008 [P] Extend `tests/unit/test_runs_queries.py`, keeping every existing test unchanged:
+- [x] T008 [P] Extend `tests/unit/test_runs_queries.py`, keeping every existing test unchanged:
   - `RESULT_OUTCOMES` equals `{"written", "unchanged", "not_found", "failed", "skipped"}`, which matches both `typing.get_args(factorflow.api.models.ResultOutcome)` and the `run_result_outcome_known` check in `migrations/0004_runs.sql`. Extract the check with the existing `tests/unit/design_sql.py` helper if it applies; otherwise use a literal parse of the migration file.
   - `ListFilters(state=s)` is accepted for every member of `RUN_STATES` and raises `ValueError` for `"bogus"`, `""` and `"FAILED"`.
   - `DetailFilters(outcome=o)` is accepted for every member of `RESULT_OUTCOMES` and raises `ValueError` otherwise.
