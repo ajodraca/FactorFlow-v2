@@ -50,7 +50,7 @@ export function isNonTerminalRunState(state: RunState): boolean {
  * One shape per tier, so the six tiers stay distinguishable in greyscale
  * (STD-UI-8) rather than being the same shape recoloured.
  */
-function TierIcon({ tier }: { tier: RunTier }): JSX.Element {
+export function TierIcon({ tier }: { tier: RunTier }): JSX.Element {
   const shapes: Record<RunTier, JSX.Element> = {
     neutral: <circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" strokeWidth="2" />,
     active: <circle cx="6" cy="6" r="5" fill="currentColor" />,
@@ -72,7 +72,7 @@ function TierIcon({ tier }: { tier: RunTier }): JSX.Element {
   );
 }
 
-const TIER_CLASSES: Record<RunTier, string> = {
+export const TIER_CLASSES: Record<RunTier, string> = {
   neutral: "bg-status-neutral-muted text-status-neutral",
   active: "bg-status-active-muted text-status-active",
   good: "bg-status-good-muted text-status-good",

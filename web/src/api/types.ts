@@ -264,3 +264,62 @@ export interface RunStartResult {
 export interface RunCancelResult {
   state: "cancelling" | "cancelled";
 }
+
+/**
+ * The four data types a run records a result for, exactly the values of the
+ * `run_result_data_type_known` check in `migrations/0004_runs.sql`
+ * (`ResultRow.data_type` in `src/factorflow/api/models.py`).
+ */
+export type DataType = "reference" | "prices" | "fundamentals" | "corporate_actions";
+
+/**
+ * One data type's outcome in a run, exactly the values of the
+ * `run_result_outcome_known` check (`ResultOutcome` in
+ * `src/factorflow/api/models.py`; component design `ingestion-api` section 11).
+ */
+export type ResultOutcome = "written" | "unchanged" | "not_found" | "failed" | "skipped";
+
+/**
+ * Whole-run result counts per outcome, `counts.results_by_outcome` in
+ * `RunDetailResponse` (CAP-001-E7-S1, DEC-0007), mapped from snake_case.
+ */
+export interface OutcomeCounts {
+  written: number;
+  unchanged: number;
+  notFound: number;
+  failed: number;
+  skipped: number;
+}
+
+/**
+ * One per-instrument, per-data-type result in `RunDetailResponse`
+ * (`ResultRow` in `src/factorflow/api/models.py`; ingestion-api section 11),
+ * mapped from snake_case. `symbol` is CAP-001-E7-S1's addition (DEC-0008).
+ */
+export interface RunResult {
+  instrumentId: number;
+  symbol: string;
+  dataType: DataType;
+  outcome: ResultOutcome;
+  reason: string | null;
+  attempts: number;
+  completedAt: string;
+}
+
+/**
+ * `GET /api/acquisition-runs/{id}`'s `200` body (`RunDetailResponse` in
+ * `src/factorflow/api/models.py`; ingestion-api section 11), mapped from
+ * snake_case. `results` is one keyset page of instruments, served
+ * failure-first; `nextCursor` is `null` on the last page.
+ */
+export interface RunDetail {
+  run: AcquisitionRun;
+  counts: {
+    instrumentsNamed: number;
+    instrumentsWritten: number;
+    instrumentsFailed: number;
+    resultsByOutcome: OutcomeCounts;
+  };
+  results: RunResult[];
+  nextCursor: string | null;
+}

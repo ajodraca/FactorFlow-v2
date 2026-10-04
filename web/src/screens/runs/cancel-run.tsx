@@ -129,6 +129,12 @@ function CancelRunDialog({
  * `cancelling` run is never presented as already cancelled (AC-19). A `409`
  * `run_already_terminal` says the run had already completed and shows its
  * actual outcome, never a cancellation that did not happen (DAC-E5-S6-6).
+ *
+ * After a `202`, once the `state` prop has moved past `requested`/`running`,
+ * the control renders nothing: its owner has observed the newer state and
+ * shows it, so the control's own badge would be stale (CAP-001-E7-S4;
+ * DEC-0018). On Runs the prop never advances, so nothing changes there. A
+ * `409`'s message stays, because the owner cannot tell it apart.
  */
 export function CancelRunControl({
   runId,
@@ -170,6 +176,9 @@ export function CancelRunControl({
   }
 
   if (settled !== null) {
+    if (!settled.alreadyCompleted && state !== "requested" && state !== "running") {
+      return null;
+    }
     return (
       <output className="flex items-center gap-2 text-sm">
         {settled.alreadyCompleted ? <span>This run had already completed.</span> : null}

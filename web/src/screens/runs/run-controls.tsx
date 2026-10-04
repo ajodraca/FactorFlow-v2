@@ -18,6 +18,8 @@ export interface StartRunControlProps {
   activeInstrumentCount?: number;
   /** Called once with the 202 result, before any navigation. */
   onStarted?: (result: RunStartResult) => void;
+  /** The button's text. Defaults to `Start acquisition run` (DEC-0004). */
+  label?: string;
 }
 
 type Refusal = "depth" | "instruments";
@@ -34,11 +36,16 @@ type Refusal = "depth" | "instruments";
  * props change. After a `202` it calls `onStarted`, then routes to the run's
  * detail; when the run is queued behind an active one it stays and says so
  * instead, and the action remains available (AC-23).
+ *
+ * CAP-001-E7-S4 passes `label="Re-run acquisition"` on a failed or partial
+ * run's detail, the named recovery action (DAC-E7-S4-2; DEC-0017). Every
+ * other behaviour is the same under either label.
  */
 export function StartRunControl({
   historyDepthYears,
   activeInstrumentCount,
   onStarted,
+  label = "Start acquisition run",
 }: StartRunControlProps): JSX.Element {
   const navigate = useNavigate();
   const depthId = useId();
@@ -115,7 +122,7 @@ export function StartRunControl({
         }}
         className="w-fit rounded border border-border px-3 py-2 text-base data-[variant=blocked]:text-muted-foreground"
       >
-        Start acquisition run
+        {label}
       </button>
       {depthBlocked ? (
         <p id={depthId} className="text-muted-foreground text-sm">

@@ -59,3 +59,45 @@ cycles:
         change the only other edit.
     tests_executed: true
     commit_hash: 0cf8125a90cf74473d910bebe2c630019db9e240
+  - name: detail-read-badge-controls-red
+    tasks: [T011, T012, T013]
+    status: red-observed
+    diff_sha256: ebddfc5b97833be3312519f48836a6a6e4b18ae230106da259167d4ee64b68b6
+    deviation: >-
+      T011-T013 touch separate files but specify one layer (the fetch, the
+      per-data-type badge and the two control changes) that T018-T021 then
+      satisfy, so they form one RED cycle.
+    red:
+      command: >-
+        npx vitest run web/src/api/client.runs.test.ts
+        web/src/screens/runs/run-controls.test.tsx
+        web/src/screens/runs/cancel.test.tsx
+        web/src/screens/runs/detail/result-outcome-badge.test.tsx
+      result: >-
+        11 failed, 39 passed: 8 getAcquisitionRun cases (TypeError, not a
+        function); 2 label cases (no button named Re-run acquisition); the
+        202-then-newer-state cancel case (stale Cancelling badge still in the
+        document); result-outcome-badge.test.tsx fails to resolve
+        ./result-outcome-badge. Every pre-existing case passes.
+    characterization:
+      result: >-
+        The default-label case and the 409 rerender case pass on arrival; they
+        pin DEC-0004 and DAC-E5-S6-6 across the T021 change.
+    green:
+      status: pending
+      reason: T018-T021 add the types, the fetch, the badge and the control changes.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed RED fails only for the planned reasons,
+      the URL, mapping and unknown-field assertions are exact and
+      non-vacuous, the fixtures match RunDetailResponse, and no existing case
+      changed. Low: the reused WIRE_RUN pairs partial with ended_at null,
+      affecting no assertion.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped every T011-T013 bullet, with DEC-0015,
+        DEC-0017 and DEC-0018 values exact; the RESULT_OUTCOME_ORDER and
+        no-argument default checks pin values T019 and T020 specify.
+    tests_executed: true
+    commit_hash: 7a2dbb77aa2577057a1cdfc0eb8209e951388b91
