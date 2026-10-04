@@ -9,6 +9,10 @@ This module owns:
 - Fetching a single run's summary and persisted counts (DAC-E5-S5-5).
 - Selecting paged per-instrument results with failure-first ordering, outcome
   filter, and instrument-level continuation (DAC-E5-S5-5).
+- Computing all per-outcome result-row counts for a run, independently of
+  result paging and filtering (DAC-E7-S1-2).
+- Returning the owner-readable instrument symbol with every result row
+  (CAP-001-E7-S1, AC-10).
 
 It does NOT perform any lifecycle transitions; those belong to
 `factorflow.runs.journal` (S2/S3).
@@ -31,8 +35,13 @@ from uuid import UUID
 import psycopg
 
 from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from factorflow.runs.states import RUN_STATES
 
 _CURSOR_VERSION = 1
+# `run_result_outcome_known` in migrations/0004_runs.sql defines these values.
+RESULT_OUTCOMES: frozenset[str] = frozenset(
+    {"written", "unchanged", "not_found", "failed", "skipped"}
+)
 
 
 class CursorError(ValueError):
@@ -50,6 +59,9 @@ class ListFilters:
     def __post_init__(self) -> None:
         if self.limit < 1 or self.limit > MAX_PAGE_SIZE:
             raise ValueError(f"limit must be between 1 and {MAX_PAGE_SIZE}, got {self.limit}")
+        # component-design-run-journal.md §4, SEC-INP-002
+        if self.state is not None and self.state not in RUN_STATES:
+            raise ValueError(f"state must be one of {sorted(RUN_STATES)}, got {self.state!r}")
 
 
 @dataclass(frozen=True)
@@ -63,6 +75,11 @@ class DetailFilters:
     def __post_init__(self) -> None:
         if self.limit < 1 or self.limit > MAX_PAGE_SIZE:
             raise ValueError(f"limit must be between 1 and {MAX_PAGE_SIZE}, got {self.limit}")
+        # component-design-run-journal.md §4, SEC-INP-002
+        if self.outcome is not None and self.outcome not in RESULT_OUTCOMES:
+            raise ValueError(
+                f"outcome must be one of {sorted(RESULT_OUTCOMES)}, got {self.outcome!r}"
+            )
 
 
 @dataclass(frozen=True)
@@ -87,6 +104,7 @@ class ResultRow:
 
     run_id: UUID
     instrument_id: int
+    symbol: str
     data_type: str
     outcome: str
     reason: str | None
@@ -102,6 +120,17 @@ class RunNotFound:
 
 
 @dataclass(frozen=True)
+class OutcomeCounts:
+    """Whole-run per-result-row outcome counts."""
+
+    written: int
+    unchanged: int
+    not_found: int
+    failed: int
+    skipped: int
+
+
+@dataclass(frozen=True)
 class RunPage:
     """Result of `list_runs`."""
 
@@ -114,6 +143,7 @@ class RunDetail:
     """Result of `get_run_detail`."""
 
     run: RunRow
+    outcome_counts: OutcomeCounts
     results: list[ResultRow]
     next_cursor: str | None
 
@@ -298,6 +328,13 @@ SELECT
  WHERE run_id = %s
 """
 
+_OUTCOME_COUNTS_SQL = """
+SELECT outcome, count(*)
+  FROM run_instrument_result
+ WHERE run_id = %s
+ GROUP BY outcome
+"""
+
 # Instruments for a page are selected by choosing up to limit+1 distinct
 # instruments (failure-first, then by symbol/instrument_id), then fetching ALL
 # data-type rows for the selected instruments — up to 4 * limit result rows.
@@ -357,6 +394,17 @@ def get_run_detail(
         return RunNotFound(run_id=run_id)
 
     run = _row_to_run(run_row)
+    with connection.cursor() as cur:
+        cur.execute(_OUTCOME_COUNTS_SQL, (run_id,))
+        raw_counts = cur.fetchall()
+    counts_by_outcome = {str(outcome): int(count) for outcome, count in raw_counts}
+    outcome_counts = OutcomeCounts(
+        written=counts_by_outcome.get("written", 0),
+        unchanged=counts_by_outcome.get("unchanged", 0),
+        not_found=counts_by_outcome.get("not_found", 0),
+        failed=counts_by_outcome.get("failed", 0),
+        skipped=counts_by_outcome.get("skipped", 0),
+    )
 
     outcome_params: list[object] = []
     if filters.outcome is not None:
@@ -399,6 +447,7 @@ def get_run_detail(
     page_instrument_rows = id_rows[: filters.limit]
     has_more = len(id_rows) > filters.limit
     page_instrument_ids = [row[0] for row in page_instrument_rows]
+    symbols_by_instrument_id = {int(row[0]): str(row[2]) for row in page_instrument_rows}
 
     results: list[ResultRow] = []
     if page_instrument_ids:
@@ -423,6 +472,7 @@ def get_run_detail(
             ResultRow(
                 run_id=r[0],
                 instrument_id=int(r[1]),
+                symbol=symbols_by_instrument_id[int(r[1])],
                 data_type=str(r[2]),
                 outcome=str(r[3]),
                 reason=r[4],
@@ -441,4 +491,9 @@ def get_run_detail(
             symbol=str(last[2]),
         )
 
-    return RunDetail(run=run, results=results, next_cursor=next_cursor)
+    return RunDetail(
+        run=run,
+        outcome_counts=outcome_counts,
+        results=results,
+        next_cursor=next_cursor,
+    )
