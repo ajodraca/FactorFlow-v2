@@ -7,7 +7,7 @@ per-instrument paging contract.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from time import perf_counter
 
 import psycopg
@@ -18,7 +18,13 @@ from factorflow.ingestion.massive.errors import (
     ProviderUnavailable,
     compose_failure_reason,
 )
-from factorflow.runs.queries import DetailFilters, RunDetail, get_run_detail
+from factorflow.runs.queries import (
+    DetailFilters,
+    ListFilters,
+    RunDetail,
+    get_run_detail,
+    list_runs,
+)
 
 
 def _seed_run(connection: psycopg.Connection) -> uuid.UUID:
@@ -435,3 +441,103 @@ def test_detail_pages_a_three_thousand_instrument_run(
     assert all(counts == all_counts[0] for counts in all_counts + filtered_counts)
     assert sum(vars(all_counts[0]).values()) == 12000
     print(f"T006 traversal diagnostic: {perf_counter() - started:.3f}s")
+
+
+def _seed_run_with_state(
+    connection: psycopg.Connection, state: str, requested_at: datetime
+) -> uuid.UUID:
+    """Insert one run with the state-specific required lifecycle fields."""
+    terminal_states = {"succeeded", "partial", "failed", "cancelled", "abandoned"}
+    with connection.cursor() as cursor:
+        if state in terminal_states:
+            cursor.execute(
+                "INSERT INTO acquisition_run (state, history_depth_years, requested_at, ended_at) "
+                "VALUES (%s, %s, %s, now()) RETURNING run_id",
+                (state, 5, requested_at),
+            )
+        elif state in {"running", "cancelling"}:
+            cursor.execute(
+                "INSERT INTO acquisition_run "
+                "(state, history_depth_years, requested_at, started_at, claimed_by, heartbeat_at) "
+                "VALUES (%s, %s, %s, now(), 'test', now()) RETURNING run_id",
+                (state, 5, requested_at),
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO acquisition_run (state, history_depth_years, requested_at) "
+                "VALUES (%s, %s, %s) RETURNING run_id",
+                (state, 5, requested_at),
+            )
+        row = cursor.fetchone()
+    connection.commit()
+    assert row is not None
+    return row[0]
+
+
+@pytest.mark.postgres
+def test_run_history_orders_and_validates_state_filters(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    # Implements TC-COMP-081
+    """Run history is tie-safe, state-filtered, and rejects unknown states."""
+    connection = migrated_run_schema_connection
+    base = datetime(2026, 10, 3, 12, tzinfo=UTC)
+    list_states = ("requested", "succeeded", "partial", "failed", "cancelled", "abandoned")
+    requested_at_by_state = {
+        "requested": base,
+        "succeeded": base + timedelta(minutes=3),
+        "partial": base + timedelta(minutes=1),
+        "failed": base,
+        "cancelled": base + timedelta(minutes=2),
+        "abandoned": base - timedelta(minutes=1),
+    }
+    seeded = {
+        state: _seed_run_with_state(connection, state, requested_at_by_state[state])
+        for state in list_states
+    }
+
+    page = list_runs(connection, ListFilters(limit=2))
+    pages = [page]
+    while pages[-1].next_cursor is not None:
+        pages.append(list_runs(connection, ListFilters(limit=2, cursor=pages[-1].next_cursor)))
+    assert pages[1].rows[-1].requested_at == base
+    assert pages[2].rows[0].requested_at == base
+    returned_ids = [row.run_id for current_page in pages for row in current_page.rows]
+    expected_ids = [
+        run_id
+        for _, run_id in sorted(
+                (
+                    (
+                    requested_at_by_state[state],
+                    run_id,
+                )
+                for state, run_id in seeded.items()
+            ),
+            reverse=True,
+        )
+    ]
+    assert returned_ids == expected_ids
+    assert len(returned_ids) == len(set(returned_ids)) == len(list_states)
+
+    failed_page = list_runs(connection, ListFilters(state="failed"))
+    assert [row.run_id for row in failed_page.rows] == [seeded["failed"]]
+
+    running_id = _seed_run_with_state(connection, "running", base + timedelta(hours=1))
+    assert [row.run_id for row in list_runs(connection, ListFilters(state="running")).rows] == [
+        running_id
+    ]
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE acquisition_run SET state = 'abandoned', ended_at = now(), "
+            "claimed_by = NULL, heartbeat_at = NULL WHERE run_id = %s",
+            (running_id,),
+        )
+    connection.commit()
+
+    cancelling_id = _seed_run_with_state(connection, "cancelling", base + timedelta(hours=2))
+    assert [row.run_id for row in list_runs(connection, ListFilters(state="cancelling")).rows] == [
+        cancelling_id
+    ]
+
+    with pytest.raises(ValueError):
+        ListFilters(state="bogus")
