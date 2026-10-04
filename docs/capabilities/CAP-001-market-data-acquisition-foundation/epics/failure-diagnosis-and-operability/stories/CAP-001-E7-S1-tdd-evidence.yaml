@@ -194,3 +194,24 @@ cycles:
       evidence: Independent reviewer found the test conforms to T009 only.
     tests_executed: true
     commit_hash: d3fe41226edf968643432d966703232c7e785458
+  - name: run-detail-api-red
+    tasks: [T010]
+    status: red-observed
+    diff_sha256: a14400996ac29b0687048d412ee38932adba9227b79583ffc095e782fd919249
+    red:
+      command: >-
+        uv run pytest -m postgres tests/integration/test_api_runs.py -k
+        'includes_sql_outcome_counts or outcome_filter_preserves_counts or reject_unknown_enumerations' -q
+      result: 3 failed: missing results_by_outcome in two responses; bogus state returned 200.
+    green:
+      status: pending
+      reason: T012/T013 expose query counts/symbols and validate route enumerations.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact counts, symbols, filter invariance,
+      unfiltered serialization redaction, and complete shared 422 envelopes.
+    spec_drift:
+      drift_detected: false
+      evidence: Independent reviewer found the three API cases conform to T010.
+    tests_executed: true
+    commit_hash: 7e1daf1e3ea8b0d99e0ffe256debfbca347947a9

@@ -145,7 +145,7 @@ T002–T007 share the new file `tests/integration/test_run_queries.py`, so they 
 
   Observe RED before T011 (depends on T001; traces to DAC-E7-10, DAC-E7-S1-4, DAC-E7-S1-2).
 - [x] T009 [P] Extend `tests/unit/test_api_models.py`. Assert that the new `OutcomeCounts` model has exactly the fields `written`, `unchanged`, `not_found`, `failed` and `skipped`, all `int`. `RunCounts` keeps `instruments_named`, `instruments_written` and `instruments_failed`, and adds a required `results_by_outcome: OutcomeCounts`. `ResultRow` keeps every owner-confirmed field (`instrument_id`, `data_type`, `outcome`, `reason`, `attempts`, `completed_at`) and adds `symbol: str`. No new field is credential-shaped. Observe RED before T012 (depends on T001; traces to DAC-E7-S1-2, AC-10).
-- [ ] T010 [P] Add separately named `postgres` cases to `tests/integration/test_api_runs.py` without modifying the existing ones:
+- [x] T010 [P] Add separately named `postgres` cases to `tests/integration/test_api_runs.py` without modifying the existing ones:
   - `GET /api/acquisition-runs/{id}` returns `counts.results_by_outcome` with all five keys and SQL-computed values, plus the unchanged persisted `instruments_*` counts.
   - Every element of `results` carries `symbol`.
   - `?outcome=not_found` returns only `not_found` rows, while `counts.results_by_outcome` is unchanged by the filter.
