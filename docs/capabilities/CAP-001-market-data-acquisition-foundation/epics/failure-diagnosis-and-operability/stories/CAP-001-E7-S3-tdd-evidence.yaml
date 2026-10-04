@@ -276,4 +276,34 @@ cycles:
         Independent reviewer found every T012 bullet and DEC-0014's fallback,
         with the probe, timeout and log line unchanged.
     tests_executed: true
+    commit_hash: cd313ab4c21f7205c9a9ac723cc00ffc4e300b99
+  - name: web-type-mirror
+    tasks: [T013]
+    status: type-only
+    diff_sha256: 3a5d339f3af40cc05c8def0b2360198fae0dfc9081bffedb4d7ea8b195120d78
+    red:
+      status: not-applicable
+      reason: >-
+        A type-only widening with no behaviour change (DEC-0013); GREEN on
+        arrival is the evidence, as the plan requires.
+    green:
+      commands:
+        - npx tsc --noEmit (clean)
+        - npm run lint (clean); npm run format (no fixes)
+        - npm run test (36 files, 222 tests passed)
+      result: >-
+        RunSummary mirrors MostRecentRun; every existing most_recent_run null
+        fixture type-checks; status-region.tsx, its tests and fixtures are
+        unchanged.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the snake_case mirror matches the
+      unmapped fetchHealth() cast, RunState matches the Python literal, and
+      null fixtures remain type-correct.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T013's four bullets exactly, with no
+        consumer, test or fixture touched.
+    tests_executed: true
     commit_hash: pending

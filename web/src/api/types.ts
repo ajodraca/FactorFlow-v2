@@ -9,15 +9,21 @@
  */
 
 /**
- * The most recent acquisition run's summary.
+ * The most recent acquisition run's summary, `GET /api/health`'s
+ * `most_recent_run`.
  *
- * CAP-001-E1-S6's `HealthResponse` hardcodes this field to `null`, and
- * CAP-001-E7-S3 owns its real shape. Typing it `null` exactly — rather than
- * an `unknown`-shaped placeholder — keeps the current contract precise and
- * forces the widening to be a deliberate, reviewable change in that story,
- * mirroring the same decision the API model records (IR-006).
+ * CAP-001-E1-S6 typed this `null` exactly so the widening would be a
+ * deliberate, reviewable change (IR-006); CAP-001-E7-S3 has now widened it
+ * to the wire shape, mirroring `MostRecentRun` in
+ * `src/factorflow/api/models.py`. The names stay snake_case because
+ * `fetchHealth()` casts the raw JSON without mapping. `ended_at` is `null`
+ * for a run that has not ended.
  */
-export type RunSummary = null;
+export interface RunSummary {
+  run_id: string;
+  state: RunState;
+  ended_at: string | null;
+}
 
 /**
  * `GET /api/health`'s response body (component design `ingestion-api`
@@ -36,7 +42,7 @@ export interface HealthResponse {
   database: "reachable" | "unreachable";
   credential_present: boolean;
   schema_version: number | null;
-  most_recent_run: RunSummary;
+  most_recent_run: RunSummary | null;
 }
 
 /**
@@ -212,7 +218,7 @@ export type RunState =
  * One run in `GET /api/acquisition-runs` (`RunSummary` in
  * `src/factorflow/api/models.py`; component design `ingestion-api` section
  * 11), mapped from snake_case. Named `AcquisitionRun` rather than reusing
- * `RunSummary`, which is the health placeholder CAP-001-E7-S3 owns.
+ * `RunSummary`, which is the health `most_recent_run` shape.
  */
 export interface AcquisitionRun {
   runId: string;

@@ -196,7 +196,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - Update the module docstring to name the fifth field and CAP-001-E7-S3, and note that the route still delegates the read to the run-journal boundary (ingestion-api §1, run-journal §9).
 
   Leave `probe_database_reachable`, its 2-second timeout, the log line, and the rule that the reachability probe gates every query unchanged. `tests/unit/test_health_route_unreachable.py` must stay green unmodified (depends on T010, T011 and RED from T003, T004, T005, T008; satisfies AC-18, DAC-E7-8, DAC-E7-S3-1, DAC-E7-S3-2).
-- [ ] T013 [P] Update `web/src/api/types.ts`:
+- [x] T013 [P] Update `web/src/api/types.ts`:
   - Replace `export type RunSummary = null;` with `export interface RunSummary { run_id: string; state: RunState; ended_at: string | null; }`. The names are snake_case because `fetchHealth()` in `web/src/api/client.ts` casts the raw JSON without mapping.
   - Change `HealthResponse.most_recent_run` to `RunSummary | null`.
   - Rewrite the `RunSummary` doc comment to say CAP-001-E7-S3 widened it to the wire shape, mirroring `MostRecentRun` in `src/factorflow/api/models.py`.
