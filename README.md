@@ -106,7 +106,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with an enum-validated state filter, and fetching a single run's summary, persisted and whole-run outcome counts, and paged per-instrument results with owner-readable symbols, failure-first ordering, and an enum-validated outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with an enum-validated state filter, and fetching a single run's summary, persisted and whole-run outcome counts, and paged per-instrument results with owner-readable symbols, failure-first ordering, and an enum-validated outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors, and reading the single most recent run for `GET /api/health` (`get_most_recent_run`) in the same order as the runs list. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time, and `read_gap_dates`, one instrument's missing dates; `gaps.py` derives the trading-day set and each instrument's missing days (`detect_gaps`). `sql/coverage.sql`, `sql/never_acquired.sql`, `sql/gap_instrument.sql`, `sql/gap_range.sql` and `sql/gaps.sql` are their statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Exposed over HTTP by `src/factorflow/api/routes/coverage.py`. See [Coverage read](#coverage-read), [Gap detection](#gap-detection) and [Coverage API](#coverage-api) |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
@@ -121,7 +121,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
-| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, which stays the health `most_recent_run` placeholder), and the coverage shapes `PresenceState`, `CoverageDataType`, `CoverageRow`, `CoverageGapDetection`, `CoverageView`, `CoverageExpansion`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, `fetchCoverage()`, `fetchCoverageGapDates()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
+| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, the health `most_recent_run` shape `{run_id, state, ended_at}`, kept snake_case because `fetchHealth()` casts the body unmapped), and the coverage shapes `PresenceState`, `CoverageDataType`, `CoverageRow`, `CoverageGapDetection`, `CoverageView`, `CoverageExpansion`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, `fetchCoverage()`, `fetchCoverageGapDates()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
 | `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom. The shell is exactly the viewport's height (`h-screen`) and the main region scrolls on its own (`overflow-auto`), so a screen's content scrolls within `main` rather than the page; `routes.tsx` mounts the Coverage, Instruments, Runs and Settings screens (see below) at their destinations, plus a `/runs/:runId` placeholder, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
 | `web/src/screens/coverage/` | The Coverage screen. `index.tsx` composes the screen's `ScreenState`, toolbar, plan-limit note and cursor-stack pager; `coverage-table.tsx` renders the expandable table and fetches gap dates on expansion; `badges.tsx` renders the presence, gaps-unknown and depth-shortfall badges; `cells.tsx` renders missing, measured and inapplicable values, session dates and Chicago timestamps; `uniform-shortfall.ts` decides when every loaded row shares one shortfall; `copy.ts` holds every user-visible sentence. See [Coverage screen](#coverage-screen) |
 | `web/src/screens/instruments/` | The Instruments screen: one table with a lifecycle column (never two tables), single-symbol and bulk (`textarea`) add, and retirement through a `dialog` `confirm`. `index.tsx` composes the screen's `ScreenState`; `instrument-table.tsx` holds server-side search/filter and keyset "Load more" paging; `add-field.tsx` and `bulk-add.tsx` (with `parse-bulk-symbols.ts`) add instruments; `retire-dialog.tsx` confirms retirement; `start-action.tsx` renders the acquisition-run trigger `blocked` when history depth is unset; `badges.tsx` renders the active/retired lifecycle badge. See [Instruments and Settings screens](#instruments-and-settings-screens) |
@@ -1162,8 +1162,8 @@ FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
 ```
 
 `GET /api/health` reports liveness, database reachability, whether the
-provider credential is set (a boolean, never the value), and the highest
-applied migration version:
+provider credential is set (a boolean, never the value), the highest
+applied migration version, and the most recent acquisition run:
 
 ```json
 {
@@ -1171,17 +1171,47 @@ applied migration version:
   "database": "reachable",
   "credential_present": true,
   "schema_version": 4,
-  "most_recent_run": null
+  "most_recent_run": {
+    "run_id": "3f1c2a9e-8d4b-4e6f-9a10-2b7c5d8e1f03",
+    "state": "running",
+    "ended_at": null
+  }
 }
 ```
 
+`most_recent_run` is the run with the latest `(requested_at, run_id)` —
+the same order as `GET /api/acquisition-runs`, so health and the first row of
+the Runs list name the same run (DEC-0012). It is read by
+`get_most_recent_run` in `src/factorflow/runs/queries.py`, served by
+`idx_acquisition_run_recent`, so the interface's 30-second poll stays cheap.
+No state is filtered out: a `requested`, `running` or `cancelling` run is
+reported as it is, with `ended_at: null`, rather than skipped in favour of an
+older finished one. `state` is any run state, and `ended_at` is set exactly
+for terminal states. The object carries only these three fields; run detail
+is `GET /api/acquisition-runs/{id}`. `most_recent_run` is `null` when the
+database is reachable and no run has ever been recorded.
+
 An unreachable database still responds `200` with `database: "unreachable"`,
 rather than failing the request, so a caller can distinguish a dead database
-from a dead API. `most_recent_run` is `null` until a later story populates
-it. An unmatched non-API path falls back to the built `index.html` when a
+from a dead API. In that case `schema_version` and `most_recent_run` are both
+`null`, including when the connection fails after the run was read
+(DEC-0014). An unmatched non-API path falls back to the built `index.html` when a
 bundle is present, and 404s when it is not — the bundle is build output, so a
 fresh clone has none until `npm run build` runs; an unmatched path under
 `/api` always returns the `{"error": {...}}` envelope.
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E7-S3-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- The published OpenAPI schema does not list `most_recent_run` in
+  `HealthResponse.required`, because the Pydantic field defaults to `None`,
+  while `web/src/api/types.ts` types the key as always present. The body
+  always carries the key; only a client generated from `/openapi.json` would
+  treat it as possibly absent (IR-002, low).
+- `tests/unit/test_api_models.py` imports `MostRecentRun` inside each new
+  test, under a comment saying this keeps collection working; the symbol now
+  imports at module scope, so the comment is stale (IR-001, low).
 
 The API lifespan also manages a reclaim sweep: an asyncio background task
 calls `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds, using
@@ -1321,8 +1351,10 @@ Three further behaviors are worth knowing:
   zone and never in a locale format. Before the first poll resolves the line
   reads `Not yet checked`.
 - **`most_recent_run: null`** renders as `No run recorded` — not as an empty
-  success and not as a failure. A later story populates the field and fills in
-  the recorded branch.
+  success and not as a failure. When the API reports a run, the line reads
+  `Most recent run recorded`: the region does not yet state the run's outcome
+  or link to its detail, although the health response now carries both the
+  state and the run id.
 - **A missing provider credential** is reported only on the strength of a
   response that actually arrived. When the API did not answer, presence is
   unknown and the region says nothing about it rather than inferring absence
