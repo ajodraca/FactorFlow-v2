@@ -1521,6 +1521,10 @@ It carries the actions:
 - `CancelRunControl` is always mounted, keyed on the run, and renders
   nothing where it does not apply. A conditional mount would lose the
   `409`'s *This run had already completed.* on the refetch that follows.
+  After a successful cancel, the summary shows the returned state
+  immediately, then refetches the run for its updated timestamps and
+  counts. The control's temporary outcome badge disappears when the
+  summary takes over.
 - A `failed` or `partial` run shows *Re-running is safe: data already
   recorded is not duplicated or overwritten.* and a `StartRunControl`
   labelled *Re-run acquisition*. An `abandoned` run shows the Runs screen's
