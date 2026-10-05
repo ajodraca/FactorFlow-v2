@@ -57,7 +57,10 @@ detection in daily prices (`src/factorflow/coverage/gaps.py`), and is served
 over HTTP by `GET /api/coverage` (`src/factorflow/api/routes/coverage.py`).
 The Runs screen is also built: it lists run history with each outcome's
 severity tier, polls while a run is in progress, and carries the reusable
-Start and Cancel run controls. The Coverage screen is also built: it shows
+Start and Cancel run controls. The Run detail screen is also built at
+`/runs/:runId`: it shows one run's outcome, timestamps and counts, its
+instrument roster with each data type's outcome and failure reason behind
+row expansion, and the cancel and re-run actions. The Coverage screen is also built: it shows
 each instrument's per-data-type presence, covered range, gap count and
 depth shortfall from `GET /api/coverage`, with gap dates behind row
 expansion, and it never polls. What exists today is described
@@ -121,16 +124,16 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
-| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, the health `most_recent_run` shape `{run_id, state, ended_at}`, kept snake_case because `fetchHealth()` casts the body unmapped), and the coverage shapes `PresenceState`, `CoverageDataType`, `CoverageRow`, `CoverageGapDetection`, `CoverageView`, `CoverageExpansion`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, `fetchCoverage()`, `fetchCoverageGapDates()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
-| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom. The shell is exactly the viewport's height (`h-screen`) and the main region scrolls on its own (`overflow-auto`), so a screen's content scrolls within `main` rather than the page; `routes.tsx` mounts the Coverage, Instruments, Runs and Settings screens (see below) at their destinations, plus a `/runs/:runId` placeholder, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
+| `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, the health `most_recent_run` shape `{run_id, state, ended_at}`, kept snake_case because `fetchHealth()` casts the body unmapped), the run-detail shapes `DataType`, `ResultOutcome`, `OutcomeCounts`, `RunResult`, `RunDetail`, and the coverage shapes `PresenceState`, `CoverageDataType`, `CoverageRow`, `CoverageGapDetection`, `CoverageView`, `CoverageExpansion`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `getAcquisitionRun()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, `fetchCoverage()`, `fetchCoverageGapDates()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
+| `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom. The shell is exactly the viewport's height (`h-screen`) and the main region scrolls on its own (`overflow-auto`), so a screen's content scrolls within `main` rather than the page; `routes.tsx` mounts the Coverage, Instruments, Runs and Settings screens (see below) at their destinations, plus the Run detail screen at `/runs/:runId`, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
 | `web/src/screens/coverage/` | The Coverage screen. `index.tsx` composes the screen's `ScreenState`, toolbar, plan-limit note and cursor-stack pager; `coverage-table.tsx` renders the expandable table and fetches gap dates on expansion; `badges.tsx` renders the presence, gaps-unknown and depth-shortfall badges; `cells.tsx` renders missing, measured and inapplicable values, session dates and Chicago timestamps; `uniform-shortfall.ts` decides when every loaded row shares one shortfall; `copy.ts` holds every user-visible sentence. See [Coverage screen](#coverage-screen) |
 | `web/src/screens/instruments/` | The Instruments screen: one table with a lifecycle column (never two tables), single-symbol and bulk (`textarea`) add, and retirement through a `dialog` `confirm`. `index.tsx` composes the screen's `ScreenState`; `instrument-table.tsx` holds server-side search/filter and keyset "Load more" paging; `add-field.tsx` and `bulk-add.tsx` (with `parse-bulk-symbols.ts`) add instruments; `retire-dialog.tsx` confirms retirement; `start-action.tsx` renders the acquisition-run trigger `blocked` when history depth is unset; `badges.tsx` renders the active/retired lifecycle badge. See [Instruments and Settings screens](#instruments-and-settings-screens) |
-| `web/src/screens/runs/` | The Runs screen and the reusable run controls. `index.tsx` composes the screen's `ScreenState` and its 10-second poll (`RUNS_POLL_INTERVAL_MS`); `run-table.tsx` renders the `history` table, whose run-id link is the only way into a run; `outcome-badge.tsx` maps each run state to its tier, word and icon (`RUN_STATE_TIER`, `RUN_STATE_LABEL`, `OutcomeBadge`); `run-controls.tsx` exports `StartRunControl`; `cancel-run.tsx` exports `CancelRunControl`, which no screen mounts yet. See [Runs screen](#runs-screen) |
+| `web/src/screens/runs/` | The Runs screen and the reusable run controls. `index.tsx` composes the screen's `ScreenState` and its 10-second poll (`RUNS_POLL_INTERVAL_MS`); `run-table.tsx` renders the `history` table, whose run-id link is the only way into a run; `outcome-badge.tsx` maps each run state to its tier, word and icon (`RUN_STATE_TIER`, `RUN_STATE_LABEL`, `OutcomeBadge`); `run-controls.tsx` exports `StartRunControl`; `cancel-run.tsx` exports `CancelRunControl`, which the Run detail screen mounts. `detail/` is the Run detail screen: `index.tsx` composes its `ScreenState`, outcome filter, cursor-stack pager and 10-second poll (`RUN_DETAIL_POLL_INTERVAL_MS`); `run-summary.tsx` renders the summary card with the cancel and re-run actions; `instrument-roster.tsx` renders the expandable per-instrument roster; `result-outcome-badge.tsx` maps each per-data-type outcome to its tier and word. See [Runs screen](#runs-screen) and [Run detail screen](#run-detail-screen) |
 | `web/src/screens/settings/` | The Settings screen: `index.tsx` composes the layout; `history-depth-form.tsx` reads and writes the history-depth setting with STD-UI-19-shaped validation errors; `credential-status.tsx` reports provider credential presence only, never the value, with a distinct icon/shape per state. See [Instruments and Settings screens](#instruments-and-settings-screens) |
 | `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
-| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh`. `fixtures/` holds plain SQL seeds that a spec applies itself; Playwright does not collect them |
+| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh`. `fixtures/` holds plain SQL seeds that a spec applies itself, and `support/database.ts` exports `sql()`, which runs one statement in the e2e container; Playwright collects neither |
 | `docs/` | Constitution, capability specifications, and designs |
 
 ## Configuration
@@ -1416,8 +1419,8 @@ The list is a `history` table — Run, Outcome, Requested, Started, Ended,
 Instruments written, Instruments failed — newest first, with any run that
 has not finished pinned to the top and marked in progress. The history
 variant allows no row target, so the run id in the first column is a real
-link to `/runs/<runId>` (middle-click and open-in-new-tab work); that
-destination is still a placeholder. Timestamps use the status region's
+link to `/runs/<runId>` (middle-click and open-in-new-tab work), the
+[Run detail screen](#run-detail-screen). Timestamps use the status region's
 `America/Chicago` format, and a missing start or end time shows an em dash
 read out as *Not recorded*. An *Outcome* select filters server-side by
 state. Having no run ever reads differently from a filter that matches
@@ -1464,7 +1467,9 @@ own message. A new set of precondition values clears it. After a `202`
 the control calls `onStarted` (the Runs screen reloads), then navigates to
 the new run's detail. When the run is queued behind an active one it
 stays put, says *A run is in progress. This will start when it finishes.*,
-and leaves the action available.
+and leaves the action available. An optional `label` prop replaces the
+button's text, which defaults to *Start acquisition run*; nothing else
+changes under another label.
 
 **`CancelRunControl`** (`cancel-run.tsx`) is offered only for a `requested`
 or `running` run. It opens a `dialog` `confirm` — never `destructive` —
@@ -1474,8 +1479,10 @@ request. The dialog stays open and busy until the request answers. The
 result is shown as an outcome badge and the action is withdrawn, so a
 `cancelling` run is never presented as cancelled. A `409`
 `run_already_terminal` shows *This run had already completed.* with the
-run's actual outcome. No screen mounts this control yet: the design places
-cancellation on Run detail, which CAP-001-E7-S4 builds.
+run's actual outcome. After a `202`, once its `state` prop moves past
+`requested` or `running`, the control renders nothing, since its owner now
+shows the newer state and the control's own badge would be stale; the
+`409` message stays (DEC-0018). The Run detail screen mounts it.
 
 Known gaps, recorded in
 `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/run-lifecycle/stories/CAP-001-E5-S6-implementation-review-v1.md`:
@@ -1485,8 +1492,103 @@ Known gaps, recorded in
   (IR-001).
 - The toolbar reads *Not yet loaded* in every state other than `populated`,
   including after a failed poll or an empty filtered answer (IR-002).
-- `CancelRunControl` is reachable only through its tests until
-  CAP-001-E7-S4 mounts it (IR-003).
+- `CancelRunControl` was reachable only through its tests until
+  CAP-001-E7-S4 mounted it on Run detail (IR-003, now resolved).
+
+## Run detail screen
+
+`web/src/screens/runs/detail/` renders at `/runs/:runId` inside the shell
+and reads `GET /api/acquisition-runs/{id}` through `getAcquisitionRun()`.
+It produces the `loading`, `empty-no-match`, `populated` and `error`
+variants of `ScreenState<T>`; the shell owns `unreachable`. A run that has
+recorded no results yet is `populated`, and says so in place of the roster.
+The screen is keyed on the run id, so opening another run — as a re-run
+does — starts from a clean filter, page and expansion.
+
+`getAcquisitionRun()` sends only the `outcome` and `cursor` filters that are
+set, and never a `limit`, so the API's default page of 50 instruments
+applies and a 3000-instrument run is never requested at once. It maps the
+body field by field into camelCase, so nothing outside the contract reaches
+the screen, and rejects with `ApiError` on a `404` or `422`.
+
+**The summary** (`run-summary.tsx`) is a card holding the run's outcome
+badge, its Requested, Started and Ended times (a missing time is an em dash
+read out as *Not recorded*, as on the Runs screen), the persisted
+*n written and n failed of n named instruments* line, the whole-run count
+per outcome from `counts.results_by_outcome`, and a *Last updated* time.
+It carries the actions:
+
+- `CancelRunControl` is always mounted, keyed on the run, and renders
+  nothing where it does not apply. A conditional mount would lose the
+  `409`'s *This run had already completed.* on the refetch that follows.
+- A `failed` or `partial` run shows *Re-running is safe: data already
+  recorded is not duplicated or overwritten.* and a `StartRunControl`
+  labelled *Re-run acquisition*. An `abandoned` run shows the Runs screen's
+  abandoned explanation and the default *Start acquisition run*. Neither
+  passes precondition props, so the button is blocked only by the API's
+  `409` (DEC-0017).
+
+**The roster** (`instrument-roster.tsx`) is an expandable table with one
+collapsed row per instrument, grouping the API's consecutive rows and
+keeping its failure-first order. The collapsed row shows one badge per
+distinct outcome, failed first. A disclosure button (`aria-expanded`,
+`aria-controls`) opens the data-type rows the API returned, in the fixed
+order Reference, Prices, Fundamentals, Corporate actions. Under an outcome
+filter only the matching rows come back, and none is synthesised. A failed
+data type reads *Acquiring prices for AAPL failed: \<reason\>*; a
+`not_found` one reads *…: not found at the provider.*, never as a failure.
+Reasons render as text, never markup.
+
+Each per-data-type outcome is a badge with a word and its tier's icon
+(`result-outcome-badge.tsx`, reusing `outcome-badge.tsx`'s icons), per
+DEC-0015:
+
+| Outcome | Reads | Tier |
+|---|---|---|
+| `written` | Written | good |
+| `unchanged` | Unchanged | good |
+| `not_found` | Not found | warning |
+| `skipped` | Skipped | warning |
+| `failed` | Failed | critical |
+
+An *Outcome* select filters server-side and returns to page 1, announcing
+*n instruments shown* politely. A filter that matches nothing reads *No
+instrument in this run matches this filter.* and offers *Reset filter*.
+Paging is *Previous page*, *Page n* and *Next page* over a client-side
+cursor stack; pages replace each other rather than accumulate. A failed
+load shows *Loading run \<id\> failed: …* with its request id and a
+*Retry*, and the last good summary stays rendered.
+
+While the run is `requested`, `running` or `cancelling`, the screen
+re-requests the same filter and cursor 10 seconds after each answer
+(`RUN_DETAIL_POLL_INTERVAL_MS`), keeping open rows open. A terminal run
+schedules nothing, a failed poll stops until *Retry*, and the timer is
+cleared on unmount (DEC-0016).
+
+The outcome tiers and labels, the paging and polling shape, the re-run
+action and the cancel control's change are DEC-0015 to DEC-0018, all
+owner-upheld and pending absorption into `ux-design.md` §1.5 and
+`component-design-owner-web-app.md` §§2.3, 2.5 and 2.6.
+
+The *n of n named instruments* line shows the run's persisted counts as
+served. No production code writes `acquisition_run.instruments_named`,
+`instruments_written` or `instruments_failed` yet, so outside seeded tests
+the line reads *0 written and 0 failed of 0*. The defect belongs to the run
+journal and runner, not this screen (`CAP-001-E7-S4-tasks.md` Other Notes).
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E7-S4-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- The expander's `aria-controls` names the instrument's whole `tbody`,
+  which also holds the expander's own row, so the region it points at is
+  never hidden. `aria-expanded` still conveys the state (IR-001, low).
+- `getAcquisitionRun()` guards `outcome` and `cursor` by truthiness, so an
+  explicit empty string would be dropped rather than sent. No current caller
+  passes one (IR-002, low).
+- The page controls render only in the `populated` state. A later filtered
+  page that empties offers only *Reset filter*, which clears the filter as
+  well as the page (IR-003, low).
 
 ## Coverage screen
 
@@ -1651,7 +1753,11 @@ interface bundle, and runs the API process on `127.0.0.1:8123` (or
 removes the container by name as a backstop against a hard-killed teardown.
 `coverage-expansion.spec.ts` applies `fixtures/coverage-seed.sql` itself, by
 `docker exec … psql` into that container (`factorflow-e2e-postgres`), before
-its test runs. The seed is idempotent.
+its test runs. The seed is idempotent. `cancel-run.spec.ts` and
+`run-detail.spec.ts` seed runs and results through `sql()` in
+`support/database.ts`, the same `docker exec … psql`, because the e2e server
+starts no runner. Every spec shares that one database, so the suite runs on
+one worker (`workers: 1` in `playwright.config.ts`).
 Needs Docker and Playwright's browsers installed (`npx playwright install`).
 
 ## Validation
