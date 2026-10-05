@@ -13,6 +13,8 @@ This module owns:
   result paging and filtering (DAC-E7-S1-2).
 - Returning the owner-readable instrument symbol with every result row
   (CAP-001-E7-S1, AC-10).
+- Reading the single most recent run for `GET /api/health`'s
+  `most_recent_run` (CAP-001-E7-S3, DAC-E7-S3-2, DAC-E7-S3-4).
 
 It does NOT perform any lifecycle transitions; those belong to
 `factorflow.runs.journal` (S2/S3).
@@ -291,6 +293,23 @@ def list_runs(connection: psycopg.Connection, filters: ListFilters) -> RunPage:
         encode_cursor(rows[-1].requested_at, rows[-1].run_id) if has_more and rows else None
     )
     return RunPage(rows=rows, next_cursor=next_cursor)
+
+
+# The most recent run for health (CAP-001-E7-S3). No WHERE clause and no
+# state filter: a non-terminal run is reported, never skipped (DAC-E7-S3-2).
+# The order deliberately repeats `list_runs`' so health and the first row of
+# the Runs list name the same run (Open Gap 1, DEC-0012), and
+# `idx_acquisition_run_recent` (migrations/0004_runs.sql) serves it so the
+# 30-second poll is cheap (DAC-E7-S3-4, TC-COMP-091).
+_MOST_RECENT_RUN_SQL = _LIST_SQL_BASE + _LIST_ORDER + " LIMIT 1"
+
+
+def get_most_recent_run(connection: psycopg.Connection) -> RunRow | None:
+    """The most recent run by `(requested_at, run_id)`, or `None` if none exists."""
+    with connection.cursor() as cur:
+        cur.execute(_MOST_RECENT_RUN_SQL)
+        row = cur.fetchone()
+    return _row_to_run(row) if row else None
 
 
 def _row_to_run(r: tuple[Any, ...]) -> RunRow:

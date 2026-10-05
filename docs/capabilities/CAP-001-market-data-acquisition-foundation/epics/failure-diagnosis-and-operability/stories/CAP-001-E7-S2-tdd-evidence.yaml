@@ -1,0 +1,373 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S2-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S2
+tasks_file: CAP-001-E7-S2-tasks.md
+decisions: [DEC-0009, DEC-0010, DEC-0011]
+created: 2026-10-04
+updated: 2026-10-04
+
+baseline:
+  task: T001
+  base_commit: 2c28d53493f43b311defea80a9bbcb95eba1a92e
+  seams_verified: >-
+    errors.py ErrorDetail, ErrorEnvelope, error_response(status_code, code,
+    message, request_id, resource=None, state=None) and internal_error_handler;
+    app.py _request_id_var, _install_request_id_patch,
+    _add_request_id_middleware, not_found_handler inside _add_static_mount,
+    _VALIDATION_ERROR_RESOURCES, _resource_for_path, _validation_error_handler
+    and the two add_exception_handler calls in create_app all match the plan,
+    verified before any file was edited.
+  command: >-
+    uv run pytest -m 'not postgres' tests/unit/test_api_errors.py
+    tests/unit/test_api_request_id.py
+    tests/unit/test_api_request_id_redaction_composition.py
+    tests/unit/test_api_no_secrets.py
+    tests/unit/test_api_instruments_error_mapping.py
+    tests/unit/test_api_runs_routes.py tests/unit/test_api_coverage_routes.py
+  result: 27 passed, 2 warnings, against the unmodified base commit.
+
+cycles:
+  - name: envelope-matrix-red
+    tasks: [T002]
+    status: red-observed
+    diff_sha256: 608ceff81c3259d5177c31e8553aaa89af2d086ae5ba829d25eabe3850e97cce
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k
+        every_handled_error_returns_the_full_envelope
+      result: >-
+        2 failed: unmatched-api-path (resource is null) and
+        method-not-allowed (body is Starlette's {"detail": ...}).
+    characterization:
+      result: >-
+        4 passed on arrival: run-not-found, depth-not-set, body-validation
+        and query-validation already return the full envelope.
+    green:
+      status: pending
+      reason: T010 supplies the 405 handler and the unmatched-path resource.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed all six planned cases, that the
+      top-level-key and non-empty-resource assertions detect both gaps, and
+      that the helpers reuse _app_with_pool without database access.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test conforms to T002, ingestion-api
+        section 2.5, DEC-0009 and DEC-0010, with no unspecified assertion.
+    tests_executed: true
+    commit_hash: 003ffa2c5a35d775588d5448c1e1ba5da696f9cd
+  - name: internal-error-body-red
+    tasks: [T003]
+    status: red-observed
+    diff_sha256: aca7a3eb75b04c8c0d976bc5a0725c8a094e765c48578a698c282392b146d92c
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k
+        500_body_is_only_the_internal_error_code_and_request_id
+      result: >-
+        1 failed: the 500 response has no X-Request-Id header; its body also
+        carries message and resource: null beside code and request_id.
+    green:
+      status: pending
+      reason: T009 reduces the body; T010's middleware adds the header.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed exact-body equality catches the extra
+      keys, the header assertion catches the missing header, the front-of-
+      router probe is reachable, and exc_info formatting proves the log detail.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test matches T003, DAC-E7-7,
+        DAC-E7-S2-2, ingestion-api sections 2.3 and 4, and TC-COMP-072/084.
+    tests_executed: true
+    commit_hash: 7b5722c0d25e9ecf2e6d22ce4dcc564ace60749c
+  - name: error-request-id-correlation-red
+    tasks: [T004]
+    status: red-observed
+    diff_sha256: c088090d5f29e1659877d0f664963c8a48d8528264dd43be77acfccddda001c1
+    red:
+      command: uv run pytest tests/unit/test_api_request_id.py -q
+      result: >-
+        2 failed: unhandled-500 (no X-Request-Id header; the unhandled-
+        exception record carries no request_id) and
+        test_two_error_requests_get_different_request_ids (KeyError on the
+        500's missing header).
+    characterization:
+      result: >-
+        unmatched-404 and validation-422 passed on arrival; both existing
+        tests passed unchanged.
+    deviation: >-
+      A sibling probe_client fixture with the same setup replaces literal
+      reuse of the client fixture, because the plan's shared mechanics require
+      raise_server_exceptions=False for a raising probe; client is unchanged.
+    green:
+      status: pending
+      reason: T009's extra request id and T010's middleware catch supply it.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the sibling fixture is justified, the
+      unhandled-record assertion is non-vacuous, and the 404/422 per-record
+      loop is trivially true because neither handler logs.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the tests match T004, DAC-E7-6,
+        DAC-E7-S2-3 and TC-COMP-071/085; the fixture is the minimal faithful
+        realization of the plan's mechanics.
+    tests_executed: true
+    commit_hash: 28f36aa3d324204355bfb228fe149779cc20b2ea
+  - name: stable-codes-red
+    tasks: [T005]
+    status: red-observed
+    diff_sha256: 8f84d196f2f8e9bdfe7033d71418af7b5dc744eacc0717a680bbc8a69ef6787a
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k
+        "snake_case or detail_wording"
+      result: >-
+        2 failed: the matrix's method-not-allowed case and
+        test_framework_http_error_code_does_not_change_with_detail_wording
+        (KeyError 'error'; both 405 probes return Starlette's {"detail": ...}).
+    characterization:
+      result: >-
+        6 passed on arrival: the other matrix codes and the 500's
+        internal_error are already literal snake_case.
+    green:
+      status: pending
+      reason: T010 supplies the framework HTTP error handler (DEC-0009).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the regex and literal checks, that the
+      wording probes isolate the detail-independence property, and no
+      flakiness or meaningful duplication.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the tests match T005, DAC-E7-S2-1,
+        DEC-0009 and TC-COMP-083; separate probe apps are equivalent to two
+        routes in one.
+    tests_executed: true
+    commit_hash: ffde384d598ab750bc419a9741c618288d9a4309
+  - name: credential-free-errors-red
+    tasks: [T006]
+    status: red-observed
+    diff_sha256: c6e8aa5c14cbc1aae14354d431fa9f1862bc7d238e6a5f2a6e0e1f74e789a78e
+    red:
+      command: uv run pytest tests/unit/test_api_errors.py -q -k credential
+      result: >-
+        1 failed: http-exception-detail, whose body is Starlette's
+        {"detail": "bad key <secret>"}.
+    characterization:
+      result: >-
+        3 passed on arrival: the unhandled 500, the body-field 422 and the
+        query-parameter 422 already omit the credential.
+    green:
+      status: pending
+      reason: T010's framework HTTP error handler never echoes the detail.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed body-text and every-header checks and the
+      RED on the echoed detail. Non-blocking nit: status_code >= 400 is looser
+      than the exact 500/400; carried to T011's mutation pass.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the four cases match T006, DAC-E7-S2-4,
+        TC-COMP-086 and the plan's TC-COMP-069 error-response facet.
+    tests_executed: true
+    commit_hash: 2cc5d760b2e281a608b86a4af89de64f145457df
+  - name: validation-field-naming-red
+    tasks: [T007]
+    status: red-observed
+    diff_sha256: 2dd8e0d930cad6bd50284c2ce04df5ccbfebb9305f9c09a4c42fa3a6c1cbb7f9
+    red:
+      command: uv run pytest tests/unit/test_api_errors.py -q -k names_the_field
+      result: >-
+        3 failed, each only on the field assertion: years, body and limit are
+        absent from "The request did not match the expected shape."
+    characterization:
+      result: >-
+        Envelope, validation_error code and resource (settings, settings,
+        acquisition-run) already held in all three cases.
+    green:
+      status: pending
+      reason: T010 names loc-derived fields in the message (DEC-0011).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the three planned cases and a genuine
+      RED; field-in-message is discriminating for years and limit and
+      acceptable for body; input/ctx/msg exclusion is covered by T006.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the test matches T007, DAC-E7-S2-5,
+        DEC-0011, ingestion-api section 8 item 12 and TC-COMP-087.
+    tests_executed: true
+    commit_hash: 9d51a59afcc7ae4fdbc4afe40338df68b080b934
+  - name: framework-http-handler-red
+    tasks: [T008]
+    status: red-observed
+    diff_sha256: dcd6c8ce647e59ea805909ce61d4c37a76428ced4984299d650698a8ddc34780
+    red:
+      command: >-
+        uv run pytest tests/unit/test_api_errors.py -q -k "allow_header or
+        not_found_handler or http_error or phrase_not or comes_from_the_path"
+      result: >-
+        5 new cases failed with KeyError 'error' (Starlette's default
+        {"detail": ...} body): Allow header, 599 http_error, phrase-not-detail
+        message, and both resource-from-path cases.
+    characterization:
+      result: >-
+        test_raised_404_still_goes_through_the_not_found_handler passed on
+        arrival: the status-specific 404 handler already takes precedence.
+    deviation: >-
+      The plan's "405 keeps Starlette's Allow header" cannot be exercised by
+      DELETE /api/health: the tracked static directory always mounts
+      StaticFiles at /, which answers that request with HTTPException(405)
+      and no headers (starlette/staticfiles.py:114). The test supplies Allow
+      through a probe HTTPException(405, headers={"Allow": "GET"}) so the
+      handler's exc.headers copy is what is asserted.
+    green:
+      status: pending
+      reason: T010 adds _http_error_handler (DEC-0009, DEC-0010).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer found the probe deviation forced by StaticFiles,
+      documented in the test, and the other four cases faithful to T008.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found all five bullets covered per T008,
+        DEC-0009, DEC-0010, DAC-E7-S2-1 and DAC-E7-S2-4, with no added
+        behaviour.
+    tests_executed: true
+    commit_hash: a7b3262af77f846942b5afc9c0a6898ed0a37c92
+  - name: internal-error-handler-green
+    tasks: [T009]
+    status: green-partial
+    diff_sha256: 894449be50ccbcd38e0396f9cd297f9db9f33449aea04e9c60b70a29fa0cc891
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: T003 and T004 recorded the extra 500 keys and the unstamped record.
+    green:
+      command: >-
+        uv run pytest -m 'not postgres' tests/unit/test_api_errors.py
+        tests/unit/test_api_request_id.py tests/unit/test_api_coverage_routes.py -q
+      result: >-
+        33 passed, 16 failed. A probe 500 now returns exactly
+        {"error": {"code": "internal_error", "request_id": id}} and the
+        unhandled-exception record carries request_id == id; every
+        pre-existing test passes, including
+        test_database_failure_is_an_internal_error. The 16 remaining failures
+        are T010's (X-Request-Id on the 500, framework HTTP errors, field
+        naming, unmatched-path resource). mypy and ruff clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the exact body, the explicit extra request
+      id, correct composition with _stamped_handle, and unchanged
+      error_response; the "unknown" fallback matches the other handlers.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the handler conforms to T009, DAC-E7-7,
+        DAC-E7-S2-2, DAC-E7-S2-3, the Resolved Conflicts and ingestion-api
+        sections 2.3 and 4.
+    tests_executed: true
+    commit_hash: b0ee0c2688b2799ce57cbc7828b1e6d6fcef2cb6
+  - name: envelope-wiring-green
+    tasks: [T010]
+    status: green
+    diff_sha256: aeda4a51792b7872c953d0fca472d97b20488cbfbb6a34d86f8ab5d936b1a79f
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: T002, T004, T005, T006, T007 and T008 recorded their RED outcomes.
+    green:
+      commands:
+        - >-
+          uv run pytest -m 'not postgres' tests/unit/test_api_errors.py
+          tests/unit/test_api_request_id.py (42 passed)
+        - uv run pytest -m 'not postgres' (497 passed, 257 deselected)
+        - uv run ruff check . (passed); uv run ruff format --check . (171 files)
+        - uv run mypy src (no issues in 47 source files)
+      result: >-
+        Every T002-T008 case is green through create_app(); every existing API
+        unit test passes unmodified.
+    test_correction: >-
+      T003's log assertion read r.exc_info through formatException. The
+      redaction patch (factorflow.config.redaction) pre-formats the traceback
+      into a scrubbed exc_text and clears exc_info, so that assertion could
+      never pass under the lifespan's configure_logging(); in T003's RED it
+      was never reached because the header assertion failed first. It now
+      checks the driver text in logging.Formatter().format(record), which
+      proves the same property through the redaction path.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the middleware catch sees only unhandled
+      exceptions, the 404 status handler keeps precedence, _validation_fields
+      and _http_error_handler follow the plan, and the test correction is a
+      legitimate mechanism fix rather than a weakening.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the change matches T010, DEC-0009/0010/0011
+        and ingestion-api sections 2.3, 2.5 and 8 item 12.
+    tests_executed: true
+    commit_hash: c121afac8e72b6d0bc809757f062f7e1e4fdb495
+  - name: mutation-and-final-validation
+    tasks: [T011]
+    status: green
+    diff_sha256: 165f41e94f9504b6f5a5620bf3ff4bb7d28cd620451eb61b3d7723a188cf18b8
+    red:
+      status: mutation-checks-killed
+      method: >-
+        Each mutant was applied to the source, tests/unit/test_api_errors.py
+        and tests/unit/test_api_request_id.py were run with -x, and the source
+        was restored. Two mutants survived the first pass and the tests were
+        strengthened: "drop the extra request id" (the middleware now logs
+        while the id is bound, so a direct handler test was added) and "remove
+        a loc prefix strip" (years is a substring of body.years, so T007 now
+        requires the backticked whole name). T006's raised-credential test now
+        asserts the exact 500/400 status, per the T006 review nit.
+      results:
+        - 500 re-adds message - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - 500 re-adds resource - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - drop the middleware except branch - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - drop the extra request id - killed by test_internal_error_handler_stamps_the_record_without_a_bound_id
+        - drop the header on the 500 - killed by test_500_body_is_only_the_internal_error_code_and_request_id
+        - echo exc.detail into the message - killed by test_raised_credential_never_reaches_the_response[http-exception-detail]
+        - echo input into the 422 message - killed by test_submitted_credential_never_reaches_a_validation_error[body-field]
+        - derive the code from exc.detail - killed by test_framework_http_error_code_does_not_change_with_detail_wording
+        - drop the Allow header copy - killed by test_405_keeps_the_allow_header
+        - restore resource=None in not_found_handler - killed by test_every_handled_error_returns_the_full_envelope[unmatched-api-path]
+        - remove a loc prefix strip - killed by test_validation_error_uses_the_envelope_and_names_the_field[body-field]
+    green:
+      commands:
+        - uv run pytest -q (755 passed, 2 warnings; PostgreSQL available)
+        - uv run pytest -m 'not postgres' (498 passed, 257 deselected)
+        - uv run ruff check . (passed)
+        - uv run ruff format --check . (171 files already formatted)
+        - uv run mypy src (no issues in 47 source files)
+        - uv build (wheel built)
+        - npm test (36 files, 222 tests passed)
+        - npm run build (built)
+      result: >-
+        All mutants killed and restored. web/src/api/client.ts toApiError
+        still reads error.request_id and error.code from a 500 and falls back
+        when message is absent.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the three strengthenings, that the direct
+      handler test is the right probe for the masked path, toApiError
+      compatibility, and the whole S2 change set against every contract.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the strengthened tests and the whole
+        implementation conform to the story ACs, DEC-0009/0010/0011 and the
+        design.
+    tests_executed: true
+    commit_hash: ce92028fe6eecea9d43dfda61c6d7af77d6d646e

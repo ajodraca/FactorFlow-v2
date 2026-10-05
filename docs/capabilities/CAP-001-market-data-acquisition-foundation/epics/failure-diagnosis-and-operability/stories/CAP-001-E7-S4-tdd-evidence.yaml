@@ -1,0 +1,305 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S4-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S4
+tasks_file: CAP-001-E7-S4-tasks.md
+decisions: [DEC-0015, DEC-0016, DEC-0017, DEC-0018, DEC-0019]
+created: 2026-10-04
+updated: 2026-10-04
+
+baseline:
+  task: T001
+  base_commit: 25aa48fbfb00853c738b39d7118b375d376a1325
+  seams_verified: >-
+    E7-S1 on the wire: OutcomeCounts, RunCounts.results_by_outcome and
+    ResultRow.symbol in src/factorflow/api/models.py, ResultOutcome query
+    on GET /api/acquisition-runs/{id}; DEFAULT_PAGE_SIZE = 50 in
+    api/bounds.py; CancelRunControl({runId, state, onSettled}) in
+    cancel-run.tsx; StartRunControl in run-controls.tsx; OutcomeBadge,
+    RUN_STATE_TIER, RUN_STATE_LABEL, ABANDONED_EXPLANATION, isRunState,
+    isNonTerminalRunState and the private TierIcon / TIER_CLASSES in
+    outcome-badge.tsx; RunState, AcquisitionRun, RunCancelResult,
+    RunStartResult in api/types.ts; requestJson, toApiError, ApiError,
+    toAcquisitionRun, WireRun, startAcquisitionRun, cancelAcquisitionRun in
+    api/client.ts; formatTimestamp in app/status-region.tsx; the
+    /runs/:runId route with RunDetailPlaceholder in app/routes.tsx and
+    TC-COMP-330 in routes.test.tsx. All match the plan, verified before any
+    edit.
+  commands:
+    - npm run test (36 files, 222 tests passed)
+    - npx tsc --noEmit (clean)
+    - npm run lint (75 files, no fixes)
+  result: Green against the integration branch head, the S4 story branch base.
+
+cycles:
+  - name: render-characterization
+    tasks: [T015]
+    status: characterization
+    diff_sha256: 80bea9ed56d5bba1352fc27c3d56f30e98813969a5cbee75cb2ccdbf2aceb751
+    red:
+      status: green-on-arrival
+      reason: >-
+        T015 characterizes the existing absence of dangerouslySetInnerHTML
+        under web/src; it has no RED by design (TEST-TDD-007).
+    green:
+      command: npx vitest run web/src/api/render.test.tsx
+      result: 1 passed against unmodified production code (67 files scanned).
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the recursive walk covers every .ts and
+      .tsx under web/src, the non-empty guard and offender list make it
+      non-vacuous, the self-exclusion works, and it follows the
+      routes.test.tsx readFileSync pattern; biome and tsc clean.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T015 implemented exactly, tracing only to
+        DAC-E7-S4-5 and leaving TC-COMP-096 to T006, with the story status
+        change the only other edit.
+    tests_executed: true
+    commit_hash: 0cf8125a90cf74473d910bebe2c630019db9e240
+  - name: detail-read-badge-controls-red
+    tasks: [T011, T012, T013]
+    status: red-observed
+    diff_sha256: ebddfc5b97833be3312519f48836a6a6e4b18ae230106da259167d4ee64b68b6
+    deviation: >-
+      T011-T013 touch separate files but specify one layer (the fetch, the
+      per-data-type badge and the two control changes) that T018-T021 then
+      satisfy, so they form one RED cycle.
+    red:
+      command: >-
+        npx vitest run web/src/api/client.runs.test.ts
+        web/src/screens/runs/run-controls.test.tsx
+        web/src/screens/runs/cancel.test.tsx
+        web/src/screens/runs/detail/result-outcome-badge.test.tsx
+      result: >-
+        11 failed, 39 passed: 8 getAcquisitionRun cases (TypeError, not a
+        function); 2 label cases (no button named Re-run acquisition); the
+        202-then-newer-state cancel case (stale Cancelling badge still in the
+        document); result-outcome-badge.test.tsx fails to resolve
+        ./result-outcome-badge. Every pre-existing case passes.
+    characterization:
+      result: >-
+        The default-label case and the 409 rerender case pass on arrival; they
+        pin DEC-0004 and DAC-E5-S6-6 across the T021 change.
+    green:
+      status: pending
+      reason: T018-T021 add the types, the fetch, the badge and the control changes.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed RED fails only for the planned reasons,
+      the URL, mapping and unknown-field assertions are exact and
+      non-vacuous, the fixtures match RunDetailResponse, and no existing case
+      changed. Low: the reused WIRE_RUN pairs partial with ended_at null,
+      affecting no assertion.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped every T011-T013 bullet, with DEC-0015,
+        DEC-0017 and DEC-0018 values exact; the RESULT_OUTCOME_ORDER and
+        no-argument default checks pin values T019 and T020 specify.
+    tests_executed: true
+    commit_hash: 7a2dbb77aa2577057a1cdfc0eb8209e951388b91
+  - name: detail-read-badge-controls-green
+    tasks: [T018, T019, T020, T021]
+    status: green
+    diff_sha256: 286ab6163431fb53f3c271b84395ec328a3b7ff959e78a1e900bd5ee51e0769e
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: detail-read-badge-controls-red (T011-T013) recorded the 11 failures.
+    green:
+      commands:
+        - npm run test (38 files, 245 tests passed)
+        - npx tsc --noEmit (clean); npm run lint (78 files, no fixes)
+      result: >-
+        Every T011-T013 case passes and every pre-existing case passes
+        unmodified; StartRunControl's default label and CancelRunControl's
+        Runs-screen behaviour are unchanged.
+    deviation: >-
+      A biome --write pass reordered imports in two unrelated test files
+      (build-output.test.tsx, status-region.a11y.test.tsx); both were
+      restored before staging, so the cycle touches only its six files.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the field-by-field mapping matches
+      RunDetailResponse with nothing passed through, the GREEN is minimal,
+      and Runs and Coverage are unaffected. Low: the CancelRunControl
+      docstring says "On Runs the prop never advances", though Runs does not
+      mount the control; reworded when the screen mounts it.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T018-T021 implemented as specified with
+        the change-nothing-else constraints holding. Low: some T018 type
+        comments cite ResultRow or the DDL rather than RunDetailResponse and
+        ingestion-api section 11; comment wording only.
+    tests_executed: true
+    commit_hash: c9b21488badd3480cea686452066ae752cfdf4ed
+  - name: run-detail-screen-red
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T014]
+    status: red-observed
+    diff_sha256: 1ccae5bac61ce906eaa2fa34cd35a7cfb35db9a46136c1097f7993d532730e52
+    deviation: >-
+      T002-T010 specify one screen that T022-T024 build, and T014 its route,
+      so they form one RED cycle. The shared harness observes navigation with
+      a location probe rather than a second /runs/:other route, which would
+      never match behind /runs/:runId.
+    red:
+      command: npx vitest run web/src/app/routes.test.tsx web/src/screens/runs/
+      result: >-
+        run-detail.test.tsx, run-detail.reason.test.tsx and
+        run-detail.polling.test.tsx fail to resolve ./detail; the new T014
+        routes case fails (no heading "Run run-123"); 82 other tests pass,
+        including every pre-existing routes.test.tsx case with the planned
+        getAcquisitionRun mock added.
+    green:
+      status: pending
+      reason: T022-T025 add the summary, the roster, the screen and the route.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer (re-dispatched after the first reviewer's tool
+      call was rejected) traced every assertion to the planned T022-T024
+      design and the landed seams, found none vacuous, racy or impossible,
+      confirmed the fake-timer pattern and the reason test's real-mapping
+      path, and that existing routes cases are byte-identical.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found all fourteen TC trace comments and every
+        T002-T010 and T014 bullet asserted with verbatim copy; additions are
+        authorised by T020, T022-T024 and P5; the location probe meets the
+        harness's intent.
+    tests_executed: true
+    commit_hash: f156ed7b3048a9d152cfe39720baa1dcb24d7248
+  - name: run-detail-e2e-red
+    tasks: [T016, T017]
+    status: red-observed
+    diff_sha256: 0d98832a917029802dd56be707d9bb166861537e984014bd0965535c5e7cc297
+    deviation: >-
+      playwright.config.ts gains workers: 1. The plan's Other Notes assume the
+      specs share one database and run serially in file order, but
+      fullyParallel: false only serializes within a file; the first run put
+      run-detail.spec.ts on a second worker beside cancel-run.spec.ts.
+    red:
+      command: >-
+        npx playwright test tests/e2e/cancel-run.spec.ts
+        tests/e2e/run-detail.spec.ts, then each later cancel-run test alone
+        with -g (serial mode skips them after the first failure)
+      result: >-
+        All four fail at their first screen interaction against the real API
+        and PostgreSQL: the queued, running and races tests time out clicking
+        Cancel run (the placeholder renders); run-detail.spec expects 2
+        Show data types buttons and gets 0. Every seeding statement ran.
+    green:
+      status: pending
+      reason: T022-T025 mount the screen on /runs/:runId.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the seeding is DDL-valid, the CTE yields
+      only the uuid, the cleanup vacates the single-active slot, the poll
+      wait can only match a later poll, the five Not found badges are four
+      rows plus the collapsed badge, and workers: 1 is necessary. Low: the
+      cleanup leaves a requested run if test 1 fails mid-way.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found every T016 and T017 bullet, the exact
+        docker/psql arguments and verbatim reason copy, and judged workers: 1
+        authorised by the Other Notes' serial-order invariant.
+    tests_executed: true
+    commit_hash: 4244ae902fba227e62d98ddfce6cca3f1835a623
+  - name: run-detail-screen-green
+    tasks: [T022, T023, T024, T025]
+    status: green
+    diff_sha256: 1bce160d1f2408729e27edd19910783a65c02c7710103e3d71526a0e2071e4af
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: >-
+        run-detail-screen-red (T002-T010, T014) and run-detail-e2e-red
+        (T016, T017) recorded their RED outcomes.
+    green:
+      commands:
+        - npm run test (41 files, 290 tests passed)
+        - >-
+          npx tsc --noEmit (clean); npm run lint (87 files, no fixes);
+          npm run format exited 1 on tests/e2e/run-detail.spec.ts and
+          cancel-run.spec.ts, misread here as clean; the reflow is in
+          cycle mutation-pass-and-final-validation
+        - npm run build (built)
+        - >-
+          npm run test:e2e (7 passed against the real API and PostgreSQL:
+          cancel-run x3, run-detail, and the existing coverage-expansion,
+          instruments-add-retire and runs-start-cancel)
+      result: >-
+        Every RED case from T002-T010, T014, T016 and T017 passes, and every
+        pre-existing unit and E2E test passes.
+    deviation: >-
+      (1) The race assertions in run-detail.test.tsx and cancel-run.spec.ts
+      expected one summary badge after a 409; DEC-0018 keeps the control's
+      own actual-outcome badge, so they now expect exactly
+      ["Succeeded", "Succeeded"], a test defect corrected rather than a
+      weakening. (2) The default export keys an inner view on runId, so a
+      re-run's navigation never sends the old run's cursor. (3) The page
+      controls are a div, not a nav, to add no second navigation landmark
+      inside the shell. (4) The CancelRunControl docstring no longer claims
+      Runs mounts the control.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the plan match, a single outstanding
+      timer with correct cleanup, filters omitting absent keys, the summary
+      kept on error, the a11y wiring and text-only rendering, and judged all
+      four deviations legitimate. Low: the live region reads "0 instruments
+      shown" while loading.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped every T022-T025 bullet and its copy, and
+        judged the keyed view, the div, the corrected 409 assertions and the
+        docstring wording non-drift.
+    tests_executed: true
+    commit_hash: 557093e5beee96b824370cea5db9533ab8074322
+  - name: mutation-pass-and-final-validation
+    tasks: [T026]
+    status: green
+    diff_sha256: d42686a769b341f0c421fd117b8106875f930b9f87e23454962c451fb658cc3e
+    red:
+      status: mutation-checks-killed
+      method: >-
+        Each of the 17 planned T026 mutants was applied to the source, the S4
+        test files were run, and the source was restored from a copy.
+      result: >-
+        16 of 17 were killed against the cycle-6 tests. "Reorder
+        groupByInstrument alphabetically" survived, because no test pinned
+        the server's failure-first order. A Roster order test in
+        run-detail.test.tsx now pins it. Re-applying that mutant fails
+        exactly that test (1 failed, 34 passed), and the source was restored.
+    formatting: >-
+      npm run format had exited 1 on tests/e2e/run-detail.spec.ts and
+      cancel-run.spec.ts since cycle 5. Biome reflows them. Ignoring
+      whitespace, the only change is one trailing comma.
+    green:
+      commands:
+        - npm run test (41 files, 291 tests passed)
+        - npx tsc --noEmit (clean); npm run lint (87 files, no fixes); npm run format (87 files, exit 0)
+        - npm run build (built)
+        - npm run test:e2e (7 passed against the real API and PostgreSQL)
+        - uv run pytest -m postgres tests/integration/test_api_runs.py (28 passed)
+      result: Every command in the Validation Plan is green.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      An independent reviewer confirmed that the expected AAPL, ZZZZ, MSFT
+      order matches the MIXED fixture's server order, that an alphabetical
+      sort would fail the test, and that the test follows the file's
+      conventions. Low: the test carries no TC-ID, since T026's
+      strengthening maps to none. The reviewer could not byte-diff the E2E
+      specs, so the driver confirmed the change is formatting-only.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        An independent reviewer mapped the assertion to T023 (preserve the
+        server's failure-first order), to T026's named mutant, to ux-design
+        1.5 (failures sort above successes) and to the E5-S5 failure-first
+        query order. It invents no requirement.
+    tests_executed: true
+    commit_hash: 9f6fc6bfa9f05cffb450e74e789fa68f7976a616

@@ -1,0 +1,362 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E7-S3-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E7-S3
+tasks_file: CAP-001-E7-S3-tasks.md
+decisions: [DEC-0012, DEC-0013, DEC-0014]
+created: 2026-10-04
+updated: 2026-10-04
+
+baseline:
+  task: T001
+  base_commit: 9e8bac9f3f5923b47457167002e7dbc33e1132ac
+  seams_verified: >-
+    health.py get_health, probe_schema_version, probe_database_reachable, the
+    pool.connection() block and the except psycopg.Error fallback;
+    HealthResponse.most_recent_run typed None = None; queries.py RunRow,
+    _row_to_run, _LIST_SQL_BASE, _LIST_ORDER (requested_at DESC, run_id
+    DESC), list_runs and ListFilters; RunState in api/models.py;
+    idx_acquisition_run_recent, acquisition_run_terminal_has_end and
+    acquisition_run_claim_agrees in migrations/0004_runs.sql; the
+    migrated_run_schema_connection fixture; RunState and RunSummary = null in
+    web/src/api/types.ts. All match the plan, verified before any edit.
+  commands:
+    - >-
+      uv run pytest tests/unit/test_health_database_probe.py
+      tests/unit/test_health_route_unreachable.py
+      tests/unit/test_health_schema_version.py tests/unit/test_api_models.py
+      tests/unit/test_api_no_secrets.py (12 passed)
+    - uv run pytest -m postgres tests/integration/test_api_health.py (3 passed)
+    - npx tsc --noEmit (clean)
+    - npm run test (36 files, 222 tests passed)
+  result: Green against the integration branch head, the S3 story branch base.
+
+cycles:
+  - name: health-null-characterization
+    tasks: [T009, T002]
+    status: characterization
+    diff_sha256: 50fde0488f0e03b4cae2ee1419f7ae48edac1c1e445f45e786f663c544e09a81
+    red:
+      status: green-on-arrival
+      reason: >-
+        T009 is a precondition change (the real migrator replaces two
+        synthetic applied_migrations rows) and T002 characterizes the
+        existing null answer; neither has a RED by design.
+    green:
+      command: uv run pytest -m postgres tests/integration/test_api_health.py
+      result: 4 passed against unmodified production code.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the fixture's migration commits and
+      TestClient lifespan, that T009 keeps every original assertion, that the
+      two other existing tests are untouched, and that T002's assertions are
+      non-vacuous on a fresh per-test database.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the change matches T009, T002, the Phase 2
+        migrated_health_client preamble and TC-COMP-088, with no unspecified
+        assertion.
+    tests_executed: true
+    commit_hash: f7df176b2c604cee6f5a0431e125254c39124be0
+  - name: health-most-recent-run-red
+    tasks: [T003, T004, T005]
+    status: red-observed
+    diff_sha256: 4bc9779389e894d447c25ce4b30613a0a1e1ef757e98110724a81d16a2231198
+    deviation: >-
+      T003-T005 run serially on one file against the same missing behaviour
+      (the hardcoded null), so they form one RED cycle rather than three.
+    red:
+      command: uv run pytest -m postgres tests/integration/test_api_health.py
+      result: >-
+        6 failed, 4 passed: every new case fails because most_recent_run is
+        null (5 x "assert None is not None", 1 x TypeError iterating None in
+        T003's key-set check); the four existing cases still pass.
+    green:
+      status: pending
+      reason: T010-T012 supply the read, the model and the route wiring.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the seeding is DDL-valid (terminal end,
+      claim agreement, single active row), the assertions are non-vacuous,
+      the RED is the expected failure mode, and the httpx request hook on
+      TestClient genuinely proves a single /api/health request.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T003-T005 implemented exactly, including
+        trace comments, the non-terminal parametrisation, both AC-18
+        directions in fresh databases, and DEC-0012's ordering.
+    tests_executed: true
+    commit_hash: 69fd9845af630cc1cd1d293a66c34f3dd461cbb8
+  - name: most-recent-run-query-red
+    tasks: [T006]
+    status: red-observed
+    diff_sha256: 057f3819be34a9a794004404c016ece0ce146e8f37686654cfbe92bd7335be0d
+    red:
+      command: uv run pytest -m postgres tests/integration/test_run_most_recent.py
+      result: >-
+        Collection error: ImportError, cannot import name
+        'get_most_recent_run' from 'factorflow.runs.queries'; neither the
+        function nor _MOST_RECENT_RUN_SQL exists yet.
+    green:
+      status: pending
+      reason: T010 adds the read and its statement.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed DDL-valid seeding, a non-vacuous
+      recursive EXPLAIN walk with no planner setting, that Python UUID order
+      matches PostgreSQL's uuid order for the tie case, and the list_runs
+      parity check.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found all four T006 parts, the TC-COMP-091 and
+        TC-COMP-089 trace comments and DEC-0012's tie-breaker, with nothing
+        unspecified.
+    tests_executed: true
+    commit_hash: d674772cce20db76e5a527aea116cadd7b5539eb
+  - name: most-recent-run-model-red
+    tasks: [T007]
+    status: red-observed
+    diff_sha256: 8cf266fa2ff32bc8f83e151abddc3f0da9626e21a68b14f7838e67efd9119c13
+    red:
+      command: uv run pytest tests/unit/test_api_models.py
+      result: >-
+        12 failed, 8 passed: every new MostRecentRun case fails with
+        ImportError (cannot import name 'MostRecentRun'); the 7 existing
+        tests pass unchanged.
+    characterization:
+      result: >-
+        test_health_response_still_serializes_a_null_most_recent_run passed
+        on arrival; it pins DAC-E1-S6-3 across the widening.
+    green:
+      status: pending
+      reason: T011 adds MostRecentRun and widens HealthResponse.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the per-test import keeps existing tests
+      collectable, the RED count is consistent, the existing tests are
+      untouched, and the constructions match the planned T011 model.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped all five T007 bullets one to one, with
+        test_api_no_secrets.py untouched.
+    tests_executed: true
+    commit_hash: 834e10b6002b7196f04be113e7dae29193850e7e
+  - name: health-route-mapping-red
+    tasks: [T008]
+    status: red-observed
+    diff_sha256: 69b5c8c570bbd0d1f1e62572b1e48a4ce99ecc923ef143827f50733b3d99739b
+    red:
+      command: uv run pytest tests/unit/test_health_most_recent_run.py
+      result: >-
+        3 failed: AttributeError, module factorflow.api.routes.health has no
+        attribute 'get_most_recent_run'.
+    green:
+      status: pending
+      reason: T012 imports the read and wires it into get_health.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed distinct timestamps plus exact dump
+      equality catch a wrong ended_at mapping, the OperationalError side
+      effect exercises the except branch, and the fakes fit the planned
+      T012 block. Noted that a dropped most_recent_run reset in the except
+      branch is not independently observable; carried to T014.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped T008's three assertions and the fake
+        request pattern exactly, consistent with DEC-0014.
+    tests_executed: true
+    commit_hash: 2c905c3a3fe135170b7fbc45cb436ba70acd42aa
+  - name: most-recent-run-query-green
+    tasks: [T010]
+    status: green
+    diff_sha256: 57aeb4e15440def6676fc1fb70016a1662d64a55d66b7605b47ad716f2b1e73f
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: most-recent-run-query-red (T006) recorded the ImportError.
+    green:
+      commands:
+        - uv run pytest -m postgres tests/integration/test_run_most_recent.py (4 passed)
+        - >-
+          uv run pytest tests/unit/test_runs_queries.py
+          tests/integration/test_api_runs.py tests/unit/test_api_no_secrets.py
+          (42 passed)
+        - uv run ruff check src (passed); uv run mypy src (no issues in 47 files)
+      result: >-
+        The shipped statement's plan on 1000 analysed runs uses
+        idx_acquisition_run_recent with no Seq Scan and no planner setting;
+        ties, non-terminal and empty cases pass; list_runs, get_run_detail,
+        the cursors and RunRow are unchanged.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the shared fragments keep column order
+      and ordering aligned with list_runs, the empty-table path, the
+      context-managed cursor convention and the comment's accuracy.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the constant, function, comment and
+        docstring exactly as T010 and DEC-0012 specify, with no other hunk.
+    tests_executed: true
+    commit_hash: bfefb9882d897140d42738fe6dd77d7e74009d6b
+  - name: most-recent-run-model-green
+    tasks: [T011]
+    status: green
+    diff_sha256: 89e2e9f5d9b160a4866cc2a6693a41d17d4302d4e9f45f695e716f5335e2c0f2
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: most-recent-run-model-red (T007) recorded the ImportError.
+    green:
+      commands:
+        - uv run pytest tests/unit/test_api_models.py tests/unit/test_api_no_secrets.py (21 passed)
+        - >-
+          uv run pytest -m 'not postgres' (511 passed, 3 failed: the three
+          T008 cases, still RED until T012)
+        - uv run ruff check src (passed); uv run mypy src (no issues in 47 files)
+      result: >-
+        MostRecentRun has exactly run_id, state and ended_at;
+        HealthResponse.most_recent_run is MostRecentRun | None and still
+        serializes null.
+    deviation: >-
+      MostRecentRun sits after RunState, below HealthResponse, as the plan
+      places it, so the field annotation is a string forward reference and
+      HealthResponse.model_rebuild() runs right after MostRecentRun.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the forward reference is needed and is
+      resolved before FastAPI uses the response model, the three fields and
+      RunState typing, and the DDL claim in the docstring.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the model, the widening and the rewritten
+        IR-006 paragraph exactly as T011 specifies, with no extra field.
+    tests_executed: true
+    commit_hash: cb4771de029a04cc3707663aa5b1bd87312af1ed
+  - name: health-route-wiring-green
+    tasks: [T012]
+    status: green
+    diff_sha256: 2b13ab3cd5e49f6bd83d2684fc46aa089ca779623ee0c31141f285e0cef9745d
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: >-
+        health-most-recent-run-red (T003-T005) and health-route-mapping-red
+        (T008) recorded their RED outcomes.
+    green:
+      commands:
+        - >-
+          uv run pytest tests/unit/test_health_most_recent_run.py
+          tests/unit/test_health_route_unreachable.py
+          tests/unit/test_health_database_probe.py
+          tests/unit/test_health_schema_version.py (7 passed)
+        - >-
+          uv run pytest -m postgres tests/integration/test_api_health.py
+          tests/integration/test_run_most_recent.py (14 passed)
+        - uv run ruff check src (passed); uv run mypy src (no issues in 47 files)
+      result: >-
+        T002-T009 are green through create_app() against PostgreSQL;
+        test_health_route_unreachable.py passes unmodified.
+    deviation: >-
+      state=row.state carries "# type: ignore[arg-type]": RunRow.state is a
+      str and MostRecentRun.state is the RunState literal, validated by
+      Pydantic at runtime, the convention routes/runs.py already uses.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the read shares the gated connection
+      block, the except branch resets all three fields, the type ignore
+      follows runs.py, and the only new import is the run-journal boundary.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found every T012 bullet and DEC-0014's fallback,
+        with the probe, timeout and log line unchanged.
+    tests_executed: true
+    commit_hash: cd313ab4c21f7205c9a9ac723cc00ffc4e300b99
+  - name: web-type-mirror
+    tasks: [T013]
+    status: type-only
+    diff_sha256: 3a5d339f3af40cc05c8def0b2360198fae0dfc9081bffedb4d7ea8b195120d78
+    red:
+      status: not-applicable
+      reason: >-
+        A type-only widening with no behaviour change (DEC-0013); GREEN on
+        arrival is the evidence, as the plan requires.
+    green:
+      commands:
+        - npx tsc --noEmit (clean)
+        - npm run lint (clean); npm run format (no fixes)
+        - npm run test (36 files, 222 tests passed)
+      result: >-
+        RunSummary mirrors MostRecentRun; every existing most_recent_run null
+        fixture type-checks; status-region.tsx, its tests and fixtures are
+        unchanged.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the snake_case mirror matches the
+      unmapped fetchHealth() cast, RunState matches the Python literal, and
+      null fixtures remain type-correct.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found T013's four bullets exactly, with no
+        consumer, test or fixture touched.
+    tests_executed: true
+    commit_hash: 32aa449ca68d53ca5daf65c413e126f5c0ec72f2
+  - name: mutation-and-final-validation
+    tasks: [T014]
+    status: green
+    diff_sha256: fbfb4c7f3cabadc0324124fc9cc538ac8fe66ba9a49268961c8531b98b4e2a47
+    red:
+      status: mutation-checks-killed
+      method: >-
+        Each mutant was applied to the source, the five S3 test files were run
+        with -x, and the source was restored from a copy. Two mutants survived
+        the first pass and the tests were strengthened: "drop the run_id
+        tie-breaker" (two tied runs could pass by physical row order, so the
+        tie test now seeds fixed low and high run ids in both insertion
+        orders) and "omit the reset in the except branch" (unobservable when
+        the run read itself raises, so a new unit test makes the pooled
+        connection fail on release after both reads succeeded).
+      results:
+        - DESC to ASC - killed by test_health_reports_a_newer_non_terminal_run[requested]
+        - drop run_id tie-breaker - killed by test_most_recent_run_breaks_ties_like_the_runs_list[lower-first]
+        - drop LIMIT 1 - killed by test_most_recent_run_query_uses_the_recent_index
+        - WHERE ended_at IS NOT NULL - killed by test_health_reports_a_newer_non_terminal_run[requested]
+        - terminal-state filter - killed by test_health_reports_a_newer_non_terminal_run[requested]
+        - hardcode most_recent_run None - killed by test_health_reports_the_most_recent_terminal_run
+        - omit reset in except - killed by test_get_health_discards_a_run_read_before_the_connection_failed
+        - map requested_at into ended_at - killed by test_health_reports_the_most_recent_terminal_run
+        - map started_at into ended_at - killed by test_health_reports_the_most_recent_terminal_run
+        - loosen state to str - killed by test_most_recent_run_rejects_an_unknown_state
+    green:
+      commands:
+        - uv run pytest -q (784 passed, 2 warnings; PostgreSQL available)
+        - uv run ruff check . (passed)
+        - uv run ruff format --check . (173 files already formatted)
+        - uv run mypy src (no issues in 47 source files)
+        - uv build (wheel built)
+        - npx tsc --noEmit (clean); npm run lint (clean); npm run format (no fixes)
+        - npm run test (36 files, 222 tests passed)
+        - npm run build (built)
+      result: >-
+        All mutants killed and sources restored; the T001 baseline stays green
+        and test_health_reachable_database passes with only its T009 setup
+        change.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed both strengthenings are legitimate and
+      realistic, the mutant list covers T014 exactly, and found no defect in
+      the whole S3 change set.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found the strengthened tests within DEC-0012 and
+        DEC-0014, and the whole implementation conforming to AC-18, DAC-E7-8
+        and DAC-E7-S3-1 to 4.
+    tests_executed: true
+    commit_hash: 9f9728fc8274f9048c3c57774ce7c3a19c9f4be9

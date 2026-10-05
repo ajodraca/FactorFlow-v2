@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-02
-updated: 2026-10-02
+updated: 2026-10-04
+docs_synced_review: CAP-001-E7-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -79,7 +80,7 @@ No migration is added. No other health field changes, and the route still never 
 
 **Purpose**: Confirm that the producers this delta reads and modifies have landed, and record a characterization baseline before any change (TEST-TDD-007).
 
-- [ ] T001 Before you edit any file, verify these exist as described:
+- [x] T001 Before you edit any file, verify these exist as described:
   - CAP-001-E1-S6's `src/factorflow/api/routes/health.py` (`get_health`, `probe_schema_version`, `probe_database_reachable`, the `with pool.connection() as conn:` block, and the `except psycopg.Error` fallback) and `HealthResponse` in `src/factorflow/api/models.py`.
   - CAP-001-E5-S5's `src/factorflow/runs/queries.py`: `RunRow`, `_row_to_run`, `_LIST_SQL_BASE`, `_LIST_ORDER = " ORDER BY requested_at DESC, run_id DESC"`, `list_runs` and `ListFilters`. Also its `RunState` literal in `src/factorflow/api/models.py`.
   - CAP-001-E5-S1's `idx_acquisition_run_recent ON acquisition_run (requested_at DESC)` and the `acquisition_run_terminal_has_end` and `acquisition_run_claim_agrees` checks in `migrations/0004_runs.sql`, plus the `migrated_run_schema_connection` fixture in `tests/conftest.py`.
@@ -101,13 +102,13 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 ### Mandatory Component Tests
 
-- [ ] T002 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-088` and `test_health_most_recent_run_null_when_no_run_recorded`. Use `migrated_health_client` with an empty `acquisition_run`, and assert:
+- [x] T002 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-088` and `test_health_most_recent_run_null_when_no_run_recorded`. Use `migrated_health_client` with an empty `acquisition_run`, and assert:
   - `database == "reachable"`;
   - `schema_version` equals the highest version `discover(...)` returns;
   - the `most_recent_run` key is present and its value `is None`. A reachable store with no run is `null`, not an unreachable or failed answer.
 
   This passes against unmodified code, so record it as characterization (TEST-TDD-007) and do not fabricate a RED. It must stay green through T012 (depends on T001; traces to DAC-E7-S3-1).
-- [ ] T003 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-090` and `# Implements TC-COMP-073`. Seed one terminal `partial` run with a fixed `requested_at` and `ended_at`. `GET /api/health` and assert:
+- [x] T003 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-090` and `# Implements TC-COMP-073`. Seed one terminal `partial` run with a fixed `requested_at` and `ended_at`. `GET /api/health` and assert:
   - the body's key set is exactly `{"status", "database", "credential_present", "schema_version", "most_recent_run"}`;
   - the four E1 fields still hold (`status == "ok"`, `database == "reachable"`, `credential_present` is a `bool` matching the environment, `schema_version` is the highest migration);
   - `most_recent_run`'s key set is exactly `{"run_id", "state", "ended_at"}`;
@@ -115,19 +116,19 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - `datetime.fromisoformat(ended_at)` equals the seeded `ended_at` as an aware datetime. Compare values, not the string form; zone rendering is the interface's concern (ingestion-api §10).
 
   Observe RED: today the field is `None` (depends on T002; traces to DAC-E7-S3-3, DAC-E7-8).
-- [ ] T004 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-089`, parametrised over the three non-terminal states `requested`, `running` and `cancelling`. Seed an older terminal `failed` run, then a newer run in the parametrised state with a later `requested_at`. Assert:
+- [x] T004 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-089`, parametrised over the three non-terminal states `requested`, `running` and `cancelling`. Seed an older terminal `failed` run, then a newer run in the parametrised state with a later `requested_at`. Assert:
   - `most_recent_run.run_id` is the newer run;
   - `state` is the parametrised state;
   - `ended_at is None` (the `acquisition_run_terminal_has_end` DDL makes a non-terminal run's end timestamp null).
 
   It must never report the older `failed` run. Observe RED (depends on T003; traces to DAC-E7-S3-2).
-- [ ] T005 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-018`. Cover AC-18's question, "did the most recent run fail?", in both directions:
+- [x] T005 In `tests/integration/test_api_health.py`, add `# Implements TC-COMP-018`. Cover AC-18's question, "did the most recent run fail?", in both directions:
   - an older `succeeded` and a newer `failed` run report `state == "failed"`;
   - in a fresh database, an older `failed` and a newer `succeeded` run report `state == "succeeded"`, so a past failure is not sticky;
   - the answer comes from `GET /api/health` alone, with no request to `/api/acquisition-runs`. Assert this with a single request on the client.
 
   Observe RED (depends on T004; traces to AC-18).
-- [ ] T006 Create `tests/integration/test_run_most_recent.py`, kept separate from CAP-001-E7-S1's planned `tests/integration/test_run_queries.py` so the two stories do not collide. Add `# Implements TC-COMP-091` and `# Implements TC-COMP-089`. Use `migrated_run_schema_connection` and call `factorflow.runs.queries` directly, with no HTTP.
+- [x] T006 Create `tests/integration/test_run_most_recent.py`, kept separate from CAP-001-E7-S1's planned `tests/integration/test_run_queries.py` so the two stories do not collide. Add `# Implements TC-COMP-091` and `# Implements TC-COMP-089`. Use `migrated_run_schema_connection` and call `factorflow.runs.queries` directly, with no HTTP.
   - **Index (DAC-E7-S3-4).** Seed 1000 terminal `succeeded` runs with distinct `requested_at` values using one `INSERT … SELECT … FROM generate_series(1, 1000)`, then run `ANALYZE acquisition_run`. Execute `EXPLAIN (FORMAT JSON)` with `queries._MOST_RECENT_RUN_SQL`, the exact statement the read executes. Walk the plan tree recursively and assert:
     - some node is an `Index Scan` or `Index Only Scan` with `"Index Name": "idx_acquisition_run_recent"`;
     - no node is a `Seq Scan` on `acquisition_run`.
@@ -141,7 +142,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 ### Additional Unit Tests
 
-- [ ] T007 [P] Extend `tests/unit/test_api_models.py`, keeping the existing tests unchanged:
+- [x] T007 [P] Extend `tests/unit/test_api_models.py`, keeping the existing tests unchanged:
   - `MostRecentRun.model_fields` is exactly `{"run_id", "state", "ended_at"}`.
   - `state` accepts every `typing.get_args(RunState)` value and rejects `"bogus"` with `ValidationError`.
   - `ended_at=None` serializes as JSON `null` and is present, not omitted.
@@ -149,13 +150,13 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - `HealthResponse(..., most_recent_run=None)` still serializes `null` (DAC-E1-S6-3).
 
   `tests/unit/test_api_no_secrets.py` must keep passing over the new model without modification. Observe RED (depends on T001; traces to DAC-E7-S3-3).
-- [ ] T008 [P] Create `tests/unit/test_health_most_recent_run.py`. Follow the `_fake_request` and fake-pool pattern in `tests/unit/test_health_route_unreachable.py`, monkeypatch `health.probe_database_reachable` to `True`, and stub `health.probe_schema_version` and `health.get_most_recent_run`. Assert:
+- [x] T008 [P] Create `tests/unit/test_health_most_recent_run.py`. Follow the `_fake_request` and fake-pool pattern in `tests/unit/test_health_route_unreachable.py`, monkeypatch `health.probe_database_reachable` to `True`, and stub `health.probe_schema_version` and `health.get_most_recent_run`. Assert:
   - When `get_most_recent_run` returns a `RunRow` in `failed` with an `ended_at`, `get_health(...)` returns `most_recent_run` with that `run_id`, `state` and `ended_at`, not some other `RunRow` field.
   - When it returns `None`, `most_recent_run is None` and `database == "reachable"`.
   - When it raises `psycopg.OperationalError`, `get_health` does not raise. It returns `database == "unreachable"`, `schema_version is None` and `most_recent_run is None`. This is the same fallback shape the existing version-query branch produces (Open Gap 3).
 
   Observe RED (depends on T001; traces to AC-18, DAC-E7-S3-1).
-- [ ] T009 [P] In `tests/integration/test_api_health.py`, update the setup of the existing `test_health_reachable_database`. It currently creates only `APPLIED_MIGRATIONS_DDL` and two synthetic rows, so `acquisition_run` does not exist. Once T012 reads that table, the existing `except psycopg.Error` branch would report the database as `unreachable`. Give the test the real schema with `apply_pending(conn, discover(...))`, and assert `schema_version` equals the highest discovered version instead of the literal `2`. Keep every other assertion (`status`, `database == "reachable"`, `credential_present is True`, `most_recent_run is None` on an empty run table). The test keeps DAC-E1-S6-1's intent, the highest applied version, and its precondition now matches production, where the migrator always runs before the API binds (AC-16). Leave `test_health_unreachable_database` and `test_health_most_recent_run_is_null` unchanged. The latter runs against an unmigrated database and stays green through the unreachable path. This passes both before and after T012, so record it as a characterization precondition change (depends on T001; traces to DAC-E7-S3-1).
+- [x] T009 [P] In `tests/integration/test_api_health.py`, update the setup of the existing `test_health_reachable_database`. It currently creates only `APPLIED_MIGRATIONS_DDL` and two synthetic rows, so `acquisition_run` does not exist. Once T012 reads that table, the existing `except psycopg.Error` branch would report the database as `unreachable`. Give the test the real schema with `apply_pending(conn, discover(...))`, and assert `schema_version` equals the highest discovered version instead of the literal `2`. Keep every other assertion (`status`, `database == "reachable"`, `credential_present is True`, `most_recent_run is None` on an empty run table). The test keeps DAC-E1-S6-1's intent, the highest applied version, and its precondition now matches production, where the migrator always runs before the API binds (AC-16). Leave `test_health_unreachable_database` and `test_health_most_recent_run_is_null` unchanged. The latter runs against an unmigrated database and stays green through the unreachable path. This passes both before and after T012, so record it as a characterization precondition change (depends on T001; traces to DAC-E7-S3-1).
 
 **Checkpoint**: All six mapped TC-IDs (TC-COMP-018, 073, 088, 089, 090, 091) carry `# Implements` trace comments. RED is observed and recorded for T003–T008. T002 and T009 are recorded as characterization. Every pre-existing health and model test is untouched except T009's setup change.
 
@@ -165,14 +166,14 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 **Purpose**: Add the most-recent-run read and the response model, without changing the E5-S5 list/detail contract (TEST-TDD-003).
 
-- [ ] T010 Update `src/factorflow/runs/queries.py`:
+- [x] T010 Update `src/factorflow/runs/queries.py`:
   - Add `_MOST_RECENT_RUN_SQL = _LIST_SQL_BASE + _LIST_ORDER + " LIMIT 1"`. It has no `WHERE` clause and no state filter: a non-terminal run is reported, never skipped (DAC-E7-S3-2).
   - Add `get_most_recent_run(connection: psycopg.Connection) -> RunRow | None`. It executes that constant with no parameters and maps the row through the existing `_row_to_run`.
   - In a comment, cite `idx_acquisition_run_recent` (`migrations/0004_runs.sql`), DAC-E7-S3-4 and TC-COMP-091, and say that the order deliberately repeats `list_runs`' so health and the Runs list agree (Open Gap 1).
   - Extend the module docstring's "This module owns" list with the CAP-001-E7-S3 addition.
 
   Leave `list_runs`, `get_run_detail`, the cursors and `RunRow` unchanged (depends on RED from T006; satisfies DAC-E7-S3-2, DAC-E7-S3-4, AC-18).
-- [ ] T011 [P] Update `src/factorflow/api/models.py`:
+- [x] T011 [P] Update `src/factorflow/api/models.py`:
   - Add `class MostRecentRun(BaseModel)` with `run_id: UUID`, `state: RunState` and `ended_at: datetime | None`, and a docstring citing the story's API contract and the `acquisition_run_terminal_has_end` DDL as the reason `ended_at` is null for a non-terminal run. Place it after `RunState`, which it references.
   - Change `HealthResponse.most_recent_run` from `None = None` to `MostRecentRun | None = None`.
   - Rewrite the IR-006 paragraph of the `HealthResponse` docstring to record that CAP-001-E7-S3 has now widened the type, and drop "this story hardcodes the field to `None`".
@@ -187,7 +188,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 **Purpose**: Serve the read through `GET /api/health` and keep the interface's type mirror true to the wire.
 
-- [ ] T012 Update `src/factorflow/api/routes/health.py`:
+- [x] T012 Update `src/factorflow/api/routes/health.py`:
   - Import `get_most_recent_run` from `factorflow.runs.queries` and `MostRecentRun` from `factorflow.api.models`.
   - In `get_health`, initialise `most_recent_run: MostRecentRun | None = None`.
   - Inside the existing `with pool.connection() as conn:` block, after `probe_schema_version(conn)`, call `get_most_recent_run(conn)`. When it returns a row, build `MostRecentRun(run_id=row.run_id, state=row.state, ended_at=row.ended_at)`.
@@ -196,7 +197,7 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
   - Update the module docstring to name the fifth field and CAP-001-E7-S3, and note that the route still delegates the read to the run-journal boundary (ingestion-api §1, run-journal §9).
 
   Leave `probe_database_reachable`, its 2-second timeout, the log line, and the rule that the reachability probe gates every query unchanged. `tests/unit/test_health_route_unreachable.py` must stay green unmodified (depends on T010, T011 and RED from T003, T004, T005, T008; satisfies AC-18, DAC-E7-8, DAC-E7-S3-1, DAC-E7-S3-2).
-- [ ] T013 [P] Update `web/src/api/types.ts`:
+- [x] T013 [P] Update `web/src/api/types.ts`:
   - Replace `export type RunSummary = null;` with `export interface RunSummary { run_id: string; state: RunState; ended_at: string | null; }`. The names are snake_case because `fetchHealth()` in `web/src/api/client.ts` casts the raw JSON without mapping.
   - Change `HealthResponse.most_recent_run` to `RunSummary | null`.
   - Rewrite the `RunSummary` doc comment to say CAP-001-E7-S3 widened it to the wire shape, mirroring `MostRecentRun` in `src/factorflow/api/models.py`.
@@ -212,13 +213,13 @@ Seed runs with bound-parameter `INSERT`s that satisfy the DDL checks. Terminal s
 
 **Purpose**: Kill mutants on the changed behaviour, run full validation, and keep the per-cycle evidence chain.
 
-- [ ] T014 After T002–T013 are green and their T015 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines and strengthen tests until every mutant is killed:
+- [x] T014 After T002–T013 are green and their T015 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines and strengthen tests until every mutant is killed:
   - In `_MOST_RECENT_RUN_SQL`: `DESC` → `ASC`, drop the `run_id` tie-breaker, drop `LIMIT 1`, or add `WHERE ended_at IS NOT NULL` / a terminal-state filter.
   - In `get_health`: keep `most_recent_run = None` hardcoded, omit the reset in the `except` branch, or map `requested_at`/`started_at` into `ended_at`.
   - In `MostRecentRun`: loosen `state` to `str`.
 
   Do behaviour-preserving refactoring under TEST-TDD-004, keep the T001 baseline green (TEST-TDD-007), verify the TEST-TDD-001 to TEST-TDD-008 chain, and run every command in the Validation Plan (depends on T002–T013; verifies all story criteria).
-- [ ] T015 Run this after **each** TDD cycle in T002–T014, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S3-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record the characterization cycles (T002, T009) and the type-only change (T013) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
+- [x] T015 Run this after **each** TDD cycle in T002–T014, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S3-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record the characterization cycles (T002, T009) and the type-only change (T013) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
 
 **Checkpoint**: All acceptance criteria are satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 

@@ -19,6 +19,28 @@ vi.mock("../api/client", async () => {
     }),
     getHistoryDepth: vi.fn().mockResolvedValue({ years: null, updatedAt: null }),
     listAcquisitionRuns: vi.fn().mockResolvedValue({ runs: [], nextCursor: null }),
+    getAcquisitionRun: vi.fn().mockResolvedValue({
+      run: {
+        runId: "run-123",
+        state: "succeeded",
+        historyDepthYears: 5,
+        requestedAt: "2026-09-06T14:00:00Z",
+        startedAt: "2026-09-06T14:00:05Z",
+        endedAt: "2026-09-06T14:30:00Z",
+        instrumentsNamed: 0,
+        instrumentsWritten: 0,
+        instrumentsFailed: 0,
+        failureReason: null,
+      },
+      counts: {
+        instrumentsNamed: 0,
+        instrumentsWritten: 0,
+        instrumentsFailed: 0,
+        resultsByOutcome: { written: 0, unchanged: 0, notFound: 0, failed: 0, skipped: 0 },
+      },
+      results: [],
+      nextCursor: null,
+    }),
   };
 });
 
@@ -160,5 +182,27 @@ describe("Routes — Instruments and Settings render inside the shell (T030)", (
     expect(await within(main).findByRole("heading", { name: "Settings" })).toBeInTheDocument();
     expect(within(nav).getByText("Settings").closest("a")).toHaveAttribute("aria-current", "page");
     expect(within(nav).getByText("Instruments").closest("a")).not.toHaveAttribute("aria-current");
+  });
+});
+
+// CAP-001-E7-S4 T014 (AC-10; DAC-E1-S4-2): the real Run detail screen
+// replaces the placeholder at /runs/:runId inside the shell.
+describe("Routes — Run detail renders its real screen inside the shell (CAP-001-E7-S4)", () => {
+  it("renders the run-detail heading, not the placeholder, with Runs active", async () => {
+    render(
+      <MemoryRouter initialEntries={["/runs/run-123"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const main = screen.getByRole("main");
+    expect(
+      await within(main).findByRole("heading", { level: 1, name: "Run run-123" }),
+    ).toBeInTheDocument();
+    expect(within(main).queryByText("Run detail")).not.toBeInTheDocument();
+
+    const nav = screen.getByRole("navigation");
+    expect(within(nav).getByText("Runs").closest("a")).toHaveAttribute("aria-current", "page");
   });
 });

@@ -16,13 +16,17 @@ import type {
   CoverageGapDetection,
   CoverageRow,
   CoverageView,
+  DataType,
   HealthResponse,
   HistoryDepth,
   Instrument,
   InstrumentLifecycle,
   InstrumentListResult,
   PresenceState,
+  ResultOutcome,
   RunCancelResult,
+  RunDetail,
+  RunResult,
   RunStartResult,
   RunState,
   SymbolOutcome,
@@ -456,6 +460,96 @@ export async function listAcquisitionRuns(
     `/api/acquisition-runs${queryString ? `?${queryString}` : ""}`,
   );
   return { runs: body.runs.map(toAcquisitionRun), nextCursor: body.next_cursor };
+}
+
+/** `GET /api/acquisition-runs/{id}` filters (component design `ingestion-api` section 2.3). */
+export interface RunDetailFilters {
+  outcome?: ResultOutcome;
+  cursor?: string;
+}
+
+interface WireRunResult {
+  instrument_id: number;
+  symbol: string;
+  data_type: DataType;
+  outcome: ResultOutcome;
+  reason: string | null;
+  attempts: number;
+  completed_at: string;
+}
+
+function toRunResult(row: WireRunResult): RunResult {
+  return {
+    instrumentId: row.instrument_id,
+    symbol: row.symbol,
+    dataType: row.data_type,
+    outcome: row.outcome,
+    reason: row.reason,
+    attempts: row.attempts,
+    completedAt: row.completed_at,
+  };
+}
+
+/**
+ * `GET /api/acquisition-runs/{id}` (CAP-001-E5-S5; CAP-001-E7-S1's
+ * `results_by_outcome` and `symbol`; DAC-E7-10). Only the filters that are
+ * present become query parameters, and no `limit` is sent, so the API's
+ * default page of instruments applies and a 3000-instrument run is never
+ * requested at once (CAP-001-E7-S4-tasks Open Gap P2).
+ *
+ * The body is mapped field by field, so nothing outside the contract
+ * reaches a caller (DAC-E7-S4-5). Rejects with `ApiError` on `404`
+ * (unknown run) or `422` (unknown `outcome`).
+ */
+export async function getAcquisitionRun(
+  runId: string,
+  filters: RunDetailFilters = {},
+): Promise<RunDetail> {
+  const query = new URLSearchParams();
+  if (filters.outcome) {
+    query.set("outcome", filters.outcome);
+  }
+  if (filters.cursor) {
+    query.set("cursor", filters.cursor);
+  }
+  const queryString = query.toString();
+
+  const body = await requestJson<{
+    run: WireRun;
+    counts: {
+      instruments_named: number;
+      instruments_written: number;
+      instruments_failed: number;
+      results_by_outcome: {
+        written: number;
+        unchanged: number;
+        not_found: number;
+        failed: number;
+        skipped: number;
+      };
+    };
+    results: WireRunResult[];
+    next_cursor: string | null;
+  }>(`/api/acquisition-runs/${encodeURIComponent(runId)}${queryString ? `?${queryString}` : ""}`);
+
+  const byOutcome = body.counts.results_by_outcome;
+  return {
+    run: toAcquisitionRun(body.run),
+    counts: {
+      instrumentsNamed: body.counts.instruments_named,
+      instrumentsWritten: body.counts.instruments_written,
+      instrumentsFailed: body.counts.instruments_failed,
+      resultsByOutcome: {
+        written: byOutcome.written,
+        unchanged: byOutcome.unchanged,
+        notFound: byOutcome.not_found,
+        failed: byOutcome.failed,
+        skipped: byOutcome.skipped,
+      },
+    },
+    results: body.results.map(toRunResult),
+    nextCursor: body.next_cursor,
+  };
 }
 
 /**

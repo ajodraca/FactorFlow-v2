@@ -9,9 +9,11 @@ task plan T017-T020. The factory itself does not bind a socket -- binding is
 import asyncio
 import contextvars
 import logging
+import re
 import uuid
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +21,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from psycopg_pool import ConnectionPool
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
@@ -203,6 +206,13 @@ def _add_request_id_middleware(app: FastAPI) -> None:
     the `X-Request-Id` response header on every response, and passed to the
     error envelope (`errors.py`) on any non-2xx response via
     `request.state.request_id`.
+
+    CAP-001-E7-S2: an unhandled exception is turned into the `500` here, while
+    the id is still bound, so its log record and its `X-Request-Id` header
+    carry the same id as its body (DAC-E7-6, DAC-E7-S2-3). Starlette runs the
+    `Exception` handler in `ServerErrorMiddleware`, outside this middleware,
+    after the id is unbound and too late for a header; that registration
+    remains only as a backstop.
     """
 
     @app.middleware("http")
@@ -214,6 +224,8 @@ def _add_request_id_middleware(app: FastAPI) -> None:
         token = _request_id_var.set(request_id)
         try:
             response = await call_next(request)
+        except Exception as exc:
+            response = await internal_error_handler(request, exc)
         finally:
             _request_id_var.reset(token)
         response.headers["X-Request-Id"] = request_id
@@ -238,6 +250,7 @@ def _add_static_mount(app: FastAPI) -> None:
                 code="not_found",
                 message="No resource exists at this path.",
                 request_id=request_id,
+                resource=_resource_for_path(request.url.path),
             )
 
         index_html = _STATIC_DIR / "index.html"
@@ -285,25 +298,90 @@ async def _validation_error_handler(request: Request, exc: Exception) -> Respons
     CAP-001-E2-S3: every non-2xx response from `instruments.py` and
     `settings.py` must carry the envelope (DAC-E2-S3-3), including request
     validation failures FastAPI raises before a route body ever runs.
+
+    CAP-001-E7-S2: the message names the offending fields, taken from each
+    error's `loc` only (DEC-0011). An error's `input`, `ctx` and `msg` can
+    carry a submitted value and are never included (DAC-E7-S2-4).
     """
     request_id = getattr(request.state, "request_id", "unknown")
+    errors = exc.errors() if isinstance(exc, RequestValidationError) else []
+    fields = _validation_fields(errors)
+    message = "The request did not match the expected shape"
+    if fields:
+        message += ": " + ", ".join(f"`{field}`" for field in fields)
+    message += "."
     return error_response(
         status_code=422,
         code="validation_error",
-        message="The request did not match the expected shape.",
+        message=message,
         request_id=request_id,
         resource=_resource_for_path(request.url.path),
     )
 
 
+_LOCATION_PREFIXES = {"body", "query", "path", "header", "cookie"}
+
+
+def _validation_fields(errors: Sequence[Any]) -> list[str]:
+    """The field paths named by `errors`, without their transport prefix.
+
+    A leading `body`/`query`/`path`/`header`/`cookie` segment is dropped, but
+    `body` alone is kept, since then the body itself is what is missing.
+    De-duplicated, in first-seen order.
+    """
+    fields: list[str] = []
+    for error in errors:
+        loc = [str(part) for part in error.get("loc", ())]
+        if len(loc) > 1 and loc[0] in _LOCATION_PREFIXES:
+            loc = loc[1:]
+        field = ".".join(loc)
+        if field and field not in fields:
+            fields.append(field)
+    return fields
+
+
+async def _http_error_handler(request: Request, exc: Exception) -> Response:
+    """Map a framework `HTTPException` (e.g. `405`) to the shared envelope.
+
+    CAP-001-E7-S2, DEC-0009: the code is the snake_case of the status's
+    reason phrase (`method_not_allowed`), or `http_error` for a status outside
+    `HTTPStatus`, so it never changes with the detail's wording
+    (DAC-E7-S2-1). The message is a fixed sentence built from that phrase and
+    never echoes `exc.detail`, which may carry a credential (DAC-E7-S2-4).
+    The exception's headers, such as `Allow`, are kept. The status-specific
+    `404` handler takes precedence over this one.
+    """
+    status_code = exc.status_code if isinstance(exc, StarletteHTTPException) else 500
+    headers = exc.headers if isinstance(exc, StarletteHTTPException) else None
+    try:
+        phrase = HTTPStatus(status_code).phrase
+        code = re.sub(r"[^a-z0-9]+", "_", phrase.lower()).strip("_")
+    except ValueError:
+        phrase, code = "HTTP error", "http_error"
+    response = error_response(
+        status_code=status_code,
+        code=code,
+        message=f"The request could not be completed: {phrase}.",
+        request_id=getattr(request.state, "request_id", "unknown"),
+        resource=_resource_for_path(request.url.path),
+    )
+    if headers:
+        response.headers.update(headers)
+    return response
+
+
 def create_app() -> FastAPI:
     """Construct the application: no default dependencies, so no route
     inherits an auth requirement (DAC-E1-S6-6).
+
+    CAP-001-E7-S2 registers `_http_error_handler`, so every framework HTTP
+    error carries the shared envelope (DAC-E7-5).
     """
     app = FastAPI(lifespan=_lifespan)
 
     app.add_exception_handler(Exception, internal_error_handler)
     app.add_exception_handler(RequestValidationError, _validation_error_handler)
+    app.add_exception_handler(StarletteHTTPException, _http_error_handler)
 
     app.include_router(health.router)
     app.include_router(instruments.router)

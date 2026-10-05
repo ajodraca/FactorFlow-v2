@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-02
-updated: 2026-10-02
+updated: 2026-10-04
+docs_synced_review: CAP-001-E7-S2-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -87,7 +88,7 @@ Everything else is already met and is pinned here by mapped component tests writ
 
 **Purpose**: Confirm the producers this delta modifies have landed, and record a characterization baseline before any change (TEST-TDD-007).
 
-- [ ] T001 Before you edit any file, verify these seams exist as described: in `src/factorflow/api/errors.py`, `ErrorDetail`, `ErrorEnvelope`, `error_response(status_code, code, message, request_id, resource=None, state=None)` and `internal_error_handler` (CAP-001-E1-S6, CAP-001-E5-S5); in `src/factorflow/api/app.py`, `_request_id_var`, `_install_request_id_patch`, `_add_request_id_middleware`, `not_found_handler` inside `_add_static_mount`, `_VALIDATION_ERROR_RESOURCES`, `_resource_for_path`, `_validation_error_handler` and the two `add_exception_handler` calls in `create_app` (CAP-001-E1-S6, CAP-001-E2-S3). Then run `uv run pytest -m 'not postgres' tests/unit/test_api_errors.py tests/unit/test_api_request_id.py tests/unit/test_api_request_id_redaction_composition.py tests/unit/test_api_no_secrets.py tests/unit/test_api_instruments_error_mapping.py tests/unit/test_api_runs_routes.py tests/unit/test_api_coverage_routes.py` and record it green as the baseline. Stop if any seam differs from this description (prerequisite infrastructure, traces to AC-10).
+- [x] T001 Before you edit any file, verify these seams exist as described: in `src/factorflow/api/errors.py`, `ErrorDetail`, `ErrorEnvelope`, `error_response(status_code, code, message, request_id, resource=None, state=None)` and `internal_error_handler` (CAP-001-E1-S6, CAP-001-E5-S5); in `src/factorflow/api/app.py`, `_request_id_var`, `_install_request_id_patch`, `_add_request_id_middleware`, `not_found_handler` inside `_add_static_mount`, `_VALIDATION_ERROR_RESOURCES`, `_resource_for_path`, `_validation_error_handler` and the two `add_exception_handler` calls in `create_app` (CAP-001-E1-S6, CAP-001-E2-S3). Then run `uv run pytest -m 'not postgres' tests/unit/test_api_errors.py tests/unit/test_api_request_id.py tests/unit/test_api_request_id_redaction_composition.py tests/unit/test_api_no_secrets.py tests/unit/test_api_instruments_error_mapping.py tests/unit/test_api_runs_routes.py tests/unit/test_api_coverage_routes.py` and record it green as the baseline. Stop if any seam differs from this description (prerequisite infrastructure, traces to AC-10).
 
 **Checkpoint**: The existing envelope, handlers and middleware are green and unmodified, and recorded as the baseline every later task must preserve.
 
@@ -108,33 +109,33 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 ### Mandatory Component Tests
 
-- [ ] T002 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-070` and `# Implements TC-COMP-010`. Parametrise over every handled error type: unmatched `GET /api/does-not-exist` (404), `GET /api/acquisition-runs/{uuid}` with the run absent (404 `not_found`), `POST /api/acquisition-runs` without depth (409 `history_depth_not_set`), `PUT /api/settings/history-depth` with `{"years": "x"}` (422), `GET /api/instruments?limit=501` (422), and `DELETE /api/health` (405). For each, assert:
+- [x] T002 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-070` and `# Implements TC-COMP-010`. Parametrise over every handled error type: unmatched `GET /api/does-not-exist` (404), `GET /api/acquisition-runs/{uuid}` with the run absent (404 `not_found`), `POST /api/acquisition-runs` without depth (409 `history_depth_not_set`), `PUT /api/settings/history-depth` with `{"years": "x"}` (422), `GET /api/instruments?limit=501` (422), and `DELETE /api/health` (405). For each, assert:
   - the body's only top-level key is `"error"`, and there is no top-level `"detail"`;
   - `error` carries `code`, `message`, `resource` and `request_id`, each a non-empty string (`state` remains permitted only on `run_already_terminal`, per the existing test);
   - `error.request_id` equals the `X-Request-Id` header.
 
   Observe RED for the 405 case (Starlette's default `{"detail": …}` body) and for the unmatched path (`resource` is `null`). The other cases are characterization (depends on T001; traces to DAC-E7-5, AC-10).
-- [ ] T003 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-072` and `# Implements TC-COMP-084`. Through a probe route raising `RuntimeError("psycopg.OperationalError: connection to 127.0.0.1:5432 failed")`, assert:
+- [x] T003 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-072` and `# Implements TC-COMP-084`. Through a probe route raising `RuntimeError("psycopg.OperationalError: connection to 127.0.0.1:5432 failed")`, assert:
   - status `500` and a body exactly equal to `{"error": {"code": "internal_error", "request_id": <id>}}`, with no `message` and no `resource` key;
   - `<id>` equals the `X-Request-Id` header, which is present;
   - the body contains none of `Traceback`, `RuntimeError`, `psycopg`, `5432`;
   - a captured `ERROR` record from logger `factorflow.api` carries `exc_info` whose formatted text contains the driver message, so the detail went to the log.
 
   Observe RED on the extra keys and on the missing header (depends on T002; traces to DAC-E7-7, DAC-E7-S2-2, DAC-E7-S2-3).
-- [ ] T004 [P] In `tests/unit/test_api_request_id.py`, add `# Implements TC-COMP-071` and `# Implements TC-COMP-085`, reusing the existing `client` fixture with a probe route inserted as described above. For a `500` from a probe route that first logs an `INFO` line on `factorflow.api.probe` and then raises, a `404` on an unmatched `/api` path, and a `422` from `GET /api/instruments?limit=501`, capture at root (`caplog.at_level(logging.INFO)`) and assert that every `factorflow.api*` record carries `request_id` equal to the response's `X-Request-Id` and its `error.request_id`. For the `500`, specifically assert that the `unhandled exception during request handling` record carries it. Two error requests get different ids. Keep both existing tests unchanged. Observe RED on the `500` record (its `request_id` is `None` today) (depends on T001; traces to DAC-E7-6, DAC-E7-S2-3).
-- [ ] T005 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-083`. Assert that every `error.code` produced by T002's matrix and T003's `500` matches `^[a-z][a-z0-9]*(_[a-z0-9]+)*$` and equals its expected literal. Add two probe routes raising `starlette.exceptions.HTTPException(status_code=405, detail="wording one")` and `(…, detail="completely different wording")`, and assert both return the same `error.code` (`method_not_allowed`, Open Gap 1). Observe RED on the probe routes (depends on T003; traces to DAC-E7-S2-1, DAC-E7-5).
-- [ ] T006 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-086` and `# Implements TC-COMP-069`. Set `FACTORFLOW_MASSIVE_API_KEY` to a synthetic `SECRET` constant and compose each error with that value in scope:
+- [x] T004 [P] In `tests/unit/test_api_request_id.py`, add `# Implements TC-COMP-071` and `# Implements TC-COMP-085`, reusing the existing `client` fixture with a probe route inserted as described above. For a `500` from a probe route that first logs an `INFO` line on `factorflow.api.probe` and then raises, a `404` on an unmatched `/api` path, and a `422` from `GET /api/instruments?limit=501`, capture at root (`caplog.at_level(logging.INFO)`) and assert that every `factorflow.api*` record carries `request_id` equal to the response's `X-Request-Id` and its `error.request_id`. For the `500`, specifically assert that the `unhandled exception during request handling` record carries it. Two error requests get different ids. Keep both existing tests unchanged. Observe RED on the `500` record (its `request_id` is `None` today) (depends on T001; traces to DAC-E7-6, DAC-E7-S2-3).
+- [x] T005 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-083`. Assert that every `error.code` produced by T002's matrix and T003's `500` matches `^[a-z][a-z0-9]*(_[a-z0-9]+)*$` and equals its expected literal. Add two probe routes raising `starlette.exceptions.HTTPException(status_code=405, detail="wording one")` and `(…, detail="completely different wording")`, and assert both return the same `error.code` (`method_not_allowed`, Open Gap 1). Observe RED on the probe routes (depends on T003; traces to DAC-E7-S2-1, DAC-E7-5).
+- [x] T006 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-086` and `# Implements TC-COMP-069`. Set `FACTORFLOW_MASSIVE_API_KEY` to a synthetic `SECRET` constant and compose each error with that value in scope:
   - (a) a probe route raising `RuntimeError(f"auth failed apiKey={SECRET}")` → `500`;
   - (b) a probe route raising `HTTPException(status_code=400, detail=f"bad key {SECRET}")`;
   - (c) `PUT /api/settings/history-depth` with `{"years": SECRET}` → `422`, where FastAPI's default shape would echo the input;
   - (d) `GET /api/instruments?limit=` + `SECRET` → `422`.
 
   Assert `SECRET` appears in neither `response.text` nor any response header value. Observe RED on (b), whose detail is echoed today. (a), (c) and (d) are characterization (depends on T005; traces to DAC-E7-S2-4).
-- [ ] T007 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-087`. For `PUT /api/settings/history-depth` with `{"years": "x"}`, the same route with no body, and `GET /api/acquisition-runs?limit=0`, assert the body is the shared envelope with no top-level `detail`, `code == "validation_error"`, `resource` from `_resource_for_path` (`settings`, `settings`, `acquisition-run`), and `message` naming the offending field (`years`, `body` for the missing body, `limit`). Observe RED on the field naming (depends on T006; traces to DAC-E7-S2-5, AC-10).
+- [x] T007 In `tests/unit/test_api_errors.py`, add `# Implements TC-COMP-087`. For `PUT /api/settings/history-depth` with `{"years": "x"}`, the same route with no body, and `GET /api/acquisition-runs?limit=0`, assert the body is the shared envelope with no top-level `detail`, `code == "validation_error"`, `resource` from `_resource_for_path` (`settings`, `settings`, `acquisition-run`), and `message` naming the offending field (`years`, `body` for the missing body, `limit`). Observe RED on the field naming (depends on T006; traces to DAC-E7-S2-5, AC-10).
 
 ### Additional Unit Tests
 
-- [ ] T008 In `tests/unit/test_api_errors.py`, add implementation-level cases for the framework HTTP error handler:
+- [x] T008 In `tests/unit/test_api_errors.py`, add implementation-level cases for the framework HTTP error handler:
   - `405` keeps Starlette's `Allow` response header;
   - an `HTTPException(status_code=404)` raised from a probe route still goes through `not_found_handler` (`code: not_found`), because the status-specific handler takes precedence;
   - a status code absent from `http.HTTPStatus` (e.g. `599`) yields `code: "http_error"`;
@@ -151,7 +152,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 **Purpose**: Reduce the `500` to its specified shape and make its log record findable, without touching the envelope that route-composed errors use (TEST-TDD-003).
 
-- [ ] T009 Update `src/factorflow/api/errors.py`:
+- [x] T009 Update `src/factorflow/api/errors.py`:
   - **Body.** `internal_error_handler` returns `JSONResponse(status_code=500, content={"error": {"code": "internal_error", "request_id": request_id}})` directly, with no `message` and no `resource` (ingestion-api §2.3 and §4, DAC-E7-7; Resolved Conflicts 1 and 2).
   - **Log record.** Keep `_LOGGER.error("unhandled exception during request handling", exc_info=exc)` and add `extra={"request_id": request_id}` when `request.state` carries one. The handler is then correct even when Starlette's `ServerErrorMiddleware` invokes it after `_request_id_var` was reset. `_stamped_handle` sets the attribute only when it is absent, so the two compose.
   - **Unchanged.** `ErrorDetail`, `ErrorEnvelope` and `error_response` keep their signature, the `state` exclusion and the `resource`-may-be-null behaviour that CAP-001-E5-S5 and every route depend on.
@@ -167,7 +168,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 **Purpose**: Wire the remaining envelope coverage and the `500` correlation into the application factory and middleware.
 
-- [ ] T010 Update `src/factorflow/api/app.py`:
+- [x] T010 Update `src/factorflow/api/app.py`:
   - **Middleware.** In `_add_request_id_middleware`, wrap `await call_next(request)` in `try/except Exception as exc`, and on an exception build the response with `internal_error_handler(request, exc)` while `_request_id_var` is still bound. Keep the `finally` reset. Set `X-Request-Id` on every response, the `500` included. Keep `app.add_exception_handler(Exception, internal_error_handler)` as the backstop. Planning verified that this Starlette (1.6.0) re-raises app exceptions from `call_next` (DAC-E7-6, DAC-E7-S2-3).
   - **Framework HTTP errors.** Add `_http_error_handler(request, exc: starlette.exceptions.HTTPException)` beside `_validation_error_handler` and register it in `create_app` with `app.add_exception_handler(StarletteHTTPException, _http_error_handler)`. The status-specific `404` handler keeps precedence. The handler returns `error_response`:
     - `code`: snake_case of `http.HTTPStatus(exc.status_code).phrase`, or `"http_error"` when the status is not in `HTTPStatus`;
@@ -191,7 +192,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
 
 **Purpose**: Kill mutants on the changed behaviour, run full validation, and keep the per-cycle evidence chain.
 
-- [ ] T011 After T002–T010 are green and their T012 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Mutate:
+- [x] T011 After T002–T010 are green and their T012 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Mutate:
   - re-adding `message` or `resource` to the `500`;
   - dropping the middleware `except` branch, the `extra` request id, or the header on the `500`;
   - echoing `exc.detail` or `input` into any message;
@@ -201,7 +202,7 @@ T002, T003, T005, T006, T007 and T008 extend `tests/unit/test_api_errors.py` (th
   - removing a `loc` prefix strip.
 
   Strengthen tests until every mutant is killed. Then run the full constitution validation set below. Confirm that `web/src/api/client.ts`'s `toApiError` still reads `error.request_id` and `error.code` from a `500`, and that `npm test` (`vitest run`, `package.json`) and `npm run build` stay green (traces to every AC).
-- [ ] T012 Run this after **each** TDD cycle in T002–T011, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S2-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record characterization cases (the already-green parts of T002, T006 and T007) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
+- [x] T012 Run this after **each** TDD cycle in T002–T011, not once at the end. Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it. Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S2-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record characterization cases (the already-green parts of T002, T006 and T007) as such, with GREEN-on-arrival evidence instead of a fabricated RED. Do not commit a `REJECTED` or `drift_detected: true` cycle. After the commit, record its `commit_hash` and `tests_executed: true` before the next cycle begins (INV-TDD-002, TEST-TDD-008; traces to no AC).
 
 **Checkpoint**: All acceptance criteria are satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 

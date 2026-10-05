@@ -188,3 +188,37 @@ describe("StartRunControl — no double submit", () => {
     await waitFor(() => expect(startButton()).not.toHaveAttribute("aria-busy", "true"));
   });
 });
+
+// CAP-001-E7-S4 T013 (DAC-E7-S4-2; DEC-0017, Open Gap P3): the optional label.
+describe("StartRunControl — label (CAP-001-E7-S4)", () => {
+  it("renders the given label as the button's accessible name", () => {
+    renderControl({ label: "Re-run acquisition" });
+    expect(screen.getByRole("button", { name: "Re-run acquisition" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Start acquisition run" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the blocked, queued and navigation behaviour under a custom label", async () => {
+    const user = userEvent.setup();
+    startMock
+      .mockResolvedValueOnce({ runId: "r-2", state: "requested", queuedBehind: "r-1" })
+      .mockResolvedValueOnce({ runId: "r-9", state: "requested", queuedBehind: null });
+    const view = renderControl({ label: "Re-run acquisition", historyDepthYears: null });
+    const button = () => screen.getByRole("button", { name: "Re-run acquisition" });
+
+    expect(button()).toHaveAttribute("data-variant", "blocked");
+    await user.click(button());
+    expect(startMock).not.toHaveBeenCalled();
+
+    view.rerenderWith({ label: "Re-run acquisition" });
+    await user.click(button());
+    expect(await screen.findByText(QUEUED_NOTICE)).toBeInTheDocument();
+
+    await user.click(button());
+    await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent("/runs/r-9"));
+  });
+
+  it("defaults to Start acquisition run when no label is given (DEC-0004)", () => {
+    renderControl({});
+    expect(screen.getByRole("button", { name: "Start acquisition run" })).toBeInTheDocument();
+  });
+});

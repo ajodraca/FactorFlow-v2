@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-02
-updated: 2026-10-02
+updated: 2026-10-05
+docs_synced_review: CAP-001-E7-S4-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -99,7 +100,7 @@ No backend file changes.
 
 **Purpose**: Confirm that every producer this screen imports or consumes has landed, and record a green baseline before any change (TEST-TDD-007).
 
-- [ ] T001 Before you edit any file, verify these exist as described:
+- [x] T001 Before you edit any file, verify these exist as described:
   - **CAP-001-E7-S1** has landed. `GET /api/acquisition-runs/{id}` returns `counts.results_by_outcome.{written,unchanged,not_found,failed,skipped}` and `results[].symbol` (`src/factorflow/api/models.py` `OutcomeCounts`, `RunCounts.results_by_outcome`, `ResultRow.symbol`). An unknown `outcome` returns `422`. **Stop if it has not landed.** Every roster task depends on it.
   - **CAP-001-E5-S5's run detail contract**:
     - per-instrument keyset paging by `limit` instruments, default 50 (`src/factorflow/api/bounds.py` `DEFAULT_PAGE_SIZE`);
@@ -138,7 +139,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
 
 ### Mandatory Component Tests
 
-- [ ] T002 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-074` (DAC-E7-9). Use a `partial` run with `instrumentsNamed: 3000` and a first page of 50 instruments × 4 data types (200 result rows), with `nextCursor: "c1"`. Assert:
+- [x] T002 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-074` (DAC-E7-9). Use a `partial` run with `instrumentsNamed: 3000` and a first page of 50 instruments × 4 data types (200 result rows), with `nextCursor: "c1"`. Assert:
   - the roster renders exactly 50 instrument rows and no data-type row;
   - each instrument row's expander is a `button` with `aria-expanded="false"`, and its accessible name identifies the row: *Show data types for S0001* (owner-web-app §10, "Expander accessible names identify their row");
   - activating S0001's expander, by click and by `Enter`, sets `aria-expanded="true"` and renders exactly four data-type rows under it, in the fixed order *Reference*, *Prices*, *Fundamentals*, *Corporate actions*, whatever the order of the API rows;
@@ -146,7 +147,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - activating the expander again collapses S0001.
 
   Observe RED (depends on T001; traces to DAC-E7-9).
-- [ ] T003 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-010` and `// Implements TC-COMP-011`. Use a `partial` run with:
+- [x] T003 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-010` and `// Implements TC-COMP-011`. Use a `partial` run with:
   - `AAPL`: `prices` `failed`, with reason `[failed] symbol=AAPL data_type=prices request_id=req-1: upstream returned 503`, and the other three data types `written`;
   - `ZZZZ`: all four data types `not_found`, with reasons carrying `request_id=req-2`;
   - `MSFT`: four `written`.
@@ -156,18 +157,18 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - **AC-11.** ZZZZ's rows read *Acquiring … for ZZZZ: not found at the provider.* with the reason. The word *failed* appears nowhere in ZZZZ's rows. MSFT's `written` rows still render, so the run is visibly shown to have continued past the unrecognised instrument (owner-web-app §7 "Unrecognised is distinguished… Not rendered as a run failure").
 
   Observe RED (depends on T002; traces to AC-10, AC-11).
-- [ ] T004 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-067` and `// Implements TC-COMP-095`. With T003's fixture, assert that a `not_found` result badge and a `failed` result badge differ in all three of:
+- [x] T004 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-067` and `// Implements TC-COMP-095`. With T003's fixture, assert that a `not_found` result badge and a `failed` result badge differ in all three of:
   - text: *Not found* versus *Failed*;
   - `data-variant`: exactly `status-warning` versus exactly `status-critical`;
   - icon: `svg[data-icon]` `warning` versus `critical`.
 
   Assert the same on the collapsed rows' outcome badges (Open Gap P1). Observe RED (depends on T003; traces to DAC-E7-2, DAC-E7-S4-4, AC-11).
-- [ ] T005 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-076`. Assert both of the following:
+- [x] T005 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-076`. Assert both of the following:
   - **Run states.** For each of the eight `RunState`s rendered as the run (`it.each`), the summary's outcome badge has non-empty text equal to `RUN_STATE_LABEL[state]` and an `svg[data-icon]` child.
   - **Result outcomes.** For each of the five result outcomes, the data-type badge has its label text and an `svg[data-icon]` child.
 
   Also assert that `failed` and `not_found` have different `data-icon` values, so the two remain distinguishable in greyscale (STD-UI-8). Observe RED (depends on T004; traces to DAC-E7-11).
-- [ ] T006 Create `web/src/screens/runs/run-detail.reason.test.tsx` with `// Implements TC-COMP-096`. This file does **not** mock the client. It stubs `fetch` with a wire-shaped `GET /api/acquisition-runs/r-1` body, so the real `getAcquisitionRun` mapping is exercised. Use a synthetic constant `SECRET = "sk-e7s4-credential-like-0000"`.
+- [x] T006 Create `web/src/screens/runs/run-detail.reason.test.tsx` with `// Implements TC-COMP-096`. This file does **not** mock the client. It stubs `fetch` with a wire-shaped `GET /api/acquisition-runs/r-1` body, so the real `getAcquisitionRun` mapping is exercised. Use a synthetic constant `SECRET = "sk-e7s4-credential-like-0000"`.
   - Give one `failed` `fundamentals` row for `MSFT` the reason that `compose_failure_reason` would store after redaction: `[provider_unavailable] symbol=MSFT data_type=fundamentals request_id=req-e7s4-001: upstream error key=[redacted]`.
   - Put `SECRET` only in fields the contract does not define: an extra `api_key` on that result row and an extra `credential` on `run`.
   - Give a second row the reason `<img src=x onerror="alert(1)">`.
@@ -178,7 +179,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - the markup reason renders as literal text, and the document has no `img` element (owner-web-app §4).
 
   Observe RED (depends on T001; traces to DAC-E7-S4-5).
-- [ ] T007 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-092` and `// Implements TC-COMP-093`.
+- [x] T007 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-092` and `// Implements TC-COMP-093`.
   - **Abandoned (TC-COMP-092).** An `abandoned` run shows `ABANDONED_EXPLANATION` verbatim beside a `status-serious` badge, plus a *Start acquisition run* button (`StartRunControl` with its default label). Those are "the path to starting a new run".
   - **Re-run offered (TC-COMP-093).** For `failed` and `partial` runs (`it.each`):
     - a *Re-run acquisition* button with `data-variant="default"` renders;
@@ -187,7 +188,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - **Re-run absent.** For `succeeded`, `cancelled`, `requested`, `running` and `cancelling`, neither the re-run button nor the sentence renders. For `abandoned`, the Start button renders but the re-run button does not.
 
   Observe RED (depends on T005; traces to DAC-E7-S4-1, DAC-E7-S4-2).
-- [ ] T008 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-019`, `// Implements TC-COMP-026` and `// Implements TC-COMP-094`.
+- [x] T008 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-019`, `// Implements TC-COMP-026` and `// Implements TC-COMP-094`.
   - **AC-19 (running run).**
     - The summary offers *Cancel run*.
     - Confirming *Stop run* with `cancelAcquisitionRun` resolving `{state: "cancelling"}`, and the refetch returning the run `cancelling`, leaves the summary badge reading *Cancelling* with `status-warning`.
@@ -204,7 +205,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
     - `document.body` matches neither `/Cancelled/` nor `/Cancelling/`.
 
   Observe RED (depends on T007; traces to AC-19, AC-26, DAC-E7-S4-3).
-- [ ] T009 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-098`. Assert:
+- [x] T009 In `web/src/screens/runs/run-detail.test.tsx`, add `// Implements TC-COMP-098`. Assert:
   - **Initial load.** The initial call is `getAcquisitionRun("r-1", {})`, with no `limit`, `outcome` or `cursor`, so the server default page applies and 3000 rows are never requested at once.
   - **Filter.** Choosing *Not found* in the *Outcome* `select` (`data-variant="inline"`) calls `getAcquisitionRun("r-1", {outcome: "not_found"})`. Only the instruments in that response render, and focus stays on the `select`. A polite live region announces *2 instruments shown*.
   - **Filtered expansion.** Expanding an instrument under the filter renders only the rows the response returned. It renders no row for the data types the filter excluded, because with a filter the API returns only matching rows (CAP-001-E7-S1-tasks Other Notes).
@@ -216,7 +217,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
     - Changing the filter returns to page 1.
 
   Observe RED (depends on T008; traces to DAC-E7-S4-7, DAC-E7-10).
-- [ ] T010 [P] Create `web/src/screens/runs/run-detail.polling.test.tsx` with `// Implements TC-COMP-097`. Use pure fake timers and an `advance(ms)` helper, as `web/src/screens/runs/runs-screen.polling.test.tsx` does.
+- [x] T010 [P] Create `web/src/screens/runs/run-detail.polling.test.tsx` with `// Implements TC-COMP-097`. Use pure fake timers and an `advance(ms)` helper, as `web/src/screens/runs/runs-screen.polling.test.tsx` does.
   - **Non-terminal runs.** For `requested`, `running` and `cancelling` (`it.each`):
     - one call on mount;
     - no second call at 9 999 ms;
@@ -232,7 +233,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
 
 ### Additional Unit Tests
 
-- [ ] T011 [P] Extend `web/src/api/client.runs.test.ts`, keeping every existing case unchanged:
+- [x] T011 [P] Extend `web/src/api/client.runs.test.ts`, keeping every existing case unchanged:
   - **Path and query.** `getAcquisitionRun("a b", {})` requests `/api/acquisition-runs/a%20b`. `{outcome: "failed", cursor: "c1"}` adds exactly those two query parameters, and `{}` adds none.
   - **Mapping.** A wire body maps to camelCase:
     - `run` through the existing `toAcquisitionRun`;
@@ -247,7 +248,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
     - A transport failure rejects with `ApiUnreachableError`.
 
   Observe RED (depends on T001; traces to AC-10, DAC-E7-S4-5, DAC-E7-S4-7).
-- [ ] T012 [P] Create `web/src/screens/runs/detail/result-outcome-badge.test.tsx`. Assert that `RESULT_OUTCOME_TIER` covers exactly the five `ResultOutcome` values, with this mapping:
+- [x] T012 [P] Create `web/src/screens/runs/detail/result-outcome-badge.test.tsx`. Assert that `RESULT_OUTCOME_TIER` covers exactly the five `ResultOutcome` values, with this mapping:
 
   | Outcome | Tier |
   |---------|------|
@@ -262,7 +263,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - every tier is one of `good`, `warning` or `critical`, the three variants ux-design §1.5 maps for per-data-type outcomes.
 
   Observe RED (depends on T001; traces to DAC-E7-2, DAC-E7-S4-4, DAC-E7-11).
-- [ ] T013 [P] Add separately named cases, without modifying any existing case:
+- [x] T013 [P] Add separately named cases, without modifying any existing case:
   - **`web/src/screens/runs/run-controls.test.tsx`** (Open Gap P3).
     - `<StartRunControl label="Re-run acquisition" />` renders a button with exactly that accessible name.
     - The control keeps its blocked, queued and navigation behaviour.
@@ -272,13 +273,13 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
     - After a `409` `run_already_terminal`, re-rendering with the terminal `state` keeps *This run had already completed.* and the actual outcome.
 
   Observe RED (depends on T001; traces to AC-19, DAC-E7-S4-2, DAC-E7-S4-3).
-- [ ] T014 [P] Update `web/src/app/routes.test.tsx`:
+- [x] T014 [P] Update `web/src/app/routes.test.tsx`:
   - Add `getAcquisitionRun: vi.fn().mockResolvedValue(<a terminal succeeded RunDetail with no results>)` to the existing `vi.mock("../api/client", …)` list, so TC-COMP-330's `/runs/run-123` render no longer reaches the global health `fetch` stub with a run request.
   - Add a separately named case. At `/runs/run-123` inside `Shell`, the main region shows the run-detail heading *Run run-123*, not the text *Run detail* from the placeholder, and *Runs* stays the active rail item (DAC-E1-S4-2).
 
   Keep the five-route source assertion unchanged, because the route path does not change. Observe RED on the new case (depends on T001; traces to AC-10).
-- [ ] T015 [P] Create `web/src/api/render.test.tsx`, the file owner-web-app §7 names for "No raw HTML injection". Read every `*.ts` and `*.tsx` under `web/src` with `node:fs`, following the `readFileSync` pattern in `web/src/app/routes.test.tsx`, and assert that none contains `dangerouslySetInnerHTML`. Skip this test file itself. This passes against current code, so record it as characterization (TEST-TDD-007). Its markup-as-text counterpart is in T006 (depends on T001; traces to DAC-E7-S4-5).
-- [ ] T016 Create `tests/e2e/support/database.ts`, exporting `sql(statement: string): string`. It runs `execFileSync("docker", ["exec", "-e", "PGPASSWORD=postgres", "factorflow-e2e-postgres", "psql", "--host=127.0.0.1", "--username=postgres", "--dbname=factorflow", "--no-password", "--tuples-only", "--no-align", "-v", "ON_ERROR_STOP=1", "--command", statement])` and returns trimmed stdout. The container name and credentials are those `scripts/run-e2e-server.sh` creates (see Other Notes, "E2E seeding").
+- [x] T015 [P] Create `web/src/api/render.test.tsx`, the file owner-web-app §7 names for "No raw HTML injection". Read every `*.ts` and `*.tsx` under `web/src` with `node:fs`, following the `readFileSync` pattern in `web/src/app/routes.test.tsx`, and assert that none contains `dangerouslySetInnerHTML`. Skip this test file itself. This passes against current code, so record it as characterization (TEST-TDD-007). Its markup-as-text counterpart is in T006 (depends on T001; traces to DAC-E7-S4-5).
+- [x] T016 Create `tests/e2e/support/database.ts`, exporting `sql(statement: string): string`. It runs `execFileSync("docker", ["exec", "-e", "PGPASSWORD=postgres", "factorflow-e2e-postgres", "psql", "--host=127.0.0.1", "--username=postgres", "--dbname=factorflow", "--no-password", "--tuples-only", "--no-align", "-v", "ON_ERROR_STOP=1", "--command", statement])` and returns trimmed stdout. The container name and credentials are those `scripts/run-e2e-server.sh` creates (see Other Notes, "E2E seeding").
 
   Then create `tests/e2e/cancel-run.spec.ts`, the owner-web-app §7 "Cancel a run" file. It runs three serial tests, and an `afterEach` moves any seeded `running` or `cancelling` run to `cancelled` (`ended_at = now()`, `claimed_by = NULL`, `heartbeat_at = NULL`). That cleanup frees the single-active-run slot, so the later `runs-start-cancel.spec.ts` still navigates on start.
   1. **Queued run (AC-26).**
@@ -296,7 +297,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
      - Click *Stop run*. *This run had already completed.* and *Succeeded* render, and *Cancelling* never appears.
 
   Observe RED (depends on T001; traces to AC-19, AC-26, DAC-E7-S4-3).
-- [ ] T017 Create `tests/e2e/run-detail.spec.ts`. Add `DIAGA` and `DIAGZ` through `POST /api/instruments`. Then, with `sql(...)`, seed a `partial` run that has `started_at`, `ended_at` and `instruments_named = 2`, plus eight `run_instrument_result` rows:
+- [x] T017 Create `tests/e2e/run-detail.spec.ts`. Add `DIAGA` and `DIAGZ` through `POST /api/instruments`. Then, with `sql(...)`, seed a `partial` run that has `started_at`, `ended_at` and `instruments_named = 2`, plus eight `run_instrument_result` rows:
   - `DIAGA`: `prices` `failed`, reason `[failed] symbol=DIAGA data_type=prices request_id=req-e2e-1: upstream returned 503`; the other three data types `written`;
   - `DIAGZ`: four `not_found`.
 
@@ -318,7 +319,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
 
 **Purpose**: Add the run-detail types, the fetch call, the per-data-type badge, the two additive control changes and the screen's components. This is the minimum that turns Phase 2 green.
 
-- [ ] T018 Update `web/src/api/types.ts`, additively. Add:
+- [x] T018 Update `web/src/api/types.ts`, additively. Add:
   - `export type DataType = "reference" | "prices" | "fundamentals" | "corporate_actions";` (the `run_result_data_type_known` DDL; `ResultRow.data_type` in `src/factorflow/api/models.py`);
   - `export type ResultOutcome = "written" | "unchanged" | "not_found" | "failed" | "skipped";` (`run_result_outcome_known`; `ResultOutcome` in `models.py`);
   - `export interface OutcomeCounts { written: number; unchanged: number; notFound: number; failed: number; skipped: number; }` (DEC-0007);
@@ -326,14 +327,14 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - `export interface RunDetail { run: AcquisitionRun; counts: { instrumentsNamed: number; instrumentsWritten: number; instrumentsFailed: number; resultsByOutcome: OutcomeCounts }; results: RunResult[]; nextCursor: string | null; }`.
 
   Each comment cites `RunDetailResponse` in `src/factorflow/api/models.py`, ingestion-api §11, and the E7-S1 additions. Leave `RunSummary`, `HealthResponse` and every E5-S6 type unchanged. CAP-001-E7-S3 owns the health `RunSummary` (depends on T001; satisfies AC-10, DAC-E7-S4-7).
-- [ ] T019 Update `web/src/api/client.ts`:
+- [x] T019 Update `web/src/api/client.ts`:
   - Add `export interface RunDetailFilters { outcome?: ResultOutcome; cursor?: string; }`.
   - Add `export async function getAcquisitionRun(runId: string, filters: RunDetailFilters = {}): Promise<RunDetail>`. It sends `GET /api/acquisition-runs/${encodeURIComponent(runId)}`, through `requestJson`, with only the present filters as query parameters, as `listAcquisitionRuns` does. It sends no `limit`, so the server's `DEFAULT_PAGE_SIZE` applies (Open Gap P2).
   - Map the wire body explicitly, field by field, through `toAcquisitionRun` and a new `toRunResult`, so any field outside the contract is dropped (DAC-E7-S4-5).
   - Write a doc comment naming CAP-001-E5-S5, CAP-001-E7-S1, DAC-E7-10 and the `404` / `422` rejections.
 
   Leave `toApiError` and the existing functions unchanged (depends on RED from T011; satisfies AC-10, DAC-E7-S4-5, DAC-E7-S4-7).
-- [ ] T020 [P] Update `web/src/screens/runs/outcome-badge.tsx`:
+- [x] T020 [P] Update `web/src/screens/runs/outcome-badge.tsx`:
   - Add `export` to `TierIcon` and `TIER_CLASSES`. Change nothing else, so every `outcome-badge.test.tsx` case stays green.
 
   Create `web/src/screens/runs/detail/result-outcome-badge.tsx`, exporting:
@@ -343,7 +344,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - `ResultOutcomeBadge({outcome})`, the same `badge` markup as `OutcomeBadge`, using `TierIcon` and `TIER_CLASSES`, with `data-testid="result-outcome-badge"`.
 
   Cite ux-design §1.5's per-data-type variants, the acquisition-runner §2.4 outcome table and STD-UI-8/12 in comments (depends on RED from T012; satisfies DAC-E7-2, DAC-E7-S4-4, DAC-E7-11, AC-11).
-- [ ] T021 [P] Make two additive control changes, keeping each component's exported name and every existing prop:
+- [x] T021 [P] Make two additive control changes, keeping each component's exported name and every existing prop:
   - **`web/src/screens/runs/run-controls.tsx` (Open Gap P3).**
     - Add `label?: string` to `StartRunControlProps`, defaulting to `"Start acquisition run"`, and render it as the button text.
     - Extend the docstring to say CAP-001-E7-S4 passes *Re-run acquisition*.
@@ -353,7 +354,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
     - Extend the docstring.
 
   All existing `run-controls.test.tsx` and `cancel.test.tsx` cases must stay green unmodified (depends on RED from T013; satisfies AC-19, DAC-E7-S4-2, DAC-E7-S4-3).
-- [ ] T022 Create `web/src/screens/runs/detail/run-summary.tsx`, exporting `RunSummaryCard({detail, fetchedAt, onRunChanged})`. Render a `section` with `data-variant="summary"`, and use `card` tokens following the existing utility-class style (`rounded border border-border p-5`). It contains:
+- [x] T022 Create `web/src/screens/runs/detail/run-summary.tsx`, exporting `RunSummaryCard({detail, fetchedAt, onRunChanged})`. Render a `section` with `data-variant="summary"`, and use `card` tokens following the existing utility-class style (`rounded border border-border p-5`). It contains:
   - **Outcome.** `OutcomeBadge` for `detail.run.state`.
   - **Abandoned explanation.** When the run is `abandoned`, `ABANDONED_EXPLANATION` in a `p` with `data-testid="abandoned-explanation"`, then `<StartRunControl />` with the default label. Together these are the path to a new run (DAC-E7-S4-1).
   - **Timestamps.** *Requested*, *Started* and *Ended* as a description list. Each uses `formatTimestamp` from `web/src/app/status-region.tsx`, or the em dash plus `sr-only` *Not recorded* when the value is null, matching `run-table.tsx`'s `Timestamp` (AC-26: no started time).
@@ -364,7 +365,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - **Re-run.** For `failed` and `partial` only, the sentence *Re-running is safe: data already recorded is not duplicated or overwritten.*, then `<StartRunControl label="Re-run acquisition" />` (DAC-E7-S4-2, AC-6). It passes no precondition props, so a refused re-run renders `blocked` from the API's `409` code (DEC-0004/DEC-0005 Open Gap 9 precedent).
 
   (depends on T018, T020, T021; satisfies AC-19, AC-26, DAC-E7-S4-1, DAC-E7-S4-2, DAC-E7-11).
-- [ ] T023 Create `web/src/screens/runs/detail/instrument-roster.tsx`. Export `groupByInstrument(results: RunResult[])`, which groups consecutive rows by `instrumentId`, preserves the server's failure-first order and takes `symbol` from the first row. Also export `InstrumentRoster({results, busy, expanded, onToggle})`. Render a `table` with `data-variant="expandable"` and `aria-busy={busy}`, with these columns:
+- [x] T023 Create `web/src/screens/runs/detail/instrument-roster.tsx`. Export `groupByInstrument(results: RunResult[])`, which groups consecutive rows by `instrumentId`, preserves the server's failure-first order and takes `symbol` from the first row. Also export `InstrumentRoster({results, busy, expanded, onToggle})`. Render a `table` with `data-variant="expandable"` and `aria-busy={busy}`, with these columns:
   - an expander column with a visually hidden header *Expand*;
   - *Instrument*;
   - *Outcomes*.
@@ -386,7 +387,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
     | any other | the reason if present, else empty |
 
   Render all text as React text children, never as markup. Do not synthesise rows the API did not return. Under an outcome filter, the API returns only matching rows (Open Gap P2) (depends on T018, T020; satisfies AC-10, AC-11, DAC-E7-9, DAC-E7-2, DAC-E7-S4-5).
-- [ ] T024 Create `web/src/screens/runs/detail/index.tsx` as `export default function RunDetailScreen()`. It reads `runId` with `useParams`.
+- [x] T024 Create `web/src/screens/runs/detail/index.tsx` as `export default function RunDetailScreen()`. It reads `runId` with `useParams`.
 
   **State it holds:**
   - `ScreenState<RunDetail>`;
@@ -425,7 +426,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
 
 **Purpose**: Mount the screen on its child route, inside the shell.
 
-- [ ] T025 Update `web/src/app/routes.tsx`:
+- [x] T025 Update `web/src/app/routes.tsx`:
   - Import `RunDetailScreen` from `../screens/runs/detail`.
   - Point `<Route path="/runs/:runId" …>` at `<RunDetailScreen />`.
   - Delete the now-unused `RunDetailPlaceholder`.
@@ -440,7 +441,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
 
 **Purpose**: Kill mutants on the changed behaviour, run full validation, and keep the per-cycle evidence chain.
 
-- [ ] T026 After T002–T025 are green and their T027 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Strengthen tests until every mutant is killed:
+- [x] T026 After T002–T025 are green and their T027 entries are complete, run the TEST-TDD-005 and TEST-TDD-006 mutation checks on the changed lines. Strengthen tests until every mutant is killed:
   - **`RESULT_OUTCOME_TIER`.** Make `not_found` `critical` or `failed` `warning`, or swap their labels.
   - **Polling.** Make `RUN_DETAIL_POLL_INTERVAL_MS` `5_000`, poll on terminal states, or omit the `clearTimeout`.
   - **Request shape.** Drop `cursor` or `outcome` from the poll's request, or send a `limit`.
@@ -450,7 +451,7 @@ Fourteen TC-IDs are mapped: TC-COMP-010, 011, 019, 026, 067, 074, 076, 092, 093,
   - **Reasons.** Render a reason through `dangerouslySetInnerHTML`.
 
   Do behaviour-preserving refactoring under TEST-TDD-004, keep the T001 baseline green (TEST-TDD-007), verify the TEST-TDD-001 to TEST-TDD-008 chain, and run every command in the Validation Plan (depends on T002–T025; verifies all story criteria).
-- [ ] T027 Run this after **each** TDD cycle in T002–T026, not once at the end.
+- [x] T027 Run this after **each** TDD cycle in T002–T026, not once at the end.
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `docs/capabilities/CAP-001-market-data-acquisition-foundation/epics/failure-diagnosis-and-operability/stories/CAP-001-E7-S4-tdd-evidence.yaml`, beside this story, with `code_review_verdict`, `spec_drift.drift_detected` and its RED/GREEN evidence. Record the characterization cycle (T015) as such, with GREEN-on-arrival evidence instead of a fabricated RED.

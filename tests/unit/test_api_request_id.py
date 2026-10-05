@@ -9,6 +9,7 @@ while handling it carries the id as a field, and included in the response
 import logging
 
 import pytest
+from fastapi import APIRouter
 from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
@@ -62,5 +63,78 @@ def test_request_id_appears_in_every_log_record_and_the_response(
 def test_two_requests_get_different_request_ids(client: TestClient) -> None:
     first = client.get("/api/health")
     second = client.get("/api/health")
+
+    assert first.headers["x-request-id"] != second.headers["x-request-id"]
+
+
+_PROBE_LOGGER = logging.getLogger("factorflow.api.probe")
+
+
+@pytest.fixture
+def probe_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """`client`, plus `GET /api/probe`, which logs an INFO line and raises.
+
+    The probe's routes go at the front of the router, ahead of the
+    `StaticFiles` mount at `/`, and the client does not re-raise server
+    exceptions so the `500` response itself can be inspected.
+    """
+    monkeypatch.delenv("FACTORFLOW_DATABASE_URL", raising=False)
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    app = create_app()
+    probe = APIRouter()
+
+    @probe.get("/api/probe")
+    def _raise() -> None:
+        _PROBE_LOGGER.info("probe handling request")
+        raise RuntimeError("probe failure")
+
+    app.router.routes[0:0] = probe.routes
+    with TestClient(app, raise_server_exceptions=False) as test_client:
+        yield test_client
+
+
+@pytest.mark.parametrize(
+    ("path", "status"),
+    [
+        pytest.param("/api/probe", 500, id="unhandled-500"),
+        pytest.param("/api/does-not-exist", 404, id="unmatched-404"),
+        pytest.param("/api/instruments?limit=501", 422, id="validation-422"),
+    ],
+)
+def test_error_request_id_is_in_every_component_log_record(
+    probe_client: TestClient, caplog: pytest.LogCaptureFixture, path: str, status: int
+) -> None:
+    # Implements TC-COMP-071
+    # Implements TC-COMP-085
+    """DAC-E7-6 / DAC-E7-S2-3: on an error, every `factorflow.api*` record for
+    the request carries the id in the body and in `X-Request-Id`."""
+    with caplog.at_level(logging.INFO):
+        caplog.clear()
+        response = probe_client.get(path)
+
+    assert response.status_code == status
+    header_id = response.headers.get("x-request-id")
+    assert header_id
+    assert response.json()["error"]["request_id"] == header_id
+
+    component_records = [r for r in caplog.records if r.name.startswith("factorflow.api")]
+    for record in component_records:
+        assert getattr(record, "request_id", None) == header_id, (
+            f"record {record.name!r} ({record.getMessage()!r}) does not carry the request's id"
+        )
+    if status == 500:
+        unhandled = [
+            r
+            for r in component_records
+            if r.getMessage() == "unhandled exception during request handling"
+        ]
+        assert unhandled, "expected the unhandled-exception record"
+        assert getattr(unhandled[0], "request_id", None) == header_id
+
+
+def test_two_error_requests_get_different_request_ids(probe_client: TestClient) -> None:
+    # Implements TC-COMP-085
+    first = probe_client.get("/api/probe")
+    second = probe_client.get("/api/does-not-exist")
 
     assert first.headers["x-request-id"] != second.headers["x-request-id"]
