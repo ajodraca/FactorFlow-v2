@@ -257,6 +257,19 @@ function badgeIn(container: HTMLElement, label: string): HTMLElement {
   return badge;
 }
 
+describe("Roster order (ux-design 1.5: failure-first, as the API serves it)", () => {
+  it("keeps the server's instrument order rather than re-sorting it", async () => {
+    getMock.mockResolvedValue(detail(run("partial"), MIXED));
+    renderScreen();
+    await screen.findByRole("table");
+    expect(
+      screen
+        .getAllByRole("button", { name: /^Show data types for / })
+        .map((button) => button.getAttribute("aria-label")),
+    ).toEqual(["Show data types for AAPL", "Show data types for ZZZZ", "Show data types for MSFT"]);
+  });
+});
+
 // Implements TC-COMP-067
 // Implements TC-COMP-095
 describe("not_found is distinguishable from failed (DAC-E7-2, DAC-E7-S4-4)", () => {

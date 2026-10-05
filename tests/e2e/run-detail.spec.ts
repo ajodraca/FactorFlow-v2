@@ -65,7 +65,9 @@ test("a partial run expands an instrument to its data types and filters by outco
   for (const name of DATA_TYPES) {
     await expect(diaga.getByRole("rowheader", { name, exact: true })).toHaveCount(1);
   }
-  await expect(diaga.getByText(`Acquiring prices for DIAGA failed: ${FAILED_REASON}`)).toBeVisible();
+  await expect(
+    diaga.getByText(`Acquiring prices for DIAGA failed: ${FAILED_REASON}`),
+  ).toBeVisible();
   await expect(diaga).toContainText("req-e2e-1");
   const failedBadge = diaga
     .locator("tr", { has: page.getByRole("rowheader", { name: "Prices", exact: true }) })
