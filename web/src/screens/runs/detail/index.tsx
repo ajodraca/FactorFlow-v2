@@ -1,7 +1,7 @@
 import { type JSX, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ApiError, type RunDetailFilters, getAcquisitionRun } from "../../../api/client";
-import type { ResultOutcome, RunDetail, ScreenState } from "../../../api/types";
+import type { ResultOutcome, RunDetail, RunState, ScreenState } from "../../../api/types";
 import { isNonTerminalRunState } from "../outcome-badge";
 import { InstrumentRoster, groupByInstrument } from "./instrument-roster";
 import { RESULT_OUTCOME_LABEL } from "./result-outcome-badge";
@@ -105,6 +105,15 @@ function RunDetailView({ runId }: { runId: string }): JSX.Element {
 
   const reload = (): void => setReloadToken((token) => token + 1);
 
+  function onRunChanged(state: RunState): void {
+    setLatest((current) =>
+      current === null
+        ? null
+        : { ...current, detail: { ...current.detail, run: { ...current.detail.run, state } } },
+    );
+    reload();
+  }
+
   function changeFilter(next: ResultOutcome | ""): void {
     setOutcome(next);
     setCursors([undefined]);
@@ -132,7 +141,11 @@ function RunDetailView({ runId }: { runId: string }): JSX.Element {
       </h1>
 
       {latest !== null ? (
-        <RunSummaryCard detail={latest.detail} fetchedAt={latest.fetchedAt} onRunChanged={reload} />
+        <RunSummaryCard
+          detail={latest.detail}
+          fetchedAt={latest.fetchedAt}
+          onRunChanged={onRunChanged}
+        />
       ) : null}
 
       <div className="flex flex-wrap items-center gap-5">
