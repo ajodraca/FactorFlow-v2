@@ -465,6 +465,32 @@ describe("Cancelling from Run detail (AC-19, AC-26, DAC-E7-S4-3)", () => {
     expect(document.body).not.toHaveTextContent(/Cancelling/);
   });
 
+  it("shows one cancelled summary badge while the detail refetch is pending", async () => {
+    const user = userEvent.setup();
+    let resolveRefetch!: (value: RunDetail) => void;
+    const refetch = new Promise<RunDetail>((resolve) => {
+      resolveRefetch = resolve;
+    });
+    getMock.mockResolvedValueOnce(detail(run("requested"))).mockReturnValueOnce(refetch);
+    cancelMock.mockResolvedValue({ state: "cancelled" });
+    renderScreen();
+
+    await user.click(await screen.findByRole("button", { name: "Cancel run" }));
+    await user.click(screen.getByRole("button", { name: "Cancel queued run" }));
+
+    await waitFor(() => expect(getMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => {
+      const badges = within(summary()).getAllByTestId("outcome-badge");
+      expect(badges).toHaveLength(1);
+      expect(badges[0]).toHaveTextContent("Cancelled");
+    });
+
+    resolveRefetch(detail(run("cancelled", { startedAt: null })));
+    await waitFor(() =>
+      expect(within(summary()).getByTestId("outcome-badge")).toHaveTextContent("Cancelled"),
+    );
+  });
+
   it("says the run had already completed when the cancel races completion", async () => {
     const user = userEvent.setup();
     getMock
