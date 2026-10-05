@@ -209,3 +209,97 @@ cycles:
         authorised by the Other Notes' serial-order invariant.
     tests_executed: true
     commit_hash: 4244ae902fba227e62d98ddfce6cca3f1835a623
+  - name: run-detail-screen-green
+    tasks: [T022, T023, T024, T025]
+    status: green
+    diff_sha256: 1bce160d1f2408729e27edd19910783a65c02c7710103e3d71526a0e2071e4af
+    red:
+      status: satisfied-by-prior-cycles
+      evidence: >-
+        run-detail-screen-red (T002-T010, T014) and run-detail-e2e-red
+        (T016, T017) recorded their RED outcomes.
+    green:
+      commands:
+        - npm run test (41 files, 290 tests passed)
+        - >-
+          npx tsc --noEmit (clean); npm run lint (87 files, no fixes);
+          npm run format exited 1 on tests/e2e/run-detail.spec.ts and
+          cancel-run.spec.ts, misread here as clean; the reflow is in
+          cycle mutation-pass-and-final-validation
+        - npm run build (built)
+        - >-
+          npm run test:e2e (7 passed against the real API and PostgreSQL:
+          cancel-run x3, run-detail, and the existing coverage-expansion,
+          instruments-add-retire and runs-start-cancel)
+      result: >-
+        Every RED case from T002-T010, T014, T016 and T017 passes, and every
+        pre-existing unit and E2E test passes.
+    deviation: >-
+      (1) The race assertions in run-detail.test.tsx and cancel-run.spec.ts
+      expected one summary badge after a 409; DEC-0018 keeps the control's
+      own actual-outcome badge, so they now expect exactly
+      ["Succeeded", "Succeeded"], a test defect corrected rather than a
+      weakening. (2) The default export keys an inner view on runId, so a
+      re-run's navigation never sends the old run's cursor. (3) The page
+      controls are a div, not a nav, to add no second navigation landmark
+      inside the shell. (4) The CancelRunControl docstring no longer claims
+      Runs mounts the control.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the plan match, a single outstanding
+      timer with correct cleanup, filters omitting absent keys, the summary
+      kept on error, the a11y wiring and text-only rendering, and judged all
+      four deviations legitimate. Low: the live region reads "0 instruments
+      shown" while loading.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped every T022-T025 bullet and its copy, and
+        judged the keyed view, the div, the corrected 409 assertions and the
+        docstring wording non-drift.
+    tests_executed: true
+    commit_hash: 557093e5beee96b824370cea5db9533ab8074322
+  - name: mutation-pass-and-final-validation
+    tasks: [T026]
+    status: green
+    diff_sha256: d42686a769b341f0c421fd117b8106875f930b9f87e23454962c451fb658cc3e
+    red:
+      status: mutation-checks-killed
+      method: >-
+        Each of the 17 planned T026 mutants was applied to the source, the S4
+        test files were run, and the source was restored from a copy.
+      result: >-
+        16 of 17 were killed against the cycle-6 tests. "Reorder
+        groupByInstrument alphabetically" survived, because no test pinned
+        the server's failure-first order. A Roster order test in
+        run-detail.test.tsx now pins it. Re-applying that mutant fails
+        exactly that test (1 failed, 34 passed), and the source was restored.
+    formatting: >-
+      npm run format had exited 1 on tests/e2e/run-detail.spec.ts and
+      cancel-run.spec.ts since cycle 5. Biome reflows them. Ignoring
+      whitespace, the only change is one trailing comma.
+    green:
+      commands:
+        - npm run test (41 files, 291 tests passed)
+        - npx tsc --noEmit (clean); npm run lint (87 files, no fixes); npm run format (87 files, exit 0)
+        - npm run build (built)
+        - npm run test:e2e (7 passed against the real API and PostgreSQL)
+        - uv run pytest -m postgres tests/integration/test_api_runs.py (28 passed)
+      result: Every command in the Validation Plan is green.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      An independent reviewer confirmed that the expected AAPL, ZZZZ, MSFT
+      order matches the MIXED fixture's server order, that an alphabetical
+      sort would fail the test, and that the test follows the file's
+      conventions. Low: the test carries no TC-ID, since T026's
+      strengthening maps to none. The reviewer could not byte-diff the E2E
+      specs, so the driver confirmed the change is formatting-only.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        An independent reviewer mapped the assertion to T023 (preserve the
+        server's failure-first order), to T026's named mutant, to ux-design
+        1.5 (failures sort above successes) and to the E5-S5 failure-first
+        query order. It invents no requirement.
+    tests_executed: true
+    commit_hash: 9f6fc6bfa9f05cffb450e74e789fa68f7976a616
