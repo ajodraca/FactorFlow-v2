@@ -1010,22 +1010,20 @@ Clears claim fields (`claimed_by`, `heartbeat_at`) and sets `ended_at` in
 every terminal transition. The runner therefore cannot record a run as
 successful; it can only write results and let the journal read them.
 
-**Known limitations, carried forward as accepted warnings from implementation
-review v1** (`CAP-001-E5-S3-implementation-review-v1.md`) — none blocks a
-current acceptance criterion:
+`finalise` reads the current state with `SELECT ... FOR UPDATE`, so the row
+stays locked from that read to the terminal write and concurrent calls on the
+same run serialise. Every terminal write is guarded by `validate_transition`,
+as in `request_cancel`: a run that is neither `running` nor `cancelling` — a
+`requested` run, for instance — raises `IllegalRunTransition` and the row is
+left unchanged.
 
-- `finalise` does not call `validate_transition` before writing a terminal
-  state, unlike `request_cancel`. In the single-runner architecture, only a
-  claimed run calls `finalise`, so the risk is bounded to future callers that
-  bypass the runner contract (IR-001, medium).
-- `finalise` reads the current state with a plain `SELECT` rather than
-  `SELECT ... FOR UPDATE`. The `UPDATE` in `_FINALISE_UPDATE_SQL` acquires a
-  row lock implicitly, but the read-then-write window permits a TOCTOU race if
-  two transactions call `finalise` concurrently on the same run — not expected
-  in the single-runner architecture (IR-002, medium).
+**Known limitation, carried forward as an accepted warning from implementation
+review v2** (`CAP-001-E5-S3-implementation-review-v2.md`) — it does not block
+an acceptance criterion:
+
 - TDD evidence `commit_hash` fields contain placeholders rather than actual
   Git SHAs; all work was delivered as a single commit rather than per-task
-  (IR-003, low).
+  (IR-001, low).
 
 ## Stale-claim reclaim
 
