@@ -7,7 +7,7 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-09
-updated: 2026-09-09
+updated: 2026-10-07
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
@@ -25,7 +25,8 @@ ai_provenance:
 # Automation Tasks: Integration Tests
 
 **Test Specification:** `docs/capabilities/CAP-001-market-data-acquisition-foundation/tests/integration/integration-tests.md`
-**Component(s):** FactorFlow-v2 application and ingestion process; Massive is an external dependency
+**Component(s)**: `FactorFlow-v2`
+**External dependencies:** Massive
 **Test Scope:** integration
 **Branch:** `main`
 **Date:** 2026-09-09

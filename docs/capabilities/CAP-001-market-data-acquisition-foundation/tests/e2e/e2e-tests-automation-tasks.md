@@ -7,7 +7,7 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-09
-updated: 2026-09-09
+updated: 2026-10-07
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
@@ -25,7 +25,7 @@ ai_provenance:
 # Automation Tasks: E2E Tests
 
 **Test Specification:** `docs/capabilities/CAP-001-market-data-acquisition-foundation/tests/e2e/e2e-tests.md`
-**Component(s):** FactorFlow-v2 owner web application and API
+**Component(s)**: `FactorFlow-v2`
 **Test Scope:** e2e
 **Branch:** `main`
 **Date:** 2026-09-09
