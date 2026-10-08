@@ -4,7 +4,8 @@ import { sql } from "./support/database";
 /**
  * Cancel a run from its detail screen, against the real API and PostgreSQL
  * (owner-web-app section 7, "Cancel a run"; CAP-001-E7-S4 Testing:
- * "open-run-then-cancel"; AC-19, AC-26, DAC-E7-S4-3).
+ * "open-run-then-cancel"; AC-19, AC-26, DAC-E7-S4-3; TC-E2E-008, cancellation
+ * races completed run).
  *
  * The e2e server starts no runner, so a running run is seeded directly. The
  * cleanup below frees the single-active-run slot after every test, so the
@@ -72,7 +73,7 @@ test("a running run shows cancelling, withdraws the action, and stays cancelling
   await expect(summaryBadge(page)).toHaveText("Cancelling");
 });
 
-test("a cancel that races completion says the run had already completed (DAC-E7-S4-3)", async ({
+test("TC-E2E-008: a cancel that races completion says the run had already completed (DAC-E7-S4-3)", async ({
   page,
 }) => {
   const runId = seedRunningRun();
