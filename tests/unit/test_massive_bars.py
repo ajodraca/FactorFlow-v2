@@ -192,6 +192,7 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
 # --- MassiveClient.fetch_daily_bars (CAP-001-E3-S1) ----------------------
 
 
+# Implements TC-INT-022
 def test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates() -> None:
     """TC-COMP-003 / TC-COMP-210 / DAC-E3-S1-2: the daily aggregate request
     uses multiplier `1`, timespan `day`, and inclusive `YYYY-MM-DD` range
@@ -228,6 +229,7 @@ def test_fetch_daily_bars_requests_unadjusted_bars() -> None:
     assert kwargs["adjusted"] is False
 
 
+# Implements TC-INT-022
 def test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order() -> None:
     """TC-COMP-003 / TC-COMP-211: two recorded pages return all rows, in
     order, as one complete result (DAC-E3-S1-3, AC-3 acceptance criterion

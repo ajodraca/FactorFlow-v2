@@ -18,6 +18,7 @@ def client(migrated_connection_string: str, monkeypatch: pytest.MonkeyPatch) -> 
 
 
 @pytest.mark.postgres
+# Implements TC-INT-003
 def test_add_status_codes(client: TestClient) -> None:
     """TC-COMP-102: `201` with at least one added/reactivated, `409` all
     duplicate, `422` all malformed."""
@@ -26,12 +27,22 @@ def test_add_status_codes(client: TestClient) -> None:
 
     duplicates = client.post("/api/instruments", json={"symbols": ["AAPL", "MSFT"]})
     assert duplicates.status_code == 409
+    duplicates_envelope = duplicates.json()["error"]
+    assert duplicates_envelope["code"] == "all_duplicate"
 
     malformed = client.post("/api/instruments", json={"symbols": ["1BAD", "$$$"]})
     assert malformed.status_code == 422
+    malformed_envelope = malformed.json()["error"]
+    assert malformed_envelope["code"] == "all_malformed"
+
+    for envelope in (duplicates_envelope, malformed_envelope):
+        assert envelope["resource"] == "instruments"
+        assert envelope["message"]
+        assert envelope["request_id"]
 
 
 @pytest.mark.postgres
+# Implements TC-INT-002
 def test_add_mixed_batch_response_shape(client: TestClient) -> None:
     """TC-COMP-123/DAC-E2-S3-1: a mixed batch reports every disposition
     group separately, each rejection carrying a reason."""
@@ -55,10 +66,14 @@ def test_add_mixed_batch_response_shape(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+# Implements TC-INT-004
+# Implements TC-INT-005
 def test_retire_status_codes(client: TestClient) -> None:
     """TC-COMP-103: `404` unknown, `409` already retired, `200` otherwise."""
     unknown = client.delete("/api/instruments/NOPE")
     assert unknown.status_code == 404
+    unknown_code = unknown.json()["error"]["code"]
+    assert unknown_code == "instrument_not_found"
 
     client.post("/api/instruments", json={"symbols": ["AAPL"]})
 
@@ -70,9 +85,13 @@ def test_retire_status_codes(client: TestClient) -> None:
 
     already_retired = client.delete("/api/instruments/AAPL")
     assert already_retired.status_code == 409
+    already_retired_code = already_retired.json()["error"]["code"]
+    assert already_retired_code == "instrument_already_retired"
+    assert unknown_code != already_retired_code
 
 
 @pytest.mark.postgres
+# Implements TC-INT-001
 def test_list_filters_and_counts(client: TestClient) -> None:
     """TC-COMP-108/DAC-E2-10: prefix filter, lifecycle filter, and counts."""
     client.post("/api/instruments", json={"symbols": ["AAPL", "AMZN", "MSFT"]})
@@ -103,6 +122,7 @@ def test_list_rejects_unrecognised_lifecycle(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+# Implements TC-INT-005
 def test_error_envelope_shape(client: TestClient) -> None:
     """TC-COMP-125/DAC-E2-S3-3: every non-2xx response from this route
     carries the shared error envelope."""
@@ -158,6 +178,7 @@ def test_list_limit_at_bound_accepted(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+# Implements TC-INT-001
 def test_list_cursor_pagination(client: TestClient) -> None:
     """TC-COMP-127/DAC-E2-S3-5: a cursor from one page continues to the next
     with stable ordering and no duplicate or skipped instrument."""

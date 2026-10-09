@@ -175,6 +175,7 @@ def test_health_most_recent_run_null_when_no_run_recorded(
 
 # Implements TC-COMP-090
 # Implements TC-COMP-073
+# Implements TC-INT-020
 @pytest.mark.postgres
 def test_health_reports_the_most_recent_terminal_run(
     migrated_health_client: tuple[TestClient, str],

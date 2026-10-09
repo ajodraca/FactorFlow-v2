@@ -133,7 +133,7 @@ repository root.
 so a later failure is attributable to this work. No new dependency, marker,
 configuration or `conftest.py` is needed (owner direction 2026-10-07, item 3).
 
-- [ ] T001 From the repository root, run `uv sync --all-extras`, then `uv run pytest -m 'not postgres'` and `uv run pytest tests/integration --collect-only -q`. Record the pass and collect counts in the automation hand-off as the baseline. Where Docker is available, also record a baseline `uv run pytest tests/integration -m postgres`. Change no file.
+- [x] T001 From the repository root, run `uv sync --all-extras`, then `uv run pytest -m 'not postgres'` and `uv run pytest tests/integration --collect-only -q`. Record the pass and collect counts in the automation hand-off as the baseline. Where Docker is available, also record a baseline `uv run pytest tests/integration -m postgres`. Change no file.
 
 **Checkpoint:** The baseline counts are recorded, and the suite collects with the
 existing `pyproject.toml` and `tests/conftest.py`.
@@ -145,7 +145,7 @@ existing `pyproject.toml` and `tests/conftest.py`.
 **Purpose:** Create the one new test module this plan needs, with the per-file
 helpers every `tests/unit/test_massive_*.py` file defines (DEC-0028).
 
-- [ ] T002 Create `tests/unit/test_massive_retry.py`. Its module docstring cites the test table in `component-design-massive-client.md` section 7: "429 is not an attempt", "Timeout retries to the limit" and "A 429 without Retry-After is still throttling". Define the helpers the same way `tests/unit/test_massive_client_governor_integration.py` does: `FIXTURES`, `_load`, `_settings()` (`max_attempts: 3`), `_governor()` (`max_attempts=3`, `max_throttle_wait_seconds=1.0`, no-op `sleep`), `_FakeResponse` and `_envelope`. Do not import helpers across test modules, because the existing files do not. Add no tests in this task (supports TC-INT-025 and TC-INT-026).
+- [x] T002 Create `tests/unit/test_massive_retry.py`. Its module docstring cites the test table in `component-design-massive-client.md` section 7: "429 is not an attempt", "Timeout retries to the limit" and "A 429 without Retry-After is still throttling". Define the helpers the same way `tests/unit/test_massive_client_governor_integration.py` does: `FIXTURES`, `_load`, `_settings()` (`max_attempts: 3`), `_governor()` (`max_attempts=3`, `max_throttle_wait_seconds=1.0`, no-op `sleep`), `_FakeResponse` and `_envelope`. Do not import helpers across test modules, because the existing files do not. Add no tests in this task (supports TC-INT-025 and TC-INT-026).
 
 **Checkpoint:** `uv run pytest tests/unit/test_massive_retry.py --collect-only -q`
 imports the module cleanly, and `uv run ruff check tests/unit/test_massive_retry.py`
@@ -161,17 +161,17 @@ test asserts (owner direction 2026-10-07; DEC-0023, DEC-0024).
 
 ### Traceability annotations (no assertion changes)
 
-- [ ] T003 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_instruments.py`:
+- [x] T003 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_instruments.py`:
   - TC-INT-001 on `test_list_filters_and_counts` and `test_list_cursor_pagination`
   - TC-INT-002 on `test_add_mixed_batch_response_shape`
   - TC-INT-003 on `test_add_status_codes`
   - TC-INT-004 and TC-INT-005 on `test_retire_status_codes`
   - TC-INT-005 on `test_error_envelope_shape`
-- [ ] T004 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_settings.py`:
+- [x] T004 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_settings.py`:
   - TC-INT-006 on `test_get_depth_when_unset`
   - TC-INT-007 on `test_put_depth_accepts_bounded_value`
   - TC-INT-008 on `test_put_depth_rejects_invalid` and `test_error_envelope_shape_on_settings`
-- [ ] T005 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_runs.py`:
+- [x] T005 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_runs.py`:
   - TC-INT-009 on `test_start_with_active_run_returns_202_queued_behind_set`
   - TC-INT-010 on `test_start_no_depth_returns_409_history_depth_not_set` and `test_start_no_active_instruments_returns_409_no_active_instruments`
   - TC-INT-011 on `test_list_runs_reverse_chronological_order`, `test_list_runs_state_filter` and `test_list_runs_cursor_continuation_no_gaps`
@@ -180,48 +180,48 @@ test asserts (owner direction 2026-10-07; DEC-0023, DEC-0024).
   - TC-INT-014 on `test_cancel_running_run_returns_202_cancelling`
   - TC-INT-015 on `test_cancel_queued_run_returns_202_cancelled`
   - TC-INT-016 on `test_cancel_terminal_run_returns_409_run_already_terminal` and `test_cancel_unknown_run_returns_404`
-- [ ] T006 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_coverage.py`:
+- [x] T006 [P] Add `# Implements TC-INT-NNN` lines in `tests/integration/test_api_coverage.py`:
   - TC-INT-017 on `test_coverage_reports_presence_ranges_and_last_acquired`, `test_coverage_reports_gap_counts_and_availability`, `test_symbol_filter_is_a_prefix`, `test_lifecycle_filter_and_default_includes_retired`, `test_date_bounds_narrow_gaps` and `test_cursor_pages_through_every_instrument_once`
   - TC-INT-018 on `test_inverted_range_is_rejected`
-- [ ] T007 [P] Add `# Implements TC-INT-019` on `test_coverage_page_size_defaults_and_caps` in `tests/integration/test_api_pagination.py`.
-- [ ] T008 [P] Add `# Implements TC-INT-020` on `test_health_reports_the_most_recent_terminal_run` in `tests/integration/test_api_health.py`.
-- [ ] T009 [P] Add `# Implements TC-INT-NNN` lines in `tests/unit/test_massive_reference.py`:
+- [x] T007 [P] Add `# Implements TC-INT-019` on `test_coverage_page_size_defaults_and_caps` in `tests/integration/test_api_pagination.py`.
+- [x] T008 [P] Add `# Implements TC-INT-020` on `test_health_reports_the_most_recent_terminal_run` in `tests/integration/test_api_health.py`.
+- [x] T009 [P] Add `# Implements TC-INT-NNN` lines in `tests/unit/test_massive_reference.py`:
   - TC-INT-021 on `test_fetch_reference_uses_the_single_ticker_endpoint_only` and `test_fetch_reference_returns_product_shaped_reference`
   - TC-INT-025 on `test_fetch_reference_raises_instrument_not_found_for_unknown_symbol`
-- [ ] T010 [P] Add `# Implements TC-INT-022` on `test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates` and `test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order` in `tests/unit/test_massive_bars.py`.
+- [x] T010 [P] Add `# Implements TC-INT-022` on `test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates` and `test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order` in `tests/unit/test_massive_bars.py`.
 - [ ] T011 [P] Add `# Implements TC-INT-023` on `test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol` and `test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_financials.py`.
-- [ ] T012 [P] Add `# Implements TC-INT-024` on `test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_actions.py`.
-- [ ] T013 [P] Add `# Implements TC-INT-025` on `test_a_first_page_provider_failure_surfaces_as_the_typed_error` in `tests/unit/test_massive_client_governor_integration.py`.
-- [ ] T014 [P] Add the runner traceability lines in `tests/integration/test_runner_isolation.py` (DEC-0024):
+- [x] T012 [P] Add `# Implements TC-INT-024` on `test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_actions.py`.
+- [x] T013 [P] Add `# Implements TC-INT-025` on `test_a_first_page_provider_failure_surfaces_as_the_typed_error` in `tests/unit/test_massive_client_governor_integration.py`.
+- [x] T014 [P] Add the runner traceability lines in `tests/integration/test_runner_isolation.py` (DEC-0024):
   - `# Implements TC-INT-025` on `test_not_found_instrument_is_recorded_and_run_continues`
   - `# Implements TC-INT-026` on `test_provider_unavailable_is_recorded_and_run_continues`
 
 ### Missing assertions and new tests (DEC-0023)
 
-- [ ] T015 Extend `test_add_status_codes` in `tests/integration/test_api_instruments.py` for TC-INT-003 (depends on T003):
+- [x] T015 Extend `test_add_status_codes` in `tests/integration/test_api_instruments.py` for TC-INT-003 (depends on T003):
   - On the 409 response, assert `error.code == "all_duplicate"`.
   - On the 422 response, assert `error.code == "all_malformed"`.
   - On both, assert `error.resource == "instruments"` and that `error.message` and `error.request_id` are non-empty.
-- [ ] T016 Extend `test_retire_status_codes` in `tests/integration/test_api_instruments.py` for TC-INT-005. Assert that the 404 carries `error.code == "instrument_not_found"`, the 409 carries `error.code == "instrument_already_retired"`, and the two codes differ (depends on T015, same file).
-- [ ] T017 Extend `test_start_with_active_run_returns_202_queued_behind_set` in `tests/integration/test_api_runs.py` for TC-INT-009. After the second start, assert that `GET /api/acquisition-runs?state=running` returns 200 and that its `runs` hold exactly one run, `first_id`. This shows the queued run is not executing at the same time (depends on T005).
-- [ ] T018 Extend `test_get_run_detail_unknown_returns_404` in `tests/integration/test_api_runs.py` for TC-INT-013. Assert `error.code == "not_found"`, `error.resource == "acquisition-run"`, and that `error.message` and `error.request_id` are non-empty (depends on T017, same file).
-- [ ] T019 Add `test_cancel_queued_run_leaves_active_run_unaffected` to `tests/integration/test_api_runs.py`, with `# Implements TC-INT-015` and `@pytest.mark.postgres` (depends on T018, same file).
+- [x] T016 Extend `test_retire_status_codes` in `tests/integration/test_api_instruments.py` for TC-INT-005. Assert that the 404 carries `error.code == "instrument_not_found"`, the 409 carries `error.code == "instrument_already_retired"`, and the two codes differ (depends on T015, same file).
+- [x] T017 Extend `test_start_with_active_run_returns_202_queued_behind_set` in `tests/integration/test_api_runs.py` for TC-INT-009. After the second start, assert that `GET /api/acquisition-runs?state=running` returns 200 and that its `runs` hold exactly one run, `first_id`. This shows the queued run is not executing at the same time (depends on T005).
+- [x] T018 Extend `test_get_run_detail_unknown_returns_404` in `tests/integration/test_api_runs.py` for TC-INT-013. Assert `error.code == "not_found"`, `error.resource == "acquisition-run"`, and that `error.message` and `error.request_id` are non-empty (depends on T017, same file).
+- [x] T019 Add `test_cancel_queued_run_leaves_active_run_unaffected` to `tests/integration/test_api_runs.py`, with `# Implements TC-INT-015` and `@pytest.mark.postgres` (depends on T018, same file).
   - Reuse `runs_client`, `_set_history_depth`, `_add_instrument` and `_start_run`, and the `UPDATE acquisition_run SET state='running' …` setup from `test_cancel_running_run_returns_202_cancelling`.
   - Start run A and make it `running`.
   - Start run B and assert 202 with `queued_behind == A`.
   - Cancel B and assert 202 with `state == "cancelled"`.
   - Assert that `GET /api/acquisition-runs/{A}` returns 200 with `run.state == "running"`.
-- [ ] T020 [P] Extend `test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_actions.py` for TC-INT-024 (depends on T012). The argument names are the ones `MassiveClient.fetch_corporate_actions` passes in `src/factorflow/ingestion/massive/client.py`.
+- [x] T020 [P] Extend `test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_actions.py` for TC-INT-024 (depends on T012). The argument names are the ones `MassiveClient.fetch_corporate_actions` passes in `src/factorflow/ingestion/massive/client.py`.
   - Assert that `list_stocks_splits` was called once with `ticker="AAPL"`, `execution_date_gte="2000-01-01"`, `execution_date_lte="2024-12-31"` and `raw=True`.
   - Assert the same for `list_stocks_dividends`, using `ex_dividend_date_gte` and `ex_dividend_date_lte`.
   - Assert the same for `vx.list_ipos`, using `listing_date_gte` and `listing_date_lte`.
   - Assert that `get_ticker_events` was called once for `"AAPL"`.
-- [ ] T021 Add `test_rate_limited_responses_are_paced_without_consuming_attempts` to `tests/unit/test_massive_retry.py`, with `# Implements TC-INT-025` (depends on T002).
+- [x] T021 Add `test_rate_limited_responses_are_paced_without_consuming_attempts` to `tests/unit/test_massive_retry.py`, with `# Implements TC-INT-025` (depends on T002).
   - Patch `RESTClient` as the other `test_massive_*.py` files do.
   - Set `get_ticker_details.side_effect` to four `BadResponse((FIXTURES / "error_rate_limited.json").read_text())` instances, followed by `_FakeResponse(_envelope(_load("reference_active.json")))`.
   - Assert that `MassiveClient(settings=_settings(), governor=_governor()).fetch_reference("AAPL")` returns the reference.
   - Assert `get_ticker_details.call_count == 5`. That is more sends than `max_attempts`, so no 429 was counted as an attempt.
-- [ ] T022 Add the parametrized test `test_timeouts_and_server_errors_retry_to_the_attempt_limit` to `tests/unit/test_massive_retry.py`, with `# Implements TC-INT-026` (depends on T021, same file).
+- [x] T022 Add the parametrized test `test_timeouts_and_server_errors_retry_to_the_attempt_limit` to `tests/unit/test_massive_retry.py`, with `# Implements TC-INT-026` (depends on T021, same file).
   - Timeout case: set `get_ticker_details.side_effect` to `urllib3.exceptions.ReadTimeoutError(None, "https://api.massive.com", "Read timed out.")`. `urllib3` is already a dependency of `client.py`.
   - Server-error case: set it to `BadResponse((FIXTURES / "error_unknown_shape.json").read_text())`. This is the unrecognised error body that the later-page failure test in `test_massive_bars.py` already uses.
   - In both cases, assert that `fetch_reference("AAPL")` raises `ProviderUnavailable` and that `get_ticker_details.call_count == 3`: the configured `max_attempts`, with no fourth send.
@@ -238,7 +238,7 @@ changed.
 **Purpose:** Prove that the annotated, extended and new tests pass and that all
 26 IDs are traced.
 
-- [ ] T023 From the repository root, run the checks that need no Docker (depends on T002–T022):
+- [x] T023 From the repository root, run the checks that need no Docker (depends on T002–T022):
   - `uv run ruff check .`
   - `uv run ruff format --check .`
   - `uv run mypy src`
@@ -246,7 +246,7 @@ changed.
   - `uv run pytest tests/integration --collect-only -q`, which proves T003–T019 still import and collect
 
   Compare the results with the T001 baseline.
-- [ ] T024 On a host with Docker, run `uv run pytest tests/integration -m postgres` and then the full `uv run pytest`. Both must pass. This container has no Docker, so use a local machine or CI. Record where the run happened and the pass counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T023).
+- [x] T024 On a host with Docker, run `uv run pytest tests/integration -m postgres` and then the full `uv run pytest`. Both must pass. This container has no Docker, so use a local machine or CI. Record where the run happened and the pass counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T023).
 - [ ] T025 From the repository root, verify traceability: `for n in $(seq -w 1 26); do grep -rqE "# Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing (depends on T003–T022).
 
 **Checkpoint:** Lint, format, type check and the non-postgres tests pass

@@ -7,7 +7,7 @@ import { expect, test } from "@playwright/test";
  * Expansion to gap dates on Coverage, in a browser against the real API and
  * PostgreSQL from `playwright.config.ts` (CAP-001-E6-S4 Testing:
  * "`@playwright/test` for expansion to gap dates"; AC-8, DAC-E6-13,
- * DAC-E6-S4-2, DAC-E6-S4-5).
+ * DAC-E6-S4-2, DAC-E6-S4-5; TC-E2E-003, coverage is fit to rely on).
  *
  * The seed is applied through the e2e container, whose name and credentials
  * are the constants in `scripts/run-e2e-server.sh`. CVC is missing
@@ -35,7 +35,7 @@ test.beforeAll(() => {
   );
 });
 
-test("a gap count sits in the row and its dates load once, on expansion, without polling", async ({
+test("TC-E2E-003: a gap count sits in the row and its dates load once, on expansion, without polling", async ({
   page,
 }) => {
   const coverageRequests: string[] = [];
@@ -58,6 +58,26 @@ test("a gap count sits in the row and its dates load once, on expansion, without
     page.locator("tr", { has: page.getByRole("rowheader", { name: new RegExp(`\\b${symbol}$`) }) });
   for (const symbol of ["CVA", "CVB", "CVC"]) {
     await expect(rowOf(symbol)).toBeVisible();
+  }
+
+  // TC-E2E-003: data-type presence and last-acquired time. The seed covers
+  // reference and prices only and records an acquisition for prices only, so
+  // fundamentals and corporate actions were never attempted and read
+  // Unknown (coverage-service section 2.4; DEC-0030).
+  const presence = (symbol: string, column: number) =>
+    rowOf(symbol).locator("td").nth(column).getByTestId("presence-badge");
+  for (const symbol of ["CVA", "CVB", "CVC"]) {
+    for (const column of [1, 2]) {
+      await expect(presence(symbol, column)).toHaveAttribute("data-variant", "coverage-present");
+      await expect(presence(symbol, column)).toContainText("Present");
+    }
+    for (const column of [3, 4]) {
+      await expect(presence(symbol, column)).toHaveAttribute("data-variant", "coverage-unknown");
+      await expect(presence(symbol, column)).toContainText("Unknown");
+    }
+    await expect(rowOf(symbol).locator("td").nth(9)).toHaveText(
+      "2024-01-05 16:14:03 America/Chicago",
+    );
   }
 
   const gapsCell = (symbol: string) => rowOf(symbol).locator("td").nth(7);

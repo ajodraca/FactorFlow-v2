@@ -142,6 +142,7 @@ def _fetch_run_state(conn: psycopg.Connection, run_id: uuid.UUID) -> str:
 
 @pytest.mark.postgres
 # Implements TC-COMP-011, TC-COMP-178
+# Implements TC-INT-025
 def test_not_found_instrument_is_recorded_and_run_continues(
     migrated_runner_connection: psycopg.Connection,
 ) -> None:
@@ -180,6 +181,7 @@ def test_not_found_instrument_is_recorded_and_run_continues(
 
 @pytest.mark.postgres
 # Implements TC-COMP-178
+# Implements TC-INT-026
 def test_provider_unavailable_is_recorded_and_run_continues(
     migrated_runner_connection: psycopg.Connection,
 ) -> None:

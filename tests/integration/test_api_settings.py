@@ -17,6 +17,7 @@ def client(migrated_connection_string: str, monkeypatch: pytest.MonkeyPatch) -> 
 
 
 @pytest.mark.postgres
+# Implements TC-INT-008
 def test_put_depth_rejects_invalid(client: TestClient) -> None:
     """TC-COMP-106/DAC-E2-8: only a positive integer within the canonical
     bound is accepted."""
@@ -28,6 +29,7 @@ def test_put_depth_rejects_invalid(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+# Implements TC-INT-007
 def test_put_depth_accepts_bounded_value(client: TestClient) -> None:
     response = client.put("/api/settings/history-depth", json={"years": 10})
 
@@ -38,6 +40,7 @@ def test_put_depth_accepts_bounded_value(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+# Implements TC-INT-006
 def test_get_depth_when_unset(client: TestClient) -> None:
     """TC-COMP-124/DAC-E2-S3-2: `years` is `null`, not omitted or zero,
     before any value is stated."""
@@ -50,6 +53,7 @@ def test_get_depth_when_unset(client: TestClient) -> None:
 
 
 @pytest.mark.postgres
+# Implements TC-INT-008
 def test_error_envelope_shape_on_settings(client: TestClient) -> None:
     """TC-COMP-125/DAC-E2-S3-3: a non-2xx response from this route also
     carries the shared error envelope, with all four fields present and
