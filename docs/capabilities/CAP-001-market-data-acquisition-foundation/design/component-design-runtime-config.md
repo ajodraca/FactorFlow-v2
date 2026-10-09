@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-runtime-config
 artifact_type: component-design
-artifact_version: 10
+artifact_version: 11
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.295"
-  timestamp: 2026-10-09T15:03:28Z
+  timestamp: 2026-10-09T20:40:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -24,6 +24,8 @@ ai_provenance:
       version: "5"
     - id: tech-stack
       version: "3"
+    - id: CONST-SEC
+      version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -268,7 +270,8 @@ process exits non-zero before it makes any provider request.
    contains the API key or any other setting's value (AC-13, SEC-ERR-001).
 
 **Loopback `http`: conditional on CONST-SEC 1.2, non-release builds only
-(DEC-0031, DEC-0033, DEC-0034).** The owner's direction also asks for `http` to
+(DEC-0031, DEC-0033 to DEC-0037).** This design relies on the SEC-ENC-001
+loopback test-double exception, recorded for this project in DEC-0036. The owner's direction also asks for `http` to
 be accepted when the host is a loopback address, so that local test doubles
 such as the DEC-0025 E2E stub (`http://127.0.0.1:8126`) can stand in for the
 provider. The clause reads:
@@ -290,25 +293,43 @@ forbids an environment variable switching encryption off in production. The
 owner directed on 2026-10-09 that both invariants be amended with a narrow
 loopback test-double exception that never applies in a release build or a
 production environment. **Clause 2a is conditional on that amendment**, which
-is Security Constitution version 1.2 (CONST-SEC 1.2) as reworked after its
-independent review (`docs/constitutions/reviews/security-review-v1.md` in the
-AI-agents harness). Its SEC-ENC-001 permits plain HTTP to a local test double
-only when four conditions hold, and this section meets each of them:
+is Security Constitution version 1.2 (CONST-SEC 1.2) in the AI-agents harness,
+as reworked after its two independent reviews
+(`docs/constitutions/reviews/security-review-v1.md` and `security-review-v2.md`).
+Its SEC-ENC-001 permits plain HTTP to a local test double only when four
+conditions hold, and this section meets each of them:
 
 | CONST-SEC 1.2 SEC-ENC-001 condition | Where this design meets it |
 |---|---|
 | (1) Host exactly `127.0.0.1`, `[::1]` or `localhost`; no other form | Clause 2a and the table below |
-| (2) Every connected address is loopback; `localhost` resolves only to loopback; no redirect off loopback is followed | Items 2 and 6 below |
+| Precondition: the peer is a local test double (fixture responses only, no outbound connection, no relay) | Item 3 below (the DEC-0025 stub, started by the script itself) |
+| (2) Every connected address is loopback; `localhost` resolves only to loopback; no redirect is followed; no proxy is used | Items 2 and 6 below |
 | (3) No production credential or data; anything but a designated test credential refused at start and at every later credential load | Item 3 below |
-| (4) Non-release code only (SEC-NDG-001: no configuration, flag or environment variable enables it) | *Release and non-release*, items 1, 4 and 5 below |
+| (4) The allowance is reachable only through non-release code (SEC-NDG-001: no configuration, flag or environment variable enables it) | *Release and non-release*, items 1, 4 and 5 below |
+| Consumer record: designs cite the exception by its phrase; the project records a decision naming them | This section, `component-design-massive-client.md` sections 2.2b and 4, `component-design-acquisition-runner.md` section 2.1; DEC-0036 |
 
-**When clause 2a is in force.** Clause 2a takes effect once CONST-SEC 1.2,
-carrying that exception, is merged to the AI-agents harness default branch.
-Until then it is specified but must not be implemented, and an `http` value
-fails start whatever its host, exactly as before. The amendment is the
-constitution owner's change, made in the AI-agents harness
-(`docs/constitutions/security.constitution.md`) and not in this repository. It
-awaits the owner's re-review and approval (section 14 item 4).
+**When clause 2a is in force (DEC-0036, PROVISIONAL).** This design was
+checked against one exact text: CONST-SEC 1.2 at content revision
+`sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`, the value
+`python3 scripts/artifact-gate.py revision --repo-dir . --artifact docs/constitutions/security.constitution.md`
+prints for that text in the AI-agents harness. Clause 2a takes effect only when
+both of the following hold:
+
+- CONST-SEC 1.2 is in force under its own rule (*How to Use*, "When a version
+  is in force"): its frontmatter carries the constitution owner's `approval`
+  block whose `reviewed_revision` equals the file's content revision, and the
+  file is on the AI-agents harness default branch; and
+- that in-force file's content revision equals the pinned revision above.
+
+The content revision ignores the `status` and `approval` fields, so the owner's
+approval does not change it. If CONST-SEC 1.2 comes into force with a different
+revision, clause 2a stays unimplemented until the condition table above is
+re-checked against the in-force text, the pin here and in DEC-0036 is updated,
+and this design is re-reviewed. Until clause 2a takes effect it is specified
+but must not be implemented, and an `http` value fails start whatever its host,
+exactly as before. The amendment is the constitution owner's change, made in
+the AI-agents harness (`docs/constitutions/security.constitution.md`) and not in
+this repository (section 14 item 4).
 
 **Release and non-release (DEC-0033, DEC-0034, PROVISIONAL).** No environment,
 profile or build-type setting exists in this project, and none is added: a
@@ -362,38 +383,61 @@ Clause 2a is therefore implemented only in that test-only entry point, never in
    accepts parse to the same host under `urlsplit` and under urllib3's
    `parse_url`, which the SDK uses, because userinfo, paths and every other
    form are rejected first.
-3. The test entry point refuses to start unless `FACTORFLOW_MASSIVE_API_KEY` is
-   the E2E dummy value `e2e-test-key`. It applies the same check at every
-   claim, where section 2.2b re-reads the credential: it passes
-   `factorflow.ingestion_main.main` a credential reader that wraps
-   `read_provider_credential` and refuses any value other than `e2e-test-key`.
-   A refusal ends the process with a non-zero exit before any client is built
-   or rebuilt with that value, and its message does not echo the value. The
-   plain-HTTP channel therefore cannot carry a production credential at start
-   or after a rotation. The DEC-0025 stub serves fixture data only and makes no
-   outbound connection, so it is a local test double in CONST-SEC 1.2's sense,
-   and the channel carries no production data.
-4. `factorflow.ingestion_main.main` gains two keyword-only parameters: a
-   settings factory defaulting to `Settings`, and a credential reader
-   defaulting to `read_provider_credential`. The test entry point passes its
-   wrapped settings and its checking reader. The release entry point passes
-   neither. A parameter is not configuration: only code absent from the release
-   artifact can supply it.
-5. `scripts/run-e2e-server.sh` starts the acquisition stack's ingestion process
-   through the test entry point instead of `python -m factorflow.ingestion_main`.
+3. **Designated test credential only (DEC-0037, PROVISIONAL).** The test entry
+   point refuses to start unless `FACTORFLOW_MASSIVE_API_KEY` fully matches
+   `^TEST-ONLY-[0-9a-f]{32,}$`, the pattern CONST-SEC 1.2 gives a designated
+   test credential. It applies the same check at every claim, where section 2.2b
+   re-reads the credential: it passes `factorflow.ingestion_main.main` a
+   credential reader that wraps `read_provider_credential` and refuses any value
+   that does not match. A refusal ends the process with a non-zero exit before
+   any client is built or rebuilt with that value, and its message does not echo
+   the value. The plain-HTTP channel therefore cannot carry a production
+   credential at start or after a rotation. No fixed key value appears in this
+   design, the test entry point, its tests or the script: the script generates
+   the value for each run (item 5), and tests generate their own. The DEC-0025
+   stub, `tests/e2e/support/massive_stub.py`, serves committed fixture data only,
+   opens no outbound connection and is started by the script itself on
+   `127.0.0.1`, with nothing between it and the ingestion process. It is a local
+   test double in CONST-SEC 1.2's sense, and the channel carries no production
+   data.
+4. `factorflow.ingestion_main.main` gains two keyword-only parameters, a
+   settings factory and a credential reader (DEC-0035).
+   `component-design-acquisition-runner.md`, which owns
+   `src/factorflow/ingestion_main.py`, specifies them in its sections 2.1, 3 and
+   11. The test entry point passes its wrapped settings and its checking reader.
+   The release entry point passes neither. A parameter is not configuration:
+   only code absent from the release artifact can supply it.
+5. **The script change (DEC-0037; specified here, not yet made).** When clause
+   2a takes effect, `scripts/run-e2e-server.sh` changes in one edit:
+   - it generates one key per run,
+     `E2E_PROVIDER_KEY="TEST-ONLY-$(uv run python -c 'import secrets; print(secrets.token_hex(16))')"`,
+     before either stack starts;
+   - line 90 exports `FACTORFLOW_MASSIVE_API_KEY="$E2E_PROVIDER_KEY"` for the
+     main stack, with no fallback to an inherited value, and line 138 sets the
+     acquisition stack's `FACTORFLOW_MASSIVE_API_KEY=$E2E_PROVIDER_KEY`; the
+     literal `e2e-test-key` is removed from both;
+   - line 145 starts the acquisition stack's ingestion process through
+     `uv run python tests/e2e/support/ingestion_e2e_main.py` instead of
+     `python -m factorflow.ingestion_main`.
+
    The acquisition API process reads presence only and is unaffected.
-6. **No redirect is followed.** The SDK client is built with `retries=0`
-   (`component-design-massive-client.md` section 2.2b). Under that setting
-   urllib3 refuses a redirect instead of following it, so no request leaves the
-   double's address. The massive-client design states this as a requirement in
-   every build and tests it against a loopback double. The test entry point
-   relies on it and adds no redirect handling of its own.
+6. **No redirect is followed and no proxy is used.** The SDK client is built
+   with `retries=0` (`component-design-massive-client.md` section 2.2b). Under
+   that setting urllib3 refuses a redirect instead of following it, so no
+   request leaves the double's address. The SDK builds a plain
+   `urllib3.PoolManager`, never a `ProxyManager`, and neither the SDK nor
+   urllib3 2.7.0 reads `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY` or `NO_PROXY`,
+   so the channel is never routed through a proxy whatever the environment
+   says. The massive-client design states both as requirements in every build
+   and tests them without opening a socket (DEC-0038). The test entry point
+   relies on them and adds no redirect or proxy handling of its own.
 
 The reading in `component-design-ingestion-api.md` section 4, that loopback does
 not engage SEC-ENC-001 for the owner interface, is not affected by this
 exception and is not settled by it: the exception covers only a component and
-its local test double. CONST-SEC 1.2 records the standing of other loopback
-channels as the constitution owner's open question (section 14 item 6).
+its local test double. CONST-SEC 1.2 records the standing of other host-local
+plaintext channels, the database connections included, as the constitution
+owner's open question (section 14 item 6).
 
 | Value of `FACTORFLOW_MASSIVE_BASE_URL` | Outcome |
 |---|---|
@@ -705,13 +749,16 @@ N/A, not applicable for this component.
 - **Transport encryption (SEC-ENC-001, SEC-NDG-001).** In the release build
   the provider base URL must be `https`, so no setting can send the credential
   over plain HTTP. The loopback `http` allowance (clause 2a, section 2.2c)
-  rests on the owner's amendment of both invariants, CONST-SEC 1.2, and takes
-  effect once that version is merged to the AI-agents harness default branch.
-  It is confined to a test-only entry point absent from the release artifact
-  (DEC-0033, DEC-0034). That entry point refuses any key other than the E2E
-  dummy at start and at every claim, checks that `localhost` resolves only to
-  loopback, and relies on the client never following a redirect. The owner's
-  re-review of the amendment is tracked in section 14 item 4.
+  rests on the SEC-ENC-001 loopback test-double exception that CONST-SEC 1.2
+  adds, and takes effect only when that version is in force under its own rule
+  (the owner's `approval` block and the harness default branch) at the content
+  revision section 2.2c pins (DEC-0036). It is confined to a test-only entry
+  point absent from the release artifact (DEC-0033, DEC-0034). That entry point
+  refuses, at start and at every claim, any key that is not a designated test
+  credential (`^TEST-ONLY-[0-9a-f]{32,}$`, generated per run, DEC-0037), checks
+  that `localhost` resolves only to loopback, and relies on the client never
+  following a redirect and never using a proxy. The owner's approval of the
+  amendment is tracked in section 14 item 4.
 - **No dynamic code execution.** No variable is evaluated, imported by name, or
   used to construct a code path (SEC-INP-003).
 - **Error disclosure (SEC-ERR-001).** Validation failures are written to the
@@ -778,8 +825,9 @@ N/A, not applicable for this component.
 | Loopback `http` fails start in the release settings | `tests/unit/test_settings_base_url.py` | `http://127.0.0.1:8126`, `http://localhost:8126` and `http://[::1]:8126` each raise `ConfigurationError` from `MassiveSettings`. This test does not change when clause 2a takes effect: the release settings never accept `http` (SEC-NDG-001, DEC-0033) |
 | Loopback `http` is accepted only by the test-only entry point | `tests/unit/test_ingestion_e2e_main.py` | Under CONST-SEC 1.2: the three loopback values load through `tests/e2e/support/ingestion_e2e_main.py`; `http://127.0.0.2`, `http://127.1`, `http://0.0.0.0`, `http://localhost.`, `http://[0:0:0:0:0:0:0:1]`, `http://[::ffff:127.0.0.1]`, `http://[::1%25lo]`, `http://::1:8126` and `http://api.massive.com` still raise; every other "rejected" row of section 2.2c still raises (clause 2a) |
 | `localhost` must resolve only to loopback | `tests/unit/test_ingestion_e2e_main.py` | With name resolution patched so `localhost` returns a non-loopback address alongside `127.0.0.1`, the test entry point exits non-zero before constructing a `RESTClient`; with only loopback addresses it starts (clause 2a, item 2; CONST-SEC 1.2 SEC-ENC-001 condition 2) |
-| The test-only entry point refuses a non-dummy key | `tests/unit/test_ingestion_e2e_main.py` | With any `FACTORFLOW_MASSIVE_API_KEY` other than `e2e-test-key`, the test entry point exits non-zero before constructing a `RESTClient`, and the message does not echo the key (clause 2a, item 3, AC-13) |
-| The test-only entry point refuses a non-dummy key at a later claim | `tests/unit/test_ingestion_e2e_main.py` | Started with `e2e-test-key`, after the environment value changes to any other key, the next claim's credential read ends the process non-zero, no `RESTClient` is built or rebuilt with the new value, and the message does not echo it (clause 2a, item 3, section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 3) |
+| The test-only entry point accepts only a designated test credential | `tests/unit/test_ingestion_e2e_main.py` | A key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)` starts. Each of `e2e-test-key`, `TEST-ONLY-` with a 31-character hex tail, `TEST-ONLY-` with an uppercase hex tail, `test-only-` with a valid tail, a valid key with a trailing newline, and a random 32-character alphanumeric key makes the test entry point exit non-zero before constructing a `RESTClient`, and the message does not echo the key (clause 2a, item 3, AC-13; CONST-SEC 1.2 Definitions) |
+| The test-only entry point refuses a non-test key at a later claim | `tests/unit/test_ingestion_e2e_main.py` | Started with a generated `TEST-ONLY-` key, after the environment value changes to a key that does not match the pattern, the next claim's credential read ends the process non-zero, no `RESTClient` is built or rebuilt with the new value, and the message does not echo it; a change to another generated `TEST-ONLY-` key rebuilds the client normally (clause 2a, item 3, section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 3) |
+| No fixed provider key is committed for the E2E stack | `tests/unit/test_no_committed_secrets.py` | Once the item 5 script change is made, no tracked file under `scripts/`, `tests/` or `src/` contains the former fixed key `e2e-test-key` or a literal matching `TEST-ONLY-[0-9a-f]{32,}`, other than in this test's own search patterns (CONST-SEC 1.2 Definitions; SEC-SEC-001; DEC-0037) |
 | Clause 2a is absent from the release artifact | `tests/unit/test_release_excludes_test_paths.py` | The `Dockerfile` copies no path under `tests/`; the wheel `uv build` produces contains no file under `tests/`; and no module under `src/factorflow` imports from `tests` or accepts an `http` base URL scheme (SEC-NDG-001, DEC-0033, DEC-0034) |
 | A malformed base URL fails start | `tests/unit/test_settings_base_url.py` | Each "rejected" row of section 2.2c's table raises `ConfigurationError`: missing host, userinfo, invalid or zero port, a path, a query or fragment, an empty value, surrounding whitespace (clauses 3 to 8) |
 | A base URL failure discloses no value | `tests/unit/test_settings_base_url.py` | For `https://user:s3cret@api.massive.com`, and for each rejected value, the message contains `FACTORFLOW_MASSIVE_BASE_URL` and contains neither the submitted value, nor `s3cret`, nor the configured API key (clause 9, AC-13) |
@@ -815,7 +863,8 @@ something checks them.
     value whose scheme is not `https`, loopback `http` included, prevents the
     release ingestion process from starting. Only the test-only entry point of
     section 2.2c accepts loopback `http` (clause 2a, under CONST-SEC 1.2), and
-    only with the E2E dummy key, at start and at every claim.
+    only with a designated test credential, checked at start and at every
+    claim.
 11. Failure scenario: a base URL that breaks any clause of section 2.2c fails
     start with a message naming `FACTORFLOW_MASSIVE_BASE_URL` and the clause,
     containing neither the submitted value nor the API key.
@@ -865,10 +914,11 @@ do.
 | Capability | CAP-001 v6 | AC-13 credential handling, AC-14 network exposure | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Steps 37 to 39, constraints 5.11 to 5.15 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Section 1.3, the credential region and its copy | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Security Constitution v1.2 (CONST-SEC 1.2, as reworked after review v1; clause 2a relies on its loopback test-double exception and takes effect when 1.2 is merged to the harness default branch) | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001; Definitions | `docs/constitutions/security.constitution.md` in the AI-agents harness |
-| Review | CONST-SEC constitution review v1 | FINDING-1 to FINDING-13 on the 1.2 amendment and this design | `docs/constitutions/reviews/security-review-v1.md` in the AI-agents harness |
+| Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`; clause 2a relies on its SEC-ENC-001 loopback test-double exception and takes effect only as section 2.2c states) | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001; Definitions; How to Use, "When a version is in force" | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Review | CONST-SEC constitution reviews v1 and v2 | v1 FINDING-1 to FINDING-13 and v2 FINDING-14 to FINDING-23 on the 1.2 amendment and this design | `docs/constitutions/reviews/security-review-v1.md` and `security-review-v2.md` in the AI-agents harness |
+| Review | CAP-001 specification review v6 | FINDING-3 (in-force trigger and pinned text), FINDING-5 (entry-point parameters) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
 | Review | EXP-20261009-1 expedited review v1 | ER-001 and ER-002: an unvalidated base URL chooses the credential's destination and scheme | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
-| Decision | DEC-0031, DEC-0032, DEC-0033, DEC-0034 | Loopback `http` first held BLOCKED; base URL edge-case rules; release and non-release confinement of clause 2a (PROVISIONAL); the release artifact and production launch (PROVISIONAL) | `projects/factorflow-v2/decisions/` in the AI-agents harness |
+| Decision | DEC-0031 to DEC-0037 | Loopback `http` first held BLOCKED; base URL edge-case rules; release and non-release confinement of clause 2a (PROVISIONAL); the release artifact and production launch (PROVISIONAL); the entry-point parameters, correcting DEC-0033; this project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text (PROVISIONAL); the per-run designated test credential (PROVISIONAL) | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 | Constitution | Tech Stack v3 | Pydantic in the approved stack; credential supplied at runtime | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
@@ -928,20 +978,24 @@ do.
    The amendment is a change to the AI-agents harness constitution
    `docs/constitutions/security.constitution.md`, not to this repository. It
    is CONST-SEC 1.2, first drafted in AI-agents commit `64f61f8`, reviewed
-   independently (`docs/constitutions/reviews/security-review-v1.md`,
-   READY-WITH-WARNINGS) and then reworked on the owner's direction. Version
-   1.2 now states four conditions, and section 2.2c meets each of them. Clause
-   2a takes effect when that version is merged to the harness default branch.
-   It then unblocks the test-only entry point and its tests in section 7, the
-   change to `scripts/run-e2e-server.sh` that starts the acquisition stack's
-   ingestion process through it, and with them the DEC-0025 E2E acquisition
-   stack running against the `http` stub once the base URL is honoured.
+   independently twice (`docs/constitutions/reviews/security-review-v1.md` and
+   `security-review-v2.md`, both READY-WITH-WARNINGS) and reworked after each
+   on the owner's direction, the second time as the last round. Version 1.2
+   states four conditions, and section 2.2c meets each of them against the
+   pinned text. Clause 2a takes effect only as section 2.2c, *When clause 2a is
+   in force*, states (DEC-0036). It then unblocks the test-only entry point and
+   its tests in section 7, the change to `scripts/run-e2e-server.sh` specified
+   in section 2.2c item 5, and with them the DEC-0025 E2E acquisition stack
+   running against the `http` stub once the base URL is honoured.
 
-   *Still open, owner: constitution owner.* The re-review of the reworked
-   CONST-SEC 1.2 and the owner's approval of it; owner review of DEC-0033 and
-   DEC-0034 (both PROVISIONAL). DEC-0031 still reads `status: open`. The
-   decisions tooling has no command to mark it superseded, so it stays open
-   until the owner reviews it.
+   *Still open, owner: constitution owner.* The owner's approval of CONST-SEC
+   1.2, recorded as the `approval` block its "When a version is in force" rule
+   requires, and its merge to the harness default branch; owner review of
+   DEC-0033 to DEC-0037 (DEC-0035 corrects DEC-0033's signature sentence, and
+   DEC-0037 replaces the fixed key DEC-0025 and DEC-0033 name). DEC-0031 still
+   reads `status: open`. The decisions tooling has no command to mark a record
+   superseded or to edit it, so superseded text stays in place until the owner
+   reviews it.
 5. **How is the production ingestion container launched?** DEC-0034 requires
    it to run from an image that installs only the `factorflow` distribution,
    but nothing in the repository defines it. The `Dockerfile`'s command starts
@@ -954,10 +1008,16 @@ do.
    production from a source checkout satisfies neither. *Owner: capability
    owner. Blocks: the deployment evidence that the release artifact excludes
    clause 2a.*
-6. **May a production loopback channel carrying non-Public data use plain
-   HTTP?** `component-design-ingestion-api.md` section 4 reads the owner
-   interface's loopback hop as not engaging SEC-ENC-001. CONST-SEC 1.2's
-   exception deliberately does not decide that, and records it as an open
-   question in its Exception Record. That design is approved, so it is not
-   changed here. *Owner: constitution owner. Blocks: nothing in this
-   component; the standing of ingestion-api's section 4 reading.*
+6. **What is the standing of the product's other host-local plaintext
+   channels under SEC-ENC-001?** Open; nothing is decided here. CONST-SEC 1.2's
+   Exception Record lists three: the owner interface's production loopback hop,
+   which `component-design-ingestion-api.md` section 4 reads as not engaging
+   SEC-ENC-001; the application's and ingestion's production connections to
+   PostgreSQL (`FACTORFLOW_DATABASE_URL`, which this component loads), for
+   which no design states transport encryption; and the E2E stack's connection
+   to its real `postgres:16` container without TLS. The loopback test-double
+   exception covers none of them. The ingestion-api design is approved, so it
+   is not changed here. *Owner: constitution owner. Blocks: nothing in this
+   component's clause 2a; the standing of ingestion-api's section 4 reading,
+   the database connection settings, and the release-readiness security
+   evidence.*
