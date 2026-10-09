@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
 artifact_version: 11
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
@@ -28,6 +28,12 @@ ai_provenance:
       version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-09T21:00:05Z
+  reviewed_revision: sha256:af95ec5e503f93915f2b7496956e20e756902e703dc9cfc3fc06c8140d05f64e
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md"
 ---
 
 # Component: Massive Client
