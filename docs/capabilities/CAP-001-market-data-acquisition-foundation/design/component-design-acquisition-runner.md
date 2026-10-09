@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-acquisition-runner
 artifact_type: component-design
-artifact_version: 7
+artifact_version: 8
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-10-09
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.295"
+  timestamp: 2026-10-09T20:40:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -24,14 +24,16 @@ ai_provenance:
       version: "5"
     - id: tech-stack
       version: "3"
+    - id: CONST-SEC
+      version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T01:59:59Z
-  reviewed_revision: sha256:87a130bc8f229715adf20082b54654f479f3438ff339d06ad5564dd6532059a6
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-10-09T21:00:06Z
+  reviewed_revision: sha256:e0522afb927bda200926be52dcf5e32f8fc050c6dc6157eb2688293fad6218b9
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md"
 ---
 
 # Component: Acquisition Runner
@@ -39,7 +41,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-001
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-09-05
+**Last Updated:** 2026-10-09
 
 ## 1. Overview
 
@@ -86,6 +88,48 @@ src/factorflow/ingestion/plan.py           the range each data type needs
 src/factorflow/ingestion/outcomes.py       per-instrument outcome classification
 src/factorflow/ingestion_main.py           the container entrypoint
 ```
+
+**Entrypoint signature (DEC-0035).** `main` takes two keyword-only
+parameters. Both default to the release behaviour, and the release launch,
+`python -m factorflow.ingestion_main`, passes neither:
+
+```python
+# src/factorflow/ingestion_main.py
+from collections.abc import Callable
+
+from pydantic import SecretStr
+
+from factorflow.config.settings import Settings, read_provider_credential
+
+
+def main(
+    *,
+    settings_factory: Callable[[], Settings] = Settings,
+    credential_reader: Callable[[], SecretStr] = read_provider_credential,
+) -> int:
+    """Load settings with settings_factory() at start, and re-read the
+    provider credential with credential_reader() at every claim (section 3)."""
+```
+
+- `settings_factory` replaces the direct `Settings()` call at start. A
+  `ConfigurationError` it raises is handled exactly as today: the variable is
+  named, the value never, and `main` returns 1.
+- `credential_reader` replaces the direct `read_provider_credential()` call in
+  the claim path. An exception it raises propagates out of
+  `run_polling_loop`, which catches nothing, so the process ends non-zero
+  before any client is built or rebuilt with the refused value.
+- The parameters exist for one caller: the test-only entry point
+  `tests/e2e/support/ingestion_e2e_main.py`, which passes a settings factory
+  accepting loopback `http` and a reader that refuses any key that is not a
+  designated test credential. That is how the project confines the SEC-ENC-001
+  loopback test-double exception of CONST-SEC 1.2 (pinned at content revision
+  `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`) to non-release
+  code, as SEC-NDG-001 requires: a parameter is not configuration, and only
+  code absent from the release artifact supplies one. When that entry point may
+  exist, and what it checks, is specified in
+  `component-design-runtime-config.md` section 2.2c (clause 2a, items 2 to 5)
+  and recorded in DEC-0036. Until clause 2a is in force the parameters may be
+  added, but nothing passes them.
 
 ### 2.2 The run loop
 
@@ -234,7 +278,11 @@ N/A, not applicable for this component. The run journal table is the handoff.
   changed. This is what makes the credential rotatable without a restart, and
   claim time is chosen because it is the one point where no provider connection
   and no partial instrument write is in flight. The mechanism belongs to
-  `runtime-config` section 2.2b; this component is where it is invoked.
+  `runtime-config` section 2.2b; this component is where it is invoked, through
+  the `credential_reader` parameter of `main` (section 2.1), which defaults to
+  `read_provider_credential`. The test-only entry point injects a reader that
+  also refuses any key that is not a designated test credential
+  (`component-design-runtime-config.md` section 2.2c item 3).
 - **The roster is a snapshot taken at claim time** (AC-25, system design
   constraint 5.19, owner decision 2026-09-05). Order is stable within a run, and
   an instrument retired mid-run is still reached by that run and excluded from
@@ -335,6 +383,7 @@ Massive is tested in its component.
 | Re-run writes nothing new | `tests/integration/test_runner_rerun.py` | A second identical run records `unchanged` and the run is `succeeded` (AC-6, AC-9) |
 | Volume | `tests/integration/test_runner_volume.py` | 3000 stubbed instruments complete one run without intervention (AC-4) |
 | Reason redaction | `tests/unit/test_runner_reason.py` | A provider error containing a credential is recorded without it (AC-13) |
+| The entrypoint parameters default to the release behaviour | `tests/unit/test_ingestion_main.py` | `inspect.signature(main)` shows `settings_factory` and `credential_reader` as keyword-only with defaults `Settings` and `read_provider_credential`; a `settings_factory` raising `ConfigurationError` makes `main` return 1; a `credential_reader` that raises at the first claim ends `main` with the exception and no `RESTClient` is constructed (section 2.1, DEC-0035) |
 
 ## 8. Acceptance Criteria
 
@@ -412,6 +461,7 @@ several internal ones.
 | `run-journal.finalise` | in-process call | ingestion database credential | Run id | Terminal state | Outcome derived from results (AC-9) |
 | `instrument-list-service.active_instrument_ids` | in-process call | ingestion database credential | none | Active roster | Read once per run |
 | `massive-client` reads | in-process call | provider API key, held by the client | Symbol and date range | Parsed observations, or a typed error | Four reads per instrument (AC-3) |
+| `factorflow.ingestion_main.main` | process entrypoint, called by `python -m factorflow.ingestion_main` and by the test-only `tests/e2e/support/ingestion_e2e_main.py` | none | keyword-only `settings_factory` (default `Settings`) and `credential_reader` (default `read_provider_credential`); the release launch passes neither | Exit code: 1 on `ConfigurationError`, non-zero when the credential reader raises, otherwise runs the polling loop | Section 2.1; DEC-0035. The test-only caller exists only under clause 2a of `component-design-runtime-config.md` section 2.2c |
 | `observation-writer.write_instrument` | in-process call | ingestion database credential | Parsed observations and the range written | Rows appended and coverage extended | One transaction per instrument (AC-12) |
 
 ## 12. References
@@ -424,6 +474,9 @@ several internal ones.
 | Component design | Run Journal | Claim, heartbeat, cancellation and outcome derivation | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-run-journal.md` |
 | Component design | Observation Writer | The per-instrument transaction and idempotent append | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-observation-writer.md` |
 | Constitution | Operational Safety v1.3 | OPS-ERR-001, OPS-LOOP-001 | `docs/constitutions/operational-safety.constitution.md` |
+| Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`) | The SEC-ENC-001 loopback test-double exception and SEC-NDG-001, which the entrypoint parameters help confine to non-release code | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Component design | Runtime Configuration | Section 2.2b credential reload; section 2.2c clause 2a and items 2 to 5, the test-only caller of `main` | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
+| Decision | DEC-0035, DEC-0036 | The entrypoint's two keyword-only parameters, correcting DEC-0033; this project's record of relying on the SEC-ENC-001 loopback test-double exception | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 
 ## 13. Traceability
 

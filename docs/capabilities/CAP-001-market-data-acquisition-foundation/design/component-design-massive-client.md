@@ -2,8 +2,8 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 10
-status: draft
+artifact_version: 11
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.295"
-  timestamp: 2026-10-09T15:03:28Z
+  timestamp: 2026-10-09T20:40:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -24,8 +24,16 @@ ai_provenance:
       version: "5"
     - id: tech-stack
       version: "3"
+    - id: CONST-SEC
+      version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-09T21:00:05Z
+  reviewed_revision: sha256:af95ec5e503f93915f2b7496956e20e756902e703dc9cfc3fc06c8140d05f64e
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md"
 ---
 
 # Component: Massive Client
@@ -206,8 +214,22 @@ could move a request to another host, or from `https` to plain HTTP. Under
 `component-design-runtime-config.md` clause 2a it could take a plain-HTTP
 request off loopback, which CONST-SEC 1.2 SEC-ENC-001 condition 2 forbids. No
 construction path may pass `redirect=True` or replace the SDK's `Retry`. A test
-in section 7 drives a redirect from a loopback double and asserts that the
-target receives nothing.
+in section 7 drives a redirect on the default `https` base, for a main-pool read
+and a `vx` read, without opening a socket and without any plain-HTTP channel,
+and asserts that the redirect target receives no request (DEC-0038).
+
+**No proxy is ever used.** The SDK builds a plain `urllib3.PoolManager` for the
+main client and another for `vx`, never a `ProxyManager`, and neither the SDK
+(which reads only `MASSIVE_API_KEY` from the environment) nor urllib3 2.7.0
+(which reads only `SSLKEYLOGFILE`) consults `HTTP_PROXY`, `HTTPS_PROXY`,
+`ALL_PROXY` or `NO_PROXY`. A probe on 2026-10-09 with all of them pointing at a
+loopback listener saw the listener receive no request and the target receive
+every one (DEC-0038). This component requires that behaviour in every build: no
+construction path may pass a proxy or replace the SDK's pool with a
+`ProxyManager`. A proxy would add a hop this component does not govern, and
+under clause 2a it would break CONST-SEC 1.2 SEC-ENC-001 condition 2, which
+forbids routing the channel through a proxy whatever the environment says. A
+test in section 7 asserts it with the proxy variables set.
 
 **`pagination=False` is deliberate.** The SDK follows `next_url` automatically
 and returns every page. That is convenient and wrong here for two reasons: each
@@ -228,17 +250,21 @@ against this base. The value reaching this argument has already been validated
 at process start by `component-design-runtime-config.md` section 2.2c: `https`
 only, a host, no userinfo, path, query or fragment, and no trailing slash. This
 component does not re-validate or rewrite it. The one exception is clause 2a
-there, the loopback `http` allowance the owner asked for. It is conditional on
-CONST-SEC 1.2 (the loopback test-double exception to SEC-ENC-001 and
-SEC-NDG-001), takes effect once that version is merged to the AI-agents harness
-default branch, and is confined to the test-only entry point
-`tests/e2e/support/ingestion_e2e_main.py` (DEC-0033, DEC-0034, PROVISIONAL).
-There `http` is accepted only when the host is exactly `127.0.0.1`, `::1` or
-`localhost`, and `localhost` must resolve only to loopback. Every other clause
-still applies. The entry point refuses any key other than the E2E dummy, at
-start and again each time the credential is re-read at a claim. The release
-artifact never contains that entry point, so in the release build no value this
-component receives is plain HTTP.
+there, the loopback `http` allowance the owner asked for. It relies on the
+SEC-ENC-001 loopback test-double exception of CONST-SEC 1.2 (with SEC-NDG-001),
+recorded for this project in DEC-0036. It takes effect only as
+`component-design-runtime-config.md` section 2.2c, *When clause 2a is in
+force*, states: CONST-SEC 1.2 in force under its own rule (the owner's
+`approval` block and the harness default branch) at the pinned content revision
+`sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`. It is confined to the
+test-only entry point `tests/e2e/support/ingestion_e2e_main.py` (DEC-0033,
+DEC-0034, PROVISIONAL). There `http` is accepted only when the host is exactly
+`127.0.0.1`, `::1` or `localhost`, and `localhost` must resolve only to
+loopback. Every other clause still applies. The entry point refuses any key
+that is not a designated test credential (`^TEST-ONLY-[0-9a-f]{32,}$`,
+generated per run, DEC-0037), at start and again each time the credential is
+re-read at a claim. The release artifact never contains that entry point, so in
+the release build no value this component receives is plain HTTP.
 
 ### 2.3 Interface
 
@@ -608,18 +634,21 @@ scope here.
   that the default base is `https`. The loopback `http` allowance in the
   owner's direction of 2026-10-09 (`component-design-runtime-config.md`
   section 2.2c clause 2a, section 14 item 4) is the one exception, and it is
-  the loopback test-double exception CONST-SEC 1.2 adds to SEC-ENC-001 and
-  SEC-NDG-001. It allows plain HTTP only to a local test double on
+  the SEC-ENC-001 loopback test-double exception CONST-SEC 1.2 adds, with
+  SEC-NDG-001 (DEC-0036). It allows plain HTTP only to a local test double on
   `127.0.0.1`, `::1` or `localhost`, with `localhost` resolving only to
-  loopback, and only with the E2E dummy key, checked at start and at every
-  claim. It is reachable only through the test-only entry point
+  loopback, and only with a designated test credential, checked at start and at
+  every claim. It takes effect only at the pinned text, as section 2.2b states.
+  It is reachable only through the test-only entry point
   `tests/e2e/support/ingestion_e2e_main.py`, which the release artifact never
   contains (DEC-0033, DEC-0034, PROVISIONAL). It never applies in a release
   build or a production environment.
-- **Redirects are never followed (SEC-ENC-001).** `retries=0` makes urllib3
-  refuse a redirect rather than follow it (section 2.2b), so a response cannot
-  move a request to another host or downgrade it to plain HTTP. Under clause 2a
-  this is what keeps the plain-HTTP channel on loopback.
+- **Redirects are never followed and no proxy is used (SEC-ENC-001).**
+  `retries=0` makes urllib3 refuse a redirect rather than follow it, and the
+  SDK's pools are plain `PoolManager`s that read no proxy variable (section
+  2.2b), so neither a response nor the environment can move a request to
+  another host or downgrade it to plain HTTP. Under clause 2a this is what keeps
+  the plain-HTTP channel on loopback.
 - **External input validation (SEC-INP-001).** Every response is validated
   against a Pydantic model before it leaves this component: field types, value
   ranges where the domain has them, and enumerations for action types. A
@@ -713,7 +742,8 @@ The gap that leaves is section 14's item 6.
 | Financials keep filing date as an attribute | `tests/unit/test_massive_financials.py` | `filing_date` is present on the model and is not used as an as-of date (C5) |
 | Corporate actions parse | `tests/unit/test_massive_actions.py` | All four action types map to the product's enumeration (AC-3) |
 | SDK retries are disabled | `tests/unit/test_massive_sdk_config.py` | The constructed `RESTClient` carries `retries == 0`, so the governor owns retry alone (section 2.2b). Guards against an SDK default reasserting itself on upgrade |
-| A redirect is never followed | `tests/unit/test_massive_redirects.py` | A `MassiveClient` built as in section 2.2b against a loopback double (`http://127.0.0.1:<port>`, test-only construction) that answers `302` with a `Location` on a second loopback listener: the read fails without returning data, and the second listener receives no request. A `Location` naming a non-loopback host is likewise not contacted (connection attempts patched to fail the test). Proves the no-redirect requirement on the real, unpatched SDK and urllib3 (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2) |
+| A redirect is never followed | `tests/unit/test_massive_redirects.py` | No socket and no plain HTTP (DEC-0038). A `MassiveClient` built as in section 2.2b on the default base `https://api.massive.com`, with a key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`. `socket.create_connection` and `socket.getaddrinfo` are patched to fail the test, and `urllib3.connectionpool.HTTPConnectionPool._make_request` is replaced by a fake that records each request's scheme and host and answers `302` with `Location: https://198.51.100.7/`. For a main-pool read (`fetch_reference`) and a read through the `vx` sub-client (the IPO read in `fetch_corporate_actions`, which calls `vx.list_ipos`): the read raises without returning data, and exactly one request is recorded, to `api.massive.com`, none to `198.51.100.7`. A control client built with `retries=3` records requests to `198.51.100.7`, proving the fake exercises urllib3's real redirect path. Everything above `_make_request`, the SDK and urllib3's `PoolManager.urlopen` redirect and retry logic included, is unpatched (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2) |
+| No proxy is ever used | `tests/unit/test_massive_redirects.py` | No socket (DEC-0038). With `HTTP_PROXY`, `HTTPS_PROXY` and `ALL_PROXY` (and their lowercase forms) set to `http://127.0.0.1:9` and `NO_PROXY` unset, a `MassiveClient` built as in section 2.2b has an SDK pool and a `vx` pool that are both `urllib3.PoolManager` and neither a `urllib3.ProxyManager`, and the connection pool each returns for the base URL is an `HTTPSConnectionPool` for `api.massive.com` whose `proxy` is `None` (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2 and Verification (e)) |
 | SDK pagination is disabled | `tests/unit/test_massive_sdk_config.py` | `pagination` is False, so pages are followed under governor permits rather than eagerly (section 2.2b) |
 | Trace logging is off | `tests/unit/test_massive_sdk_config.py` | `trace` is False, so request headers carrying the credential are never logged (AC-13) |
 | BadResponse maps to the taxonomy | `tests/unit/test_massive_errors.py` | A `NOT_FOUND` envelope becomes `InstrumentNotFound`, an API-key envelope becomes `CredentialRejected`, and an unrecognised one becomes `ProviderUnavailable` (section 2.4) |
@@ -831,7 +861,9 @@ never uses (section 2.6).
 | System design | CAP-001 system design v3 | Control flow steps 8 to 28, constraints 5.4, 5.6, 5.13 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Constitution | Tech Stack v3 | Official `massive` client adopted 2026-09-05; `MassiveClient` retained as the operational boundary, not a portability layer; provider evaluation and plan tiers | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C4, one market data contract; C5, point-in-time history; C7, long-lived connections | `docs/constitution/product-charter.md` |
-| Constitution | Security Constitution v1.2 (CONST-SEC 1.2, as reworked after review v1; in force for clause 2a once merged to the harness default branch) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the loopback test-double exception to SEC-ENC-001 and SEC-NDG-001 that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect condition | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`; in force for clause 2a only as `component-design-runtime-config.md` section 2.2c states) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the SEC-ENC-001 loopback test-double exception that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect and no-proxy condition; Definitions (designated test credential) | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Decision | DEC-0036, DEC-0037, DEC-0038 | This project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text; the per-run designated test credential; the socket-free redirect and proxy tests (all PROVISIONAL) | `projects/factorflow-v2/decisions/` in the AI-agents harness |
+| Review | CAP-001 specification review v6 | FINDING-2 (ratios, open in section 14 item 7), FINDING-3, FINDING-4 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
 | Review | EXP-20261009-1 expedited review v1 | ER-001, ER-002, ER-004: the base URL was unvalidated, §2.2b lacked `base=`, and `tests/unit/test_massive_tls.py` did not exist | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | External | Massive REST documentation | Endpoint paths, query parameters, response fields and `next_url` paging for all four reads, recorded in sections 2.5 and 11. Read 2026-09-05 | `https://massive.com/docs/llms.txt` and the per-endpoint pages it links |
 | Verification | Live provider probe, 2026-09-05 | Base URL, `Authorization: Bearer` scheme, the 401/404/429 error envelope, and the absence of `Retry-After` and `X-RateLimit-*` headers. Recorded in sections 2.6, 2.6a and 2.6b because Massive documents none of it | One authenticated request per case against `https://api.massive.com` |
@@ -900,3 +932,15 @@ never uses (section 2.6).
    the first real run, because every fixture-based test passes against a provider
    contract that has never been observed. *Owner: capability owner. Blocks:
    confidence in the first acquisition, not the implementation.*
+7. **What is the ratios contract, and how are ratios stored?** Open; nothing is
+   decided here. Specification review v6 FINDING-2 reports that section 2.5 and
+   the section 11 ratios row ("as above", "Same shape and constraints")
+   contradict the locked SDK: massive 2.8.0 `list_financials_ratios` takes
+   `ticker` and no period filter, and `FinancialRatio` carries `ticker` and
+   `date` but no `period_end`, `filing_date`, `fiscal_year` or `timeframe`,
+   while `component-design-market-data-store.md` keys `fundamental_observation`
+   on `fiscal_period_end` for `statement_type = 'ratios'`. The expedited review
+   EXP-20261009-1 recorded this as ER-003, and ER-004's ratios correction to
+   section 11 is not made. Sections 2.5 and 11 are left as they stand until the
+   owner decides. *Owner: capability owner. Blocks: the ratios read and AC-3's
+   fundamentals for ratios.*
