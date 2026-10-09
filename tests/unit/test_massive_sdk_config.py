@@ -118,9 +118,7 @@ def test_constructs_rest_client_with_the_configured_base_url() -> None:
     as `base`, so the configured provider host is the one requested --
     not the SDK's own default (EXP-20261009-1)."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
-        MassiveClient(
-            settings=_settings(base_url="http://127.0.0.1:8126"), governor=_governor()
-        )
+        MassiveClient(settings=_settings(base_url="http://127.0.0.1:8126"), governor=_governor())
 
     _, kwargs = rest_client_cls.call_args
     assert kwargs["base"] == "http://127.0.0.1:8126"

@@ -272,9 +272,7 @@ def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() 
     (EXP-20261009-1). The three statement endpoints select by `tickers`
     and bound the period by `period_end`; `list_financials_ratios` selects
     by `ticker` (singular) and accepts no period parameter at all."""
-    with patch(
-        "factorflow.ingestion.massive.client.RESTClient", autospec=True
-    ) as rest_client_cls:
+    with patch("factorflow.ingestion.massive.client.RESTClient", autospec=True) as rest_client_cls:
         instance = rest_client_cls.return_value
         for method in (
             instance.list_financials_balance_sheets,

@@ -55,6 +55,7 @@ class MassiveClient:
         self._governor = governor
         self._rest_client = RESTClient(
             api_key=settings.api_key.get_secret_value(),
+            base=settings.base_url,  # FACTORFLOW_MASSIVE_BASE_URL; also used by `vx`
             retries=0,  # the governor owns retry alone (section 2.2b)
             connect_timeout=settings.timeout_seconds,
             read_timeout=settings.timeout_seconds,
@@ -114,8 +115,9 @@ class MassiveClient:
     ) -> list[models.FinancialStatement]:
         """Company financials. `filing_date` is carried as a descriptive
         attribute and is never the as-of date (C5). Queries all four
-        sibling statement endpoints, each constrained by ticker and period
-        (component design section 2.5)."""
+        sibling statement endpoints, each constrained by ticker and, for
+        the three statements, by period (component design section 2.5;
+        the ratios endpoint accepts no period bound)."""
         statements: list[models.FinancialStatement] = []
 
         for statement_type, sdk_method in (
@@ -249,6 +251,10 @@ class MassiveClient:
         start: date,
         end: date,
     ) -> Callable[[], HTTPResponse]:
+        if sdk_method == self._rest_client.list_financials_ratios:
+            # The ratios endpoint selects by `ticker` (singular) and takes no
+            # period bound; the SDK rejects the statement endpoints' arguments.
+            return lambda: self._through_governor(lambda: sdk_method(ticker=symbol, raw=True))
         return lambda: self._through_governor(
             lambda: sdk_method(
                 tickers=symbol,
