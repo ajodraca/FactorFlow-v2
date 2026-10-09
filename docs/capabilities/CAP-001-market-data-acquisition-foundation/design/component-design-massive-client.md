@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 9
+artifact_version: 10
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.295"
-  timestamp: 2026-10-09T14:47:51Z
+  timestamp: 2026-10-09T15:03:28Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -193,6 +193,22 @@ the attempt bound are already specified and tested. A test asserts
 `retries == 0` on the constructed client, because a default reasserting itself
 in a future SDK release would degrade run timing without any error.
 
+**No redirect is ever followed.** The SDK calls `PoolManager.request` without
+a `redirect` argument, so urllib3 follows redirects by default and counts them
+against the `Retry` total. With the SDK's default `retries` a `302` is
+followed: a loopback probe on 2026-10-09 (SDK 2.8.0, urllib3 2.7.0) saw the
+second request land at the `Location` target. With `retries=0` the redirect is
+refused rather than followed. urllib3 raises `MaxRetryError`, the target never
+receives a request, and the read fails rather than succeeding from another
+host. This component requires that behaviour in every build. Massive's API
+does not redirect, so a redirect is never a legitimate answer. Following one
+could move a request to another host, or from `https` to plain HTTP. Under
+`component-design-runtime-config.md` clause 2a it could take a plain-HTTP
+request off loopback, which CONST-SEC 1.2 SEC-ENC-001 condition 2 forbids. No
+construction path may pass `redirect=True` or replace the SDK's `Retry`. A test
+in section 7 drives a redirect from a loopback double and asserts that the
+target receives nothing.
+
 **`pagination=False` is deliberate.** The SDK follows `next_url` automatically
 and returns every page. That is convenient and wrong here for two reasons: each
 page is a provider request that must take a governor permit, and a five-year bar
@@ -212,14 +228,17 @@ against this base. The value reaching this argument has already been validated
 at process start by `component-design-runtime-config.md` section 2.2c: `https`
 only, a host, no userinfo, path, query or fragment, and no trailing slash. This
 component does not re-validate or rewrite it. The one exception is clause 2a
-there, the loopback `http` allowance the owner asked for, which is conditional
-on CONST-SEC 1.2 (the loopback test-double exception to SEC-ENC-001 and
-SEC-NDG-001) and confined to the test-only entry point
-`tests/e2e/support/ingestion_e2e_main.py` (DEC-0033, PROVISIONAL). There `http`
-is accepted only when the host is exactly `127.0.0.1`, `::1` or `localhost`,
-every other clause still applies, and the entry point refuses any key other
-than the E2E dummy. The release image never contains that entry point, so in
-the release build no value this component receives is plain HTTP.
+there, the loopback `http` allowance the owner asked for. It is conditional on
+CONST-SEC 1.2 (the loopback test-double exception to SEC-ENC-001 and
+SEC-NDG-001), takes effect once that version is merged to the AI-agents harness
+default branch, and is confined to the test-only entry point
+`tests/e2e/support/ingestion_e2e_main.py` (DEC-0033, DEC-0034, PROVISIONAL).
+There `http` is accepted only when the host is exactly `127.0.0.1`, `::1` or
+`localhost`, and `localhost` must resolve only to loopback. Every other clause
+still applies. The entry point refuses any key other than the E2E dummy, at
+start and again each time the credential is re-read at a claim. The release
+artifact never contains that entry point, so in the release build no value this
+component receives is plain HTTP.
 
 ### 2.3 Interface
 
@@ -590,11 +609,17 @@ scope here.
   owner's direction of 2026-10-09 (`component-design-runtime-config.md`
   section 2.2c clause 2a, section 14 item 4) is the one exception, and it is
   the loopback test-double exception CONST-SEC 1.2 adds to SEC-ENC-001 and
-  SEC-NDG-001: plain HTTP only to a local test double on `127.0.0.1`, `::1` or
-  `localhost`, only with the E2E dummy key, and only through the test-only
-  entry point `tests/e2e/support/ingestion_e2e_main.py`, which the release
-  image never contains (DEC-0033, PROVISIONAL). It never applies in a release
-  or production build.
+  SEC-NDG-001. It allows plain HTTP only to a local test double on
+  `127.0.0.1`, `::1` or `localhost`, with `localhost` resolving only to
+  loopback, and only with the E2E dummy key, checked at start and at every
+  claim. It is reachable only through the test-only entry point
+  `tests/e2e/support/ingestion_e2e_main.py`, which the release artifact never
+  contains (DEC-0033, DEC-0034, PROVISIONAL). It never applies in a release
+  build or a production environment.
+- **Redirects are never followed (SEC-ENC-001).** `retries=0` makes urllib3
+  refuse a redirect rather than follow it (section 2.2b), so a response cannot
+  move a request to another host or downgrade it to plain HTTP. Under clause 2a
+  this is what keeps the plain-HTTP channel on loopback.
 - **External input validation (SEC-INP-001).** Every response is validated
   against a Pydantic model before it leaves this component: field types, value
   ranges where the domain has them, and enumerations for action types. A
@@ -688,6 +713,7 @@ The gap that leaves is section 14's item 6.
 | Financials keep filing date as an attribute | `tests/unit/test_massive_financials.py` | `filing_date` is present on the model and is not used as an as-of date (C5) |
 | Corporate actions parse | `tests/unit/test_massive_actions.py` | All four action types map to the product's enumeration (AC-3) |
 | SDK retries are disabled | `tests/unit/test_massive_sdk_config.py` | The constructed `RESTClient` carries `retries == 0`, so the governor owns retry alone (section 2.2b). Guards against an SDK default reasserting itself on upgrade |
+| A redirect is never followed | `tests/unit/test_massive_redirects.py` | A `MassiveClient` built as in section 2.2b against a loopback double (`http://127.0.0.1:<port>`, test-only construction) that answers `302` with a `Location` on a second loopback listener: the read fails without returning data, and the second listener receives no request. A `Location` naming a non-loopback host is likewise not contacted (connection attempts patched to fail the test). Proves the no-redirect requirement on the real, unpatched SDK and urllib3 (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2) |
 | SDK pagination is disabled | `tests/unit/test_massive_sdk_config.py` | `pagination` is False, so pages are followed under governor permits rather than eagerly (section 2.2b) |
 | Trace logging is off | `tests/unit/test_massive_sdk_config.py` | `trace` is False, so request headers carrying the credential are never logged (AC-13) |
 | BadResponse maps to the taxonomy | `tests/unit/test_massive_errors.py` | A `NOT_FOUND` envelope becomes `InstrumentNotFound`, an API-key envelope becomes `CredentialRejected`, and an unrecognised one becomes `ProviderUnavailable` (section 2.4) |
@@ -805,7 +831,7 @@ never uses (section 2.6).
 | System design | CAP-001 system design v3 | Control flow steps 8 to 28, constraints 5.4, 5.6, 5.13 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Constitution | Tech Stack v3 | Official `massive` client adopted 2026-09-05; `MassiveClient` retained as the operational boundary, not a portability layer; provider evaluation and plan tiers | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C4, one market data contract; C5, point-in-time history; C7, long-lived connections | `docs/constitution/product-charter.md` |
-| Constitution | Security Constitution v1.2 | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the loopback test-double exception to SEC-ENC-001 and SEC-NDG-001 that clause 2a of `component-design-runtime-config.md` section 2.2c relies on | `docs/constitutions/security.constitution.md` |
+| Constitution | Security Constitution v1.2 (CONST-SEC 1.2, as reworked after review v1; in force for clause 2a once merged to the harness default branch) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the loopback test-double exception to SEC-ENC-001 and SEC-NDG-001 that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect condition | `docs/constitutions/security.constitution.md` in the AI-agents harness |
 | Review | EXP-20261009-1 expedited review v1 | ER-001, ER-002, ER-004: the base URL was unvalidated, §2.2b lacked `base=`, and `tests/unit/test_massive_tls.py` did not exist | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | External | Massive REST documentation | Endpoint paths, query parameters, response fields and `next_url` paging for all four reads, recorded in sections 2.5 and 11. Read 2026-09-05 | `https://massive.com/docs/llms.txt` and the per-endpoint pages it links |
 | Verification | Live provider probe, 2026-09-05 | Base URL, `Authorization: Bearer` scheme, the 401/404/429 error envelope, and the absence of `Retry-After` and `X-RateLimit-*` headers. Recorded in sections 2.6, 2.6a and 2.6b because Massive documents none of it | One authenticated request per case against `https://api.massive.com` |
