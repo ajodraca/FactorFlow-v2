@@ -5,6 +5,7 @@ keep filing date as an attribute`); `component-design-market-data-store.md`
 section 2.3 (`fundamental_observation`).
 """
 
+import inspect
 import json
 from datetime import date
 from decimal import Decimal
@@ -12,6 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from massive import RESTClient as RealRESTClient
 from pydantic import ValidationError
 
 from factorflow.config.settings import MassiveSettings
@@ -262,9 +264,15 @@ def test_fetch_financials_labels_ratios_rows_with_the_ddl_statement_type() -> No
 
 def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() -> None:
     """Component design section 2.5: financials are four sibling
-    endpoints under one shape, each constrained by ticker and period so
-    the request does not return the whole corpus."""
-    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+    endpoints, each constrained by ticker so the request does not return
+    the whole corpus.
+
+    `RESTClient` is autospecced, so every call is checked against the
+    installed SDK's real signature rather than accepted by a bare mock
+    (EXP-20261009-1). The three statement endpoints select by `tickers`
+    and bound the period by `period_end`; `list_financials_ratios` selects
+    by `ticker` (singular) and accepts no period parameter at all."""
+    with patch("factorflow.ingestion.massive.client.RESTClient", autospec=True) as rest_client_cls:
         instance = rest_client_cls.return_value
         for method in (
             instance.list_financials_balance_sheets,
@@ -277,13 +285,22 @@ def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() 
 
         client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
 
-    for method in (
-        instance.list_financials_balance_sheets,
-        instance.list_financials_income_statements,
-        instance.list_financials_cash_flow_statements,
-        instance.list_financials_ratios,
+    for method, sdk_name in (
+        (instance.list_financials_balance_sheets, "list_financials_balance_sheets"),
+        (instance.list_financials_income_statements, "list_financials_income_statements"),
+        (instance.list_financials_cash_flow_statements, "list_financials_cash_flow_statements"),
     ):
         method.assert_called_once()
         _, kwargs = method.call_args
-        assert kwargs["tickers"] == "AAPL"
-        assert kwargs["raw"] is True
+        inspect.signature(getattr(RealRESTClient, sdk_name)).bind(None, **kwargs)
+        assert kwargs == {
+            "tickers": "AAPL",
+            "period_end_gte": "2023-01-01",
+            "period_end_lte": "2023-12-31",
+            "raw": True,
+        }
+
+    instance.list_financials_ratios.assert_called_once()
+    _, kwargs = instance.list_financials_ratios.call_args
+    inspect.signature(RealRESTClient.list_financials_ratios).bind(None, **kwargs)
+    assert kwargs == {"ticker": "AAPL", "raw": True}
