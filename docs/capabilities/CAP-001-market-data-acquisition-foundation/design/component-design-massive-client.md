@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 8
+artifact_version: 9
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.295"
-  timestamp: 2026-10-09T03:01:19Z
+  timestamp: 2026-10-09T14:47:51Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -211,9 +211,15 @@ redirects every request. Pages followed from `next_url` reuse only its path
 against this base. The value reaching this argument has already been validated
 at process start by `component-design-runtime-config.md` section 2.2c: `https`
 only, a host, no userinfo, path, query or fragment, and no trailing slash. This
-component does not re-validate or rewrite it. The loopback `http` allowance the
-owner asked for is BLOCKED there on SEC-ENC-001 and SEC-NDG-001 (DEC-0031), so
-no value this component receives is plain HTTP.
+component does not re-validate or rewrite it. The one exception is clause 2a
+there, the loopback `http` allowance the owner asked for, which is conditional
+on CONST-SEC 1.2 (the loopback test-double exception to SEC-ENC-001 and
+SEC-NDG-001) and confined to the test-only entry point
+`tests/e2e/support/ingestion_e2e_main.py` (DEC-0033, PROVISIONAL). There `http`
+is accepted only when the host is exactly `127.0.0.1`, `::1` or `localhost`,
+every other clause still applies, and the entry point refuses any key other
+than the E2E dummy. The release image never contains that entry point, so in
+the release build no value this component receives is plain HTTP.
 
 ### 2.3 Interface
 
@@ -573,17 +579,22 @@ scope here.
   old value goes out of scope with it (SEC-SEC-002, section 2.6).
 - **Header authentication, never query parameters.** Section 2.6 explains why
   this is a security control rather than a convention.
-- **TLS (SEC-ENC-001).** Every request is HTTPS. The SDK constructs its
-  `urllib3.PoolManager` with `cert_reqs="CERT_REQUIRED"` and `certifi` roots,
+- **TLS (SEC-ENC-001).** Every request in the release build is HTTPS. The SDK
+  constructs its `urllib3.PoolManager` with `cert_reqs="CERT_REQUIRED"` and `certifi` roots,
   and this component never overrides that, which is asserted by a test because
   disabling verification is the single-line change that quietly removes
-  transport security. The scheme is guaranteed upstream: the configured base
-  URL reaches the SDK only after `runtime-config` has rejected anything but
-  `https` at start (section 2.2b). A test also asserts that the default base is
-  `https`. The loopback `http` allowance in the owner's direction of
-  2026-10-09 is BLOCKED on SEC-ENC-001 and SEC-NDG-001 (DEC-0031,
-  `component-design-runtime-config.md` section 14 item 4), so this statement
-  holds without exception.
+  transport security. The scheme is guaranteed upstream: in the release build
+  the configured base URL reaches the SDK only after `runtime-config` has
+  rejected anything but `https` at start (section 2.2b). A test also asserts
+  that the default base is `https`. The loopback `http` allowance in the
+  owner's direction of 2026-10-09 (`component-design-runtime-config.md`
+  section 2.2c clause 2a, section 14 item 4) is the one exception, and it is
+  the loopback test-double exception CONST-SEC 1.2 adds to SEC-ENC-001 and
+  SEC-NDG-001: plain HTTP only to a local test double on `127.0.0.1`, `::1` or
+  `localhost`, only with the E2E dummy key, and only through the test-only
+  entry point `tests/e2e/support/ingestion_e2e_main.py`, which the release
+  image never contains (DEC-0033, PROVISIONAL). It never applies in a release
+  or production build.
 - **External input validation (SEC-INP-001).** Every response is validated
   against a Pydantic model before it leaves this component: field types, value
   ranges where the domain has them, and enumerations for action types. A
@@ -794,7 +805,7 @@ never uses (section 2.6).
 | System design | CAP-001 system design v3 | Control flow steps 8 to 28, constraints 5.4, 5.6, 5.13 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Constitution | Tech Stack v3 | Official `massive` client adopted 2026-09-05; `MassiveClient` retained as the operational boundary, not a portability layer; provider evaluation and plan tiers | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C4, one market data contract; C5, point-in-time history; C7, long-lived connections | `docs/constitution/product-charter.md` |
-| Constitution | Security Constitution v1.1 | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001 | `docs/constitutions/security.constitution.md` |
+| Constitution | Security Constitution v1.2 | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the loopback test-double exception to SEC-ENC-001 and SEC-NDG-001 that clause 2a of `component-design-runtime-config.md` section 2.2c relies on | `docs/constitutions/security.constitution.md` |
 | Review | EXP-20261009-1 expedited review v1 | ER-001, ER-002, ER-004: the base URL was unvalidated, §2.2b lacked `base=`, and `tests/unit/test_massive_tls.py` did not exist | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | External | Massive REST documentation | Endpoint paths, query parameters, response fields and `next_url` paging for all four reads, recorded in sections 2.5 and 11. Read 2026-09-05 | `https://massive.com/docs/llms.txt` and the per-endpoint pages it links |
 | Verification | Live provider probe, 2026-09-05 | Base URL, `Authorization: Bearer` scheme, the 401/404/429 error envelope, and the absence of `Retry-After` and `X-RateLimit-*` headers. Recorded in sections 2.6, 2.6a and 2.6b because Massive documents none of it | One authenticated request per case against `https://api.massive.com` |

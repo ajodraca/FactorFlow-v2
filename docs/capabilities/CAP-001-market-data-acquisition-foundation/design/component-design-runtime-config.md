@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-runtime-config
 artifact_type: component-design
-artifact_version: 8
+artifact_version: 9
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.295"
-  timestamp: 2026-10-09T13:41:57Z
+  timestamp: 2026-10-09T14:47:51Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -287,12 +287,14 @@ exception for a channel carrying the Restricted credential, and SEC-NDG-001
 forbids an environment variable switching encryption off in production. The
 owner directed on 2026-10-09 that both invariants be amended with a narrow
 loopback test-double exception that never applies in a release or production
-build. **Clause 2a is conditional on that amendment.** It is in force only once
-the Security Constitution is published at version 1.2 carrying the amended
-SEC-ENC-001 and SEC-NDG-001; until then it must not be implemented and an
-`http` value fails start whatever its host, exactly as before. The amendment is
-made in the AI-agents harness (`docs/constitutions/security.constitution.md`),
-not in this repository, and is the constitution owner's change.
+build. **Clause 2a is conditional on that amendment.** The amendment is
+published as Security Constitution version 1.2 (CONST-SEC 1.2, AI-agents
+commit `64f61f8`), whose SEC-ENC-001 and SEC-NDG-001 carry the loopback
+test-double exception, so clause 2a is in force under it, confined as below.
+The amendment is made in the AI-agents harness
+(`docs/constitutions/security.constitution.md`), not in this repository, is the
+constitution owner's change, and remains subject to the owner's review
+(section 14 item 4).
 
 **Release and non-release (DEC-0033, PROVISIONAL).** No environment, profile
 or build-type setting exists in this project, and none is added: a variable
@@ -349,7 +351,7 @@ its local test double.
 | `https://api.massive.com:443` | accepted |
 | `https://other.example` | accepted (the host is not allow-listed; see section 3) |
 | `http://api.massive.com` | rejected: scheme must be `https` |
-| `http://127.0.0.1:8126`, `http://localhost:8126`, `http://[::1]:8126` | rejected by `MassiveSettings` and in the release build, always; accepted only by the test-only entry point under clause 2a, once CONST-SEC 1.2 is in force |
+| `http://127.0.0.1:8126`, `http://localhost:8126`, `http://[::1]:8126` | rejected by `MassiveSettings` and in the release build, always; accepted only by the test-only entry point under clause 2a (CONST-SEC 1.2) |
 | `http://127.0.0.2`, `http://0.0.0.0`, `http://localhost.` | rejected, including by the test-only entry point under clause 2a |
 | `ftp://api.massive.com`, `api.massive.com` (no scheme) | rejected: scheme must be `https` |
 | `https://`, `https:///v3`, `https:api.massive.com` | rejected: host missing |
@@ -649,10 +651,10 @@ N/A, not applicable for this component.
 - **Transport encryption (SEC-ENC-001, SEC-NDG-001).** In the release build
   the provider base URL must be `https`, so no setting can send the credential
   over plain HTTP. The loopback `http` allowance (clause 2a, section 2.2c)
-  depends on the owner's amendment of both invariants (CONST-SEC 1.2) and is
-  confined to a test-only entry point absent from the release image, which also
-  refuses any key other than the E2E dummy (DEC-0033). Until CONST-SEC 1.2 is in
-  force it is not implemented; section 14 item 4 tracks that.
+  rests on the owner's amendment of both invariants, published as CONST-SEC 1.2,
+  and is confined to a test-only entry point absent from the release image,
+  which also refuses any key other than the E2E dummy (DEC-0033). The owner's
+  review of the amendment is tracked in section 14 item 4.
 - **No dynamic code execution.** No variable is evaluated, imported by name, or
   used to construct a code path (SEC-INP-003).
 - **Error disclosure (SEC-ERR-001).** Validation failures are written to the
@@ -717,7 +719,7 @@ N/A, not applicable for this component.
 | An `https` base URL is accepted and normalised | `tests/unit/test_settings_base_url.py` | Every "accepted" row of section 2.2c's table loads; `https://api.massive.com/` loads as `https://api.massive.com` (clauses 2, 5 and 6) |
 | A non-`https` base URL fails start | `tests/unit/test_settings_base_url.py` | `http://api.massive.com`, `ftp://api.massive.com` and a value with no scheme each raise `ConfigurationError` naming `FACTORFLOW_MASSIVE_BASE_URL` (clause 2, SEC-ENC-001) |
 | Loopback `http` fails start in the release settings | `tests/unit/test_settings_base_url.py` | `http://127.0.0.1:8126`, `http://localhost:8126` and `http://[::1]:8126` each raise `ConfigurationError` from `MassiveSettings`. This test does not change when clause 2a takes effect: the release settings never accept `http` (SEC-NDG-001, DEC-0033) |
-| Loopback `http` is accepted only by the test-only entry point | `tests/unit/test_ingestion_e2e_main.py` | Once CONST-SEC 1.2 is in force: the three loopback values load through `tests/e2e/support/ingestion_e2e_main.py`; `http://127.0.0.2`, `http://0.0.0.0`, `http://localhost.` and `http://api.massive.com` still raise; every other "rejected" row of section 2.2c still raises (clause 2a) |
+| Loopback `http` is accepted only by the test-only entry point | `tests/unit/test_ingestion_e2e_main.py` | Under CONST-SEC 1.2: the three loopback values load through `tests/e2e/support/ingestion_e2e_main.py`; `http://127.0.0.2`, `http://0.0.0.0`, `http://localhost.` and `http://api.massive.com` still raise; every other "rejected" row of section 2.2c still raises (clause 2a) |
 | The test-only entry point refuses a non-dummy key | `tests/unit/test_ingestion_e2e_main.py` | With any `FACTORFLOW_MASSIVE_API_KEY` other than `e2e-test-key`, the test entry point exits non-zero before constructing a `RESTClient`, and the message does not echo the key (clause 2a, AC-13) |
 | Clause 2a is absent from the release build | `tests/unit/test_release_excludes_test_paths.py` | The `Dockerfile` copies no path under `tests/`, and no module under `src/factorflow` imports from `tests` or accepts an `http` base URL scheme (SEC-NDG-001, DEC-0033) |
 | A malformed base URL fails start | `tests/unit/test_settings_base_url.py` | Each "rejected" row of section 2.2c's table raises `ConfigurationError`: missing host, userinfo, invalid or zero port, a path, a query or fragment, an empty value, surrounding whitespace (clauses 3 to 8) |
@@ -753,8 +755,8 @@ something checks them.
 10. `FACTORFLOW_MASSIVE_BASE_URL` unset yields `https://api.massive.com`; any
     value whose scheme is not `https`, loopback `http` included, prevents the
     release ingestion process from starting. Only the test-only entry point of
-    section 2.2c accepts loopback `http` (clause 2a), only once CONST-SEC 1.2 is
-    in force, and only with the E2E dummy key.
+    section 2.2c accepts loopback `http` (clause 2a, under CONST-SEC 1.2), and
+    only with the E2E dummy key.
 11. Failure scenario: a base URL that breaks any clause of section 2.2c fails
     start with a message naming `FACTORFLOW_MASSIVE_BASE_URL` and the clause,
     containing neither the submitted value nor the API key.
@@ -804,7 +806,7 @@ do.
 | Capability | CAP-001 v6 | AC-13 credential handling, AC-14 network exposure | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Steps 37 to 39, constraints 5.11 to 5.15 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Section 1.3, the credential region and its copy | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Security Constitution v1.1 (clause 2a depends on v1.2, pending) | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001 | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Constitution | Security Constitution v1.2 (clause 2a relies on its loopback test-double exception) | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001 | `docs/constitutions/security.constitution.md` in the AI-agents harness |
 | Review | EXP-20261009-1 expedited review v1 | ER-001 and ER-002: an unvalidated base URL chooses the credential's destination and scheme | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | Decision | DEC-0031, DEC-0032, DEC-0033 | Loopback `http` first held BLOCKED; base URL edge-case rules; release and non-release confinement of clause 2a (PROVISIONAL) | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 | Constitution | Tech Stack v3 | Pydantic in the approved stack; credential supplied at runtime | `docs/constitution/tech-stack.md` |
@@ -863,14 +865,15 @@ do.
    absent from the release image (section 2.2c, DEC-0033), so the release
    settings never accept `http`.
 
-   *Still open, owner: constitution owner.* The amendment is a change to the
-   AI-agents harness constitution `docs/constitutions/security.constitution.md`,
-   not to this repository. Until version 1.2 carrying the amended SEC-ENC-001
-   and SEC-NDG-001 is published there, clause 2a is not implemented, and DEC-0033
-   (PROVISIONAL) awaits owner review.
-
-   *Blocks until then:* the test-only entry point and its tests in section 7,
-   the change to `scripts/run-e2e-server.sh` that starts the acquisition
+   The amendment is a change to the AI-agents harness constitution
+   `docs/constitutions/security.constitution.md`, not to this repository. It is
+   published there as version 1.2 (CONST-SEC 1.2, AI-agents commit `64f61f8`),
+   carrying the amended SEC-ENC-001 and SEC-NDG-001, so the constitution no
+   longer blocks what clause 2a needs: the test-only entry point and its tests
+   in section 7, the change to `scripts/run-e2e-server.sh` that starts the acquisition
    stack's ingestion process through it, and with them the DEC-0025 E2E
    acquisition stack running against the `http` stub once the base URL is
    honoured.
+
+   *Still open, owner: constitution owner.* The owner's review of the CONST-SEC
+   1.2 amendment, and of DEC-0033 (PROVISIONAL), which awaits owner review.
