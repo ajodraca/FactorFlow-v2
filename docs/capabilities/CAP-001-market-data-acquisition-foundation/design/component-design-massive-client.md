@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 7
-status: approved
+artifact_version: 8
+status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-11
+updated: 2026-10-09
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.295"
+  timestamp: 2026-10-09T03:01:19Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -26,12 +26,6 @@ ai_provenance:
       version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-11T00:35:00Z
-  reviewed_revision: sha256:a547b2e319c58207eb95fb91151d2317f21cd2bd001a80a37c54f0ba97b2c030
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
 # Component: Massive Client
@@ -39,7 +33,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-001
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-09-05
+**Last Updated:** 2026-10-09
 
 ## 1. Overview
 
@@ -166,6 +160,7 @@ from massive import RESTClient
 
 client = RESTClient(
     api_key=settings.api_key.get_secret_value(),
+    base=settings.base_url,          # validated https at start, see below
     retries=0,                       # MUST be 0 — see below
     connect_timeout=settings.timeout_seconds,
     read_timeout=settings.timeout_seconds,
@@ -207,6 +202,18 @@ one permit per page.
 
 **`trace=False`.** The SDK's trace mode logs full request detail including
 headers, and the header carries the credential (AC-13).
+
+**`base=settings.base_url` is mandatory.** Without it the SDK uses its own
+built-in `https://api.massive.com`, and `FACTORFLOW_MASSIVE_BASE_URL` has no
+effect. `RESTClient.__init__` passes the same `base` to its `vx` sub-client,
+which serves the `vX` corporate-action reads in section 2.5, so one argument
+redirects every request. Pages followed from `next_url` reuse only its path
+against this base. The value reaching this argument has already been validated
+at process start by `component-design-runtime-config.md` section 2.2c: `https`
+only, a host, no userinfo, path, query or fragment, and no trailing slash. This
+component does not re-validate or rewrite it. The loopback `http` allowance the
+owner asked for is BLOCKED there on SEC-ENC-001 and SEC-NDG-001 (DEC-0031), so
+no value this component receives is plain HTTP.
 
 ### 2.3 Interface
 
@@ -445,6 +452,9 @@ open.
 
 Base URL: `https://api.massive.com`. Confirmed by probe on 2026-09-05; Massive's
 documentation states no base URL, so this is recorded here as the governed one.
+It is the default of `FACTORFLOW_MASSIVE_BASE_URL`, which overrides it only
+with a value that passes `component-design-runtime-config.md` section 2.2c
+(section 2.2b).
 
 Massive accepts the key **two** ways, both verified: `Authorization: Bearer
 <key>`, and an `apiKey=<key>` query parameter. Nothing else works —
@@ -567,7 +577,13 @@ scope here.
   `urllib3.PoolManager` with `cert_reqs="CERT_REQUIRED"` and `certifi` roots,
   and this component never overrides that, which is asserted by a test because
   disabling verification is the single-line change that quietly removes
-  transport security.
+  transport security. The scheme is guaranteed upstream: the configured base
+  URL reaches the SDK only after `runtime-config` has rejected anything but
+  `https` at start (section 2.2b). A test also asserts that the default base is
+  `https`. The loopback `http` allowance in the owner's direction of
+  2026-10-09 is BLOCKED on SEC-ENC-001 and SEC-NDG-001 (DEC-0031,
+  `component-design-runtime-config.md` section 14 item 4), so this statement
+  holds without exception.
 - **External input validation (SEC-INP-001).** Every response is validated
   against a Pydantic model before it leaves this component: field types, value
   ranges where the domain has them, and enumerations for action types. A
@@ -679,7 +695,10 @@ The gap that leaves is section 14's item 6.
 | Either error field name parses | `tests/unit/test_massive_errors.py` | A 404 body using `message` and a 401 body using `error` both yield a message; neither field is required (section 2.6a) |
 | A 429 without Retry-After is still throttling | `tests/unit/test_massive_retry.py` | The absence of the header does not turn a 429 into a failed attempt (section 2.6b) |
 | Exception messages carry no URL | `tests/unit/test_massive_auth.py` | A failure message names the symbol and status, not the request URL (AC-13) |
-| TLS verification is not disabled | `tests/unit/test_massive_tls.py` | No construction path sets `verify=False` (SEC-ENC-001) |
+| TLS verification is not disabled | `tests/unit/test_massive_tls.py` | No construction path sets `verify=False`, and the constructed SDK pool keeps `cert_reqs="CERT_REQUIRED"` (SEC-ENC-001). Not yet written: the expedited review of 2026-10-09 found this file missing (ER-001, ER-004) |
+| The default base URL is `https` | `tests/unit/test_massive_tls.py` | With `FACTORFLOW_MASSIVE_BASE_URL` unset, the constructed client's `BASE` and its `vx` sub-client's `BASE` are both `https://api.massive.com` (SEC-ENC-001, section 2.2b) |
+| The configured base URL is passed to the SDK | `tests/unit/test_massive_sdk_config.py` | The `RESTClient` is constructed with `base=settings.base_url`, and on the real, unpatched SDK both `BASE` and `vx.BASE` equal a configured `https` value such as `https://stub.example:8443` (section 2.2b). An `https` value is used because `runtime-config` rejects `http` at start (`component-design-runtime-config.md` section 2.2c) |
+| A normalised base produces no double slash | `tests/unit/test_massive_sdk_config.py` | A configured `https://api.massive.com/` reaches the SDK as `https://api.massive.com`, so the first request path is `https://api.massive.com/v3/...`, never `//v3/...` (runtime-config section 2.2c, clause 6) |
 | The API does not import this module | `tests/unit/test_api_isolation.py` | Shared with the API design; enforces C1 |
 
 Live-provider verification is deliberately excluded from the automated suite and
@@ -708,6 +727,9 @@ owner's rate budget and depends on a credential that must not be in CI.
 11. A multi-page range returns every page's rows.
 12. Failure scenario: the provider returns a partial page and then fails; the
     method raises rather than returning the partial set as complete.
+13. The SDK client and its `vx` sub-client are constructed with the configured
+    `FACTORFLOW_MASSIVE_BASE_URL`, which `runtime-config` guarantees is
+    `https`; with the variable unset they use `https://api.massive.com`.
 
 ## 9. Workflows
 
@@ -772,7 +794,8 @@ never uses (section 2.6).
 | System design | CAP-001 system design v3 | Control flow steps 8 to 28, constraints 5.4, 5.6, 5.13 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Constitution | Tech Stack v3 | Official `massive` client adopted 2026-09-05; `MassiveClient` retained as the operational boundary, not a portability layer; provider evaluation and plan tiers | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C4, one market data contract; C5, point-in-time history; C7, long-lived connections | `docs/constitution/product-charter.md` |
-| Constitution | Security Constitution v1.1 | SEC-INP-001, SEC-ENC-001, SEC-SEC-001 | `docs/constitutions/security.constitution.md` |
+| Constitution | Security Constitution v1.1 | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001 | `docs/constitutions/security.constitution.md` |
+| Review | EXP-20261009-1 expedited review v1 | ER-001, ER-002, ER-004: the base URL was unvalidated, §2.2b lacked `base=`, and `tests/unit/test_massive_tls.py` did not exist | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | External | Massive REST documentation | Endpoint paths, query parameters, response fields and `next_url` paging for all four reads, recorded in sections 2.5 and 11. Read 2026-09-05 | `https://massive.com/docs/llms.txt` and the per-endpoint pages it links |
 | Verification | Live provider probe, 2026-09-05 | Base URL, `Authorization: Bearer` scheme, the 401/404/429 error envelope, and the absence of `Retry-After` and `X-RateLimit-*` headers. Recorded in sections 2.6, 2.6a and 2.6b because Massive documents none of it | One authenticated request per case against `https://api.massive.com` |
 
@@ -786,6 +809,7 @@ never uses (section 2.6).
 | AC-11 | Unrecognised instrument reported, run continues | `InstrumentNotFound` as a distinct type | 2.4 |
 | AC-12 | A failed run leaves no false history | `ProviderContractViolation` rather than lenient parsing | 2.4 |
 | AC-13 | Credential never logged or echoed | `Authorization: Bearer`, never the supported `apiKey` query form; messages built from safe fields | 2.6, 4 |
+| AC-13 | Provider reads over HTTPS (§4.2 provider row) | `base=settings.base_url`, validated `https` by `runtime-config` §2.2c; certificate verification never disabled | 2.2b, 4 |
 | AC-10 | Per-instrument failure detail | Typed errors carrying symbol, data type, status and the provider's `request_id` | 2.4, 2.6a, 10 |
 
 ## 14. Open Questions

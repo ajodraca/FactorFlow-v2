@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-runtime-config
 artifact_type: component-design
-artifact_version: 6
-status: approved
+artifact_version: 7
+status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-10-09
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.295"
+  timestamp: 2026-10-09T03:01:19Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -26,12 +26,6 @@ ai_provenance:
       version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:01Z
-  reviewed_revision: sha256:d748d38dff2d8ef506a46f7420a3c89dbdb61471fb87fb158112bdea0eed0579
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
 ---
 
 # Component: Runtime Configuration
@@ -39,7 +33,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-001
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-09-05
+**Last Updated:** 2026-10-09
 
 ## 1. Overview
 
@@ -99,7 +93,7 @@ the relationships between them.
 | `FACTORFLOW_API_HOST` | application | no | `127.0.0.1` | AC-14, system design constraint 5.11 |
 | `FACTORFLOW_API_PORT` | application | no | 8000 | conventional; no capability value |
 | `FACTORFLOW_MASSIVE_API_KEY` | **both** | yes | none | AC-13; system design v3 constraint 5.12. Ingestion uses the value; the application reads presence only |
-| `FACTORFLOW_MASSIVE_BASE_URL` | ingestion | no | `https://api.massive.com` | Verified by probe 2026-09-05; Massive documents no base URL. See `component-design-massive-client.md` section 2.6 |
+| `FACTORFLOW_MASSIVE_BASE_URL` | ingestion | no | `https://api.massive.com` | Verified by probe 2026-09-05; Massive documents no base URL. See `component-design-massive-client.md` section 2.6. Validated at start, `https` only (section 2.2c) |
 | `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` | ingestion | yes | none | system design constraint 5.14, the budget is the owner's plan and cannot be defaulted |
 | `FACTORFLOW_MASSIVE_MAX_ATTEMPTS` | ingestion | no | 3 | system design constraint 5.13, owner decision 2026-09-04 |
 | `FACTORFLOW_MASSIVE_TIMEOUT_SECONDS` | ingestion | no | 30 | Owner decision 2026-09-05; section 2.2a |
@@ -236,6 +230,141 @@ and CAP-001 does not solve it; a capability that needs database credential
 rotation owns that outcome. This is a scope statement, not a claim that the
 requirement does not apply.
 
+### 2.2c Provider base URL validation
+
+`massive-client` passes `FACTORFLOW_MASSIVE_BASE_URL` to the SDK as `base`
+(`component-design-massive-client.md` section 2.2b). The value therefore decides
+which host receives the Restricted provider credential as `Authorization:
+Bearer`, and over which scheme. An unvalidated value would let a typo, an
+`http://` value or a foreign host receive the key, against SEC-ENC-001 and the
+massive-client statement that every request is HTTPS. The expedited review of
+2026-10-09 (`EXP-20261009-1-review-v1.md`, ER-001 and ER-002) found exactly
+that gap, and the owner's direction of 2026-10-09 sets the rule below. The edge
+cases are decided in DEC-0032.
+
+**The rule.** `MassiveSettings` validates the value once, at process start. A
+value that breaks any clause raises `ConfigurationError`, and the ingestion
+process exits non-zero before it makes any provider request.
+
+1. **Unset** means the default `https://api.massive.com`.
+2. **The scheme must be `https`.** The comparison ignores case.
+3. **The host must be present.**
+4. **No userinfo.** A `user@` or `user:password@` part is rejected.
+5. **The port is optional.** When present it must be an integer from 1 to
+   65535.
+6. **The path must be empty or a single `/`.** A single trailing `/` is removed
+   before the value reaches the SDK, because the SDK builds every request URL as
+   `base + path` with `path` starting with `/`. Any other path is rejected,
+   because the SDK would prefix it to every endpoint in section 2.5 of the
+   massive-client design, and no design governs a prefixed base.
+7. **No query and no fragment.** A `?` or a `#` anywhere is rejected.
+8. **No empty value, whitespace or control characters.** A variable that is set
+   but empty is rejected rather than falling back to the default, because a
+   silent fallback hides a misconfiguration (section 3). Surrounding whitespace
+   is rejected, not stripped.
+9. **The error names the variable and the clause, never the value.** The message
+   reads `FACTORFLOW_MASSIVE_BASE_URL: <clause that failed>`. It never contains
+   the submitted URL, because a userinfo part can carry a password, and it never
+   contains the API key or any other setting's value (AC-13, SEC-ERR-001).
+
+**Loopback `http`: specified, BLOCKED, not in force (DEC-0031).** The owner's
+direction also asks for `http` to be accepted when the host is a loopback
+address, so that local test doubles such as the DEC-0025 E2E stub
+(`http://127.0.0.1:8126`) can stand in for the provider. The clause would read:
+
+> 2a. `http` is accepted only when the host is exactly `127.0.0.1`, `::1`
+> (written `[::1]` in the URL) or `localhost`, compared without case. No other
+> address qualifies: not the rest of `127.0.0.0/8`, not `0.0.0.0`, not
+> `localhost.` and not a `*.localhost` name. The set is `_LOOPBACK_HOSTS`, the
+> one `ApiSettings` already uses for `FACTORFLOW_API_HOST`.
+
+This clause conflicts with the security constitution as written, and it must not
+be implemented until the owner resolves that. Until then, an `http` value fails
+start whatever its host.
+
+- **SEC-ENC-001 (Critical)** prohibits plain HTTP "for any channel carrying
+  non-Public data". It has no loopback exception. The channel carries the
+  credential, which section 4 classifies as Restricted, and a configuration
+  check cannot tell a dummy test key from the real one.
+- **SEC-NDG-001 (Critical)** says encryption "must not be disableable via
+  configuration ... or environment variables in production environments".
+  Clause 2a would make one environment variable switch provider transport to
+  plaintext in the release build.
+- The constitution says specifications may never relax its invariants, and that
+  no exception is made without a waiver approved by the constitution owner. The
+  reading in `component-design-ingestion-api.md` section 4, that loopback does
+  not engage SEC-ENC-001, is a project interpretation for Internal data. It is
+  not constitution text, and it does not cover a Restricted credential whose
+  destination an environment variable chooses.
+
+Section 14, item 4 states the constitution change that would unblock clause 2a.
+Until that change is made, the E2E acquisition stack in DEC-0025 cannot start
+its ingestion process against an `http` stub.
+
+| Value of `FACTORFLOW_MASSIVE_BASE_URL` | Outcome |
+|---|---|
+| unset | `https://api.massive.com` |
+| `https://api.massive.com` | accepted unchanged |
+| `https://api.massive.com/` | accepted as `https://api.massive.com` |
+| `HTTPS://API.MASSIVE.COM` | accepted (scheme and host compare without case) |
+| `https://api.massive.com:443` | accepted |
+| `https://other.example` | accepted (the host is not allow-listed; see section 3) |
+| `http://api.massive.com` | rejected: scheme must be `https` |
+| `http://127.0.0.1:8126`, `http://localhost:8126`, `http://[::1]:8126` | rejected while clause 2a is BLOCKED; accepted only once it is unblocked |
+| `http://127.0.0.2`, `http://0.0.0.0`, `http://localhost.` | rejected, and still rejected under clause 2a |
+| `ftp://api.massive.com`, `api.massive.com` (no scheme) | rejected: scheme must be `https` |
+| `https://`, `https:///v3`, `https:api.massive.com` | rejected: host missing |
+| `https://user:pw@api.massive.com` | rejected: userinfo not allowed; the message does not echo the password |
+| `https://api.massive.com:0`, `:70000`, `:abc` | rejected: port invalid |
+| `https://api.massive.com/v3`, `https://api.massive.com//` | rejected: path not allowed |
+| `https://api.massive.com?x=1`, `https://api.massive.com#f` | rejected: query or fragment not allowed |
+| empty string, `" https://api.massive.com"` | rejected: empty, or contains whitespace |
+
+```python
+# src/factorflow/config/settings.py
+from urllib.parse import urlsplit
+
+from pydantic import field_validator
+
+
+class MassiveSettings(_EnvNamedSettings):
+    ...  # fields as in section 2.3
+
+    @field_validator("base_url")
+    @classmethod
+    def _validate_base_url(cls, value: str) -> str:
+        """Section 2.2c. Messages name the clause, never the value; the
+        _EnvNamedSettings wrapper prefixes FACTORFLOW_MASSIVE_BASE_URL."""
+        if not value or any(c.isspace() or not c.isprintable() for c in value):
+            raise ValueError("must be a non-empty URL without whitespace")
+        if "?" in value or "#" in value:
+            raise ValueError("must not carry a query or fragment")
+        parts = urlsplit(value)
+        if parts.scheme != "https":  # clause 2a is BLOCKED (DEC-0031)
+            raise ValueError("scheme must be https")
+        if not parts.hostname:
+            raise ValueError("host is missing")
+        if "@" in parts.netloc:
+            raise ValueError("must not carry userinfo")
+        try:
+            port = parts.port
+        except ValueError:
+            raise ValueError("port must be an integer from 1 to 65535") from None
+        if port == 0:
+            raise ValueError("port must be an integer from 1 to 65535")
+        if parts.path not in ("", "/"):
+            raise ValueError("must not carry a path")
+        return value[:-1] if parts.path == "/" else value
+```
+
+`urlsplit` lowercases the scheme and the hostname and removes the brackets from
+an IPv6 literal, which is what makes the case-insensitive comparison and the
+`[::1]` form work. `ConfigurationError` already formats Pydantic's errors with
+`include_input=False` (the `_EnvNamedSettings` base in `settings.py`), so the submitted value
+cannot reach the message by that route either. The snippet does not contain
+clause 2a, and no flag, constant or environment variable enables it. Code that
+is BLOCKED is not shipped dormant.
+
 ### 2.3 Settings models
 
 ```python
@@ -263,7 +392,7 @@ class MassiveSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FACTORFLOW_MASSIVE_")
 
     api_key: SecretStr
-    base_url: str = "https://api.massive.com"
+    base_url: str = "https://api.massive.com"  # validated at start, section 2.2c
     requests_per_minute: int = Field(ge=1)
     max_attempts: int = Field(default=3, ge=1)
     timeout_seconds: float = Field(default=30.0, gt=0)
@@ -448,6 +577,12 @@ N/A, not applicable for this component.
   than the credential is still read once at start, because nothing requires
   those to be rotatable and re-reading them mid-life would let a process drift
   from the settings it validated.
+- **The provider base URL is validated by scheme and shape, not by host**
+  (owner direction 2026-10-09, section 2.2c). Any `https` host passes, so a
+  mistyped `https` host would still receive the credential, over TLS with
+  certificate verification. The owner's rule does not allow-list hosts. Because
+  this setting now redirects all provider egress, the release evidence must name
+  it (EXP-20261009-1 review, ER-002).
 
 ## 4. Security
 
@@ -468,8 +603,14 @@ N/A, not applicable for this component.
   cover.
 - **Input validation (SEC-INP-001).** Every variable is validated by a Pydantic
   model with a type and, where meaningful, a range: pool sizes at least 1, port
-  within 1 to 65535, requests per minute at least 1, attempts at least 1. An
-  invalid value fails the start.
+  within 1 to 65535, requests per minute at least 1, attempts at least 1, and
+  the provider base URL by the rule in section 2.2c. An invalid value fails the
+  start.
+- **Transport encryption (SEC-ENC-001, SEC-NDG-001).** The provider base URL
+  must be `https`, so no setting can send the credential over plain HTTP. The
+  loopback `http` allowance the owner asked for conflicts with both invariants.
+  It is specified but BLOCKED in section 2.2c, and section 14 item 4 holds the
+  question for the owner.
 - **No dynamic code execution.** No variable is evaluated, imported by name, or
   used to construct a code path (SEC-INP-003).
 - **Error disclosure (SEC-ERR-001).** Validation failures are written to the
@@ -530,6 +671,13 @@ N/A, not applicable for this component.
 | The fingerprint is not the credential | `tests/unit/test_credential_reload.py` | The fingerprint of a known value contains no substring of it and is stable across calls (SEC-SEC-001) |
 | The credential is not cached at module level | `tests/unit/test_credential_reload.py` | `read_provider_credential()` reflects a changed environment without reimport, which is what makes rotation observable |
 | No committed credential | `tests/unit/test_no_committed_secrets.py` | No tracked file contains a value matching the provider key shape, and no `.env` is tracked (SEC-SEC-001) |
+| Base URL default is the governed host | `tests/unit/test_settings_base_url.py` | With the variable unset, `MassiveSettings().base_url == "https://api.massive.com"` (section 2.2c, clause 1) |
+| An `https` base URL is accepted and normalised | `tests/unit/test_settings_base_url.py` | Every "accepted" row of section 2.2c's table loads; `https://api.massive.com/` loads as `https://api.massive.com` (clauses 2, 5 and 6) |
+| A non-`https` base URL fails start | `tests/unit/test_settings_base_url.py` | `http://api.massive.com`, `ftp://api.massive.com` and a value with no scheme each raise `ConfigurationError` naming `FACTORFLOW_MASSIVE_BASE_URL` (clause 2, SEC-ENC-001) |
+| Loopback `http` fails start while clause 2a is BLOCKED | `tests/unit/test_settings_base_url.py` | `http://127.0.0.1:8126`, `http://localhost:8126` and `http://[::1]:8126` each raise. When the owner unblocks clause 2a, this test is the one that changes: these three then load, and `http://127.0.0.2`, `http://0.0.0.0` and `http://localhost.` still raise (DEC-0031) |
+| A malformed base URL fails start | `tests/unit/test_settings_base_url.py` | Each "rejected" row of section 2.2c's table raises `ConfigurationError`: missing host, userinfo, invalid or zero port, a path, a query or fragment, an empty value, surrounding whitespace (clauses 3 to 8) |
+| A base URL failure discloses no value | `tests/unit/test_settings_base_url.py` | For `https://user:s3cret@api.massive.com`, and for each rejected value, the message contains `FACTORFLOW_MASSIVE_BASE_URL` and contains neither the submitted value, nor `s3cret`, nor the configured API key (clause 9, AC-13) |
+| The ingestion process refuses to start on a bad base URL | `tests/unit/test_ingestion_main.py` | With `FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com`, the entry point exits non-zero before constructing a `RESTClient`, and the log line names the variable but not the value (clause 2, AC-16) |
 
 Every test in this component runs without a container, so all carry no
 `postgres` marker and run under `uv run pytest -m 'not postgres'`.
@@ -557,6 +705,13 @@ something checks them.
    size, prevents the process from starting rather than being clamped.
 9. Failure scenario: a credential deliberately formatted into a log call is
    emitted as `[redacted]`.
+10. `FACTORFLOW_MASSIVE_BASE_URL` unset yields `https://api.massive.com`; any
+    value whose scheme is not `https` prevents the ingestion process from
+    starting. While clause 2a of section 2.2c is BLOCKED, that includes
+    loopback `http` values.
+11. Failure scenario: a base URL that breaks any clause of section 2.2c fails
+    start with a message naming `FACTORFLOW_MASSIVE_BASE_URL` and the clause,
+    containing neither the submitted value nor the API key.
 
 ## 9. Workflows
 
@@ -603,7 +758,9 @@ do.
 | Capability | CAP-001 v6 | AC-13 credential handling, AC-14 network exposure | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Steps 37 to 39, constraints 5.11 to 5.15 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Section 1.3, the credential region and its copy | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Security Constitution v1.1 | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003 | `docs/constitutions/security.constitution.md` |
+| Constitution | Security Constitution v1.1 | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001 | `docs/constitutions/security.constitution.md` |
+| Review | EXP-20261009-1 expedited review v1 | ER-001 and ER-002: an unvalidated base URL chooses the credential's destination and scheme | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
+| Decision | DEC-0031, DEC-0032 | Loopback `http` held BLOCKED; base URL edge-case rules | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 | Constitution | Tech Stack v3 | Pydantic in the approved stack; credential supplied at runtime | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
@@ -611,6 +768,7 @@ do.
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
 | AC-13 | `runtime-config` environment load, redaction, no API echo | `SecretStr` wrapping, `RedactingFilter`, presence-only reporting | 2.3, 2.5, 2.6 |
+| AC-13 | Provider reads over HTTPS (§4.2 provider row, block diagram `MC -->\|HTTPS\| EXT`) | Base URL validated `https` at start; failure message carries no value | 2.2c, 4 |
 | AC-14 | Port published to `127.0.0.1`; uvicorn bound to loopback | `ApiSettings.host` default `127.0.0.1` | 2.2, 2.3 |
 | AC-16 | Refuse an inconsistent start | A missing required value exits before any work is done | 2.4, 3 |
 | AC-18 | `GET /api/health` | `credential_present()` supplying the health payload | 2.6 |
@@ -647,3 +805,32 @@ do.
    without inspecting the store. The exposure this accepts is one process holding
    a string it never sends anywhere; the test in section 7 asserting that no
    response model carries a secret-shaped field is what keeps that true.
+4. **May `FACTORFLOW_MASSIVE_BASE_URL` use `http` when the host is loopback?**
+   *BLOCKED on a constitution decision (DEC-0031). Owner: constitution owner.*
+   The owner's direction of 2026-10-09 asks for it, so that the DEC-0025 E2E
+   stub can stand in for the provider. SEC-ENC-001 and SEC-NDG-001 (both
+   Critical) do not permit it as written (section 2.2c), and a specification may
+   not relax them. Clause 2a is unblocked by one of the following, and this
+   design does not choose between them:
+   - **Amend SEC-ENC-001** with a narrow exception, for example: *"Plain HTTP
+     is permitted only on a loopback interface (127.0.0.1, ::1, localhost)
+     between a component and a local test double, and only when the channel
+     carries no production credential or production data."* **And amend
+     SEC-NDG-001** to state that a configuration value accepted only for a
+     loopback test double does not count as disabling encryption, or else
+     confine clause 2a to non-release builds. Without the second change, clause
+     2a still breaks SEC-NDG-001.
+   - **Record a time-boxed waiver** approved by the constitution owner for
+     SEC-ENC-001 and SEC-NDG-001, scoped to this variable and to loopback hosts.
+     Both are Critical, so the constitution's enforcement clause also requires
+     security-lead sign-off.
+   - **Keep `https`-only** and supply the E2E stub through a test-only path that
+     is absent from the release build, for example a test entry point that
+     builds `MassiveSettings` with the stub base and a dummy key. The
+     environment-variable rule in section 2.2c then never accepts `http`. This
+     needs a change to DEC-0025 and to `scripts/run-e2e-server.sh`, which sets
+     `FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:${STUB_PORT}`.
+
+   *Blocks:* clause 2a, the "Loopback `http`" test in section 7 changing to its
+   unblocked form, and the DEC-0025 E2E acquisition stack starting its
+   ingestion process against an `http` stub once the base URL is honoured.
