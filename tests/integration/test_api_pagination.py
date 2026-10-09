@@ -54,6 +54,7 @@ def pagination_client(
 
 
 # Implements TC-COMP-056
+# Implements TC-INT-019
 def test_coverage_page_size_defaults_and_caps(pagination_client: TestClient) -> None:
     client = pagination_client
 

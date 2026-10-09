@@ -162,6 +162,7 @@ def _seed_gap_of_three(conn: psycopg.Connection) -> None:
 
 
 # Implements TC-COMP-007
+# Implements TC-INT-017
 def test_coverage_reports_presence_ranges_and_last_acquired(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -212,6 +213,7 @@ def test_coverage_reports_presence_ranges_and_last_acquired(
 
 
 # Implements TC-COMP-008
+# Implements TC-INT-017
 def test_coverage_reports_gap_counts_and_availability(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -308,6 +310,7 @@ def test_gap_dates_only_behind_expansion(
 
 
 # Implements TC-COMP-057
+# Implements TC-INT-017
 def test_lifecycle_filter_and_default_includes_retired(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -333,6 +336,7 @@ def test_lifecycle_filter_and_default_includes_retired(
 
 
 # Implements TC-COMP-058
+# Implements TC-INT-018
 def test_inverted_range_is_rejected(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -352,6 +356,7 @@ def test_inverted_range_is_rejected(
 
 
 # Implements TC-COMP-036
+# Implements TC-INT-017
 def test_symbol_filter_is_a_prefix(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -365,6 +370,7 @@ def test_symbol_filter_is_a_prefix(
 
 
 # Implements TC-COMP-036
+# Implements TC-INT-017
 def test_date_bounds_narrow_gaps(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -382,6 +388,7 @@ def test_date_bounds_narrow_gaps(
 
 
 # Implements TC-COMP-036
+# Implements TC-INT-017
 def test_cursor_pages_through_every_instrument_once(
     coverage_env: tuple[TestClient, psycopg.Connection],
 ) -> None:

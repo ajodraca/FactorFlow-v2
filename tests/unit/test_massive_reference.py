@@ -139,6 +139,7 @@ def _envelope(results: dict, request_id: str = "req_ok_001") -> dict:
     return {"request_id": request_id, "results": results}
 
 
+# Implements TC-INT-021
 def test_fetch_reference_returns_product_shaped_reference() -> None:
     """TC-COMP-003 / TC-COMP-204: `fetch_reference` returns a
     `TickerReference` retaining CIK, composite FIGI and share class FIGI
@@ -187,6 +188,7 @@ def test_fetch_reference_raises_instrument_not_found_when_results_is_empty() -> 
             client.fetch_reference("NOTREAL")
 
 
+# Implements TC-INT-021
 def test_fetch_reference_uses_the_single_ticker_endpoint_only() -> None:
     """TC-COMP-212 / DAC-E3-S1-4: reference reads use the single-ticker
     endpoint (`get_ticker_details`); the list-form endpoint
@@ -223,6 +225,7 @@ def test_fetch_reference_delisted_instrument_carries_active_and_delisted_fields(
     assert reference.delisted_utc is not None
 
 
+# Implements TC-INT-025
 def test_fetch_reference_raises_instrument_not_found_for_unknown_symbol() -> None:
     """AC-3's covered-instrument guarantee has a counterpart: an unknown
     symbol raises the typed `InstrumentNotFound`, not a raw SDK

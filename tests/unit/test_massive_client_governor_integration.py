@@ -168,6 +168,7 @@ def test_fetch_corporate_actions_routes_all_four_reads_through_the_governor() ->
     ],
     ids=["fetch_reference", "fetch_daily_bars", "fetch_financials", "fetch_corporate_actions"],
 )
+# Implements TC-INT-025
 def test_a_first_page_provider_failure_surfaces_as_the_typed_error(call, sdk_method) -> None:
     """IR-001: before routing the first page through the governor, a
     first-page failure escaped as the SDK's own `massive.exceptions.

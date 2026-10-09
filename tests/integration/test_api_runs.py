@@ -93,6 +93,7 @@ def test_start_valid_returns_202_requested_null_queued_behind(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-009
 def test_start_with_active_run_returns_202_queued_behind_set(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -126,8 +127,13 @@ def test_start_with_active_run_returns_202_queued_behind_set(
     assert body["queued_behind"] == first_id
     assert _db_run_count(postgres_connection_string) == before + 1
 
+    running = runs_client.get("/api/acquisition-runs", params={"state": "running"})
+    assert running.status_code == 200, running.text
+    assert [r["run_id"] for r in running.json()["runs"]] == [first_id]
+
 
 @pytest.mark.postgres
+# Implements TC-INT-010
 def test_start_no_depth_returns_409_history_depth_not_set(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -146,6 +152,7 @@ def test_start_no_depth_returns_409_history_depth_not_set(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-010
 def test_start_no_active_instruments_returns_409_no_active_instruments(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -196,6 +203,7 @@ def test_start_both_preconditions_unmet_returns_history_depth_not_set(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-015
 def test_cancel_queued_run_returns_202_cancelled(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -216,6 +224,47 @@ def test_cancel_queued_run_returns_202_cancelled(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-015
+def test_cancel_queued_run_leaves_active_run_unaffected(
+    runs_client: TestClient, postgres_connection_string: str
+) -> None:
+    """AC-26: cancelling a run queued behind an active run returns 202 with
+    state=cancelled and leaves the active run running."""
+    _set_history_depth(runs_client, 5)
+    _add_instrument(runs_client, "AAPL")
+
+    active_resp = _start_run(runs_client)
+    assert active_resp.status_code == 202, active_resp.text
+    active_id = active_resp.json()["run_id"]
+
+    conn = psycopg.connect(postgres_connection_string)
+    try:
+        conn.execute(
+            "UPDATE acquisition_run SET state='running', started_at=now(), "
+            "claimed_by='test', heartbeat_at=now() WHERE run_id=%s",
+            (uuid.UUID(active_id),),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    queued_resp = _start_run(runs_client)
+    assert queued_resp.status_code == 202, queued_resp.text
+    assert queued_resp.json()["queued_behind"] == active_id
+    queued_id = queued_resp.json()["run_id"]
+
+    cancel_resp = runs_client.post(f"/api/acquisition-runs/{queued_id}/cancel")
+
+    assert cancel_resp.status_code == 202, cancel_resp.text
+    assert cancel_resp.json()["state"] == "cancelled"
+
+    active_detail = runs_client.get(f"/api/acquisition-runs/{active_id}")
+    assert active_detail.status_code == 200, active_detail.text
+    assert active_detail.json()["run"]["state"] == "running"
+
+
+@pytest.mark.postgres
+# Implements TC-INT-014
 def test_cancel_running_run_returns_202_cancelling(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -245,6 +294,7 @@ def test_cancel_running_run_returns_202_cancelling(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-016
 def test_cancel_terminal_run_returns_409_run_already_terminal(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -291,6 +341,7 @@ def test_cancel_terminal_run_returns_409_run_already_terminal(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-016
 def test_cancel_unknown_run_returns_404(
     runs_client: TestClient,
 ) -> None:
@@ -392,6 +443,7 @@ def _seed_result(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-011
 def test_list_runs_reverse_chronological_order(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -463,6 +515,7 @@ def test_list_runs_rejects_limit_501(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-011
 def test_list_runs_state_filter(runs_client: TestClient, postgres_connection_string: str) -> None:
     """TC-COMP-009/DAC-E5-S5-4: state filter returns only matching runs."""
     conn = psycopg.connect(postgres_connection_string)
@@ -481,6 +534,7 @@ def test_list_runs_state_filter(runs_client: TestClient, postgres_connection_str
 
 
 @pytest.mark.postgres
+# Implements TC-INT-011
 def test_list_runs_cursor_continuation_no_gaps(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -526,6 +580,7 @@ def test_list_runs_malformed_cursor_returns_422(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-013
 def test_get_run_detail_unknown_returns_404(
     runs_client: TestClient,
 ) -> None:
@@ -533,9 +588,15 @@ def test_get_run_detail_unknown_returns_404(
     resp = runs_client.get(f"/api/acquisition-runs/{uuid.uuid4()}")
 
     assert resp.status_code == 404
+    error = resp.json()["error"]
+    assert error["code"] == "not_found"
+    assert error["resource"] == "acquisition-run"
+    assert error["message"]
+    assert error["request_id"]
 
 
 @pytest.mark.postgres
+# Implements TC-INT-012
 def test_get_run_detail_returns_run_counts_and_results(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:
@@ -694,6 +755,7 @@ def test_get_run_detail_response_shape(
 
 
 @pytest.mark.postgres
+# Implements TC-INT-012
 def test_api_detail_includes_sql_outcome_counts_and_symbols(
     runs_client: TestClient, postgres_connection_string: str
 ) -> None:

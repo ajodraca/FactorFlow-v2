@@ -211,6 +211,7 @@ def test_ticker_change_payload_deliberately_retains_provider_keys() -> None:
 # --- MassiveClient.fetch_corporate_actions (CAP-001-E3-S1) ---------------
 
 
+# Implements TC-INT-024
 def test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol() -> None:
     """TC-COMP-003: `fetch_corporate_actions` returns splits, dividends,
     ticker changes and IPOs mapped to the product's enumeration for a
@@ -238,6 +239,27 @@ def test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol(
     action_types = {action.action_type for action in actions}
     assert action_types == {"split", "dividend", "ticker_change", "ipo"}
     assert all(isinstance(action, CorporateAction) for action in actions)
+
+    instance.list_stocks_splits.assert_called_once_with(
+        ticker="AAPL",
+        execution_date_gte="2000-01-01",
+        execution_date_lte="2024-12-31",
+        raw=True,
+    )
+    instance.list_stocks_dividends.assert_called_once_with(
+        ticker="AAPL",
+        ex_dividend_date_gte="2000-01-01",
+        ex_dividend_date_lte="2024-12-31",
+        raw=True,
+    )
+    instance.vx.list_ipos.assert_called_once_with(
+        ticker="AAPL",
+        listing_date_gte="2000-01-01",
+        listing_date_lte="2024-12-31",
+        raw=True,
+    )
+    instance.get_ticker_events.assert_called_once()
+    assert instance.get_ticker_events.call_args.args[0] == "AAPL"
 
 
 def test_fetch_corporate_actions_split_effective_on_is_execution_date() -> None:
