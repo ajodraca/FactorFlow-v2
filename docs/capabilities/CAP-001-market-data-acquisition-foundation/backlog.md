@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
-artifact_version: 3
+artifact_version: 4
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.296"
-  timestamp: 2026-10-09T21:20:00Z
+  timestamp: 2026-10-09T22:45:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -23,7 +23,13 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "approved"
     - id: CAP-001-E3
+      version: "3"
+    - id: CAP-001-E3-S6
       version: "2"
+    - id: CAP-001-E3-S7
+      version: "2"
+    - id: CAP-001-backlog-review
+      version: "10"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
@@ -65,9 +71,10 @@ and E4.
 
 ```
 E1 ──┬── E2 ────────────────┐
-     ├── E3 ────────────────┤
+     ├── E3-S1..S5 ─────────┤
      └── E4-S1 ── E5-S1 ── E5-S2
                        ├─────┴── E4 remainder ── E6
+                       │               └── E4-S5 ── E3-S6 + E3-S7 (merge together)
                        └──────── E5 remainder ── E7
 ```
 
@@ -78,7 +85,7 @@ screen-delivering EPICs would otherwise be scheduled ahead of the frame they
 need, or each would invent its own.
 
 - **E1** first and alone. Nothing else can start without the schema, migrations, runtime configuration and the application shell.
-- **E2 and E3** are parallelizable once E1 lands, and share no components.
+- **E2 and E3-S1 to E3-S5** are parallelizable once E1 lands, and share no components. **E3-S6 and E3-S7** also need E4-S5 (`factorflow.ingestion_main`), deliberately a later-epic dependency, and touch `acquisition-runner`'s module. They **merge together**: same pull request, or E3-S7 merged before or with E3-S6 reaching `main` (see below).
 - **E4** starts with E4-S1 after E1, then its remaining stories need E2's instrument list and stated depth, E3's provider client, E5-S1's schema and E5-S2's claim contract. It is the largest EPIC and carries the three commitments the system design names unrecoverable if wrong.
 - **E5** needs E1, E2 and E4-S1's observation migration. E5-S1 then owns migrations 0003 and 0004 together, avoiding a migration-order cycle with E4-S3; the remaining E5 work can run alongside later E4 stories against the fixed schema and claim contracts.
 - **E6** needs E4's written coverage segments to read, though its read contract is fixed and can be built against in parallel.
@@ -113,9 +120,19 @@ SDK, and socket-free no-redirect and no-proxy tests. E3-S7 is the test-only
 loopback `http` entry point for the E2E stub, which rests on CONST-SEC 1.2
 (in force at the pinned revision since 2026-10-09). Both depend on E4-S5, a
 later epic, deliberately, because E4 owns `factorflow.ingestion_main`.
-Placement and split: DEC-0039. Until E3-S7 lands after E3-S6, the E2E
-acquisition stack's ingestion process exits at start (specification review v7
-FINDING-10, an open question in E3-S6).
+Placement and split: DEC-0039. E3-S6's redirect test expectations supersede
+the approved massive-client section 7 redirect row and DEC-0038 (DEC-0042); the
+design row is aligned at `$doc-sync`.
+
+**Landing rule: E3-S6 and E3-S7 merge together** (specification review v7
+FINDING-10 (a), resolved 2026-10-09). E3-S6 alone makes the E2E acquisition
+stack's ingestion process refuse to start, and `.github/workflows/validate.yml`
+runs the `End-to-end` job on every pull request and on push to `main`. So the
+two merge in the same pull request, or E3-S7 is merged before or with E3-S6
+reaching `main`. Both are `P1`. No design change is needed, because clause 2a is
+in force under CONST-SEC 1.2 at the pinned revision. It is a merge-order rule,
+not a dependency: E3-S7 already depends on E3-S6, and a reverse edge would be a
+cycle.
 
 ### Critical path
 
@@ -193,7 +210,7 @@ None is blocking. Each is recorded in the EPIC it affects, or in the story it af
 | Question | Affects | EPIC | Source |
 |----------|---------|------|--------|
 | Massive's instrument coverage for all four data types is untested | AC-3 | E3, E4 | Capability 7, assumption 1 |
-| Interim E2E acquisition breakage between E3-S6 and E3-S7 (spec review v7 FINDING-10) | AC-13 | E3 | runtime-config 2.2c item 5 |
+| Decoupling the per-run E2E key from clause 2a (spec review v7 FINDING-10 (b); (a) resolved by the landing rule) | AC-13 | E3 | runtime-config 2.2c item 5 |
 | `localhost` resolved once at start by the test entry point (spec review v7 FINDING-11) | AC-13 | E3 | runtime-config 2.2c item 2 |
 | No duration target for a 3000-instrument run | AC-4 | E4 | Capability 7 |
 | Backup and restore procedure unspecified | AC-15 | E1 | market-data-store 14 |
