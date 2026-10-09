@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
-artifact_version: 2
+artifact_version: 3
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-18
+updated: 2026-10-09
 ai_provenance:
-  agent_id: epic-generation-agent
+  agent_id: story-generation-agent
   agent_version: "1.0"
-  model: gpt-5.6
-  tool: Devin
-  tool_version: "unknown"
-  timestamp: 2026-09-18T16:29:53Z
+  model: claude-opus-5-5
+  tool: Claude Code
+  tool_version: "2.1.296"
+  timestamp: 2026-10-09T21:20:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -22,6 +22,8 @@ ai_provenance:
       version: "6"
     - id: CAP-001-ux-design
       version: "approved"
+    - id: CAP-001-E3
+      version: "2"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
@@ -37,8 +39,8 @@ approval:
 **Capability:** CAP-001
 **Generated:** 2026-09-06
 **Total EPICs:** 7
-**Total Stories:** 36
-**Total Points:** 154
+**Total Stories:** 38
+**Total Points:** 164
 
 ## EPICs
 
@@ -46,7 +48,7 @@ approval:
 |---------|----------|-------|----------|---------|-------------|
 | [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation, Schema and Application Shell | L | 6 | 24 |
 | [CAP-001-E2](epics/instrument-list-and-history-depth/CAP-001-E2.md) | N/A | Instrument List and History Depth | M | 4 | 16 |
-| [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | 5 | 20 |
+| [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | 7 | 30 |
 | [CAP-001-E4](epics/point-in-time-acquisition/CAP-001-E4.md) | N/A | Point-in-Time Acquisition and Re-run Safety | XL | 7 | 32 |
 | [CAP-001-E5](epics/run-lifecycle/CAP-001-E5.md) | N/A | Run Lifecycle: Queueing, Cancellation and Recovery | L | 6 | 31 |
 | [CAP-001-E6](epics/coverage-and-gap-visibility/CAP-001-E6.md) | N/A | Coverage and Gap Visibility | L | 4 | 18 |
@@ -84,7 +86,7 @@ need, or each would invent its own.
 
 ## Stories
 
-36 stories across the seven EPICs, 154 points. Every story is scoped to the
+38 stories across the seven EPICs, 164 points. Every story is scoped to the
 single writable repository `FactorFlow-v2`, which `project.yaml` declares; the
 twelve component names from the system design are modules within it rather than
 separate repositories, and each story names its module in the description.
@@ -93,14 +95,27 @@ separate repositories, and each story names its module in the description.
 |------|---------|--------|----------------|
 | E1 Runnable Foundation, Schema and Application Shell | 6 | 24 | 4 Python, 2 TypeScript |
 | E2 Instrument List and History Depth | 4 | 16 | 3 Python, 1 TypeScript |
-| E3 Provider Integration and Pacing | 5 | 20 | 5 Python |
+| E3 Provider Integration and Pacing | 7 | 30 | 7 Python |
 | E4 Point-in-Time Acquisition and Re-run Safety | 7 | 32 | 7 Python |
 | E5 Run Lifecycle: Queueing, Cancellation and Recovery | 6 | 31 | 5 Python, 1 TypeScript |
 | E6 Coverage and Gap Visibility | 4 | 18 | 3 Python, 1 TypeScript |
 | E7 Failure Diagnosis and Operational Visibility | 4 | 13 | 3 Python, 1 TypeScript |
-| **Total** | **36** | **154** | 30 Python, 6 TypeScript |
+| **Total** | **38** | **164** | 32 Python, 6 TypeScript |
 
 No story spans both languages, so none straddles the pytest and vitest boundary.
+
+### Provider base URL stories (added 2026-10-09)
+
+E3-S6 and E3-S7 implement the approved base URL designs (runtime-config v11
+section 2.2c, massive-client v11 section 2.2b, acquisition-runner v8 section
+2.1). E3-S6 is the release-build half: `https`-only validation, `base=` on the
+SDK, and socket-free no-redirect and no-proxy tests. E3-S7 is the test-only
+loopback `http` entry point for the E2E stub, which rests on CONST-SEC 1.2
+(in force at the pinned revision since 2026-10-09). Both depend on E4-S5, a
+later epic, deliberately, because E4 owns `factorflow.ingestion_main`.
+Placement and split: DEC-0039. Until E3-S7 lands after E3-S6, the E2E
+acquisition stack's ingestion process exits at start (specification review v7
+FINDING-10, an open question in E3-S6).
 
 ### Critical path
 
@@ -129,7 +144,7 @@ so a reader reconciling this table against an EPIC file finds what they expect.
 |--------------|----------------------|--------------------------|------|-------|
 | AC-1 Named instrument list | 4.1, 4.2 | instrument-list-service, ingestion-api, owner-web-app | E2 | E1-S1, E2-S1, E2-S3, E2-S4 |
 | AC-2 History depth stated, not assumed | 4.2, 3 | instrument-list-service, ingestion-api | E2; E4, E5 (derived) | E1-S1, E2-S2, E2-S3, E2-S4 |
-| AC-3 Data types acquired | 4.1, 4.2 | massive-client, acquisition-runner, observation-writer | E3, E4 | E3-S1, E3-S2, E4-S4, E4-S5 |
+| AC-3 Data types acquired | 4.1, 4.2 | massive-client, acquisition-runner, observation-writer | E3, E4 | E3-S1, E3-S2, E3-S6, E3-S7, E4-S4, E4-S5 |
 | AC-4 Acquisition volume, 3000 instruments | 3, 5.13, 5.14 | rate-limit-governor, acquisition-runner | E4; E3 (derived) | E3-S4, E4-S5, E4-S7 |
 | AC-5 Point-in-time record | 3, 5.3, 5.4 | observation-writer, massive-client | E3, E4 | E3-S2, E4-S1, E4-S2, E4-S3 |
 | AC-6 Re-run safety | 3 step 16, 4.2 | observation-writer, acquisition-runner | E4 | E4-S1, E4-S2, E4-S3, E4-S4, E4-S6 |
@@ -139,7 +154,7 @@ so a reader reconciling this table against an EPIC file finds what they expect.
 | AC-10 Failure diagnosis | 3 step 21, 4.2 | run-journal, ingestion-api, owner-web-app | E7 | E4-S6, E5-S5, E7-S1, E7-S2, E7-S4 |
 | AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E7; E4 (derived) | E3-S3, E3-S5, E4-S6, E7-S1, E7-S4 |
 | AC-12 A failed run leaves no false history | 3 step 17, 5.9 | market-data-store, observation-writer, coverage-service | E4, E5, E6 | E4-S1, E5-S1, E4-S3, E6-S1 |
-| AC-13 Credential handling | 3 steps 37-39, 5.12 | runtime-config, massive-client, schema-migrator | E1, E3; E7 (derived) | E1-S2, E1-S3, E3-S1, E3-S5, E7-S2 |
+| AC-13 Credential handling | 3 steps 37-39, 4.2, 5.12 | runtime-config, massive-client, acquisition-runner, schema-migrator | E1, E3; E7 (derived) | E1-S2, E1-S3, E3-S1, E3-S5, E3-S6, E3-S7, E7-S2 |
 | AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | E1-S3, E1-S4, E1-S6 |
 | AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1, E5 | E1-S1, E1-S2, E5-S1 |
 | AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1; E7 (derived) | E1-S2, E1-S5 |
@@ -173,11 +188,13 @@ traceability table.
 
 ## Open Questions Carried From the Capability and Designs
 
-None is blocking. Each is recorded in the EPIC it affects.
+None is blocking. Each is recorded in the EPIC it affects, or in the story it affects.
 
 | Question | Affects | EPIC | Source |
 |----------|---------|------|--------|
 | Massive's instrument coverage for all four data types is untested | AC-3 | E3, E4 | Capability 7, assumption 1 |
+| Interim E2E acquisition breakage between E3-S6 and E3-S7 (spec review v7 FINDING-10) | AC-13 | E3 | runtime-config 2.2c item 5 |
+| `localhost` resolved once at start by the test entry point (spec review v7 FINDING-11) | AC-13 | E3 | runtime-config 2.2c item 2 |
 | No duration target for a 3000-instrument run | AC-4 | E4 | Capability 7 |
 | Backup and restore procedure unspecified | AC-15 | E1 | market-data-store 14 |
 | Whether a separate DDL credential is worth introducing | AC-13 | E1 | schema-migrator 14 |
