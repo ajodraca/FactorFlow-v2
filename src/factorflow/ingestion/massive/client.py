@@ -55,7 +55,6 @@ class MassiveClient:
         self._governor = governor
         self._rest_client = RESTClient(
             api_key=settings.api_key.get_secret_value(),
-            base=settings.base_url,  # FACTORFLOW_MASSIVE_BASE_URL; also used by `vx`
             retries=0,  # the governor owns retry alone (section 2.2b)
             connect_timeout=settings.timeout_seconds,
             read_timeout=settings.timeout_seconds,
