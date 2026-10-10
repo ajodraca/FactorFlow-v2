@@ -27,45 +27,34 @@ def _free_port() -> int:
         return sock.getsockname()[1]
 
 
-def _usable(ip: str) -> bool:
-    return not ipaddress.ip_address(ip).is_loopback and ip != "0.0.0.0"
-
-
 def _find_non_loopback_ipv4() -> str | None:
     """A real, non-loopback IPv4 address this host owns, or `None`.
 
-    Tries two sources and returns the first usable address, so the test runs
-    wherever either one finds an address:
+    Asks the kernel's routing table, not the resolver: `connect()` on a UDP
+    socket sends no packet, it only picks the local address the host would
+    use to reach an off-host destination, which `getsockname()` returns.
+    That address is assigned to one of this host's interfaces.
 
-    1. The kernel's routing table: `connect()` on a UDP socket sends no
-       packet, it only picks the local address the host would use to reach
-       an off-host destination, which `getsockname()` returns. This works
-       when the hostname maps only to `127.0.0.1` in `/etc/hosts` (IR-604)
-       or has no DNS entry (IR-003), but needs a default route.
-    2. The hostname's own addresses (`getaddrinfo`), which works on a host
-       with a non-loopback interface but no default route (EXP-20261010-1
-       review v1, ER-001).
+    Earlier versions resolved the hostname (`gethostbyname`, then
+    `getaddrinfo`). That is a name lookup, so it found nothing on hosts
+    whose hostname has no DNS entry (IR-003) or maps to `127.0.0.1` in
+    `/etc/hosts` (IR-604), even when non-loopback interfaces existed.
 
-    Returns `None` only when neither finds one, which is the case on a host
-    with only loopback, so callers must handle it.
+    Returns `None` when the kernel has no IPv4 route to an off-host
+    destination, which is the case on a host with only loopback, so callers
+    must handle it. A host whose only non-loopback interfaces carry no such
+    route (no default route) also yields `None`.
     """
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         try:
             # TEST-NET-2 (RFC 5737): never on-link, so it follows the default route.
             sock.connect(("198.51.100.1", 9))
-            ip = sock.getsockname()[0]
-            if _usable(ip):
-                return ip
         except OSError:
-            pass
-    try:
-        infos = socket.getaddrinfo(socket.gethostname(), None, family=socket.AF_INET)
-    except socket.gaierror:
+            return None
+        ip = sock.getsockname()[0]
+    if ipaddress.ip_address(ip).is_loopback or ip == "0.0.0.0":
         return None
-    for *_, sockaddr in infos:
-        if _usable(sockaddr[0]):
-            return str(sockaddr[0])
-    return None
+    return ip
 
 
 def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -79,7 +68,7 @@ def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
     non_loopback_ip = _find_non_loopback_ipv4()
     if non_loopback_ip is None:
         pytest.skip(
-            "no non-loopback IPv4 address found by route or hostname lookup; "
+            "no non-loopback IPv4 address found via the default route (none, or it is loopback); "
             "the non-loopback-rejection half of AC-14 cannot be exercised here"
         )
 
