@@ -84,6 +84,38 @@ def test_scanned_scope_still_covers_this_story_own_files() -> None:
         assert _in_scanned_scope(rel_path), f"{rel_path} unexpectedly out of scope"
 
 
+_E2E_KEY_SCANNED_PREFIXES = ("scripts/", "tests/", "src/")
+_FORMER_FIXED_KEY = "e2e" + "-test-key"
+_TEST_KEY_LITERAL = re.compile(r"TEST-ONLY-[0-9a-f]{32,}")
+
+
+# Implements TC-COMP-381
+def test_no_tracked_file_contains_a_fixed_e2e_provider_key() -> None:
+    """SEC-SEC-001, DEC-0037, DEC-0040: the e2e provider key is generated per
+    run, so no tracked file under `scripts/`, `tests/` or `src/` holds the
+    former fixed key or a literal designated test credential. Both patterns
+    are built so that they never match this file itself."""
+    tracked = [f for f in _tracked_files() if f.startswith(_E2E_KEY_SCANNED_PREFIXES)]
+    offenders = []
+    for rel_path in tracked:
+        path = REPO_ROOT / rel_path
+        if not path.is_file():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        if _FORMER_FIXED_KEY in text or _TEST_KEY_LITERAL.search(text):
+            offenders.append(rel_path)
+    assert offenders == [], f"fixed e2e provider key found in: {offenders}"
+
+
+# Implements TC-COMP-381
+def test_e2e_key_scope_covers_the_script_and_entry_point() -> None:
+    for rel_path in ("scripts/run-e2e-server.sh", "tests/e2e/support/ingestion_e2e_main.py"):
+        assert rel_path.startswith(_E2E_KEY_SCANNED_PREFIXES), f"{rel_path} out of scope"
+
+
 def test_scanned_scope_excludes_docs() -> None:
     """The exclusion this fix relies on: a governance document quoting a
     key-shaped fixture value as review evidence must not trip the scan."""

@@ -86,8 +86,12 @@ if [[ "$DATABASE_READY" != true ]]; then
   exit 1
 fi
 
+# The provider key is a designated test credential generated for this run
+# and never written to a file; nothing falls back to an inherited key
+# (runtime-config 2.2c item 5, DEC-0037).
+E2E_PROVIDER_KEY="TEST-ONLY-$(uv run python -c 'import secrets; print(secrets.token_hex(16))')"
 export FACTORFLOW_DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:${DB_PORT}/factorflow"
-export FACTORFLOW_MASSIVE_API_KEY="${FACTORFLOW_MASSIVE_API_KEY:-e2e-test-key}"
+export FACTORFLOW_MASSIVE_API_KEY="$E2E_PROVIDER_KEY"
 export FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE="${FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE:-60}"
 export FACTORFLOW_API_PORT="${API_PORT}"
 
@@ -128,21 +132,23 @@ if [[ "$REFUSED_STATUS" -ne 2 ]]; then
 fi
 
 # The acquisition stack. Its provider and runner settings are set only for
-# these child processes, never exported to the main API.
+# these child processes, never exported to the main API. Its ingestion
+# process runs through the test-only entry point, the one place plain `http`
+# to the loopback stub is accepted (runtime-config 2.2c clause 2a).
 uv run python tests/e2e/support/massive_stub.py "$STUB_PORT" &
 BACKGROUND_PIDS+=("$!")
 
 ACQUISITION_ENV=(
   "FACTORFLOW_DATABASE_URL=$(database_url factorflow_acquisition)"
   "FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:${STUB_PORT}"
-  "FACTORFLOW_MASSIVE_API_KEY=e2e-test-key"
+  "FACTORFLOW_MASSIVE_API_KEY=$E2E_PROVIDER_KEY"
   "FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=6000"
   "FACTORFLOW_RUN_POLL_INTERVAL_SECONDS=1"
 )
 env "${ACQUISITION_ENV[@]}" FACTORFLOW_API_PORT="$ACQ_PORT" \
   uv run python -m factorflow.app_main &
 BACKGROUND_PIDS+=("$!")
-env "${ACQUISITION_ENV[@]}" uv run python -m factorflow.ingestion_main &
+env "${ACQUISITION_ENV[@]}" uv run python tests/e2e/support/ingestion_e2e_main.py &
 BACKGROUND_PIDS+=("$!")
 
 ACQUISITION_READY=false

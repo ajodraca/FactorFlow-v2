@@ -1,0 +1,249 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S7-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E3-S7
+tasks_file: CAP-001-E3-S7-tasks.md
+decisions: [DEC-0046]
+created: 2026-10-10
+updated: 2026-10-10
+
+# diff_sha256 is the SHA-256 of the cycle's own diff over src, tests and
+# scripts, taken against an index holding every earlier cycle (new files
+# added with `git add -N`), i.e. exactly the bytes the two independent
+# reviewers judged. For the first cycle the index was HEAD, so it was read as
+# `git diff --cached`. The driver commits once per stage, so every cycle
+# records commit_hash: stage.
+
+baseline:
+  base_commit: 0f62e3e45728dbf2b830bcbf9cf6fca5a858c57c
+  branch: usr/alvaro-de-jodra/CAP-001-E3-S7-run-20261010T160604Z
+  commands:
+    - uv sync --all-extras
+    - uv run pytest -m 'not postgres' -q (585 passed, 270 deselected)
+  result: >-
+    Green at the integration-branch head (CAP-001-E3-S6 promoted), the S7
+    story branch base.
+
+cycles:
+  - name: in-force-check
+    tasks: [T001]
+    status: procedural-verification
+    test_case: TC-COMP-366
+    harness_origin_main: 023255bbc541b7a6f2c05a67fd0b5b7ff61e2aea
+    harness_local_checkout: main at 5ba1068f9242ef67536253bff671f50e47021a6d
+    evidence:
+      - >-
+        `git fetch origin main`; `git show
+        origin/main:docs/constitutions/security.constitution.md` has
+        version 1.2 and an approval block (approved_by "Alvaro de Jodra",
+        approved_at 2026-10-09T21:00:28Z, review_artifact
+        docs/constitutions/reviews/security-review-v3.md).
+      - >-
+        approval.reviewed_revision on origin/main:
+        sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc
+      - >-
+        `python3 scripts/artifact-gate.py revision --repo-dir . --artifact
+        docs/constitutions/security.constitution.md` on the local main
+        checkout, whose file is byte-identical to origin/main's (diff empty):
+        sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc
+      - All three equal the pin; no repository file changed.
+    tests_executed: false
+    commit_hash: stage
+  - name: main-parameters
+    tasks: [T002, T013]
+    status: green
+    diff_sha256: 1b171832531ddaff21eb310b28a4eee855fb7c97aef10ff2ee451ac7c9d91776
+    red:
+      command: uv run pytest -q tests/unit/test_ingestion_main.py
+      result: >-
+        3 failed, 5 passed. TC-COMP-367 failed on the empty parameter list;
+        TC-COMP-368 and TC-COMP-369 failed with TypeError, main() got an
+        unexpected keyword argument. The five existing tests stayed green.
+    green:
+      command: uv run pytest -q tests/unit/test_ingestion_main.py
+      result: 8 passed after T013.
+      static_checks: >-
+        ruff check and ruff format --check clean on src and the test file;
+        mypy src: no issues in 47 source files.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the signature, settings_factory() inside
+      the unchanged ConfigurationError branch, credential_reader() before
+      get_or_rebuild with no try, and an unchanged __main__; every patch
+      target is a name main() looks up at call time; reverting the change
+      fails all three tests. LOW: the propagation through the real
+      run_polling_loop is shown indirectly; _build_client_for_key keeps its
+      local SecretStr import, which the plan says to leave unchanged.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer matched the signature to acquisition-runner 2.1,
+        the two planned imports, both call-site replacements, the docstring
+        sentences and every TC-COMP-367 to 369 assertion and environment
+        value; existing tests, __main__ and _build_client_for_key unchanged,
+        no selecting variable, flag or constant added.
+    tests_executed: true
+    commit_hash: stage
+  - name: test-entry-point
+    tasks: [T003, T004, T005, T006, T007, T008, T011, T012, T014]
+    status: green
+    diff_sha256: 4def7fe50bad7d89a8ff63ae3d25ff7618a6bcc87966b4798f2591b2583e312b
+    red:
+      command: uv run pytest -q tests/unit/test_ingestion_e2e_main.py
+      result: >-
+        55 failed, 7 passed. Every failure was FileNotFoundError for
+        tests/e2e/support/ingestion_e2e_main.py. Green on arrival: T011's two
+        TC-COMP-382 checks (src imports and Dockerfile), as planned, and the
+        five TC-COMP-372 rows (see deviations).
+    deviations:
+      - >-
+        TC-COMP-372 (T004) is green on arrival, although the plan lists it in
+        the RED set: it checks urlsplit against urllib3 for the accepted
+        values and never loads the entry point, so it cannot fail first. It
+        still guards DAC-E3-S7-6, comparing hosts as DEC-0046 decided.
+      - >-
+        TC-COMP-382 (a)'s string-constant scan skips module, class and
+        function docstrings. T013 put the entry point's path in
+        ingestion_main.main's docstring, which a literal scan would flag; a
+        docstring is never evaluated as a module name, and the import checks
+        still cover every module and T017's import mutation.
+      - >-
+        T012's additional tests carry `# Implements` labels chosen by the
+        coder, as Phase 2 requires a label on every test: (a) TC-COMP-371,
+        (b) and (c) TC-COMP-370, (d) TC-COMP-373, (e) TC-COMP-375 and 377.
+        They add rows, not new case IDs.
+    green:
+      command: uv run pytest -q tests/unit/test_ingestion_e2e_main.py
+      result: 62 passed after T014.
+      full_suite_command: uv run pytest -m 'not postgres' -q
+      full_suite_result: 650 passed, 270 deselected
+      static_checks: >-
+        ruff check: All checks passed; ruff format --check: 182 files already
+        formatted; mypy src: no issues in 47 source files.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed http is accepted only for a hostname in
+      the imported _LOOPBACK_HOSTS, every other clause is the release
+      validator's on the scheme-replaced value, localhost resolution refuses
+      on error, empty result or any non-loopback address, both key checks
+      use fullmatch, and no message echoes the key or URL. A probe of tricky
+      values (leading space or control characters, tabs, userinfo, zone ids,
+      backslashes, http:host) found nothing accepted beyond loopback case
+      variants. LOW: the empty-resolver branch and the reader's fullmatch are
+      not pinned by a test (taken up under T017); mypy over tests reports
+      pre-existing-style errors (the plan gates mypy src only); an empty port
+      passes, inherited from the release validator.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped T014's six parts, every input value of
+        TC-COMP-370, 371 (including S6's TC-COMP-351 rows), 373 to 379 and
+        382, and T012 (a) to (e) to the diff with the planned values and
+        messages, and judged the four deviations recorded here as not drift.
+    tests_executed: true
+    commit_hash: stage
+  - name: script-and-key-scan
+    tasks: [T009, T010, T015]
+    status: green
+    diff_sha256: 297904343081832b0d1932ded6810bc0ac791116134ab64e6362c9178201520f
+    red:
+      command: >-
+        uv run pytest -q tests/unit/test_run_e2e_server_script.py
+        tests/unit/test_no_committed_secrets.py
+      result: >-
+        2 failed, 5 passed. TC-COMP-380 failed on the missing key line;
+        TC-COMP-381 failed with the fixed key found only in
+        scripts/run-e2e-server.sh. The four existing secret-scan tests and
+        the scope test stayed green.
+    green:
+      command: >-
+        bash -n scripts/run-e2e-server.sh; uv run pytest -q
+        tests/unit/test_run_e2e_server_script.py
+        tests/unit/test_no_committed_secrets.py
+      result: >-
+        7 passed after T015; `git grep -n "e2e-test-key" -- scripts tests
+        src` prints nothing.
+      static_checks: ruff check clean; ruff format --check 183 files formatted.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the key assignment aborts the script
+      under set -euo pipefail if generation fails, all expansions are
+      quoted, the key reaches only the environment (no echo, file or set -x),
+      the fallback and fixed key are gone, existing tests and constants are
+      untouched, and restoring the fallback, keeping the old launch or adding
+      a literal key fails a test; the patterns never match their own files.
+      LOW: the scope test is close to a tautology (mirrors the existing
+      guard); the per-run test key is briefly visible as an env argument, as
+      before.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer matched the exact key line and its position
+        (before the first migrate_main and the export), the fallback-free
+        export, the ACQUISITION_ENV entry, the new ingestion launch, the
+        unchanged base URL and API launch lines, every TC-COMP-380 assertion,
+        and TC-COMP-381's constants, tests and citations.
+    tests_executed: true
+    commit_hash: stage
+
+# T016 (TC-INT-027, DAC-E3-S7-14): E2E verification. BLOCKED -- the stage
+# stopped here (story-coding "halt on failure"); T017 to T019's closing
+# steps were not run.
+e2e_verification:
+  task: T016
+  test_case: TC-INT-027
+  status: blocked
+  environment: >-
+    Docker 28.3.2 available. The host has no GNU `timeout` (used by the
+    script's pre-existing refused-start check, line 125) and bash 3.2; the
+    first attempt exited 127 there, before the acquisition stack. The
+    verification was re-run with a temporary perl `timeout` shim first on
+    PATH (/tmp, not in the repository); no repository file changed for it.
+  steps:
+    - step: 1 health and process
+      result: >-
+        pass. GET /api/health on 8125 answered
+        {"status":"ok","database":"reachable","credential_present":true,...};
+        `pgrep -f tests/e2e/support/ingestion_e2e_main.py` showed the
+        ingestion process still running after health answered.
+    - step: 2 request a run
+      result: >-
+        PUT /api/settings/history-depth {"years": 1} -> 200; POST
+        /api/instruments {"symbols": ["AAPL"]} -> 201 added; POST
+        /api/acquisition-runs -> 202, run 319f7994-23bb-484f-8e48-62f8af8c16a8.
+    - step: 3 stub reached, run terminal
+      result: >-
+        stub reached, run NOT terminal. The script's stderr shows ten
+        `[massive-stub] "GET ..." 200` lines for AAPL (/v3/reference/tickers,
+        /v2/aggs, the four /stocks/financials/v1 endpoints, /stocks/v1/splits
+        and dividends, /vX/reference/ipos and ticker events), so the run
+        reached the stub on 127.0.0.1:8126 over loopback http. The run stayed
+        `running` with zero counted results for more than five minutes.
+    - step: 4 npm run test:e2e
+      result: >-
+        9 passed (45.1s), with the stack started by the edited script; the
+        suite includes tests/e2e/coverage-empty.spec.ts on the acquisition
+        stack.
+  root_cause: >-
+    Pre-existing, outside this story's diff. `ingestion_main.main` opens its
+    connection with psycopg's default autocommit=False (CAP-001-E4-S5;
+    unchanged here apart from the two parameters). claim_next commits its
+    own transaction, but claim_fn then calls
+    instruments.service.active_instrument_ids, a bare SELECT outside any
+    `connection.transaction()` block, which opens an implicit transaction
+    that is never committed. Every later `with connection.transaction()`
+    (heartbeat, the instrument write, finalise) becomes a savepoint inside
+    it. Evidence: pg_stat_activity showed the runner's backend `idle in
+    transaction` with xact_start 2026-10-10 17:08:06.460619+00 (the run's
+    started_at is 17:08:06.455760), last query `RELEASE "_pg3_1"`, and
+    tup_inserted unchanged across polls; `sample` showed the process in
+    time.sleep from run_polling_loop. The release launch shares this code
+    path. Before CAP-001-E3-S6 passed `base=` to the SDK, the acquisition
+    stack never reached the stub, so no E2E run went far enough to show it.
+  disposition: >-
+    TC-INT-027's expected result "the run reaches a terminal state" is not
+    met. Fixing it changes production transaction handling in
+    CAP-001-E4-S5's module, which this story's plan does not authorize
+    (only `src/factorflow/ingestion_main.py`'s two parameters); abstained
+    for the owner's decision.
