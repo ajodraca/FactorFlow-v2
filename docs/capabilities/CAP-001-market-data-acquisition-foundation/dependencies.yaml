@@ -8,6 +8,11 @@
 # until the full epic's plans are updated.
 # 2026-10-09: CAP-001-E3-S6 and CAP-001-E3-S7 added by story-generation; the
 # graph stays at version 1 (DEC-0039).
+# 2026-10-10: CAP-001-E3-S6 gains CAP-001-E3-S3 (implementation-planning: its
+# tests import ProviderUnavailable from massive/errors.py; already transitive).
+# 2026-10-10: CAP-001-E3-S7 gains CAP-001-E1-S3 and CAP-001-E3-S1
+# (implementation-planning: its test entry point imports config/settings.py and
+# its tests patch massive/client.py's RESTClient; both already transitive).
 dependency_contract: 1
 capability: CAP-001
 stories:
@@ -26,8 +31,8 @@ stories:
   CAP-001-E3-S3: [CAP-001-E3-S2]
   CAP-001-E3-S4: [CAP-001-E1-S3, CAP-001-E3-S3]
   CAP-001-E3-S5: [CAP-001-E3-S3]
-  CAP-001-E3-S6: [CAP-001-E1-S3, CAP-001-E3-S1, CAP-001-E3-S4, CAP-001-E4-S5]
-  CAP-001-E3-S7: [CAP-001-E3-S6, CAP-001-E4-S5]
+  CAP-001-E3-S6: [CAP-001-E1-S3, CAP-001-E3-S1, CAP-001-E3-S3, CAP-001-E3-S4, CAP-001-E4-S5]
+  CAP-001-E3-S7: [CAP-001-E1-S3, CAP-001-E3-S1, CAP-001-E3-S6, CAP-001-E4-S5]
   CAP-001-E4-S1: [CAP-001-E1-S1, CAP-001-E1-S2]
   CAP-001-E4-S2: []
   CAP-001-E4-S3: [CAP-001-E4-S1, CAP-001-E4-S2, CAP-001-E5-S1]
