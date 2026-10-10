@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
 artifact_version: 7
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
@@ -26,6 +26,12 @@ ai_provenance:
       version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-10T23:06:40Z
+  reviewed_revision: sha256:8b11cff20e3589027130fd69dc060a9f979ceebd507523f902fc79c58c4eec2d
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
 ---
 
 # Component: Market Data Store
