@@ -67,7 +67,7 @@ def main() -> int:
 
     db_url = settings.database.url.get_secret_value()
 
-    connection = psycopg.connect(db_url)
+    connection = psycopg.connect(db_url, autocommit=True)
 
     # CredentialAwareClientFactory: rebuilds the provider client only when the
     # API key fingerprint changes at claim time (DAC-E4-S5-7, DAC-E1-10, IR-001).
