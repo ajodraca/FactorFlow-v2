@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.296"
-  timestamp: 2026-10-10T03:01:49Z
+  timestamp: 2026-10-10T07:05:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -548,7 +548,7 @@ ai_provenance:
 
 **Scope:** integration
 **Component(s):** owner-web-app, ingestion-api, massive-client, Massive REST API
-**Traces to:** AC-11, DAC-E3-10
+**Traces to:** AC-11, DAC-E3-2, DAC-E3-6
 **Priority:** P1
 **Type:** functional
 
@@ -569,7 +569,7 @@ ai_provenance:
 
 **Scope:** integration
 **Component(s):** owner-web-app, ingestion-api, massive-client, Massive REST API
-**Traces to:** DAC-E3-11
+**Traces to:** DAC-E3-8
 **Priority:** P1
 **Type:** functional
 

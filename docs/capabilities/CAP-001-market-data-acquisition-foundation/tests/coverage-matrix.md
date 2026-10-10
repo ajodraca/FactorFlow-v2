@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.296"
-  timestamp: 2026-10-10T03:01:49Z
+  timestamp: 2026-10-10T07:05:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -239,16 +239,16 @@ ai_provenance:
 | DAC-E4-S7-4 | Derived | Given a run interrupted after some instruments, When coverage is read, Then it reports exactly the committed instruments, with no partial range for the one in flight. | TC-COMP-193 | — | — | Covered |
 | DAC-E4-S7-5 | Derived | Given no duration target exists, When this story is verified, Then completion and resumability are asserted and elapsed time is recorded for information rather than asserted as a threshold. | TC-COMP-194 | — | — | Covered |
 | DAC-E3-1 | Derived | The client MUST expose one operation per data type, each accepting a symbol and a date range, so that the runner drives acquisition without knowing provider paths. | TC-COMP-195 | — | — | Covered |
-| DAC-E3-2 | Derived | Provider failures MUST be typed as `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable` or `ProviderContractViolation`, since AC-11 depends on telling a 404 from a 401. | TC-COMP-196 | — | — | Covered |
+| DAC-E3-2 | Derived | Provider failures MUST be typed as `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable` or `ProviderContractViolation`, since AC-11 depends on telling a 404 from a 401. | TC-COMP-196 | TC-INT-025 | — | Covered |
 | DAC-E3-3 | Derived | Because the SDK discards the status code and raises only the response body, the client MUST reconstruct the distinction by parsing the error envelope, accepting either `message` or `error` as the failure field and requiring neither. | TC-COMP-197 | — | — | Covered |
 | DAC-E3-4 | Derived | An error payload that will not parse as JSON MUST be classified `ProviderUnavailable` and never `InstrumentNotFound`, because guessing not-found from an unparseable error would let an outage look like an empty instrument. | TC-COMP-198 | — | — | Covered |
 | DAC-E3-5 | Derived | A `200` response that does not validate against the model MUST be `ProviderContractViolation`, distinct from unavailability, because it means the provider changed rather than that it is down and retrying will not help. | TC-COMP-199 | — | — | Covered |
-| DAC-E3-6 | Derived | A `429` MUST NOT consume the attempt budget, because the request was never served. | TC-COMP-200 | — | — | Covered |
+| DAC-E3-6 | Derived | A `429` MUST NOT consume the attempt budget, because the request was never served. | TC-COMP-200 | TC-INT-025 | — | Covered |
 | DAC-E3-7 | Derived | Since Massive sends no `Retry-After`, verified against the live provider on 2026-09-05, the throttled path MUST wait to the next minute boundary with jitter, matching the fixed per-minute window the provider enforces, rather than applying exponential backoff. | TC-COMP-201 | — | — | Covered |
-| DAC-E3-8 | Derived | Timeouts and server errors MUST be retried with exponential backoff up to a configured attempt limit, defaulting to 3, after which the instrument is recorded failed and the run continues. | TC-COMP-202 | — | — | Covered |
+| DAC-E3-8 | Derived | Timeouts and server errors MUST be retried with exponential backoff up to a configured attempt limit, defaulting to 3, after which the instrument is recorded failed and the run continues. | TC-COMP-202 | TC-INT-026 | — | Covered |
 | DAC-E3-9 | Derived | A throttle wait budget MUST bound the throttled path so that indefinite `429` responses fail the instrument rather than stalling the run. | TC-COMP-203 | — | — | Covered |
-| DAC-E3-10 | Derived | Reference data MUST capture stable instrument identity, including CIK, composite FIGI and share class FIGI, so identity does not rest on the ticker. | TC-COMP-204 | TC-INT-025 | — | Covered |
-| DAC-E3-11 | Derived | A delisted instrument MUST remain acquirable, carrying its active flag and delisting date, so survivorship bias does not enter the recorded history. | TC-COMP-205 | TC-INT-026 | — | Covered |
+| DAC-E3-10 | Derived | Reference data MUST capture stable instrument identity, including CIK, composite FIGI and share class FIGI, so identity does not rest on the ticker. | TC-COMP-204 | — | — | Covered |
+| DAC-E3-11 | Derived | A delisted instrument MUST remain acquirable, carrying its active flag and delisting date, so survivorship bias does not enter the recorded history. | TC-COMP-205 | — | — | Covered |
 | DAC-E3-12 | Derived | Provider wire field names MUST NOT escape this component; models MUST name fields in the product's vocabulary. | TC-COMP-206 | — | — | Covered |
 | DAC-E3-13 | Derived | Every stored failure reason MUST carry the provider's `request_id` alongside the symbol and data type, and MUST NOT contain the credential. | TC-COMP-207 | — | — | Covered |
 | DAC-E3-14 | Derived | The client's interface MUST NOT foreclose the M3 streaming half of the same provider contract. | TC-COMP-208 | — | — | Covered |
@@ -447,4 +447,4 @@ ai_provenance:
 - `component-design-massive-client.md` v12 section 7 allows the redirect tests' governor budget to be set either by `requests_per_minute` or by injecting `monotonic`. TC-COMP-360 and TC-COMP-361 use `requests_per_minute` only: specification review v9 FINDING-27 shows a frozen injected clock with a no-op `sleep` never ends the token wait.
 - DAC-E3-S7-1 is a stage-entry check, not product behaviour. TC-COMP-366 records it as a procedural verification; its mismatch branch cannot be exercised without altering the constitution (DEC-0043).
 - DAC-E3-S7-14 is covered at integration tier (TC-INT-027) rather than by a new E2E case, so each user flow keeps exactly one happy-path and one error-path E2E case (DEC-0043).
-- TC-INT-025 traces to DAC-E3-10 (reference identity fields) and TC-INT-026 to DAC-E3-11 (delisted instruments), but their expected results test not-found/429 propagation and timeout/5xx propagation. They are mapped as their `Traces to:` lines state, by owner direction; the traces look misassigned (closer to DAC-E3-6 and DAC-E3-8) and are left for a future refinement.
+- TC-INT-025 and TC-INT-026 were re-traced on 2026-10-10 by owner direction. They had traced to DAC-E3-10 (reference identity) and DAC-E3-11 (delisted instruments), but test not-found/429 and timeout/5xx propagation. TC-INT-025 now traces to AC-11, DAC-E3-2 and DAC-E3-6, and TC-INT-026 to DAC-E3-8. The automated tests carry `# Implements TC-INT-…` markers by test ID, so no test code changes.
