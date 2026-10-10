@@ -1,0 +1,252 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E3-S6-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E3-S6
+tasks_file: CAP-001-E3-S6-tasks.md
+decisions: [DEC-0044, DEC-0045]
+created: 2026-10-10
+updated: 2026-10-10
+
+# diff_sha256 is the SHA-256 of `git diff -- src tests` for the cycle, taken
+# against an index holding every earlier cycle (new files added with
+# `git add -N`), i.e. exactly the bytes the two independent reviewers judged.
+# The driver commits once per stage, so every cycle records commit_hash: stage.
+
+baseline:
+  base_commit: 878099d4f3f209de591ad1c66e5514918b8ac78d
+  branch: usr/alvaro-de-jodra/CAP-001-E3-S6-run-20261010T160604Z
+  commands:
+    - uv sync --all-extras
+    - uv run pytest -m 'not postgres' -q (518 passed, 270 deselected)
+  result: Green at the integration-branch head, the S6 story branch base.
+
+cycles:
+  - name: base-url-validator
+    tasks: [T001, T002, T003, T004, T014, T015]
+    status: green
+    diff_sha256: f207de6d72d516b704b158ae18616f9ebda9fadbb0a60145828e6c44ccbe5a1d
+    red:
+      command: uv run pytest -q tests/unit/test_settings_base_url.py
+      result: >-
+        45 failed, 5 passed. Every rejected-row, message and aggregate-load
+        case failed with DID NOT RAISE ConfigurationError, and the trailing
+        slash row loaded unchanged. Green on arrival, as planned: the
+        default (TC-COMP-347) and the four accepted rows whose value is
+        returned unchanged.
+    green:
+      command: uv run pytest -q tests/unit/test_settings_base_url.py
+      result: 50 passed after T015 added MassiveSettings._validate_base_url.
+      full_suite_command: uv run pytest -m 'not postgres' -q
+      full_suite_result: 568 passed, 270 deselected
+      static_checks: >-
+        ruff check: All checks passed; ruff format --check: 177 files already
+        formatted (after ruff format fixed line wrapping in the three cycle
+        files); mypy src: Success, no issues found in 47 source files.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the validator follows the 2.2c snippet's
+      clause order and strings, that PydanticCustomError yields exactly
+      'FACTORFLOW_MASSIVE_BASE_URL: <clause>' through _EnvNamedSettings
+      (DEC-0044), that the tests pin exact messages and non-leakage of the
+      value, 's3cret' and the key, and that the transport fake echoes the
+      retries it was passed. Three LOW notes, none blocking: the fake keeps
+      pool references, isprintable() matches the snippet verbatim, and exact
+      message equality assumes a single failing field.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer mapped T001-T004, T014 and T015 to the plan,
+        DAC-E3-S6-1 to S6-6 and TC-COMP-347 to 352; clause strings and order
+        match 2.2c, no http branch, flag or variable was added (DEC-0033),
+        and http://::1:8126 asserts only rejection and the variable name.
+    tests_executed: true
+    commit_hash: stage
+  - name: start-refusal
+    tasks: [T005]
+    status: green
+    diff_sha256: 39bfb6535733bd401f4f35e5a62ba7dcc554da4d90a1be8c742886d850e53a7b
+    red:
+      command: >-
+        uv run pytest -q tests/unit/test_ingestion_main.py, with
+        src/factorflow/config/settings.py temporarily restored to the base
+        commit (no validator), then the cycle-1 file put back
+      result: >-
+        1 failed, 4 passed: TC-COMP-353 failed with "start opened a database
+        connection", i.e. main() went past Settings() to psycopg.connect when
+        no validator existed.
+    green:
+      command: uv run pytest -q tests/unit/test_ingestion_main.py
+      result: 5 passed with the cycle-1 validator; ingestion_main.py unchanged.
+      static_checks: ruff check and ruff format clean on the changed file.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the three patch targets are the names
+      main() actually uses, that a missing validator reaches the patched
+      psycopg.connect, that the key is generated per test, and that the diff
+      is purely additive. Informational only: the caplog check cannot fire on
+      this path because logging is not configured before the failure.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer matched the four environment variables, the three
+        failing patches, the argument-free main() call and every T005 assertion
+        to the plan, TC-COMP-353 and Resolved Conflicts 3; existing tests and
+        src/factorflow/ingestion_main.py are unchanged.
+    tests_executed: true
+    commit_hash: stage
+  - name: base-honoured
+    tasks: [T007, T013, T016]
+    status: green
+    diff_sha256: 6043a3f917a3ea611fcc3751096ae0963a89cd6be7b3dc89c39a00a88f5e266b
+    red:
+      command: uv run pytest -q tests/unit/test_massive_sdk_config.py
+      result: >-
+        3 failed, 8 passed before T016: TC-COMP-354 (patched) KeyError 'base';
+        TC-COMP-354 (real SDK) BASE was https://api.massive.com, not
+        https://stub.example:8443; T013 recorded ('https', 'api.massive.com',
+        443) instead of ('https', 'stub.example', 8443). Green on arrival:
+        TC-COMP-357 (guards today's retries/pagination/trace) and TC-COMP-356.
+    deviation: >-
+      The plan lists TC-COMP-356 as RED before Phase 3. It cannot be: its
+      input is the default host with a trailing slash, so without base= the
+      SDK default yields the same https://api.massive.com/v3/... URL. A
+      missing base= is an equivalent mutant for this one test and is killed
+      by TC-COMP-354 and T013 (recorded under T018). TC-COMP-356 guards the
+      trailing-slash normalisation reaching the transport.
+    green:
+      command: uv run pytest -q tests/unit/test_massive_sdk_config.py
+      result: 11 passed after T016 added base=settings.base_url.
+      full_suite_command: uv run pytest -m 'not postgres' -q
+      full_suite_result: 574 passed, 270 deselected
+      static_checks: >-
+        ruff check clean; ruff format --check 177 files formatted; mypy src
+        no issues in 47 files. The T016 comment sits on its own line above
+        base= because inline it exceeded the 100-column limit.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed base= is the only production change, no
+      redirect, Retry, proxy or TLS argument was added, retries=0 and existing
+      tests are untouched, and the new tests are non-vacuous (next_url page
+      asserted followed, vx pool attributed by identity). LOW: the TC-COMP-356
+      equivalent mutant, as recorded; _env_settings does not clear other
+      FACTORFLOW_MASSIVE_* variables, consistent with the file's precedent.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer found every plan value verbatim (stub base,
+        trailing-slash base, next_url, Bearer header, no apiKey, /vX ipos on
+        the vx pool) and judged the comment's move above base= a lint
+        accommodation, not drift.
+    tests_executed: true
+    commit_hash: stage
+  - name: transport-guards
+    tasks: [T006, T008, T009, T010, T011, T012, T018]
+    status: green-on-arrival-mutation-proven
+    diff_sha256: 89a25bcaa9a466d8c0d014a9bdb7acdda5347d65626cd9662613e3248c7b2c77
+    red:
+      status: green-on-arrival
+      reason: >-
+        T006 and T008-T012 guard behaviour the code already has once cycles
+        1 and 3 landed (TLS defaults, retries=0, no proxy, release contents),
+        so they have no RED phase. T018's mutations below make each one
+        meaningful, as the plan's suggested cycle 4 prescribes.
+    green:
+      command: >-
+        uv run pytest -q tests/unit/test_massive_tls.py
+        tests/unit/test_massive_redirects.py
+        tests/unit/test_release_excludes_test_paths.py
+      result: 11 passed, no production change in this cycle.
+      static_checks: ruff check clean; ruff format applied to the three new files.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed only _make_request is patched so urllib3's
+      real redirect path runs (the retries=3 control reaches 198.51.100.7), vx
+      attribution by pool identity is sound, the proxy test covers both pools
+      and both URL forms, the Dockerfile parser handles multi-source COPY, and
+      the AST rule skips @app.middleware("http"). LOW: the TLS-kwargs check
+      reads keyword arguments only; one mocked test omits forbid_sockets;
+      the wheel test depends on uv's cache (DEC-0045, PROVISIONAL).
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer matched every planned value (302 target,
+        max_attempts 3, injected sleep and jitter without monotonic,
+        ProviderUnavailable with a MaxRetryError cause, route one for vx,
+        the retries=3 control, six proxy variables, both TLS construction
+        paths, T012 (a) to (c) with uv build --wheel --offline) and found the
+        T018 list covers every mutation the plan names, plus COPY . .
+    tests_executed: true
+    commit_hash: stage
+
+# T018: manual mutations, each applied alone to the GREEN tree, the named
+# tests run, and the file restored byte-identical from a saved copy before
+# the next one. Each restore was checked with git status/diff afterwards.
+manual_mutations_baseline: GREEN tree after cycle transport-guards
+manual_mutations:
+  - {id: M1, target: client.py, change: "retries=0 -> retries=3", caught: true,
+     killed_by: [TC-COMP-209, TC-COMP-357, TC-COMP-360, TC-COMP-361]}
+  - {id: M2, target: client.py, change: "base=settings.base_url removed", caught: true,
+     killed_by: [TC-COMP-354 (patched), TC-COMP-354 (real SDK), T013],
+     note: "TC-COMP-356 survives by construction: default host, equivalent mutant for that test"}
+  - {id: M3, target: client.py, change: "connection_pool_kw['cert_reqs'] = 'CERT_NONE' after construction", caught: true,
+     killed_by: [TC-COMP-358]}
+  - {id: C8, target: settings.py, change: "empty/whitespace/control clause removed", caught: true,
+     killed_by: [TC-COMP-351 (leading space, \x7f), TC-COMP-352 (empty, leading space, \x7f)]}
+  - {id: C7, target: settings.py, change: "query/fragment clause removed", caught: true,
+     killed_by: [TC-COMP-351, TC-COMP-352]}
+  - {id: C2, target: settings.py, change: "scheme clause removed", caught: true,
+     killed_by: [TC-COMP-349, TC-COMP-350, TC-COMP-352, T014]}
+  - {id: C3, target: settings.py, change: "host clause removed", caught: true,
+     killed_by: [TC-COMP-351, TC-COMP-352]}
+  - {id: C4, target: settings.py, change: "userinfo clause removed", caught: true,
+     killed_by: [TC-COMP-351, TC-COMP-352]}
+  - {id: C5a, target: settings.py, change: "port ValueError not caught", caught: true,
+     killed_by: ["TC-COMP-352 (:70000, :abc)"]}
+  - {id: C5b, target: settings.py, change: "port == 0 check removed", caught: true,
+     killed_by: [TC-COMP-351, TC-COMP-352]}
+  - {id: C6a, target: settings.py, change: "path clause removed", caught: true,
+     killed_by: [TC-COMP-351, TC-COMP-352]}
+  - {id: C6b, target: settings.py, change: "trailing / not removed", caught: true,
+     killed_by: [TC-COMP-348, TC-COMP-356]}
+  - {id: ACCEPT-http, target: settings.py, change: "scheme accepted in ('https', 'http')", caught: true,
+     killed_by: [TC-COMP-349, TC-COMP-350, TC-COMP-352, T014, TC-COMP-364 (c)]}
+  - {id: F1, target: tests/unit/massive_transport_fakes.py, change: "fake returns retries=None", caught: true,
+     killed_by: ["TC-COMP-359 via TC-COMP-360, 361, 362"]}
+  - {id: D1, target: Dockerfile, change: "COPY tests ./tests added", caught: true,
+     killed_by: [TC-COMP-364 (a)]}
+  - {id: D2, target: Dockerfile, change: "COPY . . added", caught: true,
+     killed_by: [TC-COMP-364 (a)]}
+surviving_mutants: []
+
+# T017 and T019 (TC-COMP-365): verification and suite check.
+verification:
+  t017: >-
+    src/factorflow/ingestion_main.py unchanged (git diff HEAD empty);
+    TC-COMP-353 green, and TC-COMP-358's _build_client_for_key path keeps
+    the configured base and TLS defaults.
+  t019:
+    - command: uv run pytest -m 'not postgres' -q
+      result: 585 passed, 270 deselected
+    - command: >-
+        uv run pytest -m postgres --collect-only -q (the six new or extended
+        test files)
+      result: no tests collected (77 deselected)
+    - command: uv run pytest -q
+      result: 855 passed (postgres-marked tests included, Docker available)
+    - command: uv run ruff check .
+      result: All checks passed
+    - command: uv run ruff format --check .
+      result: 180 files already formatted
+    - command: uv run mypy src
+      result: Success, no issues found in 47 source files
+    - command: uv build
+      result: succeeded
+    - command: >-
+        FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com uv run python -m
+        factorflow.ingestion_main (otherwise valid settings)
+      result: >-
+        exit 1, stderr "Configuration error: FACTORFLOW_MASSIVE_BASE_URL:
+        scheme must be https"; the value is not printed.
+    - command: git diff HEAD -- scripts tests/e2e src/factorflow/ingestion_main.py
+      result: empty

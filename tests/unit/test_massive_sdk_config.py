@@ -15,9 +15,19 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive.client import MassiveClient
 from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
+from tests.unit.massive_transport_fakes import (
+    FakeAnswer,
+    RecordedRequest,
+    RecordingMakeRequest,
+    forbid_sockets,
+    generated_test_key,
+    json_answer,
+)
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
@@ -154,3 +164,131 @@ def test_market_status_endpoint_is_never_called() -> None:
     assert not instance.get_market_holidays.called
     assert not instance.get_market_status.called
     assert not instance.list_tickers.called
+
+
+# --- CAP-001-E3-S6: the configured base URL is honoured ------------------
+#
+# `component-design-massive-client.md` section 2.2b; `runtime-config` 2.2c.
+
+
+def _env_settings(monkeypatch: pytest.MonkeyPatch, base_url: str) -> MassiveSettings:
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", generated_test_key())
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_BASE_URL", base_url)
+    return MassiveSettings(_env_file=None)  # type: ignore[call-arg]
+
+
+# Implements TC-COMP-354
+def test_rest_client_receives_the_configured_base(monkeypatch: pytest.MonkeyPatch) -> None:
+    """DAC-E3-S6-8: `RESTClient` is built with `base=settings.base_url`."""
+    settings = _env_settings(monkeypatch, "https://stub.example:8443")
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        MassiveClient(settings=settings, governor=_governor())
+
+    _, kwargs = rest_client_cls.call_args
+    assert kwargs["base"] == settings.base_url == "https://stub.example:8443"
+
+
+# Implements TC-COMP-354
+def test_real_sdk_and_vx_sub_client_use_the_configured_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """DAC-E3-S6-8: on the real, unpatched SDK both the client and its `vx`
+    sub-client carry the configured base."""
+    settings = _env_settings(monkeypatch, "https://stub.example:8443")
+    client = MassiveClient(settings=settings, governor=_governor())
+
+    assert client._rest_client.BASE == "https://stub.example:8443"
+    assert client._rest_client.vx.BASE == "https://stub.example:8443"
+
+
+# Implements TC-COMP-356
+def test_trailing_slash_base_never_produces_a_double_slash(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """DAC-E3-S6-9, `runtime-config` clause 6: a configured trailing `/` is
+    removed before the SDK builds `base + path`, so no request URL holds
+    `//v3`."""
+    forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(
+        lambda _r: json_answer(
+            {"request_id": "req_ok_001", "results": _load("reference_active.json")}
+        )
+    ).install(monkeypatch)
+    settings = _env_settings(monkeypatch, "https://api.massive.com/")
+    client = MassiveClient(settings=settings, governor=_governor())
+
+    client.fetch_reference("AAPL")
+
+    first = transport.requests[0]
+    assert (first.scheme, first.host) == ("https", "api.massive.com")
+    assert first.path.startswith("/v3/")
+    assert "//v3" not in f"{first.scheme}://{first.host}{first.path}"
+
+
+# Implements TC-COMP-357
+def test_real_sdk_retries_pagination_and_trace_are_off_on_both_clients(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """DAC-E3-S6-10: `retries == 0` on the main client and on `vx`
+    (specification review v7 FINDING-19), with pagination and trace off."""
+    settings = _env_settings(monkeypatch, "https://api.massive.com")
+    client = MassiveClient(settings=settings, governor=_governor())
+
+    assert client._rest_client.retries == 0
+    assert client._rest_client.vx.retries == 0
+    assert client._rest_client.pagination is False
+    assert client._rest_client.trace is False
+
+
+_NEXT_URL = (
+    "https://api.massive.com/v2/aggs/ticker/AAPL/range/1/day/2024-01-01/2024-01-31?cursor=abc"
+)
+
+
+def _four_reads_answer(request: RecordedRequest) -> FakeAnswer:
+    path = request.path
+    if "/events" in path:
+        return json_answer({"request_id": "req_ok_001", "results": {"events": []}})
+    if path.startswith("/v3/reference/tickers/"):
+        return json_answer({"request_id": "req_ok_001", "results": _load("reference_active.json")})
+    if path.startswith("/v2/aggs/") and "cursor=abc" not in path:
+        return json_answer(
+            {
+                "request_id": "req_ok_001",
+                "results": [_load("bar_regular.json")],
+                "next_url": _NEXT_URL,
+            }
+        )
+    return json_answer({"request_id": "req_ok_001", "results": []})
+
+
+def test_every_request_of_the_four_reads_goes_to_the_configured_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-13: every request of the four reads -- the `vx` sub-client's and a
+    page followed from a `next_url` naming another host included -- goes to
+    the configured `https` base, carrying the key only in
+    `Authorization: Bearer`."""
+    forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(_four_reads_answer).install(monkeypatch)
+    settings = _env_settings(monkeypatch, "https://stub.example:8443")
+    key = settings.api_key.get_secret_value()
+    client = MassiveClient(settings=settings, governor=_governor())
+
+    client.fetch_reference("AAPL")
+    client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+    client.fetch_financials("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+    client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+
+    requests = transport.requests
+    assert any("cursor=abc" in r.path for r in requests), "the next_url page was not followed"
+    for request in requests:
+        assert (request.scheme, request.host, request.port) == ("https", "stub.example", 8443)
+        assert request.authorization == "Bearer " + key
+        assert key not in request.path
+        assert "apiKey" not in request.path
+    vx_pool = client._rest_client.vx.client.connection_from_url("https://stub.example:8443")
+    ipos = [r for r in requests if r.path.startswith("/vX/reference/ipos")]
+    assert ipos, "no /vX/reference/ipos request was recorded"
+    assert all(r.pool is vx_pool for r in ipos)

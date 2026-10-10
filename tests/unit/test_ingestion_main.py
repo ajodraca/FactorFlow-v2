@@ -96,3 +96,43 @@ def test_runner_loop_uses_no_api_routes(monkeypatch) -> None:
     # Verify no API module was imported during the loop.
     # run_polling_loop must not call into factorflow.api as a side effect.
     assert mock_execute.call_count == 0  # nothing to execute (empty queue)
+
+
+# Implements TC-COMP-353
+def test_main_refuses_a_non_https_base_url_before_any_client(monkeypatch, capsys, caplog) -> None:
+    """DAC-E3-S6-7, AC-13: an `http` provider base URL ends start non-zero
+    before any `RESTClient` is built or any connection opened, and the
+    stderr line names the variable but never the value
+    (`component-design-runtime-config.md` sections 2.2c and 7)."""
+    import pytest
+
+    import factorflow.ingestion_main as ingestion_main
+    from tests.unit.massive_transport_fakes import generated_test_key
+
+    value = "http://api.massive.com"
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", generated_test_key())
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_BASE_URL", value)
+
+    rest_client = MagicMock()
+    monkeypatch.setattr("factorflow.ingestion.massive.client.RESTClient", rest_client)
+    monkeypatch.setattr(
+        ingestion_main.psycopg,
+        "connect",
+        lambda *_a, **_k: pytest.fail("start opened a database connection"),
+    )
+    monkeypatch.setattr(
+        ingestion_main,
+        "run_polling_loop",
+        lambda **_k: pytest.fail("start reached the polling loop"),
+    )
+
+    exit_code = ingestion_main.main()
+
+    assert exit_code != 0
+    assert not rest_client.called
+    err = capsys.readouterr().err
+    assert "FACTORFLOW_MASSIVE_BASE_URL" in err
+    assert value not in err
+    assert all(value not in record.getMessage() for record in caplog.records)
