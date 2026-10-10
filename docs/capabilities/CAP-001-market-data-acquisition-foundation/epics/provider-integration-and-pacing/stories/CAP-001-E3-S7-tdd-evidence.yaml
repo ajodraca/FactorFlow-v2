@@ -187,63 +187,202 @@ cycles:
     tests_executed: true
     commit_hash: stage
 
-# T016 (TC-INT-027, DAC-E3-S7-14): E2E verification. BLOCKED -- the stage
-# stopped here (story-coding "halt on failure"); T017 to T019's closing
-# steps were not run.
+  - name: e2e-verification-and-mutations
+    tasks: [T016, T017]
+    status: green
+    diff_sha256: 9172c9bce385e5bc0d92dfe144a8135201e208136bfcd4d9c41ad1ee0f4d2be5
+    context: >-
+      Resumed attended (owner direction, landing route (b)) on
+      usr/alvaro-de-jodra/CAP-001-E3-S6-S7, which holds CAP-001-E3-S6's reviewed
+      commits (0eb02b9, 6668e50, 0f62e3e), a merge of origin/main at dce91bb
+      carrying EXP-20261010-2 (merge a4bcc1f), and cycles 1 to 3 cherry-picked
+      from b9c664c as cc0b410. EXP-20261010-2 opens the ingestion connection
+      with autocommit=True, which resolves the blocked attempt recorded under
+      e2e_verification below.
+    red:
+      command: >-
+        /tmp/s7_mutations.py, a scratch runner outside the repository, applied
+        each T017 mutation, ran `uv run pytest -q -m 'not postgres'` over
+        tests/unit/test_ingestion_main.py, test_ingestion_e2e_main.py,
+        test_run_e2e_server_script.py, test_no_committed_secrets.py and
+        test_release_excludes_test_paths.py, then reverted the file with
+        `git checkout --`. Baseline 81 passed.
+      result: >-
+        Every planned mutation failed its named test. settings_factory() to
+        Settings(): 10 failed, including TC-COMP-368, 374 and 375.
+        credential_reader() to read_provider_credential(): TC-COMP-369 and
+        377. __main__ passing settings_factory=Settings: TC-COMP-367.
+        _LOOPBACK_HOSTS to any 127.0.0.0/8 address: 6 failed, including
+        TC-COMP-371's http://127.0.0.2 and http://127.1 rows. localhost
+        resolution check removed: TC-COMP-373 and T012 (d). Validator
+        fullmatch to a $-anchored re.match: TC-COMP-376's trailing-newline
+        row. Reader's check removed: TC-COMP-377 and T012 (e). Loopback
+        delegation removed: 7 failed, all T012 (a) and (b) rows. import
+        urllib3: TC-COMP-379. settings.py importing ingestion_e2e_main:
+        T011 (a). Dockerfile COPY of the entry point: T011 (b) and
+        CAP-001-E3-S6's TC-COMP-364 (a). Script :- fallback: TC-COMP-380.
+        Script TEST-ONLY- literal: TC-COMP-381. One extra mutation, the
+        reader's fullmatch replaced by a $-anchored re.match, left all 81
+        green: read_provider_credential does not strip, so a rotated key with
+        a trailing newline would pass the claim-time check. The cycle-2 code
+        review had already flagged this as unpinned.
+    strengthening: >-
+      test_read_test_credential_refuses_a_non_test_key (T012 (e), TC-COMP-377)
+      is parametrised over a non-prefixed key and generated_test_key() + "\n",
+      both generated at run time. Under the reader mutation the
+      trailing-newline row fails (1 failed, 2 passed); on the real code all 3
+      pass. This diff is the only change in the cycle; diff_sha256 is
+      `git diff --cached -- src tests scripts` against cc0b410.
+    green:
+      command: uv run pytest -q tests/unit/test_ingestion_e2e_main.py
+      result: >-
+        63 passed. ruff check and ruff format --check clean on the file. The
+        tree was clean after every mutation was reverted.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      An independent reviewer confirmed the trailing-newline row fails under
+      the $-anchored mutation and passes on fullmatch. The exact-equality
+      message assertion guarantees no echo for both rows. The lambdas keep key
+      generation at test time, and the import and ids follow the file. LOW
+      notes only: the TC-COMP-377 label is unchanged and defensible, and the
+      lambdas are slightly less readable than the _refused_keys() pattern.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        An independent reviewer judged the change T017's "strengthen any test
+        a mutation leaves green". The row is the same boundary T006 prescribes
+        for TC-COMP-376, applied to the reader. The message matches T012 (e)
+        and T014 (5), keys are generated at run time, there is no postgres
+        marker and no socket, and the TC-COMP-377 label is appropriate.
+    tests_executed: true
+    commit_hash: stage
+
+# T016 (TC-INT-027, DAC-E3-S7-14). The first attempt, in run-20261010T160604Z,
+# was blocked by a pre-existing defect; the second passed once EXP-20261010-2
+# was merged.
 e2e_verification:
   task: T016
   test_case: TC-INT-027
-  status: blocked
-  environment: >-
-    Docker 28.3.2 available. The host has no GNU `timeout` (used by the
-    script's pre-existing refused-start check, line 125) and bash 3.2; the
-    first attempt exited 127 there, before the acquisition stack. The
-    verification was re-run with a temporary perl `timeout` shim first on
-    PATH (/tmp, not in the repository); no repository file changed for it.
-  steps:
-    - step: 1 health and process
-      result: >-
-        pass. GET /api/health on 8125 answered
-        {"status":"ok","database":"reachable","credential_present":true,...};
-        `pgrep -f tests/e2e/support/ingestion_e2e_main.py` showed the
-        ingestion process still running after health answered.
-    - step: 2 request a run
-      result: >-
-        PUT /api/settings/history-depth {"years": 1} -> 200; POST
-        /api/instruments {"symbols": ["AAPL"]} -> 201 added; POST
-        /api/acquisition-runs -> 202, run 319f7994-23bb-484f-8e48-62f8af8c16a8.
-    - step: 3 stub reached, run terminal
-      result: >-
-        stub reached, run NOT terminal. The script's stderr shows ten
-        `[massive-stub] "GET ..." 200` lines for AAPL (/v3/reference/tickers,
-        /v2/aggs, the four /stocks/financials/v1 endpoints, /stocks/v1/splits
-        and dividends, /vX/reference/ipos and ticker events), so the run
-        reached the stub on 127.0.0.1:8126 over loopback http. The run stayed
-        `running` with zero counted results for more than five minutes.
-    - step: 4 npm run test:e2e
-      result: >-
-        9 passed (45.1s), with the stack started by the edited script; the
-        suite includes tests/e2e/coverage-empty.spec.ts on the acquisition
-        stack.
-  root_cause: >-
-    Pre-existing, outside this story's diff. `ingestion_main.main` opens its
-    connection with psycopg's default autocommit=False (CAP-001-E4-S5;
-    unchanged here apart from the two parameters). claim_next commits its
-    own transaction, but claim_fn then calls
-    instruments.service.active_instrument_ids, a bare SELECT outside any
-    `connection.transaction()` block, which opens an implicit transaction
-    that is never committed. Every later `with connection.transaction()`
-    (heartbeat, the instrument write, finalise) becomes a savepoint inside
-    it. Evidence: pg_stat_activity showed the runner's backend `idle in
-    transaction` with xact_start 2026-10-10 17:08:06.460619+00 (the run's
-    started_at is 17:08:06.455760), last query `RELEASE "_pg3_1"`, and
-    tup_inserted unchanged across polls; `sample` showed the process in
-    time.sleep from run_polling_loop. The release launch shares this code
-    path. Before CAP-001-E3-S6 passed `base=` to the SDK, the acquisition
-    stack never reached the stub, so no E2E run went far enough to show it.
-  disposition: >-
-    TC-INT-027's expected result "the run reaches a terminal state" is not
-    met. Fixing it changes production transaction handling in
-    CAP-001-E4-S5's module, which this story's plan does not authorize
-    (only `src/factorflow/ingestion_main.py`'s two parameters); abstained
-    for the owner's decision.
+  status: passed
+  attempts:
+    - attempt: 1
+      run: run-20261010T160604Z (unit u005)
+      status: blocked
+      environment: >-
+        Docker 28.3.2 available. The host had no GNU `timeout` (used by the
+        script's pre-existing refused-start check, line 125) and bash 3.2; the
+        first attempt exited 127 there, before the acquisition stack. The
+        verification was re-run with a temporary perl `timeout` shim first on
+        PATH (/tmp, not in the repository); no repository file changed for it.
+      steps:
+        - step: 1 health and process
+          result: >-
+            pass. GET /api/health on 8125 answered
+            {"status":"ok","database":"reachable","credential_present":true,...};
+            `pgrep -f tests/e2e/support/ingestion_e2e_main.py` showed the
+            ingestion process still running after health answered.
+        - step: 2 request a run
+          result: >-
+            PUT /api/settings/history-depth {"years": 1} -> 200; POST
+            /api/instruments {"symbols": ["AAPL"]} -> 201 added; POST
+            /api/acquisition-runs -> 202, run 319f7994-23bb-484f-8e48-62f8af8c16a8.
+        - step: 3 stub reached, run terminal
+          result: >-
+            stub reached, run NOT terminal. The script's stderr showed ten
+            `[massive-stub] "GET ..." 200` lines for AAPL. The run stayed
+            `running` with zero counted results for more than five minutes.
+        - step: 4 npm run test:e2e
+          result: 9 passed (45.1s), with the stack started by the edited script.
+      root_cause: >-
+        Pre-existing, outside this story's diff. `ingestion_main.main` opened
+        its connection with psycopg's default autocommit=False
+        (CAP-001-E4-S5). claim_next committed its own transaction, but
+        active_instrument_ids then ran a bare SELECT that opened an implicit
+        transaction which was never committed, so every later `with
+        connection.transaction()` became a savepoint inside it. pg_stat_activity
+        showed the runner's backend `idle in transaction`, last query `RELEASE
+        "_pg3_1"`.
+      disposition: >-
+        Abstained for the owner's decision. The owner directed an expedited
+        fix: EXP-20261010-2 (autocommit=True), expedited review v2
+        PASS-WITH-WARNINGS, owner-approved, merged to main in PR #100 at
+        dce91bb.
+    - attempt: 2
+      branch: usr/alvaro-de-jodra/CAP-001-E3-S6-S7 at cc0b410
+      status: passed
+      environment: >-
+        Docker available; GNU `timeout` from Homebrew coreutils, with its
+        gnubin directory first on PATH for the script only (owner approved the
+        install). No repository file changed for it.
+      steps:
+        - step: 1 health and process
+          result: >-
+            pass. GET /api/health on 8125 answered {"status":"ok",
+            "database":"reachable","credential_present":true,
+            "schema_version":4,"most_recent_run":null};
+            `pgrep -f tests/e2e/support/ingestion_e2e_main.py` showed the
+            ingestion process (pid 98279) running after health answered.
+        - step: 2 request a run
+          result: >-
+            PUT /api/settings/history-depth {"years": 1} -> 200; POST
+            /api/instruments {"symbols": ["AAPL"]} -> 201 added; POST
+            /api/acquisition-runs -> requested, run
+            b62c6427-6727-42d8-8965-db48fcafedc2.
+        - step: 3 stub reached, run terminal
+          result: >-
+            pass. The script's stderr shows ten `[massive-stub] "GET ..." 200`
+            lines for AAPL (/v3/reference/tickers, /v2/aggs, the four
+            /stocks/financials/v1 endpoints, /stocks/v1/splits and dividends,
+            /vX/reference/ipos and ticker events), so the run reached the stub
+            on 127.0.0.1:8126 over loopback http. GET
+            /api/acquisition-runs/{id} shows state `partial`, ended_at
+            19:21:19.221Z (0.2s after started_at), and four `written` results
+            for AAPL.
+        - step: 4 npm run test:e2e
+          result: >-
+            9 passed (44.3s), with the stack started by the edited script,
+            including tests/e2e/coverage-empty.spec.ts on the acquisition
+            stack.
+      observation: >-
+        The run is `partial`, not `succeeded`, although all four data types
+        wrote. No code under src/ sets acquisition_run.instruments_named; it
+        stays at its default 0. journal.finalise returns `succeeded` only when
+        instruments_named > 0, so no run can succeed. This is pre-existing,
+        outside this story, and does not affect TC-INT-027, whose expected
+        result is a terminal run. It is reported to the owner as a follow-up.
+
+validation:
+  task: T018
+  head: cc0b410 plus the cycle 4 diff
+  commands:
+    - uv sync --all-extras (exit 0)
+    - uv run ruff check . (All checks passed!)
+    - uv run ruff format --check . (184 files already formatted)
+    - uv run mypy src (no issues in 47 source files)
+    - uv run pytest -q (925 passed, 0 skipped; PostgreSQL via testcontainers; 3m57s)
+    - uv run pytest -m 'not postgres' -q (654 passed, 271 deselected)
+    - uv build (sdist and wheel built outside the repository)
+    - >-
+      uv build --wheel --offline --out-dir "$(mktemp -d)" (DEC-0045); `python
+      -m zipfile -l <wheel>` lists no tests/ entry and no ingestion_e2e_main
+      (TC-COMP-382 step 2)
+    - >-
+      tests/unit/test_release_excludes_test_paths.py (CAP-001-E3-S6),
+      unchanged, passed within both suites (TC-COMP-382 step 1)
+    - >-
+      uv run pytest -m postgres --collect-only -q on the four story test
+      files: no tests collected (78 deselected)
+    - bash -n scripts/run-e2e-server.sh (exit 0)
+    - git grep -n "e2e-test-key" -- scripts tests src (no output)
+    - >-
+      git diff --stat a4bcc1f -- src: only src/factorflow/ingestion_main.py
+      (15 insertions, 3 deletions)
+    - >-
+      FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:8126 uv run python -m
+      factorflow.ingestion_main: exit 1, "FACTORFLOW_MASSIVE_BASE_URL: scheme
+      must be https" (release path)
+    - >-
+      uv run python tests/e2e/support/ingestion_e2e_main.py with a
+      non-TEST-ONLY- key: exit 1, "FACTORFLOW_MASSIVE_API_KEY: must be a
+      designated test credential", key not echoed
+    - npm run test:e2e (9 passed; T016 attempt 2)

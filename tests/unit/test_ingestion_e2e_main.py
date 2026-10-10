@@ -20,6 +20,7 @@ import sys
 import traceback
 import types
 import urllib.parse
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -558,8 +559,15 @@ def test_read_test_credential_accepts_a_generated_key(monkeypatch: pytest.Monkey
 
 
 # Implements TC-COMP-377
-def test_read_test_credential_refuses_a_non_test_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    key = secrets.token_hex(16)
+@pytest.mark.parametrize(
+    "make_key",
+    [lambda: secrets.token_hex(16), lambda: generated_test_key() + "\n"],
+    ids=["no-prefix", "trailing-newline"],
+)
+def test_read_test_credential_refuses_a_non_test_key(
+    monkeypatch: pytest.MonkeyPatch, make_key: Callable[[], str]
+) -> None:
+    key = make_key()
     monkeypatch.setenv(_KEY_VAR, key)
     with pytest.raises(ConfigurationError) as exc_info:
         _load_entry_module().read_test_credential()
