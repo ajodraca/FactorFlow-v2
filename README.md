@@ -122,7 +122,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
-| `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. See [Running the acquisition runner](#running-the-acquisition-runner) |
+| `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. `main()` takes two keyword-only parameters, `settings_factory` (default `Settings`) and `credential_reader` (default `read_provider_credential`, called at every claim). They exist only for the test-only entry point `tests/e2e/support/ingestion_e2e_main.py` and are not configuration; the release launch passes neither. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
 | `web/src/api/` | The interface's typed access to the JSON API. `types.ts` hand-writes the response shapes against the published contract — `HealthResponse`, `ScreenState<T>`, and the instrument/settings shapes `SymbolOutcome`, `AddInstrumentsResult`, `Instrument`, `InstrumentListResult`, `HistoryDepth`, and the run shapes `RunState`, `AcquisitionRun`, `AcquisitionRunPage`, `RunStartResult`, `RunCancelResult` (named apart from `RunSummary`, the health `most_recent_run` shape `{run_id, state, ended_at}`, kept snake_case because `fetchHealth()` casts the body unmapped), the run-detail shapes `DataType`, `ResultOutcome`, `OutcomeCounts`, `RunResult`, `RunDetail`, and the coverage shapes `PresenceState`, `CoverageDataType`, `CoverageRow`, `CoverageGapDetection`, `CoverageView`, `CoverageExpansion`; `client.ts` holds `fetchHealth()`, `addInstruments()`, `retireInstrument()`, `listInstruments()`, `getHistoryDepth()`, `setHistoryDepth()`, `listAcquisitionRuns()`, `getAcquisitionRun()`, `startAcquisitionRun()`, `cancelAcquisitionRun()`, `fetchCoverage()`, `fetchCoverageGapDates()`, and the `ApiError`/`ApiUnreachableError` types a non-2xx response or a failed fetch each map to. `ApiError` carries the envelope's `requestId`, plus `code` and `state` (each `null` when absent), so callers branch on `error.code` rather than on message text. Same-origin only — the bundle is served by the API process, so every path is relative |
 | `web/src/app/` | The application shell. `shell.tsx` renders the fixed navigation rail of four destinations — Coverage, Instruments, Runs, Settings — a main region, and the status region pinned to the rail's bottom. The shell is exactly the viewport's height (`h-screen`) and the main region scrolls on its own (`overflow-auto`), so a screen's content scrolls within `main` rather than the page; `routes.tsx` mounts the Coverage, Instruments, Runs and Settings screens (see below) at their destinations, plus the Run detail screen at `/runs/:runId`, a `/` redirect to `/coverage`, and a catch-all not-found rendered inside the frame. `status-region.tsx` polls health and renders the region, and exports the unreachable state the shell substitutes for the main region. See [The status region](#the-status-region) |
@@ -133,7 +133,7 @@ files, since `index.html` references only the current ones.
 | `design-system/` | Vendored `theme.css` design tokens, imported by `web/src/index.css` and mapped into Tailwind's scales by `tailwind.config.js` |
 | `tests/unit/` | Tests needing no database |
 | `tests/integration/` | Tests running against a real PostgreSQL 16 container |
-| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh`. `fixtures/` holds plain SQL seeds that a spec applies itself, and `support/database.ts` exports `sql()`, which runs one statement in the e2e container; Playwright collects neither |
+| `tests/e2e/` | Playwright end-to-end specs, run by `npm run test:e2e` against a real API and PostgreSQL container started by `scripts/run-e2e-server.sh`. `fixtures/` holds plain SQL seeds that a spec applies itself, and `support/database.ts` exports `sql()`, which runs one statement in the e2e container; Playwright collects neither. `support/massive_stub.py` is the loopback provider stub and `support/ingestion_e2e_main.py` the test-only ingestion entry point that accepts it — see [Testing](#testing). Nothing under `tests/` is in the release artifact |
 | `docs/` | Constitution, capability specifications, and designs |
 
 ## Configuration
@@ -1802,11 +1802,35 @@ starts no runner. Every spec shares that one database, so the suite runs on
 one worker (`workers: 1` in `playwright.config.ts`).
 Needs Docker and Playwright's browsers installed (`npx playwright install`).
 
-The script's acquisition stack still points the ingestion process at the
-loopback provider stub with `FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:<port>`.
-The release settings now refuse that value, so that process exits at start.
-CAP-001-E3-S7 adds the test-only entry point that accepts the stub. It lands in
-the same merge as CAP-001-E3-S6.
+The script also starts an acquisition stack on `127.0.0.1:8125` (or
+`FACTORFLOW_E2E_ACQ_PORT`): its own API and database, the provider stub
+`tests/e2e/support/massive_stub.py` on `127.0.0.1:8126` (or
+`FACTORFLOW_E2E_STUB_PORT`), and an ingestion process pointed at it with
+`FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:<port>`. The release settings
+refuse `http`, so that process runs through the test-only entry point
+`tests/e2e/support/ingestion_e2e_main.py`, which calls
+`factorflow.ingestion_main.main(settings_factory=..., credential_reader=...)`:
+
+- Its settings accept `http` only for a loopback host (`127.0.0.1`,
+  `localhost` or `[::1]`, compared case-insensitively). `localhost` must
+  resolve only to loopback addresses. Every other base-URL rule is the
+  release validator's.
+- It accepts only a designated test credential, `TEST-ONLY-` followed by at
+  least 32 lowercase hex characters, at start and again at every claim. Any
+  other key refuses start, or ends the process at a later claim, naming
+  `FACTORFLOW_MASSIVE_API_KEY` without echoing the value.
+- The script generates that key once per run
+  (`E2E_PROVIDER_KEY="TEST-ONLY-$(...secrets.token_hex(16)...)"`) and passes it
+  only through the environment. No tracked file holds a provider key, and
+  `tests/unit/test_no_committed_secrets.py` scans `scripts/`, `tests/` and
+  `src/` to keep it that way.
+
+The entry point lives under `tests/`, so the wheel and the container image
+never contain it, and no module under `src/` imports it. The release launch
+`python -m factorflow.ingestion_main` with an `http` base URL still exits 1.
+
+The script's refused-start check uses GNU `timeout`. On macOS, install
+coreutils and put its `gnubin` directory first on `PATH` for the run.
 
 ## Validation
 
