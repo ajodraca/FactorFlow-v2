@@ -4,6 +4,7 @@ The API binds to loopback only, and no route declares an authentication
 requirement (component design sections 3, 4; task plan T006).
 """
 
+import ipaddress
 import socket
 import threading
 import time
@@ -29,24 +30,31 @@ def _free_port() -> int:
 def _find_non_loopback_ipv4() -> str | None:
     """A real, non-loopback IPv4 address this host owns, or `None`.
 
-    `socket.gethostbyname(socket.gethostname())` (the previous approach)
-    raises `gaierror` on hosts without a forward DNS entry for their own
-    hostname, which silently skipped the one assertion AC-14 exists to
-    make (IR-003). `getaddrinfo` resolves the *interface* addresses
-    directly rather than depending on that name lookup, so it is not
-    subject to the same failure mode -- but a sandboxed CI runner can
-    still have no non-loopback interface at all, so callers must still
-    handle `None`.
+    Asks the kernel's routing table, not the resolver: `connect()` on a UDP
+    socket sends no packet, it only picks the local address the host would
+    use to reach an off-host destination, which `getsockname()` returns.
+    That address is assigned to one of this host's interfaces.
+
+    Earlier versions resolved the hostname (`gethostbyname`, then
+    `getaddrinfo`). That is a name lookup, so it found nothing on hosts
+    whose hostname has no DNS entry (IR-003) or maps to `127.0.0.1` in
+    `/etc/hosts` (IR-604), even when non-loopback interfaces existed.
+
+    Returns `None` when the kernel has no IPv4 route to an off-host
+    destination, which is the case on a host with only loopback, so callers
+    must handle it. A host whose only non-loopback interfaces carry no such
+    route (no default route) also yields `None`.
     """
-    try:
-        infos = socket.getaddrinfo(socket.gethostname(), None, family=socket.AF_INET)
-    except socket.gaierror:
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        try:
+            # TEST-NET-2 (RFC 5737): never on-link, so it follows the default route.
+            sock.connect(("198.51.100.1", 9))
+        except OSError:
+            return None
+        ip = sock.getsockname()[0]
+    if ipaddress.ip_address(ip).is_loopback or ip == "0.0.0.0":
         return None
-    for _, _, _, _, sockaddr in infos:
-        ip = sockaddr[0]
-        if ip != "127.0.0.1":
-            return ip
-    return None
+    return ip
 
 
 def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -60,7 +68,7 @@ def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
     non_loopback_ip = _find_non_loopback_ipv4()
     if non_loopback_ip is None:
         pytest.skip(
-            "no non-loopback IPv4 interface found on this host; "
+            "no non-loopback IPv4 address found: this host has no IPv4 route off itself; "
             "the non-loopback-rejection half of AC-14 cannot be exercised here"
         )
 

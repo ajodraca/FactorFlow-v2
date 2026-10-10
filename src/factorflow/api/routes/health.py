@@ -34,9 +34,11 @@ class _ConnectionLike(Protocol):
 def probe_schema_version(connection: _ConnectionLike) -> int | None:
     """The highest version recorded in `applied_migrations`, or `None`.
 
-    `None` when the table is empty (no migration has been applied yet, or
-    the table itself does not exist -- both report "no version" the same
-    way to a health caller).
+    `None` when the table exists but is empty (no migration recorded yet).
+    When the table itself does not exist, the query raises
+    `psycopg.errors.UndefinedTable` (a `psycopg.Error`) and this function
+    lets it propagate; `get_health` catches it and reports the database as
+    `"unreachable"` with `schema_version` `None`.
     """
     with connection.cursor() as cur:  # type: ignore[attr-defined]
         cur.execute("SELECT max(version) FROM applied_migrations")
