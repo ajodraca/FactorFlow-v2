@@ -1305,6 +1305,14 @@ claimable — waits `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` and polls again. In
 normal operation the loop does not exit. A configuration error exits `1`
 naming the offending environment variable, never its value.
 
+The process holds one database connection, opened with `autocommit=True`.
+Every unit of work marks its own `connection.transaction()` block, such as the
+claim, each instrument's write and `finalise`, and each block commits when it
+exits. Reads outside a block, such as the roster snapshot, hold no transaction
+open. Without autocommit, the first bare read would open an implicit
+transaction, every later block would become an uncommitted savepoint inside it,
+and the run would stay `running` (EXP-20261010-2).
+
 Each process identifies its claims as `ingestion-runner-<hostname>`, which is
 what `heartbeat` checks ownership against, so two runners on different hosts
 cannot mistake each other's claims for their own.
