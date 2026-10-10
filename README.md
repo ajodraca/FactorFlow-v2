@@ -152,7 +152,7 @@ variable** — never its value.
 | `FACTORFLOW_API_HOST` | no | `127.0.0.1` | Loopback only; a non-loopback address is rejected at start |
 | `FACTORFLOW_API_PORT` | no | `8000` | 1–65535 |
 | `FACTORFLOW_MASSIVE_API_KEY` | yes | — | Held as a secret. Supplied to both processes; the application reads only whether it is set |
-| `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | |
+| `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | `https` only, with a host and nothing else: a query, fragment, userinfo, path, whitespace or control character, or a port outside 1–65535 is rejected at start, and so is `http`, loopback included. One trailing `/` is removed. The error names the variable and the broken rule, never the value. See [Massive historical client](#massive-historical-client) |
 | `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` | yes | — | No default: the budget is the owner's provider plan and cannot be guessed |
 | `FACTORFLOW_MASSIVE_MAX_ATTEMPTS` | no | `3` | Minimum 1 |
 | `FACTORFLOW_MASSIVE_TIMEOUT_SECONDS` | no | `30` | Minimum 1 second |
@@ -438,7 +438,10 @@ models above rather than provider wire shapes.
 The client creates one reusable SDK client from `MassiveSettings`, explicitly
 disabling SDK retries, pagination, and request tracing. It passes the runtime
 credential to the SDK for header authentication; it does not put the credential
-in request URLs. Every initial and followed page request passes through
+in request URLs. It also passes the validated `FACTORFLOW_MASSIVE_BASE_URL` as
+the SDK's `base`, so every request of the four reads, followed `next_url` pages
+and the `vx` sub-client's IPO reads included, goes to that host
+(CAP-001-E3-S6). Every initial and followed page request passes through
 `RateLimitGovernor`, while `paging.follow_pages()` follows a present
 `next_url` one page at a time and raises if a later page fails rather than
 returning a partial range.
@@ -450,6 +453,35 @@ actions combine splits, dividends, IPOs, and ticker-change events. Ticker
 events have no provider date-range parameter, so the client validates their
 rows and applies the requested inclusive range locally. The client never calls
 Massive's forward-looking market-status endpoint or ticker-list endpoint.
+
+The credential never leaves for another host. With SDK retries at `0`, a
+redirect is refused rather than followed: the governor retries the request to
+the same host up to `max_attempts`, then raises `ProviderUnavailable`. Neither
+SDK connection pool uses a proxy, whatever the `HTTP_PROXY`, `HTTPS_PROXY` or
+`ALL_PROXY` environment says, and no construction path relaxes TLS
+verification (`cert_reqs="CERT_REQUIRED"` on both pools). The release build
+carries none of the test tree: the `Dockerfile` copies nothing under `tests/`,
+the wheel contains nothing under it, and nothing in `src/factorflow` imports
+from it. `tests/unit/test_massive_redirects.py`, `test_massive_tls.py` and
+`test_release_excludes_test_paths.py` prove each of these without opening a
+socket.
+
+**Known limitations, carried forward as accepted warnings from
+implementation review v1**
+(`CAP-001-E3-S6-implementation-review-v1.md`). All four are about how strong
+the tests are. None leaves an acceptance criterion unmet:
+
+- `test_trailing_slash_base_never_produces_a_double_slash` uses the default
+  host, so it would still pass if `base=` were removed. Other tests catch that
+  removal (IR-001).
+- `test_no_construction_path_passes_a_tls_override` does not install the
+  `forbid_sockets` guard. It patches `RESTClient` for the whole test, so no
+  pool exists today (IR-002).
+- The source scan for `http` acceptance flags string constants, comparisons
+  and collection literals. It would miss a `startswith("http")` or a `match`
+  case (IR-003).
+- The `Dockerfile` check reads `COPY`/`ADD` line by line. It would miss a
+  continued line or the JSON array form (IR-004).
 
 ## Massive provider failure reasons
 
@@ -1761,6 +1793,12 @@ its test runs. The seed is idempotent. `cancel-run.spec.ts` and
 starts no runner. Every spec shares that one database, so the suite runs on
 one worker (`workers: 1` in `playwright.config.ts`).
 Needs Docker and Playwright's browsers installed (`npx playwright install`).
+
+The script's acquisition stack still points the ingestion process at the
+loopback provider stub with `FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:<port>`.
+The release settings now refuse that value, so that process exits at start.
+CAP-001-E3-S7 adds the test-only entry point that accepts the stub. It lands in
+the same merge as CAP-001-E3-S6.
 
 ## Validation
 
