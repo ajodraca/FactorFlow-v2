@@ -2,23 +2,37 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-10-10
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: gpt-5.6
-  tool: Codex
-  tool_version: "unknown"
-  timestamp: 2026-09-06T00:00:00Z
+  model: claude-opus-5-5
+  tool: Claude Code
+  tool_version: "2.1.296"
+  timestamp: 2026-10-10T03:01:49Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
+      version: "6"
+    - id: CAP-001-E3-S6
+      version: "3"
+    - id: CAP-001-E3-S7
+      version: "3"
+    - id: CAP-001-E5-S1
+      version: "2"
+    - id: CAP-001-component-design-massive-client
+      version: "12"
+    - id: CAP-001-component-design-runtime-config
+      version: "11"
+    - id: CAP-001-component-design-acquisition-runner
+      version: "8"
+    - id: CAP-001-component-design-market-data-store
       version: "6"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
@@ -7638,4 +7652,947 @@ ai_provenance:
 #### Error / Edge Cases
 - Only the explicitly stated failure, boundary, or edge condition in DAC-E1-S6-6 is exercised; no additional condition is assumed.
 
+### TC-COMP-347: Unset FACTORFLOW_MASSIVE_BASE_URL defaults to the governed https host
 
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-1
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- `FACTORFLOW_MASSIVE_BASE_URL` is absent from the environment; every other required `MassiveSettings` variable is set, the API key generated in the test.
+- Unit harness only, no `postgres` marker, no socket (`tests/unit/test_settings_base_url.py`).
+
+#### Steps
+1. Load `MassiveSettings()`.
+2. Read `base_url` from the loaded settings.
+
+#### Expected Result
+- `base_url == "https://api.massive.com"` (`runtime-config` section 2.2c clause 1).
+
+#### Error / Edge Cases
+- An empty-string value is not "unset" and is covered by TC-COMP-351 (rejected, not defaulted).
+
+### TC-COMP-348: Every accepted base URL row loads, and a single trailing slash is removed
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-2
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket. API key generated in the test.
+
+#### Steps
+1. For each "accepted" row of the `runtime-config` section 2.2c table, set `FACTORFLOW_MASSIVE_BASE_URL` to `https://api.massive.com`, `https://api.massive.com/`, `HTTPS://API.MASSIVE.COM`, `https://api.massive.com:443` and `https://other.example` in turn.
+2. Load `MassiveSettings()` for each value and read `base_url`.
+
+#### Expected Result
+- Each value loads without error.
+- `https://api.massive.com/` loads as `https://api.massive.com` (clause 6); the others load as section 2.2c's table states (clauses 2 and 5).
+
+#### Error / Edge Cases
+- Boundary: the port `443` is accepted (clause 5, 1 to 65535); a host that is not `api.massive.com` is accepted because no allow-list exists (section 3).
+
+### TC-COMP-349: A non-https scheme fails settings load naming the variable
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-3
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket. API key generated in the test.
+
+#### Steps
+1. Set `FACTORFLOW_MASSIVE_BASE_URL` to `http://api.massive.com`, `ftp://api.massive.com` and `api.massive.com` in turn.
+2. Load `MassiveSettings()` for each value.
+
+#### Expected Result
+- Each load raises `ConfigurationError` whose message names `FACTORFLOW_MASSIVE_BASE_URL` (clause 2, SEC-ENC-001).
+
+#### Error / Edge Cases
+- A value with no scheme is rejected by the scheme clause, not defaulted to `https`.
+
+### TC-COMP-350: Loopback http is rejected by the release settings
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-4
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket. API key generated in the test.
+
+#### Steps
+1. Set `FACTORFLOW_MASSIVE_BASE_URL` to `http://127.0.0.1:8126`, `http://localhost:8126` and `http://[::1]:8126` in turn.
+2. Load `MassiveSettings()` for each value.
+
+#### Expected Result
+- Each load raises `ConfigurationError`.
+
+#### Error / Edge Cases
+- The test is unchanged when clause 2a is in force: the release `MassiveSettings` never accepts `http` (SEC-NDG-001, DEC-0033). Acceptance by the test-only entry point is TC-COMP-370.
+
+### TC-COMP-351: Every other rejected base URL row fails settings load
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-5
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket. API key generated in the test.
+
+#### Steps
+1. Load `MassiveSettings()` with `FACTORFLOW_MASSIVE_BASE_URL` set, in turn, to: `https://`, `https:///v3`, `https:api.massive.com` (missing host); `https://user:pw@api.massive.com` (userinfo); `https://api.massive.com:0`, `https://api.massive.com:70000`, `https://api.massive.com:abc` (port); `https://api.massive.com/v3`, `https://api.massive.com//` (path); `https://api.massive.com?x=1`, `https://api.massive.com#f` (query, fragment); the empty string; `" https://api.massive.com"` (surrounding whitespace); unbracketed `http://::1:8126`; and `"https://api.massive.com\x7f"` (control character).
+
+#### Expected Result
+- Every load raises `ConfigurationError` naming `FACTORFLOW_MASSIVE_BASE_URL` (clauses 3 to 8).
+
+#### Error / Edge Cases
+- Boundary: ports `0` and `70000` lie outside 1 to 65535.
+- `http://::1:8126` is asserted only as rejected; the clause it reports is not asserted (story open question, specification review v7 FINDING-12 (c)).
+- Surrounding whitespace is rejected, not stripped; an empty value is rejected, not defaulted.
+
+### TC-COMP-352: A base URL failure message never discloses the value, a password or the API key
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-6
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket.
+- `FACTORFLOW_MASSIVE_API_KEY` set to a key generated in the test.
+
+#### Steps
+1. Load `MassiveSettings()` with `FACTORFLOW_MASSIVE_BASE_URL=https://user:s3cret@api.massive.com` and capture the `ConfigurationError` message.
+2. Repeat for each rejected value of TC-COMP-349, TC-COMP-350 and TC-COMP-351.
+
+#### Expected Result
+- Each message contains `FACTORFLOW_MASSIVE_BASE_URL` and the clause that failed.
+- No message contains the submitted value, `s3cret`, or the API key (clause 9, SEC-ERR-001).
+
+#### Error / Edge Cases
+- The message is formatted with `include_input=False`, so the value cannot reach it through Pydantic's error rendering either.
+
+### TC-COMP-353: The ingestion entry point refuses to start on an http base URL
+
+**Scope:** component
+**Component(s):** acquisition-runner
+**Traces to:** DAC-E3-S6-7
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_main.py`).
+- Otherwise valid settings in the environment, API key generated in the test; `FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com`.
+- `RESTClient` construction is observed, so the test can assert it never happens.
+
+#### Steps
+1. Call `factorflow.ingestion_main.main()` with no arguments.
+2. Capture its return value, the log records it emits, and whether `RESTClient` was constructed.
+
+#### Expected Result
+- `main()` returns non-zero before any `RESTClient` is constructed.
+- The log line names `FACTORFLOW_MASSIVE_BASE_URL` and does not contain `http://api.massive.com`.
+
+#### Error / Edge Cases
+- No provider request is attempted.
+
+### TC-COMP-354: A configured https base reaches the SDK client and its vx sub-client
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-8
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_massive_sdk_config.py`).
+- `FACTORFLOW_MASSIVE_BASE_URL=https://stub.example:8443`; API key generated in the test.
+
+#### Steps
+1. Build `MassiveClient` from the loaded settings, recording the keyword arguments passed to `RESTClient`.
+2. Build it again on the real, unpatched SDK and read the client's `BASE` and its `vx` sub-client's `BASE`.
+
+#### Expected Result
+- `RESTClient` receives `base=settings.base_url`.
+- Both `BASE` and `vx.BASE` equal `https://stub.example:8443` (`massive-client` section 2.2b, section 8 item 13).
+
+#### Error / Edge Cases
+- An `https` value is used because `runtime-config` rejects `http` at start.
+
+### TC-COMP-355: With the variable unset, the SDK client and vx sub-client use https://api.massive.com
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-8
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_massive_tls.py`).
+- `FACTORFLOW_MASSIVE_BASE_URL` unset; API key generated in the test.
+
+#### Steps
+1. Build `MassiveClient` on the real, unpatched SDK.
+2. Read the client's `BASE` and its `vx` sub-client's `BASE`.
+
+#### Expected Result
+- Both equal `https://api.massive.com` (`massive-client` section 7 row "The default base URL is `https`").
+
+#### Error / Edge Cases
+- None stated beyond the default case.
+
+### TC-COMP-356: A normalised base produces no double slash in the request URL
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-9
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_massive_sdk_config.py`).
+- `FACTORFLOW_MASSIVE_BASE_URL=https://api.massive.com/`; the transport records the URL of the first request instead of sending it.
+
+#### Steps
+1. Build `MassiveClient` and issue one read that reaches a `/v3/...` path.
+2. Read the recorded URL of the first request.
+
+#### Expected Result
+- The URL begins `https://api.massive.com/v3/` and contains no `//v3` (`runtime-config` clause 6).
+
+#### Error / Edge Cases
+- None stated beyond the trailing-slash case.
+
+### TC-COMP-357: SDK retries are 0 on the main client and on vx; pagination and trace are off
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-10
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_massive_sdk_config.py`). API key generated in the test.
+
+#### Steps
+1. Build `MassiveClient` as in `massive-client` section 2.2b.
+2. Read `retries` on the `RESTClient` and on its `vx` sub-client, and `pagination` and `trace` on the client.
+
+#### Expected Result
+- `retries == 0` on the main `RESTClient` and `vx.retries == 0`.
+- `pagination` is False and `trace` is False.
+
+#### Error / Edge Cases
+- Guards against an SDK default reasserting itself on upgrade; the `vx` assertion is the one specification review v7 FINDING-19 found missing.
+
+### TC-COMP-358: TLS verification is never disabled
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-11
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_massive_tls.py`). API key generated in the test.
+
+#### Steps
+1. Build `MassiveClient` through every construction path the component offers.
+2. Inspect the arguments of each construction and the SDK pool's connection keyword arguments.
+
+#### Expected Result
+- No construction path passes `verify=False`.
+- The SDK pool keeps `cert_reqs="CERT_REQUIRED"` (`massive-client` section 4, SEC-ENC-001).
+
+#### Error / Edge Cases
+- None stated beyond the two assertions.
+
+### TC-COMP-359: The redirect harness opens no socket and makes no plain-HTTP request
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-12
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker (`tests/unit/test_massive_redirects.py`).
+- `MassiveClient` built as in `massive-client` section 2.2b on the default base `https://api.massive.com`, with a key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`.
+- `socket.create_connection` and `socket.getaddrinfo` are patched to fail the test when called.
+- `urllib3.connectionpool.HTTPConnectionPool._make_request` is replaced by a fake that records each request's scheme, host and path, answers `302` with `Location: https://198.51.100.7/`, and returns its response with `retries` set to the `retries` value it was passed, as urllib3 does.
+- Everything above `_make_request` is unpatched: the SDK and urllib3's `PoolManager.urlopen` redirect and retry logic.
+
+#### Steps
+1. Run the redirect cases TC-COMP-360, TC-COMP-361 and TC-COMP-362 inside this harness.
+2. After each, read the socket guards and the fake's recorded requests.
+
+#### Expected Result
+- Neither socket guard fired.
+- Every recorded request's scheme is `https`; no plain-HTTP request was recorded.
+
+#### Error / Edge Cases
+- A fake that does not return the `retries` value it was passed is a harness defect (specification review v7 FINDING-19 (c)); the harness asserts the returned response carries the passed value.
+
+### TC-COMP-360: A main-pool redirect is refused and retried by the production governor to the same host
+
+**Scope:** component
+**Component(s):** massive-client, rate-limit-governor
+**Traces to:** DAC-E3-S6-13
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- The TC-COMP-359 harness.
+- A `RateLimitGovernor` built with `GovernorSettings.from_massive_settings` from production settings: `max_attempts` at its default of 3, `requests_per_minute` no smaller than the 3 requests the test sends through this governor, and `sleep` and `jitter` injected so the test never waits on the real clock. `monotonic` is not injected.
+
+#### Steps
+1. Call `fetch_reference` for one symbol through the client and the governor.
+2. Read the exception raised and the fake's recorded requests.
+
+#### Expected Result
+- `ProviderUnavailable` is raised, not `MaxRetryError`.
+- The recorded requests number `max_attempts` (3), because the client's classifier maps the refused redirect's `MaxRetryError` to `RETRYABLE` and the governor retries it.
+- Every recorded request is `https` to `api.massive.com`; none is to `198.51.100.7`.
+
+#### Error / Edge Cases
+- The budget is set by `requests_per_minute`, not by an injected `monotonic`: with a frozen clock and a no-op `sleep` the token wait never ends (specification review v9 FINDING-27).
+
+### TC-COMP-361: A vx redirect is refused and retried to the same host, through the vx pool
+
+**Scope:** component
+**Component(s):** massive-client, rate-limit-governor
+**Traces to:** DAC-E3-S6-14
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- The TC-COMP-359 harness and the production governor of TC-COMP-360.
+- The read is driven so the first redirect it meets is on a `/vX/` request, by one of the two routes `massive-client` section 7 names:
+  - `vx.list_ipos` called through `MassiveClient._through_governor`, with `requests_per_minute` no smaller than 3; or
+  - `fetch_corporate_actions`, with the fake answering an empty `200` page to the main-pool `/stocks/v1/splits` and `/stocks/v1/dividends` requests and `302` only to `/vX/` paths, and `requests_per_minute` no smaller than 5.
+
+#### Steps
+1. Run the chosen route.
+2. Read the exception raised, the fake's recorded requests, and the pool each `/vX/reference/ipos` request was sent through.
+
+#### Expected Result
+- `ProviderUnavailable` is raised.
+- The recorded `/vX/reference/ipos` requests number `max_attempts` (3) and were sent through the `vx` sub-client's `PoolManager`.
+- Every recorded request is to `api.massive.com`; none is to `198.51.100.7`.
+
+#### Error / Edge Cases
+- The test fails when no `/vX/reference/ipos` request is recorded, so it cannot pass while exercising only the main pool. A `/vX/` path alone does not identify the `vx` sub-client, because the SDK's ticker-events read is a `/vX/` path on the main pool.
+
+### TC-COMP-362: A control client with retries=3 follows the redirect, proving the fake drives urllib3's real redirect path
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-15
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- The TC-COMP-359 harness.
+- A bare SDK `RESTClient(retries=3)` on the default base, with a key generated in the test (a `MassiveClient` takes no `retries` argument).
+
+#### Steps
+1. Call `get_ticker_details` on the control client.
+2. Read the fake's recorded requests.
+
+#### Expected Result
+- Requests to `198.51.100.7` are recorded.
+
+#### Error / Edge Cases
+- If the control records no request to `198.51.100.7`, the harness is not exercising urllib3's redirect path and TC-COMP-360 and TC-COMP-361 prove nothing.
+
+### TC-COMP-363: No proxy is ever used, whatever the proxy environment says
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** DAC-E3-S6-16
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket permitted (`tests/unit/test_massive_redirects.py`).
+- `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `http_proxy`, `https_proxy` and `all_proxy` set to `http://127.0.0.1:9`; `NO_PROXY` and `no_proxy` unset. API key generated in the test.
+
+#### Steps
+1. Build `MassiveClient` as in `massive-client` section 2.2b.
+2. Inspect the SDK pool and the `vx` pool.
+3. On each pool, obtain the connection pool for the base URL, and call `connection_from_url("http://127.0.0.1:8126")`.
+
+#### Expected Result
+- The SDK pool and the `vx` pool are each a `urllib3.PoolManager` and neither is a `urllib3.ProxyManager`.
+- The connection pool each returns for the base URL is an `HTTPSConnectionPool` for `api.massive.com` whose `proxy` is `None`.
+- `connection_from_url("http://127.0.0.1:8126")` on each returns an `HTTPConnectionPool` whose `proxy` is `None`, the clause 2a channel's form (DEC-0041).
+- Building the pools sends nothing.
+
+#### Error / Edge Cases
+- CONST-SEC 1.2 SEC-ENC-001 condition 2 and Verification (e): the channel is never routed through a proxy.
+
+### TC-COMP-364: The release artifact contains no test path and no http-accepting module
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S6-17
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `tests/unit/test_release_excludes_test_paths.py`, no `postgres` marker.
+
+#### Steps
+1. Read the `Dockerfile` and list the paths it copies.
+2. Build the wheel with `uv build` and list its files.
+3. Scan every module under `src/factorflow` for imports from `tests` and for acceptance of an `http` base URL scheme.
+
+#### Expected Result
+- The `Dockerfile` copies no path under `tests/`.
+- The wheel contains no file under `tests/`.
+- No module under `src/factorflow` imports from `tests` or accepts an `http` base URL scheme (SEC-NDG-001, DEC-0033, DEC-0034).
+
+#### Error / Edge Cases
+- None stated beyond the three assertions.
+
+### TC-COMP-365: The new tests run in the not-postgres suite without a container or network, and existing tests still pass
+
+**Scope:** component
+**Component(s):** runtime-config, massive-client, acquisition-runner
+**Traces to:** DAC-E3-S6-18
+**Priority:** P2
+**Type:** non-functional
+
+#### Preconditions
+- Repository checkout with no PostgreSQL container and no network access.
+
+#### Steps
+1. Run `uv run pytest -m 'not postgres'`.
+2. Inspect the markers on every test that TC-COMP-347 to TC-COMP-364 describe.
+
+#### Expected Result
+- None of those tests carries a `postgres` marker, and all pass.
+- The existing `tests/unit/test_massive_sdk_config.py`, `tests/unit/test_massive_auth.py` and `tests/unit/test_ingestion_main.py` tests still pass.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-366: Clause 2a work starts only after the CONST-SEC 1.2 in-force re-check passes
+
+**Scope:** component
+**Component(s):** runtime-config, acquisition-runner
+**Traces to:** DAC-E3-S7-1
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- CAP-001-E3-S7 is selected for implementation planning or for coding.
+- The AI-agents harness default branch is available locally.
+- This is a stage-entry procedural verification, recorded as evidence by the stage, not a product unit test (DEC-0043).
+
+#### Steps
+1. On the AI-agents default branch, run `python3 scripts/artifact-gate.py revision --repo-dir . --artifact docs/constitutions/security.constitution.md`.
+2. Read `approval.reviewed_revision` from that file on the same branch.
+3. Compare both values with the pin `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`.
+
+#### Expected Result
+- The printed revision, `approval.reviewed_revision` and the pin are equal, and the stage proceeds.
+- When any of them differs, or the file has no `approval` block on the default branch, the stage stops and writes nothing of clause 2a (`runtime-config` 2.2c; DEC-0036).
+
+#### Error / Edge Cases
+- The mismatch branch cannot be exercised without altering the constitution; it is verified by inspecting that the stage records the comparison before writing any clause 2a file (DEC-0043).
+
+### TC-COMP-367: main exposes settings_factory and credential_reader as keyword-only parameters with release defaults
+
+**Scope:** component
+**Component(s):** acquisition-runner
+**Traces to:** DAC-E3-S7-2
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker (`tests/unit/test_ingestion_main.py`).
+
+#### Steps
+1. Read `inspect.signature(factorflow.ingestion_main.main)`.
+2. Read the `__main__` launch of `factorflow.ingestion_main`.
+
+#### Expected Result
+- `settings_factory` and `credential_reader` are keyword-only, with defaults `Settings` and `read_provider_credential`.
+- The `__main__` launch passes neither.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-368: A settings_factory raising ConfigurationError makes main return 1 without echoing the value
+
+**Scope:** component
+**Component(s):** acquisition-runner
+**Traces to:** DAC-E3-S7-3
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_main.py`).
+- A `settings_factory` that raises `ConfigurationError` for a named variable carrying a value generated in the test.
+
+#### Steps
+1. Call `main(settings_factory=<raising factory>)`.
+2. Capture the return value and the log records.
+
+#### Expected Result
+- `main` returns 1.
+- The log names the variable and never the value.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-369: A credential_reader raising at the first claim ends main non-zero with no RESTClient built
+
+**Scope:** component
+**Component(s):** acquisition-runner
+**Traces to:** DAC-E3-S7-4
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_main.py`).
+- A claimable run is presented to the polling loop through a stubbed `run-journal`.
+- A `credential_reader` that raises when called; `RESTClient` construction is observed.
+
+#### Steps
+1. Call `main(credential_reader=<raising reader>)` so the loop reaches its first claim.
+2. Observe how `main` ends and whether `RESTClient` was constructed.
+
+#### Expected Result
+- The exception propagates out of `run_polling_loop` and out of `main`, and the process ends non-zero.
+- No `RESTClient` is constructed.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-370: The test entry point's settings factory accepts the three loopback http values
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-5
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_e2e_main.py`).
+- The settings factory of `tests/e2e/support/ingestion_e2e_main.py`; name resolution for `localhost` patched to return only loopback addresses; API key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`.
+
+#### Steps
+1. Load the factory with `FACTORFLOW_MASSIVE_BASE_URL` set to `http://127.0.0.1:8126`, `http://localhost:8126` and `http://[::1]:8126` in turn.
+
+#### Expected Result
+- Each value loads (clause 2a).
+
+#### Error / Edge Cases
+- Host comparison ignores case (clause 2a).
+
+### TC-COMP-371: The test entry point rejects every non-qualifying loopback form and every other rejected row
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-5
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- As TC-COMP-370.
+
+#### Steps
+1. Load the factory with each of `http://127.0.0.2`, `http://127.1`, `http://0.0.0.0`, `http://localhost.`, `http://[0:0:0:0:0:0:0:1]`, `http://[::ffff:127.0.0.1]`, `http://[::1%25lo]`, `http://::1:8126` and `http://api.massive.com`.
+2. Load it with each other "rejected" row of the `runtime-config` section 2.2c table (the values of TC-COMP-351, and `ftp://api.massive.com` and `api.massive.com`).
+3. Capture each error message.
+
+#### Expected Result
+- Every load raises.
+- No message echoes the submitted value.
+
+#### Error / Edge Cases
+- Only `127.0.0.1`, `::1` and `localhost` qualify; the rest of `127.0.0.0/8`, `0.0.0.0`, expanded, IPv4-mapped and zone-qualified forms of `::1`, and `localhost.` do not.
+
+### TC-COMP-372: Every value the test entry point accepts parses to the same host under urlsplit and urllib3
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-6
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_e2e_main.py`).
+
+#### Steps
+1. For each value TC-COMP-370 accepts, parse it with `urllib.parse.urlsplit` and with urllib3's `parse_url`.
+2. Compare the two hosts.
+
+#### Expected Result
+- Both parsers yield the same host for every accepted value (item 2; specification review v7 FINDING-12 (b)).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-373: localhost resolving to a non-loopback address makes the test entry point exit before any client
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-7
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_e2e_main.py`).
+- `socket.getaddrinfo` patched so `localhost` returns a non-loopback address alongside `127.0.0.1`; `FACTORFLOW_MASSIVE_BASE_URL=http://localhost:8126`; API key generated in the test as a `TEST-ONLY-` key; `RESTClient` construction observed.
+
+#### Steps
+1. Start the test entry point.
+2. Observe its exit status and whether `RESTClient` was constructed.
+
+#### Expected Result
+- It exits non-zero before constructing a `RESTClient` (item 2; CONST-SEC 1.2 SEC-ENC-001 condition 2).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-374: localhost resolving only to loopback lets the test entry point start
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-7
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- As TC-COMP-373, with `socket.getaddrinfo` patched so `localhost` returns only loopback addresses.
+
+#### Steps
+1. Start the test entry point.
+
+#### Expected Result
+- It starts.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-375: A generated TEST-ONLY key lets the test entry point start
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-8
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_e2e_main.py`).
+- `FACTORFLOW_MASSIVE_API_KEY` set to a key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`; `FACTORFLOW_MASSIVE_BASE_URL=http://127.0.0.1:8126`.
+
+#### Steps
+1. Start the test entry point.
+
+#### Expected Result
+- It starts.
+
+#### Error / Edge Cases
+- No fixed key literal is used.
+
+### TC-COMP-376: Any key that is not a designated test credential is refused at start without being echoed
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-8
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- As TC-COMP-375; `RESTClient` construction observed.
+
+#### Steps
+1. Start the test entry point with `FACTORFLOW_MASSIVE_API_KEY` set, in turn, to: `TEST-ONLY-` with a 31-character hex tail; `TEST-ONLY-` with an uppercase hex tail; `test-only-` with a valid tail; a valid generated key with a trailing newline; and a random 32-character alphanumeric key. Every value is generated in the test.
+2. Capture each exit status and message.
+
+#### Expected Result
+- Each start exits non-zero before constructing a `RESTClient`.
+- No message echoes the key.
+
+#### Error / Edge Cases
+- Boundary: a 31-character hex tail is one short of `{32,}`.
+- The literal `e2e-test-key` is not among the inputs (DEC-0040; specification review v7 FINDING-20), although `runtime-config` section 7 still lists it.
+
+### TC-COMP-377: A non-test key read at a later claim ends the process without building a client
+
+**Scope:** component
+**Component(s):** runtime-config, acquisition-runner
+**Traces to:** DAC-E3-S7-9
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker, no socket (`tests/unit/test_ingestion_e2e_main.py`).
+- The test entry point started with a generated `TEST-ONLY-` key; a stubbed `run-journal` presents a second claimable run; `RESTClient` construction observed.
+
+#### Steps
+1. Change `FACTORFLOW_MASSIVE_API_KEY` to a generated value that does not match `^TEST-ONLY-[0-9a-f]{32,}$`.
+2. Let the next claim re-read the credential.
+
+#### Expected Result
+- The process ends non-zero.
+- No `RESTClient` is built or rebuilt with the new value, and the message does not echo it (item 3; CONST-SEC 1.2 SEC-ENC-001 condition 3).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-378: Another generated TEST-ONLY key at a later claim rebuilds the client normally
+
+**Scope:** component
+**Component(s):** runtime-config, acquisition-runner
+**Traces to:** DAC-E3-S7-9
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- As TC-COMP-377.
+
+#### Steps
+1. Change `FACTORFLOW_MASSIVE_API_KEY` to another key generated as `"TEST-ONLY-" + secrets.token_hex(16)`.
+2. Let the next claim re-read the credential.
+
+#### Expected Result
+- The client is rebuilt with the new key and the process continues (`runtime-config` 2.2b).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-379: The test entry point builds the client only through main and adds no transport handling
+
+**Scope:** component
+**Component(s):** runtime-config, acquisition-runner
+**Traces to:** DAC-E3-S7-10
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Unit harness, no `postgres` marker (`tests/unit/test_ingestion_e2e_main.py`).
+
+#### Steps
+1. Start the test entry point with `factorflow.ingestion_main.main` replaced by a recorder.
+2. Inspect the source of `tests/e2e/support/ingestion_e2e_main.py`.
+
+#### Expected Result
+- The entry point calls `factorflow.ingestion_main.main(settings_factory=..., credential_reader=...)` and builds the provider client by no other route.
+- It constructs no `RESTClient` itself and adds no redirect, retry or proxy handling (`runtime-config` 2.2c item 6).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-380: The E2E server script generates a per-run test key and launches ingestion through the test entry point
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-11
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout.
+
+#### Steps
+1. Run `bash -n scripts/run-e2e-server.sh`.
+2. Read the script.
+
+#### Expected Result
+- The script is syntactically valid.
+- Before either stack starts it generates `E2E_PROVIDER_KEY="TEST-ONLY-$(uv run python -c 'import secrets; print(secrets.token_hex(16))')"`.
+- The main stack exports `FACTORFLOW_MASSIVE_API_KEY="$E2E_PROVIDER_KEY"` with no fallback to an inherited value; the acquisition stack's environment sets `FACTORFLOW_MASSIVE_API_KEY=$E2E_PROVIDER_KEY`.
+- The literal `e2e-test-key` appears nowhere in the script.
+- The acquisition ingestion process starts as `uv run python tests/e2e/support/ingestion_e2e_main.py`, not `python -m factorflow.ingestion_main`; the acquisition API process is otherwise unchanged (item 5, DEC-0037).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-381: No fixed provider test key is committed
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-12
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout after the script change; `tests/unit/test_no_committed_secrets.py`, no `postgres` marker.
+
+#### Steps
+1. Search every tracked file under `scripts/`, `tests/` and `src/` for `e2e-test-key` and for a literal matching `TEST-ONLY-[0-9a-f]{32,}`.
+
+#### Expected Result
+- No match, other than the test's own search patterns (SEC-SEC-001; DEC-0037, DEC-0040).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-382: The release artifact excludes the test entry point
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E3-S7-13
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- `tests/e2e/support/ingestion_e2e_main.py` exists; `tests/unit/test_release_excludes_test_paths.py` from CAP-001-E3-S6, unchanged.
+
+#### Steps
+1. Run the release-exclusion test.
+2. List the wheel's files and the paths the `Dockerfile` copies; scan `src/factorflow` for imports of `ingestion_e2e_main`.
+
+#### Expected Result
+- The test passes.
+- Neither the wheel nor the `Dockerfile` image contains `ingestion_e2e_main.py`, and no module under `src/factorflow` imports it (SEC-NDG-001, DEC-0033, DEC-0034).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-383: A coverage segment with a known data type and an ordered inclusive range is accepted
+
+**Scope:** component
+**Component(s):** market-data-store
+**Traces to:** DAC-E5-S1-8
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- PostgreSQL test container with migrations through `0003_coverage.sql` applied, marked `postgres`; one `instrument` row.
+
+#### Steps
+1. Insert one `coverage_segment` row for each of `reference`, `prices`, `fundamentals` and `corporate_actions` with `covered_from < covered_to`.
+2. Insert one row with `covered_from = covered_to`.
+
+#### Expected Result
+- Every insert succeeds.
+
+#### Error / Edge Cases
+- Boundary: `covered_from <= covered_to` admits a single-day range (`coverage_range_ordered`).
+
+### TC-COMP-384: A coverage segment with an unknown data type or a reversed range is rejected
+
+**Scope:** component
+**Component(s):** market-data-store
+**Traces to:** DAC-E5-S1-8
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- As TC-COMP-383.
+
+#### Steps
+1. Insert a `coverage_segment` row whose `data_type` is not one of the four.
+2. Insert a row with `covered_from > covered_to`.
+
+#### Expected Result
+- The first insert is rejected by `coverage_data_type_known`.
+- The second insert is rejected by `coverage_range_ordered`.
+
+#### Error / Edge Cases
+- None stated beyond the two constraints.
+
+### TC-COMP-385: An overlapping inclusive coverage range is rejected by coverage_no_overlap
+
+**Scope:** component
+**Component(s):** market-data-store
+**Traces to:** DAC-E5-S1-9
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- As TC-COMP-383, with one `prices` segment for the instrument from D1 to D10.
+
+#### Steps
+1. Insert a `prices` segment for the same instrument from D5 to D15.
+2. Insert a `prices` segment for the same instrument from D10 to D12.
+
+#### Expected Result
+- Both inserts are rejected by `coverage_no_overlap`.
+
+#### Error / Edge Cases
+- Boundary: ranges are inclusive (`'[]'`), so a segment that starts on the existing segment's last day overlaps it.
+
+### TC-COMP-386: Disjoint coverage ranges, and the same range for another data type, are permitted
+
+**Scope:** component
+**Component(s):** market-data-store
+**Traces to:** DAC-E5-S1-9
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- As TC-COMP-385.
+
+#### Steps
+1. Insert a `prices` segment for the same instrument from D20 to D30.
+2. Insert a `fundamentals` segment for the same instrument from D1 to D10.
+
+#### Expected Result
+- Both inserts succeed; the instrument holds two disjoint `prices` segments (market-data-store section 2.3, AC-22 backfill).
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-387: acquisition_state retains a failed attempt without asserting coverage
+
+**Scope:** component
+**Component(s):** market-data-store
+**Traces to:** DAC-E5-S1-10
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- As TC-COMP-383, with no `coverage_segment` row for the instrument.
+
+#### Steps
+1. Insert an `acquisition_state` row for the instrument and `prices` with `last_acquired_at`, a `last_run_id` UUID and `last_outcome = 'failed'`.
+2. Read `acquisition_state` and `coverage_segment` for the instrument.
+
+#### Expected Result
+- Step 1 succeeds and step 2 returns the stored timestamp, run identifier and outcome, while `coverage_segment` holds no row for the instrument.
+
+#### Error / Edge Cases
+- `last_run_id` has no foreign key to `acquisition_run`, so the row is accepted before `0004_runs.sql` is applied.
+
+### TC-COMP-388: Migrations 0003 and 0004 are ordered, scoped to their tables, and carry no transaction control
+
+**Scope:** component
+**Component(s):** market-data-store, schema-migrator
+**Traces to:** DAC-E5-S1-11
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; PostgreSQL test container marked `postgres` for step 3.
+
+#### Steps
+1. Discover the numbered migrations through the migrator's discovery.
+2. Read `0003_coverage.sql` and `0004_runs.sql`.
+3. Apply migrations through `0003`, list the tables, then apply `0004` and list them again.
+
+#### Expected Result
+- `0003_coverage.sql` is ordered before `0004_runs.sql`.
+- `0003` creates only `coverage_segment` and `acquisition_state`; `0004` creates only `acquisition_run` and `run_instrument_result`.
+- Neither file contains `BEGIN` or `COMMIT`.
+- After `0003` the coverage tables exist and no run table does; after `0004` the run tables exist.
+
+#### Error / Edge Cases
+- None stated.
