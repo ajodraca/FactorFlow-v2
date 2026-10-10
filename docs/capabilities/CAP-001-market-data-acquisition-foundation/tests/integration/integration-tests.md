@@ -2,23 +2,37 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-integration-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-09-06
+updated: 2026-10-10
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: gpt-5.6
-  tool: Codex
-  tool_version: "unknown"
-  timestamp: 2026-09-06T00:00:00Z
+  model: claude-opus-5-5
+  tool: Claude Code
+  tool_version: "2.1.296"
+  timestamp: 2026-10-10T07:05:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
+      version: "6"
+    - id: CAP-001-E3-S6
+      version: "3"
+    - id: CAP-001-E3-S7
+      version: "3"
+    - id: CAP-001-E5-S1
+      version: "2"
+    - id: CAP-001-component-design-massive-client
+      version: "12"
+    - id: CAP-001-component-design-runtime-config
+      version: "11"
+    - id: CAP-001-component-design-acquisition-runner
+      version: "8"
+    - id: CAP-001-component-design-market-data-store
       version: "6"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
@@ -534,7 +548,7 @@ ai_provenance:
 
 **Scope:** integration
 **Component(s):** owner-web-app, ingestion-api, massive-client, Massive REST API
-**Traces to:** AC-11, DAC-E3-10
+**Traces to:** AC-11, DAC-E3-2, DAC-E3-6
 **Priority:** P1
 **Type:** functional
 
@@ -555,7 +569,7 @@ ai_provenance:
 
 **Scope:** integration
 **Component(s):** owner-web-app, ingestion-api, massive-client, Massive REST API
-**Traces to:** DAC-E3-11
+**Traces to:** DAC-E3-8
 **Priority:** P1
 **Type:** functional
 
@@ -572,4 +586,30 @@ ai_provenance:
 #### Error / Edge Cases
 - The response is asserted at the protocol boundary; component internals are not inspected.
 
+### TC-INT-027: E2E acquisition stack reaches the loopback Massive stub
 
+**Scope:** integration
+**Component(s):** ingestion-api, acquisition-runner, massive-client, Massive REST API (DEC-0025 loopback stub)
+**Traces to:** DAC-E3-S7-14
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- CAP-001-E3-S6 and CAP-001-E3-S7 are both applied (landing rule).
+- The stack is started by `scripts/run-e2e-server.sh`, which serves the acquisition API on port 8125 and the DEC-0025 stub on `127.0.0.1:8126`, with a provider key generated for the run.
+- The acquisition stack has a stated history depth and at least one active instrument the stub's fixtures cover.
+
+#### Steps
+1. Wait until `GET /api/health` on port 8125 answers.
+2. Confirm the acquisition ingestion process started by the script is still running.
+3. Send `POST /api/acquisition-runs` to port 8125.
+4. Poll `GET /api/acquisition-runs/{id}` on port 8125 until the run is terminal.
+5. Read the requests the stub on `127.0.0.1:8126` received.
+
+#### Expected Result
+- After health answers, the ingestion process is still running rather than having refused to start.
+- The stub received the run's provider `GET` requests on `127.0.0.1:8126`.
+- The run reaches a terminal state, so the acquisition E2E journeys run against the stub (`runtime-config` section 14 item 4).
+
+#### Error / Edge Cases
+- With CAP-001-E3-S6 applied alone, the ingestion process refuses to start on `http://127.0.0.1:8126`; this case then fails at step 2, which is the breakage the landing rule prevents.

@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 11
+artifact_version: 12
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-10-09
+updated: 2026-10-10
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.295"
-  timestamp: 2026-10-09T20:40:00Z
+  tool_version: "2.1.296"
+  timestamp: 2026-10-10T02:45:19Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -31,9 +31,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-09T21:00:05Z
-  reviewed_revision: sha256:af95ec5e503f93915f2b7496956e20e756902e703dc9cfc3fc06c8140d05f64e
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md"
+  approved_at: 2026-10-10T02:57:43Z
+  reviewed_revision: sha256:7e3139a8f24f0222a333ddddc2956e1a46a8edc70fc84c31da9b2b57efa45580
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v9.md"
 ---
 
 # Component: Massive Client
@@ -41,7 +41,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-001
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-09
+**Last Updated:** 2026-10-10
 
 ## 1. Overview
 
@@ -206,9 +206,14 @@ a `redirect` argument, so urllib3 follows redirects by default and counts them
 against the `Retry` total. With the SDK's default `retries` a `302` is
 followed: a loopback probe on 2026-10-09 (SDK 2.8.0, urllib3 2.7.0) saw the
 second request land at the `Location` target. With `retries=0` the redirect is
-refused rather than followed. urllib3 raises `MaxRetryError`, the target never
-receives a request, and the read fails rather than succeeding from another
-host. This component requires that behaviour in every build. Massive's API
+refused rather than followed. urllib3 raises `MaxRetryError` and the target
+never receives a request. `massive-client`'s classifier in `_through_governor`
+maps any error that is not a `BadResponse`, `MaxRetryError` included, to
+`RETRYABLE`, so the governor repeats the same refused request up to
+`max_attempts` times, every one
+to the configured host, and then fails with `ProviderUnavailable` rather than
+succeeding from another host (specification review v7 FINDING-19 (b),
+DEC-0042). This component requires that behaviour in every build. Massive's API
 does not redirect, so a redirect is never a legitimate answer. Following one
 could move a request to another host, or from `https` to plain HTTP. Under
 `component-design-runtime-config.md` clause 2a it could take a plain-HTTP
@@ -216,7 +221,7 @@ request off loopback, which CONST-SEC 1.2 SEC-ENC-001 condition 2 forbids. No
 construction path may pass `redirect=True` or replace the SDK's `Retry`. A test
 in section 7 drives a redirect on the default `https` base, for a main-pool read
 and a `vx` read, without opening a socket and without any plain-HTTP channel,
-and asserts that the redirect target receives no request (DEC-0038).
+and asserts that the redirect target receives no request (DEC-0038, DEC-0042).
 
 **No proxy is ever used.** The SDK builds a plain `urllib3.PoolManager` for the
 main client and another for `vx`, never a `ProxyManager`, and neither the SDK
@@ -244,7 +249,7 @@ headers, and the header carries the credential (AC-13).
 **`base=settings.base_url` is mandatory.** Without it the SDK uses its own
 built-in `https://api.massive.com`, and `FACTORFLOW_MASSIVE_BASE_URL` has no
 effect. `RESTClient.__init__` passes the same `base` to its `vx` sub-client,
-which serves the `vX` corporate-action reads in section 2.5, so one argument
+which serves the IPO read in section 2.5 (`/vX/reference/ipos`), so one argument
 redirects every request. Pages followed from `next_url` reuse only its path
 against this base. The value reaching this argument has already been validated
 at process start by `component-design-runtime-config.md` section 2.2c: `https`
@@ -741,9 +746,9 @@ The gap that leaves is section 14's item 6.
 | Daily bars parse and page | `tests/unit/test_massive_bars.py` | A two-page range returns all bars in date order (AC-3) |
 | Financials keep filing date as an attribute | `tests/unit/test_massive_financials.py` | `filing_date` is present on the model and is not used as an as-of date (C5) |
 | Corporate actions parse | `tests/unit/test_massive_actions.py` | All four action types map to the product's enumeration (AC-3) |
-| SDK retries are disabled | `tests/unit/test_massive_sdk_config.py` | The constructed `RESTClient` carries `retries == 0`, so the governor owns retry alone (section 2.2b). Guards against an SDK default reasserting itself on upgrade |
-| A redirect is never followed | `tests/unit/test_massive_redirects.py` | No socket and no plain HTTP (DEC-0038). A `MassiveClient` built as in section 2.2b on the default base `https://api.massive.com`, with a key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`. `socket.create_connection` and `socket.getaddrinfo` are patched to fail the test, and `urllib3.connectionpool.HTTPConnectionPool._make_request` is replaced by a fake that records each request's scheme and host and answers `302` with `Location: https://198.51.100.7/`. For a main-pool read (`fetch_reference`) and a read through the `vx` sub-client (the IPO read in `fetch_corporate_actions`, which calls `vx.list_ipos`): the read raises without returning data, and exactly one request is recorded, to `api.massive.com`, none to `198.51.100.7`. A control client built with `retries=3` records requests to `198.51.100.7`, proving the fake exercises urllib3's real redirect path. Everything above `_make_request`, the SDK and urllib3's `PoolManager.urlopen` redirect and retry logic included, is unpatched (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2) |
-| No proxy is ever used | `tests/unit/test_massive_redirects.py` | No socket (DEC-0038). With `HTTP_PROXY`, `HTTPS_PROXY` and `ALL_PROXY` (and their lowercase forms) set to `http://127.0.0.1:9` and `NO_PROXY` unset, a `MassiveClient` built as in section 2.2b has an SDK pool and a `vx` pool that are both `urllib3.PoolManager` and neither a `urllib3.ProxyManager`, and the connection pool each returns for the base URL is an `HTTPSConnectionPool` for `api.massive.com` whose `proxy` is `None` (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2 and Verification (e)) |
+| SDK retries are disabled | `tests/unit/test_massive_sdk_config.py` | The constructed `RESTClient` carries `retries == 0`, and so does its `vx` sub-client, so the governor owns retry alone (section 2.2b; specification review v7 FINDING-19). Guards against an SDK default reasserting itself on upgrade |
+| A redirect is never followed | `tests/unit/test_massive_redirects.py` | No socket and no plain HTTP (DEC-0038, DEC-0042). A `MassiveClient` built as in section 2.2b on the default base `https://api.massive.com`, with a key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`. `socket.create_connection` and `socket.getaddrinfo` are patched to fail the test, and `urllib3.connectionpool.HTTPConnectionPool._make_request` is replaced by a fake that records each request's scheme, host and path, answers `302` with `Location: https://198.51.100.7/`, and returns its response with `retries` set to the `retries` value it was passed, as urllib3 does. The reads run through a `RateLimitGovernor` built with `GovernorSettings.from_massive_settings` from production settings (`max_attempts` at its default of 3), with `requests_per_minute` set no smaller than the requests the test sends through one governor (3 for the main-pool read, 5 for the `fetch_corporate_actions` route), or with `monotonic` injected as well, and with `sleep` and `jitter` injected, so the test never waits on the real clock. For a main-pool read (`fetch_reference`): it raises `ProviderUnavailable`, not `MaxRetryError`, the recorded requests number `max_attempts` because `massive-client`'s classifier maps the refused redirect's `MaxRetryError` to `RETRYABLE` and the governor retries it, every one is `https` to `api.massive.com`, and none is to `198.51.100.7`. For a `vx` read, driven so that the first redirect it meets is on a `/vX/` request (either `vx.list_ipos` called through `MassiveClient._through_governor`, the client's governor seam, or `fetch_corporate_actions` with the fake answering an empty `200` page to the main-pool `/stocks/v1/splits` and `/stocks/v1/dividends` requests and `302` only to `/vX/` paths): it raises `ProviderUnavailable`, the recorded `/vX/reference/ipos` requests number `max_attempts` and are sent through the `vx` sub-client's `PoolManager`, every request is to `api.massive.com`, none is to `198.51.100.7`, and the test fails when no `/vX/reference/ipos` request is recorded. A `/vX/` path alone does not identify the `vx` sub-client, because the SDK's ticker-events read is a `/vX/` path on the main pool. A control, a bare SDK `RESTClient(retries=3)` calling `get_ticker_details` (a `MassiveClient` takes no `retries` argument), records requests to `198.51.100.7`, proving the fake exercises urllib3's real redirect path. Everything above `_make_request`, the SDK and urllib3's `PoolManager.urlopen` redirect and retry logic included, is unpatched (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2; specification review v7 FINDING-19) |
+| No proxy is ever used | `tests/unit/test_massive_redirects.py` | No socket (DEC-0038). With `HTTP_PROXY`, `HTTPS_PROXY` and `ALL_PROXY` (and their lowercase forms) set to `http://127.0.0.1:9` and `NO_PROXY` unset, a `MassiveClient` built as in section 2.2b has an SDK pool and a `vx` pool that are both `urllib3.PoolManager` and neither a `urllib3.ProxyManager`, and the connection pool each returns for the base URL is an `HTTPSConnectionPool` for `api.massive.com` whose `proxy` is `None`. On the same two pools, `connection_from_url("http://127.0.0.1:8126")` returns an `HTTPConnectionPool` whose `proxy` is `None`, which is the clause 2a channel's form (DEC-0041). Building a pool sends nothing (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2 and Verification (e)) |
 | SDK pagination is disabled | `tests/unit/test_massive_sdk_config.py` | `pagination` is False, so pages are followed under governor permits rather than eagerly (section 2.2b) |
 | Trace logging is off | `tests/unit/test_massive_sdk_config.py` | `trace` is False, so request headers carrying the credential are never logged (AC-13) |
 | BadResponse maps to the taxonomy | `tests/unit/test_massive_errors.py` | A `NOT_FOUND` envelope becomes `InstrumentNotFound`, an API-key envelope becomes `CredentialRejected`, and an unrecognised one becomes `ProviderUnavailable` (section 2.4) |
@@ -862,7 +867,8 @@ never uses (section 2.6).
 | Constitution | Tech Stack v3 | Official `massive` client adopted 2026-09-05; `MassiveClient` retained as the operational boundary, not a portability layer; provider evaluation and plan tiers | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C4, one market data contract; C5, point-in-time history; C7, long-lived connections | `docs/constitution/product-charter.md` |
 | Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`; in force for clause 2a only as `component-design-runtime-config.md` section 2.2c states) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the SEC-ENC-001 loopback test-double exception that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect and no-proxy condition; Definitions (designated test credential) | `docs/constitutions/security.constitution.md` in the AI-agents harness |
-| Decision | DEC-0036, DEC-0037, DEC-0038 | This project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text; the per-run designated test credential; the socket-free redirect and proxy tests (all PROVISIONAL) | `projects/factorflow-v2/decisions/` in the AI-agents harness |
+| Decision | DEC-0036, DEC-0037, DEC-0038, DEC-0041, DEC-0042 | This project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text; the per-run designated test credential; the socket-free redirect and proxy tests (all PROVISIONAL); the no-proxy test's loopback `http` pool assertion; the redirect test's outcome under the production governor, which supersedes DEC-0038's redirect-outcome clause | `projects/factorflow-v2/decisions/` in the AI-agents harness |
+| Review | CAP-001 specification review v7 | FINDING-19: the redirect test's fake must return the retries it was passed, the production governor retries a refused redirect `max_attempts` times and raises `ProviderUnavailable`, the `vx` read must be driven so that it reaches `/vX/`, and `vx.retries` is asserted (sections 2.2b and 7) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md` |
 | Review | CAP-001 specification review v6 | FINDING-2 (ratios, open in section 14 item 7), FINDING-3, FINDING-4 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
 | Review | EXP-20261009-1 expedited review v1 | ER-001, ER-002, ER-004: the base URL was unvalidated, §2.2b lacked `base=`, and `tests/unit/test_massive_tls.py` did not exist | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | External | Massive REST documentation | Endpoint paths, query parameters, response fields and `next_url` paging for all four reads, recorded in sections 2.5 and 11. Read 2026-09-05 | `https://massive.com/docs/llms.txt` and the per-endpoint pages it links |
