@@ -6,7 +6,9 @@ construction), 2.3 (interface) and 2.5 (endpoint paths). Story:
 
 `MassiveClient` builds one reusable `massive.RESTClient`, overriding the
 three SDK defaults section 2.2b identifies as silently wrong for this
-capability (`retries`, `pagination`, `trace`), and exposes one operation
+capability (`retries`, `pagination`, `trace`) and passing the mandatory
+`base` from the validated `FACTORFLOW_MASSIVE_BASE_URL` (CAP-001-E3-S6),
+which the SDK hands on to its `vx` sub-client, and exposes one operation
 per data type rather than a generic provider-path method -- which is what
 leaves room for the M3 streaming half to attach here later without
 redefining this interface (DAC-E3-14).
@@ -55,6 +57,8 @@ class MassiveClient:
         self._governor = governor
         self._rest_client = RESTClient(
             api_key=settings.api_key.get_secret_value(),
+            # validated https at start (runtime-config 2.2c); vx inherits it (section 2.2b)
+            base=settings.base_url,
             retries=0,  # the governor owns retry alone (section 2.2b)
             connect_timeout=settings.timeout_seconds,
             read_timeout=settings.timeout_seconds,

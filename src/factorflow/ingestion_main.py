@@ -14,10 +14,12 @@ import logging
 import socket
 import sys
 import time
+from collections.abc import Callable
 from datetime import date
 from typing import Any
 
 import psycopg
+from pydantic import SecretStr
 
 from factorflow.config.settings import (
     ConfigurationError,
@@ -46,15 +48,25 @@ def _make_runner_id() -> str:
         return _RUNNER_ID_PREFIX
 
 
-def main() -> int:
+def main(
+    *,
+    settings_factory: Callable[[], Settings] = Settings,
+    credential_reader: Callable[[], SecretStr] = read_provider_credential,
+) -> int:
     """Load settings, build dependencies, and start the polling loop.
+
+    Load settings with settings_factory() at start, and re-read the provider
+    credential with credential_reader() at every claim. The two parameters
+    exist only for ``tests/e2e/support/ingestion_e2e_main.py``; they are not
+    configuration, and the release launch passes neither (DEC-0035,
+    DAC-E3-S7-2 to S7-4).
 
     Returns a non-zero exit code naming the invalid setting on configuration
     failure (DAC-E1-7); returns 0 only if the loop exits normally (which it
     does not in production).
     """
     try:
-        settings = Settings()
+        settings = settings_factory()
     except ConfigurationError as exc:
         # DAC-E1-7: name the variable, never its value
         print(f"Configuration error: {exc}", file=sys.stderr)
@@ -92,7 +104,7 @@ def main() -> int:
         today = date.today()
         # Re-read the credential at claim time; rebuild client only when
         # the key value changes (DAC-E4-S5-7, DAC-E1-10).
-        key = read_provider_credential()
+        key = credential_reader()
         key_value = key.get_secret_value()
         client = client_factory.get_or_rebuild(key_value)
         # Build a redaction callable from the live key value so provider

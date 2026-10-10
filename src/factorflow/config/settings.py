@@ -12,8 +12,10 @@ import hashlib
 import logging
 import os
 from typing import Any
+from urllib.parse import urlsplit
 
-from pydantic import Field, SecretStr, ValidationError, model_validator
+from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
+from pydantic_core import PydanticCustomError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from factorflow.config.redaction import RedactingFilter
@@ -119,6 +121,44 @@ class MassiveSettings(_EnvNamedSettings):
     timeout_seconds: float = Field(default=30.0, ge=1)
     backoff_initial_seconds: float = Field(default=2.0, gt=0)
     max_throttle_wait_seconds: float = Field(default=300.0, gt=0)
+
+    @field_validator("base_url")
+    @classmethod
+    def _validate_base_url(cls, value: str) -> str:
+        """Section 2.2c, clauses 1 to 9 (DAC-E3-S6-1 to S6-6, TC-COMP-347 to
+        TC-COMP-352). `https` only; messages name the clause, never the
+        value, and `_EnvNamedSettings` prefixes FACTORFLOW_MASSIVE_BASE_URL.
+
+        The design's illustrative snippet raises `ValueError`, which Pydantic
+        renders as `Value error, <clause>`; clause 9's prose and the story's
+        API Contract both require exactly `FACTORFLOW_MASSIVE_BASE_URL:
+        <clause>`. Each clause is therefore raised as a `PydanticCustomError`
+        carrying the snippet's own clause string, which fills the gap the
+        snippet left open without changing `_EnvNamedSettings` for every
+        other variable (DEC-0044).
+        """
+        if not value or any(c.isspace() or not c.isprintable() for c in value):
+            raise PydanticCustomError("base_url", "must be a non-empty URL without whitespace")
+        if "?" in value or "#" in value:
+            raise PydanticCustomError("base_url", "must not carry a query or fragment")
+        parts = urlsplit(value)
+        if parts.scheme != "https":  # clause 2a lives only under tests/ (DEC-0033)
+            raise PydanticCustomError("base_url", "scheme must be https")
+        if not parts.hostname:
+            raise PydanticCustomError("base_url", "host is missing")
+        if "@" in parts.netloc:
+            raise PydanticCustomError("base_url", "must not carry userinfo")
+        try:
+            port = parts.port
+        except ValueError:
+            raise PydanticCustomError(
+                "base_url", "port must be an integer from 1 to 65535"
+            ) from None
+        if port == 0:
+            raise PydanticCustomError("base_url", "port must be an integer from 1 to 65535")
+        if parts.path not in ("", "/"):
+            raise PydanticCustomError("base_url", "must not carry a path")
+        return value[:-1] if parts.path == "/" else value
 
 
 class RunSettings(_EnvNamedSettings):
