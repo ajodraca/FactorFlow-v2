@@ -62,7 +62,8 @@ test("a running run shows cancelling, withdraws the action, and stays cancelling
   await page.getByRole("button", { name: "Stop run" }).click();
 
   await expect(summaryBadge(page)).toHaveText("Cancelling");
-  await expect(page.getByTestId("outcome-badge")).toHaveCount(1);
+  // Scoped to the screen: the status region carries its own last-run badge.
+  await expect(page.getByRole("main").getByTestId("outcome-badge")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Cancel run" })).toHaveCount(0);
 
   const polled = page.waitForResponse(
