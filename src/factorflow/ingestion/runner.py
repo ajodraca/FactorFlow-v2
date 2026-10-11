@@ -54,6 +54,7 @@ from factorflow.ingestion.writer import (
 from factorflow.runs.journal import (
     ClaimedRun,
     cancellation_requested,
+    fail_run,
     finalise,
     heartbeat,
     record_instruments_named,
@@ -233,8 +234,9 @@ class AcquisitionRunner:
             reference: list[TickerReference] = []
             try:
                 reference = self._fetch_reference(symbol)
-            except CredentialRejected:
-                raise
+            except CredentialRejected as exc:
+                self._fail_on_rejected_credential(run_id, exc, symbol, "reference")
+                return
             except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
                     exc, symbol=symbol, data_type="reference", redact=self._redact
@@ -253,8 +255,9 @@ class AcquisitionRunner:
             prices: list[DailyBar] = []
             try:
                 prices = self._fetch_prices(symbol, instrument_id, depth_start)
-            except CredentialRejected:
-                raise
+            except CredentialRejected as exc:
+                self._fail_on_rejected_credential(run_id, exc, symbol, "prices")
+                return
             except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
                     exc, symbol=symbol, data_type="prices", redact=self._redact
@@ -273,8 +276,9 @@ class AcquisitionRunner:
             fundamentals: list[FinancialStatement] = []
             try:
                 fundamentals = self._fetch_financials(symbol, instrument_id, depth_start)
-            except CredentialRejected:
-                raise
+            except CredentialRejected as exc:
+                self._fail_on_rejected_credential(run_id, exc, symbol, "fundamentals")
+                return
             except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
                     exc, symbol=symbol, data_type="fundamentals", redact=self._redact
@@ -295,8 +299,9 @@ class AcquisitionRunner:
                 corporate_actions = self._fetch_corporate_actions(
                     symbol, instrument_id, depth_start
                 )
-            except CredentialRejected:
-                raise
+            except CredentialRejected as exc:
+                self._fail_on_rejected_credential(run_id, exc, symbol, "corporate_actions")
+                return
             except (InstrumentNotFound, ProviderUnavailable, MassiveError) as exc:
                 reason = compose_failure_reason(
                     exc, symbol=symbol, data_type="corporate_actions", redact=self._redact
@@ -336,6 +341,19 @@ class AcquisitionRunner:
 
         # --- Finalise from written results (DAC-E4-S5-5, DAC-E5-4) ---
         finalise(self._connection, run_id)
+
+    def _fail_on_rejected_credential(
+        self, run_id: uuid.UUID, error: CredentialRejected, symbol: str, data_type: str
+    ) -> None:
+        """Fail the whole run on a rejected credential and write nothing for
+        the instrument being read (massive-client section 2.4,
+        EXP-20261011-3). Every remaining instrument would fail the same way,
+        so the run stops here rather than recording identical failures."""
+        reason = compose_failure_reason(
+            error, symbol=symbol, data_type=data_type, redact=self._redact
+        )
+        log.warning("run=%s credential rejected; failing the run: %s", run_id, reason)
+        fail_run(self._connection, run_id, reason)
 
     # -----------------------------------------------------------------------
     # Provider fetch helpers

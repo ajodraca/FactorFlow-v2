@@ -273,6 +273,32 @@ def cancellation_requested(connection: psycopg.Connection, run_id: UUID) -> bool
     return str(row[0]) == "cancelling"
 
 
+def fail_run(connection: psycopg.Connection, run_id: UUID, reason: str) -> str:
+    """Record a run-level failure that is not derived from written results.
+
+    Used when the provider rejects the credential: every remaining instrument
+    would fail the same way, so the whole run is `failed` with that reason
+    (`component-design-massive-client.md` section 2.4, EXP-20261011-3). A
+    cancellation already requested is the owner's decision and wins, as in
+    `finalise` rule 1. Clears the claim and sets `ended_at`. Returns the
+    recorded terminal state.
+    """
+    with connection.transaction():
+        with connection.cursor() as cursor:
+            cursor.execute(_READ_STATE_FOR_FINALISE_SQL, (run_id,))
+            state_row = cursor.fetchone()
+            current_state = str(state_row[0]) if state_row else "running"
+
+            if current_state == "cancelling":
+                validate_transition(current_state, "cancelled")
+                cursor.execute(_FINALISE_UPDATE_SQL, {"state": "cancelled", "run_id": run_id})
+                return "cancelled"
+
+            validate_transition(current_state, "failed")
+            cursor.execute(_FAILED_UPDATE_SQL, {"reason": reason, "run_id": run_id})
+            return "failed"
+
+
 def finalise(connection: psycopg.Connection, run_id: UUID) -> str:
     """Compute and record the terminal outcome from written results (section 2.5).
 
