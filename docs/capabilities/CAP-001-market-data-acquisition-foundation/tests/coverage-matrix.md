@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-10-10
+updated: 2026-10-11
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.296"
-  timestamp: 2026-10-10T07:05:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-11T03:27:07Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -27,13 +27,13 @@ ai_provenance:
     - id: CAP-001-E5-S1
       version: "2"
     - id: CAP-001-component-design-massive-client
-      version: "12"
+      version: "13"
     - id: CAP-001-component-design-runtime-config
       version: "11"
     - id: CAP-001-component-design-acquisition-runner
       version: "8"
     - id: CAP-001-component-design-market-data-store
-      version: "6"
+      version: "7"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -46,7 +46,7 @@ ai_provenance:
 |-------|--------|----------------|-----------------|-------------------|-----------|--------|
 | AC-1 | Capability | Named instrument list: The owner-operator MUST be able to add instruments to and remove them from the acquisition list, and see the current list, without editing configuration files or the data store directly. | TC-COMP-001 | TC-INT-001, TC-INT-002 | TC-E2E-001, TC-E2E-009 | Covered |
 | AC-2 | Capability | History depth is stated, not assumed: The product MUST require the owner-operator to state the history depth before the first acquisition run, and MUST NOT acquire to a depth the owner has not stated. | TC-COMP-002 | TC-INT-006, TC-INT-007 | TC-E2E-001 | Covered |
-| AC-3 | Capability | Data types acquired: A successful acquisition run MUST provide, for each named instrument the provider covers, instrument reference data, daily prices, company fundamentals and corporate actions over the stated history depth. | TC-COMP-003 | TC-INT-021, TC-INT-022, TC-INT-023, TC-INT-024 | TC-E2E-001, TC-E2E-009 | Covered |
+| AC-3 | Capability | Data types acquired: A successful acquisition run MUST provide, for each named instrument the provider covers, instrument reference data, daily prices, company fundamentals and corporate actions over the stated history depth. | TC-COMP-003, TC-COMP-389 | TC-INT-021, TC-INT-022, TC-INT-023, TC-INT-024 | TC-E2E-001, TC-E2E-009 | Covered |
 | AC-4 | Capability | Acquisition volume: The product MUST complete an acquisition run covering up to 3000 named instruments without manual intervention. | TC-COMP-004 | — | — | Covered |
 | AC-5 | Capability | Point-in-time record: Every acquired value MUST be recorded with the date on which it was known, and a run returning a restated value for a date already held MUST add a record rather than replace the existing one. | TC-COMP-005 | — | — | Covered |
 | AC-6 | Capability | Re-run safety: Re-running acquisition over a period already acquired MUST NOT duplicate, overwrite or remove previously recorded data. | TC-COMP-006 | — | TC-E2E-005, TC-E2E-009 | Covered |
@@ -432,12 +432,13 @@ ai_provenance:
 - **Total ACs:** 382 (capability: 26, derived: 356)
 - **Covered:** 382
 - **Gaps:** 0
-- **Component test cases:** 388
+- **Component test cases:** 389
 - **Integration test cases:** 27
 - **E2E test cases:** 12
 
 ### Coverage Notes
 
+- 2026-10-11: TC-COMP-389 adds `component-design-massive-client.md` v13's "Ratios are never requested" test to AC-3. CAP-001's company fundamentals are the three financial statements, and ratios are not acquired (owner decision of 2026-10-10, v13 section 14 item 7).
 - The approved market-data-store design identifies backup and restore as unspecified; this is a product-operability gap, not a CAP-001 acceptance criterion, so no scenario is invented for it.
 - The provider's historical calendar limitation means market-wide outages are not detectable through gap analysis; the capability explicitly requires that limitation to be presented honestly.
 - Refinement of 2026-10-10 (unattended `$test-run`, DEC-0043): DAC-E3-S6-1 to S6-18, DAC-E3-S7-1 to S7-14 and DAC-E5-S1-8 to S1-11 were added as TC-COMP-347 to TC-COMP-388 and TC-INT-027, and the existing TC-INT-001 to TC-INT-026 were mapped to the criteria their own `Traces to:` lines name. No existing test case was changed.

@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-09
-updated: 2026-10-07
+updated: 2026-10-11
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-07T00:00:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-11T03:27:07Z
   source_artifacts:
     - id: CAP-001-integration-tests
       version: "1"
@@ -89,7 +89,7 @@ repository root.
 | TC-INT-020 | GET /api/health contract | integration | owner-web-app, ingestion-api | Annotate `tests/integration/test_api_health.py::test_health_reports_the_most_recent_terminal_run` (status, database, `credential_present` bool, `schema_version`, `most_recent_run`) | T008 |
 | TC-INT-021 | Massive reference-data HTTPS contract | integration | massive-client, Massive REST API | Annotate `tests/unit/test_massive_reference.py::test_fetch_reference_uses_the_single_ticker_endpoint_only` (documented request) and `::test_fetch_reference_returns_product_shaped_reference` (mapped result) | T009 |
 | TC-INT-022 | Massive daily-prices HTTPS contract | integration | massive-client, Massive REST API | Annotate `tests/unit/test_massive_bars.py::test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates` and `::test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order` | T010 |
-| TC-INT-023 | Massive fundamentals HTTPS contract | integration | massive-client, Massive REST API | Annotate `tests/unit/test_massive_financials.py::test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol` and `::test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` | T011 |
+| TC-INT-023 | Massive fundamentals HTTPS contract | integration | massive-client, Massive REST API | Annotate `tests/unit/test_massive_financials.py::test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol` and `::test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` | T011 |
 | TC-INT-024 | Massive corporate-actions HTTPS contract | integration | massive-client, Massive REST API | Annotate `tests/unit/test_massive_actions.py::test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` (mapping). Add request-argument assertions, because no test checks the documented corporate-actions requests | T012, T020 |
 | TC-INT-025 | Massive not-found and rate-limit propagation | integration | massive-client, Massive REST API, acquisition-runner | Annotate `tests/unit/test_massive_reference.py::test_fetch_reference_raises_instrument_not_found_for_unknown_symbol`, `tests/unit/test_massive_client_governor_integration.py::test_a_first_page_provider_failure_surfaces_as_the_typed_error` and `tests/integration/test_runner_isolation.py::test_not_found_instrument_is_recorded_and_run_continues` (isolated). Add a new test that a 429 is paced without consuming attempts, because no test drives a 429 through `MassiveClient` | T009, T013, T014, T002, T021 |
 | TC-INT-026 | Massive timeout and server-error propagation | integration | massive-client, Massive REST API, acquisition-runner | Annotate `tests/integration/test_runner_isolation.py::test_provider_unavailable_is_recorded_and_run_continues` (per-instrument failure). Add a new test that a timeout or 5xx is retried up to the attempt limit through `MassiveClient`, because no test drives either through the client | T014, T002, T022 |
@@ -189,7 +189,7 @@ test asserts (owner direction 2026-10-07; DEC-0023, DEC-0024).
   - TC-INT-021 on `test_fetch_reference_uses_the_single_ticker_endpoint_only` and `test_fetch_reference_returns_product_shaped_reference`
   - TC-INT-025 on `test_fetch_reference_raises_instrument_not_found_for_unknown_symbol`
 - [x] T010 [P] Add `# Implements TC-INT-022` on `test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates` and `test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order` in `tests/unit/test_massive_bars.py`.
-- [ ] T011 [P] Add `# Implements TC-INT-023` on `test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol` and `test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_financials.py`.
+- [ ] T011 [P] Add `# Implements TC-INT-023` on `test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol` (renamed from `..._all_four_...` when CAP-001-E3-S1 stopped requesting ratios, massive-client v13) and `test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_financials.py`.
 - [x] T012 [P] Add `# Implements TC-INT-024` on `test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_actions.py`.
 - [x] T013 [P] Add `# Implements TC-INT-025` on `test_a_first_page_provider_failure_surfaces_as_the_typed_error` in `tests/unit/test_massive_client_governor_integration.py`.
 - [x] T014 [P] Add the runner traceability lines in `tests/integration/test_runner_isolation.py` (DEC-0024):
