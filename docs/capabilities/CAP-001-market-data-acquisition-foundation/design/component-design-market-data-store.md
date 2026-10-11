@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
-artifact_version: 6
+artifact_version: 7
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-10-10
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-10T22:50:06Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -29,9 +29,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:00Z
-  reviewed_revision: sha256:2f1c55747db5ed2faa6f977a7e2a8523f9f55cc1248caebf3fd2457b5394703e
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-10-10T23:06:40Z
+  reviewed_revision: sha256:8b11cff20e3589027130fd69dc060a9f979ceebd507523f902fc79c58c4eec2d
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
 ---
 
 # Component: Market Data Store
@@ -285,6 +285,15 @@ CREATE INDEX idx_corporate_action_instrument ON corporate_action (instrument_id,
 record, and it is never read as the date a value became known. System design
 constraint 5.4 states this and the tech stack's provider evaluation explains
 why: Massive's `filing_date` conflates restatements of the same period.
+
+`'ratios'` stays an allowed `statement_type` but is unused in this capability.
+CAP-001 does not acquire Massive ratios (owner decision, 2026-10-10,
+`component-design-massive-client.md` section 14 item 7): fundamentals are the
+balance sheet, income statement and cash-flow statement, and ratios are mostly
+price-derived, have no period filter at the provider and can be computed later
+from stored statements and bars. The value is kept in
+`fundamental_statement_known` so the shipped `0002_observations.sql` needs no
+migration, and no CAP-001 write produces a row with it.
 
 The natural key on each table includes `value_hash`, which is what gives AC-6
 its meaning. A re-run returning a value already held collides on the unique
@@ -560,8 +569,8 @@ constraint 5.1.
 - **Sizing basis (AC-4).** 3000 instruments. At the owner's stated history depth
   of, for example, five years, daily bars dominate: 3000 instruments times
   roughly 252 sessions per year times five years is approximately 3.8 million
-  rows in `daily_bar`. Fundamentals add four statement types per quarter per
-  instrument, roughly 240 thousand rows over the same span. Corporate actions
+  rows in `daily_bar`. Fundamentals add three statement types per quarter per
+  instrument, roughly 180 thousand rows over the same span. Corporate actions
   and reference data are smaller by an order of magnitude. This is a small
   PostgreSQL workload on one machine.
 - **Index strategy.** `idx_daily_bar_instrument_session` serves per-instrument

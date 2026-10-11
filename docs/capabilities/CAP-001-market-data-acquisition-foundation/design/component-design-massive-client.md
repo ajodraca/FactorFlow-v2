@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 12
+artifact_version: 13
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -13,8 +13,8 @@ ai_provenance:
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.296"
-  timestamp: 2026-10-10T02:45:19Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-10T22:50:06Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -31,9 +31,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-10T02:57:43Z
-  reviewed_revision: sha256:7e3139a8f24f0222a333ddddc2956e1a46a8edc70fc84c31da9b2b57efa45580
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v9.md"
+  approved_at: 2026-10-10T23:06:40Z
+  reviewed_revision: sha256:7b6e20a0b46b0aef37caec4e296ddf829f103bcbeb50fdd2bdc2d8b4f4ae5a51
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
 ---
 
 # Component: Massive Client
@@ -448,12 +448,14 @@ writer.
 by default, because it changes what the stored history means. It is carried in
 section 14.
 
-**Company financials (AC-3).** Four sibling endpoints under one shape:
+**Company financials (AC-3).** In this capability, company fundamentals are
+the three financial statements (owner decision, 2026-10-10, section 14 item 7),
+read from three sibling endpoints under one shape:
 `GET /stocks/financials/v1/balance-sheets`,
-`GET /stocks/financials/v1/income-statements`,
-`GET /stocks/financials/v1/cash-flow-statements` and
-`GET /stocks/financials/v1/ratios`. Every parameter is optional, which means a
-request must be constrained deliberately or it returns the whole corpus.
+`GET /stocks/financials/v1/income-statements` and
+`GET /stocks/financials/v1/cash-flow-statements`. Every parameter is optional,
+which means a request must be constrained deliberately or it returns the whole
+corpus.
 Selection is by `cik` or `tickers`, the period by `period_end` or
 `filing_date`, both accepting `.gt`/`.gte`/`.lt`/`.lte` suffixes, plus
 `fiscal_year`, `fiscal_quarter` and `timeframe` (`quarterly` or `annual`).
@@ -465,6 +467,27 @@ Each result carries `cik`, `tickers`, `period_end`, `filing_date`,
 the most recent filing including the period, conflating restatements — which is
 why C5 requires this component to carry it as a descriptive attribute and never
 as the as-of date.
+
+**Financial ratios: not acquired in this capability.**
+`GET /stocks/financials/v1/ratios` sits under the same add-on but does not share
+the statements' shape, and **this component does not call it**. In the locked
+SDK (massive 2.8.0), `list_financials_ratios` selects by `ticker` or `cik` and
+filters only on ratio values, never on a date or period, and its
+`FinancialRatio` result carries `ticker`, `cik` and `date` but no `period_end`,
+`filing_date`, `fiscal_year`, `fiscal_quarter` or `timeframe`. Ratios are
+values as of a date, not values of a fiscal period: most are price-derived
+(`price_to_earnings`, `price_to_book`, `ev_to_ebitda`, `dividend_yield`), and
+the rest are computed from statement lines (`current`, `quick`,
+`debt_to_equity`). A request therefore cannot be bounded to the requested range,
+and a result has no `fiscal_period_end` to key a `fundamental_observation` row
+on. Every ratio is computable later from the stored statements and daily bars,
+which is why the owner excluded the read rather than designing a second
+contract for it.
+`fetch_financials` therefore issues exactly the three statement reads per
+instrument and never invokes `list_financials_ratios`. A later capability that
+needs ratios derives them from stored data, or reopens the read with its own
+contract and storage. Section 11 records the endpoint as not called, as it does
+`/v3/reference/tickers`.
 
 **Corporate actions (AC-3).** Four endpoints, not one:
 
@@ -745,6 +768,7 @@ The gap that leaves is section 14's item 6.
 | Reference parse | `tests/unit/test_massive_reference.py` | CIK, composite FIGI and share class FIGI are extracted; a delisted instrument's `list_date` and `delisted_utc` survive (AC-3) |
 | Daily bars parse and page | `tests/unit/test_massive_bars.py` | A two-page range returns all bars in date order (AC-3) |
 | Financials keep filing date as an attribute | `tests/unit/test_massive_financials.py` | `filing_date` is present on the model and is not used as an as-of date (C5) |
+| Ratios are never requested | `tests/unit/test_massive_financials.py` | `fetch_financials` calls `list_financials_balance_sheets`, `list_financials_income_statements` and `list_financials_cash_flow_statements` once each for the first page (later pages follow `next_url`), never calls `list_financials_ratios`, sends no request to `/stocks/financials/v1/ratios`, and every returned statement's type is one of `balance_sheet`, `income_statement` or `cash_flow_statement` (section 2.5, section 14 item 7) |
 | Corporate actions parse | `tests/unit/test_massive_actions.py` | All four action types map to the product's enumeration (AC-3) |
 | SDK retries are disabled | `tests/unit/test_massive_sdk_config.py` | The constructed `RESTClient` carries `retries == 0`, and so does its `vx` sub-client, so the governor owns retry alone (section 2.2b; specification review v7 FINDING-19). Guards against an SDK default reasserting itself on upgrade |
 | A redirect is never followed | `tests/unit/test_massive_redirects.py` | No socket and no plain HTTP (DEC-0038, DEC-0042). A `MassiveClient` built as in section 2.2b on the default base `https://api.massive.com`, with a key generated in the test as `"TEST-ONLY-" + secrets.token_hex(16)`. `socket.create_connection` and `socket.getaddrinfo` are patched to fail the test, and `urllib3.connectionpool.HTTPConnectionPool._make_request` is replaced by a fake that records each request's scheme, host and path, answers `302` with `Location: https://198.51.100.7/`, and returns its response with `retries` set to the `retries` value it was passed, as urllib3 does. The reads run through a `RateLimitGovernor` built with `GovernorSettings.from_massive_settings` from production settings (`max_attempts` at its default of 3), with `requests_per_minute` set no smaller than the requests the test sends through one governor (3 for the main-pool read, 5 for the `fetch_corporate_actions` route), or with `monotonic` injected as well, and with `sleep` and `jitter` injected, so the test never waits on the real clock. For a main-pool read (`fetch_reference`): it raises `ProviderUnavailable`, not `MaxRetryError`, the recorded requests number `max_attempts` because `massive-client`'s classifier maps the refused redirect's `MaxRetryError` to `RETRYABLE` and the governor retries it, every one is `https` to `api.massive.com`, and none is to `198.51.100.7`. For a `vx` read, driven so that the first redirect it meets is on a `/vX/` request (either `vx.list_ipos` called through `MassiveClient._through_governor`, the client's governor seam, or `fetch_corporate_actions` with the fake answering an empty `200` page to the main-pool `/stocks/v1/splits` and `/stocks/v1/dividends` requests and `302` only to `/vX/` paths): it raises `ProviderUnavailable`, the recorded `/vX/reference/ipos` requests number `max_attempts` and are sent through the `vx` sub-client's `PoolManager`, every request is to `api.massive.com`, none is to `198.51.100.7`, and the test fails when no `/vX/reference/ipos` request is recorded. A `/vX/` path alone does not identify the `vx` sub-client, because the SDK's ticker-events read is a `/vX/` path on the main pool. A control, a bare SDK `RESTClient(retries=3)` calling `get_ticker_details` (a `MassiveClient` takes no `retries` argument), records requests to `198.51.100.7`, proving the fake exercises urllib3's real redirect path. Everything above `_make_request`, the SDK and urllib3's `PoolManager.urlopen` redirect and retry logic included, is unpatched (section 2.2b; CONST-SEC 1.2 SEC-ENC-001 condition 2; specification review v7 FINDING-19) |
@@ -850,7 +874,7 @@ never uses (section 2.6).
 | `/stocks/financials/v1/balance-sheets` | GET | `Authorization: Bearer` | `tickers` or `cik`; `period_end`/`filing_date` with `.gte`/`.lte`; `timeframe`; `limit` (max 50000) | Statements with `period_end`, `filing_date`, `fiscal_year`, `fiscal_quarter` | Paged by `next_url`. `filing_date` is descriptive only (C5) |
 | `/stocks/financials/v1/income-statements` | GET | `Authorization: Bearer` | as above | as above | Same shape and constraints |
 | `/stocks/financials/v1/cash-flow-statements` | GET | `Authorization: Bearer` | as above | as above | Same shape and constraints |
-| `/stocks/financials/v1/ratios` | GET | `Authorization: Bearer` | as above | as above | Same shape and constraints |
+| `/stocks/financials/v1/ratios` | GET | `Authorization: Bearer` | `ticker` or `cik`; ratio-value filters only, no date or period filter | `FinancialRatio` with `ticker`, `cik` and `date`; no `period_end`, `filing_date`, `fiscal_year` or `timeframe` | **Not called by this capability** (owner decision, 2026-10-10). Mostly price-derived and not period-keyed; computable later from stored statements and bars. See section 2.5 and section 14 item 7 |
 | `/stocks/v1/splits` | GET | `Authorization: Bearer` | `ticker`, `execution_date` with suffixes, `adjustment_type`; `limit` (max 5000) | `execution_date`, `split_from`, `split_to`, `adjustment_type`, `historical_adjustment_factor` | Paged by `next_url`. `fetch_corporate_actions` (AC-3) |
 | `/stocks/v1/dividends` | GET | `Authorization: Bearer` | `ticker`, `ex_dividend_date` with suffixes, `frequency`, `distribution_type`; `limit` (max 5000) | `cash_amount`, `ex_dividend_date`, `record_date`, `pay_date`, `declaration_date`, `distribution_type` | Paged by `next_url` |
 | `/vX/reference/ipos` | GET | `Authorization: Bearer` | `ticker`, `listing_date` with suffixes, `ipo_status` | `listing_date`, `announced_date`, `ipo_status`, `final_issue_price`, `issuer_name` | Paged by `next_url`. `vX` — unstable contract |
@@ -869,7 +893,7 @@ never uses (section 2.6).
 | Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`; in force for clause 2a only as `component-design-runtime-config.md` section 2.2c states) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the SEC-ENC-001 loopback test-double exception that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect and no-proxy condition; Definitions (designated test credential) | `docs/constitutions/security.constitution.md` in the AI-agents harness |
 | Decision | DEC-0036, DEC-0037, DEC-0038, DEC-0041, DEC-0042 | This project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text; the per-run designated test credential; the socket-free redirect and proxy tests (all PROVISIONAL); the no-proxy test's loopback `http` pool assertion; the redirect test's outcome under the production governor, which supersedes DEC-0038's redirect-outcome clause | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 | Review | CAP-001 specification review v7 | FINDING-19: the redirect test's fake must return the retries it was passed, the production governor retries a refused redirect `max_attempts` times and raises `ProviderUnavailable`, the `vx` read must be driven so that it reaches `/vX/`, and `vx.retries` is asserted (sections 2.2b and 7) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md` |
-| Review | CAP-001 specification review v6 | FINDING-2 (ratios, open in section 14 item 7), FINDING-3, FINDING-4 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
+| Review | CAP-001 specification review v6 | FINDING-2 (ratios, closed by owner decision in section 14 item 7), FINDING-3, FINDING-4 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
 | Review | EXP-20261009-1 expedited review v1 | ER-001, ER-002, ER-004: the base URL was unvalidated, §2.2b lacked `base=`, and `tests/unit/test_massive_tls.py` did not exist | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | External | Massive REST documentation | Endpoint paths, query parameters, response fields and `next_url` paging for all four reads, recorded in sections 2.5 and 11. Read 2026-09-05 | `https://massive.com/docs/llms.txt` and the per-endpoint pages it links |
 | Verification | Live provider probe, 2026-09-05 | Base URL, `Authorization: Bearer` scheme, the 401/404/429 error envelope, and the absence of `Retry-After` and `X-RateLimit-*` headers. Recorded in sections 2.6, 2.6a and 2.6b because Massive documents none of it | One authenticated request per case against `https://api.massive.com` |
@@ -938,15 +962,38 @@ never uses (section 2.6).
    the first real run, because every fixture-based test passes against a provider
    contract that has never been observed. *Owner: capability owner. Blocks:
    confidence in the first acquisition, not the implementation.*
-7. **What is the ratios contract, and how are ratios stored?** Open; nothing is
-   decided here. Specification review v6 FINDING-2 reports that section 2.5 and
-   the section 11 ratios row ("as above", "Same shape and constraints")
-   contradict the locked SDK: massive 2.8.0 `list_financials_ratios` takes
-   `ticker` and no period filter, and `FinancialRatio` carries `ticker` and
+7. ~~**What is the ratios contract, and how are ratios stored?**~~ **Closed
+   2026-10-10 by owner decision: CAP-001 does not acquire Massive ratios.**
+   Company fundamentals in this capability are the balance sheet, the income
+   statement and the cash-flow statement. Ratios are mostly price-derived, the
+   ratios endpoint takes no period filter, and every ratio can be computed later from
+   the stored statements and daily bars, so acquiring them would add a second
+   contract and a storage key for values the store can already reproduce.
+   Specification review v6 FINDING-2 reported that section 2.5 and the section
+   11 ratios row ("as above", "Same shape and constraints") contradicted the
+   locked SDK: massive 2.8.0 `list_financials_ratios` takes `ticker` or `cik`
+   and no period filter, and `FinancialRatio` carries `ticker`, `cik` and
    `date` but no `period_end`, `filing_date`, `fiscal_year` or `timeframe`,
-   while `component-design-market-data-store.md` keys `fundamental_observation`
-   on `fiscal_period_end` for `statement_type = 'ratios'`. The expedited review
-   EXP-20261009-1 recorded this as ER-003, and ER-004's ratios correction to
-   section 11 is not made. Sections 2.5 and 11 are left as they stand until the
-   owner decides. *Owner: capability owner. Blocks: the ratios read and AC-3's
-   fundamentals for ratios.*
+   while
+   `component-design-market-data-store.md` keys `fundamental_observation` on
+   `fiscal_period_end`. Section 2.5 now names three statement endpoints and
+   records the ratios endpoint as not called, and the section 11 ratios row
+   states its real shape and that it is not called, which is the section 11
+   ratios correction EXP-20261009-1's ER-004 called for and removes the
+   contradiction its ER-003 recorded. Section 7 adds the test that holds the
+   decision. The store's `statement_type` check keeps
+   `'ratios'` as an allowed but unused value
+   (`component-design-market-data-store.md`), so no migration follows.
+   **Implementation consequence:** the code on the current branch line does
+   not yet match: `fetch_financials` in
+   `src/factorflow/ingestion/massive/client.py` still iterates
+   `list_financials_ratios` with a ratios-specific `_financial_page` branch,
+   its docstring and the `FinancialStatement` docstring in
+   `src/factorflow/ingestion/massive/models.py` still name ratios, and
+   `tests/unit/test_massive_financials.py`,
+   `tests/unit/test_massive_sdk_config.py`,
+   `tests/unit/test_massive_client_governor_integration.py`,
+   `tests/fixtures/massive/financial_quarterly.json` and
+   `tests/e2e/support/massive_stub.py` reference ratios. Removing the read is
+   follow-up implementation work, not part of this design revision.
+   *Owner: capability owner. Resolved.*
