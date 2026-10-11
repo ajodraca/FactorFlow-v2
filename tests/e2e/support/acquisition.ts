@@ -1,4 +1,4 @@
-import { type APIRequestContext, expect } from "@playwright/test";
+import { type APIRequestContext, type Locator, type Page, expect } from "@playwright/test";
 import { sql } from "./database";
 
 /**
@@ -42,7 +42,7 @@ async function stubControl(path: string, body: Record<string, string> = {}): Pro
   }
 }
 
-export type ProviderMode = "ok" | "reject-credential";
+export type ProviderMode = "ok" | "reject-credential" | "unavailable";
 
 export function setProviderMode(mode: ProviderMode): Promise<void> {
   return stubControl("mode", { mode });
@@ -64,6 +64,85 @@ export function resetStub(): Promise<void> {
 export async function resetAcquisitionStore(): Promise<void> {
   await resetStub();
   sql(`TRUNCATE ${DATA_TABLES.join(", ")} RESTART IDENTITY CASCADE`, ACQUISITION_DATABASE);
+}
+
+/** States the history depth on Settings, as the owner does: type, then leave the field. */
+export async function stateHistoryDepth(page: Page, years: number): Promise<void> {
+  await page.goto("/settings");
+  const field = page.getByRole("spinbutton", { name: "History depth, in years" });
+  await expect(field).toBeEnabled();
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/settings/history-depth") &&
+      response.request().method() === "PUT",
+  );
+  await field.fill(String(years));
+  await field.blur();
+  expect((await saved).ok()).toBe(true);
+}
+
+/** Adds each symbol through the Instruments screen's single-symbol field. */
+export async function addInstruments(page: Page, symbols: string[]): Promise<void> {
+  await page.goto("/instruments");
+  const field = page.getByRole("textbox", { name: /instrument symbol/i });
+  for (const symbol of symbols) {
+    await field.fill(symbol);
+    await field.press("Enter");
+    await expect(page.getByRole("table").locator("tr", { hasText: symbol })).toBeVisible();
+  }
+}
+
+/**
+ * Starts a run from the Runs screen, which routes to the new run's detail
+ * (ux-design 1.1: Start lives on Coverage and Runs), and returns its id.
+ */
+export async function startRun(page: Page): Promise<string> {
+  await page.goto("/runs");
+  await page.getByRole("button", { name: "Start acquisition run" }).click();
+  await expect(page).toHaveURL(/\/runs\/[0-9a-f-]{36}$/);
+  return new URL(page.url()).pathname.split("/").pop() as string;
+}
+
+/** The outcome badge in Run detail's summary card. */
+export function summaryOutcome(page: Page): Locator {
+  return page.locator('section[data-variant="summary"]').getByTestId("outcome-badge");
+}
+
+/** The Run detail roster's expander for one instrument. */
+export function rosterExpander(page: Page, symbol: string): Locator {
+  return page.getByRole("button", { name: new RegExp(`data types for ${symbol}$`) });
+}
+
+/** Expands one instrument on Run detail and returns its data-type group. */
+export async function expandInstrument(page: Page, symbol: string): Promise<Locator> {
+  const expander = rosterExpander(page, symbol);
+  await expander.click();
+  return page.locator(`[id="${await expander.getAttribute("aria-controls")}"]`);
+}
+
+/** One instrument's row on the Coverage screen. */
+export function coverageRow(page: Page, symbol: string): Locator {
+  return page.locator("tr", {
+    has: page.getByRole("rowheader", { name: new RegExp(`\\b${symbol}$`) }),
+  });
+}
+
+/** Coverage columns after the symbol header, in `coverage-table.tsx` order. */
+export const COVERAGE_COLUMN = {
+  lifecycle: 0,
+  reference: 1,
+  prices: 2,
+  fundamentals: 3,
+  corporateActions: 4,
+  coveredFrom: 5,
+  coveredTo: 6,
+  gaps: 7,
+  depth: 8,
+  lastAcquired: 9,
+} as const;
+
+export function coverageCell(page: Page, symbol: string, column: number): Locator {
+  return coverageRow(page, symbol).locator("td").nth(column);
 }
 
 /**
