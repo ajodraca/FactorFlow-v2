@@ -189,7 +189,7 @@ test asserts (owner direction 2026-10-07; DEC-0023, DEC-0024).
   - TC-INT-021 on `test_fetch_reference_uses_the_single_ticker_endpoint_only` and `test_fetch_reference_returns_product_shaped_reference`
   - TC-INT-025 on `test_fetch_reference_raises_instrument_not_found_for_unknown_symbol`
 - [x] T010 [P] Add `# Implements TC-INT-022` on `test_fetch_daily_bars_requests_multiplier_1_day_timespan_and_inclusive_dates` and `test_fetch_daily_bars_returns_all_rows_from_a_two_page_response_in_order` in `tests/unit/test_massive_bars.py`.
-- [ ] T011 [P] Add `# Implements TC-INT-023` on `test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol` (renamed from `..._all_four_...` when CAP-001-E3-S1 stopped requesting ratios, massive-client v13) and `test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_financials.py`.
+- [x] T011 [P] Add `# Implements TC-INT-023` on `test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol` (renamed from `..._all_four_...` when CAP-001-E3-S1 stopped requesting ratios, massive-client v13) and `test_fetch_financials_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_financials.py`.
 - [x] T012 [P] Add `# Implements TC-INT-024` on `test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` in `tests/unit/test_massive_actions.py`.
 - [x] T013 [P] Add `# Implements TC-INT-025` on `test_a_first_page_provider_failure_surfaces_as_the_typed_error` in `tests/unit/test_massive_client_governor_integration.py`.
 - [x] T014 [P] Add the runner traceability lines in `tests/integration/test_runner_isolation.py` (DEC-0024):
@@ -247,7 +247,7 @@ changed.
 
   Compare the results with the T001 baseline.
 - [x] T024 On a host with Docker, run `uv run pytest tests/integration -m postgres` and then the full `uv run pytest`. Both must pass. This container has no Docker, so use a local machine or CI. Record where the run happened and the pass counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T023).
-- [ ] T025 From the repository root, verify traceability: `for n in $(seq -w 1 26); do grep -rqE "# Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing (depends on T003–T022).
+- [x] T025 From the repository root, verify traceability: `for n in $(seq -w 1 26); do grep -rqE "# Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing (depends on T003–T022).
 
 **Checkpoint:** Lint, format, type check and the non-postgres tests pass
 locally. The postgres integration suite and the full suite pass on a Docker
