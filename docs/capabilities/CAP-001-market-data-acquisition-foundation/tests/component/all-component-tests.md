@@ -7,14 +7,14 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-10-10
+updated: 2026-10-11
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.296"
-  timestamp: 2026-10-10T03:01:49Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-11T03:27:07Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -27,13 +27,13 @@ ai_provenance:
     - id: CAP-001-E5-S1
       version: "2"
     - id: CAP-001-component-design-massive-client
-      version: "12"
+      version: "13"
     - id: CAP-001-component-design-runtime-config
       version: "11"
     - id: CAP-001-component-design-acquisition-runner
       version: "8"
     - id: CAP-001-component-design-market-data-store
-      version: "6"
+      version: "7"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -8596,3 +8596,27 @@ ai_provenance:
 
 #### Error / Edge Cases
 - None stated.
+
+### TC-COMP-389: Given a financials read, When it runs, Then only the three statement endpoints are requested and ratios never are
+
+**Scope:** component
+**Component(s):** massive-client
+**Traces to:** AC-3
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- An SDK test double, or the socket-free transport harness, that answers each statement endpoint with one statement row and the ratios endpoint with a row shaped like massive 2.8.0's `FinancialRatio`, so that a ratios request would be observable.
+
+#### Steps
+1. Call `fetch_financials` for one symbol over a bounded range.
+2. Record which SDK list methods were called and which request paths were sent.
+3. Read the statement type of every returned statement.
+
+#### Expected Result
+- `list_financials_balance_sheets`, `list_financials_income_statements` and `list_financials_cash_flow_statements` are each called once for the first page.
+- `list_financials_ratios` is never called, and no request goes to `/stocks/financials/v1/ratios`.
+- Every returned statement's type is `balance_sheet`, `income_statement` or `cash_flow_statement`.
+
+#### Error / Edge Cases
+- None stated. Company fundamentals in CAP-001 are the three statements (`component-design-massive-client.md` v13 section 2.5, section 7 "Ratios are never requested", section 14 item 7).
