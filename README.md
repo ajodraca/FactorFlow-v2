@@ -1424,9 +1424,10 @@ Three further behaviors are worth knowing:
   reads `Not yet checked`.
 - **`most_recent_run: null`** renders as `No run recorded` — not as an empty
   success and not as a failure. When the API reports a run, the line reads
-  `Most recent run recorded`: the region does not yet state the run's outcome
-  or link to its detail, although the health response now carries both the
-  state and the run id.
+  `Last run` followed by that run's outcome badge, the same word, icon and
+  severity tier the Runs screen shows (EXP-20261011-2). The region does not
+  yet link to the run's detail, although the health response carries the run
+  id.
 - **A missing provider credential** is reported only on the strength of a
   response that actually arrived. When the API did not answer, presence is
   unknown and the region says nothing about it rather than inferring absence
