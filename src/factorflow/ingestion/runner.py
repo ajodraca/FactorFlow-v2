@@ -56,6 +56,7 @@ from factorflow.runs.journal import (
     cancellation_requested,
     finalise,
     heartbeat,
+    record_instruments_named,
 )
 
 __all__ = [
@@ -182,6 +183,10 @@ class AcquisitionRunner:
                 (DAC-E4-12).  The caller supplies it so the roster is read
                 exactly once.
         """
+        # The roster size is what finalise compares written results against
+        # (run-journal section 2.5, EXP-20261011-1).
+        record_instruments_named(self._connection, run_id, self._runner_id, len(instrument_ids))
+
         if depth_years is None:
             # DAC-E4-13: no stated depth → finalise failed without provider access.
             # journal.finalise derives "failed" from zero written results (IR-005).

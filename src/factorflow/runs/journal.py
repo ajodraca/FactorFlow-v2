@@ -215,6 +215,32 @@ _INSTRUMENTS_NAMED_SQL = """
 SELECT instruments_named FROM acquisition_run WHERE run_id = %s
 """
 
+_RECORD_INSTRUMENTS_NAMED_SQL = """
+UPDATE acquisition_run
+   SET instruments_named = %(count)s
+ WHERE run_id = %(run_id)s
+   AND claimed_by = %(runner_id)s
+   AND state IN ('running', 'cancelling')
+"""
+
+
+def record_instruments_named(
+    connection: psycopg.Connection, run_id: UUID, runner_id: str, count: int
+) -> None:
+    """Record how many instruments the claimed run's roster snapshot named.
+
+    `finalise` awards `succeeded` only when every named instrument wrote all
+    four data types (section 2.5), so this count must be on the row before
+    the run finalises (EXP-20261011-1). Guarded by the claim, as `heartbeat`
+    is, so a runner that has lost its claim writes nothing.
+    """
+    with connection.transaction():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                _RECORD_INSTRUMENTS_NAMED_SQL,
+                {"count": count, "run_id": run_id, "runner_id": runner_id},
+            )
+
 
 def heartbeat(connection: psycopg.Connection, run_id: UUID, runner_id: str) -> bool:
     """Refresh the claim heartbeat. Returns False when the claim was lost.
