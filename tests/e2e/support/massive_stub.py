@@ -66,7 +66,6 @@ _FINANCIAL_PATHS = {
     "/stocks/financials/v1/balance-sheets": "balance_sheet",
     "/stocks/financials/v1/income-statements": "income_statement",
     "/stocks/financials/v1/cash-flow-statements": "cash_flow_statement",
-    "/stocks/financials/v1/ratios": "ratios",
 }
 _ACTION_PATHS = {
     "/stocks/v1/splits": (SPLIT, "execution_date"),

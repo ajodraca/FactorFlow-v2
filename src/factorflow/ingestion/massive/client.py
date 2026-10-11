@@ -117,17 +117,17 @@ class MassiveClient:
         self, symbol: str, start: date, end: date
     ) -> list[models.FinancialStatement]:
         """Company financials. `filing_date` is carried as a descriptive
-        attribute and is never the as-of date (C5). Queries all four
-        sibling statement endpoints, each constrained by ticker and, for
-        the three statements, by period (component design section 2.5;
-        the ratios endpoint accepts no period bound)."""
+        attribute and is never the as-of date (C5). Queries the three
+        sibling statement endpoints, each constrained by ticker and by
+        period. Ratios are not acquired: CAP-001's fundamentals are the
+        three statements, and the ratios endpoint takes no period bound
+        (component design v13 section 2.5 and section 14 item 7)."""
         statements: list[models.FinancialStatement] = []
 
         for statement_type, sdk_method in (
             ("balance_sheet", self._rest_client.list_financials_balance_sheets),
             ("income_statement", self._rest_client.list_financials_income_statements),
             ("cash_flow_statement", self._rest_client.list_financials_cash_flow_statements),
-            ("ratios", self._rest_client.list_financials_ratios),
         ):
             rows = follow_pages(
                 first_page=self._financial_page(sdk_method, symbol, start, end),
@@ -254,10 +254,6 @@ class MassiveClient:
         start: date,
         end: date,
     ) -> Callable[[], HTTPResponse]:
-        if sdk_method == self._rest_client.list_financials_ratios:
-            # The ratios endpoint selects by `ticker` (singular) and takes no
-            # period bound; the SDK rejects the statement endpoints' arguments.
-            return lambda: self._through_governor(lambda: sdk_method(ticker=symbol, raw=True))
         return lambda: self._through_governor(
             lambda: sdk_method(
                 tickers=symbol,
