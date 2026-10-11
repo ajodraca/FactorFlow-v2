@@ -400,7 +400,7 @@ follow-up also pins the accepted statement/action domains, the September
 deliberately duplicated ticker-change payload keys with regression tests.
 
 **Known limitations, carried forward as accepted warnings from implementation
-review v4** (`CAP-001-E3-S2-implementation-review-v4.md`) — none changes the
+review v5** (`CAP-001-E3-S2-implementation-review-v5.md`) — none changes the
 current model behavior or blocks an acceptance criterion:
 
 - The supplementary package-boundary test rejects a bare raw dictionary and
@@ -415,15 +415,20 @@ current model behavior or blocks an acceptance criterion:
   (IR-002, low).
 - The attended decision that CAP-001-E4's writer derives
   `fundamental_observation.fiscal_period` was propagated into E4-S3's task plan
-  during this story's coding run, outside E4-S3's planning phase, while this
-  story's evidence originally still described the propagation as pending
-  (IR-003, medium). The propagated plan's AI provenance attributes that revision
-  to an implementation-planning run not represented by the commit history
-  (IR-004, low). Both are process/provenance warnings for the later E4-S3 gate;
-  `FinancialStatement` intentionally has no `fiscal_period` field.
+  during this story's coding run. E4-S3 has since implemented and passed its
+  own gate on that plan, so v4's process warning is superseded; what remains is
+  that the plan's AI provenance attributes the revision to an
+  implementation-planning run not represented by the commit history (IR-003,
+  low). `FinancialStatement` intentionally has no `fiscal_period` field.
 - The optional-versus-zero behavior is covered for `fiscal_quarter` and
   `is_otc`, but those tests do not name their mapped `TC-COMP-219` identifier,
   leaving an automated traceability gap rather than a behavioral coverage gap
+  (IR-004, low).
+- The extra-field `Decimal` coercion leaves `bool` values as `bool` at every
+  level, which matters because `bool` is an `int` subclass. No test pins that
+  exemption: without it the suite stays green, but a boolean extra field would
+  raise a raw `decimal.InvalidOperation` rather than a `ValidationError`. No
+  documented field of the `extra="allow"` endpoint shapes is boolean today
   (IR-005, low).
 
 ## Massive historical client
