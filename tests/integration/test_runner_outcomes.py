@@ -194,9 +194,10 @@ def test_appended_rows_persist_written_outcome(
     assert outcomes.get("reference") == "written"
     assert outcomes.get("prices") == "written"
     assert outcomes.get("fundamentals") == "written"
-    # Run should be succeeded or partial (at least not failed)
+    # EXP-20261011-1: every named instrument wrote every data type, so the
+    # journal must record succeeded, not partial.
     run_state = _fetch_run_state(conn, run_id)
-    assert run_state in ("succeeded", "partial")
+    assert run_state == "succeeded"
 
 
 @pytest.mark.postgres
@@ -239,8 +240,48 @@ def test_unchanged_rows_persist_unchanged_outcome(
     assert outcomes.get("prices") == "unchanged"
     assert outcomes.get("fundamentals") == "unchanged"
 
+    # EXP-20261011-1: unchanged counts as written (run-journal section 2.5).
     run_state = _fetch_run_state(conn, run_id_2)
-    assert run_state in ("succeeded", "partial")
+    assert run_state == "succeeded"
+
+
+@pytest.mark.postgres
+# Implements TC-COMP-183
+def test_run_records_how_many_instruments_it_named(
+    migrated_runner_connection: psycopg.Connection,
+) -> None:
+    """EXP-20261011-1: the run row records the size of the roster it was
+    given, which is what `finalise` compares written results against. One
+    instrument writes everything and one is unknown to the provider, so two
+    were named and the run is partial rather than succeeded (AC-9)."""
+    conn = migrated_runner_connection
+    known_id = _insert_instrument(conn, "AAPL")
+    unknown_id = _insert_instrument(conn, "UNKN")
+    run_id = _insert_claimed_run(conn)
+
+    from factorflow.ingestion.runner import AcquisitionRunner
+
+    client = _make_full_stub_client("AAPL")
+    full_reference = client.fetch_reference.return_value
+
+    def _reference(symbol: str) -> TickerReference:
+        if symbol == "UNKN":
+            raise InstrumentNotFound(
+                "The provider does not recognise this instrument.",
+                provider_request_id="req-nf-002",
+            )
+        return full_reference
+
+    client.fetch_reference.side_effect = _reference
+    runner = AcquisitionRunner(connection=conn, client=client, today=date(2025, 9, 22))
+    runner.execute_claimed(run_id=run_id, depth_years=5, instrument_ids=[known_id, unknown_id])
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT instruments_named FROM acquisition_run WHERE run_id = %s", (run_id,))
+        row = cur.fetchone()
+    assert row is not None
+    assert row[0] == 2
+    assert _fetch_run_state(conn, run_id) == "partial"
 
 
 # ---------------------------------------------------------------------------
