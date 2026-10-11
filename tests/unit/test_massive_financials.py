@@ -367,3 +367,27 @@ def test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol()
         }
 
     instance.list_financials_ratios.assert_not_called()
+
+
+def test_fetch_financials_returns_no_statements_when_every_endpoint_is_empty() -> None:
+    """An instrument that files no statements in range, such as an ETF.
+    An empty successful response is a valid no-data result for a
+    recognised instrument and returns `[]`: only the reference read means
+    an unknown instrument (implementation review v5 IR-002; owner decision
+    DEC-0047 in the ai-agents SDD harness; component design section 8
+    criterion 4). acquisition-runner records `InstrumentNotFound` as a
+    failure of that data type, so raising here would record a false
+    failure."""
+    with patch("factorflow.ingestion.massive.client.RESTClient", autospec=True) as rest_client_cls:
+        instance = rest_client_cls.return_value
+        for method in (
+            instance.list_financials_balance_sheets,
+            instance.list_financials_income_statements,
+            instance.list_financials_cash_flow_statements,
+        ):
+            method.return_value = _FakeResponse(_envelope([]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    assert statements == []

@@ -83,7 +83,11 @@ class MassiveClient:
     # -- fetch_daily_bars (DAC-E3-S1-2, DAC-E3-S1-3) ----------------------
 
     def fetch_daily_bars(self, symbol: str, start: date, end: date) -> list[models.DailyBar]:
-        """Daily aggregates over an inclusive range. Follows paging.
+        """Daily aggregates over an inclusive range. Follows paging. An
+        empty successful result returns `[]`: a recognised instrument can
+        have no sessions in range, and only `fetch_reference` reports an
+        unknown instrument (SDD decision record `DEC-0047`, ai-agents
+        harness).
 
         Requests **unadjusted** bars (`adjusted=False`). Component design
         section 14, open question 3, left this as an owner decision at
@@ -121,7 +125,9 @@ class MassiveClient:
         sibling statement endpoints, each constrained by ticker and by
         period. Ratios are not acquired: CAP-001's fundamentals are the
         three statements, and the ratios endpoint takes no period bound
-        (component design v13 section 2.5 and section 14 item 7)."""
+        (component design v13 section 2.5 and section 14 item 7). An empty
+        successful result returns `[]`, not `InstrumentNotFound`
+        (`DEC-0047`)."""
         statements: list[models.FinancialStatement] = []
 
         for statement_type, sdk_method in (
@@ -154,7 +160,8 @@ class MassiveClient:
         differently; this method supplies `action_type` and `effective_on`
         per row, since neither is on the wire consistently across all four
         (component design section 2.5, models.py `CorporateAction`
-        docstring)."""
+        docstring). An empty successful result returns `[]`, not
+        `InstrumentNotFound` (`DEC-0047`)."""
         actions: list[models.CorporateAction] = []
 
         actions.extend(

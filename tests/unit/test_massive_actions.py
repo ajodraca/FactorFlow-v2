@@ -361,3 +361,25 @@ def test_fetch_corporate_actions_includes_ticker_events_on_both_date_boundaries(
     actions = client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
 
     assert [action.effective_on for action in actions] == [date(2024, 1, 1), date(2024, 12, 31)]
+
+
+def test_fetch_corporate_actions_returns_no_actions_when_every_endpoint_is_empty() -> None:
+    """No split, dividend, IPO or ticker change in range, the common case.
+    An empty successful response is a valid no-data result for a
+    recognised instrument and returns `[]`: only the reference read means
+    an unknown instrument (implementation review v5 IR-002; owner decision
+    DEC-0047 in the ai-agents SDD harness; component design section 8
+    criterion 4). acquisition-runner records `InstrumentNotFound` as a
+    failure of that data type, so raising here would record a false
+    failure."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.list_stocks_splits.return_value = _FakeResponse(_envelope([]))
+        instance.list_stocks_dividends.return_value = _FakeResponse(_envelope([]))
+        instance.vx.list_ipos.return_value = _FakeResponse(_envelope([]))
+        instance.get_ticker_events.return_value = _FakeResponse(_envelope({"events": []}))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        actions = client.fetch_corporate_actions("AAPL", date(2024, 1, 1), date(2024, 12, 31))
+
+    assert actions == []
