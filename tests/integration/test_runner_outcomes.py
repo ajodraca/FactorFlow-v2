@@ -19,6 +19,7 @@ import psycopg
 import pytest
 
 from factorflow.ingestion.massive.errors import (
+    CredentialRejected,
     InstrumentNotFound,
     ProviderUnavailable,
 )
@@ -194,9 +195,10 @@ def test_appended_rows_persist_written_outcome(
     assert outcomes.get("reference") == "written"
     assert outcomes.get("prices") == "written"
     assert outcomes.get("fundamentals") == "written"
-    # Run should be succeeded or partial (at least not failed)
+    # EXP-20261011-1: every named instrument wrote every data type, so the
+    # journal must record succeeded, not partial.
     run_state = _fetch_run_state(conn, run_id)
-    assert run_state in ("succeeded", "partial")
+    assert run_state == "succeeded"
 
 
 @pytest.mark.postgres
@@ -239,8 +241,134 @@ def test_unchanged_rows_persist_unchanged_outcome(
     assert outcomes.get("prices") == "unchanged"
     assert outcomes.get("fundamentals") == "unchanged"
 
+    # EXP-20261011-1: unchanged counts as written (run-journal section 2.5).
     run_state = _fetch_run_state(conn, run_id_2)
-    assert run_state in ("succeeded", "partial")
+    assert run_state == "succeeded"
+
+
+@pytest.mark.postgres
+# Implements TC-COMP-183
+def test_run_records_how_many_instruments_it_named(
+    migrated_runner_connection: psycopg.Connection,
+) -> None:
+    """EXP-20261011-1: the run row records the size of the roster it was
+    given, which is what `finalise` compares written results against. One
+    instrument writes everything and one is unknown to the provider, so two
+    were named and the run is partial rather than succeeded (AC-9)."""
+    conn = migrated_runner_connection
+    known_id = _insert_instrument(conn, "AAPL")
+    unknown_id = _insert_instrument(conn, "UNKN")
+    run_id = _insert_claimed_run(conn)
+
+    from factorflow.ingestion.runner import AcquisitionRunner
+
+    client = _make_full_stub_client("AAPL")
+    full_reference = client.fetch_reference.return_value
+
+    def _reference(symbol: str) -> TickerReference:
+        if symbol == "UNKN":
+            raise InstrumentNotFound(
+                "The provider does not recognise this instrument.",
+                provider_request_id="req-nf-002",
+            )
+        return full_reference
+
+    client.fetch_reference.side_effect = _reference
+    runner = AcquisitionRunner(connection=conn, client=client, today=date(2025, 9, 22))
+    runner.execute_claimed(run_id=run_id, depth_years=5, instrument_ids=[known_id, unknown_id])
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT instruments_named FROM acquisition_run WHERE run_id = %s", (run_id,))
+        row = cur.fetchone()
+    assert row is not None
+    assert row[0] == 2
+    assert _fetch_run_state(conn, run_id) == "partial"
+
+
+def _rejecting_client(rejected_symbol: str, on_reject: object = None) -> MagicMock:
+    """A full stub client whose reference read rejects the credential for
+    `rejected_symbol`, after calling `on_reject` when one is given."""
+    client = _make_full_stub_client("AAPL")
+    full_reference = client.fetch_reference.return_value
+
+    def _reference(symbol: str) -> TickerReference:
+        if symbol == rejected_symbol:
+            if callable(on_reject):
+                on_reject()
+            raise CredentialRejected(
+                "api key TEST-ONLY-secret-value was rejected",
+                provider_request_id="req-cr-001",
+            )
+        return full_reference
+
+    client.fetch_reference.side_effect = _reference
+    return client
+
+
+@pytest.mark.postgres
+def test_rejected_credential_fails_the_run_with_its_reason(
+    migrated_runner_connection: psycopg.Connection,
+) -> None:
+    """EXP-20261011-3 (massive-client section 2.4; capability flow 1 step 5):
+    a rejected credential fails the whole run with a credential-safe reason.
+    The runner returns normally, so the ingestion process keeps polling; it
+    reads no further instrument, and writes nothing for the one that was
+    rejected, while an instrument committed earlier keeps its results."""
+    conn = migrated_runner_connection
+    first_id = _insert_instrument(conn, "AAPL")
+    rejected_id = _insert_instrument(conn, "REJ")
+    untouched_id = _insert_instrument(conn, "ZZZ")
+    run_id = _insert_claimed_run(conn)
+
+    from factorflow.ingestion.runner import AcquisitionRunner
+
+    client = _rejecting_client("REJ")
+    runner = AcquisitionRunner(connection=conn, client=client, today=date(2025, 9, 22))
+    runner.execute_claimed(
+        run_id=run_id, depth_years=5, instrument_ids=[first_id, rejected_id, untouched_id]
+    )
+
+    assert _fetch_run_state(conn, run_id) == "failed"
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT failure_reason, ended_at IS NOT NULL, claimed_by FROM acquisition_run "
+            "WHERE run_id = %s",
+            (run_id,),
+        )
+        run_row = cur.fetchone()
+    assert run_row is not None
+    reason, ended, claimed_by = run_row
+    assert reason == (
+        "[credential_rejected] symbol=REJ data_type=reference request_id=req-cr-001: "
+        "the provider rejected the configured credential"
+    )
+    assert "TEST-ONLY-secret-value" not in reason
+    assert ended is True
+    assert claimed_by is None
+
+    rows = _fetch_result_rows(conn, run_id)
+    assert {r["instrument_id"] for r in rows} == {first_id}
+    assert [call.args[0] for call in client.fetch_reference.call_args_list] == ["AAPL", "REJ"]
+
+
+@pytest.mark.postgres
+def test_rejected_credential_during_cancellation_records_the_cancel(
+    migrated_runner_connection: psycopg.Connection,
+) -> None:
+    """EXP-20261011-3: a cancellation already requested when the credential is
+    rejected is the owner's decision, so the run ends cancelled, never failed
+    (run-journal section 2.5 rule 1; AC-19)."""
+    conn = migrated_runner_connection
+    rejected_id = _insert_instrument(conn, "REJ")
+    run_id = _insert_claimed_run(conn)
+
+    from factorflow.ingestion.runner import AcquisitionRunner
+
+    client = _rejecting_client("REJ", on_reject=lambda: _set_cancelling(conn, run_id))
+    runner = AcquisitionRunner(connection=conn, client=client, today=date(2025, 9, 22))
+    runner.execute_claimed(run_id=run_id, depth_years=5, instrument_ids=[rejected_id])
+
+    assert _fetch_run_state(conn, run_id) == "cancelled"
 
 
 # ---------------------------------------------------------------------------

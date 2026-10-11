@@ -11,9 +11,11 @@ Controlled behaviour, driven by the specs through `tests/e2e/support/
 acquisition.ts`:
 
 - a symbol starting `UNK` answers 404 with `error_not_found.json`;
-- `POST /__stub/mode {"mode": "ok" | "reject-credential"}`: in
-  `reject-credential` every provider path answers 401 with
-  `error_credential_unknown_key.json`;
+- `POST /__stub/mode {"mode": "ok" | "reject-credential" | "unavailable"}`:
+  in `reject-credential` every provider path answers 401 with
+  `error_credential_unknown_key.json`; in `unavailable` every provider path
+  answers 503 with an envelope naming no known error, which the client
+  classifies as `ProviderUnavailable` (DEC-0048);
 - `POST /__stub/hold {"symbol": S}` makes S's requests block until
   `POST /__stub/release {"symbol": S}`;
 - `POST /__stub/reset` restores mode `ok` and releases every hold.
@@ -56,6 +58,11 @@ IPO = _fixture("action_ipo.json")
 TICKER_CHANGE = _fixture("action_ticker_change.json")
 NOT_FOUND = _fixture("error_not_found.json")
 CREDENTIAL_REJECTED = _fixture("error_credential_unknown_key.json")
+UNAVAILABLE = {
+    "status": "ERROR",
+    "request_id": "req_e2e_unavailable",
+    "error": "Service temporarily unavailable.",
+}
 
 _TICKER_PATH = re.compile(r"^/v3/reference/tickers/(?P<symbol>[^/]+)$")
 _AGGS_PATH = re.compile(
@@ -83,7 +90,7 @@ class StubState:
         self._holds: dict[str, threading.Event] = {}
 
     def set_mode(self, mode: str) -> None:
-        if mode not in ("ok", "reject-credential"):
+        if mode not in ("ok", "reject-credential", "unavailable"):
             raise ValueError(f"unknown mode {mode!r}")
         with self._lock:
             self.mode = mode
@@ -160,6 +167,8 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
     symbol = _symbol_of(path, query)
     if STATE.mode == "reject-credential":
         return 401, CREDENTIAL_REJECTED
+    if STATE.mode == "unavailable":
+        return 503, UNAVAILABLE
     if symbol is not None and symbol.startswith("UNK"):
         return 404, NOT_FOUND
 

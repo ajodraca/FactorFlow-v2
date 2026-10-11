@@ -215,6 +215,32 @@ _INSTRUMENTS_NAMED_SQL = """
 SELECT instruments_named FROM acquisition_run WHERE run_id = %s
 """
 
+_RECORD_INSTRUMENTS_NAMED_SQL = """
+UPDATE acquisition_run
+   SET instruments_named = %(count)s
+ WHERE run_id = %(run_id)s
+   AND claimed_by = %(runner_id)s
+   AND state IN ('running', 'cancelling')
+"""
+
+
+def record_instruments_named(
+    connection: psycopg.Connection, run_id: UUID, runner_id: str, count: int
+) -> None:
+    """Record how many instruments the claimed run's roster snapshot named.
+
+    `finalise` awards `succeeded` only when every named instrument wrote all
+    four data types (section 2.5), so this count must be on the row before
+    the run finalises (EXP-20261011-1). Guarded by the claim, as `heartbeat`
+    is, so a runner that has lost its claim writes nothing.
+    """
+    with connection.transaction():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                _RECORD_INSTRUMENTS_NAMED_SQL,
+                {"count": count, "run_id": run_id, "runner_id": runner_id},
+            )
+
 
 def heartbeat(connection: psycopg.Connection, run_id: UUID, runner_id: str) -> bool:
     """Refresh the claim heartbeat. Returns False when the claim was lost.
@@ -245,6 +271,32 @@ def cancellation_requested(connection: psycopg.Connection, run_id: UUID) -> bool
     if row is None:
         return False
     return str(row[0]) == "cancelling"
+
+
+def fail_run(connection: psycopg.Connection, run_id: UUID, reason: str) -> str:
+    """Record a run-level failure that is not derived from written results.
+
+    Used when the provider rejects the credential: every remaining instrument
+    would fail the same way, so the whole run is `failed` with that reason
+    (`component-design-massive-client.md` section 2.4, EXP-20261011-3). A
+    cancellation already requested is the owner's decision and wins, as in
+    `finalise` rule 1. Clears the claim and sets `ended_at`. Returns the
+    recorded terminal state.
+    """
+    with connection.transaction():
+        with connection.cursor() as cursor:
+            cursor.execute(_READ_STATE_FOR_FINALISE_SQL, (run_id,))
+            state_row = cursor.fetchone()
+            current_state = str(state_row[0]) if state_row else "running"
+
+            if current_state == "cancelling":
+                validate_transition(current_state, "cancelled")
+                cursor.execute(_FINALISE_UPDATE_SQL, {"state": "cancelled", "run_id": run_id})
+                return "cancelled"
+
+            validate_transition(current_state, "failed")
+            cursor.execute(_FAILED_UPDATE_SQL, {"reason": reason, "run_id": run_id})
+            return "failed"
 
 
 def finalise(connection: psycopg.Connection, run_id: UUID) -> str:

@@ -227,6 +227,37 @@ describe("StatusRegion — run outcome before any run exists (DAC-E1-17, DAC-E1-
   });
 });
 
+// EXP-20261011-2 (AC-18; ux-design section 0): once a run exists, the line
+// reports how the most recent run ended, as the run's own outcome badge.
+describe("StatusRegion — run outcome once a run exists (AC-18)", () => {
+  it.each([
+    ["succeeded", "Succeeded", "status-good"],
+    ["partial", "Partial", "status-warning"],
+    ["failed", "Failed", "status-critical"],
+    ["cancelled", "Cancelled", "status-neutral"],
+    ["running", "Running", "status-active"],
+  ] as const)("renders a %s run as %s with the %s badge", async (state, word, variant) => {
+    fetchHealthMock.mockResolvedValue(
+      answering({
+        most_recent_run: {
+          run_id: "9b2f4c1e-0000-4000-8000-000000000001",
+          state,
+          ended_at: state === "running" ? null : "2026-09-06T18:00:00Z",
+        },
+      }),
+    );
+
+    render(<StatusRegion />);
+
+    const runOutcome = await screen.findByTestId("run-outcome");
+    expect(runOutcome).toHaveAttribute("data-outcome", state);
+    expect(runOutcome).toHaveTextContent(/last run/i);
+    const badge = within(runOutcome).getByTestId("outcome-badge");
+    expect(badge).toHaveTextContent(word);
+    expect(badge).toHaveAttribute("data-variant", variant);
+  });
+});
+
 // TC-COMP-339 (DAC-E1-S5-5): unmounting clears the polling interval, so no
 // request continues after the owner navigates away.
 describe("StatusRegion — polling stops on unmount (DAC-E1-S5-5)", () => {

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { fetchHealth } from "../api/client";
 import type { HealthResponse } from "../api/types";
+import { OutcomeBadge } from "../screens/runs/outcome-badge";
 
 /**
  * The persistent status region (UX design section 0; component design
@@ -261,11 +262,11 @@ export function UnreachableState(): JSX.Element {
 /**
  * The most recent run's outcome (T015).
  *
- * `most_recent_run` is `null` until CAP-001-E7-S3 populates it, and `null`
- * states that no run has been recorded rather than presenting an empty
- * successful state (DAC-E1-17, DAC-E1-S5-4). The populated branch is that
- * story's to add; this one implements only the null case, and `data-outcome`
- * is the seam that story extends rather than replaces.
+ * A `null` `most_recent_run` states that no run has been recorded rather
+ * than presenting an empty successful state (DAC-E1-17, DAC-E1-S5-4).
+ * Otherwise the line shows the run's state as the same outcome badge the
+ * Runs screen uses, so the region answers how the last run ended (AC-18,
+ * EXP-20261011-2). `data-outcome` carries the recorded state.
  */
 function RunOutcomeLine({ health }: { health: HealthResponse | null }): JSX.Element {
   if (health === null || health.most_recent_run === null) {
@@ -276,12 +277,11 @@ function RunOutcomeLine({ health }: { health: HealthResponse | null }): JSX.Elem
     );
   }
 
-  // Unreachable today: `most_recent_run` is typed `null` until
-  // CAP-001-E7-S3 widens it. Kept as an explicit branch so that widening is
-  // a visible change rather than a silent fallthrough into the line above.
+  const { state } = health.most_recent_run;
   return (
-    <span data-testid="run-outcome" data-outcome="recorded">
-      Most recent run recorded
+    <span data-testid="run-outcome" data-outcome={state} className="flex items-center gap-2">
+      Last run
+      <OutcomeBadge state={state} />
     </span>
   );
 }

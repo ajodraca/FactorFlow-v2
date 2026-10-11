@@ -144,6 +144,9 @@ ACQUISITION_ENV=(
   "FACTORFLOW_MASSIVE_API_KEY=$E2E_PROVIDER_KEY"
   "FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=6000"
   "FACTORFLOW_RUN_POLL_INTERVAL_SECONDS=1"
+  # The stub's `unavailable` mode is retried to the attempt limit; a short
+  # backoff keeps those retries inside the Playwright timeout (DEC-0048).
+  "FACTORFLOW_MASSIVE_BACKOFF_INITIAL_SECONDS=0.05"
 )
 env "${ACQUISITION_ENV[@]}" FACTORFLOW_API_PORT="$ACQ_PORT" \
   uv run python -m factorflow.app_main &

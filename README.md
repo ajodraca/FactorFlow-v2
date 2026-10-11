@@ -109,7 +109,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
-| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with an enum-validated state filter, and fetching a single run's summary, persisted and whole-run outcome counts, and paged per-instrument results with owner-readable symbols, failure-first ordering, and an enum-validated outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors, and reading the single most recent run for `GET /api/health` (`get_most_recent_run`) in the same order as the runs list. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
+| `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, records how many instruments a claimed run's roster named, fails a run outright with a reason when the provider rejects the credential, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with an enum-validated state filter, and fetching a single run's summary, persisted and whole-run outcome counts, and paged per-instrument results with owner-readable symbols, failure-first ordering, and an enum-validated outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors, and reading the single most recent run for `GET /api/health` (`get_most_recent_run`) in the same order as the runs list. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time, and `read_gap_dates`, one instrument's missing dates; `gaps.py` derives the trading-day set and each instrument's missing days (`detect_gaps`). `sql/coverage.sql`, `sql/never_acquired.sql`, `sql/gap_instrument.sql`, `sql/gap_range.sql` and `sql/gaps.sql` are their statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Exposed over HTTP by `src/factorflow/api/routes/coverage.py`. See [Coverage read](#coverage-read), [Gap detection](#gap-detection) and [Coverage API](#coverage-api) |
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
@@ -400,7 +400,7 @@ follow-up also pins the accepted statement/action domains, the September
 deliberately duplicated ticker-change payload keys with regression tests.
 
 **Known limitations, carried forward as accepted warnings from implementation
-review v4** (`CAP-001-E3-S2-implementation-review-v4.md`) — none changes the
+review v5** (`CAP-001-E3-S2-implementation-review-v5.md`) — none changes the
 current model behavior or blocks an acceptance criterion:
 
 - The supplementary package-boundary test rejects a bare raw dictionary and
@@ -415,15 +415,20 @@ current model behavior or blocks an acceptance criterion:
   (IR-002, low).
 - The attended decision that CAP-001-E4's writer derives
   `fundamental_observation.fiscal_period` was propagated into E4-S3's task plan
-  during this story's coding run, outside E4-S3's planning phase, while this
-  story's evidence originally still described the propagation as pending
-  (IR-003, medium). The propagated plan's AI provenance attributes that revision
-  to an implementation-planning run not represented by the commit history
-  (IR-004, low). Both are process/provenance warnings for the later E4-S3 gate;
-  `FinancialStatement` intentionally has no `fiscal_period` field.
+  during this story's coding run. E4-S3 has since implemented and passed its
+  own gate on that plan, so v4's process warning is superseded; what remains is
+  that the plan's AI provenance attributes the revision to an
+  implementation-planning run not represented by the commit history (IR-003,
+  low). `FinancialStatement` intentionally has no `fiscal_period` field.
 - The optional-versus-zero behavior is covered for `fiscal_quarter` and
   `is_otc`, but those tests do not name their mapped `TC-COMP-219` identifier,
   leaving an automated traceability gap rather than a behavioral coverage gap
+  (IR-004, low).
+- The extra-field `Decimal` coercion leaves `bool` values as `bool` at every
+  level, which matters because `bool` is an `int` subclass. No test pins that
+  exemption: without it the suite stays green, but a boolean extra field would
+  raise a raw `decimal.InvalidOperation` rather than a `ValidationError`. No
+  documented field of the `extra="allow"` endpoint shapes is boolean today
   (IR-005, low).
 
 ## Massive historical client
@@ -1048,6 +1053,17 @@ error. The row is not modified (AC-26, DAC-E5-6, DAC-E5-8, DAC-E5-9).
 moved to `cancelling`. The runner calls this between instruments alongside
 `heartbeat`.
 
+`record_instruments_named(connection, run_id, runner_id, count)` stores the
+size of the claimed run's roster snapshot in `acquisition_run.instruments_named`.
+Like `heartbeat`, it updates only a run this runner still holds in `running`
+or `cancelling`, so a runner that has lost its claim writes nothing.
+
+`fail_run(connection, run_id, reason)` records a run-level failure that is not
+derived from written results: the runner calls it when the provider rejects
+the credential. It ends the run `failed` with `failure_reason` set, unless
+cancellation was already requested, in which case the run ends `cancelled`
+as `finalise` rule 1 would record it.
+
 `finalise(connection, run_id)` never accepts a caller-supplied outcome. It
 derives the terminal state from `run_instrument_result` using the rule:
 
@@ -1132,7 +1148,10 @@ segments through two parameterised queries of its own.
 
 `AcquisitionRunner.execute_claimed(run_id, depth_years, instrument_ids)`
 walks the roster it was handed — snapshotted once at claim time, so an
-instrument added mid-run belongs to the next one. A run whose claimed depth
+instrument added mid-run belongs to the next one. Before anything else it
+records the roster's size on the run through the journal's
+`record_instruments_named`, because that is the count `finalise` compares
+written results against. A run whose claimed depth
 is `None` is finalised without a single provider call: no stated depth means
 there is no window to fetch.
 
@@ -1146,8 +1165,14 @@ is one instrument.
 For each instrument it fetches the four data types individually through
 [`plan_fetches`](#range-planner), which is what keeps a re-run from
 re-fetching covered ground. Each data type is fetched in a separate
-try/except block: `CredentialRejected` re-raises and terminates the run,
-while `InstrumentNotFound`, `ProviderUnavailable`, and any other `MassiveError`
+try/except block. `CredentialRejected` is the one run-level error: every
+remaining instrument would fail the same way, so the runner records the whole
+run `failed` through the journal's `fail_run`, with the composed
+credential-safe reason as `failure_reason`, writes nothing for the instrument
+it was reading, and returns, so the ingestion process keeps polling
+(EXP-20261011-3). The reason is served as `failure_reason` by
+`GET /api/acquisition-runs` and `GET /api/acquisition-runs/{id}`; no screen
+shows it yet. `InstrumentNotFound`, `ProviderUnavailable`, and any other `MassiveError`
 are classified by `classify_provider_error` into a per-data-type
 `InstrumentOutcomeRecord` (`not_found` or `failed`). The reason is composed
 by `compose_failure_reason` and passed through the entrypoint's redaction
@@ -1411,9 +1436,10 @@ Three further behaviors are worth knowing:
   reads `Not yet checked`.
 - **`most_recent_run: null`** renders as `No run recorded` — not as an empty
   success and not as a failure. When the API reports a run, the line reads
-  `Most recent run recorded`: the region does not yet state the run's outcome
-  or link to its detail, although the health response now carries both the
-  state and the run id.
+  `Last run` followed by that run's outcome badge, the same word, icon and
+  severity tier the Runs screen shows (EXP-20261011-2). The region does not
+  yet link to the run's detail, although the health response carries the run
+  id.
 - **A missing provider credential** is reported only on the strength of a
   response that actually arrived. When the API did not answer, presence is
   unknown and the region says nothing about it rather than inferring absence
@@ -1631,10 +1657,12 @@ owner-upheld and pending absorption into `ux-design.md` §1.5 and
 `component-design-owner-web-app.md` §§2.3, 2.5 and 2.6.
 
 The *n of n named instruments* line shows the run's persisted counts as
-served. No production code writes `acquisition_run.instruments_named`,
-`instruments_written` or `instruments_failed` yet, so outside seeded tests
-the line reads *0 written and 0 failed of 0*. The defect belongs to the run
-journal and runner, not this screen (`CAP-001-E7-S4-tasks.md` Other Notes).
+served. The runner records `acquisition_run.instruments_named` when it starts
+a run (EXP-20261011-1), but no production code writes `instruments_written`
+or `instruments_failed` yet, so outside seeded tests the line reads
+*0 written and 0 failed of n*, even beside a `Succeeded` outcome. The defect
+belongs to the run journal and runner, not this screen
+(`CAP-001-E7-S4-tasks.md` Other Notes; EXP-20261011-1 review v1 ER-001).
 
 **Accepted warnings from implementation review v1**
 (`CAP-001-E7-S4-implementation-review-v1.md`) — none blocks a current

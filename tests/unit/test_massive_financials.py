@@ -225,6 +225,7 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
 # --- MassiveClient.fetch_financials (CAP-001-E3-S1) ----------------------
 
 
+# Implements TC-INT-023
 def test_fetch_financials_returns_a_complete_result_for_a_covered_symbol() -> None:
     """TC-COMP-003: `fetch_financials` returns the complete parsed result
     across the three sibling statement endpoints for a covered symbol
@@ -331,6 +332,7 @@ def test_fetch_financials_sends_no_request_to_the_ratios_path(
     assert sorted(paths) == sorted(_STATEMENT_PATHS)
 
 
+# Implements TC-INT-023
 def test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol() -> None:
     """Component design v13 section 2.5: financials are three sibling
     statement endpoints, each constrained by ticker so the request does not
