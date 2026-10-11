@@ -84,7 +84,6 @@ def test_rate_limited_responses_are_paced_without_consuming_attempts() -> None:
     assert instance.get_ticker_details.call_count == 5
 
 
-# Implements TC-INT-026
 @pytest.mark.parametrize(
     "failure",
     [
@@ -98,6 +97,7 @@ def test_rate_limited_responses_are_paced_without_consuming_attempts() -> None:
         ),
     ],
 )
+# Implements TC-INT-026
 def test_timeouts_and_server_errors_retry_to_the_attempt_limit(failure: Exception) -> None:
     """Timeout retries to the limit (section 7, 5.13): a timeout or an
     unrecognised server error is retried up to `max_attempts`, then
