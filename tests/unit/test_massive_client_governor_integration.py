@@ -103,7 +103,7 @@ def test_fetch_daily_bars_routes_both_the_first_and_next_page_through_the_govern
     assert execute.call_count == 2
 
 
-def test_fetch_financials_routes_each_of_the_four_statement_reads_through_the_governor() -> None:
+def test_fetch_financials_routes_each_of_the_three_statement_reads_through_the_governor() -> None:
     with (
         patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls,
         patch.object(RateLimitGovernor, "execute", autospec=True) as execute,
@@ -114,14 +114,15 @@ def test_fetch_financials_routes_each_of_the_four_statement_reads_through_the_go
             instance.list_financials_balance_sheets,
             instance.list_financials_income_statements,
             instance.list_financials_cash_flow_statements,
-            instance.list_financials_ratios,
         ):
             method.return_value = _FakeResponse(_envelope([]))
         client = MassiveClient(settings=_settings(), governor=_governor())
 
         client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
 
-    assert execute.call_count == 4
+    # Three statement reads, each its own governor permit; ratios are not
+    # acquired (component design v13 section 2.5).
+    assert execute.call_count == 3
 
 
 def test_fetch_corporate_actions_routes_all_four_reads_through_the_governor() -> None:
@@ -190,7 +191,6 @@ def test_a_first_page_provider_failure_surfaces_as_the_typed_error(call, sdk_met
             "list_financials_balance_sheets",
             "list_financials_income_statements",
             "list_financials_cash_flow_statements",
-            "list_financials_ratios",
             "list_stocks_splits",
         ):
             if other != sdk_method:

@@ -448,11 +448,29 @@ returning a partial range.
 
 Reference reads use Massive's single-ticker endpoint. Daily-bar requests use
 multiplier `1`, timespan `day`, inclusive ISO date bounds, and unadjusted bars.
-Financial statements are read from the four statement endpoints; corporate
-actions combine splits, dividends, IPOs, and ticker-change events. Ticker
-events have no provider date-range parameter, so the client validates their
-rows and applies the requested inclusive range locally. The client never calls
+Financial statements are read from the three statement endpoints (balance
+sheets, income statements and cash-flow statements), each bounded by
+`period_end`. Massive's ratios endpoint is not called: CAP-001's fundamentals
+are the three statements, and ratios can be derived later from stored
+statements and bars (component design v13 section 2.5). Corporate actions
+combine splits, dividends, IPOs, and ticker-change events. Ticker events have
+no provider date-range parameter, so the client validates their rows and
+applies the requested inclusive range locally. The client never calls
 Massive's forward-looking market-status endpoint or ticker-list endpoint.
+
+An empty successful response is not an unknown instrument. `fetch_daily_bars`,
+`fetch_financials` and `fetch_corporate_actions` return an empty list when a
+recognised instrument has nothing in range, such as no corporate action, no
+filings or a range outside its trading life. Only `fetch_reference` raises
+`InstrumentNotFound` for an empty result, and any provider 404 still raises it
+on every read (decision record DEC-0047 in the ai-agents SDD harness).
+
+**Known limitation, carried forward as an accepted warning from
+implementation review v6** (`CAP-001-E3-S1-implementation-review-v6.md`,
+IR-001, low). The empty-result tests serve `results: []` only. An envelope
+with no `results` key is also handled as empty today (`paging.follow_pages`
+reads `envelope.get("results") or []`), but no test pins that form, so a
+refactor that indexed `envelope["results"]` directly would still pass.
 
 The credential never leaves for another host. With SDK retries at `0`, a
 redirect is refused rather than followed: the governor retries the request to

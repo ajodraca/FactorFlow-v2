@@ -145,7 +145,6 @@ def test_market_status_endpoint_is_never_called() -> None:
             instance.list_financials_balance_sheets,
             instance.list_financials_income_statements,
             instance.list_financials_cash_flow_statements,
-            instance.list_financials_ratios,
             instance.list_stocks_splits,
             instance.list_stocks_dividends,
             instance.vx.list_ipos,

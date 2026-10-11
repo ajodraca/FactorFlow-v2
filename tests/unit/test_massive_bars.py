@@ -278,3 +278,22 @@ def test_fetch_daily_bars_raises_when_a_later_page_fails_rather_than_returning_p
 
         with pytest.raises(ProviderUnavailable):
             client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+
+
+def test_fetch_daily_bars_returns_no_bars_for_an_empty_range_rather_than_not_found() -> None:
+    """A range with no sessions, before listing or after delisting.
+    An empty successful response is a valid no-data result for a
+    recognised instrument and returns `[]`: only the reference read means
+    an unknown instrument (implementation review v5 IR-002; owner decision
+    DEC-0047 in the ai-agents SDD harness; component design section 8
+    criterion 4). acquisition-runner records `InstrumentNotFound` as a
+    failure of that data type, so raising here would record a false
+    failure."""
+    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+        instance = rest_client_cls.return_value
+        instance.get_aggs.return_value = _FakeResponse(_bar_envelope([]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        bars = client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+
+    assert bars == []

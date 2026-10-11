@@ -4,7 +4,7 @@ artifact_type: tdd-evidence
 story: CAP-001-E3-S1
 tasks_file: CAP-001-E3-S1-tasks.md
 created: 2026-09-13
-updated: 2026-09-15
+updated: 2026-10-10
 
 # RED -> GREEN -> MUTATE -> STRENGTHEN -> REFACTOR evidence for
 # MassiveClient (client.py) and its pager (paging.py). Recorded as one
@@ -298,3 +298,85 @@ open_items:
       leaning. fetch_daily_bars's docstring and
       test_fetch_daily_bars_requests_unadjusted_bars updated to cite
       DEC-0001 instead of describing the choice as flagged/provisional.
+
+# Review v5 rework (CAP-001-E3-S1-implementation-review-v5.md, 2026-10-10),
+# on branch usr/alvaro-de-jodra/CAP-001-E3-S1-ratios. Mutations ran in the
+# working tree against a saved copy of the GREEN files, and each was
+# restored and byte-compared (cmp) before the next step.
+review_v5_rework:
+  - finding: IR-001
+    unit: "MassiveClient.fetch_financials (client.py)"
+    governing: "component-design-massive-client.md v13 sections 2.5, 7 (Ratios are never requested) and 14 item 7; owner decision 2026-10-10"
+    red:
+      description: >-
+        tests/unit/test_massive_financials.py: the ratios-label test
+        replaced by test_fetch_financials_never_requests_ratios (autospecced
+        RESTClient; ratios served a FinancialRatio-shaped row) and
+        test_fetch_financials_sends_no_request_to_the_ratios_path (real SDK
+        path, socket-free massive_transport_fakes); the TC-COMP-003 and
+        request-kwargs tests updated to three endpoints and
+        list_financials_ratios.assert_not_called(). The governor-routing
+        count (4 -> 3) and the market-status test's mock list were updated
+        to match.
+      command: uv run pytest -m 'not postgres' -p no:cacheprovider -q tests/unit/test_massive_financials.py tests/unit/test_massive_client_governor_integration.py tests/unit/test_massive_sdk_config.py
+      result: "6 failed, 37 passed"
+      observed_failure: >-
+        ProviderContractViolation (FinancialStatement failed model
+        validation, 5 fields: filing_date, fiscal_year, period_end, tickers,
+        timeframe) on the FinancialRatio-shaped row, which reproduces review
+        v5 probe P1; TypeError decoding an unconfigured ratios mock on the
+        other four.
+    green:
+      change: >-
+        fetch_financials iterates the three statement endpoints only; the
+        ratios branch of _financial_page is removed; the docstring cites
+        component design v13. tests/e2e/support/massive_stub.py drops its
+        now-unreached ratios route.
+      result: "43 passed (same three files)"
+      commit: 75edce1
+    mutations:
+      - id: M-R1
+        change: 'add ("ratios", list_financials_ratios) back to the fetch_financials tuple'
+        result: "7 failed, 161 passed (tests/unit/test_massive_*.py)"
+        caught: true
+        reverted_and_reconfirmed_green: true
+      - id: M-R2
+        change: client.py replaced by its pre-rework HEAD version (7b6a82b)
+        result: "6 failed, 162 passed (tests/unit/test_massive_*.py)"
+        caught: true
+        reverted_and_reconfirmed_green: true
+  - finding: IR-002
+    unit: "fetch_daily_bars, fetch_financials, fetch_corporate_actions (client.py)"
+    governing: "DEC-0047 (owner): an empty successful paged read is valid no-data; only fetch_reference means an unknown instrument"
+    red:
+      description: >-
+        One test per paged read: test_fetch_daily_bars_returns_no_bars_for_an_empty_range_rather_than_not_found,
+        test_fetch_financials_returns_no_statements_when_every_endpoint_is_empty,
+        test_fetch_corporate_actions_returns_no_actions_when_every_endpoint_is_empty.
+      result: "3 passed on first run"
+      observed_failure: >-
+        None. These are characterization tests: the code already returned
+        [] (review v5 probe P4), and DEC-0047 keeps that behaviour, so no
+        RED is possible without changing production behaviour. Their
+        strength is shown by the mutations below instead.
+    green:
+      change: docstrings of the three paged reads state the empty-result semantics and cite DEC-0047; no behaviour change
+      commit: 0669dd4
+    mutations:
+      - id: M-E1
+        change: paging.follow_pages raises InstrumentNotFound when the accumulated rows are empty
+        result: "16 failed, 155 passed (tests/unit/test_massive_*.py); all three new tests among them"
+        caught: true
+        reverted_and_reconfirmed_green: true
+      - id: M-E2
+        change: fetch_daily_bars raises InstrumentNotFound when rows is empty
+        result: "2 failed, 169 passed; the new bars test among them"
+        caught: true
+        reverted_and_reconfirmed_green: true
+review_v5_rework_validation:
+  - "uv sync --all-extras: exit 0"
+  - "uv run ruff check .: All checks passed!"
+  - "uv run ruff format --check .: 184 files already formatted"
+  - "uv run mypy src: Success, 47 source files"
+  - "uv build --out-dir <scratchpad>/dist: sdist and wheel built"
+  - "uv run pytest -p no:cacheprovider -q -rs: 929 passed, 0 skipped (PostgreSQL via testcontainers)"

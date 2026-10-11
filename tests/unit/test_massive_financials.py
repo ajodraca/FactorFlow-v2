@@ -20,6 +20,13 @@ from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive.client import MassiveClient
 from factorflow.ingestion.massive.models import FinancialStatement
 from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
+from tests.unit.massive_transport_fakes import (
+    FakeAnswer,
+    RecordedRequest,
+    RecordingMakeRequest,
+    forbid_sockets,
+    json_answer,
+)
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
@@ -220,8 +227,8 @@ def test_value_payload_uses_decimal_strings_and_owns_no_writer_metadata() -> Non
 
 def test_fetch_financials_returns_a_complete_result_for_a_covered_symbol() -> None:
     """TC-COMP-003: `fetch_financials` returns the complete parsed result
-    across the four sibling statement endpoints for a covered symbol
-    (AC-3)."""
+    across the three sibling statement endpoints for a covered symbol
+    (AC-3; massive-client v13 section 2.5)."""
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
         instance = rest_client_cls.return_value
         instance.list_financials_balance_sheets.return_value = _FakeResponse(
@@ -229,7 +236,6 @@ def test_fetch_financials_returns_a_complete_result_for_a_covered_symbol() -> No
         )
         instance.list_financials_income_statements.return_value = _FakeResponse(_envelope([]))
         instance.list_financials_cash_flow_statements.return_value = _FakeResponse(_envelope([]))
-        instance.list_financials_ratios.return_value = _FakeResponse(_envelope([]))
         client = MassiveClient(settings=_settings(), governor=_governor())
 
         statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
@@ -240,45 +246,105 @@ def test_fetch_financials_returns_a_complete_result_for_a_covered_symbol() -> No
     assert statements[0].cik == "0000320193"
 
 
-def test_fetch_financials_labels_ratios_rows_with_the_ddl_statement_type() -> None:
-    """A ratios row must parse: the client's label for the ratios endpoint has
-    to be a `fundamental_statement_known` value (`ratios`, plural). Every other
-    test mocks ratios as empty, so a wrong label never reached validation."""
-    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
-        instance = rest_client_cls.return_value
-        for method in (
-            instance.list_financials_balance_sheets,
-            instance.list_financials_income_statements,
-            instance.list_financials_cash_flow_statements,
-        ):
-            method.return_value = _FakeResponse(_envelope([]))
-        instance.list_financials_ratios.return_value = _FakeResponse(
-            _envelope([_wire_statement("financial_quarterly.json")])
-        )
-        client = MassiveClient(settings=_settings(), governor=_governor())
-
-        statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
-
-    assert [s.statement_type for s in statements] == ["ratios"]
+def _financial_ratio_row() -> dict:
+    """One row in the shape massive 2.8.0's `FinancialRatio` deserialises
+    from `GET /stocks/financials/v1/ratios`: `ticker`, `cik` and `date`
+    plus ratio values, and none of a statement's period fields. Served so
+    that a ratios read, if one were made, would be observable."""
+    return {
+        "ticker": "AAPL",
+        "cik": "0000320193",
+        "date": "2023-12-29",
+        "price": 192.53,
+        "price_to_earnings": 31.3,
+        "current": 0.988,
+        "debt_to_equity": 1.79,
+    }
 
 
-def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() -> None:
-    """Component design section 2.5: financials are four sibling
-    endpoints, each constrained by ticker so the request does not return
-    the whole corpus.
-
-    `RESTClient` is autospecced, so every call is checked against the
-    installed SDK's real signature rather than accepted by a bare mock
-    (EXP-20261009-1). The three statement endpoints select by `tickers`
-    and bound the period by `period_end`; `list_financials_ratios` selects
-    by `ticker` (singular) and accepts no period parameter at all."""
+def test_fetch_financials_never_requests_ratios() -> None:
+    """Component design v13 section 7, "Ratios are never requested"
+    (section 2.5; section 14 item 7, owner decision 2026-10-10): CAP-001
+    does not acquire Massive ratios. `fetch_financials` calls the three
+    statement endpoints once each for the first page, never calls
+    `list_financials_ratios`, and returns only the three statement types."""
     with patch("factorflow.ingestion.massive.client.RESTClient", autospec=True) as rest_client_cls:
         instance = rest_client_cls.return_value
         for method in (
             instance.list_financials_balance_sheets,
             instance.list_financials_income_statements,
             instance.list_financials_cash_flow_statements,
-            instance.list_financials_ratios,
+        ):
+            method.return_value = _FakeResponse(
+                _envelope([_wire_statement("financial_annual.json")])
+            )
+        instance.list_financials_ratios.return_value = _FakeResponse(
+            _envelope([_financial_ratio_row()])
+        )
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    instance.list_financials_ratios.assert_not_called()
+    for method in (
+        instance.list_financials_balance_sheets,
+        instance.list_financials_income_statements,
+        instance.list_financials_cash_flow_statements,
+    ):
+        method.assert_called_once()
+    assert [s.statement_type for s in statements] == [
+        "balance_sheet",
+        "income_statement",
+        "cash_flow_statement",
+    ]
+
+
+_STATEMENT_PATHS = (
+    "/stocks/financials/v1/balance-sheets",
+    "/stocks/financials/v1/income-statements",
+    "/stocks/financials/v1/cash-flow-statements",
+)
+_RATIOS_PATH = "/stocks/financials/v1/ratios"
+
+
+def _financials_answer(request: RecordedRequest) -> FakeAnswer:
+    if request.path.startswith(_RATIOS_PATH):
+        return json_answer({"request_id": "req_ok_001", "results": [_financial_ratio_row()]})
+    return json_answer({"request_id": "req_ok_001", "results": []})
+
+
+def test_fetch_financials_sends_no_request_to_the_ratios_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Component design v13 section 7, "Ratios are never requested": on the
+    real SDK request path (socket-free, `massive_transport_fakes`), the
+    financials read sends exactly one request to each statement path and
+    none to `/stocks/financials/v1/ratios`."""
+    forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(_financials_answer).install(monkeypatch)
+    client = MassiveClient(settings=_settings(), governor=_governor())
+
+    client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    paths = [request.path.split("?", 1)[0] for request in transport.requests]
+    assert not any(path.startswith(_RATIOS_PATH) for path in paths)
+    assert sorted(paths) == sorted(_STATEMENT_PATHS)
+
+
+def test_fetch_financials_queries_the_three_statement_endpoints_for_the_symbol() -> None:
+    """Component design v13 section 2.5: financials are three sibling
+    statement endpoints, each constrained by ticker so the request does not
+    return the whole corpus, and each bounded by `period_end`.
+
+    `RESTClient` is autospecced, so every call is checked against the
+    installed SDK's real signature rather than accepted by a bare mock
+    (EXP-20261009-1)."""
+    with patch("factorflow.ingestion.massive.client.RESTClient", autospec=True) as rest_client_cls:
+        instance = rest_client_cls.return_value
+        for method in (
+            instance.list_financials_balance_sheets,
+            instance.list_financials_income_statements,
+            instance.list_financials_cash_flow_statements,
         ):
             method.return_value = _FakeResponse(_envelope([]))
         client = MassiveClient(settings=_settings(), governor=_governor())
@@ -300,7 +366,28 @@ def test_fetch_financials_queries_all_four_statement_endpoints_for_the_symbol() 
             "raw": True,
         }
 
-    instance.list_financials_ratios.assert_called_once()
-    _, kwargs = instance.list_financials_ratios.call_args
-    inspect.signature(RealRESTClient.list_financials_ratios).bind(None, **kwargs)
-    assert kwargs == {"ticker": "AAPL", "raw": True}
+    instance.list_financials_ratios.assert_not_called()
+
+
+def test_fetch_financials_returns_no_statements_when_every_endpoint_is_empty() -> None:
+    """An instrument that files no statements in range, such as an ETF.
+    An empty successful response is a valid no-data result for a
+    recognised instrument and returns `[]`: only the reference read means
+    an unknown instrument (implementation review v5 IR-002; owner decision
+    DEC-0047 in the ai-agents SDD harness; component design section 8
+    criterion 4). acquisition-runner records `InstrumentNotFound` as a
+    failure of that data type, so raising here would record a false
+    failure."""
+    with patch("factorflow.ingestion.massive.client.RESTClient", autospec=True) as rest_client_cls:
+        instance = rest_client_cls.return_value
+        for method in (
+            instance.list_financials_balance_sheets,
+            instance.list_financials_income_statements,
+            instance.list_financials_cash_flow_statements,
+        ):
+            method.return_value = _FakeResponse(_envelope([]))
+        client = MassiveClient(settings=_settings(), governor=_governor())
+
+        statements = client.fetch_financials("AAPL", date(2023, 1, 1), date(2023, 12, 31))
+
+    assert statements == []
