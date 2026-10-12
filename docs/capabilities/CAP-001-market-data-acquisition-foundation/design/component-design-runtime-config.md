@@ -25,7 +25,7 @@ ai_provenance:
     - id: tech-stack
       version: "5"
     - id: CONST-SEC
-      version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
+      version: "1.3 (content revision sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7)"
     - id: CAP-001-release
       version: "1"
   invoking_user: ajodraca
@@ -327,10 +327,14 @@ conditions hold, and this section meets each of them:
 | Consumer record: designs cite the exception by its phrase; the project records a decision naming them | This section, `component-design-massive-client.md` sections 2.2b and 4, `component-design-acquisition-runner.md` section 2.1; DEC-0036 |
 
 **When clause 2a is in force (DEC-0036, PROVISIONAL).** This design was
-checked against one exact text: CONST-SEC 1.2 at content revision
-`sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`, the value
+checked against one exact text: CONST-SEC 1.3 at content revision
+`sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7`, the value
 `python3 scripts/artifact-gate.py revision --repo-dir . --artifact docs/constitutions/security.constitution.md`
-prints for that text in the AI-agents harness. Clause 2a takes effect only when
+prints for that text in the AI-agents harness. It was re-pinned from 1.2 on
+2026-10-12, after re-checking clause 2a against 1.3: version 1.3 leaves the
+test-double exception's conditions (1) to (4) unchanged and adds only that the
+test-double exception alone governs a channel whose peer is a local test double,
+in every build. Clause 2a takes effect only when
 both of the following hold:
 
 - CONST-SEC 1.2 is in force under its own rule (*How to Use*, "When a version
@@ -1393,7 +1397,7 @@ do.
 | Capability | CAP-001 v6 | AC-13 credential handling, AC-14 network exposure | `docs/capabilities/CAP-001-market-data-acquisition-foundation/Capability-CAP-001.md` |
 | System design | CAP-001 system design v3 | Steps 37 to 39, constraints 5.11 to 5.15 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Section 1.3, the credential region and its copy | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`; clause 2a relies on its SEC-ENC-001 loopback test-double exception and takes effect only as section 2.2c states) | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001; Definitions; How to Use, "When a version is in force" | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Constitution | Security Constitution v1.3 (CONST-SEC 1.3 at content revision `sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7`; clause 2a relies on its SEC-ENC-001 loopback test-double exception and takes effect only as section 2.2c states) | SEC-SEC-001, SEC-SEC-002, SEC-DAT-001, SEC-DAT-003, SEC-ENC-001, SEC-NDG-001; Definitions; How to Use, "When a version is in force" | `docs/constitutions/security.constitution.md` in the AI-agents harness |
 | Review | CONST-SEC constitution reviews v1 and v2 | v1 FINDING-1 to FINDING-13 and v2 FINDING-14 to FINDING-23 on the 1.2 amendment and this design | `docs/constitutions/reviews/security-review-v1.md` and `security-review-v2.md` in the AI-agents harness |
 | Review | CAP-001 specification review v6 | FINDING-3 (in-force trigger and pinned text), FINDING-5 (entry-point parameters) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
 | Review | EXP-20261009-1 expedited review v1 | ER-001 and ER-002: an unvalidated base URL chooses the credential's destination and scheme | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |

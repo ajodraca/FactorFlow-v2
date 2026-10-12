@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-acquisition-runner
 artifact_type: component-design
-artifact_version: 8
+artifact_version: 9
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-10-09
+updated: 2026-10-12
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.295"
-  timestamp: 2026-10-09T20:40:00Z
+  timestamp: 2026-10-12T22:00:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -25,7 +25,7 @@ ai_provenance:
     - id: tech-stack
       version: "3"
     - id: CONST-SEC
-      version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
+      version: "1.3 (content revision sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
@@ -122,8 +122,8 @@ def main(
   `tests/e2e/support/ingestion_e2e_main.py`, which passes a settings factory
   accepting loopback `http` and a reader that refuses any key that is not a
   designated test credential. That is how the project confines the SEC-ENC-001
-  loopback test-double exception of CONST-SEC 1.2 (pinned at content revision
-  `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`) to non-release
+  loopback test-double exception of CONST-SEC 1.3 (pinned at content revision
+  `sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7`) to non-release
   code, as SEC-NDG-001 requires: a parameter is not configuration, and only
   code absent from the release artifact supplies one. When that entry point may
   exist, and what it checks, is specified in
@@ -474,7 +474,7 @@ several internal ones.
 | Component design | Run Journal | Claim, heartbeat, cancellation and outcome derivation | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-run-journal.md` |
 | Component design | Observation Writer | The per-instrument transaction and idempotent append | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-observation-writer.md` |
 | Constitution | Operational Safety v1.3 | OPS-ERR-001, OPS-LOOP-001 | `docs/constitutions/operational-safety.constitution.md` |
-| Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`) | The SEC-ENC-001 loopback test-double exception and SEC-NDG-001, which the entrypoint parameters help confine to non-release code | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Constitution | Security Constitution v1.3 (CONST-SEC 1.3 at content revision `sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7`) | The SEC-ENC-001 loopback test-double exception and SEC-NDG-001, which the entrypoint parameters help confine to non-release code | `docs/constitutions/security.constitution.md` in the AI-agents harness |
 | Component design | Runtime Configuration | Section 2.2b credential reload; section 2.2c clause 2a and items 2 to 5, the test-only caller of `main` | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Decision | DEC-0035, DEC-0036 | The entrypoint's two keyword-only parameters, correcting DEC-0033; this project's record of relying on the SEC-ENC-001 loopback test-double exception | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 
