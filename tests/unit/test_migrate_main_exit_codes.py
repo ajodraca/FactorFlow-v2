@@ -13,6 +13,8 @@ driving it with a mocked `MigrationError` subtype or successful result and
 asserting `sys.exit` is called with the right code — no database needed.
 """
 
+from pathlib import Path
+
 import pytest
 
 from factorflow.db.migrate_main import (
@@ -21,6 +23,7 @@ from factorflow.db.migrate_main import (
     MigrationFailedError,
     StoreAheadOfBuildError,
     exit_code_for_outcome,
+    run_migrations,
 )
 from factorflow.db.migrator import MigrationError
 
@@ -45,3 +48,17 @@ def test_every_migrate_main_error_is_a_migration_error() -> None:
     assert issubclass(StoreAheadOfBuildError, MigrationError)
     assert issubclass(ChecksumMismatchError, MigrationError)
     assert issubclass(MigrationFailedError, MigrationError)
+
+
+def test_run_migrations_refuses_a_missing_migrations_directory(tmp_path: Path) -> None:
+    """Exit 4 before connecting, so the entrypoint never starts the API (EXP-20261012-1).
+
+    The database URL points at a closed port: reaching it would fail with exit
+    1, so exit 4 also shows no connection was attempted.
+    """
+    missing = tmp_path / "absent"
+
+    exit_code, message = run_migrations("postgresql://user@127.0.0.1:9/none", missing)
+
+    assert exit_code == 4
+    assert str(missing) in message
