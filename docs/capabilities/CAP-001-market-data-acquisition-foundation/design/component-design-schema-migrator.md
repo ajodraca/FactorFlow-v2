@@ -2,28 +2,30 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-schema-migrator
 artifact_type: component-design
-artifact_version: 4
+artifact_version: 5
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-10-12
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-12T15:10:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "7"
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
-      version: "3"
+      version: "4"
+    - id: CAP-001-release
+      version: "1"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
@@ -70,7 +72,9 @@ container never migrates, because two processes racing to apply DDL is a defect
 with no upside. Environments: the owner's single self-hosted Docker host.
 
 Dependencies: PostgreSQL 16, `psycopg` 3, the migration files under
-`migrations/`, and `runtime-config` for the database connection settings.
+`src/factorflow/db/migrations/`, shipped inside the installed distribution,
+and `runtime-config` for the database connection settings and the release
+image that carries them (`runtime-config` section 2.8).
 
 ## 2. Design Details
 
@@ -79,11 +83,45 @@ Dependencies: PostgreSQL 16, `psycopg` 3, the migration files under
 ```
 src/factorflow/db/migrator.py       the migrator
 src/factorflow/db/migrate_main.py   the container entrypoint
-migrations/0001_extensions_owner_state.sql
-migrations/0002_observations.sql
-migrations/0003_coverage.sql
-migrations/0004_runs.sql
+src/factorflow/db/migrations/0001_extensions_owner_state.sql
+src/factorflow/db/migrations/0002_observations.sql
+src/factorflow/db/migrations/0003_coverage.sql
+src/factorflow/db/migrations/0004_runs.sql
+src/factorflow/db/migrations/README.md
 ```
+
+**Where the migrations live (B1, owner decision 2026-10-12).** The migration
+files are package data of `factorflow.db`, not a repository-root directory.
+`migrate_main` resolves them next to itself and exposes the path as a public
+constant:
+
+```python
+# src/factorflow/db/migrate_main.py
+MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
+```
+
+`pyproject.toml` lists `"db/migrations/*.sql"` in
+`[tool.setuptools.package-data]`, so `pip install .` and `uv build` carry the
+files. A source checkout and the installed image therefore resolve the same
+directory. Before this revision `migrate_main` resolved
+`Path(__file__).resolve().parents[3] / "migrations"`. That is the repository
+root from a checkout, but `/usr/local/lib/python3.12/migrations` in the image,
+which does not exist: the image migrated nothing (release manifest v1, B1). Since
+EXP-20261012-1 a missing directory refuses the start with exit 4 (section 2.5),
+so the defect failed closed, but the image still could not start.
+
+The move changes no file's content, so no checksum recorded in an existing
+store changes. Every reference to the repository-root `migrations/` path moves
+with it: the Python constant above; the tests that build paths to the files
+(`tests/conftest.py`, and 16 test modules under `tests/unit/` and
+`tests/integration/` that each compute `parents[N] / "migrations"`), which
+import `MIGRATIONS_DIR` instead of recomputing it;
+`tests/unit/test_no_committed_secrets.py`'s scanned prefixes; the comments in
+`src/factorflow/api/models.py` and `src/factorflow/runs/queries.py` and the two
+SQL fixtures that cite `migrations/000N_*.sql`; the `Dockerfile`, which stops
+copying `migrations/`; and the README. The implementing story lists the files.
+`tests/fixtures/migrations_ok/` stays where it is: it is a test fixture, not a
+release migration.
 
 The application container's entrypoint runs `python -m factorflow.db.migrate_main`
 and only then execs uvicorn. Running the migrator as a separate command rather
@@ -163,7 +201,8 @@ class MigrationFile:
 def discover(directory: Path) -> list[MigrationFile]:
     """Return every migration this build carries, ordered by version.
 
-    Raises MigrationError when a filename is malformed or a version repeats.
+    Raises MigrationError when the directory does not exist, a filename is
+    malformed, a version repeats, or a file contains BEGIN or COMMIT.
     """
 
 
@@ -189,7 +228,7 @@ would allow a crash between the two to leave a store no future run can classify.
 | 1 | Database unreachable or credentials rejected | `database unreachable: <driver message>`, naming the host and database but never the password | AC-16, AC-13 |
 | 2 | Store holds a version this build does not carry | `store is at version N, this build carries up to M; deploy a build that knows version N` | AC-16 |
 | 3 | A recorded migration's checksum does not match | `migration N was applied with a different definition than this build carries` | AC-16 |
-| 4 | A migration failed to apply | `migration N failed: <driver message>; no change was committed` | AC-16 |
+| 4 | A migration failed to apply, or this build's migrations cannot be read: the directory is missing, a filename is malformed, a version repeats, or a file contains `BEGIN` or `COMMIT`. The read failures are reported before any connection is made | `migration N failed: <driver message>; no change was committed`, or the read failure's own message, for example `migrations directory not found: <path>` | AC-16 |
 
 Every message is emitted through the structured logger at `error` level with the
 migration version as a field, never through `print` (SA-LOG-001).
@@ -215,9 +254,10 @@ N/A, not applicable for this component. No broker, topic or queue.
 - **`CREATE EXTENSION btree_gist` in `0001` requires database owner or superuser
   privileges** on first application. The `postgres:16` image's default superuser
   satisfies this in the owner's deployment.
-- **Assumption: the migration files are shipped inside the image.** They are
-  read from the filesystem at a path resolved relative to the package, not
-  fetched at runtime.
+- **The migration files are shipped inside the installed distribution**
+  (section 2.1). They are read from `MIGRATIONS_DIR`, next to `migrate_main`,
+  and never fetched at runtime. This was an assumption until release manifest
+  v1 showed the image carried none.
 - **Assumption: the owner deploys images in order.** The migrator refuses a
   backwards deployment rather than attempting to handle it, which is the correct
   behaviour but does mean a rollback of the application image after a migration
@@ -294,6 +334,9 @@ capability's.
 | No transactional-DDL violation | `tests/unit/test_migration_filenames.py` | No file contains `CREATE INDEX CONCURRENTLY` or `VACUUM` |
 | Password never logged | `tests/unit/test_migrator_logging.py` | A connection failure with a password in the URL produces a log record not containing it (AC-13) |
 | Advisory lock serialises | `tests/integration/test_migrator_concurrent.py` | Two migrators against one empty store both exit 0 and apply each version once |
+| A missing directory refuses the start | `tests/unit/test_migrator_discover.py`, `tests/unit/test_migrate_main_exit_codes.py` | `discover` raises naming the path, and `run_migrations` returns 4 before connecting (EXP-20261012-1, AC-16) |
+| The migrations resolve inside the package | `tests/unit/test_migrator_discover.py` | `MIGRATIONS_DIR` is `factorflow/db/migrations` next to `migrate_main.py`, and `discover(MIGRATIONS_DIR)` returns versions 1 to 4 (B1) |
+| The installed distribution carries the migrations | `tests/unit/test_distribution_contents.py` (`runtime-config` section 7) | The built wheel contains `factorflow/db/migrations/0001_*.sql` to `0004_*.sql` (B1) |
 
 Security testing: the password-redaction test above is the security-relevant
 case. Performance and scalability testing do not apply at four files.
@@ -363,13 +406,15 @@ This component exposes no HTTP surface.
 | System design | CAP-001 system design v3 | Application start steps 32 to 36, constraint 5.10 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Component design | Market Data Store | `applied_migrations` definition and the four migration files | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | UX design | CAP-001 UX design v4 | Section 2, the unreachable state naming a failed migration | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Tech Stack v3 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v4 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
+| Component design | Runtime Configuration v12 | Section 2.8, the release image and compose definition that carry and run the migrator | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
+| Release | CAP-001 release readiness v1 | Blocker B1, found by the image smoke test | `docs/releases/CAP-001-release-v1.md` |
 
 ## 13. Traceability
 
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
-| AC-15 | `schema-migrator`, numbered migrations, `applied_migrations` | `apply_pending`, one transaction per file, checksum recording | 2.3, 2.4 |
+| AC-15 | `schema-migrator`, numbered migrations, `applied_migrations` | `apply_pending`, one transaction per file, checksum recording; migrations shipped as package data | 2.1, 2.3, 2.4 |
 | AC-16 | Migrator exits non-zero; API never binds | Exit codes 1 to 4 and the entrypoint chaining in 2.1 | 2.5, 6 |
 | AC-13 | `runtime-config` redaction | Failure messages built from known-safe fields, never from the raw driver exception | 4 |
 | AC-18 | `GET /api/health` liveness | A refused migration presents as the interface's unreachable state rather than as a running product | 9, 10 |

@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
-artifact_version: 7
+artifact_version: 8
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-10-10
+updated: 2026-10-12
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-10T22:50:06Z
+  timestamp: 2026-10-12T15:10:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "7"
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
@@ -137,12 +137,17 @@ recorded in `applied_migrations` (C5, tech stack, AC-15). A correction is a new
 file, never an edit to a file that has been applied.
 
 ```
-migrations/
+src/factorflow/db/migrations/
 ├── 0001_extensions_owner_state.sql
 ├── 0002_observations.sql
 ├── 0003_coverage.sql
 └── 0004_runs.sql
 ```
+
+The files are package data of `factorflow.db`, so the installed distribution
+and the release image carry them (`schema-migrator` section 2.1, which moved
+them from a repository-root `migrations/` on 2026-10-12, release manifest v1
+blocker B1). Their content, and so every recorded checksum, is unchanged.
 
 `applied_migrations` is created by `schema-migrator` before the first file runs,
 not by a migration file, because the migrator has to read it to decide what to
@@ -460,7 +465,7 @@ Three mechanisms, because the constraint is unrecoverable if it is broken (C5):
    `INSERT ... ON CONFLICT DO NOTHING` only. No other component holds a write
    path to the four observation tables.
 2. **A repository test asserts it.** `tests/unit/test_sql_is_append_only.py`
-   scans every `.sql` file under `migrations/` and every SQL string in
+   scans every `.sql` file under `src/factorflow/db/migrations/` and every SQL string in
    `src/factorflow/` for `UPDATE` or `DELETE` naming `daily_bar`,
    `fundamental_observation`, `corporate_action` or `instrument_reference`, and
    fails on a match. This catches the case the first mechanism relies on a human

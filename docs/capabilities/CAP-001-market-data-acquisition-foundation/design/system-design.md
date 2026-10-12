@@ -2,22 +2,22 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-system-design
 artifact_type: system-design
-artifact_version: 6
+artifact_version: 7
 capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
 created: 2026-09-03
-updated: 2026-09-06
+updated: 2026-10-12
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: approved
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-12T15:10:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -65,9 +65,11 @@ but does add a row when the provider returns something different (AC-5, AC-6).
 
 The interface is bound to the loopback address and performs no authentication, on
 the owner's decision of 2026-09-03. This design treats that as a constraint on
-deployment rather than an absence of a requirement: the port is published to
-`127.0.0.1` only, and nothing in the API assumes an authenticated principal that
-a later capability would have to retrofit.
+deployment rather than an absence of a requirement: the containers run in the
+host network namespace, the API binds `127.0.0.1` and PostgreSQL listens on
+`127.0.0.1` only, so nothing listens on another interface
+(`component-design-runtime-config.md` section 2.8.1). Nothing in the API assumes
+an authenticated principal that a later capability would have to retrofit.
 
 The block diagram below is described in Section 2, and the components it names
 are declared in Section 4.1. Read Section 4 first: it is the vocabulary the rest
@@ -400,8 +402,10 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
    `applied_migrations`. There is no reversal path, so a migration that loses data
    is unrecoverable.
 11. **Loopback-only interface, no authentication.** Owner decision of 2026-09-03.
-   The container publishes its port to `127.0.0.1` only. The absence of
-   authentication is sound solely because of that binding.
+   The API binds `127.0.0.1`, and the deployment runs every container in the
+   host network namespace with no published port, so the bind is the machine's
+   own loopback (owner decision 2026-10-12; `runtime-config` section 2.8.1).
+   The absence of authentication is sound solely because of that binding.
 12. **The provider credential is supplied at runtime.** It is never committed, never
    logged, and never returned by any interface (AC-13, SEC-SEC-001). It is supplied
    to **both containers**: the ingestion process uses it, and the application
@@ -509,7 +513,7 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-11 | Unrecognised instrument does not stop the run | Per-instrument isolation in the runner loop | 3 steps 18-21 |
 | AC-12 | A failed run leaves no false history | Coverage segments extended only inside the committed write transaction | 3 step 17, 5.9 |
 | AC-13 | Credential handling | `runtime-config` environment load with reload at claim time, redaction, no API echo | 3 steps 37-39, 5.12 |
-| AC-14 | Network exposure | Port published to `127.0.0.1` only; uvicorn bound to loopback | 5.11 |
+| AC-14 | Network exposure | Host-network deployment with nothing published; uvicorn bound to loopback | 5.11 |
 | AC-15 | Forward data evolution | `schema-migrator`, numbered migrations, `applied_migrations` | 3 steps 32-35 |
 | AC-16 | Refuse an inconsistent start | Migrator exits non-zero; API never binds | 3 step 36 |
 | AC-17 | Honest empty state | `GET /api/coverage` distinguishes "never acquired" from "acquired, empty"; `owner-web-app` renders it | 4.2 |
