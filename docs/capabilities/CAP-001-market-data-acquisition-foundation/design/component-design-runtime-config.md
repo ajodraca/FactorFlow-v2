@@ -805,7 +805,7 @@ conditions map to this deployment as follows:
 | (1) Listeners bind only to loopback | API: the `ApiSettings` validator; PostgreSQL: `listen_addresses=127.0.0.1` | `test_settings_validation.py`, `test_compose_definition.py`; smoke check 4 |
 | (2) Clients use the loopback forms, no redirect, no proxy | The browser opens `http://127.0.0.1:8000` (section 9). `FACTORFLOW_DATABASE_URL` names `127.0.0.1`. `psycopg` uses no HTTP proxy, and the API issues no redirect off-host | `test_compose_definition.py` (the URL's host) |
 | (3) The channel never leaves the host | Host network namespace; no `ports:`, no forward, no tunnel | `test_compose_definition.py` (no `ports:` key) |
-| (4) No credential in clear | Channel (a) carries no credential: the interface has no authentication (AC-14). Channels (b) and (c) authenticate with `scram-sha-256`, set explicitly by `POSTGRES_HOST_AUTH_METHOD` in `compose.yaml`; the password never crosses the channel | `test_compose_definition.py` |
+| (4) No credential in clear | Channel (a) carries no credential: the interface has no authentication (AC-14). Channels (b) and (c) authenticate with `scram-sha-256`. The `postgres:16` image writes `trust` for `127.0.0.1`, `::1` and the local socket unless told otherwise (verified 2026-10-12: with only `POSTGRES_HOST_AUTH_METHOD` set, those lines stay `trust`), so `compose.yaml` sets both `POSTGRES_HOST_AUTH_METHOD` and `POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256`; every `pg_hba.conf` line is then `scram-sha-256`, and the password never crosses the channel | `test_compose_definition.py`; smoke check 1 confirms the running store's `pg_hba.conf` has no `trust` line |
 | (5) A single host under the owner-operator's control | The owner's Mac. The owner states in each deployment's release evidence that no account outside the owner's control can run processes on it | Release evidence |
 | (6) An off-host listener check after every deployment, kept as release evidence | Smoke check 4, IPv4 and IPv6; its output is recorded in the release manifest | Release evidence |
 
@@ -898,6 +898,7 @@ services:
       POSTGRES_USER: factorflow
       POSTGRES_PASSWORD: ${FACTORFLOW_POSTGRES_PASSWORD:?set FACTORFLOW_POSTGRES_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     volumes:
       - factorflow-pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -954,8 +955,16 @@ volumes:
   `FACTORFLOW_POSTGRES_PASSWORD` later therefore leaves the role on the old
   password, and the application fails with exit 1 (`database unreachable`). To
   change it: `docker compose exec postgres psql -U factorflow -d factorflow -c
-  "ALTER ROLE factorflow PASSWORD '<new>'"` with the old value still exported,
-  then export the new value and run `docker compose up -d`.
+  "ALTER ROLE factorflow PASSWORD '<new>'"`, run as
+  `docker compose exec -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" postgres psql ...`
+  with the old value still exported, then export the new value and run
+  `docker compose up -d`.
+- **Every connection needs the password, including inside the PostgreSQL
+  container.** `POSTGRES_INITDB_ARGS` makes the local socket and loopback
+  `scram-sha-256` as well as remote addresses, so any `psql`, `pg_dump` or
+  `pg_restore` run through `docker compose exec` passes
+  `-e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD"`. Like `POSTGRES_PASSWORD`, it
+  acts only when the volume is first initialised.
 - **Start order.** PostgreSQL must be healthy before the application container
   starts, and the application must be healthy before ingestion starts. The
   application's healthcheck requires `database == "reachable"` and a non-null
@@ -999,8 +1008,8 @@ and are never committed.
 
 **Upgrade** from tag `<old>` to tag `<new>`:
 
-1. Back up: `docker compose exec -T postgres pg_dump -U factorflow -d factorflow
-   -Fc > "$FACTORFLOW_BACKUP_DIR/factorflow-<old>-$(date -u +%Y%m%dT%H%M%SZ).dump"`.
+1. Back up: `docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD"
+   postgres pg_dump -U factorflow -d factorflow -Fc > "$FACTORFLOW_BACKUP_DIR/factorflow-<old>-$(date -u +%Y%m%dT%H%M%SZ).dump"`.
    A non-zero exit or an empty file stops the upgrade.
 2. Build: `FACTORFLOW_IMAGE_TAG=<new> docker compose build app`.
 3. Deploy: `FACTORFLOW_IMAGE_TAG=<new> docker compose up -d`. The application
@@ -1017,10 +1026,10 @@ dump first. Step 2 destroys the current database, so the owner runs it only
 after confirming the dump to restore (OPS-DEST-001):
 
 1. `docker compose stop ingestion app`
-2. `docker compose exec -T postgres dropdb -U factorflow factorflow` then
-   `docker compose exec -T postgres createdb -U factorflow factorflow`
-3. `docker compose exec -T postgres pg_restore -U factorflow -d factorflow
-   --no-owner < "$FACTORFLOW_BACKUP_DIR/<the step 1 dump>"`
+2. `docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" postgres dropdb -U factorflow factorflow`
+   then the same with `createdb -U factorflow factorflow`
+3. `docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" postgres
+   pg_restore -U factorflow -d factorflow --no-owner < "$FACTORFLOW_BACKUP_DIR/<the step 1 dump>"`
 4. `FACTORFLOW_IMAGE_TAG=<old> docker compose up -d`
 5. Run the smoke check. Check 2 must report `<old>`'s highest schema version.
 
@@ -1048,7 +1057,9 @@ is the release evidence for AC-14, AC-15 and B1, B3 and B4, and for condition
 the project label, so it needs none of the four variables:
 
 1. `docker ps --filter label=com.docker.compose.project=factorflow` shows
-   `postgres` and `app` healthy and `ingestion` running.
+   `postgres` and `app` healthy and `ingestion` running, and
+   `docker exec <postgres container> sh -c 'grep -v "^#" "$PGDATA/pg_hba.conf"'`
+   shows no `trust` line (exception condition 4).
 2. `GET http://127.0.0.1:8000/api/health` answers 200 with
    `database == "reachable"`, and `schema_version` equals the highest version
    the running image carries. That version is read from the image itself:
@@ -1217,7 +1228,7 @@ credential.
 | The ingestion process refuses to start on a bad base URL | `tests/unit/test_ingestion_main.py` | With `FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com`, the entry point exits non-zero before constructing a `RESTClient`, and the log line names the variable but not the value (clause 2, AC-16) |
 | The release image ships its migrations and bundle | `tests/unit/test_distribution_contents.py` | The test copies `src/` and `pyproject.toml` to a temporary directory, writes a stub `factorflow/api/static/index.html` there, and runs `uv build` in it. The wheel contains `factorflow/db/migrations/0001_extensions_owner_state.sql` to `0004_runs.sql` and `factorflow/api/static/index.html`, and nothing under `tests/`. It never depends on a prior `npm run build`, so it cannot pass without checking the bundle (B1, B3, DEC-0034) |
 | The Dockerfile builds the bundle, installs from the lock and copies no non-release path | `tests/unit/test_release_excludes_test_paths.py` (extended) | The `Dockerfile` has an `interface` stage running `npm run build` and a `lock` stage running `uv export --frozen`; the final stage installs with `--require-hashes` and the project with `--no-deps`, copies the bundle from `interface`, and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`. The test's existing `_copy_sources` splits the file line by line with `shlex`, which raises on a `\` continuation; it must join continuation lines first (B3, DEC-0034, specification review v11 FINDING-32) |
-| `compose.yaml` keeps AC-14, AC-13 and the exception's conditions | `tests/unit/test_compose_definition.py` | Read as text, because PyYAML is not a project dependency and the checks need no parser: each of the three service blocks has `network_mode: host`, and the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1` and its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256`; the database URL's host is `127.0.0.1`; no service sets `FACTORFLOW_API_HOST`; every secret and the image tag are `${...:?...}` interpolations, not literals; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main` and it depends on `app` being healthy (AC-13, AC-14, AC-16; SEC-ENC-001 host-local loopback exception conditions 1 to 4) |
+| `compose.yaml` keeps AC-14, AC-13 and the exception's conditions | `tests/unit/test_compose_definition.py` | Read as text, because PyYAML is not a project dependency and the checks need no parser: each of the three service blocks has `network_mode: host`, and the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1` and its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256` and `POSTGRES_INITDB_ARGS` with both `--auth-host=scram-sha-256` and `--auth-local=scram-sha-256`; the database URL's host is `127.0.0.1`; no service sets `FACTORFLOW_API_HOST`; every secret and the image tag are `${...:?...}` interpolations, not literals; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main` and it depends on `app` being healthy (AC-13, AC-14, AC-16; SEC-ENC-001 host-local loopback exception conditions 1 to 4) |
 | The deployment serves, and nothing listens off the host | `scripts/deploy-smoke.sh` (section 2.8.5) against the real deployment, with the owner's own values | Checks 1 to 4 pass after the deployment under review. Its output is the release evidence for AC-14, AC-15, B1, B3, B4 and exception condition 6. It needs Docker with host networking, so it is not part of `uv run pytest`, and it never runs a second deployment beside the real one (specification review v11 FINDING-35) |
 | The backup and rollback procedure works | The drill of section 2.8.4, run once before the first deployment under `docker compose -p factorflow-drill` | A store holding a completed run is dumped, restored into an emptied database, and reads the same coverage; recorded as release evidence (OPS-MIG-003) |
 

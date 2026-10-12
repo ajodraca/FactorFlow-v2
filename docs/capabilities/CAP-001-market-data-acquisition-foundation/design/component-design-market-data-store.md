@@ -556,8 +556,11 @@ constraint 5.1.
 - **Authentication and authorization.** PostgreSQL runs in the host network
   namespace and listens only on the host's loopback, `127.0.0.1:5432`
   (`runtime-config` section 2.8.1). Processes on the deployment machine can
-  reach it with the database password; other hosts cannot. Clients authenticate
-  with `scram-sha-256`, so the password never crosses the connection. There is
+  reach it only with the database password; other hosts cannot. Every
+  `pg_hba.conf` line, the local socket and loopback included, is
+  `scram-sha-256` (`runtime-config` section 2.8.3 sets it at initialisation,
+  because the `postgres:16` image otherwise trusts loopback), so the password
+  never crosses the connection. There is
   no application-level authorization model, because there is one
   owner-operator and the interface is loopback-bound (system design constraint
   5.11). SEC-AUTH-001 does not engage on the database because it is not an
