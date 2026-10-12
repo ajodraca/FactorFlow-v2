@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
-      version: "4"
+      version: "5"
     - id: CONST-SEC
       version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
     - id: CAP-001-release
@@ -812,9 +812,8 @@ CMD ["sh", "-c", "python -m factorflow.db.migrate_main && exec python -m factorf
   so `pip install .` installs both the migrations and the bundle. Without the
   `api/static` entry the copied bundle would be left out of the installed
   package, which is how B3 arose.
-- Node 22 matches the toolchain the frontend validation commands already run
-  on. The tech stack names TypeScript 5.x, React 18 and Vite, not a Node
-  version, so section 14 item 7 asks the owner to record one.
+- Node 22 is the frontend toolchain's runtime the tech stack records (v5),
+  and the version the frontend validation commands run on.
 
 `.dockerignore` (new) excludes `node_modules/`, `.venv/`, `dist/`, `build/`,
 `tests/`, `test-results/`, `playwright-report/`, `.git/`, `.env` and `.env.*`,
@@ -1310,7 +1309,7 @@ do.
    component's clause 2a; the standing of ingestion-api's section 4 reading,
    the database connection settings, and the release-readiness security
    evidence.*
-7. **Which Node.js version builds the interface?** The tech stack names
+7. ~~Which Node.js version builds the interface?~~ **Resolved 2026-10-12: Node.js 22, recorded in tech stack v5.** The tech stack names
    TypeScript 5.x, React 18 and Vite, not a Node version. Section 2.8.2 uses
    `node:22-slim`, the version the frontend validation commands run on today.
    *Owner: tech stack owner. Blocks: nothing; the tech stack should record it.*

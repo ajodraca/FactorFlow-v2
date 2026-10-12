@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
-      version: "4"
+      version: "5"
     - id: CAP-001-release
       version: "1"
   invoking_user: ajodraca
@@ -406,7 +406,7 @@ This component exposes no HTTP surface.
 | System design | CAP-001 system design v3 | Application start steps 32 to 36, constraint 5.10 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Component design | Market Data Store | `applied_migrations` definition and the four migration files | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | UX design | CAP-001 UX design v4 | Section 2, the unreachable state naming a failed migration | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
-| Constitution | Tech Stack v4 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v5 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
 | Component design | Runtime Configuration v12 | Section 2.8, the release image and compose definition that carry and run the migrator | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Release | CAP-001 release readiness v1 | Blocker B1, found by the image smoke test | `docs/releases/CAP-001-release-v1.md` |
 

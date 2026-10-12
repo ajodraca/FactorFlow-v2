@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
-      version: "4"
+      version: "5"
     - id: CAP-001-release
       version: "1"
   invoking_user: ajodraca
@@ -503,7 +503,7 @@ connection pool. It consumes no external integration.
 | System design | CAP-001 system design v3 | Interfaces 4.2, control flow 3, constraints 5.1, 5.11, 5.17 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Screens 1.1 to 1.5, cross-screen navigation, the copy this API's messages must match | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Standard | STD-UI v4 | STD-UI-19 error parts, STD-UI-25 polling and last-updated | `docs/constitution/standards/ui-conventions.md` |
-| Constitution | Tech Stack v4 | FastAPI on uvicorn, Pydantic, validation commands, the frontend toolchain the image's interface stage runs | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v5 | FastAPI on uvicorn, Pydantic, validation commands, the frontend toolchain the image's interface stage runs | `docs/constitution/tech-stack.md` |
 | Component design | Runtime Configuration v12 | Section 2.8, the release image, compose definition and deployment smoke check | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Release | CAP-001 release readiness v1 | Blocker B3, the image serving 404 at `/` | `docs/releases/CAP-001-release-v1.md` |
 
