@@ -831,7 +831,7 @@ Docker Desktop runs on it. The conditions H1 to H9 map to this deployment as fol
 | Condition | How this deployment meets it | Checked by |
 |---|---|---|
 | (H1) Listeners bind only to loopback | API: the `ApiSettings` validator, in the product's own code; PostgreSQL, a third-party server: `listen_addresses=127.0.0.1` in `compose.yaml`, which is release evidence (H7) | `test_settings_validation.py`, `test_compose_definition.py`; smoke check 4 |
-| (H2) Clients use the loopback forms | The app and ingestion processes connect to `127.0.0.1` (`FACTORFLOW_DATABASE_URL`), through `psycopg`, which follows no redirect and uses no proxy. The owner's browser, a client the product does not control, is directed to `http://127.0.0.1:8000` by the README and section 9, and the API issues no redirect to any other address | `test_compose_definition.py` (the URL's host); `test_database_url_confinement.py` |
+| (H2) Clients use the loopback forms | The app and ingestion processes connect to `127.0.0.1` (`FACTORFLOW_DATABASE_URL`), through `psycopg`, which follows no redirect and uses no proxy. The application's healthcheck (`http.client`) and the smoke check (`curl --noproxy '*'`, no `-L`) are clients the product controls on the API channel and use neither a proxy nor a redirect. The owner's browser, a client the product does not control, is directed to `http://127.0.0.1:8000` by the README and section 9, and the API issues no redirect to any other address. PostgreSQL's own healthcheck uses the container's local socket, not loopback TCP | `test_compose_definition.py` (the URL's host); `test_database_url_confinement.py` |
 | (H3) The channel never leaves the host | Host network namespace; no `ports:`, no tunnel. Docker Desktop's forward between macOS loopback and the virtual machine's loopback listens on loopback on both sides, which the probes in this section evidence (LAN unreachable) | `test_compose_definition.py` (no `ports:` key); smoke check 4 |
 | (H4) No credential in clear | Channel (a) carries no credential: the interface has no authentication (AC-14). Channels (b) and (c) use `scram-sha-256`, which the client requires (`require_auth=scram-sha-256` in `FACTORFLOW_DATABASE_URL`, honoured by the bundled libpq 18) and the server uses for every connection; no `trust` line remains for loopback or the local socket. The password is generated with `openssl rand -hex 24`, 192 bits, above the exception's 128-bit floor. The `postgres:16` image writes `trust` for `127.0.0.1`, `::1` and the local socket unless told otherwise (verified 2026-10-12: with only `POSTGRES_HOST_AUTH_METHOD` set, those lines stay `trust`), so `compose.yaml` sets both `POSTGRES_HOST_AUTH_METHOD` and `POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256` | `test_compose_definition.py`; smoke check 1 confirms the running store's `pg_hba.conf` has no `trust` line |
 | (H5) No data above Internal | All three channels carry Internal data only (`market-data-store` section 4, `ingestion-api` section 4). The provider key never crosses them; the database password crosses only as a `scram-sha-256` exchange | Design review |
@@ -933,7 +933,7 @@ services:
     volumes:
       - factorflow-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "factorflow", "-d", "factorflow"]
+      test: ["CMD", "pg_isready", "-U", "factorflow", "-d", "factorflow"]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -950,7 +950,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import json,sys,urllib.request; h=json.load(urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)); sys.exit(0 if h['database'] == 'reachable' and h['schema_version'] is not None else 1)"]
+      test: ["CMD", "python", "-c", "import http.client,json,sys; c=http.client.HTTPConnection('127.0.0.1', 8000, timeout=3); c.request('GET', '/api/health'); r=c.getresponse(); h=json.loads(r.read()) if r.status == 200 else {}; sys.exit(0 if h.get('database') == 'reachable' and h.get('schema_version') is not None else 1)"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -1014,6 +1014,14 @@ volumes:
   ingestion never starts, because the application never becomes healthy. The
   owner stops the loop with `docker compose stop app`. The policy is kept
   because it also brings the three containers back after a reboot.
+- **Healthchecks open no uncovered channel.** PostgreSQL's `pg_isready` runs
+  without `-h`, so it uses the container's local Unix socket and opens no
+  loopback TCP connection; a third-party client on a plaintext network channel
+  would fall outside the exception (H7). The application's healthcheck and the
+  smoke check are clients the product controls on the API channel (H2):
+  the healthcheck uses `http.client`, which never consults proxy settings and
+  never follows a redirect, and the smoke check uses `curl --noproxy '*'
+  --proto =http` without `-L`.
 - **Healthcheck timings are design values, not derived ones.** An interval of
   5 s with 30 retries gives each service 150 s to become healthy. That covers
   PostgreSQL's first initialisation and a first migration of four files, which
@@ -1102,7 +1110,8 @@ the project label, so it needs none of the four variables:
    passes, section 2.8.3), and
    `docker exec <postgres container> sh -c 'grep -v "^#" "$PGDATA/pg_hba.conf"'`
    shows no `trust` line (exception condition H4).
-2. `GET http://127.0.0.1:8000/api/health` answers 200 with
+2. `GET http://127.0.0.1:8000/api/health`, fetched with `curl --noproxy '*'
+   --proto =http` and no `-L` like every request the script makes, answers 200 with
    `database == "reachable"`, and `schema_version` equals the highest version
    the running image carries. That version is read from the image itself:
    `docker exec <app container> python -c "from factorflow.db.migrate_main
