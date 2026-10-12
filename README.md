@@ -1223,7 +1223,10 @@ FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
 Exit code 0 means the schema is current or was brought forward; 1–4 each
 name a distinct reason the store could not be brought forward (unreachable
 database, store ahead of this build, a tampered migration, or a migration
-that failed partway) and none of them start the API.
+that failed partway) and none of them start the API. Exit 4 also covers a
+build whose migration files cannot be read: a missing migrations directory,
+a malformed filename or a repeated version, all reported before any
+connection is made.
 
 ## Running the API
 
