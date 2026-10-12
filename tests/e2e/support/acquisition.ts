@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { type APIRequestContext, type Locator, type Page, expect } from "@playwright/test";
 import { sql } from "./database";
 
@@ -6,7 +7,8 @@ import { sql } from "./database";
  * API with an ingestion runner on 127.0.0.1:8125, its own database
  * `factorflow_acquisition`, and the stub Massive provider
  * (`massive_stub.py`) on 127.0.0.1:8126 (CAP-001-e2e-tests-automation-tasks
- * T004; DEC-0025). Supports TC-E2E-001, 002, 004-007, 009, 010.
+ * T004; DEC-0025). Supports TC-E2E-001, 002, 004-007, 009, 010 and
+ * TC-INT-027 (CAP-001-integration-tests-automation-tasks T027).
  *
  * Every acquisition-stack spec calls `resetAcquisitionStore()` in
  * `beforeEach`, so no spec depends on file order, and leaves no run
@@ -58,6 +60,33 @@ export function releaseSymbol(symbol: string): Promise<void> {
 
 export function resetStub(): Promise<void> {
   return stubControl("reset");
+}
+
+/** Every provider request the stub received since its last reset, in arrival order. */
+export async function stubRequests(): Promise<{ method: string; path: string }[]> {
+  const response = await fetch(`${STUB_BASE_URL}/__stub/requests`);
+  if (!response.ok) {
+    throw new Error(`stub requests answered ${response.status}: ${await response.text()}`);
+  }
+  return (await response.json()).requests;
+}
+
+/**
+ * Whether the acquisition stack's ingestion process is running. `pgrep`
+ * exits 1 when nothing matches; any other failure is rethrown.
+ */
+export function ingestionProcessIsRunning(): boolean {
+  try {
+    execFileSync("pgrep", ["-f", "tests/e2e/support/ingestion_e2e_main.py"], {
+      encoding: "utf-8",
+    });
+    return true;
+  } catch (error) {
+    if ((error as { status?: number | null }).status === 1) {
+      return false;
+    }
+    throw error;
+  }
 }
 
 /** Restores the stub's defaults and empties every data table on the acquisition stack. */

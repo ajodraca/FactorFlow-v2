@@ -2,22 +2,23 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-integration-tests-automation-tasks
 artifact_type: automation-tasks
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-09
 updated: 2026-10-11
+last_reworked_review: integration-tests-automation-review-v1.md
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-11T03:27:07Z
+  timestamp: 2026-10-12T00:36:34Z
   source_artifacts:
     - id: CAP-001-integration-tests
-      version: "1"
+      version: "2"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -29,11 +30,29 @@ ai_provenance:
 **External dependencies:** Massive
 **Test Scope:** integration
 **Branch:** `usr/alvaro-de-jodra/CAP-001-automation`
-**Date:** 2026-10-07
+**Date:** 2026-10-11
 
 ## Summary
 
-Version 2 replaces the 2026-09-09 plan. That plan created new files and a new
+Version 3 adds TC-INT-027 ("E2E acquisition stack reaches the loopback Massive
+stub", DAC-E3-S7-14), which test specification v2 added on 2026-10-10 after
+version 2 of this plan was written (integration automation review v1, AR-001).
+T001–T025 are unchanged and stay complete. Five new tasks, T026–T030, automate
+TC-INT-027 per **owner direction 2026-10-11**:
+
+1. TC-INT-027 is a Playwright test in `tests/e2e/`, run against the stack that
+   `playwright.config.ts`'s `webServer` already starts with
+   `scripts/run-e2e-server.sh`. It is not a pytest test that starts the script
+   itself.
+2. The stub provider gains a test-only `GET /__stub/requests` that returns the
+   provider requests it received. `POST /__stub/reset` clears the list.
+3. The test checks the ingestion process with
+   `pgrep -f tests/e2e/support/ingestion_e2e_main.py` right after health
+   answers, and again by the run reaching a terminal state, which only that
+   process can cause.
+4. `npm run test:e2e` joins this plan's validation commands.
+
+Version 2 replaced the 2026-09-09 plan. That plan created new files and a new
 `tests/integration/conftest.py` for behaviour the repository already tests. With
 traceability added, the existing pytest suite automates all 26 CAP-001
 integration cases (TC-INT-001–026). Eight targeted additions cover what it
@@ -51,13 +70,13 @@ misses. Per **owner direction 2026-10-07**:
    needs a fixture that does not exist.
 
 Each mapping below was checked against the test's assertions, not its name. The
-plan has 25 tasks in four phases:
+plan has 30 tasks in four phases:
 
 - 1 baseline task
-- 1 helper-module task
+- 3 helper tasks (T002 in v2; T026 and T027 in v3)
 - 12 annotation tasks
-- 8 tasks that add an assertion or a new test
-- 3 validation tasks
+- 9 tasks that add an assertion or a new test (T015–T022 in v2; T028 in v3)
+- 5 validation tasks (T023–T025 in v2; T029 and T030 in v3)
 
 ## Test Case Traceability
 
@@ -93,6 +112,7 @@ repository root.
 | TC-INT-024 | Massive corporate-actions HTTPS contract | integration | massive-client, Massive REST API | Annotate `tests/unit/test_massive_actions.py::test_fetch_corporate_actions_returns_a_complete_result_for_a_covered_symbol` (mapping). Add request-argument assertions, because no test checks the documented corporate-actions requests | T012, T020 |
 | TC-INT-025 | Massive not-found and rate-limit propagation | integration | massive-client, Massive REST API, acquisition-runner | Annotate `tests/unit/test_massive_reference.py::test_fetch_reference_raises_instrument_not_found_for_unknown_symbol`, `tests/unit/test_massive_client_governor_integration.py::test_a_first_page_provider_failure_surfaces_as_the_typed_error` and `tests/integration/test_runner_isolation.py::test_not_found_instrument_is_recorded_and_run_continues` (isolated). Add a new test that a 429 is paced without consuming attempts, because no test drives a 429 through `MassiveClient` | T009, T013, T014, T002, T021 |
 | TC-INT-026 | Massive timeout and server-error propagation | integration | massive-client, Massive REST API, acquisition-runner | Annotate `tests/integration/test_runner_isolation.py::test_provider_unavailable_is_recorded_and_run_continues` (per-instrument failure). Add a new test that a timeout or 5xx is retried up to the attempt limit through `MassiveClient`, because no test drives either through the client | T014, T002, T022 |
+| TC-INT-027 | E2E acquisition stack reaches the loopback Massive stub | integration | ingestion-api, acquisition-runner, massive-client, Massive REST API (DEC-0025 loopback stub) | Add the new Playwright test `tests/e2e/acquisition-stack-stub.spec.ts`, because no test asserts that the ingestion process survives health or reads which requests the stub received. `npm run test:e2e` drives runs against the stub only incidentally. The case was run once by hand in `CAP-001-E3-S7-implementation-review-v1.md` | T026, T027, T028 |
 
 ## Test Infrastructure
 
@@ -126,6 +146,22 @@ repository root.
   unchanged. This matches the `# Implements` lines already in
   `test_api_coverage.py`, `test_api_health.py` and `test_runner_isolation.py`,
   and the automation-coding rule that each test names the cases it implements.
+- **TC-INT-027 (v3) runs under Playwright** (`playwright.config.ts`: `testDir`
+  `./tests/e2e`, one worker, Chromium project, `npm run test:e2e` =
+  `playwright test`, `posttest:e2e` removes the container). It uses the
+  acquisition stack that `scripts/run-e2e-server.sh` starts: the API on
+  127.0.0.1:8125 with database `factorflow_acquisition`, the ingestion process
+  `tests/e2e/support/ingestion_e2e_main.py`, and the stub
+  `tests/e2e/support/massive_stub.py` on 127.0.0.1:8126 with a provider key
+  generated for the run. It needs Docker. It reuses `ACQUISITION_BASE_URL`,
+  `resetAcquisitionStore` and `waitForRunState` from
+  `tests/e2e/support/acquisition.ts`, and runs processes with
+  `execFileSync` from `node:child_process`, as `tests/e2e/support/database.ts`
+  does.
+- **TypeScript traceability (v3).** In a `.spec.ts` file, put a
+  `// Implements TC-INT-NNN` comment line directly above the `test(` call, and
+  start the test title with the TC ID, as the `tests/e2e/*.spec.ts` titles
+  already do (`"TC-E2E-001: …"`).
 
 ## Phase 1: Test Infrastructure Setup
 
@@ -147,9 +183,21 @@ helpers every `tests/unit/test_massive_*.py` file defines (DEC-0028).
 
 - [x] T002 Create `tests/unit/test_massive_retry.py`. Its module docstring cites the test table in `component-design-massive-client.md` section 7: "429 is not an attempt", "Timeout retries to the limit" and "A 429 without Retry-After is still throttling". Define the helpers the same way `tests/unit/test_massive_client_governor_integration.py` does: `FIXTURES`, `_load`, `_settings()` (`max_attempts: 3`), `_governor()` (`max_attempts=3`, `max_throttle_wait_seconds=1.0`, no-op `sleep`), `_FakeResponse` and `_envelope`. Do not import helpers across test modules, because the existing files do not. Add no tests in this task (supports TC-INT-025 and TC-INT-026).
 
+- [x] T026 [P] Add a request log to `tests/e2e/support/massive_stub.py` (supports TC-INT-027):
+  - In `StubState`, keep a list of received provider requests under the existing `_lock`. Add `record(method, path)` and `requests()`, which returns a copy. Make `reset()` also clear the list.
+  - In `StubHandler.do_GET`, answer `GET /__stub/requests` with 200 and `{"requests": [{"method": "GET", "path": "<path>"}, …]}` in the order received, and do not record that request. Record every other `GET` as `parts.path` only, before `wait_if_held`, so a held request is logged when it arrives. Do not record the query string.
+  - Add the `GET /__stub/requests` control to the module docstring's list, and add TC-INT-027 to its "Supports" line.
+  - Change no provider response, mode or hold behaviour.
+- [x] T027 Add two helpers to `tests/e2e/support/acquisition.ts` (supports TC-INT-027; depends on T026):
+  - `stubRequests(): Promise<{ method: string; path: string }[]>`, which calls `GET ${STUB_BASE_URL}/__stub/requests` with `fetch`, throws on a non-OK status the way `stubControl` does, and returns `requests`.
+  - `ingestionProcessIsRunning(): boolean`, which runs `pgrep -f tests/e2e/support/ingestion_e2e_main.py` with `execFileSync` and returns `false` only when pgrep exits 1 (no match). Any other failure is rethrown.
+  - Add TC-INT-027 to the header comment's "Supports" line.
+
 **Checkpoint:** `uv run pytest tests/unit/test_massive_retry.py --collect-only -q`
 imports the module cleanly, and `uv run ruff check tests/unit/test_massive_retry.py`
-passes.
+passes. `uv run ruff check tests/e2e/support/massive_stub.py`,
+`uv run ruff format --check tests/e2e/support/massive_stub.py`, `npm run lint`
+and `npm run format` pass after T026 and T027.
 
 ---
 
@@ -226,10 +274,24 @@ test asserts (owner direction 2026-10-07; DEC-0023, DEC-0024).
   - Server-error case: set it to `BadResponse((FIXTURES / "error_unknown_shape.json").read_text())`. This is the unrecognised error body that the later-page failure test in `test_massive_bars.py` already uses.
   - In both cases, assert that `fetch_reference("AAPL")` raises `ProviderUnavailable` and that `get_ticker_details.call_count == 3`: the configured `max_attempts`, with no fourth send.
 
+### TC-INT-027 (v3, owner direction 2026-10-11)
+
+- [x] T028 Create `tests/e2e/acquisition-stack-stub.spec.ts` with one test, `"TC-INT-027: the E2E acquisition stack reaches the loopback Massive stub"`, and a `// Implements TC-INT-027` line above it (depends on T027).
+  - Header comment: TC-INT-027, DAC-E3-S7-14, `runtime-config` section 14 item 4, the S6/S7 landing rule, and this task.
+  - `test.beforeEach` calls `resetAcquisitionStore()`, like every acquisition-stack spec, so the stub's request log starts empty.
+  - Step 1: `GET ${ACQUISITION_BASE_URL}/api/health` with the `request` fixture answers 200.
+  - Step 2: right after that, assert `ingestionProcessIsRunning()` is `true`, with a message saying the ingestion process refused to start or exited.
+  - Precondition setup at the HTTP boundary, not through the UI: `PUT /api/settings/history-depth` with `{"years": 1}` (200), then `POST /api/instruments` with `{"symbols": ["STB"]}` (201). The stub answers every symbol that does not start with `UNK`.
+  - Step 3: `POST /api/acquisition-runs` answers 202. Keep `run.id`.
+  - Step 4: `waitForRunState(request, runId, ["succeeded", "partial", "failed", "cancelled", "abandoned"], 20_000)`, the terminal states in `src/factorflow/runs/journal.py` `_TERMINAL_STATES`. The case asserts only that the run is terminal, not which state.
+  - Step 5: `stubRequests()` is non-empty, every entry's `method` is `"GET"`, and one entry's `path` is `/v3/reference/tickers/STB`, so the requests are this run's.
+  - Leave no run non-terminal at the end.
+
 **Checkpoint:** Every TC-INT-001–026 ID appears in at least one `# Implements`
-line, and each Expected Result clause is asserted by at least one test. The only
-new tests are T019, T021 and T022. No production file and no `conftest.py`
-changed.
+line, TC-INT-027 appears in a `// Implements` line, and each Expected Result
+clause is asserted by at least one test. The only new tests are T019, T021,
+T022 and T028. No production file and no `conftest.py` changed; T026 and T027
+change test-only support files.
 
 ---
 
@@ -249,9 +311,12 @@ changed.
 - [x] T024 On a host with Docker, run `uv run pytest tests/integration -m postgres` and then the full `uv run pytest`. Both must pass. This container has no Docker, so use a local machine or CI. Record where the run happened and the pass counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T023).
 - [x] T025 From the repository root, verify traceability: `for n in $(seq -w 1 26); do grep -rqE "# Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing (depends on T003–T022).
 
+- [x] T029 On a host with Docker, run `npm run test:e2e`. Expect 18 passing tests: the 17 from the E2E automation plus T028. Confirm that `docker ps` lists no `factorflow-e2e-postgres` afterwards. Then run `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -m 'not postgres'` (the stub is still not collected), `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run test`. Record where the run happened and the counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T026–T028).
+- [x] T030 From the repository root, verify traceability for all 27 cases: `for n in $(seq -w 1 27); do grep -rqE "(#|//) Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing. This loop replaces T025's for this version (depends on T028).
+
 **Checkpoint:** Lint, format, type check and the non-postgres tests pass
-locally. The postgres integration suite and the full suite pass on a Docker
-host, and all 26 TC-INT IDs are traced.
+locally. The postgres integration suite, the full suite and `npm run test:e2e`
+pass on a Docker host, and all 27 TC-INT IDs are traced.
 
 ---
 
@@ -266,6 +331,8 @@ host, and all 26 TC-INT IDs are traced.
 - T020 depends on T012.
 - T021 depends on T002, and T022 on T021.
 - T023 and T025 depend on T002–T022. T024 depends on T023.
+- T026 has no dependency on T001–T025. T027 depends on T026, and T028 on T027.
+- T029 depends on T026–T028. T030 depends on T028.
 
 ### Parallel Opportunities
 
@@ -276,6 +343,8 @@ host, and all 26 TC-INT IDs are traced.
   - T020
   - the retry chain (T021–T022)
 - Phase 4: T023 and T025 can run in parallel.
+- The v3 chain (T026–T028) touches only `tests/e2e/` and can run in parallel
+  with anything else. T029 and T030 can run in parallel.
 
 ### Phase Dependencies
 
@@ -283,6 +352,8 @@ host, and all 26 TC-INT IDs are traced.
 - The Phase 2 module (T002) gates only T021 and T022.
 - Each Phase 3 addition waits only for the annotation task on the same file.
 - Phase 4 starts when Phases 1–3 are complete.
+- In v3, T001–T025 are already complete, so the remaining order is T026 →
+  T027 → T028 → T029 and T030.
 
 ## Validation Plan
 
@@ -297,6 +368,12 @@ These come from the **Validation Commands** table in `docs/constitution/tech-sta
 - Lint: `uv run ruff check .`
 - Format: `uv run ruff format --check .`
 - Type check: `uv run mypy src`
+- Frontend install: `npm ci`
+- Frontend lint: `npm run lint`
+- Frontend format: `npm run format`
+- Frontend type check: `npx tsc --noEmit`
+- Frontend unit tests: `npm run test`
+- E2E suite: `npm run test:e2e` (needs Docker)
 
 ### Test-Specific Validation
 
@@ -304,18 +381,24 @@ These come from the **Validation Commands** table in `docs/constitution/tech-sta
   `uv run pytest tests/integration -m postgres`, then `uv run pytest`. These
   runs validate TC-INT-001–020 and the runner-isolation half of
   TC-INT-025/026. A run without Docker does not satisfy this requirement.
+- **Required, needs Docker (v3):** `npm run test:e2e`, which runs TC-INT-027
+  (T028) with the 17 E2E tests. A run without Docker does not satisfy this
+  requirement.
 - **Runs without Docker:**
   - `uv run ruff check .`
   - `uv run ruff format --check .`
   - `uv run mypy src`
   - `uv run pytest -m 'not postgres'` (all the TC-INT-021–026 Massive client tests)
   - `uv run pytest tests/integration --collect-only -q`
-- **Traceability:** T025's loop finds all 26 `TC-INT-0NN` IDs.
+- **Traceability:** T030's loop finds all 27 `TC-INT-0NN` IDs, in `#` or `//`
+  comment lines.
 - **Expected result:**
   - Every annotated test still passes, with unchanged behaviour.
   - The extended tests (T015–T018, T020) pass.
-  - The three new tests pass: T019, T021 and T022 (T022 has two parametrized
-    cases).
+  - The three new pytest tests pass: T019, T021 and T022 (T022 has two
+    parametrized cases).
+  - The new Playwright test (T028) passes, and `npm run test:e2e` reports 18
+    passing tests.
   - No test calls the live Massive service or needs a credential.
 
 ## Notes
@@ -355,5 +438,32 @@ These come from the **Validation Commands** table in `docs/constitution/tech-sta
 - If a Phase 3 assertion fails against the current production code, report it
   as a finding for review. Do not weaken the assertion, and do not change
   production code as part of this automation work.
+- **Owner direction 2026-10-11** governs v3 (TC-INT-027), answered
+  interactively during the plan revision after integration automation review
+  v1 (AR-001):
+  - Framework: a Playwright spec against the stack `run-e2e-server.sh`
+    already starts as the `webServer`. The alternative, a pytest test that
+    starts the script itself, was rejected: it repeats about a minute of stack
+    start-up and contends with Playwright for ports 8123–8126 and the
+    `factorflow-e2e-postgres` container name.
+  - Stub requests: a test-only `GET /__stub/requests`, next to the existing
+    `/__stub/*` controls. The `[massive-stub]` stderr access-log lines remain,
+    but a Playwright test cannot read the `webServer`'s output.
+  - Ingestion liveness: `pgrep` right after health, plus the terminal run.
+  - Validation: `npm run test:e2e` is added.
+- T026 records the request path without its query string, so the log never
+  holds a query parameter, whichever way the client sends the provider key.
+- `pgrep -f` matches both the `uv run` parent and its `python` child (the E3-S7
+  review saw two pids). T027 asserts only that at least one process matches.
+  `pgrep` exists on macOS and on the Linux CI image.
+- The spec's Error / Edge Cases (CAP-001-E3-S6 applied alone) is not automated
+  as a separate test: it is the regression T028's step 2 would catch, and
+  reproducing it needs a build without CAP-001-E3-S7.
+- The E3-S7 review recorded a run ending `partial` because `instruments_named`
+  was never set. T028 accepts any terminal state, as the case requires, so it
+  passes either way. The E2E tests that expect `Succeeded` cover the outcome.
+- `npx tsc --noEmit` does not type-check `tests/e2e` (E2E automation review v2
+  warning), so T028 and T027 are type-checked only when Playwright compiles them
+  under `npm run test:e2e`. Changing `tsconfig` is outside this plan.
 - The commit that carries this plan should include these decision trailers:
   `Decision-Id: DEC-0023`, `Decision-Id: DEC-0024` and `Decision-Id: DEC-0028`.

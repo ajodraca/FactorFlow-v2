@@ -5,7 +5,7 @@ tests/e2e/support/massive_stub.py <port>`) and bound to 127.0.0.1 only, so no
 e2e request ever reaches the live provider (CAP-001-e2e-tests-automation-tasks
 T001; DEC-0025). It serves every endpoint `src/factorflow/ingestion/massive/
 client.py` calls, with bodies shaped from `tests/fixtures/massive/*.json` and
-no `next_url`. Supports TC-E2E-001, 002, 004-007, 009, 010.
+no `next_url`. Supports TC-E2E-001, 002, 004-007, 009, 010 and TC-INT-027.
 
 Controlled behaviour, driven by the specs through `tests/e2e/support/
 acquisition.ts`:
@@ -18,7 +18,12 @@ acquisition.ts`:
   classifies as `ProviderUnavailable` (DEC-0048);
 - `POST /__stub/hold {"symbol": S}` makes S's requests block until
   `POST /__stub/release {"symbol": S}`;
-- `POST /__stub/reset` restores mode `ok` and releases every hold.
+- `GET /__stub/requests` answers `{"requests": [{"method", "path"}, ...]}`,
+  every provider request received since the last reset, in arrival order,
+  path only with no query string (CAP-001-integration-tests-automation-tasks
+  T026);
+- `POST /__stub/reset` restores mode `ok`, releases every hold and clears
+  the request log.
 
 A test fixture, not a product contract. Not collected by pytest (no `test_`
 prefix) or Playwright (not `*.spec.ts`).
@@ -88,6 +93,7 @@ class StubState:
         self._lock = threading.Lock()
         self.mode = "ok"
         self._holds: dict[str, threading.Event] = {}
+        self._requests: list[dict[str, str]] = []
 
     def set_mode(self, mode: str) -> None:
         if mode not in ("ok", "reject-credential", "unavailable"):
@@ -105,11 +111,20 @@ class StubState:
         if event is not None:
             event.set()
 
+    def record(self, method: str, path: str) -> None:
+        with self._lock:
+            self._requests.append({"method": method, "path": path})
+
+    def requests(self) -> list[dict[str, str]]:
+        with self._lock:
+            return [dict(entry) for entry in self._requests]
+
     def reset(self) -> None:
         with self._lock:
             self.mode = "ok"
             held = list(self._holds.values())
             self._holds.clear()
+            self._requests.clear()
         for event in held:
             event.set()
 
@@ -210,6 +225,10 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
 class StubHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 -- BaseHTTPRequestHandler's naming
         parts = urlsplit(self.path)
+        if parts.path == "/__stub/requests":
+            self._send(200, {"requests": STATE.requests()})
+            return
+        STATE.record("GET", parts.path)
         query = parse_qs(parts.query)
         symbol = _symbol_of(parts.path, query)
         if symbol is not None:
