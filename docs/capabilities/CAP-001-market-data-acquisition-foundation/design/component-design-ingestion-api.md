@@ -266,6 +266,36 @@ Release manifest v1 found the image built from `ef2dd7c` serving 404 at `/`,
 because neither held. A development checkout still builds the bundle with
 `npm run build`, as today.
 
+### 2.5a Request host and origin checks (H9)
+
+The API is plain HTTP on loopback and has no authentication (AC-14), so any web
+page the owner's browser loads can send it requests. A cross-site page can
+issue state-changing requests, and with DNS rebinding a page can also read the
+answers, which TLS would incidentally have prevented. CONST-SEC 1.3 condition
+H9 of the `SEC-ENC-001 host-local loopback exception` therefore requires two
+checks, made by one middleware in `src/factorflow/api/app.py` registered before
+every route and the static mount (owner decision 2026-10-12):
+
+- **Host.** The allowed hosts are `127.0.0.1:<port>`, `localhost:<port>` and
+  `[::1]:<port>`, where `<port>` is `ApiSettings.port`. A request whose `Host`
+  header is missing or names anything else is answered `400` with the error
+  envelope, code `host_not_allowed`, before any route or the static mount runs.
+  This defeats DNS rebinding, where the browser sends the attacker's host name.
+- **Origin.** A request whose method is not `GET`, `HEAD` or `OPTIONS` and that
+  carries an `Origin` header is answered `403`, code `origin_not_allowed`,
+  unless the origin is `http://127.0.0.1:<port>`, `http://localhost:<port>` or
+  `http://[::1]:<port>`. A request with no `Origin` header (a script or `curl`
+  on the machine) is not refused by this check, because only a browser acting
+  for a page sends one.
+
+Neither check reads a credential or the request body, and both are logged at
+`warning` with the request id and the rejected header's value, which is not a
+secret. The interface's own requests come from its own origin and pass. The
+E2E stacks pass too, because each API's port comes from `FACTORFLOW_API_PORT`
+and the Playwright pages and request contexts use those same origins. The 15
+test modules that build a `TestClient` with its default `Host: testserver` pass
+`base_url="http://127.0.0.1:8000"` instead (the implementing story lists them).
+
 ### 2.6 Messages
 
 N/A, not applicable for this component. No broker, topic or queue. The interface
@@ -334,12 +364,15 @@ learns of run completion by polling, per the UX design's 10-second run poll and
 - **SAST and SCA.** FastAPI, Starlette, Pydantic and uvicorn are scanned through
   `pyproject.toml`. `ruff` and `mypy` run as blocking checks per the tech
   stack's validation commands.
+- **Cross-site and DNS-rebinding requests (H9).** Rejected by the host and
+  origin checks of section 2.5a, which replace the protection TLS would have
+  given incidentally.
 - **Crypto usage: none in this component.** TLS is not terminated here. The
   owner's browser reaches the API over plain HTTP at `http://127.0.0.1:8000`, a
   channel carrying Internal data that never leaves the host. It relies on the
   `SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3 (DEC-0050), and
   carries no credential, because the interface has no authentication.
-  `runtime-config` section 2.8.1 maps the exception's conditions H1 to H8 to the
+  `runtime-config` section 2.8.1 maps the exception's conditions H1 to H9 to the
   deployment. The exception is in force only once CONST-SEC 1.3 is approved and
   merged; until then the hop has no standing under SEC-ENC-001. This replaces
   the earlier reading that SEC-ENC-001 does not engage on a loopback hop.
@@ -407,6 +440,8 @@ integration tests that need a real store.
 | Bulk add is capped per request | `tests/integration/test_api_instruments.py` | 1000 symbols is accepted; 1001 returns 422 naming the cap, and no symbol is added |
 | Coverage without a range covers everything | `tests/integration/test_api_coverage.py` | Omitting `from` and `to` returns each instrument's full covered range, and a gap outside any trailing window is still reported (AC-8, section 2.4a) |
 | Unknown API path returns the envelope | `tests/unit/test_api_errors.py` | 404 with code `not_found`, not the SPA bundle |
+| A foreign Host header is refused | `tests/unit/test_api_host_origin.py` | `Host: evil.example:8000`, `Host: 127.0.0.1:9999` and a missing `Host` each return 400 `host_not_allowed` on an API path and on `/`; the three loopback hosts with the configured port pass (H9, DNS rebinding) |
+| A cross-site state change is refused | `tests/unit/test_api_host_origin.py` | `POST /api/acquisition-runs` with `Origin: https://evil.example` returns 403 `origin_not_allowed` and starts no run; the same request with `Origin: http://127.0.0.1:8000` or with no `Origin` is not refused by the check; `GET` with a foreign `Origin` is not refused (H9) |
 | The installed distribution carries the bundle | `tests/unit/test_distribution_contents.py` (`runtime-config` section 7) | With the bundle built before `uv build`, the wheel contains `factorflow/api/static/index.html` (B3) |
 | The deployed image serves the interface | `scripts/deploy-smoke.sh` check 3 (`runtime-config` section 2.8.5) | `GET http://127.0.0.1:8000/` answers 200 with the bundle's `index.html` (B3) |
 | Internal error hides detail | `tests/unit/test_api_errors.py` | A raised exception returns code and request id only, and the detail is in the log (SEC-ERR-001) |
