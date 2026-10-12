@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-runtime-config
 artifact_type: component-design
-artifact_version: 12
+artifact_version: 13
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,12 +14,12 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-12T15:10:00Z
+  timestamp: 2026-10-12T19:30:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "7"
+      version: "8"
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
@@ -121,6 +121,8 @@ the relationships between them.
 | `FACTORFLOW_RUN_STALE_AFTER_SECONDS` | both | no | 900 | Owner decision 2026-09-05; section 2.2a. Must exceed the heartbeat period by a wide margin |
 | `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` | ingestion | no | 5 | Owner decision 2026-09-05; section 2.2a. How often an idle runner looks for work |
 | `FACTORFLOW_LOG_LEVEL` | both | no | `INFO` | SA-LOG-001 |
+| `FACTORFLOW_POSTGRES_PASSWORD` | deployment (`compose.yaml`) | yes | none | Section 2.8.3. Read by `docker compose`, never by either process: it initialises PostgreSQL's role and is composed into `FACTORFLOW_DATABASE_URL`. URL-safe characters only. **Restricted** (section 4) |
+| `FACTORFLOW_IMAGE_TAG` | deployment (`compose.yaml`) | yes | none | Section 2.8.3. The immutable image tag both services run, `<release version>-<short commit>` |
 
 `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` is required rather than defaulted on
 purpose. The design is tier-agnostic (system design constraint 5.14), so a
@@ -747,19 +749,30 @@ Why host networking: under Docker's default bridge network a published port
 reaches only a process listening on the container's own network interface, so
 an API bound to loopback inside a container cannot be reached from the host at
 all. The alternative, letting the API bind `0.0.0.0` inside the container and
-publishing `127.0.0.1:8000`, would weaken the `ApiSettings` loopback validator
-(DAC-E1-S3-4) and the system design's AC-14 control. The owner chose host
-networking on 2026-10-12, which keeps both.
+publishing `127.0.0.1:8000`, would move the preventive control from the
+code-enforced `ApiSettings` validator (DAC-E1-S3-4) to one line of
+`compose.yaml`, and would require relaxing that validator.
 
-The two independent controls for AC-14 are therefore:
+Under host networking the bind address alone decides exposure: the probe below
+shows a server bound to `0.0.0.0` answering on the LAN address. This design
+therefore does not claim two independent preventive controls. An earlier
+revision did, and the owner's first decision rested on that claim
+(specification review v11, FINDING-31). On 2026-10-12, with that corrected, the
+owner decided to keep host networking with one preventive control per service
+and a detective check after every deployment:
 
-1. **The bind.** `ApiSettings` rejects any non-loopback `FACTORFLOW_API_HOST`
-   (section 2.3, unchanged). `compose.yaml` does not set `FACTORFLOW_API_HOST`,
-   so the default `127.0.0.1` applies.
-2. **The deployment.** Every service runs in the host network namespace with
-   nothing published, and PostgreSQL is started with
-   `listen_addresses=127.0.0.1`. A container that binds loopback cannot be
-   reached from another host whatever its port.
+1. **Preventive, the API.** `ApiSettings` rejects any non-loopback
+   `FACTORFLOW_API_HOST` (section 2.3, unchanged), so the API cannot be started
+   on another address. `compose.yaml` does not set the variable, so the default
+   `127.0.0.1` applies. `tests/unit/test_settings_validation.py`,
+   `tests/integration/test_api_binding.py` and `test_compose_definition.py`
+   (section 7) assert it.
+2. **Preventive, PostgreSQL.** `compose.yaml` starts PostgreSQL with
+   `listen_addresses=127.0.0.1`, and `test_compose_definition.py` asserts it.
+3. **Detective, the deployment.** The deployment smoke check (section 2.8.5,
+   check 4) runs after every `docker compose up -d` and fails the deployment if
+   port 8000 or 5432 accepts a connection on any non-loopback IPv4 or IPv6
+   address of the machine.
 
 Host requirement: Linux, or Docker Desktop with **host networking enabled**
 (Settings, Resources, Network). On the owner's machine (macOS, Docker Desktop,
@@ -775,10 +788,32 @@ With host networking disabled, none of these were reachable from macOS. The
 setting is therefore a deployment precondition, checked by the deployment smoke
 check (section 2.8.5).
 
+**Transport encryption (SEC-ENC-001).** Three production channels in this
+deployment are plaintext and never leave the host: (a) the owner's browser to
+the API at `http://127.0.0.1:8000`; (b) the application container to
+PostgreSQL at `127.0.0.1:5432`; and (c) the ingestion container to PostgreSQL
+at `127.0.0.1:5432`. All three carry Internal data. They rely on the
+`SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3, recorded for this
+project as DEC-0050. That exception is **not yet in force**: version 1.3 must
+first pass its constitution review, carry the owner's approval and be merged to
+the harness default branch. Until then these channels have no standing under
+SEC-ENC-001, and the CAP-001 release cannot be READY. The exception's six
+conditions map to this deployment as follows:
+
+| Condition | How this deployment meets it | Checked by |
+|---|---|---|
+| (1) Listeners bind only to loopback | API: the `ApiSettings` validator; PostgreSQL: `listen_addresses=127.0.0.1` | `test_settings_validation.py`, `test_compose_definition.py`; smoke check 4 |
+| (2) Clients use the loopback forms, no redirect, no proxy | The browser opens `http://127.0.0.1:8000` (section 9). `FACTORFLOW_DATABASE_URL` names `127.0.0.1`. `psycopg` uses no HTTP proxy, and the API issues no redirect off-host | `test_compose_definition.py` (the URL's host) |
+| (3) The channel never leaves the host | Host network namespace; no `ports:`, no forward, no tunnel | `test_compose_definition.py` (no `ports:` key) |
+| (4) No credential in clear | Channel (a) carries no credential: the interface has no authentication (AC-14). Channels (b) and (c) authenticate with `scram-sha-256`, set explicitly by `POSTGRES_HOST_AUTH_METHOD` in `compose.yaml`; the password never crosses the channel | `test_compose_definition.py` |
+| (5) A single host under the owner-operator's control | The owner's Mac. The owner states in each deployment's release evidence that no account outside the owner's control can run processes on it | Release evidence |
+| (6) An off-host listener check after every deployment, kept as release evidence | Smoke check 4, IPv4 and IPv6; its output is recorded in the release manifest | Release evidence |
+
 #### 2.8.2 The release image (`Dockerfile`)
 
-The image is built in two stages, so the release image carries the interface
-bundle (B3) without carrying Node.js or any frontend source.
+The image is built in three stages. The release image carries the interface
+bundle (B3), installs exactly the dependency versions `uv.lock` records, and
+carries neither Node.js, uv nor any frontend source.
 
 ```dockerfile
 # Stage 1: build the owner interface bundle.
@@ -792,16 +827,35 @@ RUN npm ci && npm run build
 # vite.config.ts writes to ../src/factorflow/api/static relative to web/,
 # so the bundle lands in /build/src/factorflow/api/static.
 
-# Stage 2: the release image.
+# Stage 2: export the locked runtime dependency set, with hashes.
+FROM python:3.12-slim AS lock
+WORKDIR /lock
+COPY pyproject.toml uv.lock ./
+RUN pip install --no-cache-dir uv==0.12.10 \
+ && uv export --frozen --no-emit-project --format requirements.txt -o requirements.txt
+
+# Stage 3: the release image.
 FROM python:3.12-slim
 WORKDIR /app
+COPY --from=lock /lock/requirements.txt ./
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY pyproject.toml uv.lock ./
 COPY src ./src
 COPY --from=interface /build/src/factorflow/api/static ./src/factorflow/api/static
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir --no-deps .
 CMD ["sh", "-c", "python -m factorflow.db.migrate_main && exec python -m factorflow.app_main"]
 ```
 
+- **Locked dependencies (specification review v11, FINDING-32).** The tech
+  stack (OQ-TS-5) makes `uv.lock` the authoritative record of versions. `pip
+  install .` alone would re-resolve the open ranges in `pyproject.toml`, for
+  example `massive>=2` where the lock pins 2.8.0. Stage 2 exports the lock.
+  `--frozen` fails the build if `uv.lock` is out of date with `pyproject.toml`,
+  so an unlocked change cannot reach an image. The export excludes the `dev`
+  extra, because extras are not exported unless named, and excludes the project
+  itself (`--no-emit-project`). Stage 3 installs that set with hash checking,
+  then installs the project with `--no-deps`, so nothing is resolved twice. uv
+  is pinned to 0.12.10, the version that wrote the lock.
 - The default command is unchanged: the migrator must exit 0 before the API is
   exec'd (AC-16, `schema-migrator` section 2.1).
 - No `COPY` names `tests/` or `migrations/`. The migrations travel inside the
@@ -809,11 +863,10 @@ CMD ["sh", "-c", "python -m factorflow.db.migrate_main && exec python -m factorf
   that the image contains nothing under `tests/` keeps holding.
 - `pyproject.toml` `[tool.setuptools.package-data]` becomes
   `factorflow = ["coverage/sql/*.sql", "db/migrations/*.sql", "api/static/**/*"]`,
-  so `pip install .` installs both the migrations and the bundle. Without the
-  `api/static` entry the copied bundle would be left out of the installed
+  so the project install carries both the migrations and the bundle. Without
+  the `api/static` entry the copied bundle would be left out of the installed
   package, which is how B3 arose.
-- Node 22 is the frontend toolchain's runtime the tech stack records (v5),
-  and the version the frontend validation commands run on.
+- Node 22 is the frontend toolchain's runtime that the tech stack records (v5).
 
 `.dockerignore` (new) excludes `node_modules/`, `.venv/`, `dist/`, `build/`,
 `tests/`, `test-results/`, `playwright-report/`, `.git/`, `.env` and `.env.*`,
@@ -824,10 +877,10 @@ the one stage 1 built.
 #### 2.8.3 Running it (`compose.yaml`)
 
 `compose.yaml` at the repository root runs the image as two containers next to
-PostgreSQL. Every secret is interpolated from the owner's shell environment,
-and a `:?` interpolation stops `docker compose` with the variable's name when
-one is missing, so nothing secret is committed (SEC-SEC-001) and nothing
-starts half-configured.
+PostgreSQL. Every secret and the image tag are interpolated from the owner's
+shell environment, and a `:?` interpolation stops `docker compose` with the
+variable's name when one is missing, so nothing secret is committed
+(SEC-SEC-001) and nothing starts half-configured.
 
 ```yaml
 name: factorflow
@@ -844,6 +897,7 @@ services:
       POSTGRES_DB: factorflow
       POSTGRES_USER: factorflow
       POSTGRES_PASSWORD: ${FACTORFLOW_POSTGRES_PASSWORD:?set FACTORFLOW_POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
     volumes:
       - factorflow-pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -854,7 +908,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: factorflow:${FACTORFLOW_IMAGE_TAG:-local}
+    image: factorflow:${FACTORFLOW_IMAGE_TAG:?set FACTORFLOW_IMAGE_TAG}
     build: .
     network_mode: host
     environment:
@@ -871,7 +925,7 @@ services:
     restart: unless-stopped
 
   ingestion:
-    image: factorflow:${FACTORFLOW_IMAGE_TAG:-local}
+    image: factorflow:${FACTORFLOW_IMAGE_TAG:?set FACTORFLOW_IMAGE_TAG}
     network_mode: host
     command: ["python", "-m", "factorflow.ingestion_main"]
     environment:
@@ -887,61 +941,132 @@ volumes:
   factorflow-pgdata:
 ```
 
+- **The owner sets four variables:** `FACTORFLOW_POSTGRES_PASSWORD`,
+  `FACTORFLOW_MASSIVE_API_KEY`, `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` and
+  `FACTORFLOW_IMAGE_TAG` (section 2.2). Every `docker compose` command
+  interpolates the whole file, so all four must be set in the shell that runs
+  `up`, `exec`, `stop` or `ps`. Any other section 2.2 variable may be added to
+  a service's `environment` by the owner; none is required.
+- **The database password** is composed into `FACTORFLOW_DATABASE_URL`
+  unencoded, so it must use only URL-safe characters: letters, digits, `-` and
+  `_`. `openssl rand -hex 24` produces one. `POSTGRES_PASSWORD` sets the role's
+  password only when the volume is first initialised. Changing
+  `FACTORFLOW_POSTGRES_PASSWORD` later therefore leaves the role on the old
+  password, and the application fails with exit 1 (`database unreachable`). To
+  change it: `docker compose exec postgres psql -U factorflow -d factorflow -c
+  "ALTER ROLE factorflow PASSWORD '<new>'"` with the old value still exported,
+  then export the new value and run `docker compose up -d`.
 - **Start order.** PostgreSQL must be healthy before the application container
   starts, and the application must be healthy before ingestion starts. The
   application's healthcheck requires `database == "reachable"` and a non-null
   `schema_version`, so ingestion never starts against a store the migrator has
-  not brought forward. A refused migration (exits 1 to 4) leaves the
-  application container exited and ingestion never started (AC-16).
-- **The owner sets three variables:** `FACTORFLOW_POSTGRES_PASSWORD`,
-  `FACTORFLOW_MASSIVE_API_KEY` and `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE`.
-  `FACTORFLOW_DATABASE_URL` is composed from the password, so the two cannot
-  disagree. Any other section 2.2 variable may be added to a service's
-  `environment` by the owner; none is required.
+  not brought forward.
+- **A refused start restarts in a loop.** Under `restart: unless-stopped`
+  Docker restarts a container whatever its exit code, so a refused migration
+  (exit 1 to 4) shows as `Restarting (N)`, re-running the migrator each time,
+  rather than as exited. AC-16 still holds: nothing serves or writes, and
+  ingestion never starts, because the application never becomes healthy. The
+  owner stops the loop with `docker compose stop app`. The policy is kept
+  because it also brings the three containers back after a reboot.
+- **Healthcheck timings are design values, not derived ones.** An interval of
+  5 s with 30 retries gives each service 150 s to become healthy. That covers
+  PostgreSQL's first initialisation and a first migration of four files, which
+  the E2E stack completes well inside the 60 s its script allows
+  (`scripts/run-e2e-server.sh`). The owner may change them; nothing else
+  depends on them.
 - **The application container receives the provider key for presence only**
   (section 14 item 3, system design constraint 5.12).
-- **One image, one tag.** Both services name the same image and tag, so they can
-  never run different builds (`FACTORFLOW_IMAGE_TAG`, default `local` for a
-  build on the machine). Upgrade and rollback move both together.
+- **One image, one immutable tag.** Both services name the same image and tag,
+  so they can never run different builds. Every build is tagged
+  `<release version>-<short commit>`, for example `0.1.0-ef2dd7c`, and a tag is
+  never reused, so the previous image stays available for rollback
+  (section 2.8.4).
 - **Data** lives in the named volume `factorflow-pgdata`. `docker compose down`
   keeps it, and only `docker compose down -v` removes it.
-- `restart: unless-stopped` brings the three back after a reboot. An ingestion
-  container killed mid-run is covered by the reclaim sweep (AC-20), not by
-  compose.
+- An ingestion container killed mid-run is covered by the reclaim sweep (AC-20),
+  not by compose.
 
-#### 2.8.4 Upgrade and rollback
+#### 2.8.4 Upgrade, backup and rollback (OPS-MIG-003)
 
-- **Upgrade:** build or pull the new tag, set `FACTORFLOW_IMAGE_TAG`, then run
-  `docker compose up -d`. The application container migrates forward before
-  serving (AC-15), and ingestion restarts on the same tag once it is healthy.
-- **Rollback (OPS-MIG-003):** set `FACTORFLOW_IMAGE_TAG` to the previous tag and
-  run `docker compose up -d`. When the newer build applied no migration, that is
-  the whole rollback. When it did, the older build refuses the newer store
-  (exit 2, AC-16) by design, and rollback is image and data restore together
-  (`schema-migrator` section 3, `ingestion-api` section 6). Restore comes from a
-  `pg_dump` taken before the upgrade:
-  `docker compose exec postgres pg_dump -U factorflow factorflow > backup.sql`.
-- 0.1.0 is the first release, so it has no earlier build to roll back to.
+The owner decided on 2026-10-12 to specify the backup procedure now. This
+supersedes the deferral recorded in `market-data-store` section 6 and section 14
+item 1 (2026-09-05): OPS-MIG-003 is met under branch (a), a documented and
+tested rollback, from this capability's first release on. Every step runs on
+the deployment machine, in a shell with the four variables of section 2.8.3 set.
+Dumps go to a directory the owner chooses outside the repository, written here
+as `$FACTORFLOW_BACKUP_DIR`. They hold Internal data and no Restricted value,
+and are never committed.
+
+**Upgrade** from tag `<old>` to tag `<new>`:
+
+1. Back up: `docker compose exec -T postgres pg_dump -U factorflow -d factorflow
+   -Fc > "$FACTORFLOW_BACKUP_DIR/factorflow-<old>-$(date -u +%Y%m%dT%H%M%SZ).dump"`.
+   A non-zero exit or an empty file stops the upgrade.
+2. Build: `FACTORFLOW_IMAGE_TAG=<new> docker compose build app`.
+3. Deploy: `FACTORFLOW_IMAGE_TAG=<new> docker compose up -d`. The application
+   container migrates forward before serving (AC-15), and ingestion restarts on
+   the same tag once the application is healthy.
+4. Verify: run the deployment smoke check (section 2.8.5).
+
+**Rollback when `<new>` applied no migration:**
+`FACTORFLOW_IMAGE_TAG=<old> docker compose up -d`, then the smoke check.
+
+**Rollback when `<new>` applied a migration.** The older build refuses the
+newer store (exit 2, AC-16) by design, so the store is restored from the step 1
+dump first. Step 2 destroys the current database, so the owner runs it only
+after confirming the dump to restore (OPS-DEST-001):
+
+1. `docker compose stop ingestion app`
+2. `docker compose exec -T postgres dropdb -U factorflow factorflow` then
+   `docker compose exec -T postgres createdb -U factorflow factorflow`
+3. `docker compose exec -T postgres pg_restore -U factorflow -d factorflow
+   --no-owner < "$FACTORFLOW_BACKUP_DIR/<the step 1 dump>"`
+4. `FACTORFLOW_IMAGE_TAG=<old> docker compose up -d`
+5. Run the smoke check. Check 2 must report `<old>`'s highest schema version.
+
+Observations acquired between the upgrade and the rollback are lost by a
+restore. That is the accepted cost: C5 makes them impossible to re-acquire as
+observed, which is why step 1 is not optional.
+
+**Drill.** Before the first deployment of 0.1.0, the implementing story runs
+the whole procedure once and records it as release evidence: back up a store
+holding a completed acquisition run, restore it into an emptied database, and
+confirm that the coverage read is unchanged. The drill runs under its own
+project name (`docker compose -p factorflow-drill`) and its own volume, while no
+`factorflow` deployment is running, because host networking fixes ports 8000
+and 5432. Afterwards the owner removes its volume with
+`docker compose -p factorflow-drill down -v`, after confirming the project name
+(OPS-DEST-001).
 
 #### 2.8.5 Deployment smoke check
 
-`scripts/deploy-smoke.sh` (new) checks a running deployment and exits non-zero
-on the first failed check. It runs on the deployment machine after
-`docker compose up -d`:
+`scripts/deploy-smoke.sh` (new) checks the running deployment and exits
+non-zero on the first failed check. The owner runs it on the deployment machine
+after every `docker compose up -d`. Its output for the deployment under review
+is the release evidence for AC-14, AC-15 and B1, B3 and B4, and for condition
+(6) of the SEC-ENC-001 host-local loopback exception. It finds containers by
+the project label, so it needs none of the four variables:
 
-1. `docker compose ps` shows `postgres` and `app` healthy and `ingestion`
-   running.
+1. `docker ps --filter label=com.docker.compose.project=factorflow` shows
+   `postgres` and `app` healthy and `ingestion` running.
 2. `GET http://127.0.0.1:8000/api/health` answers 200 with
-   `database == "reachable"` and `schema_version` equal to the highest version
-   the image carries.
+   `database == "reachable"`, and `schema_version` equals the highest version
+   the running image carries. That version is read from the image itself:
+   `docker exec <app container> python -c "from factorflow.db.migrate_main
+   import MIGRATIONS_DIR; from factorflow.db.migrator import discover;
+   print(max(f.version for f in discover(MIGRATIONS_DIR)))"`.
 3. `GET http://127.0.0.1:8000/` answers 200 with the bundle's `index.html`.
 4. Neither port 8000 nor port 5432 accepts a connection on any non-loopback
-   IPv4 address of the machine (on macOS, the addresses `ifconfig` lists; on
-   Linux, `ip -4 addr`). This is the AC-14 check in the deployed form.
+   address of the machine: every IPv4 address and every global IPv6 address
+   that `ifconfig` lists on macOS, or `ip addr` on Linux.
 
-It never reads, prints or sends the provider key, and it starts no acquisition
-run. A first run against the live provider is the owner's post-release check,
-because it needs the owner's credential.
+Precondition: ports 8000 and 5432 are free on the host before the first `up`;
+with host networking a port already taken makes the service fail to start.
+
+The script never reads, prints or sends the provider key or the database
+password, and it starts no acquisition run. A first run against the live
+provider is the owner's post-release check, because it needs the owner's
+credential.
 
 ## 3. Constraints and Assumptions
 
@@ -950,12 +1075,10 @@ because it needs the owner's credential.
   and no default value exists for `FACTORFLOW_MASSIVE_API_KEY`.
 - **The interface binds to loopback** (AC-14, system design constraint 5.11).
   `FACTORFLOW_API_HOST` defaults to `127.0.0.1`, and `ApiSettings` rejects any
-  non-loopback value. The deployment runs every container in the host network
-  namespace with no published port and PostgreSQL listening on loopback only
-  (section 2.8.1), so nothing listens on another interface. This replaces the
-  system design's "the port is published to `127.0.0.1` only", which host
-  networking makes inapplicable. The recommendation to update that sentence is
-  in section 14 item 8.
+  non-loopback value. Under host networking that validated bind is the only
+  preventive control for the API, and `listen_addresses=127.0.0.1` the only one
+  for PostgreSQL; the deployment smoke check detects a listener off the host
+  after every deployment (section 2.8.1).
 - **The deployment needs host networking** (section 2.8.1): Linux, or Docker
   Desktop with host networking enabled. Without it the interface is unreachable
   from the browser, which fails closed rather than open.
@@ -986,8 +1109,10 @@ because it needs the owner's credential.
 - **This component is the capability's credential boundary.** Every control that
   makes AC-13 true lives here: `SecretStr` wrapping, the logging filter, the
   absence of any serialisation path, and the presence-only health report.
-- **Data classification.** The Massive API key and the database URL are
-  **Restricted** under SEC-DAT-001. Both are held in memory only, never written
+- **Data classification.** The Massive API key, the database URL and
+  `FACTORFLOW_POSTGRES_PASSWORD` are **Restricted** under SEC-DAT-001. The
+  password is held only in the owner's shell environment and by
+  `docker compose`, never by either process except inside the URL. Both are held in memory only, never written
   to any store (SEC-DAT-002 does not engage, since neither is persisted), and
   never logged (SEC-DAT-003 is enforced by section 2.5).
 - **No hardcoded secrets** (SEC-SEC-001). There is no default for either
@@ -1090,17 +1215,18 @@ because it needs the owner's credential.
 | A malformed base URL fails start | `tests/unit/test_settings_base_url.py` | Each "rejected" row of section 2.2c's table raises `ConfigurationError`: missing host, userinfo, invalid or zero port, a path, a query or fragment, an empty value, surrounding whitespace (clauses 3 to 8) |
 | A base URL failure discloses no value | `tests/unit/test_settings_base_url.py` | For `https://user:s3cret@api.massive.com`, and for each rejected value, the message contains `FACTORFLOW_MASSIVE_BASE_URL` and contains neither the submitted value, nor `s3cret`, nor the configured API key (clause 9, AC-13) |
 | The ingestion process refuses to start on a bad base URL | `tests/unit/test_ingestion_main.py` | With `FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com`, the entry point exits non-zero before constructing a `RESTClient`, and the log line names the variable but not the value (clause 2, AC-16) |
+| The release image ships its migrations and bundle | `tests/unit/test_distribution_contents.py` | The test copies `src/` and `pyproject.toml` to a temporary directory, writes a stub `factorflow/api/static/index.html` there, and runs `uv build` in it. The wheel contains `factorflow/db/migrations/0001_extensions_owner_state.sql` to `0004_runs.sql` and `factorflow/api/static/index.html`, and nothing under `tests/`. It never depends on a prior `npm run build`, so it cannot pass without checking the bundle (B1, B3, DEC-0034) |
+| The Dockerfile builds the bundle, installs from the lock and copies no non-release path | `tests/unit/test_release_excludes_test_paths.py` (extended) | The `Dockerfile` has an `interface` stage running `npm run build` and a `lock` stage running `uv export --frozen`; the final stage installs with `--require-hashes` and the project with `--no-deps`, copies the bundle from `interface`, and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`. The test's existing `_copy_sources` splits the file line by line with `shlex`, which raises on a `\` continuation; it must join continuation lines first (B3, DEC-0034, specification review v11 FINDING-32) |
+| `compose.yaml` keeps AC-14, AC-13 and the exception's conditions | `tests/unit/test_compose_definition.py` | Read as text, because PyYAML is not a project dependency and the checks need no parser: each of the three service blocks has `network_mode: host`, and the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1` and its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256`; the database URL's host is `127.0.0.1`; no service sets `FACTORFLOW_API_HOST`; every secret and the image tag are `${...:?...}` interpolations, not literals; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main` and it depends on `app` being healthy (AC-13, AC-14, AC-16; SEC-ENC-001 host-local loopback exception conditions 1 to 4) |
+| The deployment serves, and nothing listens off the host | `scripts/deploy-smoke.sh` (section 2.8.5) against the real deployment, with the owner's own values | Checks 1 to 4 pass after the deployment under review. Its output is the release evidence for AC-14, AC-15, B1, B3, B4 and exception condition 6. It needs Docker with host networking, so it is not part of `uv run pytest`, and it never runs a second deployment beside the real one (specification review v11 FINDING-35) |
+| The backup and rollback procedure works | The drill of section 2.8.4, run once before the first deployment under `docker compose -p factorflow-drill` | A store holding a completed run is dumped, restored into an emptied database, and reads the same coverage; recorded as release evidence (OPS-MIG-003) |
 
-| The release image ships its migrations and bundle | `tests/unit/test_distribution_contents.py` | The wheel `uv build` produces contains `factorflow/db/migrations/0001_extensions_owner_state.sql` through `0004_runs.sql`, and `factorflow/api/static/index.html` when the bundle has been built before `uv build`; it still contains nothing under `tests/` (B1, B3, DEC-0034) |
-| The Dockerfile builds the bundle and copies no non-release path | `tests/unit/test_release_excludes_test_paths.py` (extended) | The `Dockerfile` has an `interface` stage running `npm run build`, the final stage copies the bundle from it, and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/` (B3, DEC-0034) |
-| `compose.yaml` keeps AC-14 and AC-13 | `tests/unit/test_compose_definition.py` | Read as text, because PyYAML is not a project dependency and the checks need no parser: each of the three service blocks has `network_mode: host`, and the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1`; no service sets `FACTORFLOW_API_HOST`; every secret is a `${...:?...}` interpolation, not a literal; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main` and it depends on `app` being healthy (AC-13, AC-14, AC-16) |
-| The image deploys and serves | `scripts/deploy-smoke.sh` against `docker compose up -d` with a throwaway password and a generated test key | Section 2.8.5 checks 1 to 4 pass: health reachable at the image's highest schema version, `GET /` 200, and nothing on a non-loopback address. Run on the deployment machine as release evidence; it needs Docker with host networking, so it is not part of `uv run pytest` |
 
 Every pytest test in this component runs without a container, so none carries
 the `postgres` marker and all run under `uv run pytest -m 'not postgres'`.
 `test_distribution_contents.py` runs `uv build` into a temporary directory, so
-it is marked `slow`. The deployment smoke check is a script, not a pytest test,
-for the reason given in its row.
+it is marked `slow`. The deployment smoke check and the drill are run by hand on
+the deployment machine, for the reason given in their rows.
 
 Negative-path coverage is the substance here: the component's value is what it
 refuses to do, and most of these tests assert an absence or a refusal. The
@@ -1135,16 +1261,17 @@ something checks them.
     start with a message naming `FACTORFLOW_MASSIVE_BASE_URL` and the clause,
     containing neither the submitted value nor the API key.
 12. `docker compose up -d` on a machine with host networking, with only the
-    three variables of section 2.8.3 set, starts PostgreSQL, then an
+    four variables of section 2.8.3 set, starts PostgreSQL, then an
     application container that migrates an empty store to the image's highest
     version and serves `GET /api/health` and `GET /` on `127.0.0.1:8000`, then
     an ingestion container from the same image (B1, B3, B4).
 13. On that deployment, neither port 8000 nor port 5432 accepts a connection on
     any non-loopback address of the machine (AC-14).
-14. Failure scenario: with any of the three variables unset, `docker compose up`
+14. Failure scenario: with any of the four variables unset, `docker compose up`
     stops before starting a container and names the variable; with the store
-    ahead of the image, the application container exits 2 and the ingestion
-    container never starts (AC-16).
+    ahead of the image, the application container exits 2 on every start
+    (`Restarting (2)` under `restart: unless-stopped`), never serves, and the
+    ingestion container never starts (AC-16).
 
 ## 9. Workflows
 
@@ -1201,6 +1328,9 @@ do.
 | Review | EXP-20261009-1 expedited review v1 | ER-001 and ER-002: an unvalidated base URL chooses the credential's destination and scheme | `docs/changes/EXP-20261009-1-review-v1.md` (branch carrying EXP-20261009-1, commit `1d12e67`) |
 | Decision | DEC-0031 to DEC-0037 | Loopback `http` first held BLOCKED; base URL edge-case rules; release and non-release confinement of clause 2a (PROVISIONAL); the release artifact and production launch (PROVISIONAL); the entry-point parameters, correcting DEC-0033; this project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text (PROVISIONAL); the per-run designated test credential (PROVISIONAL) | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 | Constitution | Tech Stack v3 | Pydantic in the approved stack; credential supplied at runtime | `docs/constitution/tech-stack.md` |
+| Constitution | Security Constitution v1.3 draft (CONST-SEC 1.3, harness branch `usr/alvaro-de-jodra/const-sec-1.3-host-local-loopback`; not in force until reviewed, approved and merged) | The `SEC-ENC-001 host-local loopback exception` and its six conditions, relied on in section 2.8.1 | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Decision | DEC-0050 | This project's record of relying on the host-local loopback exception, naming the designs that cite it | `projects/factorflow-v2/decisions/DEC-0050.md` in the AI-agents harness |
+| Review | CAP-001 specification review v11 | FINDING-1 and FINDING-31 to FINDING-42, which this revision answers | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v11.md` |
 | Release | CAP-001 release readiness v1 (NOT-READY) | Blockers B1, B3 and B4 that section 2.8 closes; the image smoke test that found them | `docs/releases/CAP-001-release-v1.md` |
 | Change | EXP-20261012-1 | A missing migrations directory refuses the start (B2), which made B1 fail closed | `docs/changes/EXP-20261012-1.md` |
 
@@ -1210,7 +1340,7 @@ do.
 |--------------|----------------------|--------------------------|---------|
 | AC-13 | `runtime-config` environment load, redaction, no API echo | `SecretStr` wrapping, `RedactingFilter`, presence-only reporting | 2.3, 2.5, 2.6 |
 | AC-13 | Provider reads over HTTPS (§4.2 provider row, block diagram `MC -->\|HTTPS\| EXT`) | Base URL validated `https` at start; failure message carries no value | 2.2c, 4 |
-| AC-14 | Port published to `127.0.0.1`; uvicorn bound to loopback | `ApiSettings.host` default `127.0.0.1`; host-network deployment with no published port and loopback-only PostgreSQL; smoke check 4 | 2.2, 2.3, 2.8.1, 2.8.5 |
+| AC-14 | Host-network deployment with nothing published; uvicorn bound to loopback | Validated loopback bind (`ApiSettings`) and `listen_addresses=127.0.0.1`, the two preventive controls; smoke check 4, the detective one | 2.2, 2.3, 2.8.1, 2.8.5 |
 | AC-15 | Application container migrates at start | Release image carries its migrations; compose starts ingestion only after the application is healthy at a schema version | 2.8.2, 2.8.3 |
 | AC-16 | Refuse an inconsistent start | A missing required value exits before any work is done | 2.4, 3 |
 | AC-18 | `GET /api/health` | `credential_present()` supplying the health payload | 2.6 |
@@ -1296,8 +1426,14 @@ do.
    **Resolved 2026-10-12 by owner decision: the same image**, with
    `python -m factorflow.ingestion_main` as the ingestion service's command
    in `compose.yaml` (section 2.8.3).
-6. **What is the standing of the product's other host-local plaintext
-   channels under SEC-ENC-001?** Open; nothing is decided here. CONST-SEC 1.2's
+6. ~~What is the standing of the product's other host-local plaintext
+   channels under SEC-ENC-001?~~ **Decided 2026-10-12 by the constitution
+   owner, effective when CONST-SEC 1.3 is in force.** The owner interface's
+   loopback hop and both production database channels rely on the
+   `SEC-ENC-001 host-local loopback exception` (section 2.8.1, DEC-0050). The
+   E2E stack's database channel stays open: its container publishes on every
+   host address, so the exception does not reach it. The text below records the
+   question as it stood. Open; nothing is decided here. CONST-SEC 1.2's
    Exception Record lists three: the owner interface's production loopback hop,
    which `component-design-ingestion-api.md` section 4 reads as not engaging
    SEC-ENC-001; the application's and ingestion's production connections to
@@ -1312,7 +1448,6 @@ do.
 7. ~~Which Node.js version builds the interface?~~ **Resolved 2026-10-12: Node.js 22, recorded in tech stack v5.** The tech stack names
    TypeScript 5.x, React 18 and Vite, not a Node version. Section 2.8.2 uses
    `node:22-slim`, the version the frontend validation commands run on today.
-   *Owner: tech stack owner. Blocks: nothing; the tech stack should record it.*
 8. ~~System design change recommended.~~ **Applied 2026-10-12 on the owner's direction, in system design v7.** System design section 1
    states that the interface's "port is published to `127.0.0.1` only". With
    host networking (section 2.8.1, owner decision 2026-10-12) no port is

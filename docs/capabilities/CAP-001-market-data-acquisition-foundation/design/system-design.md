@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-system-design
 artifact_type: system-design
-artifact_version: 7
+artifact_version: 8
 capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
@@ -17,7 +17,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-12T15:10:00Z
+  timestamp: 2026-10-12T19:30:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -295,7 +295,7 @@ not answer; a boolean is not the credential, and no interface exposes the value.
 | `run-journal` | Run journal | Owns the acquisition run record and its lifecycle — requested, running, cancelling, succeeded, partial, failed, cancelled, abandoned — including cancellation requests and reclaim of runs whose runner died | this design |
 | `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps in daily prices against the trading-day set formed from all named instruments' observed dates | this design |
 | `schema-migrator` | Schema migrator | Applies numbered forward-only SQL migrations and maintains `applied_migrations` | this design |
-| `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets | this design |
+| `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets; owns the deployment definition (`Dockerfile`, `compose.yaml`, `.dockerignore`) | this design |
 | `acquisition-runner` | Acquisition runner | Claims a run request and drives acquisition instrument by instrument, isolating per-instrument failure | this design |
 | `massive-client` | Massive client | Hand-written HTTP client for Massive reference, aggregate, fundamental and corporate-action reads | this design |
 | `rate-limit-governor` | Rate limit governor | Paces provider requests to the configured budget, waits out rate limiting as flow control, and applies bounded exponential backoff to transport and server errors | this design |
@@ -405,7 +405,11 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
    The API binds `127.0.0.1`, and the deployment runs every container in the
    host network namespace with no published port, so the bind is the machine's
    own loopback (owner decision 2026-10-12; `runtime-config` section 2.8.1).
-   The absence of authentication is sound solely because of that binding.
+   The absence of authentication is sound solely because of that binding. The
+   plaintext host-local channels this creates (browser to API, both processes to
+   PostgreSQL) rely on the `SEC-ENC-001 host-local loopback exception` of
+   CONST-SEC 1.3 (DEC-0050), in force only once that version is approved and
+   merged.
 12. **The provider credential is supplied at runtime.** It is never committed, never
    logged, and never returned by any interface (AC-13, SEC-SEC-001). It is supplied
    to **both containers**: the ingestion process uses it, and the application

@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-schema-migrator
 artifact_type: component-design
-artifact_version: 5
+artifact_version: 6
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,12 +14,12 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-12T15:10:00Z
+  timestamp: 2026-10-12T19:30:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "7"
+      version: "8"
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
@@ -116,9 +116,10 @@ with it: the Python constant above; the tests that build paths to the files
 (`tests/conftest.py`, and 16 test modules under `tests/unit/` and
 `tests/integration/` that each compute `parents[N] / "migrations"`), which
 import `MIGRATIONS_DIR` instead of recomputing it;
-`tests/unit/test_no_committed_secrets.py`'s scanned prefixes; the comments in
-`src/factorflow/api/models.py` and `src/factorflow/runs/queries.py` and the two
-SQL fixtures that cite `migrations/000N_*.sql`; the `Dockerfile`, which stops
+`tests/unit/test_no_committed_secrets.py`'s scanned prefixes; the comments that cite `migrations/000N_*.sql` in
+`src/factorflow/api/models.py`, `src/factorflow/runs/queries.py`,
+`web/src/api/types.ts` (two), `tests/e2e/support/acquisition.ts` and the two
+SQL fixtures; the `Dockerfile`, which stops
 copying `migrations/`; and the README. The implementing story lists the files.
 `tests/fixtures/migrations_ok/` stays where it is: it is a test fixture, not a
 release migration.
@@ -316,9 +317,10 @@ capability's.
   The container entrypoint uses `&&` between the migrate command and the uvicorn
   exec, so a non-zero exit prevents the API from starting without any additional
   supervision logic.
-- **Manual actions required: none** on a forward deployment. A backwards
-  deployment requires the owner to restore a backup, which section 14 of the
-  `market-data-store` design records as an unspecified procedure.
+- **Manual actions required: none** on a forward deployment beyond the
+  `pg_dump` every upgrade takes first. A backwards deployment after a migration
+  requires the owner to restore that dump, by the procedure in `runtime-config`
+  section 2.8.4.
 
 ## 7. Testing
 
@@ -407,7 +409,7 @@ This component exposes no HTTP surface.
 | Component design | Market Data Store | `applied_migrations` definition and the four migration files | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | UX design | CAP-001 UX design v4 | Section 2, the unreachable state naming a failed migration | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Constitution | Tech Stack v5 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
-| Component design | Runtime Configuration v12 | Section 2.8, the release image and compose definition that carry and run the migrator | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
+| Component design | Runtime Configuration v13 | Section 2.8, the release image and compose definition that carry and run the migrator | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Release | CAP-001 release readiness v1 | Blocker B1, found by the image smoke test | `docs/releases/CAP-001-release-v1.md` |
 
 ## 13. Traceability
