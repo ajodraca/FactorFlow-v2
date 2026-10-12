@@ -286,7 +286,9 @@ every route and the static mount (owner decision 2026-10-12):
   unless the origin is `http://127.0.0.1:<port>`, `http://localhost:<port>` or
   `http://[::1]:<port>`. A request with no `Origin` header (a script or `curl`
   on the machine) is not refused by this check, because only a browser acting
-  for a page sends one.
+  for a page sends one. No route changes state on `GET`, `HEAD` or `OPTIONS`, and the API
+  serves no WebSocket, so applying the check to the other methods covers every
+  state change, as H9 allows.
 
 Neither check reads a credential or the request body, and both are logged at
 `warning` with the request id and the rejected header's value, which is not a

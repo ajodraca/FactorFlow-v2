@@ -618,8 +618,12 @@ without thinking about reclaim.
 loopback address, any `sslmode` is accepted, because the channel then stays on
 the host under the exception. Because libpq can take the address it actually
 connects to from elsewhere, the start also fails when the URL carries more than
-one host or a `hostaddr` or `service` parameter, or when any of the environment
-variables `PGHOST`, `PGHOSTADDR`, `PGSERVICE` or `PGSERVICEFILE` is set. For any other host, or a
+one host or a `host`, `hostaddr` or `service` query parameter (libpq lets a `host` parameter replace the URL's host), or when any of the environment
+variables `PGHOST`, `PGHOSTADDR`, `PGSERVICE` or `PGSERVICEFILE` is set.
+`localhost` is resolved when the settings load, and libpq resolves it again at
+each connection; a change in between needs a change to the host's resolver
+configuration, which only an account under the owner-operator's control can
+make (H6). The deployment avoids the question by naming `127.0.0.1`. For any other host, or a
 URL with no host (a Unix-socket path, which this deployment does not use), the
 URL must carry `sslmode=verify-full`, or the start fails with
 `ConfigurationError` naming `FACTORFLOW_DATABASE_URL` and the rule, never the
@@ -1108,7 +1112,11 @@ the project label, so it needs none of the four variables:
 4. Neither port 8000 nor port 5432 accepts a connection on any non-loopback
    address of the machine: every IPv4 address and every IPv6 address, global
    and link-local (with its zone), that `ifconfig` lists on macOS, or `ip addr`
-   on Linux.
+   on Linux; and, on Docker Desktop, every non-loopback address of its Linux
+   virtual machine, probed from a host-network container started from the
+   release image (`docker run --rm --network host factorflow:<tag> python -c
+   ...`), which lists the virtual machine's addresses and tries both ports on
+   each.
 
 Precondition: ports 8000 and 5432 are free on the host before the first `up`;
 with host networking a port already taken makes the service fail to start.
@@ -1265,7 +1273,7 @@ credential.
 | A malformed base URL fails start | `tests/unit/test_settings_base_url.py` | Each "rejected" row of section 2.2c's table raises `ConfigurationError`: missing host, userinfo, invalid or zero port, a path, a query or fragment, an empty value, surrounding whitespace (clauses 3 to 8) |
 | A base URL failure discloses no value | `tests/unit/test_settings_base_url.py` | For `https://user:s3cret@api.massive.com`, and for each rejected value, the message contains `FACTORFLOW_MASSIVE_BASE_URL` and contains neither the submitted value, nor `s3cret`, nor the configured API key (clause 9, AC-13) |
 | The ingestion process refuses to start on a bad base URL | `tests/unit/test_ingestion_main.py` | With `FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com`, the entry point exits non-zero before constructing a `RESTClient`, and the log line names the variable but not the value (clause 2, AC-16) |
-| The database channel cannot be sent in plaintext off the host | `tests/unit/test_database_url_confinement.py` | `postgresql://u:p@127.0.0.1:5432/d`, `@localhost` (resolving to loopback only) and `@[::1]` load with no `sslmode`; `@localhost` with resolution patched to return a non-loopback address alongside `127.0.0.1` raises; a loopback URL with `hostaddr=10.0.0.5`, `service=x` or two hosts raises, and so does any loopback URL while `PGHOST`, `PGHOSTADDR`, `PGSERVICE` or `PGSERVICEFILE` is set; `@db.example.com` and `@10.0.0.5` without `sslmode`, or with `sslmode=prefer` or `require`, raise `ConfigurationError` naming `FACTORFLOW_DATABASE_URL`, and the message contains neither the URL nor `p`; the same hosts with `sslmode=verify-full` load (SEC-ENC-001 host-local loopback exception H7; AC-13) |
+| The database channel cannot be sent in plaintext off the host | `tests/unit/test_database_url_confinement.py` | `postgresql://u:p@127.0.0.1:5432/d`, `@localhost` (resolving to loopback only) and `@[::1]` load with no `sslmode`; `@localhost` with resolution patched to return a non-loopback address alongside `127.0.0.1` raises; a loopback URL with `host=10.0.0.5`, `hostaddr=10.0.0.5`, `service=x` or two hosts raises, and so does any loopback URL while `PGHOST`, `PGHOSTADDR`, `PGSERVICE` or `PGSERVICEFILE` is set; `@db.example.com` and `@10.0.0.5` without `sslmode`, or with `sslmode=prefer` or `require`, raise `ConfigurationError` naming `FACTORFLOW_DATABASE_URL`, and the message contains neither the URL nor `p`; the same hosts with `sslmode=verify-full` load (SEC-ENC-001 host-local loopback exception H7; AC-13) |
 | The release image ships its migrations and bundle | `tests/unit/test_distribution_contents.py` | The test copies `src/` and `pyproject.toml` to a temporary directory, writes a stub `factorflow/api/static/index.html` there, and runs `uv build` in it. The wheel contains `factorflow/db/migrations/0001_extensions_owner_state.sql` to `0004_runs.sql` and `factorflow/api/static/index.html`, and nothing under `tests/`. It never depends on a prior `npm run build`, so it cannot pass without checking the bundle (B1, B3, DEC-0034) |
 | The Dockerfile builds the bundle, installs from the lock and copies no non-release path | `tests/unit/test_release_excludes_test_paths.py` (extended) | The `Dockerfile` has an `interface` stage running `npm run build` and a `lock` stage running `uv export --frozen`; the final stage installs with `--require-hashes` and the project with `--no-deps`, copies the bundle from `interface`, and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`. The test's existing `_copy_sources` splits the file line by line with `shlex`, which raises on a `\` continuation; it must join continuation lines first (B3, DEC-0034, specification review v11 FINDING-32) |
 | `compose.yaml` keeps AC-14, AC-13 and the exception's conditions | `tests/unit/test_compose_definition.py` | Read as text, because PyYAML is not a project dependency and the checks need no parser: each of the three service blocks has `network_mode: host`, and the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1` and its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256` and `POSTGRES_INITDB_ARGS` with both `--auth-host=scram-sha-256` and `--auth-local=scram-sha-256`; the database URL's host is `127.0.0.1` and it sets `require_auth=scram-sha-256`; no service sets `FACTORFLOW_API_HOST`; every secret and the image tag are `${...:?...}` interpolations, not literals; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main`, it is in the `ingestion` profile, and it depends on `app` being healthy (AC-13, AC-14, AC-16; SEC-ENC-001 host-local loopback exception conditions H1 to H4) |
