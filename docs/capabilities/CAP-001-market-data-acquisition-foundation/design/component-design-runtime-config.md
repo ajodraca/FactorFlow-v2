@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-runtime-config
 artifact_type: component-design
-artifact_version: 13
+artifact_version: 14
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-12T19:30:00Z
+  timestamp: 2026-10-12T20:40:28Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -334,18 +334,23 @@ prints for that text in the AI-agents harness. It was re-pinned from 1.2 on
 2026-10-12, after re-checking clause 2a against 1.3: version 1.3 leaves the
 test-double exception's conditions (1) to (4) unchanged and adds only that the
 test-double exception alone governs a channel whose peer is a local test double,
-in every build. Clause 2a takes effect only when
-both of the following hold:
+in every build. The condition table above keeps 1.2's numbering and
+wording, which 1.3 carries unchanged; where this design cites "CONST-SEC 1.2"
+for the test-double exception, the same text in 1.3 is meant. Clause 2a takes
+effect only when both of the following hold:
 
-- CONST-SEC 1.2 is in force under its own rule (*How to Use*, "When a version
+- CONST-SEC 1.3 is in force under its own rule (*How to Use*, "When a version
   is in force"): its frontmatter carries the constitution owner's `approval`
   block whose `reviewed_revision` equals the file's content revision, and the
   file is on the AI-agents harness default branch; and
 - that in-force file's content revision equals the pinned revision above.
 
 The content revision ignores the `status` and `approval` fields, so the owner's
-approval does not change it. If CONST-SEC 1.2 comes into force with a different
-revision, clause 2a stays unimplemented until the condition table above is
+approval does not change it. Both conditions have held since 2026-10-12, when
+1.3, approved at the pinned revision, was merged to the harness default branch
+(merge commit `e2c6124`), so clause 2a is in force. If a later CONST-SEC
+version comes into force with a different revision, clause 2a stays
+unimplemented until the condition table above is
 re-checked against the in-force text, the pin here and in DEC-0036 is updated,
 and this design is re-reviewed. Until clause 2a takes effect it is specified
 but must not be implemented, and an `http` value fails start whatever its host,
@@ -634,6 +639,16 @@ URL must carry `sslmode=verify-full`, or the start fails with
 value (AC-13). No other setting can relax this. The tests and the E2E stack
 already connect to `127.0.0.1` or `localhost`, so none of them changes.
 
+Every process that connects to the store loads its URL through
+`DatabaseSettings`, so this check runs before any connection: `app_main`'s pool,
+`ingestion_main`, and `migrate_main`, which runs first in the application
+container and today reads `FACTORFLOW_DATABASE_URL` from the environment
+directly. `schema-migrator` section 2.5 specifies its change: it constructs
+`DatabaseSettings()` before connecting and exits 1 on a refusal, without
+calling `psycopg.connect`. No code under `src/` reads `FACTORFLOW_DATABASE_URL`
+from the environment except `DatabaseSettings` and the redaction filter of
+section 2.5, which only uses the value to mask it.
+
 `SecretStr` is the mechanism, not a convention. Pydantic's `SecretStr` renders
 as `**********` in `repr`, in `str`, and in `model_dump()` unless
 `model_dump(mode="python")` is called with explicit secret exposure, so a
@@ -822,26 +837,28 @@ check (section 2.8.5).
 **Transport encryption (SEC-ENC-001).** Three production channels in this
 deployment are plaintext and never leave the host: (a) the owner's browser to
 the API at `http://127.0.0.1:8000`; (b) the application container to
-PostgreSQL at `127.0.0.1:5432`; and (c) the ingestion container to PostgreSQL
-at `127.0.0.1:5432`. All three carry Internal data. They rely on the
-`SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3, recorded for this
-project as DEC-0050. That exception is **not yet in force**: version 1.3 must
-first pass its constitution review, carry the owner's approval and be merged to
-the harness default branch. Until then these channels have no standing under
-SEC-ENC-001, and the CAP-001 release cannot be READY. Under the exception's
+PostgreSQL at `127.0.0.1:5432`, which carries both the migrator's connection
+(`python -m factorflow.db.migrate_main`, run first) and the API's pool; and (c)
+the ingestion container to PostgreSQL at `127.0.0.1:5432`. All three carry
+Internal data. They rely on the `SEC-ENC-001 host-local loopback exception` of
+CONST-SEC 1.3, recorded for this project as DEC-0050. That exception has been
+in force since 2026-10-12 (approved, and merged to the harness default branch
+as `e2c6124`). The migrator is part of channel (b) as this section defines it,
+so `schema-migrator` relies on the exception through this section and DEC-0050
+rather than citing it separately. Under the exception's
 definitions the host is the owner's Mac together with the Linux virtual machine
 Docker Desktop runs on it. The conditions H1 to H9 map to this deployment as follows:
 
 | Condition | How this deployment meets it | Checked by |
 |---|---|---|
 | (H1) Listeners bind only to loopback | API: the `ApiSettings` validator, in the product's own code; PostgreSQL, a third-party server: `listen_addresses=127.0.0.1` in `compose.yaml`, which is release evidence (H7) | `test_settings_validation.py`, `test_compose_definition.py`; smoke check 4 |
-| (H2) Clients use the loopback forms | The app and ingestion processes connect to `127.0.0.1` (`FACTORFLOW_DATABASE_URL`), through `psycopg`, which follows no redirect and uses no proxy. The application's healthcheck (`http.client`) and the smoke check (`curl --noproxy '*'`, no `-L`) are clients the product controls on the API channel and use neither a proxy nor a redirect. The owner's browser, a client the product does not control, is directed to `http://127.0.0.1:8000` by the README and section 9, and the API issues no redirect to any other address. PostgreSQL's own healthcheck uses the container's local socket, not loopback TCP | `test_compose_definition.py` (the URL's host); `test_database_url_confinement.py` |
+| (H2) Clients use the loopback forms | The app and ingestion processes connect to `127.0.0.1` (`FACTORFLOW_DATABASE_URL`), through `psycopg`, which follows no redirect and uses no proxy. The application's healthcheck (`http.client`) and the smoke check (`curl --noproxy '*'`, no `-L`) are clients the product controls on the API channel and use neither a proxy nor a redirect. The owner's browser, a client the product does not control, is directed to `http://127.0.0.1:8000` by section 9 and by the README, which the implementing story changes to give that address (section 9), and the API issues no redirect to any other address. PostgreSQL's own healthcheck uses the container's local socket, not loopback TCP | `test_compose_definition.py` (the URL's host); `test_database_url_confinement.py` |
 | (H3) The channel never leaves the host | Host network namespace; no `ports:`, no tunnel. Docker Desktop's forward between macOS loopback and the virtual machine's loopback listens on loopback on both sides, which the probes in this section evidence (LAN unreachable) | `test_compose_definition.py` (no `ports:` key); smoke check 4 |
-| (H4) No credential in clear | Channel (a) carries no credential: the interface has no authentication (AC-14). Channels (b) and (c) use `scram-sha-256`, which the client requires (`require_auth=scram-sha-256` in `FACTORFLOW_DATABASE_URL`, honoured by the bundled libpq 18) and the server uses for every connection; no `trust` line remains for loopback or the local socket. The password is generated with `openssl rand -hex 24`, 192 bits, above the exception's 128-bit floor. The `postgres:16` image writes `trust` for `127.0.0.1`, `::1` and the local socket unless told otherwise (verified 2026-10-12: with only `POSTGRES_HOST_AUTH_METHOD` set, those lines stay `trust`), so `compose.yaml` sets both `POSTGRES_HOST_AUTH_METHOD` and `POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256` | `test_compose_definition.py`; smoke check 1 confirms the running store's `pg_hba.conf` has no `trust` line |
+| (H4) No credential in clear | Channel (a) carries no credential: the interface has no authentication (AC-14). Channels (b) and (c) use `scram-sha-256`, which the client requires (`require_auth=scram-sha-256` in `FACTORFLOW_DATABASE_URL`, honoured by the bundled libpq 18) and the server uses for every connection; no `trust` line remains for loopback or the local socket. Section 2.8.3 requires a password of at least 128 bits from a cryptographically secure generator, generated with `openssl rand -hex 24` (192 bits), and the owner states its generation in the release evidence. The `postgres:16` image writes `trust` for `127.0.0.1`, `::1` and the local socket unless told otherwise (verified 2026-10-12: with only `POSTGRES_HOST_AUTH_METHOD` set, those lines stay `trust`), so `compose.yaml` sets both `POSTGRES_HOST_AUTH_METHOD` and `POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256` | `test_compose_definition.py`; smoke check 1 confirms every rule in the running store's `pg_hba.conf` uses `scram-sha-256`, `peer` or `reject`; release evidence (generation statement) |
 | (H5) No data above Internal | All three channels carry Internal data only (`market-data-store` section 4, `ingestion-api` section 4). The provider key never crosses them; the database password crosses only as a `scram-sha-256` exchange | Design review |
 | (H6) The host is under the owner-operator's control | The owner, Alvaro de Jodra, controls the Mac. The owner states in each deployment's release evidence that no account outside the owner's control can run processes on it | Release evidence |
-| (H7) The component enforces the confinement | `DatabaseSettings` refuses a plaintext database channel to any non-loopback address, checking the URL host after resolving `localhost`, and refusing every libpq route that could supply another address (section 2.3); to any other host it requires `sslmode=verify-full`. The API, a server the product builds, enforces its loopback bind in code (`ApiSettings`). PostgreSQL, a third-party server, is confined by `compose.yaml`, which is part of the release evidence, and smoke check 4 after every deployment | `test_database_url_confinement.py`, `test_settings_validation.py` |
-| (H8) An off-host listener check before production data and after every deployment | Smoke check 4, IPv4 and IPv6 including link-local, after every deployment (as the exception defines it). Ingestion, the only process that brings production data in, starts only after the check passes (section 2.8.3, `profiles: [ingestion]`). Its output is recorded in the release manifest | Release evidence |
+| (H7) The component enforces the confinement | Every database client the product runs, the migrator, the API's pool and ingestion, loads its URL through `DatabaseSettings` before connecting (section 2.3; `schema-migrator` section 2.5). `DatabaseSettings` refuses a plaintext database channel to any non-loopback address, checking the URL host after resolving `localhost`, and refusing every libpq route that could supply another address (section 2.3); to any other host it requires `sslmode=verify-full`. The API, a server the product builds, enforces its loopback bind in code (`ApiSettings`). PostgreSQL, a third-party server, is confined by `compose.yaml`, which is part of the release evidence, and smoke check 4 after every deployment | `test_database_url_confinement.py`, `test_migrate_main_confinement.py` (`schema-migrator` section 7), `test_settings_validation.py` |
+| (H8) An off-host listener check before production data and after every deployment | Smoke check 4, IPv4 and IPv6 including link-local, after every deployment as the exception defines it: every `docker compose up -d`, and every change to the host's network configuration. Production data enters through ingestion and through the owner's entries in the interface (instruments, history depth). Ingestion starts only after the check passes (section 2.8.3, `profiles: [ingestion]`), and on every deployment the owner runs the check before using the interface (section 9). Its output is recorded in the release manifest; the drill runs its own check (section 2.8.4) | Release evidence |
 | (H9) The HTTP service checks Host and Origin | `ingestion-api` section 2.5a: a foreign `Host` gets 400 `host_not_allowed`; a state-changing request with a foreign `Origin` gets 403 `origin_not_allowed` | `test_api_host_origin.py` |
 
 #### 2.8.2 The release image (`Dockerfile`)
@@ -867,7 +884,7 @@ FROM python:3.12-slim AS lock
 WORKDIR /lock
 COPY pyproject.toml uv.lock ./
 RUN pip install --no-cache-dir uv==0.12.10 \
- && uv export --frozen --no-emit-project --format requirements.txt -o requirements.txt
+ && uv export --locked --no-emit-project --format requirements.txt -o requirements.txt
 
 # Stage 3: the release image.
 FROM python:3.12-slim
@@ -885,8 +902,10 @@ CMD ["sh", "-c", "python -m factorflow.db.migrate_main && exec python -m factorf
   stack (OQ-TS-5) makes `uv.lock` the authoritative record of versions. `pip
   install .` alone would re-resolve the open ranges in `pyproject.toml`, for
   example `massive>=2` where the lock pins 2.8.0. Stage 2 exports the lock.
-  `--frozen` fails the build if `uv.lock` is out of date with `pyproject.toml`,
-  so an unlocked change cannot reach an image. The export excludes the `dev`
+  `--locked` fails the build if `uv.lock` is out of date with `pyproject.toml`,
+  so an unlocked change cannot reach an image. (`--frozen` would not: it
+  exports the lock unchecked, so a dependency added without relocking would be
+  missing from the image, as specification review v12 FINDING-45 reproduced.) The export excludes the `dev`
   extra, because extras are not exported unless named, and excludes the project
   itself (`--no-emit-project`). Stage 3 installs that set with hash checking,
   then installs the project with `--no-deps`, so nothing is resolved twice. uv
@@ -986,7 +1005,11 @@ volumes:
   a service's `environment` by the owner; none is required.
 - **The database password** is composed into `FACTORFLOW_DATABASE_URL`
   unencoded, so it must use only URL-safe characters: letters, digits, `-` and
-  `_`. `openssl rand -hex 24` produces one. `POSTGRES_PASSWORD` sets the role's
+  `_`. It must also carry at least 128 bits of entropy from a cryptographically
+  secure generator (exception condition H4). The owner generates it with
+  `openssl rand -hex 24` (192 bits), which meets both rules, and states in the
+  release evidence, beside the H6 statement, that the deployed password was
+  generated this way. `POSTGRES_PASSWORD` sets the role's
   password only when the volume is first initialised. Changing
   `FACTORFLOW_POSTGRES_PASSWORD` later therefore leaves the role on the old
   password, and the application fails with exit 1 (`database unreachable`). To
@@ -1005,8 +1028,9 @@ volumes:
   starts, and the application must be healthy before ingestion starts.
   Ingestion is in the `ingestion` profile, so `docker compose up -d` starts only
   PostgreSQL and the application; the owner starts ingestion with
-  `docker compose --profile ingestion up -d` after the smoke check passes, so no
-  production data enters before the off-host listener check (H8). Restart
+  `docker compose --profile ingestion up -d` after the smoke check passes, and
+  opens the interface only after it passes, so no production data enters
+  before the off-host listener check (H8). Restart
   policies still bring a started ingestion container back after a reboot. The
   application's healthcheck requires `database == "reachable"` and a non-null
   `schema_version`, so ingestion never starts against a store the migrator has
@@ -1096,7 +1120,17 @@ holding a completed acquisition run, restore it into an emptied database, and
 confirm that the coverage read is unchanged. The drill runs under its own
 project name (`docker compose -p factorflow-drill`) and its own volume, while no
 `factorflow` deployment is running, because host networking fixes ports 8000
-and 5432. Afterwards the owner removes its volume with
+and 5432.
+
+The release image accepts only an `https` provider (section 2.2c clause 2), so
+the completed run uses the live provider and the owner's real key, and the
+drill store holds production data over channels (a) to (c). The drill is
+therefore a deployment under the exception, on the same host and covered by
+the same H6 and password-generation statements, and follows the same order:
+`docker compose -p factorflow-drill up -d` (PostgreSQL and the application
+only), then `scripts/deploy-smoke.sh factorflow-drill`, whose output is kept
+with the drill record, then the interface and
+`docker compose -p factorflow-drill --profile ingestion up -d`. Afterwards the owner removes its volume with
 `docker compose -p factorflow-drill down -v`, after confirming the project name
 (OPS-DEST-001).
 
@@ -1104,16 +1138,22 @@ and 5432. Afterwards the owner removes its volume with
 
 `scripts/deploy-smoke.sh` (new) checks the running deployment and exits
 non-zero on the first failed check. The owner runs it on the deployment machine
-after every `docker compose up -d`. Its output for the deployment under review
+after every `docker compose up -d` and after every change to the host's network
+configuration (CONST-SEC's *Deployment* definition), before using the interface
+or starting ingestion. Its output for the deployment under review
 is the release evidence for AC-14, AC-15 and B1, B3 and B4, and for condition
-H8 of the SEC-ENC-001 host-local loopback exception. It finds containers by
-the project label, so it needs none of the four variables:
+H8 of the SEC-ENC-001 host-local loopback exception. It takes the compose
+project name as its one optional argument (`scripts/deploy-smoke.sh [project]`,
+default `factorflow`; the drill passes `factorflow-drill`) and finds containers
+by that project label, so it needs none of the four variables:
 
-1. `docker ps --filter label=com.docker.compose.project=factorflow` shows
+1. `docker ps --filter label=com.docker.compose.project=<project>` shows
    `postgres` and `app` healthy (`ingestion` is started only after the check
-   passes, section 2.8.3), and
+   passes, section 2.8.3), and in
    `docker exec <postgres container> sh -c 'grep -v "^#" "$PGDATA/pg_hba.conf"'`
-   shows no `trust` line (exception condition H4).
+   every non-blank rule's method is `scram-sha-256`, `peer` or `reject`; any
+   other method, `trust` and `password` included, fails the check (exception
+   condition H4).
 2. `GET http://127.0.0.1:8000/api/health`, fetched with `curl --noproxy '*'
    --proto =http` and no `-L` like every request the script makes, answers 200 with
    `database == "reachable"`, and `schema_version` equals the highest version
@@ -1203,7 +1243,7 @@ credential.
   the provider base URL must be `https`, so no setting can send the credential
   over plain HTTP. The loopback `http` allowance (clause 2a, section 2.2c)
   rests on the SEC-ENC-001 loopback test-double exception that CONST-SEC 1.2
-  adds, and takes effect only when that version is in force under its own rule
+  added and 1.3 carries unchanged, and takes effect only when 1.3 is in force under its own rule
   (the owner's `approval` block and the harness default branch) at the content
   revision section 2.2c pins (DEC-0036). It is confined to a test-only entry
   point absent from the release artifact (DEC-0033, DEC-0034). That entry point
@@ -1244,9 +1284,12 @@ credential.
 - **Behaviour change after upgrade: none in this capability**, there being no
   previous release.
 - **Manual actions required on first deployment:** enable host networking
-  where Docker Desktop is used, then set `FACTORFLOW_POSTGRES_PASSWORD`,
-  `FACTORFLOW_MASSIVE_API_KEY` and `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` and
-  run `docker compose up -d` (section 2.8.3). `FACTORFLOW_DATABASE_URL` is
+  where Docker Desktop is used, then set `FACTORFLOW_POSTGRES_PASSWORD`
+  (generated with `openssl rand -hex 24`, at least 128 bits),
+  `FACTORFLOW_MASSIVE_API_KEY`, `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` and
+  `FACTORFLOW_IMAGE_TAG`, run `docker compose up -d` (section 2.8.3), run
+  `scripts/deploy-smoke.sh`, and only then open the interface and start
+  ingestion with `docker compose --profile ingestion up -d`. `FACTORFLOW_DATABASE_URL` is
   composed by `compose.yaml`. The other variables have defaults.
 - **Rollback (OPS-MIG-003).** Section 2.8.4. Reverting the image reverts the
   settings model. A variable added by a newer build is simply unread by an
@@ -1288,10 +1331,10 @@ credential.
 | The ingestion process refuses to start on a bad base URL | `tests/unit/test_ingestion_main.py` | With `FACTORFLOW_MASSIVE_BASE_URL=http://api.massive.com`, the entry point exits non-zero before constructing a `RESTClient`, and the log line names the variable but not the value (clause 2, AC-16) |
 | The database channel cannot be sent in plaintext off the host | `tests/unit/test_database_url_confinement.py` | `postgresql://u:p@127.0.0.1:5432/d`, `@localhost` (resolving to loopback only) and `@[::1]` load with no `sslmode`; `@localhost` with resolution patched to return a non-loopback address alongside `127.0.0.1` raises; a loopback URL with `host=10.0.0.5`, `hostaddr=10.0.0.5`, `service=x` or two hosts raises, and so does any loopback URL while `PGHOST`, `PGHOSTADDR`, `PGSERVICE` or `PGSERVICEFILE` is set; `@db.example.com` and `@10.0.0.5` without `sslmode`, or with `sslmode=prefer` or `require`, raise `ConfigurationError` naming `FACTORFLOW_DATABASE_URL`, and the message contains neither the URL nor `p`; the same hosts with `sslmode=verify-full` load (SEC-ENC-001 host-local loopback exception H7; AC-13) |
 | The release image ships its migrations and bundle | `tests/unit/test_distribution_contents.py` | The test copies `src/` and `pyproject.toml` to a temporary directory, writes a stub `factorflow/api/static/index.html` there, and runs `uv build` in it. The wheel contains `factorflow/db/migrations/0001_extensions_owner_state.sql` to `0004_runs.sql` and `factorflow/api/static/index.html`, and nothing under `tests/`. It never depends on a prior `npm run build`, so it cannot pass without checking the bundle (B1, B3, DEC-0034) |
-| The Dockerfile builds the bundle, installs from the lock and copies no non-release path | `tests/unit/test_release_excludes_test_paths.py` (extended) | The `Dockerfile` has an `interface` stage running `npm run build` and a `lock` stage running `uv export --frozen`; the final stage installs with `--require-hashes` and the project with `--no-deps`, copies the bundle from `interface`, and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`. The test's existing `_copy_sources` splits the file line by line with `shlex`, which raises on a `\` continuation; it must join continuation lines first (B3, DEC-0034, specification review v11 FINDING-32) |
+| The Dockerfile builds the bundle, installs from the lock and copies no non-release path | `tests/unit/test_release_excludes_test_paths.py` (extended) | The `Dockerfile` has an `interface` stage running `npm run build` and a `lock` stage running `uv export --locked` (and not `--frozen`); the final stage installs with `--require-hashes` and the project with `--no-deps`, copies the bundle from `interface`, and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`. The test's existing `_copy_sources` splits the file line by line with `shlex`, which raises on a `\` continuation; it must join continuation lines first (B3, DEC-0034, specification review v11 FINDING-32) |
 | `compose.yaml` keeps AC-14, AC-13 and the exception's conditions | `tests/unit/test_compose_definition.py` | Read as text, because PyYAML is not a project dependency and the checks need no parser: each of the three service blocks has `network_mode: host`, and the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1` and its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256` and `POSTGRES_INITDB_ARGS` with both `--auth-host=scram-sha-256` and `--auth-local=scram-sha-256`; the database URL's host is `127.0.0.1` and it sets `require_auth=scram-sha-256`; no service sets `FACTORFLOW_API_HOST`; every secret and the image tag are `${...:?...}` interpolations, not literals; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main`, it is in the `ingestion` profile, and it depends on `app` being healthy (AC-13, AC-14, AC-16; SEC-ENC-001 host-local loopback exception conditions H1 to H4) |
 | The deployment serves, and nothing listens off the host | `scripts/deploy-smoke.sh` (section 2.8.5) against the real deployment, with the owner's own values | Checks 1 to 4 pass after the deployment under review. Its output is the release evidence for AC-14, AC-15, B1, B3, B4 and exception condition H8. It needs Docker with host networking, so it is not part of `uv run pytest`, and it never runs a second deployment beside the real one (specification review v11 FINDING-35) |
-| The backup and rollback procedure works | The drill of section 2.8.4, run once before the first deployment under `docker compose -p factorflow-drill` | A store holding a completed run is dumped, restored into an emptied database, and reads the same coverage; recorded as release evidence (OPS-MIG-003) |
+| The backup and rollback procedure works | The drill of section 2.8.4, run once before the first deployment under `docker compose -p factorflow-drill` | `scripts/deploy-smoke.sh factorflow-drill` passes before the drill store takes any data, and its output is kept with the drill record (H8); a store holding a completed run is dumped, restored into an emptied database, and reads the same coverage; recorded as release evidence (OPS-MIG-003) |
 
 
 Every pytest test in this component runs without a container, so none carries
@@ -1326,7 +1369,7 @@ something checks them.
 10. `FACTORFLOW_MASSIVE_BASE_URL` unset yields `https://api.massive.com`; any
     value whose scheme is not `https`, loopback `http` included, prevents the
     release ingestion process from starting. Only the test-only entry point of
-    section 2.2c accepts loopback `http` (clause 2a, under CONST-SEC 1.2), and
+    section 2.2c accepts loopback `http` (clause 2a, under CONST-SEC 1.3), and
     only with a designated test credential, checked at start and at every
     claim.
 11. Failure scenario: a base URL that breaks any clause of section 2.2c fails
@@ -1341,8 +1384,9 @@ something checks them.
 13. On that deployment, neither port 8000 nor port 5432 accepts a connection on
     any non-loopback address of the machine (AC-14).
 14. Failure scenario: a `FACTORFLOW_DATABASE_URL` naming a non-loopback host
-    without `sslmode=verify-full` stops either process at start, naming the
-    variable and not its value (H7). With any of the four variables unset, `docker compose up`
+    without `sslmode=verify-full` stops the migrator, the application and the
+    ingestion process at start, before any of them opens a connection, naming
+    the variable and not its value (H7). With any of the four variables unset, `docker compose up`
     stops before starting a container and names the variable; with the store
     ahead of the image, the application container exits 2 on every start
     (`Restarting (2)` under `restart: unless-stopped`), never serves, and the
@@ -1351,12 +1395,21 @@ something checks them.
 ## 9. Workflows
 
 - **New workflow: owner supplies configuration.** The owner enables host
-  networking where Docker Desktop is used, exports the three variables of
-  section 2.8.3 and runs `docker compose up -d`. This is step 2 of the
-  capability's *Operate and upgrade the running product* flow.
+  networking where Docker Desktop is used, generates the database password with
+  `openssl rand -hex 24` (at least 128 bits from a secure generator, H4),
+  exports the four variables of section 2.8.3, runs `docker compose up -d`,
+  runs `scripts/deploy-smoke.sh`, and only after it passes opens the interface
+  at `http://127.0.0.1:8000` and starts ingestion with
+  `docker compose --profile ingestion up -d`. The release evidence records the
+  smoke check output, the H6 statement and the password-generation statement.
+  The implementing story changes the README's run instructions to this
+  procedure and that address (H2). This is step 2 of the capability's
+  *Operate and upgrade the running product* flow.
 - **New workflow: upgrade and rollback.** Section 2.8.4.
 - **New workflow: verify a deployment.** The owner runs
-  `scripts/deploy-smoke.sh` (section 2.8.5) after every `up`.
+  `scripts/deploy-smoke.sh` (section 2.8.5) after every `up` and after every
+  change to the host's network configuration, before using the interface or
+  starting ingestion.
 - **New workflow: a missing value stops the start.** The owner sees a message
   naming the variable and sets it. This is the diagnosable form of flow step 5.
 - **Intersecting workflow: the first acquisition run.** The capability's *Acquire
@@ -1453,7 +1506,7 @@ do.
    a string it never sends anywhere; the test in section 7 asserting that no
    response model carries a secret-shaped field is what keeps that true.
 4. ~~May `FACTORFLOW_MASSIVE_BASE_URL` use `http` when the host is loopback?~~
-   **Directed 2026-10-09 by the owner; conditional on CONST-SEC 1.2.** Clause
+   **Directed 2026-10-09 by the owner; in force under CONST-SEC 1.3.** Clause
    2a was first held BLOCKED because SEC-ENC-001 and SEC-NDG-001 (both
    Critical) did not permit it and a specification may not relax them
    (DEC-0031). Of the three ways out recorded then (amend both invariants,
@@ -1477,10 +1530,11 @@ do.
    in section 2.2c item 5, and with them the DEC-0025 E2E acquisition stack
    running against the `http` stub once the base URL is honoured.
 
-   *Still open, owner: constitution owner.* The owner's approval of CONST-SEC
-   1.2, recorded as the `approval` block its "When a version is in force" rule
-   requires, and its merge to the harness default branch; owner review of
-   DEC-0033 to DEC-0037 (DEC-0035 corrects DEC-0033's signature sentence, and
+   *Closed 2026-10-12 for the constitution.* CONST-SEC 1.2 was never approved;
+   1.3, which carries the same test-double exception, was approved at the
+   revision section 2.2c pins and merged to the harness default branch
+   (`e2c6124`), and DEC-0051 re-pinned this reliance to it. *Still open, owner:
+   capability owner.* Owner review of DEC-0033 to DEC-0037 (DEC-0035 corrects DEC-0033's signature sentence, and
    DEC-0037 replaces the fixed key DEC-0025 and DEC-0033 name). DEC-0031 still
    reads `status: open`. The decisions tooling has no command to mark a record
    superseded or to edit it, so superseded text stays in place until the owner

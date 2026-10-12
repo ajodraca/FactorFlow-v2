@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-schema-migrator
 artifact_type: component-design
-artifact_version: 6
+artifact_version: 7
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-12T19:30:00Z
+  timestamp: 2026-10-12T20:40:28Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -73,8 +73,9 @@ with no upside. Environments: the owner's single self-hosted Docker host.
 
 Dependencies: PostgreSQL 16, `psycopg` 3, the migration files under
 `src/factorflow/db/migrations/`, shipped inside the installed distribution,
-and `runtime-config` for the database connection settings and the release
-image that carries them (`runtime-config` section 2.8).
+and `runtime-config` for the database connection settings, including the
+loopback confinement of the database URL (`runtime-config` section 2.3), and
+the release image that carries them (`runtime-config` section 2.8).
 
 ## 2. Design Details
 
@@ -153,7 +154,9 @@ reaches uvicorn.
 
 ```mermaid
 flowchart TD
-    A["Container start"] --> B["Connect to market-data-store"]
+    A["Container start"] --> V{"URL loads through<br/>DatabaseSettings (H7)?"}
+    V -->|no| Z1
+    V -->|yes| B["Connect to market-data-store"]
     B --> C{"Connected?"}
     C -->|no| Z1["Exit 1: database unreachable"]
     C -->|yes| D["CREATE TABLE IF NOT EXISTS applied_migrations"]
@@ -226,13 +229,26 @@ would allow a crash between the two to leave a store no future run can classify.
 | Exit | Cause | Message shape | Acceptance criterion |
 |------|-------|---------------|----------------------|
 | 0 | Schema current or brought forward | `schema current at version N` or `applied migrations: N, M` | AC-15 |
-| 1 | Database unreachable or credentials rejected | `database unreachable: <driver message>`, naming the host and database but never the password | AC-16, AC-13 |
+| 1 | `FACTORFLOW_DATABASE_URL` unset or refused by `DatabaseSettings` (H7), reported before any connection; or the database is unreachable or rejects the credentials | the `ConfigurationError` message, naming `FACTORFLOW_DATABASE_URL` and the rule but never the value; or `database unreachable: <driver message>`, naming the host and database but never the password | AC-16, AC-13 |
 | 2 | Store holds a version this build does not carry | `store is at version N, this build carries up to M; deploy a build that knows version N` | AC-16 |
 | 3 | A recorded migration's checksum does not match | `migration N was applied with a different definition than this build carries` | AC-16 |
 | 4 | A migration failed to apply, or this build's migrations cannot be read: the directory is missing, a filename is malformed, a version repeats, or a file contains `BEGIN` or `COMMIT`. The read failures are reported before any connection is made | `migration N failed: <driver message>; no change was committed`, or the read failure's own message, for example `migrations directory not found: <path>` | AC-16 |
 
 Every message is emitted through the structured logger at `error` level with the
 migration version as a field, never through `print` (SA-LOG-001).
+
+**Database URL confinement (H7).** `migrate_main.main()` obtains the URL by
+constructing `runtime-config`'s `DatabaseSettings()` and reading
+`settings.url.get_secret_value()`, never from `os.environ` directly. That model
+refuses a plaintext URL to a non-loopback host and every libpq route that
+could supply another address (`runtime-config` section 2.3). A refusal, or an
+unset variable, exits 1 with the model's message before `psycopg.connect` is
+called. Today `migrate_main` reads `FACTORFLOW_DATABASE_URL` itself (its
+docstring defers the wiring until `runtime-config` landed, which it has); the
+implementing story replaces that read. The migrator's connection is part of
+channel (b) in `runtime-config` section 2.8.1, which relies on the
+`SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3 for it (DEC-0050);
+this design therefore does not cite the exception separately.
 
 ### 2.6 Messages
 
@@ -267,7 +283,9 @@ N/A, not applicable for this component. No broker, topic or queue.
 ## 4. Security
 
 - **Credential handling (AC-13, SEC-SEC-001).** The database connection string
-  comes from `runtime-config`, which reads it from the environment. The migrator
+  comes from `runtime-config`'s `DatabaseSettings`, which reads it from the
+  environment and confines a plaintext channel to loopback before the migrator
+  connects (section 2.5, H7). The migrator
   logs the host, port and database name and never the password. Its failure
   messages are the highest-risk disclosure point in the component, because a
   `psycopg` connection error can include the connection string; the message is
@@ -338,6 +356,7 @@ capability's.
 | Advisory lock serialises | `tests/integration/test_migrator_concurrent.py` | Two migrators against one empty store both exit 0 and apply each version once |
 | A missing directory refuses the start | `tests/unit/test_migrator_discover.py`, `tests/unit/test_migrate_main_exit_codes.py` | `discover` raises naming the path, and `run_migrations` returns 4 before connecting (EXP-20261012-1, AC-16) |
 | The migrations resolve inside the package | `tests/unit/test_migrator_discover.py` | `MIGRATIONS_DIR` is `factorflow/db/migrations` next to `migrate_main.py`, and `discover(MIGRATIONS_DIR)` returns versions 1 to 4 (B1) |
+| The migrator's database URL is confined before it connects | `tests/unit/test_migrate_main_confinement.py` | With `psycopg.connect` patched to fail the test if called, `main()` returns 1 for each of: `@10.0.0.5` and `@db.example.com` without `sslmode=verify-full`; a loopback URL with a `host=10.0.0.5` or `hostaddr=10.0.0.5` parameter; a loopback URL while `PGHOST` is set; and `FACTORFLOW_DATABASE_URL` unset. Each logged message names `FACTORFLOW_DATABASE_URL` and contains neither the URL nor its password. A loopback URL reaches `run_migrations` (SEC-ENC-001 host-local loopback exception H7, AC-13, AC-16) |
 | The installed distribution carries the migrations | `tests/unit/test_distribution_contents.py` (`runtime-config` section 7) | The built wheel contains `factorflow/db/migrations/0001_*.sql` to `0004_*.sql` (B1) |
 
 Security testing: the password-redaction test above is the security-relevant
@@ -362,6 +381,10 @@ case. Performance and scalability testing do not apply at four files.
    provider credential.
 9. Two migrators started concurrently against one empty store each exit zero and
    each version is applied exactly once.
+10. Failure scenario: a `FACTORFLOW_DATABASE_URL` naming a non-loopback host
+    without `sslmode=verify-full`, or carrying a libpq route to another
+    address, makes the migrator exit 1 without opening a connection, naming the
+    variable and not its value (H7).
 
 ## 9. Workflows
 
@@ -409,7 +432,8 @@ This component exposes no HTTP surface.
 | Component design | Market Data Store | `applied_migrations` definition and the four migration files | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | UX design | CAP-001 UX design v4 | Section 2, the unreachable state naming a failed migration | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Constitution | Tech Stack v5 | Numbered forward-only migrations, no ORM, validation commands | `docs/constitution/tech-stack.md` |
-| Component design | Runtime Configuration v13 | Section 2.8, the release image and compose definition that carry and run the migrator | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
+| Component design | Runtime Configuration v14 | Section 2.3, `DatabaseSettings` and its H7 confinement; section 2.8, the release image and compose definition that carry and run the migrator, and channel (b) |
+| Constitution | CONST-SEC 1.3 (AI-agents harness) | SEC-ENC-001 host-local loopback exception, condition H7; relied on through `runtime-config` section 2.8.1 and DEC-0050 | `docs/constitutions/security.constitution.md` | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Release | CAP-001 release readiness v1 | Blocker B1, found by the image smoke test | `docs/releases/CAP-001-release-v1.md` |
 
 ## 13. Traceability
@@ -419,6 +443,7 @@ This component exposes no HTTP surface.
 | AC-15 | `schema-migrator`, numbered migrations, `applied_migrations` | `apply_pending`, one transaction per file, checksum recording; migrations shipped as package data | 2.1, 2.3, 2.4 |
 | AC-16 | Migrator exits non-zero; API never binds | Exit codes 1 to 4 and the entrypoint chaining in 2.1 | 2.5, 6 |
 | AC-13 | `runtime-config` redaction | Failure messages built from known-safe fields, never from the raw driver exception | 4 |
+| AC-13, AC-14 | `runtime-config` `DatabaseSettings` (H7) | The URL loads through `DatabaseSettings` before any connection; exit 1 on refusal | 2.5, 7 |
 | AC-18 | `GET /api/health` liveness | A refused migration presents as the interface's unreachable state rather than as a running product | 9, 10 |
 
 ## 14. Open Questions

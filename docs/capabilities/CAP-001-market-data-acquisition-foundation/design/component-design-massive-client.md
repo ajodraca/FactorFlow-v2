@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 14
+artifact_version: 15
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-12T22:00:00Z
+  timestamp: 2026-10-12T20:40:28Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -256,7 +256,8 @@ at process start by `component-design-runtime-config.md` section 2.2c: `https`
 only, a host, no userinfo, path, query or fragment, and no trailing slash. This
 component does not re-validate or rewrite it. The one exception is clause 2a
 there, the loopback `http` allowance the owner asked for. It relies on the
-SEC-ENC-001 loopback test-double exception of CONST-SEC 1.2 (with SEC-NDG-001),
+SEC-ENC-001 loopback test-double exception, added in CONST-SEC 1.2 and
+carried unchanged in 1.3 (with SEC-NDG-001),
 recorded for this project in DEC-0036. It takes effect only as
 `component-design-runtime-config.md` section 2.2c, *When clause 2a is in
 force*, states: CONST-SEC 1.3 in force under its own rule (the owner's
