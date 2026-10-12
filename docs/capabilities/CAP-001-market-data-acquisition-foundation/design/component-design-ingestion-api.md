@@ -339,7 +339,7 @@ learns of run completion by polling, per the UX design's 10-second run poll and
   channel carrying Internal data that never leaves the host. It relies on the
   `SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3 (DEC-0050), and
   carries no credential, because the interface has no authentication.
-  `runtime-config` section 2.8.1 maps the exception's six conditions to the
+  `runtime-config` section 2.8.1 maps the exception's conditions H1 to H8 to the
   deployment. The exception is in force only once CONST-SEC 1.3 is approved and
   merged; until then the hop has no standing under SEC-ENC-001. This replaces
   the earlier reading that SEC-ENC-001 does not engage on a loopback hop.
