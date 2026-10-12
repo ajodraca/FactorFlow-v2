@@ -40,10 +40,14 @@ class MigrationFile:
 def discover(directory: Path) -> list[MigrationFile]:
     """Return every migration this build carries, ordered by version.
 
-    Raises MigrationError when a filename is malformed, a version repeats, or
-    a file contains `BEGIN` or `COMMIT` (the migrator opens the transaction;
-    the file must not).
+    Raises MigrationError when the directory does not exist (a build that
+    cannot find its migrations must not report that it carries none), a
+    filename is malformed, a version repeats, or a file contains `BEGIN` or
+    `COMMIT` (the migrator opens the transaction; the file must not).
     """
+    if not directory.is_dir():
+        raise MigrationError(f"migrations directory not found: {directory}")
+
     files: list[MigrationFile] = []
     seen_versions: dict[int, str] = {}
 
