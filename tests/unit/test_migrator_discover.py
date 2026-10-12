@@ -63,3 +63,11 @@ def test_discover_ignores_non_sql_files(tmp_path: Path) -> None:
 
     files = discover(tmp_path)
     assert [f.version for f in files] == [1]
+
+
+def test_discover_raises_on_missing_directory(tmp_path: Path) -> None:
+    """A build that cannot find its migrations must not report zero of them (EXP-20261012-1)."""
+    missing = tmp_path / "absent"
+
+    with pytest.raises(MigrationError, match=str(missing)):
+        discover(missing)
