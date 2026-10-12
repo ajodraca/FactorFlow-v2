@@ -8,6 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-09
 updated: 2026-10-11
+last_reworked_review: integration-tests-automation-review-v1.md
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
@@ -182,12 +183,12 @@ helpers every `tests/unit/test_massive_*.py` file defines (DEC-0028).
 
 - [x] T002 Create `tests/unit/test_massive_retry.py`. Its module docstring cites the test table in `component-design-massive-client.md` section 7: "429 is not an attempt", "Timeout retries to the limit" and "A 429 without Retry-After is still throttling". Define the helpers the same way `tests/unit/test_massive_client_governor_integration.py` does: `FIXTURES`, `_load`, `_settings()` (`max_attempts: 3`), `_governor()` (`max_attempts=3`, `max_throttle_wait_seconds=1.0`, no-op `sleep`), `_FakeResponse` and `_envelope`. Do not import helpers across test modules, because the existing files do not. Add no tests in this task (supports TC-INT-025 and TC-INT-026).
 
-- [ ] T026 [P] Add a request log to `tests/e2e/support/massive_stub.py` (supports TC-INT-027):
+- [x] T026 [P] Add a request log to `tests/e2e/support/massive_stub.py` (supports TC-INT-027):
   - In `StubState`, keep a list of received provider requests under the existing `_lock`. Add `record(method, path)` and `requests()`, which returns a copy. Make `reset()` also clear the list.
   - In `StubHandler.do_GET`, answer `GET /__stub/requests` with 200 and `{"requests": [{"method": "GET", "path": "<path>"}, …]}` in the order received, and do not record that request. Record every other `GET` as `parts.path` only, before `wait_if_held`, so a held request is logged when it arrives. Do not record the query string.
   - Add the `GET /__stub/requests` control to the module docstring's list, and add TC-INT-027 to its "Supports" line.
   - Change no provider response, mode or hold behaviour.
-- [ ] T027 Add two helpers to `tests/e2e/support/acquisition.ts` (supports TC-INT-027; depends on T026):
+- [x] T027 Add two helpers to `tests/e2e/support/acquisition.ts` (supports TC-INT-027; depends on T026):
   - `stubRequests(): Promise<{ method: string; path: string }[]>`, which calls `GET ${STUB_BASE_URL}/__stub/requests` with `fetch`, throws on a non-OK status the way `stubControl` does, and returns `requests`.
   - `ingestionProcessIsRunning(): boolean`, which runs `pgrep -f tests/e2e/support/ingestion_e2e_main.py` with `execFileSync` and returns `false` only when pgrep exits 1 (no match). Any other failure is rethrown.
   - Add TC-INT-027 to the header comment's "Supports" line.
@@ -275,7 +276,7 @@ test asserts (owner direction 2026-10-07; DEC-0023, DEC-0024).
 
 ### TC-INT-027 (v3, owner direction 2026-10-11)
 
-- [ ] T028 Create `tests/e2e/acquisition-stack-stub.spec.ts` with one test, `"TC-INT-027: the E2E acquisition stack reaches the loopback Massive stub"`, and a `// Implements TC-INT-027` line above it (depends on T027).
+- [x] T028 Create `tests/e2e/acquisition-stack-stub.spec.ts` with one test, `"TC-INT-027: the E2E acquisition stack reaches the loopback Massive stub"`, and a `// Implements TC-INT-027` line above it (depends on T027).
   - Header comment: TC-INT-027, DAC-E3-S7-14, `runtime-config` section 14 item 4, the S6/S7 landing rule, and this task.
   - `test.beforeEach` calls `resetAcquisitionStore()`, like every acquisition-stack spec, so the stub's request log starts empty.
   - Step 1: `GET ${ACQUISITION_BASE_URL}/api/health` with the `request` fixture answers 200.
@@ -310,8 +311,8 @@ change test-only support files.
 - [x] T024 On a host with Docker, run `uv run pytest tests/integration -m postgres` and then the full `uv run pytest`. Both must pass. This container has no Docker, so use a local machine or CI. Record where the run happened and the pass counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T023).
 - [x] T025 From the repository root, verify traceability: `for n in $(seq -w 1 26); do grep -rqE "# Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing (depends on T003–T022).
 
-- [ ] T029 On a host with Docker, run `npm run test:e2e`. Expect 18 passing tests: the 17 from the E2E automation plus T028. Confirm that `docker ps` lists no `factorflow-e2e-postgres` afterwards. Then run `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -m 'not postgres'` (the stub is still not collected), `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run test`. Record where the run happened and the counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T026–T028).
-- [ ] T030 From the repository root, verify traceability for all 27 cases: `for n in $(seq -w 1 27); do grep -rqE "(#|//) Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing. This loop replaces T025's for this version (depends on T028).
+- [x] T029 On a host with Docker, run `npm run test:e2e`. Expect 18 passing tests: the 17 from the E2E automation plus T028. Confirm that `docker ps` lists no `factorflow-e2e-postgres` afterwards. Then run `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -m 'not postgres'` (the stub is still not collected), `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run test`. Record where the run happened and the counts in the automation hand-off. Do not mark this task complete from a run without Docker (depends on T026–T028).
+- [x] T030 From the repository root, verify traceability for all 27 cases: `for n in $(seq -w 1 27); do grep -rqE "(#|//) Implements TC-INT-0$n\b" tests || echo "missing TC-INT-0$n"; done` must print nothing. This loop replaces T025's for this version (depends on T028).
 
 **Checkpoint:** Lint, format, type check and the non-postgres tests pass
 locally. The postgres integration suite, the full suite and `npm run test:e2e`
