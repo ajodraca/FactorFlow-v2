@@ -60,4 +60,48 @@ cycles:
         the third version against DAC-E1-S8-1 to S8-4, TC-COMP-410 to 415
         and runtime-config section 2.3.
     tests_executed: true
-    commit_hash: e44f1f5
+    commit_hash: e44f1f57816ead9d7d88b9c1e953859ee3a0d911
+  - name: migrations-as-package-data
+    tasks: [T004, T010, T011, T014]
+    status: green
+    diff_sha256: c2355fc21c46e4654b4daeb564f54344be8bf8a82bff344402a25976bfc755e1
+    red:
+      command: >-
+        uv run pytest tests/unit/test_migrator_discover.py
+        tests/unit/test_migrations_location.py
+        tests/unit/test_distribution_contents.py -q
+      result: >-
+        5 failed, 7 passed before T014: MIGRATIONS_DIR did not exist, the
+        root migrations/ directory and its parents[N] joins were present, the
+        wheel listed no factorflow/db/migrations/ file, and the unpacked
+        wheel could not import MIGRATIONS_DIR. After review rework, removing
+        the db/migrations package-data entry makes both TC-COMP-392 tests
+        fail (mutation check).
+    green:
+      command: uv run pytest; npm run test:e2e
+      result: >-
+        977 passed (full suite) and 18 passed (Playwright) on the first
+        version; the reworked test modules pass (30); ruff, ruff format,
+        mypy, biome and tsc clean; uv build carries the four migrations.
+    deviation: >-
+      tests/fixtures/migrations_ok/0001_extensions_owner_state.sql is a
+      symlink to the release migration and was repointed into the package
+      (not in the plan's file list; it dangled after the move).
+      TC-COMP-420 checks it resolves there.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer rejected the first version because the wheel test
+      copied a stale src/factorflow.egg-info whose SOURCES.txt made setuptools
+      ship the migrations even without the package-data entry, and approved
+      the third after re-running that mutation (0 migrations shipped) and
+      confirming the renames are byte-identical.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the TC-COMP-420 scan narrower than
+        T011 (no quoted "migrations/..." paths, no shell joins, .ts/.sql
+        unscanned), then found no drift against DAC-E1-20, DAC-E1-S8-6,
+        DAC-E1-S8-7, TC-COMP-392/419/420 and schema-migrator section 2.1;
+        judged the symlink repoint and the Dockerfile line removal sanctioned.
+    tests_executed: true
+    commit_hash: c8dd9594c393323a6a9e729c9e91730d8b80b391
