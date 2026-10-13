@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
-artifact_version: 5
+artifact_version: 6
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-10-09
+updated: 2026-10-12
 ai_provenance:
   agent_id: story-generation-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.296"
-  timestamp: 2026-10-09T22:53:00Z
+  timestamp: 2026-10-13T01:27:06Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "8"
     - id: CAP-001-ux-design
       version: "approved"
     - id: CAP-001-E3
@@ -28,6 +28,14 @@ ai_provenance:
       version: "3"
     - id: CAP-001-E3-S7
       version: "3"
+    - id: CAP-001-E1
+      version: "2"
+    - id: CAP-001-E1-S7
+      version: "1"
+    - id: CAP-001-E1-S8
+      version: "1"
+    - id: CAP-001-E1-S9
+      version: "1"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
@@ -43,14 +51,14 @@ approval:
 **Capability:** CAP-001
 **Generated:** 2026-09-06
 **Total EPICs:** 7
-**Total Stories:** 38
-**Total Points:** 164
+**Total Stories:** 41
+**Total Points:** 177
 
 ## EPICs
 
 | EPIC ID | Jira Key | Title | Estimate | Stories | Total Points |
 |---------|----------|-------|----------|---------|-------------|
-| [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation, Schema and Application Shell | L | 6 | 24 |
+| [CAP-001-E1](epics/runnable-foundation/CAP-001-E1.md) | N/A | Runnable Foundation, Schema and Application Shell | L | 9 | 37 |
 | [CAP-001-E2](epics/instrument-list-and-history-depth/CAP-001-E2.md) | N/A | Instrument List and History Depth | M | 4 | 16 |
 | [CAP-001-E3](epics/provider-integration-and-pacing/CAP-001-E3.md) | N/A | Provider Integration and Pacing | L | 7 | 30 |
 | [CAP-001-E4](epics/point-in-time-acquisition/CAP-001-E4.md) | N/A | Point-in-Time Acquisition and Re-run Safety | XL | 7 | 32 |
@@ -91,23 +99,40 @@ need, or each would invent its own.
 
 ## Stories
 
-38 stories across the seven EPICs, 164 points. Every story is scoped to the
+41 stories across the seven EPICs, 177 points. Every story is scoped to the
 single writable repository `FactorFlow-v2`, which `project.yaml` declares; the
 twelve component names from the system design are modules within it rather than
 separate repositories, and each story names its module in the description.
 
 | EPIC | Stories | Points | Language split |
 |------|---------|--------|----------------|
-| E1 Runnable Foundation, Schema and Application Shell | 6 | 24 | 4 Python, 2 TypeScript |
+| E1 Runnable Foundation, Schema and Application Shell | 9 | 37 | 7 Python, 2 TypeScript |
 | E2 Instrument List and History Depth | 4 | 16 | 3 Python, 1 TypeScript |
 | E3 Provider Integration and Pacing | 7 | 30 | 7 Python |
 | E4 Point-in-Time Acquisition and Re-run Safety | 7 | 32 | 7 Python |
 | E5 Run Lifecycle: Queueing, Cancellation and Recovery | 6 | 31 | 5 Python, 1 TypeScript |
 | E6 Coverage and Gap Visibility | 4 | 18 | 3 Python, 1 TypeScript |
 | E7 Failure Diagnosis and Operational Visibility | 4 | 13 | 3 Python, 1 TypeScript |
-| **Total** | **38** | **164** | 32 Python, 6 TypeScript |
+| **Total** | **41** | **177** | 35 Python, 6 TypeScript |
 
 No story spans both languages, so none straddles the pytest and vitest boundary.
+E1-S9 also writes the `Dockerfile`, `compose.yaml` and a shell script; its
+automated tests are pytest, so it is counted as Python.
+
+### Deployment stories (added 2026-10-12)
+
+E1-S7 to E1-S9 implement the approved deployment definition (runtime-config
+v14 sections 2.3 and 2.8, schema-migrator v7, ingestion-api v8 section 2.5a),
+closing release manifest v1 blockers B1, B3 and B4. E1-S7 adds the `Host` and
+`Origin` checks (H9). E1-S8 confines every database client through
+`DatabaseSettings` (H7) and ships the migrations as package data (B1). E1-S9
+delivers the release image, `compose.yaml`, `scripts/deploy-smoke.sh`, and the
+README's run, upgrade, backup and rollback procedures (B3, B4), and depends on
+E1-S8. E1-S7 and E1-S8 are independent and can start at once. The plaintext
+loopback channels rely on the CONST-SEC 1.3 `SEC-ENC-001 host-local loopback
+exception` (DEC-0050). E1-S9's smoke check against the real deployment and its
+backup drill need the owner's Docker host and live provider key, so they are
+owner-run release evidence for release readiness v2, not story blockers.
 
 ### Provider base URL stories (added 2026-10-09)
 
@@ -178,12 +203,12 @@ so a reader reconciling this table against an EPIC file finds what they expect.
 | AC-10 Failure diagnosis | 3 step 21, 4.2 | run-journal, ingestion-api, owner-web-app | E7 | E4-S6, E5-S5, E7-S1, E7-S2, E7-S4 |
 | AC-11 Unrecognised instrument does not stop the run | 3 steps 18-21 | massive-client, acquisition-runner, run-journal | E3, E7; E4 (derived) | E3-S3, E3-S5, E4-S6, E7-S1, E7-S4 |
 | AC-12 A failed run leaves no false history | 3 step 17, 5.9 | market-data-store, observation-writer, coverage-service | E4, E5, E6 | E4-S1, E5-S1, E4-S3, E6-S1 |
-| AC-13 Credential handling | 3 steps 37-39, 4.2, 5.12 | runtime-config, massive-client, acquisition-runner, schema-migrator | E1, E3; E7 (derived) | E1-S2, E1-S3, E3-S1, E3-S5, E3-S6, E3-S7, E7-S2 |
-| AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | E1-S3, E1-S4, E1-S6 |
-| AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store | E1, E5 | E1-S1, E1-S2, E5-S1 |
-| AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app | E1; E7 (derived) | E1-S2, E1-S5 |
+| AC-13 Credential handling | 3 steps 37-39, 4.2, 5.12 | runtime-config, massive-client, acquisition-runner, schema-migrator | E1, E3; E7 (derived) | E1-S2, E1-S3, E1-S8, E1-S9, E3-S1, E3-S5, E3-S6, E3-S7, E7-S2 |
+| AC-14 Network exposure | 5.11 | runtime-config, ingestion-api, owner-web-app | E1 | E1-S3, E1-S4, E1-S6, E1-S7, E1-S9 |
+| AC-15 Forward data evolution | 3 steps 32-35 | schema-migrator, market-data-store, runtime-config | E1, E5 | E1-S1, E1-S2, E1-S8, E1-S9, E5-S1 |
+| AC-16 Refuse an inconsistent start | 3 step 36 | schema-migrator, owner-web-app, runtime-config | E1; E7 (derived) | E1-S2, E1-S5, E1-S8, E1-S9 |
 | AC-17 Honest empty state | 4.2 | coverage-service, owner-web-app | E6; E1 (derived) | E6-S1, E6-S3, E6-S4, E1-S5 |
-| AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app | E1, E7 | E1-S5, E1-S6, E7-S3 |
+| AC-18 Operational visibility | 4.2 | ingestion-api, owner-web-app, runtime-config | E1, E7 | E1-S5, E1-S6, E1-S9, E7-S3 |
 | AC-19 Cancel a run in progress | 3 steps 44-47, 4.2 | run-journal, acquisition-runner, ingestion-api | E5 | E4-S5, E5-S3, E5-S5, E7-S4 |
 | AC-20 An interrupted run does not block the next | 3 steps 48-51, 5.7 | run-journal reclaim sweep | E5 | E4-S7, E5-S4 |
 | AC-21 Removal retains history | 4.1, 4.2, 5.8 | instrument-list-service, coverage-service | E2, E6 | E2-S1, E2-S4, E6-S1, E6-S3, E6-S4 |
@@ -201,14 +226,14 @@ traceability table.
 
 | EPIC | Derived ACs | Count |
 |------|-------------|-------|
-| E1 | DAC-E1-1 to DAC-E1-17 | 17 |
+| E1 | DAC-E1-1 to DAC-E1-24 | 24 |
 | E2 | DAC-E2-1 to DAC-E2-12 | 12 |
 | E3 | DAC-E3-1 to DAC-E3-14 | 14 |
 | E4 | DAC-E4-1 to DAC-E4-15 | 15 |
 | E5 | DAC-E5-1 to DAC-E5-17 | 17 |
 | E6 | DAC-E6-1 to DAC-E6-14 | 14 |
 | E7 | DAC-E7-1 to DAC-E7-12 | 12 |
-| **Total** | | **101** |
+| **Total** | | **108** |
 
 ## Open Questions Carried From the Capability and Designs
 
@@ -220,7 +245,6 @@ None is blocking. Each is recorded in the EPIC it affects, or in the story it af
 | Decoupling the per-run E2E key from clause 2a (spec review v7 FINDING-10 (b); (a) resolved by the landing rule) | AC-13 | E3 | runtime-config 2.2c item 5 |
 | `localhost` resolved once at start by the test entry point (spec review v7 FINDING-11) | AC-13 | E3 | runtime-config 2.2c item 2 |
 | No duration target for a 3000-instrument run | AC-4 | E4 | Capability 7 |
-| Backup and restore procedure unspecified | AC-15 | E1 | market-data-store 14 |
 | Whether a separate DDL credential is worth introducing | AC-13 | E1 | schema-migrator 14 |
 | Indeterminate progress indicator is an unresolved component-spec gap | AC-9 presentation | E5 | ux-design 3, 7 |
 | Density tier unselected (OQ-UI-4) | STD-UI-29 | E6 | ux-design 0 |
