@@ -13,7 +13,7 @@ from factorflow.api.app import create_app
 @pytest.fixture
 def client(migrated_connection_string: str, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", migrated_connection_string)
-    with TestClient(create_app()) as test_client:
+    with TestClient(create_app(), base_url="http://127.0.0.1:8000") as test_client:
         yield test_client
 
 

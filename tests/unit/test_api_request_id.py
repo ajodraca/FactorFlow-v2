@@ -20,7 +20,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.delenv("FACTORFLOW_DATABASE_URL", raising=False)
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as test_client:
         yield test_client
 
 
@@ -89,7 +89,9 @@ def probe_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         raise RuntimeError("probe failure")
 
     app.router.routes[0:0] = probe.routes
-    with TestClient(app, raise_server_exceptions=False) as test_client:
+    with TestClient(
+        app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False
+    ) as test_client:
         yield test_client
 
 

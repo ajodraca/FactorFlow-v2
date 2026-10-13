@@ -12,6 +12,7 @@ import time
 import httpx
 import pytest
 
+from factorflow import app_main
 from factorflow.api.app import create_app
 from factorflow.app_main import build_server
 
@@ -74,6 +75,13 @@ def test_server_binds_to_loopback_only(monkeypatch: pytest.MonkeyPatch) -> None:
 
     port = _free_port()
     monkeypatch.delenv("FACTORFLOW_API_HOST", raising=False)
+    # The Host and Origin middleware allows the loopback hosts on
+    # `ApiSettings.port`, read when the app is built (ingestion-api section
+    # 2.5a, CAP-001-E1-S7). Production sets the port before the process starts;
+    # here the free port is configured the same way and the module's app is
+    # rebuilt after it, since `app_main` built its own at import.
+    monkeypatch.setenv("FACTORFLOW_API_PORT", str(port))
+    monkeypatch.setattr(app_main, "app", create_app())
 
     server = build_server(port=port)
     thread = threading.Thread(target=server.run, daemon=True)

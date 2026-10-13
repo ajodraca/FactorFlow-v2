@@ -15,7 +15,7 @@ def test_health_never_echoes_credential(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
 
     app = create_app()
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         response = client.get("/api/health")
 
     assert secret_value not in response.text

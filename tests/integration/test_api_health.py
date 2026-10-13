@@ -34,7 +34,7 @@ def migrated_health_client(
         apply_pending(conn, discover(MIGRATIONS_DIR))
 
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", postgres_connection_string)
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(), base_url="http://127.0.0.1:8000") as client:
         yield client, postgres_connection_string
 
 
@@ -104,7 +104,7 @@ def test_health_reachable_database(
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", "test-key-value")
 
     app = create_app()
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         response = client.get("/api/health")
 
     assert response.status_code == 200
@@ -126,7 +126,7 @@ def test_health_unreachable_database(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("FACTORFLOW_MASSIVE_API_KEY", raising=False)
 
     app = create_app()
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         response = client.get("/api/health")
 
     assert response.status_code == 200
@@ -145,7 +145,7 @@ def test_health_most_recent_run_is_null(
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", postgres_connection_string)
 
     app = create_app()
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         response = client.get("/api/health")
 
     body = response.json()

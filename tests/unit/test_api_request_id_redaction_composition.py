@@ -151,7 +151,7 @@ def test_lifespan_installs_redaction_end_to_end(monkeypatch: pytest.MonkeyPatch)
 
     try:
         app = create_app()
-        with TestClient(app) as client:
+        with TestClient(app, base_url="http://127.0.0.1:8000") as client:
             response = client.get("/api/health")
     finally:
         logger.removeHandler(handler)

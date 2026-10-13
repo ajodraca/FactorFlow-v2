@@ -1,0 +1,96 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E1-S7-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E1-S7
+tasks_file: CAP-001-E1-S7-tasks.md
+decisions: []
+created: 2026-10-13
+updated: 2026-10-13
+
+baseline:
+  task: T002
+  base_commit: 73b1ea5c58544c9359ec778db1cbdccd5f23096c
+  seams_verified: >-
+    create_app() registering routers, the request-id middleware
+    (@app.middleware("http")) and the static mount in src/factorflow/api/app.py;
+    error_response(status_code, code, message, request_id, resource) in
+    api/errors.py; ApiSettings.port (FACTORFLOW_API_PORT, default 8000); the
+    five state-changing routes reaching app.state.db_pool; the SEC-NDG-001
+    scan test_release_source_accepts_no_http_scheme; the E2E pages served by
+    the API itself at http://127.0.0.1:8123.
+  commands:
+    - uv run pytest (934 passed, after T001's base_url change, committed as 2f985e4)
+  result: Green before any production change.
+
+cycles:
+  - name: release-guard-exemption
+    tasks: [T009, T010, T012]
+    status: green
+    diff_sha256: 76ef9df456d7ac680091f7cd19ed0222db073648801967b0e1b5ac424b9c75a5
+    red:
+      command: uv run pytest tests/unit/test_release_excludes_test_paths.py -q
+      result: >-
+        With the exemption removed from _http_scheme_offenders, TC-COMP-409's
+        test fails (the three allow-list parts in api/app.py are reported).
+        The path-keyed test (T010) and TC-COMP-408 pass on arrival: the first
+        asserts the exemption does not reach another app.py, the second has
+        no allow-list to exempt until the middleware lands.
+    green:
+      command: uv run pytest tests/unit/test_release_excludes_test_paths.py -q
+      result: 6 passed; ruff, ruff format and mypy clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the exemption is limited to three exact,
+      case-sensitive strings in the module whose package-relative path is
+      api/app.py, that the http comparison and listing checks stay
+      unconditional, and that SEC-NDG-001's purpose is intact.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the module docstring not updated as
+        T012 asks and TC-COMP-409's listing case missing, then found no drift
+        against DAC-E1-S7-6, TC-COMP-364/408/409 and ingestion-api section 2.5a.
+    tests_executed: true
+    commit_hash: ee7180df70efa01b4296f9f33f898adf9cbc8b1d
+  - name: host-origin-middleware
+    tasks: [T003, T004, T005, T006, T007, T008, T011, T013]
+    status: green
+    diff_sha256: 250bcd6abc108781efa64026de40c298386e223eaaf05b2bfdd719a19ddb523f
+    red:
+      command: uv run pytest tests/unit/test_api_host_origin.py -q
+      result: >-
+        19 failed, 9 passed before T013: every refusal case (foreign,
+        wrong-port and missing Host; foreign and null Origin on the five
+        state-changing routes; the warning log; the refused run start; the
+        port-follows-settings refusal) failed, and the pass-through cases
+        passed on arrival. After the test rework, replacing the middleware
+        registration with a no-op again fails 19 of 28.
+    green:
+      command: uv run pytest; npm run test:e2e
+      result: >-
+        964 passed and 18 passed; the reworked module passes 28; ruff, ruff
+        format and mypy src clean.
+    deviation: >-
+      tests/integration/test_api_binding.py (not in the plan's file list)
+      starts the real server on a free port through build_server(port=...);
+      it now sets FACTORFLOW_API_PORT to that port and rebuilds
+      app_main.app, which is built at import, because the allowed hosts
+      follow ApiSettings.port. Production code is unchanged by this.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the middleware (exact allowed sets from
+      ApiSettings.port, Host lower-cased, null Origin refused, %r logging,
+      registration order giving refusals the request id) and the reworked
+      tests, after independently confirming 19 of 28 fail without it.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the pool double crashing health
+        (connection() took no timeout), so TC-COMP-390/405 never checked a
+        normal response and TC-COMP-402's nothing-ran assertion was vacuous,
+        then found no drift against DAC-E1-18, DAC-E1-S7-1 to S7-5,
+        TC-COMP-390/401-407 and ingestion-api section 2.5a; judged the
+        test_api_binding.py change consistent with section 2.5a.
+    tests_executed: true
+    commit_hash: 7511706564a6739f3c7a606914accbad86094f3a
