@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-market-data-store
 artifact_type: component-design
-artifact_version: 7
+artifact_version: 9
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-10-10
+updated: 2026-10-12
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-10T22:50:06Z
+  timestamp: 2026-10-12T19:30:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "8"
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
@@ -29,9 +29,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-10T23:06:40Z
-  reviewed_revision: sha256:8b11cff20e3589027130fd69dc060a9f979ceebd507523f902fc79c58c4eec2d
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:51f4d6fef017ccb83a9e3c597b8217afc8eb95513f021c7c23b3b63e6b493bc1
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Market Data Store
@@ -137,12 +137,17 @@ recorded in `applied_migrations` (C5, tech stack, AC-15). A correction is a new
 file, never an edit to a file that has been applied.
 
 ```
-migrations/
+src/factorflow/db/migrations/
 ├── 0001_extensions_owner_state.sql
 ├── 0002_observations.sql
 ├── 0003_coverage.sql
 └── 0004_runs.sql
 ```
+
+The files are package data of `factorflow.db`, so the installed distribution
+and the release image carry them (`schema-migrator` section 2.1, which moved
+them from a repository-root `migrations/` on 2026-10-12, release manifest v1
+blocker B1). Their content, and so every recorded checksum, is unchanged.
 
 `applied_migrations` is created by `schema-migrator` before the first file runs,
 not by a migration file, because the migrator has to read it to decide what to
@@ -460,7 +465,7 @@ Three mechanisms, because the constraint is unrecoverable if it is broken (C5):
    `INSERT ... ON CONFLICT DO NOTHING` only. No other component holds a write
    path to the four observation tables.
 2. **A repository test asserts it.** `tests/unit/test_sql_is_append_only.py`
-   scans every `.sql` file under `migrations/` and every SQL string in
+   scans every `.sql` file under `src/factorflow/db/migrations/` and every SQL string in
    `src/factorflow/` for `UPDATE` or `DELETE` naming `daily_bar`,
    `fundamental_observation`, `corporate_action` or `instrument_reference`, and
    fails on a match. This catches the case the first mechanism relies on a human
@@ -548,12 +553,23 @@ constraint 5.1.
   (SEC-INP-002). The one dynamic element is the sort column on coverage and run
   listings, which is resolved through an allowlist of column names in
   `coverage-service` and `run-journal` rather than interpolated.
-- **Authentication and authorization.** The database accepts connections only
-  from the container network; the application publishes no database port to the
-  host. There is no application-level authorization model, because there is one
+- **Authentication and authorization.** PostgreSQL runs in the host network
+  namespace and listens only on the host's loopback, `127.0.0.1:5432`
+  (`runtime-config` section 2.8.1). Processes on the deployment machine can
+  reach it only with the database password; other hosts cannot. Every
+  `pg_hba.conf` line, the local socket and loopback included, is
+  `scram-sha-256` (`runtime-config` section 2.8.3 sets it at initialisation,
+  because the `postgres:16` image otherwise trusts loopback), so the password
+  never crosses the connection. There is
+  no application-level authorization model, because there is one
   owner-operator and the interface is loopback-bound (system design constraint
   5.11). SEC-AUTH-001 does not engage on the database because it is not an
   externally reachable endpoint.
+- **Transport encryption (SEC-ENC-001).** The application's and ingestion's
+  connections to PostgreSQL are plaintext and never leave the host. They rely on
+  the `SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3 (DEC-0050);
+  `runtime-config` section 2.8.1 maps its conditions to the deployment. The
+  exception is in force only once CONST-SEC 1.3 is approved and merged.
 - **Credentials for the database itself** are supplied to both processes from
   the environment by `runtime-config` and never committed.
 - **SAST and SCA.** The SQL files are covered by review rather than by a
@@ -609,10 +625,17 @@ constraint 5.1.
   no previous release.
 - **Manual actions required: none.** The owner deploys new container images and
   starts them. Migration is automatic at application container start.
-- **Rollback (OPS-MIG-003).** There is no schema-reversal path, by design. The
-  rollback posture for a bad migration is: stop the containers, restore the
-  PostgreSQL data directory from a backup taken before the deployment, and
-  redeploy the previous image.
+- **Rollback (OPS-MIG-003).** There is no schema-reversal path, by design. Since
+  2026-10-12 the rollback posture is the one `runtime-config` section 2.8.4
+  specifies: every upgrade takes a `pg_dump` first, and a rollback after a
+  migration restores that dump into an emptied database and redeploys the
+  previous immutable image tag. The owner decided on 2026-10-12 to specify it
+  now, so OPS-MIG-003 is met under branch (a). The record below of the earlier
+  deferral is kept as history; it no longer describes the posture.
+
+  *Superseded 2026-10-12.* The earlier posture for a bad migration was: stop
+  the containers, restore the PostgreSQL data directory from a backup taken
+  before the deployment, and redeploy the previous image.
 
   That posture depends on a backup procedure **no capability specifies**, so
   OPS-MIG-003 is satisfied here under branch (b) — rollback documented as not
@@ -766,7 +789,11 @@ below records them as the system design's section 4.2 declares them.
 ## 14. Open Questions
 
 1. ~~What backup procedure protects against a data-losing migration, or an
-   overwrite of observation history?~~ **Decided 2026-09-05: deferred, with the
+   overwrite of observation history?~~ **Superseded 2026-10-12 by owner
+   decision: specified in `runtime-config` section 2.8.4** (a `pg_dump` before
+   every upgrade, a restore into an emptied database, immutable image tags, and
+   a drill before the first deployment), meeting the trigger below before any
+   second deployment. *History:* **Decided 2026-09-05: deferred, with the
    interim risk accepted.** The owner deferred the backup procedure to a future
    operations capability rather than specifying it here. OPS-MIG-003 is
    therefore satisfied under branch (b) — rollback documented as not currently

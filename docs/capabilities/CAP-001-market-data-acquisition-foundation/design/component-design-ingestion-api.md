@@ -2,36 +2,38 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-ingestion-api
 artifact_type: component-design
-artifact_version: 6
+artifact_version: 8
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-09-06
+updated: 2026-10-12
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-12T19:30:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "8"
     - id: CAP-001-ux-design
       version: "5"
     - id: tech-stack
-      version: "3"
+      version: "5"
+    - id: CAP-001-release
+      version: "1"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:00Z
-  reviewed_revision: sha256:5fb48327ab7a372e262486ea291f2a67744b44ac75bf228e165b2cc68fe693f2
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:d640754c0efb7e8682c9b048926d84d1d92ff80792ec767ddf6b52e05d811d27
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Ingestion API
@@ -249,6 +251,53 @@ that returns `index.html` for any unmatched non-API path so client-side routing
 works on reload. Requests under `/api` never fall through to the bundle; an
 unknown API path returns the error envelope with code `not_found`.
 
+**The bundle ships inside the installed distribution (B3, 2026-10-12).** The
+directory is mounted from the installed package (`factorflow/api/static`, next
+to `app.py`), never from a source checkout. Two things put the bundle there,
+and both are specified in `runtime-config` section 2.8.2:
+
+- The release image's `interface` stage runs `npm ci && npm run build`, and the
+  final stage copies `src/factorflow/api/static` from it before `pip install .`.
+- `pyproject.toml` lists `"api/static/**/*"` in
+  `[tool.setuptools.package-data]`, so the installed package carries the copied
+  bundle.
+
+Release manifest v1 found the image built from `ef2dd7c` serving 404 at `/`,
+because neither held. A development checkout still builds the bundle with
+`npm run build`, as today.
+
+### 2.5a Request host and origin checks (H9)
+
+The API is plain HTTP on loopback and has no authentication (AC-14), so any web
+page the owner's browser loads can send it requests. A cross-site page can
+issue state-changing requests, and with DNS rebinding a page can also read the
+answers, which TLS would incidentally have prevented. CONST-SEC 1.3 condition
+H9 of the `SEC-ENC-001 host-local loopback exception` therefore requires two
+checks, made by one middleware in `src/factorflow/api/app.py` registered before
+every route and the static mount (owner decision 2026-10-12):
+
+- **Host.** The allowed hosts are `127.0.0.1:<port>`, `localhost:<port>` and
+  `[::1]:<port>`, where `<port>` is `ApiSettings.port`. A request whose `Host`
+  header is missing or names anything else is answered `400` with the error
+  envelope, code `host_not_allowed`, before any route or the static mount runs.
+  This defeats DNS rebinding, where the browser sends the attacker's host name.
+- **Origin.** A request whose method is not `GET`, `HEAD` or `OPTIONS` and that
+  carries an `Origin` header is answered `403`, code `origin_not_allowed`,
+  unless the origin is `http://127.0.0.1:<port>`, `http://localhost:<port>` or
+  `http://[::1]:<port>`. A request with no `Origin` header (a script or `curl`
+  on the machine) is not refused by this check, because only a browser acting
+  for a page sends one. No route changes state on `GET`, `HEAD` or `OPTIONS`, and the API
+  serves no WebSocket, so applying the check to the other methods covers every
+  state change, as H9 allows.
+
+Neither check reads a credential or the request body, and both are logged at
+`warning` with the request id and the rejected header's value, which is not a
+secret. The interface's own requests come from its own origin and pass. The
+E2E stacks pass too, because each API's port comes from `FACTORFLOW_API_PORT`
+and the Playwright pages and request contexts use those same origins. The 15
+test modules that build a `TestClient` with its default `Host: testserver` pass
+`base_url="http://127.0.0.1:8000"` instead (the implementing story lists them).
+
 ### 2.6 Messages
 
 N/A, not applicable for this component. No broker, topic or queue. The interface
@@ -258,8 +307,10 @@ learns of run completion by polling, per the UX design's 10-second run poll and
 ## 3. Constraints and Assumptions
 
 - **Loopback only, no authentication** (AC-14, system design constraint 5.11).
-  uvicorn binds `FACTORFLOW_API_HOST`, defaulted to `127.0.0.1`, and the compose
-  file publishes the port to `127.0.0.1` only. No endpoint assumes an
+  uvicorn binds `FACTORFLOW_API_HOST`, defaulted to `127.0.0.1`, and the
+  deployment runs the application container in the host network namespace with
+  no published port (`runtime-config` section 2.8.1), so the loopback bind is
+  the machine's own loopback. No endpoint assumes an
   authenticated principal, and no session, cookie or token exists, so a later
   capability adding authentication adds it rather than retrofitting around an
   assumption.
@@ -274,8 +325,10 @@ learns of run completion by polling, per the UX design's 10-second run poll and
   arithmetic; the API shapes its output.
 - **Assumption: one browser client.** No rate limiting, no CORS configuration
   beyond same-origin, no pagination pressure from concurrent readers.
-- **Assumption: the bundle is built into the image.** The API does not build or
-  fetch frontend assets at runtime.
+- **The bundle is built into the image** (section 2.5, `runtime-config`
+  section 2.8.2). The API does not build or fetch frontend assets at runtime.
+  This was an assumption until release manifest v1 showed the image carried
+  none.
 
 ## 4. Security
 
@@ -287,9 +340,12 @@ learns of run completion by polling, per the UX design's 10-second run poll and
   moment the interface is exposed to any network, and the capability's own open
   questions carry when to revisit it. This design adds no dependency on the
   absence of authentication, so adding it later is additive.
-- **Network exposure (AC-14).** Two independent controls: the uvicorn bind
-  address and the published port. An integration test asserts the process is not
-  listening on a non-loopback interface.
+- **Network exposure (AC-14).** One preventive control: the uvicorn bind
+  address, which `ApiSettings` confines to loopback. Under host networking
+  nothing else limits exposure (`runtime-config` section 2.8.1). An integration
+  test asserts the process is not listening on a non-loopback interface, and the
+  deployment smoke check detects a listener off the host on the deployed machine
+  after every deployment (`runtime-config` section 2.8.5).
 - **Input validation (SEC-INP-001).** Every request body and query string is a
   Pydantic model. Symbols are validated against the same pattern the database
   check constraint enforces, with a maximum length; `symbols` arrays are capped
@@ -310,8 +366,18 @@ learns of run completion by polling, per the UX design's 10-second run poll and
 - **SAST and SCA.** FastAPI, Starlette, Pydantic and uvicorn are scanned through
   `pyproject.toml`. `ruff` and `mypy` run as blocking checks per the tech
   stack's validation commands.
-- **Crypto usage: none in this component.** TLS is not terminated here; traffic
-  is loopback only, which is why SEC-ENC-001 does not engage on this hop.
+- **Cross-site and DNS-rebinding requests (H9).** Rejected by the host and
+  origin checks of section 2.5a, which replace the protection TLS would have
+  given incidentally.
+- **Crypto usage: none in this component.** TLS is not terminated here. The
+  owner's browser reaches the API over plain HTTP at `http://127.0.0.1:8000`, a
+  channel carrying Internal data that never leaves the host. It relies on the
+  `SEC-ENC-001 host-local loopback exception` of CONST-SEC 1.3 (DEC-0050), and
+  carries no credential, because the interface has no authentication.
+  `runtime-config` section 2.8.1 maps the exception's conditions H1 to H9 to the
+  deployment. The exception is in force only once CONST-SEC 1.3 is approved and
+  merged; until then the hop has no standing under SEC-ENC-001. This replaces
+  the earlier reading that SEC-ENC-001 does not engage on a loopback hop.
 
 ## 5. Scalability and Performance
 
@@ -376,6 +442,10 @@ integration tests that need a real store.
 | Bulk add is capped per request | `tests/integration/test_api_instruments.py` | 1000 symbols is accepted; 1001 returns 422 naming the cap, and no symbol is added |
 | Coverage without a range covers everything | `tests/integration/test_api_coverage.py` | Omitting `from` and `to` returns each instrument's full covered range, and a gap outside any trailing window is still reported (AC-8, section 2.4a) |
 | Unknown API path returns the envelope | `tests/unit/test_api_errors.py` | 404 with code `not_found`, not the SPA bundle |
+| A foreign Host header is refused | `tests/unit/test_api_host_origin.py` | `Host: evil.example:8000`, `Host: 127.0.0.1:9999` and a missing `Host` each return 400 `host_not_allowed` on an API path and on `/`; the three loopback hosts with the configured port pass (H9, DNS rebinding) |
+| A cross-site state change is refused | `tests/unit/test_api_host_origin.py` | `POST /api/acquisition-runs` with `Origin: https://evil.example` returns 403 `origin_not_allowed` and starts no run; the same request with `Origin: http://127.0.0.1:8000` or with no `Origin` is not refused by the check; `GET` with a foreign `Origin` is not refused (H9) |
+| The installed distribution carries the bundle | `tests/unit/test_distribution_contents.py` (`runtime-config` section 7) | With the bundle built before `uv build`, the wheel contains `factorflow/api/static/index.html` (B3) |
+| The deployed image serves the interface | `scripts/deploy-smoke.sh` check 3 (`runtime-config` section 2.8.5) | `GET http://127.0.0.1:8000/` answers 200 with the bundle's `index.html` (B3) |
 | Internal error hides detail | `tests/unit/test_api_errors.py` | A raised exception returns code and request id only, and the detail is in the log (SEC-ERR-001) |
 
 End-to-end coverage of these flows through the browser belongs to
@@ -477,7 +547,9 @@ connection pool. It consumes no external integration.
 | System design | CAP-001 system design v3 | Interfaces 4.2, control flow 3, constraints 5.1, 5.11, 5.17 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | UX design | CAP-001 UX design v4 | Screens 1.1 to 1.5, cross-screen navigation, the copy this API's messages must match | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | Standard | STD-UI v4 | STD-UI-19 error parts, STD-UI-25 polling and last-updated | `docs/constitution/standards/ui-conventions.md` |
-| Constitution | Tech Stack v3 | FastAPI on uvicorn, Pydantic, validation commands | `docs/constitution/tech-stack.md` |
+| Constitution | Tech Stack v5 | FastAPI on uvicorn, Pydantic, validation commands, the frontend toolchain the image's interface stage runs | `docs/constitution/tech-stack.md` |
+| Component design | Runtime Configuration v13 | Section 2.8, the release image, compose definition and deployment smoke check | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
+| Release | CAP-001 release readiness v1 | Blocker B3, the image serving 404 at `/` | `docs/releases/CAP-001-release-v1.md` |
 
 ## 13. Traceability
 
@@ -491,7 +563,7 @@ connection pool. It consumes no external integration.
 | AC-10 | Per-instrument failure records | Run detail returning per-instrument per-data-type outcome and reason | 11 |
 | AC-11 | Per-instrument isolation | `not_found` reported distinctly from `failed` in run detail | 11 |
 | AC-13 | No API echo of the credential | No request or response model carries it; health reports a boolean | 4, 11 |
-| AC-14 | Port published to `127.0.0.1`; uvicorn bound to loopback | Bind address and published port, both asserted by test | 3, 4, 7 |
+| AC-14 | Host-network deployment with nothing published; uvicorn bound to loopback | Loopback bind enforced by `ApiSettings` and asserted by `test_api_binding.py`; off-host listener detected by the deployment smoke check | 3, 4, 7 |
 | AC-17 | Coverage distinguishes never acquired from acquired and empty | `never_acquired` field in the coverage response | 11 |
 | AC-18 | `GET /api/health` | Liveness, credential presence, most recent run outcome | 11 |
 | AC-19 | `POST /api/acquisition-runs/{id}/cancel` | 202 `cancelling`, 409 `run_already_terminal` with state | 2.4, 11 |

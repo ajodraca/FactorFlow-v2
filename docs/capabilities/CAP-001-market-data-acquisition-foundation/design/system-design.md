@@ -2,22 +2,22 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-system-design
 artifact_type: system-design
-artifact_version: 6
+artifact_version: 8
 capability: CAP-001
 title: Market Data Acquisition Foundation
 ui_facing: true
 created: 2026-09-03
-updated: 2026-09-06
+updated: 2026-10-12
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: approved
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.0"
-  model: claude-opus-5
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.92"
-  timestamp: 2026-09-05T05:20:00Z
+  tool_version: "2.1.290"
+  timestamp: 2026-10-12T19:30:00Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -30,9 +30,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T01:59:38Z
-  reviewed_revision: sha256:62a3a399a3315ccd3ee1a2d40d9b277ae7a3c5dc6baf9bad3eeca67399cdf688
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:c0959cb4e54cfe78728eba3238ae12daee8dac8ec2359bddbe0b04c9848825bd
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # System Design: Market Data Acquisition Foundation
@@ -65,9 +65,11 @@ but does add a row when the provider returns something different (AC-5, AC-6).
 
 The interface is bound to the loopback address and performs no authentication, on
 the owner's decision of 2026-09-03. This design treats that as a constraint on
-deployment rather than an absence of a requirement: the port is published to
-`127.0.0.1` only, and nothing in the API assumes an authenticated principal that
-a later capability would have to retrofit.
+deployment rather than an absence of a requirement: the containers run in the
+host network namespace, the API binds `127.0.0.1` and PostgreSQL listens on
+`127.0.0.1` only, so nothing listens on another interface
+(`component-design-runtime-config.md` section 2.8.1). Nothing in the API assumes
+an authenticated principal that a later capability would have to retrofit.
 
 The block diagram below is described in Section 2, and the components it names
 are declared in Section 4.1. Read Section 4 first: it is the vocabulary the rest
@@ -293,7 +295,7 @@ not answer; a boolean is not the credential, and no interface exposes the value.
 | `run-journal` | Run journal | Owns the acquisition run record and its lifecycle — requested, running, cancelling, succeeded, partial, failed, cancelled, abandoned — including cancellation requests and reclaim of runs whose runner died | this design |
 | `coverage-service` | Coverage service | Derives per-instrument coverage and last-acquired dates, and detects gaps in daily prices against the trading-day set formed from all named instruments' observed dates | this design |
 | `schema-migrator` | Schema migrator | Applies numbered forward-only SQL migrations and maintains `applied_migrations` | this design |
-| `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets | this design |
+| `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets; owns the deployment definition (`Dockerfile`, `compose.yaml`, `.dockerignore`) | this design |
 | `acquisition-runner` | Acquisition runner | Claims a run request and drives acquisition instrument by instrument, isolating per-instrument failure | this design |
 | `massive-client` | Massive client | Hand-written HTTP client for Massive reference, aggregate, fundamental and corporate-action reads | this design |
 | `rate-limit-governor` | Rate limit governor | Paces provider requests to the configured budget, waits out rate limiting as flow control, and applies bounded exponential backoff to transport and server errors | this design |
@@ -400,8 +402,14 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
    `applied_migrations`. There is no reversal path, so a migration that loses data
    is unrecoverable.
 11. **Loopback-only interface, no authentication.** Owner decision of 2026-09-03.
-   The container publishes its port to `127.0.0.1` only. The absence of
-   authentication is sound solely because of that binding.
+   The API binds `127.0.0.1`, and the deployment runs every container in the
+   host network namespace with no published port, so the bind is the machine's
+   own loopback (owner decision 2026-10-12; `runtime-config` section 2.8.1).
+   The absence of authentication is sound solely because of that binding. The
+   plaintext host-local channels this creates (browser to API, both processes to
+   PostgreSQL) rely on the `SEC-ENC-001 host-local loopback exception` of
+   CONST-SEC 1.3 (DEC-0050), in force only once that version is approved and
+   merged.
 12. **The provider credential is supplied at runtime.** It is never committed, never
    logged, and never returned by any interface (AC-13, SEC-SEC-001). It is supplied
    to **both containers**: the ingestion process uses it, and the application
@@ -509,7 +517,7 @@ a vendor-neutral port — `massive-client` may use Massive's own shapes directly
 | AC-11 | Unrecognised instrument does not stop the run | Per-instrument isolation in the runner loop | 3 steps 18-21 |
 | AC-12 | A failed run leaves no false history | Coverage segments extended only inside the committed write transaction | 3 step 17, 5.9 |
 | AC-13 | Credential handling | `runtime-config` environment load with reload at claim time, redaction, no API echo | 3 steps 37-39, 5.12 |
-| AC-14 | Network exposure | Port published to `127.0.0.1` only; uvicorn bound to loopback | 5.11 |
+| AC-14 | Network exposure | Host-network deployment with nothing published; uvicorn bound to loopback | 5.11 |
 | AC-15 | Forward data evolution | `schema-migrator`, numbered migrations, `applied_migrations` | 3 steps 32-35 |
 | AC-16 | Refuse an inconsistent start | Migrator exits non-zero; API never binds | 3 step 36 |
 | AC-17 | Honest empty state | `GET /api/coverage` distinguishes "never acquired" from "acquired, empty"; `owner-web-app` renders it | 4.2 |

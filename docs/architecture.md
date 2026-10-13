@@ -27,7 +27,7 @@ system design's Section 4 and regenerate.
 | `owner-web-app` | Owner interface | React SPA presenting the instrument list, coverage, gaps, run history and failure detail | `CAP-001` |
 | `rate-limit-governor` | Rate limit governor | Paces provider requests to the configured budget, waits out rate limiting as flow control, and applies bounded exponential backoff to transport and server errors | `CAP-001` |
 | `run-journal` | Run journal | Owns the acquisition run record and its lifecycle — requested, running, cancelling, succeeded, partial, failed, cancelled, abandoned — including cancellation requests and reclaim of runs whose runner died | `CAP-001` |
-| `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets | `CAP-001` |
+| `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets; owns the deployment definition (`Dockerfile`, `compose.yaml`, `.dockerignore`) | `CAP-001` |
 | `schema-migrator` | Schema migrator | Applies numbered forward-only SQL migrations and maintains `applied_migrations | `CAP-001` |
 
 ## Interfaces

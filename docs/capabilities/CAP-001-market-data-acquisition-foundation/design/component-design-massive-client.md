@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-design-massive-client
 artifact_type: component-design
-artifact_version: 13
+artifact_version: 15
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-05
-updated: 2026-10-10
+updated: 2026-10-12
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.290"
-  timestamp: 2026-10-10T22:50:06Z
+  timestamp: 2026-10-12T20:40:28Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -25,15 +25,15 @@ ai_provenance:
     - id: tech-stack
       version: "3"
     - id: CONST-SEC
-      version: "1.2 (content revision sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc)"
+      version: "1.3 (content revision sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7)"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-10T23:06:40Z
-  reviewed_revision: sha256:7b6e20a0b46b0aef37caec4e296ddf829f103bcbeb50fdd2bdc2d8b4f4ae5a51
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:21d3a56bddbcbf5fbd728bcb61c49d4a38d716c17801c944eaf91a89a6700ace
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Massive Client
@@ -256,12 +256,13 @@ at process start by `component-design-runtime-config.md` section 2.2c: `https`
 only, a host, no userinfo, path, query or fragment, and no trailing slash. This
 component does not re-validate or rewrite it. The one exception is clause 2a
 there, the loopback `http` allowance the owner asked for. It relies on the
-SEC-ENC-001 loopback test-double exception of CONST-SEC 1.2 (with SEC-NDG-001),
+SEC-ENC-001 loopback test-double exception, added in CONST-SEC 1.2 and
+carried unchanged in 1.3 (with SEC-NDG-001),
 recorded for this project in DEC-0036. It takes effect only as
 `component-design-runtime-config.md` section 2.2c, *When clause 2a is in
-force*, states: CONST-SEC 1.2 in force under its own rule (the owner's
+force*, states: CONST-SEC 1.3 in force under its own rule (the owner's
 `approval` block and the harness default branch) at the pinned content revision
-`sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`. It is confined to the
+`sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7`. It is confined to the
 test-only entry point `tests/e2e/support/ingestion_e2e_main.py` (DEC-0033,
 DEC-0034, PROVISIONAL). There `http` is accepted only when the host is exactly
 `127.0.0.1`, `::1` or `localhost`, and `localhost` must resolve only to
@@ -890,7 +891,7 @@ never uses (section 2.6).
 | System design | CAP-001 system design v3 | Control flow steps 8 to 28, constraints 5.4, 5.6, 5.13 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
 | Constitution | Tech Stack v3 | Official `massive` client adopted 2026-09-05; `MassiveClient` retained as the operational boundary, not a portability layer; provider evaluation and plan tiers | `docs/constitution/tech-stack.md` |
 | Constitution | Product Charter v2 | C4, one market data contract; C5, point-in-time history; C7, long-lived connections | `docs/constitution/product-charter.md` |
-| Constitution | Security Constitution v1.2 (CONST-SEC 1.2 at content revision `sha256:82059ecdf4b6833dbb212bde953e39914442f211a869078f0ccbd4a96ad2cbcc`; in force for clause 2a only as `component-design-runtime-config.md` section 2.2c states) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the SEC-ENC-001 loopback test-double exception that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect and no-proxy condition; Definitions (designated test credential) | `docs/constitutions/security.constitution.md` in the AI-agents harness |
+| Constitution | Security Constitution v1.3 (CONST-SEC 1.3 at content revision `sha256:0f5659addf64eb6aff78fcc810f92673f348d7f8d943061cb5ca225fff15b0c7`; in force for clause 2a only as `component-design-runtime-config.md` section 2.2c states) | SEC-INP-001, SEC-ENC-001, SEC-SEC-001, SEC-NDG-001; the SEC-ENC-001 loopback test-double exception that clause 2a of `component-design-runtime-config.md` section 2.2c relies on, including its no-redirect and no-proxy condition; Definitions (designated test credential) | `docs/constitutions/security.constitution.md` in the AI-agents harness |
 | Decision | DEC-0036, DEC-0037, DEC-0038, DEC-0041, DEC-0042 | This project's record of relying on the SEC-ENC-001 loopback test-double exception and the pinned text; the per-run designated test credential; the socket-free redirect and proxy tests (all PROVISIONAL); the no-proxy test's loopback `http` pool assertion; the redirect test's outcome under the production governor, which supersedes DEC-0038's redirect-outcome clause | `projects/factorflow-v2/decisions/` in the AI-agents harness |
 | Review | CAP-001 specification review v7 | FINDING-19: the redirect test's fake must return the retries it was passed, the production governor retries a refused redirect `max_attempts` times and raises `ProviderUnavailable`, the `vx` read must be driven so that it reaches `/vX/`, and `vx.retries` is asserted (sections 2.2b and 7) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md` |
 | Review | CAP-001 specification review v6 | FINDING-2 (ratios, closed by owner decision in section 14 item 7), FINDING-3, FINDING-4 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v6.md` |
