@@ -18,7 +18,7 @@ from factorflow.app_main import build_server
 
 @pytest.fixture(autouse=True)
 def _database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
 
 
 def _free_port() -> int:

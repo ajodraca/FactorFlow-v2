@@ -38,7 +38,7 @@ class _FakePool:
 
 
 def _app_with_pool(monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     app.state.db_pool = _FakePool()
     return TestClient(app, raise_server_exceptions=False)
@@ -334,7 +334,7 @@ def _app_with_probe(monkeypatch: pytest.MonkeyPatch, exc: Exception) -> FastAPI:
     `create_app()` sits behind the `StaticFiles` mount at `/` and is never
     reached.
     """
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     probe = APIRouter()
 

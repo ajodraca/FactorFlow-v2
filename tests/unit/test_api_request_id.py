@@ -18,7 +18,7 @@ from factorflow.api.app import create_app
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.delenv("FACTORFLOW_DATABASE_URL", raising=False)
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     with TestClient(app) as test_client:
         yield test_client
@@ -79,7 +79,7 @@ def probe_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     exceptions so the `500` response itself can be inspected.
     """
     monkeypatch.delenv("FACTORFLOW_DATABASE_URL", raising=False)
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     probe = APIRouter()
 

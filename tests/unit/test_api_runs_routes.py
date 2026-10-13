@@ -22,7 +22,7 @@ class _FakePool:
 
 
 def _client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     app.state.db_pool = _FakePool()
     return TestClient(app, raise_server_exceptions=False)
@@ -37,7 +37,7 @@ def test_runs_routes_are_registered(monkeypatch: pytest.MonkeyPatch) -> None:
     """The four run routes are reachable after create_app()."""
     pytest.importorskip("factorflow.api.routes.runs")
 
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     # OpenAPI schema enumerates all registered paths.
     schema = app.openapi()

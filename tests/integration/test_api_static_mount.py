@@ -14,7 +14,7 @@ from factorflow.api.app import create_app
 
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestClient:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setattr(app_module, "_STATIC_DIR", tmp_path)
     app = create_app()
     with TestClient(app) as test_client:
@@ -35,7 +35,7 @@ def client_with_bundle(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestC
     exercising this second file is what actually depends on
     `app.mount(...)` rather than on the fallback handler alone.
     """
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     index_html = tmp_path / "index.html"
     index_html.write_text("<html><body>fixture bundle</body></html>")
     assets_dir = tmp_path / "assets"

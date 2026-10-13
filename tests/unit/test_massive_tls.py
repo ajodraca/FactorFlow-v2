@@ -51,7 +51,7 @@ def test_no_construction_path_passes_a_tls_override(monkeypatch: pytest.MonkeyPa
     rebuild path in `ingestion_main` passes `verify`, `cert_reqs`,
     `ssl_context` or `ca_certs` to the SDK."""
     _env(monkeypatch)
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     settings = Settings(_env_file=None)  # type: ignore[call-arg]
 
     with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
@@ -69,7 +69,7 @@ def test_both_sdk_pools_require_certificates(monkeypatch: pytest.MonkeyPatch) ->
     `vx` pool keep `cert_reqs="CERT_REQUIRED"`, on both construction paths."""
     forbid_sockets(monkeypatch)
     _env(monkeypatch)
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     settings = Settings(_env_file=None)  # type: ignore[call-arg]
 
     for client in (

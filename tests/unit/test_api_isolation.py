@@ -12,7 +12,7 @@ from factorflow.api.app import create_app
 
 @pytest.fixture(autouse=True)
 def _database_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
 
 
 def test_no_route_dependency_requires_a_credential() -> None:

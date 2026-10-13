@@ -62,8 +62,8 @@ Two changes every later deployment step needs. (1) `DatabaseSettings` gains the 
 
 **Purpose**: Make the existing tests compatible with the coming validator, so the suite stays green except for the new tests.
 
-- [ ] T001 Replace `postgresql://unused/unused` with `postgresql://unused@127.0.0.1/unused` in the 15 modules the story lists: `tests/integration/test_api_binding.py`, `test_api_static_mount.py`; `tests/unit/test_api_coverage_routes.py`, `test_api_errors.py`, `test_api_instruments_error_mapping.py`, `test_api_instruments_query_mapping.py`, `test_api_isolation.py`, `test_api_no_secrets.py`, `test_api_request_id.py`, `test_api_request_id_redaction_composition.py`, `test_api_runs_routes.py`, `test_ingestion_e2e_main.py`, `test_ingestion_main.py`, `test_massive_tls.py`, `test_settings_base_url.py`. Leave assertions unchanged; `test_settings_base_url.py`'s exact `Settings()` messages (lines 208-213) must still match.
-- [ ] T002 Run `uv run pytest` and confirm green before any production change.
+- [x] T001 Replace `postgresql://unused/unused` with `postgresql://unused@127.0.0.1/unused` in the 15 modules the story lists: `tests/integration/test_api_binding.py`, `test_api_static_mount.py`; `tests/unit/test_api_coverage_routes.py`, `test_api_errors.py`, `test_api_instruments_error_mapping.py`, `test_api_instruments_query_mapping.py`, `test_api_isolation.py`, `test_api_no_secrets.py`, `test_api_request_id.py`, `test_api_request_id_redaction_composition.py`, `test_api_runs_routes.py`, `test_ingestion_e2e_main.py`, `test_ingestion_main.py`, `test_massive_tls.py`, `test_settings_base_url.py`. Leave assertions unchanged; `test_settings_base_url.py`'s exact `Settings()` messages (lines 208-213) must still match.
+- [x] T002 Run `uv run pytest` and confirm green before any production change.
 
 **Checkpoint**: Full suite green on loopback placeholders.
 
