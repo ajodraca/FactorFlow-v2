@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
-artifact_version: 7
+artifact_version: 8
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.296"
-  timestamp: 2026-10-13T02:12:49Z
+  timestamp: 2026-10-13T02:44:32Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -35,7 +35,7 @@ ai_provenance:
     - id: CAP-001-E1-S8
       version: "2"
     - id: CAP-001-E1-S9
-      version: "2"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
