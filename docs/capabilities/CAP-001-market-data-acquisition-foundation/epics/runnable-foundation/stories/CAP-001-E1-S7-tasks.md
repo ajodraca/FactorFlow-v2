@@ -109,7 +109,7 @@ All in the new `tests/unit/test_api_host_origin.py` (no `postgres` marker), each
 
 **Purpose**: Confirm the real stacks still work through the middleware.
 
-- [ ] T014 Run `uv run pytest` (PostgreSQL-marked integration tests included) and `npm run test:e2e`. The E2E pages are served by the API itself at `http://127.0.0.1:8123` (`playwright.config.ts` `baseURL`, `scripts/run-e2e-server.sh`), so their `Host` and `Origin` are the API's own loopback forms and must pass unchanged. A failure here is a defect in T013, not a reason to widen the allowed sets.
+- [x] T014 Run `uv run pytest` (PostgreSQL-marked integration tests included) and `npm run test:e2e`. The E2E pages are served by the API itself at `http://127.0.0.1:8123` (`playwright.config.ts` `baseURL`, `scripts/run-e2e-server.sh`), so their `Host` and `Origin` are the API's own loopback forms and must pass unchanged. A failure here is a defect in T013, not a reason to widen the allowed sets.
 
 **Checkpoint**: Full Python suite and Playwright suite green.
 
@@ -119,8 +119,8 @@ All in the new `tests/unit/test_api_host_origin.py` (no `postgres` marker), each
 
 **Purpose**: Final refinements and cross-cutting concerns.
 
-- [ ] T015 Run `uv run ruff check .`, `uv run ruff format --check .` and `uv run mypy src`; fix findings in the touched files only.
-- [ ] T016 After each TDD cycle in T003–T013 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-001-E1-S7-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC)
+- [x] T015 Run `uv run ruff check .`, `uv run ruff format --check .` and `uv run mypy src`; fix findings in the touched files only.
+- [x] T016 After each TDD cycle in T003–T013 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-001-E1-S7-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC)
 
 **Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 
