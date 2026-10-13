@@ -41,9 +41,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-10T02:06:49Z
-  reviewed_revision: sha256:5e9799b963597e246737b08bbb26fb383f1c4cf1211a1d6bdb0c70015a049311
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v12.md"
+  approved_at: 2026-10-13T02:55:48Z
+  reviewed_revision: sha256:eacb6eb7ee16d9938b83ac0231b245b0df920aa7ab3b2441cadbe7b1fd726170
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/backlog-review-report-v15.md"
 ---
 
 # Backlog: Market Data Acquisition Foundation
