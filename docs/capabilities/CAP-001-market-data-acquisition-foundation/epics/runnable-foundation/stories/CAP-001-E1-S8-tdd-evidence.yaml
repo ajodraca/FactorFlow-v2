@@ -105,3 +105,40 @@ cycles:
         judged the symlink repoint and the Dockerfile line removal sanctioned.
     tests_executed: true
     commit_hash: c8dd9594c393323a6a9e729c9e91730d8b80b391
+  - name: all-clients-confined
+    tasks: [T003, T009, T012, T015]
+    status: green
+    diff_sha256: 020378f99db0dd756553088181695eaaaa3117191574d69e71cf9673be540c8b
+    red:
+      command: >-
+        uv run pytest tests/unit/test_migrate_main_confinement.py
+        tests/unit/test_database_url_all_clients.py -q
+      result: >-
+        6 failed, 6 passed before T015: the five TC-COMP-416 refusals failed
+        because migrate_main read os.environ and called psycopg.connect, and
+        TC-COMP-423 flagged migrate_main's direct read. TC-COMP-391, 417,
+        418, 421 and 422 passed on arrival: ingestion and the API already
+        load through DatabaseSettings, which the confinement cycle hardened,
+        and an unset variable already exited 1.
+    green:
+      command: uv run pytest; npm run test:e2e
+      result: >-
+        1001 passed and 18 passed; after review rework the two cycle modules
+        pass (12) with the widened scan, whose seven new forms the previous
+        scanner missed; ruff, ruff format and mypy clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the first version (run as a module, a
+      refused and an unset URL exit 1 without the URL or password) and the
+      reworked one, after confirming the widened TC-COMP-423 scan detects all
+      eleven forms and still finds settings.py's own read.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the TC-COMP-423 scan blind to the
+        imported _DATABASE_URL_VAR, bare environ/getenv from os and key=
+        arguments, then found no drift against DAC-E1-19, DAC-E1-S8-5, S8-8,
+        S8-9, TC-COMP-391/416-418/421-423 and schema-migrator section 2.5;
+        TC-COMP-421 asserting on stderr follows the plan's Notes.
+    tests_executed: true
+    commit_hash: 7453d5d067971d6031d087ad7d3826afe100963d
