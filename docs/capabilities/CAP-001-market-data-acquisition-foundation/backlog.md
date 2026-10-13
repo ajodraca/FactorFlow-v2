@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-backlog
 artifact_type: backlog
-artifact_version: 6
+artifact_version: 7
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.296"
-  timestamp: 2026-10-13T01:27:06Z
+  timestamp: 2026-10-13T02:12:49Z
   source_artifacts:
     - id: CAP-001
       version: "8"
@@ -29,13 +29,13 @@ ai_provenance:
     - id: CAP-001-E3-S7
       version: "3"
     - id: CAP-001-E1
-      version: "2"
+      version: "3"
     - id: CAP-001-E1-S7
-      version: "1"
+      version: "2"
     - id: CAP-001-E1-S8
-      version: "1"
+      version: "2"
     - id: CAP-001-E1-S9
-      version: "1"
+      version: "2"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 approval:
@@ -90,7 +90,7 @@ as for the schema. That is why the shell sits in E1 rather than in E7: three
 screen-delivering EPICs would otherwise be scheduled ahead of the frame they
 need, or each would invent its own.
 
-- **E1** first and alone. Nothing else can start without the schema, migrations, runtime configuration and the application shell.
+- **E1** first and alone. Nothing else can start without the schema, migrations, runtime configuration and the application shell. The exception is E1-S7 to E1-S9, added after the other epics landed. They follow those epics deliberately (see *Deployment stories* below).
 - **E2 and E3-S1 to E3-S5** are parallelizable once E1 lands, and share no components. **E3-S6 and E3-S7** also need E4-S5 (`factorflow.ingestion_main`), deliberately a later-epic dependency, and touch `acquisition-runner`'s module. They **merge together**: E3-S6 reaches `main` only in the same merge as E3-S7 (see below).
 - **E4** starts with E4-S1 after E1, then its remaining stories need E2's instrument list and stated depth, E3's provider client, E5-S1's schema and E5-S2's claim contract. It is the largest EPIC and carries the three commitments the system design names unrecoverable if wrong.
 - **E5** needs E1, E2 and E4-S1's observation migration. E5-S1 then owns migrations 0003 and 0004 together, avoiding a migration-order cycle with E4-S3; the remaining E5 work can run alongside later E4 stories against the fixed schema and claim contracts.
@@ -128,11 +128,15 @@ closing release manifest v1 blockers B1, B3 and B4. E1-S7 adds the `Host` and
 `DatabaseSettings` (H7) and ships the migrations as package data (B1). E1-S9
 delivers the release image, `compose.yaml`, `scripts/deploy-smoke.sh`, and the
 README's run, upgrade, backup and rollback procedures (B3, B4), and depends on
-E1-S8. E1-S7 and E1-S8 are independent and can start at once. The plaintext
+E1-S8. All three also depend on stories in later epics: E2-S3, E5-S5, E7-S2,
+E3-S6 and E4-S5, all done. So they come after those epics, not in E1's original
+position. E1-S7 and E1-S8 are independent and can start at once, but they edit
+13 of the same test modules, so whichever merges second rebases onto the first. The plaintext
 loopback channels rely on the CONST-SEC 1.3 `SEC-ENC-001 host-local loopback
-exception` (DEC-0050). E1-S9's smoke check against the real deployment and its
-backup drill need the owner's Docker host and live provider key, so they are
-owner-run release evidence for release readiness v2, not story blockers.
+exception` (DEC-0050). E1-S9's backup drill needs the owner's Docker host and
+live provider key. It is part of E1-S9's completion, run during coding with the
+owner present. The smoke check against the real production deployment is
+release evidence for release readiness v2.
 
 ### Provider base URL stories (added 2026-10-09)
 
