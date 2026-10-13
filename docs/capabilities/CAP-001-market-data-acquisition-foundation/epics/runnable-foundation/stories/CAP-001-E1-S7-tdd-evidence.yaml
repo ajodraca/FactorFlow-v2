@@ -1,0 +1,55 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E1-S7-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E1-S7
+tasks_file: CAP-001-E1-S7-tasks.md
+decisions: []
+created: 2026-10-13
+updated: 2026-10-13
+
+baseline:
+  task: T002
+  base_commit: 73b1ea5c58544c9359ec778db1cbdccd5f23096c
+  seams_verified: >-
+    create_app() registering routers, the request-id middleware
+    (@app.middleware("http")) and the static mount in src/factorflow/api/app.py;
+    error_response(status_code, code, message, request_id, resource) in
+    api/errors.py; ApiSettings.port (FACTORFLOW_API_PORT, default 8000); the
+    five state-changing routes reaching app.state.db_pool; the SEC-NDG-001
+    scan test_release_source_accepts_no_http_scheme; the E2E pages served by
+    the API itself at http://127.0.0.1:8123.
+  commands:
+    - uv run pytest (934 passed, after T001's base_url change, committed as 2f985e4)
+  result: Green before any production change.
+
+cycles:
+  - name: release-guard-exemption
+    tasks: [T009, T010, T012]
+    status: green
+    diff_sha256: 76ef9df456d7ac680091f7cd19ed0222db073648801967b0e1b5ac424b9c75a5
+    red:
+      command: uv run pytest tests/unit/test_release_excludes_test_paths.py -q
+      result: >-
+        With the exemption removed from _http_scheme_offenders, TC-COMP-409's
+        test fails (the three allow-list parts in api/app.py are reported).
+        The path-keyed test (T010) and TC-COMP-408 pass on arrival: the first
+        asserts the exemption does not reach another app.py, the second has
+        no allow-list to exempt until the middleware lands.
+    green:
+      command: uv run pytest tests/unit/test_release_excludes_test_paths.py -q
+      result: 6 passed; ruff, ruff format and mypy clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer confirmed the exemption is limited to three exact,
+      case-sensitive strings in the module whose package-relative path is
+      api/app.py, that the http comparison and listing checks stay
+      unconditional, and that SEC-NDG-001's purpose is intact.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the module docstring not updated as
+        T012 asks and TC-COMP-409's listing case missing, then found no drift
+        against DAC-E1-S7-6, TC-COMP-364/408/409 and ingestion-api section 2.5a.
+    tests_executed: true
+    commit_hash: ee7180df70efa01b4296f9f33f898adf9cbc8b1d
