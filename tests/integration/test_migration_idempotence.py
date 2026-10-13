@@ -13,18 +13,15 @@ every table in this story living in the one PostgreSQL schema the fixture
 provisions; no dedicated test exists for it, per the task plan's own note.
 """
 
-from pathlib import Path
-
 import psycopg
 import pytest
 
 from factorflow.db.applied_migrations import APPLIED_MIGRATIONS_DDL
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 
 pytestmark = pytest.mark.postgres
 
-MIGRATION_0001_PATH = (
-    Path(__file__).resolve().parents[2] / "migrations" / "0001_extensions_owner_state.sql"
-)
+MIGRATION_0001_PATH = MIGRATIONS_DIR / "0001_extensions_owner_state.sql"
 MIGRATION_0001_VERSION = 1
 MIGRATION_0001_NAME = "extensions_owner_state"
 

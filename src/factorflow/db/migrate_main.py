@@ -32,7 +32,9 @@ from factorflow.db.migrator import MigrationError, apply_pending, discover
 
 _LOGGER = logging.getLogger("factorflow.db.migrator")
 
-_MIGRATIONS_DIR = Path(__file__).resolve().parents[3] / "migrations"
+# The migrations are package data of `factorflow.db` (schema-migrator section
+# 2.1), so a source checkout and the installed image resolve the same files.
+MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 
 
 class ConnectionFailedError(MigrationError):
@@ -171,7 +173,7 @@ def main() -> int:
         _log_failure(message, version=None)
         return 1
 
-    exit_code, message = run_migrations(database_url, _MIGRATIONS_DIR)
+    exit_code, message = run_migrations(database_url, MIGRATIONS_DIR)
     if exit_code == 0:
         _LOGGER.info(message)
     return exit_code

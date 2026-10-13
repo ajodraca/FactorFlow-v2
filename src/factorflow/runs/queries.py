@@ -40,7 +40,7 @@ from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from factorflow.runs.states import RUN_STATES
 
 _CURSOR_VERSION = 1
-# `run_result_outcome_known` in migrations/0004_runs.sql defines these values.
+# `run_result_outcome_known` in src/factorflow/db/migrations/0004_runs.sql defines these values.
 RESULT_OUTCOMES: frozenset[str] = frozenset(
     {"written", "unchanged", "not_found", "failed", "skipped"}
 )
@@ -299,7 +299,7 @@ def list_runs(connection: psycopg.Connection, filters: ListFilters) -> RunPage:
 # state filter: a non-terminal run is reported, never skipped (DAC-E7-S3-2).
 # The order deliberately repeats `list_runs`' so health and the first row of
 # the Runs list name the same run (Open Gap 1, DEC-0012), and
-# `idx_acquisition_run_recent` (migrations/0004_runs.sql) serves it so the
+# `idx_acquisition_run_recent` (src/factorflow/db/migrations/0004_runs.sql) serves it so the
 # 30-second poll is cheap (DAC-E7-S3-4, TC-COMP-091).
 _MOST_RECENT_RUN_SQL = _LIST_SQL_BASE + _LIST_ORDER + " LIMIT 1"
 

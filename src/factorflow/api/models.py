@@ -170,7 +170,7 @@ class MostRecentRun(BaseModel):
     """`GET /api/health`'s `most_recent_run` (CAP-001-E7-S3 API contract).
 
     `ended_at` is `null` for `requested`, `running` and `cancelling`: the
-    `acquisition_run_terminal_has_end` check in `migrations/0004_runs.sql`
+    `acquisition_run_terminal_has_end` check in `src/factorflow/db/migrations/0004_runs.sql`
     sets it exactly for terminal states (DAC-E7-S3-2).
     """
 

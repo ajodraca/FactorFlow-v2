@@ -12,10 +12,11 @@ from pathlib import Path
 
 import pytest
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.db.migrator import MigrationError, discover
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REAL_MIGRATIONS_DIR = REPO_ROOT / "migrations"
+REAL_MIGRATIONS_DIR = MIGRATIONS_DIR
 
 FILENAME_PATTERN = re.compile(r"^\d{4}_[a-z0-9_]+\.sql$")
 NON_TRANSACTIONAL_STATEMENTS = ("CREATE INDEX CONCURRENTLY", "VACUUM")

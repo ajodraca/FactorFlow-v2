@@ -19,7 +19,6 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 COPY src ./src
-COPY migrations ./migrations
 
 RUN pip install --no-cache-dir .
 

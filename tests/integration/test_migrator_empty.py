@@ -11,13 +11,14 @@ from pathlib import Path
 import psycopg
 import pytest
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.db.migrator import apply_pending, discover
 
 pytestmark = pytest.mark.postgres
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES_OK_DIR = REPO_ROOT / "tests" / "fixtures" / "migrations_ok"
-MIGRATION_0001_PATH = REPO_ROOT / "migrations" / "0001_extensions_owner_state.sql"
+MIGRATION_0001_PATH = MIGRATIONS_DIR / "0001_extensions_owner_state.sql"
 
 
 def test_apply_pending_against_empty_database_records_checksum_version_name(

@@ -1,6 +1,6 @@
 -- Seed for tests/e2e/coverage-expansion.spec.ts (CAP-001-E6-S4-tasks T022).
 -- A plain SQL script, never collected by Playwright. Columns follow
--- migrations/0001-0003. Three active instruments, unique to that spec, each
+-- src/factorflow/db/migrations/0001-0003. Three active instruments, unique to that spec, each
 -- with reference and prices coverage over 2024-01-02..2024-01-05. CVA and CVB
 -- have a bar on every day; CVC lacks 2024-01-04, so the trading-day set
 -- (any instrument's bar) makes that CVC's one gap. Idempotent.

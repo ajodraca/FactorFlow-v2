@@ -16,6 +16,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.ingestion.massive.errors import ProviderUnavailable, compose_failure_reason
 
 # ---------------------------------------------------------------------------
@@ -28,9 +29,8 @@ def runs_client(
     postgres_connection_string: str, monkeypatch: pytest.MonkeyPatch
 ) -> Iterator[TestClient]:
     """TestClient against a fully-migrated database (all 4 migrations applied)."""
-    from pathlib import Path
 
-    migration_dir = Path(__file__).resolve().parents[2] / "migrations"
+    migration_dir = MIGRATIONS_DIR
     conn = psycopg.connect(postgres_connection_string)
     for path in sorted(migration_dir.glob("*.sql")):
         conn.execute(path.read_text())

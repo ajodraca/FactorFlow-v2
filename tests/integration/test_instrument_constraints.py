@@ -6,16 +6,14 @@ non-null if and only if `lifecycle` is `retired` — all enforced by check
 constraints rather than application code.
 """
 
-from pathlib import Path
-
 import psycopg
 import pytest
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
+
 pytestmark = pytest.mark.postgres
 
-MIGRATION_0001_PATH = (
-    Path(__file__).resolve().parents[2] / "migrations" / "0001_extensions_owner_state.sql"
-)
+MIGRATION_0001_PATH = MIGRATIONS_DIR / "0001_extensions_owner_state.sql"
 
 
 @pytest.fixture

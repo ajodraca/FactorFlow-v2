@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from tests.unit.design_sql import REPO_ROOT, sql_block_after_migration_filename
 
 
@@ -14,13 +15,13 @@ def test_e5_migrations_match_filename_design_blocks() -> None:
         / "design/component-design-market-data-store.md"
     )
     for filename in ("0003_coverage.sql", "0004_runs.sql"):
-        actual = (REPO_ROOT / "migrations" / filename).read_text(encoding="utf-8")
+        actual = (MIGRATIONS_DIR / filename).read_text(encoding="utf-8")
         assert actual == sql_block_after_migration_filename(filename, design)
 
 
 def test_unrelated_migration_tables_do_not_cross_ownership() -> None:
-    coverage = (REPO_ROOT / "migrations" / "0003_coverage.sql").read_text(encoding="utf-8")
-    runs = (REPO_ROOT / "migrations" / "0004_runs.sql").read_text(encoding="utf-8")
+    coverage = (MIGRATIONS_DIR / "0003_coverage.sql").read_text(encoding="utf-8")
+    runs = (MIGRATIONS_DIR / "0004_runs.sql").read_text(encoding="utf-8")
     assert "acquisition_state" in coverage and "acquisition_run" not in coverage
     assert "acquisition_run" in runs and "acquisition_state" not in runs
 

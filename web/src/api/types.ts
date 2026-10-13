@@ -140,7 +140,7 @@ export type PresenceState = "present" | "absent" | "unknown";
 
 /**
  * The four data types coverage reports on, exactly the values of the
- * `coverage_data_type_known` check in `migrations/0003_coverage.sql`
+ * `coverage_data_type_known` check in `src/factorflow/db/migrations/0003_coverage.sql`
  * (component design `ingestion-api` section 11).
  */
 export type CoverageDataType = "reference" | "prices" | "fundamentals" | "corporate_actions";
@@ -267,7 +267,7 @@ export interface RunCancelResult {
 
 /**
  * The four data types a run records a result for, exactly the values of the
- * `run_result_data_type_known` check in `migrations/0004_runs.sql`
+ * `run_result_data_type_known` check in `src/factorflow/db/migrations/0004_runs.sql`
  * (`ResultRow.data_type` in `src/factorflow/api/models.py`).
  */
 export type DataType = "reference" | "prices" | "fundamentals" | "corporate_actions";

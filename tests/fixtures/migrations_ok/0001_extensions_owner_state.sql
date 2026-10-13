@@ -1,1 +1,1 @@
-../../../migrations/0001_extensions_owner_state.sql
+../../../src/factorflow/db/migrations/0001_extensions_owner_state.sql
