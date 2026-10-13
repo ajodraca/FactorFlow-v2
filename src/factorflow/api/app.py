@@ -26,7 +26,12 @@ from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
 from factorflow.api.routes import coverage, health, instruments, runs, settings
-from factorflow.config.settings import DatabaseSettings, RunSettings, configure_logging
+from factorflow.config.settings import (
+    ApiSettings,
+    DatabaseSettings,
+    RunSettings,
+    configure_logging,
+)
 from factorflow.runs.reclaim import reclaim_stale_runs
 
 # Owner-confirmed reclaim loop cadence (5 seconds).  Injectable via
@@ -232,6 +237,72 @@ def _add_request_id_middleware(app: FastAPI) -> None:
         return response
 
 
+# Methods that change no state (ingestion-api section 2.5a): the API has no
+# state-changing GET, HEAD or OPTIONS route and serves no WebSocket, so checking
+# Origin on every other method covers every state change, as H9 allows.
+_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+def _add_host_origin_middleware(app: FastAPI) -> None:
+    """Refuse a foreign `Host` and a cross-site state change (CAP-001-E1-S7).
+
+    Component design `component-design-ingestion-api.md` section 2.5a;
+    CONST-SEC 1.3 SEC-ENC-001 host-local loopback exception, condition H9;
+    DAC-E1-18, DAC-E1-S7-1 to S7-5. The API is plain HTTP on loopback with no
+    authentication (AC-14), so any page the owner's browser loads could send
+    it requests, and with DNS rebinding read the answers:
+
+    - a request whose `Host` is missing or is not `127.0.0.1:<port>`,
+      `localhost:<port>` or `[::1]:<port>` gets `400 host_not_allowed`;
+    - a request whose method changes state and whose `Origin` is present but
+      not one of the API's own three loopback origins (`null` included) gets
+      `403 origin_not_allowed`.
+
+    `<port>` is `ApiSettings.port`, read once here. Registered before the
+    request-id middleware, which Starlette therefore runs outside this one,
+    so every refusal carries the request id. Neither check reads the body or
+    a credential; each refusal is logged at `warning` with the request id and
+    the rejected header's value, which is not a secret.
+    """
+    port = ApiSettings().port
+    allowed_hosts = frozenset({f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"})
+    allowed_origins = frozenset(
+        {f"http://127.0.0.1:{port}", f"http://localhost:{port}", f"http://[::1]:{port}"}
+    )
+    log = logging.getLogger(__name__)
+
+    @app.middleware("http")
+    async def host_origin_middleware(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        request_id = getattr(request.state, "request_id", "unknown")
+        host = request.headers.get("host")
+        if host is None or host.lower() not in allowed_hosts:
+            log.warning("request refused: Host %r not allowed (request_id=%s)", host, request_id)
+            return error_response(
+                status_code=400,
+                code="host_not_allowed",
+                message="The request's Host is not one of this API's loopback addresses.",
+                request_id=request_id,
+            )
+        origin = request.headers.get("origin")
+        if (
+            request.method not in _SAFE_METHODS
+            and origin is not None
+            and origin not in allowed_origins
+        ):
+            log.warning(
+                "request refused: Origin %r not allowed (request_id=%s)", origin, request_id
+            )
+            return error_response(
+                status_code=403,
+                code="origin_not_allowed",
+                message="A state-changing request must come from this API's own origin.",
+                request_id=request_id,
+            )
+        return await call_next(request)
+
+
 def _add_static_mount(app: FastAPI) -> None:
     """T011, T019: mount the built frontend bundle with an SPA fallback.
 
@@ -389,6 +460,7 @@ def create_app() -> FastAPI:
     app.include_router(runs.router)
     app.include_router(coverage.router)
 
+    _add_host_origin_middleware(app)
     _add_request_id_middleware(app)
     _add_static_mount(app)
 
