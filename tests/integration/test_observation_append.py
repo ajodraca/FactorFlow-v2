@@ -7,10 +7,12 @@ import psycopg
 import pytest
 from psycopg.errors import CheckViolation
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MIGRATION_PATHS = (
-    REPO_ROOT / "migrations" / "0001_extensions_owner_state.sql",
-    REPO_ROOT / "migrations" / "0002_observations.sql",
+    MIGRATIONS_DIR / "0001_extensions_owner_state.sql",
+    MIGRATIONS_DIR / "0002_observations.sql",
 )
 OBSERVATION_TABLES = (
     "instrument_reference",

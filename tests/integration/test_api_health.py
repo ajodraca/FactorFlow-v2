@@ -9,7 +9,6 @@ migrator so both `applied_migrations` and `acquisition_run` exist.
 import uuid
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 
 import httpx
 import psycopg
@@ -18,9 +17,8 @@ from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
 from factorflow.config.settings import credential_present
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.db.migrator import apply_pending, discover
-
-MIGRATIONS_DIR = Path(__file__).resolve().parents[2] / "migrations"
 
 
 def _highest_migration_version() -> int:

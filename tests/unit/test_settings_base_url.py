@@ -205,7 +205,7 @@ def test_aggregate_settings_load_raises_the_base_url_error_unchanged(
     """`Settings` builds `MassiveSettings` through `default_factory`, so the
     clause 9 message reaches `ingestion_main.main()` unchanged (AC-13)."""
     _env(monkeypatch)
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setenv(_VAR, "http://api.massive.com")
 
     with pytest.raises(ConfigurationError) as excinfo:

@@ -1,0 +1,144 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E1-S8-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E1-S8
+tasks_file: CAP-001-E1-S8-tasks.md
+decisions: []
+created: 2026-10-13
+updated: 2026-10-13
+
+baseline:
+  task: T002
+  base_commit: 73b1ea5c58544c9359ec778db1cbdccd5f23096c
+  seams_verified: >-
+    DatabaseSettings (env prefix FACTORFLOW_DATABASE_, url SecretStr) and
+    _EnvNamedSettings in src/factorflow/config/settings.py; migrate_main
+    reading FACTORFLOW_DATABASE_URL from os.environ and _MIGRATIONS_DIR as
+    parents[3] / "migrations"; ingestion_main catching ConfigurationError
+    from Settings(); the API lifespan constructing DatabaseSettings() before
+    ConnectionPool; the four migrations at the repository-root migrations/.
+  commands:
+    - uv run pytest (934 passed, before T001)
+    - uv run pytest (after T001's loopback placeholders, committed as 6e45759)
+  result: Green before any production change.
+
+cycles:
+  - name: database-url-confinement
+    tasks: [T005, T006, T007, T008, T013]
+    status: green
+    diff_sha256: 6d20d3593e1d6e2ac19db2514d53b39ba0292085b986249ab0cb677f00680420
+    red:
+      command: uv run pytest tests/unit/test_database_url_confinement.py -q
+      result: >-
+        16 failed, 8 passed before T013: every refusal case failed (no
+        validator existed); the 8 acceptance cases of TC-COMP-410 and
+        TC-COMP-412 passed on arrival, as expected for loopback and
+        verify-full URLs. Review rework added 10 more refusal cases (a `#`
+        before hostaddr/service/host, empty PG* variables, a host-less URL,
+        percent-encoded host); each failed against the previous version
+        before its fix (7 then 3 failures).
+    green:
+      command: uv run pytest tests/unit/test_database_url_confinement.py -q
+      result: >-
+        38 passed; full suite 958 passed after the first version; ruff
+        check, ruff format --check and mypy src clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer rejected the first version (a `#` in the password
+      or path hid hostaddr/service from the urlsplit scan, so a URL could
+      reach another address in plaintext; the host-less case was refused by
+      the wrong rule) and approved the third, after probing libpq parity on
+      edge inputs with conninfo_to_dict; 698 not-postgres tests passed.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found drift (host-less URL untested under
+        the verify-full rule, refusal assertions not checking the rule text,
+        an empty PG* variable accepted where the design says "is set", then a
+        `#?host=` parameter not refused unconditionally) and found none in
+        the third version against DAC-E1-S8-1 to S8-4, TC-COMP-410 to 415
+        and runtime-config section 2.3.
+    tests_executed: true
+    commit_hash: e44f1f57816ead9d7d88b9c1e953859ee3a0d911
+  - name: migrations-as-package-data
+    tasks: [T004, T010, T011, T014]
+    status: green
+    diff_sha256: c2355fc21c46e4654b4daeb564f54344be8bf8a82bff344402a25976bfc755e1
+    red:
+      command: >-
+        uv run pytest tests/unit/test_migrator_discover.py
+        tests/unit/test_migrations_location.py
+        tests/unit/test_distribution_contents.py -q
+      result: >-
+        5 failed, 7 passed before T014: MIGRATIONS_DIR did not exist, the
+        root migrations/ directory and its parents[N] joins were present, the
+        wheel listed no factorflow/db/migrations/ file, and the unpacked
+        wheel could not import MIGRATIONS_DIR. After review rework, removing
+        the db/migrations package-data entry makes both TC-COMP-392 tests
+        fail (mutation check).
+    green:
+      command: uv run pytest; npm run test:e2e
+      result: >-
+        977 passed (full suite) and 18 passed (Playwright) on the first
+        version; the reworked test modules pass (30); ruff, ruff format,
+        mypy, biome and tsc clean; uv build carries the four migrations.
+    deviation: >-
+      tests/fixtures/migrations_ok/0001_extensions_owner_state.sql is a
+      symlink to the release migration and was repointed into the package
+      (not in the plan's file list; it dangled after the move).
+      TC-COMP-420 checks it resolves there.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer rejected the first version because the wheel test
+      copied a stale src/factorflow.egg-info whose SOURCES.txt made setuptools
+      ship the migrations even without the package-data entry, and approved
+      the third after re-running that mutation (0 migrations shipped) and
+      confirming the renames are byte-identical.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the TC-COMP-420 scan narrower than
+        T011 (no quoted "migrations/..." paths, no shell joins, .ts/.sql
+        unscanned), then found no drift against DAC-E1-20, DAC-E1-S8-6,
+        DAC-E1-S8-7, TC-COMP-392/419/420 and schema-migrator section 2.1;
+        judged the symlink repoint and the Dockerfile line removal sanctioned.
+    tests_executed: true
+    commit_hash: c8dd9594c393323a6a9e729c9e91730d8b80b391
+  - name: all-clients-confined
+    tasks: [T003, T009, T012, T015]
+    status: green
+    diff_sha256: 020378f99db0dd756553088181695eaaaa3117191574d69e71cf9673be540c8b
+    red:
+      command: >-
+        uv run pytest tests/unit/test_migrate_main_confinement.py
+        tests/unit/test_database_url_all_clients.py -q
+      result: >-
+        6 failed, 6 passed before T015: the five TC-COMP-416 refusals failed
+        because migrate_main read os.environ and called psycopg.connect, and
+        TC-COMP-423 flagged migrate_main's direct read. TC-COMP-391, 417,
+        418, 421 and 422 passed on arrival: ingestion and the API already
+        load through DatabaseSettings, which the confinement cycle hardened,
+        and an unset variable already exited 1.
+    green:
+      command: uv run pytest; npm run test:e2e
+      result: >-
+        1001 passed and 18 passed; after review rework the two cycle modules
+        pass (12) with the widened scan, whose seven new forms the previous
+        scanner missed; ruff, ruff format and mypy clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the first version (run as a module, a
+      refused and an unset URL exit 1 without the URL or password) and the
+      reworked one, after confirming the widened TC-COMP-423 scan detects all
+      eleven forms and still finds settings.py's own read.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the TC-COMP-423 scan blind to the
+        imported _DATABASE_URL_VAR, bare environ/getenv from os and key=
+        arguments, then found no drift against DAC-E1-19, DAC-E1-S8-5, S8-8,
+        S8-9, TC-COMP-391/416-418/421-423 and schema-migrator section 2.5;
+        TC-COMP-421 asserting on stderr follows the plan's Notes.
+    tests_executed: true
+    commit_hash: 7453d5d067971d6031d087ad7d3826afe100963d

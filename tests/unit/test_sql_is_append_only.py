@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OBSERVATION_TABLES = (
     "instrument_reference",
@@ -34,7 +36,7 @@ def prohibited_observation_mutations(text: str) -> list[str]:
 
 def observation_sql_paths() -> list[Path]:
     """Return every migration and Python source path covered by the guard."""
-    migrations = (REPO_ROOT / "migrations").glob("*.sql")
+    migrations = (MIGRATIONS_DIR).glob("*.sql")
     python_sources = (REPO_ROOT / "src" / "factorflow").rglob("*.py")
     return sorted([*migrations, *python_sources])
 

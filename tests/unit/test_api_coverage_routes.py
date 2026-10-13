@@ -34,7 +34,7 @@ class _FakePool:
 
 
 def _client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     app = create_app()
     app.state.db_pool = _FakePool()
     return TestClient(app, raise_server_exceptions=False)
@@ -97,7 +97,7 @@ def _patch(monkeypatch: pytest.MonkeyPatch, coverage: _Spy, gap_dates: _Spy | No
 def test_coverage_route_is_registered_with_its_parameters(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     paths = create_app().openapi()["paths"]
 
     assert "/api/coverage" in paths

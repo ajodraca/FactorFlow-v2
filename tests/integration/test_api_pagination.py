@@ -7,7 +7,6 @@ is rejected with `422`, never silently clamped.
 import hashlib
 from collections.abc import Iterator
 from datetime import date
-from pathlib import Path
 
 import psycopg
 import pytest
@@ -15,10 +14,11 @@ from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
 from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 
 pytestmark = pytest.mark.postgres
 
-_MIGRATIONS = Path(__file__).resolve().parents[2] / "migrations"
+_MIGRATIONS = MIGRATIONS_DIR
 
 
 @pytest.fixture

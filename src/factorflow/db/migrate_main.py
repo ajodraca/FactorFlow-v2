@@ -5,12 +5,11 @@ uvicorn exec in the application container's entrypoint (component design
 section 2.1), so a non-zero exit here means the API never binds its socket —
 the whole of AC-16.
 
-The database URL is read directly from the `FACTORFLOW_DATABASE_URL`
-environment variable rather than through a `runtime-config` settings object,
-because `runtime-config` (CAP-001-E1-S3) has not landed yet. This story
-consumes only the documented environment-variable contract; wiring the real
-settings object in is a follow-up once that story lands (see the task plan's
-Notes section).
+The database URL is loaded through `runtime-config`'s `DatabaseSettings`
+(component design section 2.5, CAP-001-E1-S8), which refuses a plaintext URL
+to any address off the host before this process connects: the migrator is
+the first client on the application container's database channel (CONST-SEC
+1.3 SEC-ENC-001 host-local loopback exception, condition H7).
 
 Every exit path here logs through the structured logger at `error` level
 (SA-LOG-001, DAC-E1-S2-6) — never `print` — carrying the migration version as
@@ -20,7 +19,6 @@ full connection string, password included (AC-13, DAC-E1-S2-7).
 """
 
 import logging
-import os
 import re
 import sys
 from pathlib import Path
@@ -28,11 +26,14 @@ from urllib.parse import urlsplit
 
 import psycopg
 
+from factorflow.config.settings import ConfigurationError, DatabaseSettings
 from factorflow.db.migrator import MigrationError, apply_pending, discover
 
 _LOGGER = logging.getLogger("factorflow.db.migrator")
 
-_MIGRATIONS_DIR = Path(__file__).resolve().parents[3] / "migrations"
+# The migrations are package data of `factorflow.db` (schema-migrator section
+# 2.1), so a source checkout and the installed image resolve the same files.
+MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 
 
 class ConnectionFailedError(MigrationError):
@@ -165,13 +166,14 @@ def _version_from_message(message: str) -> int | None:
 
 
 def main() -> int:
-    database_url = os.environ.get("FACTORFLOW_DATABASE_URL")
-    if not database_url:
-        message = "FACTORFLOW_DATABASE_URL is not set"
-        _log_failure(message, version=None)
+    try:
+        settings = DatabaseSettings()  # type: ignore[call-arg]
+    except ConfigurationError as exc:
+        # Names FACTORFLOW_DATABASE_URL and the rule, never the value (AC-13).
+        _log_failure(str(exc), version=None)
         return 1
 
-    exit_code, message = run_migrations(database_url, _MIGRATIONS_DIR)
+    exit_code, message = run_migrations(settings.url.get_secret_value(), MIGRATIONS_DIR)
     if exit_code == 0:
         _LOGGER.info(message)
     return exit_code

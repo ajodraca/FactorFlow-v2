@@ -8,10 +8,11 @@ reading the design's own SQL block rather than a copy of it.
 
 from pathlib import Path
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from tests.unit.design_sql import sql_block_under_heading
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MIGRATION_0001_PATH = REPO_ROOT / "migrations" / "0001_extensions_owner_state.sql"
+MIGRATION_0001_PATH = MIGRATIONS_DIR / "0001_extensions_owner_state.sql"
 
 
 def test_migration_0001_matches_design_verbatim() -> None:

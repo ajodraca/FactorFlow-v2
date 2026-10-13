@@ -19,7 +19,7 @@ export const ACQUISITION_BASE_URL = "http://127.0.0.1:8125";
 const STUB_BASE_URL = "http://127.0.0.1:8126";
 const ACQUISITION_DATABASE = "factorflow_acquisition";
 
-/** Every table `migrations/0001`-`0004` create, except `applied_migrations`. */
+/** Every table `src/factorflow/db/migrations/0001`-`0004` create, except `applied_migrations`. */
 const DATA_TABLES = [
   "instrument",
   "owner_setting",

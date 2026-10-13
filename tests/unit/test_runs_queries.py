@@ -11,12 +11,12 @@ import re
 import uuid
 from dataclasses import fields
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import get_args, get_type_hints
 
 import pytest
 
 from factorflow.api.models import ResultOutcome
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.runs.queries import (
     RESULT_OUTCOMES,
     CursorError,
@@ -116,7 +116,7 @@ def test_list_filters_zero_limit_rejected() -> None:
 
 def test_run_and_result_filter_enumerations_match_the_contract() -> None:
     """T008: read filters accept only the schema and API enumeration values."""
-    migration = (Path(__file__).resolve().parents[2] / "migrations" / "0004_runs.sql").read_text()
+    migration = (MIGRATIONS_DIR / "0004_runs.sql").read_text()
     expected_outcomes = {"written", "unchanged", "not_found", "failed", "skipped"}
 
     assert RESULT_OUTCOMES == expected_outcomes

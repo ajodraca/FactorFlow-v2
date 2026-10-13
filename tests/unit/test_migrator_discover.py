@@ -9,10 +9,11 @@ from pathlib import Path
 
 import pytest
 
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.db.migrator import MigrationError, discover
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REAL_MIGRATIONS_DIR = REPO_ROOT / "migrations"
+REAL_MIGRATIONS_DIR = MIGRATIONS_DIR
 FIXTURES_OK_DIR = REPO_ROOT / "tests" / "fixtures" / "migrations_ok"
 
 
@@ -71,3 +72,28 @@ def test_discover_raises_on_missing_directory(tmp_path: Path) -> None:
 
     with pytest.raises(MigrationError, match=str(missing)):
         discover(missing)
+
+
+# SHA-256 of each migration file as recorded before CAP-001-E1-S8 moved the
+# files into the package; the move must change no recorded checksum.
+_CHECKSUMS_BEFORE_MOVE = {
+    1: "36362b5787db3664ee8b055dc1baae63f59c8b9dae2f2975147542ffe38cd6bb",
+    2: "5ebbcc642a83cbe471b7f2fd5ab39c6956849cb6294d91a876dabdeae5f9cf06",
+    3: "90fa247a25163a27fc9ca2ba0c69de8775dd3597fc64531e811d9d829183e405",
+    4: "d799992f3732ac85052d64f5297bca813cb298a0d962f7a6dd1718f17f73fa84",
+}
+
+
+# Implements TC-COMP-419
+def test_migrations_dir_resolves_inside_the_package_with_unchanged_checksums() -> None:
+    """DAC-E1-S8-6, schema-migrator section 2.1: `MIGRATIONS_DIR` is the
+    `migrations` directory beside `migrate_main.py`, and the moved files keep
+    the checksums an existing store recorded."""
+    from factorflow.db import migrate_main
+
+    assert (
+        Path(migrate_main.__file__).resolve().parent / "migrations" == migrate_main.MIGRATIONS_DIR
+    )
+
+    files = discover(migrate_main.MIGRATIONS_DIR)
+    assert {f.version: f.checksum for f in files} == _CHECKSUMS_BEFORE_MOVE

@@ -24,13 +24,13 @@ import hashlib
 import uuid
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
-from pathlib import Path
 
 import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
 from factorflow.api.app import create_app
+from factorflow.db.migrate_main import MIGRATIONS_DIR
 
 pytestmark = pytest.mark.postgres
 
@@ -57,7 +57,7 @@ D9 = date(2024, 1, 9)
 D10 = date(2024, 1, 10)
 WEEK = [D2, D3, D4, D5]
 
-_MIGRATIONS = Path(__file__).resolve().parents[2] / "migrations"
+_MIGRATIONS = MIGRATIONS_DIR
 
 
 @pytest.fixture

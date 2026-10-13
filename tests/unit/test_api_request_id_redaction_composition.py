@@ -123,7 +123,7 @@ def test_lifespan_installs_redaction_end_to_end(monkeypatch: pytest.MonkeyPatch)
     """
     secret = "SECRETKEY789"
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", secret)
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
 
     records: list[logging.LogRecord] = []
 

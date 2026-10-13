@@ -74,7 +74,7 @@ def _fake_getaddrinfo(addresses: tuple[str, ...]) -> Any:
 
 def _env(monkeypatch: pytest.MonkeyPatch, *, base_url: str, key: str | None = None) -> str:
     key = generated_test_key() if key is None else key
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
     monkeypatch.setenv(_KEY_VAR, key)
     monkeypatch.setenv(_BASE_URL_VAR, base_url)

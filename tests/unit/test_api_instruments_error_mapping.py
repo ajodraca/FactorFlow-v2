@@ -30,7 +30,7 @@ def test_retire_route_maps_instrument_not_found_to_404(monkeypatch) -> None:
     def _raise_not_found(_connection, _symbol):
         raise InstrumentNotFound("NOPE")
 
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setattr("factorflow.api.routes.instruments.retire_symbol", _raise_not_found)
 
     app = create_app()
@@ -46,7 +46,7 @@ def test_retire_route_maps_already_retired_to_409(monkeypatch) -> None:
     def _raise_already_retired(_connection, _symbol):
         raise AlreadyRetired("AAPL")
 
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setattr("factorflow.api.routes.instruments.retire_symbol", _raise_already_retired)
 
     app = create_app()

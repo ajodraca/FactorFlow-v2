@@ -12,19 +12,18 @@ other's tables or rows.
 
 import uuid
 from collections.abc import Iterator
-from pathlib import Path
 
 import psycopg
 import pytest
 from psycopg import sql
 from testcontainers.community.postgres import PostgresContainer
 
-MIGRATION_0001_PATH = (
-    Path(__file__).resolve().parents[1] / "migrations" / "0001_extensions_owner_state.sql"
-)
-MIGRATION_0002_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0002_observations.sql"
-MIGRATION_0003_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0003_coverage.sql"
-MIGRATION_0004_PATH = Path(__file__).resolve().parents[1] / "migrations" / "0004_runs.sql"
+from factorflow.db.migrate_main import MIGRATIONS_DIR
+
+MIGRATION_0001_PATH = MIGRATIONS_DIR / "0001_extensions_owner_state.sql"
+MIGRATION_0002_PATH = MIGRATIONS_DIR / "0002_observations.sql"
+MIGRATION_0003_PATH = MIGRATIONS_DIR / "0003_coverage.sql"
+MIGRATION_0004_PATH = MIGRATIONS_DIR / "0004_runs.sql"
 
 
 def count_backend_connections(conn: psycopg.Connection, dbname: str) -> int:
@@ -168,8 +167,8 @@ def migrated_writer_connection(postgres_connection_string: str) -> Iterator[psyc
     writer transaction tests. Each test receives an isolated database inside
     the shared session container -- no database state is shared between tests.
 
-    Requires CAP-001-E5-S1 to have landed migrations/0003_coverage.sql and
-    migrations/0004_runs.sql before this fixture is used.
+    Requires CAP-001-E5-S1 to have landed src/factorflow/db/migrations/0003_coverage.sql and
+    src/factorflow/db/migrations/0004_runs.sql before this fixture is used.
     """
     conn = psycopg.connect(postgres_connection_string)
     with conn.cursor() as cur:

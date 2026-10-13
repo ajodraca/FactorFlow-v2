@@ -110,7 +110,7 @@ def test_main_refuses_a_non_https_base_url_before_any_client(monkeypatch, capsys
     from tests.unit.massive_transport_fakes import generated_test_key
 
     value = "http://api.massive.com"
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", generated_test_key())
     monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
     monkeypatch.setenv("FACTORFLOW_MASSIVE_BASE_URL", value)
@@ -146,7 +146,7 @@ def _main_env(monkeypatch, *, base_url: str | None = None) -> str:
     from tests.unit.massive_transport_fakes import generated_test_key
 
     key = generated_test_key()
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", key)
     monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
     if base_url is None:

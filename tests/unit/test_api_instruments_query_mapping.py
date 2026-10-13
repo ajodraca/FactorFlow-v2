@@ -33,7 +33,7 @@ def test_list_route_applies_default_page_size_when_limit_omitted(monkeypatch) ->
         captured["filters"] = filters
         return InstrumentPage(rows=[], next_cursor=None, active_count=0, retired_count=0)
 
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setattr("factorflow.api.routes.instruments.list_instruments", _capture)
 
     app = create_app()
@@ -52,7 +52,7 @@ def test_list_route_forwards_explicit_query_parameters(monkeypatch) -> None:
         captured["filters"] = filters
         return InstrumentPage(rows=[], next_cursor=None, active_count=0, retired_count=0)
 
-    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
+    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
     monkeypatch.setattr("factorflow.api.routes.instruments.list_instruments", _capture)
 
     app = create_app()
