@@ -108,7 +108,7 @@ Each carries its `# Implements TC-COMP-NNN` comment. Unit tests carry no `postgr
 
 **Purpose**: Confirm the whole system still migrates and runs from the new location.
 
-- [ ] T016 Run `uv build` and the full `uv run pytest` (PostgreSQL-marked tests apply the migrations from `MIGRATIONS_DIR` through `tests/conftest.py`), then `npm ci`, `npm run build`, `npm run test:e2e` (`scripts/run-e2e-server.sh` runs `python -m factorflow.db.migrate_main` from the source checkout, which must now resolve the package directory). Run `npm run lint` and `npx tsc --noEmit` for the `web/src/api/types.ts` and `tests/e2e/support/acquisition.ts` comment edits.
+- [x] T016 Run `uv build` and the full `uv run pytest` (PostgreSQL-marked tests apply the migrations from `MIGRATIONS_DIR` through `tests/conftest.py`), then `npm ci`, `npm run build`, `npm run test:e2e` (`scripts/run-e2e-server.sh` runs `python -m factorflow.db.migrate_main` from the source checkout, which must now resolve the package directory). Run `npm run lint` and `npx tsc --noEmit` for the `web/src/api/types.ts` and `tests/e2e/support/acquisition.ts` comment edits.
 
 **Checkpoint**: Python, TypeScript and Playwright suites green; the wheel carries the migrations.
 
@@ -118,8 +118,8 @@ Each carries its `# Implements TC-COMP-NNN` comment. Unit tests carry no `postgr
 
 **Purpose**: Final refinements and cross-cutting concerns.
 
-- [ ] T017 Run `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`; fix findings in touched files only.
-- [ ] T018 After each TDD cycle in T003–T015 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-001-E1-S8-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC)
+- [x] T017 Run `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src`; fix findings in touched files only.
+- [x] T018 After each TDD cycle in T003–T015 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-001-E1-S8-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC)
 
 **Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 
