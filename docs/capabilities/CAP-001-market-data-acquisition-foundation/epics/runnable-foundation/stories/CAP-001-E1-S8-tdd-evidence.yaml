@@ -1,0 +1,63 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E1-S8-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E1-S8
+tasks_file: CAP-001-E1-S8-tasks.md
+decisions: []
+created: 2026-10-13
+updated: 2026-10-13
+
+baseline:
+  task: T002
+  base_commit: 73b1ea5c58544c9359ec778db1cbdccd5f23096c
+  seams_verified: >-
+    DatabaseSettings (env prefix FACTORFLOW_DATABASE_, url SecretStr) and
+    _EnvNamedSettings in src/factorflow/config/settings.py; migrate_main
+    reading FACTORFLOW_DATABASE_URL from os.environ and _MIGRATIONS_DIR as
+    parents[3] / "migrations"; ingestion_main catching ConfigurationError
+    from Settings(); the API lifespan constructing DatabaseSettings() before
+    ConnectionPool; the four migrations at the repository-root migrations/.
+  commands:
+    - uv run pytest (934 passed, before T001)
+    - uv run pytest (after T001's loopback placeholders, committed as 6e45759)
+  result: Green before any production change.
+
+cycles:
+  - name: database-url-confinement
+    tasks: [T005, T006, T007, T008, T013]
+    status: green
+    diff_sha256: 6d20d3593e1d6e2ac19db2514d53b39ba0292085b986249ab0cb677f00680420
+    red:
+      command: uv run pytest tests/unit/test_database_url_confinement.py -q
+      result: >-
+        16 failed, 8 passed before T013: every refusal case failed (no
+        validator existed); the 8 acceptance cases of TC-COMP-410 and
+        TC-COMP-412 passed on arrival, as expected for loopback and
+        verify-full URLs. Review rework added 10 more refusal cases (a `#`
+        before hostaddr/service/host, empty PG* variables, a host-less URL,
+        percent-encoded host); each failed against the previous version
+        before its fix (7 then 3 failures).
+    green:
+      command: uv run pytest tests/unit/test_database_url_confinement.py -q
+      result: >-
+        38 passed; full suite 958 passed after the first version; ruff
+        check, ruff format --check and mypy src clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer rejected the first version (a `#` in the password
+      or path hid hostaddr/service from the urlsplit scan, so a URL could
+      reach another address in plaintext; the host-less case was refused by
+      the wrong rule) and approved the third, after probing libpq parity on
+      edge inputs with conninfo_to_dict; 698 not-postgres tests passed.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found drift (host-less URL untested under
+        the verify-full rule, refusal assertions not checking the rule text,
+        an empty PG* variable accepted where the design says "is set", then a
+        `#?host=` parameter not refused unconditionally) and found none in
+        the third version against DAC-E1-S8-1 to S8-4, TC-COMP-410 to 415
+        and runtime-config section 2.3.
+    tests_executed: true
+    commit_hash: e44f1f5
