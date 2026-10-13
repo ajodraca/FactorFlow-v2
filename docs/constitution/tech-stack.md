@@ -29,8 +29,8 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-09T04:13:30Z
-  reviewed_revision: sha256:46408823e3b649448bfdb39abccefa98063a54fd7187ae62704a54ae78f40d8c
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:cf11e1b49118a18cac2b4f24110f365afa354c57f5a2555749c26e456bbb74a7
 ---
 
 # Tech Stack: FactorFlow

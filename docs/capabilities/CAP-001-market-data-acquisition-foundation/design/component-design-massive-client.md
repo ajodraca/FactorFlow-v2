@@ -31,9 +31,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-10T23:06:40Z
-  reviewed_revision: sha256:7b6e20a0b46b0aef37caec4e296ddf829f103bcbeb50fdd2bdc2d8b4f4ae5a51
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:21d3a56bddbcbf5fbd728bcb61c49d4a38d716c17801c944eaf91a89a6700ace
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Massive Client

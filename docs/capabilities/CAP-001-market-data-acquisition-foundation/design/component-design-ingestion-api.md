@@ -31,9 +31,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:00Z
-  reviewed_revision: sha256:5fb48327ab7a372e262486ea291f2a67744b44ac75bf228e165b2cc68fe693f2
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:d640754c0efb7e8682c9b048926d84d1d92ff80792ec767ddf6b52e05d811d27
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Ingestion API

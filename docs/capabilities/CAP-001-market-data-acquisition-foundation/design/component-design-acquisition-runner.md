@@ -31,9 +31,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-09T21:00:06Z
-  reviewed_revision: sha256:e0522afb927bda200926be52dcf5e32f8fc050c6dc6157eb2688293fad6218b9
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:2fe3c31955701e914fab84047228cc0ba41acf88e5675a754238f77d469fc47f
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Acquisition Runner

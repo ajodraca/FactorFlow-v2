@@ -31,9 +31,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-06T02:00:01Z
-  reviewed_revision: sha256:e877f0c46d6ca6c2f07f736212ccd00693c2c478fefbfbde5608e7af7ac3efa3
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v3.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:364b6b3bc5d1ca0ea33b7266592b907e03974a94b6437432a563195a14453d0e
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Schema Migrator

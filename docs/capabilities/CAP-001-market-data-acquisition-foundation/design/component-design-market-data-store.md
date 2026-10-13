@@ -29,9 +29,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-10T23:06:40Z
-  reviewed_revision: sha256:8b11cff20e3589027130fd69dc060a9f979ceebd507523f902fc79c58c4eec2d
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v10.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:51f4d6fef017ccb83a9e3c597b8217afc8eb95513f021c7c23b3b63e6b493bc1
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Market Data Store

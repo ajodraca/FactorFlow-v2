@@ -33,9 +33,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-09T21:00:05Z
-  reviewed_revision: sha256:f9c6b57a361b05c7ec0145737a3384d99eabaff5c2425a476864e73da2dbd77b
-  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v7.md"
+  approved_at: 2026-10-13T00:46:11Z
+  reviewed_revision: sha256:46aaabf8792cc8b1f3d805174a5b7117edb25f0f59348e04f2dc4c3d5b8eed1f
+  review_artifact: "docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v13.md"
 ---
 
 # Component: Runtime Configuration
