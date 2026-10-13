@@ -9,11 +9,15 @@ Component design: `component-design-runtime-config.md` sections 2.2-2.6.
 """
 
 import hashlib
+import ipaddress
 import logging
 import os
+import socket
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
+import psycopg
+from psycopg.conninfo import conninfo_to_dict
 from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,6 +29,9 @@ _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 _MASSIVE_API_KEY_VAR = "FACTORFLOW_MASSIVE_API_KEY"
 _DATABASE_URL_VAR = "FACTORFLOW_DATABASE_URL"
 _LOG_LEVEL_VAR = "FACTORFLOW_LOG_LEVEL"
+# libpq reads these when a connection string leaves them unset, so any of them
+# could send the database channel to another address than the URL names (H7).
+_LIBPQ_ADDRESS_VARS = ("PGHOST", "PGHOSTADDR", "PGSERVICE", "PGSERVICEFILE")
 
 
 class ConfigurationError(ValueError):
@@ -82,6 +89,95 @@ class DatabaseSettings(_EnvNamedSettings):
     url: SecretStr
     pool_min: int = Field(default=1, ge=1)
     pool_max: int = Field(default=4, ge=1)
+
+    @model_validator(mode="after")
+    def _confine_plaintext_to_loopback(self) -> "DatabaseSettings":
+        """SEC-ENC-001 host-local loopback exception, condition H7
+        (CONST-SEC 1.3; component design section 2.3; DAC-E1-19,
+        DAC-E1-S8-1 to S8-4).
+
+        A plaintext database channel may only stay on the host: a URL whose
+        host is exactly `127.0.0.1` or `::1`, or `localhost` resolving only
+        to loopback addresses, accepts any `sslmode`; any other host, or no
+        host, must carry `sslmode=verify-full`. Every libpq route that could
+        supply another address is refused first. Messages name the variable
+        and the rule, never the value (AC-13).
+        """
+        for name in _LIBPQ_ADDRESS_VARS:
+            if name in os.environ:
+                raise ValueError(
+                    f"{_DATABASE_URL_VAR}: {name} must not be set; it would let libpq "
+                    "connect to another address than the URL names"
+                )
+
+        url = self.url.get_secret_value()
+        try:
+            params = conninfo_to_dict(url)
+        except psycopg.ProgrammingError:
+            raise ValueError(f"{_DATABASE_URL_VAR}: is not a valid connection string") from None
+
+        # libpq's own parse is the authority: `urlsplit` disagrees with it when
+        # the URL holds a `#`, which libpq accepts inside a password or path.
+        if "hostaddr" in params or "service" in params:
+            raise ValueError(
+                f"{_DATABASE_URL_VAR}: must not carry a hostaddr or service parameter; "
+                "the host is the only address allowed"
+            )
+        # A `host` query parameter replaces the URL's host in libpq's parse, so it
+        # is only visible in the URL itself, read on libpq's terms.
+        if "host" in _libpq_uri_query_keys(url):
+            raise ValueError(
+                f"{_DATABASE_URL_VAR}: must not carry a host parameter; the URL's host "
+                "is the only address allowed"
+            )
+
+        host = str(params.get("host", ""))
+        if "," in host:
+            raise ValueError(f"{_DATABASE_URL_VAR}: must name exactly one host")
+        if _is_loopback_database_host(host):
+            return self
+        if params.get("sslmode") != "verify-full":
+            raise ValueError(
+                f"{_DATABASE_URL_VAR}: a host other than 127.0.0.1, ::1 or a "
+                "loopback-only localhost requires sslmode=verify-full"
+            )
+        return self
+
+
+def _libpq_uri_query_keys(url: str) -> set[str]:
+    """The query parameter names of a `postgresql://` URI as libpq reads them.
+
+    libpq takes the userinfo to end at an `@` found before the first `/`, and
+    the query to start at the next `?`; it gives `#` no meaning, unlike
+    `urlsplit`, which would hide a parameter written after one (H7).
+    """
+    scheme, separator, rest = url.partition("://")
+    if not separator or scheme not in ("postgresql", "postgres"):
+        return set()
+    boundary = min((i for i in (rest.find("@"), rest.find("/")) if i >= 0), default=-1)
+    if boundary >= 0 and rest[boundary] == "@":
+        rest = rest[boundary + 1 :]
+    _, question, query = rest.partition("?")
+    if not question:
+        return set()
+    return {unquote(part.partition("=")[0]) for part in query.split("&") if part}
+
+
+def _is_loopback_database_host(host: str) -> bool:
+    """True for `127.0.0.1`, `::1`, or `localhost` whose every resolved
+    address is loopback (component design section 2.3, H7)."""
+    if host in ("127.0.0.1", "::1"):
+        return True
+    if host != "localhost":
+        return False
+    try:
+        infos = socket.getaddrinfo("localhost", None)
+    except OSError:
+        return False
+    addresses = {str(info[4][0]) for info in infos}
+    return bool(addresses) and all(
+        ipaddress.ip_address(address.split("%", 1)[0]).is_loopback for address in addresses
+    )
 
 
 class ApiSettings(_EnvNamedSettings):
