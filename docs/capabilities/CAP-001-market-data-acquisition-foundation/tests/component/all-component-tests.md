@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-component-tests
 artifact_type: test-specification
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-10-11
+updated: 2026-10-12
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.290"
-  timestamp: 2026-10-11T03:27:07Z
+  tool_version: "2.1.296"
+  timestamp: 2026-10-13T03:23:07Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "8"
     - id: CAP-001-E3-S6
       version: "3"
     - id: CAP-001-E3-S7
@@ -29,11 +29,23 @@ ai_provenance:
     - id: CAP-001-component-design-massive-client
       version: "13"
     - id: CAP-001-component-design-runtime-config
-      version: "11"
+      version: "14"
     - id: CAP-001-component-design-acquisition-runner
       version: "8"
     - id: CAP-001-component-design-market-data-store
       version: "7"
+    - id: CAP-001-E1
+      version: "3"
+    - id: CAP-001-E1-S7
+      version: "2"
+    - id: CAP-001-E1-S8
+      version: "2"
+    - id: CAP-001-E1-S9
+      version: "3"
+    - id: CAP-001-component-design-schema-migrator
+      version: "7"
+    - id: CAP-001-component-design-ingestion-api
+      version: "8"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -8065,6 +8077,7 @@ ai_provenance:
 
 #### Error / Edge Cases
 - None stated beyond the three assertions.
+- The three loopback origin forms of the Host and Origin middleware (`http://127.0.0.1:`, `http://localhost:`, `http://[::1]:` in `src/factorflow/api/app.py`) are exempt from the scan's `http://` heuristic by DAC-E1-S7-6; they compare an incoming header and accept no base URL, so the assertion above still holds. TC-COMP-408 and TC-COMP-409 test the exemption's limits.
 
 ### TC-COMP-365: The new tests run in the not-postgres suite without a container or network, and existing tests still pass
 
@@ -8620,3 +8633,984 @@ ai_provenance:
 
 #### Error / Edge Cases
 - None stated. Company fundamentals in CAP-001 are the three statements (`component-design-massive-client.md` v13 section 2.5, section 7 "Ratios are never requested", section 14 item 7).
+
+### TC-COMP-390: Requests naming a loopback host from the API's own origin are served normally on API paths and the static mount
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-18
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- The application factory built with `ApiSettings.port` 8000 and the Host and Origin middleware registered; `TestClient(base_url="http://127.0.0.1:8000")`.
+
+#### Steps
+1. Send `GET /api/health` and `GET /` with `Host: 127.0.0.1:8000`.
+2. Send `POST /api/instruments` with `Host: 127.0.0.1:8000` and `Origin: http://127.0.0.1:8000`.
+
+#### Expected Result
+- Both `GET` requests return their normal responses (not 400 or 403).
+- The `POST` reaches its handler and returns that route's normal response.
+
+#### Error / Edge Cases
+- None stated beyond DAC-E1-S7-1 to S7-3, which test the refusals.
+
+### TC-COMP-391: The migrator, the API and the ingestion process each start on a loopback database URL through DatabaseSettings
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-19
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `FACTORFLOW_DATABASE_URL=postgresql://u:p@127.0.0.1:5432/d`; `psycopg.connect`, the pool constructor and `run_migrations` replaced by recording doubles.
+
+#### Steps
+1. Run `factorflow.db.migrate_main.main()`.
+2. Enter the API application lifespan through `TestClient`.
+3. Start `factorflow.ingestion_main.main()` up to its first database use.
+
+#### Expected Result
+- Each of the three loads its URL through `DatabaseSettings` and reaches its database call with the configured URL; none raises `ConfigurationError`.
+
+#### Error / Edge Cases
+- Refusals are tested by TC-COMP-411, TC-COMP-413 to TC-COMP-417, TC-COMP-421 and TC-COMP-422.
+
+### TC-COMP-392: The built wheel carries migrations 0001 to 0004 and the installed migrator resolves them
+
+**Scope:** component
+**Component(s):** schema-migrator
+**Traces to:** DAC-E1-20
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `uv` available; `tests/unit/test_distribution_contents.py`.
+
+#### Steps
+1. Copy `src/` and `pyproject.toml` to a temporary directory and run `uv build` there.
+2. List the wheel's files.
+3. Install the wheel into a temporary virtual environment and print `factorflow.db.migrate_main.MIGRATIONS_DIR` and `discover(MIGRATIONS_DIR)` versions from it.
+
+#### Expected Result
+- The wheel contains `factorflow/db/migrations/0001_extensions_owner_state.sql` to `0004_runs.sql`.
+- The installed `MIGRATIONS_DIR` lies inside the installed `factorflow/db` package and `discover` returns versions 1 to 4.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-393: The release image carries the interface bundle and exactly the locked dependency set
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-21
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Docker available (runs where Docker is present; recorded as not run otherwise, never as passed).
+- A clean checkout.
+
+#### Steps
+1. Run `docker build -t factorflow:test .`.
+2. In the image, list `factorflow/api/static/` of the installed package and run `pip freeze`.
+3. Run `uv export --locked --no-emit-project --format requirements.txt` on the checkout.
+
+#### Expected Result
+- The build succeeds; `factorflow/api/static/index.html` exists in the installed package.
+- Every distribution in `pip freeze` other than `factorflow` appears at the version the export lists, and none is missing.
+- No Node.js, uv or `web/` source is present in the release image.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-394: A uv.lock that is out of date with pyproject.toml fails the lock export
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-21
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `uv` 0.12.10 available offline; a temporary copy of `pyproject.toml` and `uv.lock`.
+
+#### Steps
+1. Add a dependency (for example `requests>=2`) to the copy's `pyproject.toml` without relocking.
+2. Run `uv export --locked --no-emit-project --format requirements.txt` in the copy.
+
+#### Expected Result
+- The export exits non-zero and writes no requirements file, so the image build's `lock` stage fails.
+
+#### Error / Edge Cases
+- `--frozen` would exit 0 and omit the new dependency (runtime-config v14 section 2.8.2); the test asserts the `Dockerfile` uses `--locked`.
+
+### TC-COMP-395: docker compose config renders the deployment with the four variables set, and ingestion only under its profile
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-22
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Docker CLI with Compose available (runs where present; recorded as not run otherwise).
+- The four variables set to non-secret test values.
+
+#### Steps
+1. Run `docker compose config`.
+2. Run `docker compose --profile ingestion config`.
+
+#### Expected Result
+- The first renders `postgres` and `app` only; the second also renders `ingestion`.
+- Every service has `network_mode: host` and no published port; the database URL's host is `127.0.0.1`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-396: A missing deployment variable stops docker compose and names it
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-22
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Docker CLI with Compose available (runs where present).
+- Three of the four variables set; `FACTORFLOW_POSTGRES_PASSWORD` unset.
+
+#### Steps
+1. Run `docker compose config` (or `up`).
+
+#### Expected Result
+- The command exits non-zero before starting any container, and its message names `FACTORFLOW_POSTGRES_PASSWORD` (runtime-config section 8 criterion 14).
+
+#### Error / Edge Cases
+- The same holds for each of the other three variables; the test may be parametrised over them.
+
+### TC-COMP-397: The smoke check passes on a healthy deployment (the drill stack)
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-23
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Owner-run: Docker with host networking enabled; no `factorflow` deployment running; the drill stack started with `docker compose -p factorflow-drill up -d` (postgres and app only).
+
+#### Steps
+1. Run `scripts/deploy-smoke.sh factorflow-drill`.
+
+#### Expected Result
+- Checks 1 to 4 pass and the script exits 0; its output is kept with the drill record.
+
+#### Error / Edge Cases
+- The production run of the same check is release evidence, not part of this test.
+
+### TC-COMP-398: The smoke check exits non-zero on its first failed check
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-23
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- A stub `docker` executable on `PATH` that reports the `app` container unhealthy; `curl` stubbed.
+
+#### Steps
+1. Run `scripts/deploy-smoke.sh`.
+
+#### Expected Result
+- The script exits non-zero after check 1, names the failed check, and runs none of checks 2 to 4.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-399: The documented upgrade takes a dump before deploying, and a rollback after a migration restores it before the older image starts
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-24
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- The README's upgrade and rollback sections.
+
+#### Steps
+1. Read the upgrade procedure.
+2. Read the rollback-after-migration procedure.
+
+#### Expected Result
+- The upgrade's first step is `pg_dump` to `$FACTORFLOW_BACKUP_DIR`, before `build`, `stop ingestion` and `up -d`.
+- The rollback restores the step 1 dump into an emptied database before `FACTORFLOW_IMAGE_TAG=<old> docker compose up -d`, then runs the smoke check, then starts ingestion.
+
+#### Error / Edge Cases
+- Rehearsal of the procedure is TC-COMP-434.
+
+### TC-COMP-400: A failed or empty dump stops the upgrade
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-24
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- The README's upgrade section.
+
+#### Steps
+1. Read step 1 of the upgrade procedure.
+
+#### Expected Result
+- It states that a non-zero exit from `pg_dump` or an empty dump file stops the upgrade before any later step.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-401: The three loopback hosts with the configured port pass the host check
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-1
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_api_host_origin.py`; application built with `ApiSettings.port` 8000.
+
+#### Steps
+1. Send `GET /api/health` with `Host: 127.0.0.1:8000`, `Host: localhost:8000` and `Host: [::1]:8000`.
+
+#### Expected Result
+- None is answered 400 `host_not_allowed`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-402: A foreign, wrong-port or missing Host is refused with 400 before any route or the static mount runs
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-1
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- Application built with `ApiSettings.port` 8000; route handlers and the static mount instrumented to record calls.
+
+#### Steps
+1. Send `GET /api/health` and `GET /` with `Host: evil.example:8000`.
+2. Repeat with `Host: 127.0.0.1:9999`.
+3. Repeat with no `Host` header.
+
+#### Expected Result
+- Every request returns 400 with the error envelope and code `host_not_allowed`.
+- No route handler and no static file response ran.
+
+#### Error / Edge Cases
+- The three header values share one outcome and may be one parametrised test.
+
+### TC-COMP-403: A state-changing request with a foreign or null Origin is refused with 403 on every state-changing route
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-2
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `Host: 127.0.0.1:8000` on every request; handlers instrumented to record calls.
+
+#### Steps
+1. For each of `POST /api/acquisition-runs`, `POST /api/acquisition-runs/{run_id}/cancel`, `PUT /api/settings/history-depth`, `POST /api/instruments`, `DELETE /api/instruments/{symbol}`, send the request with `Origin: https://evil.example`.
+2. Repeat each with `Origin: null`.
+
+#### Expected Result
+- Every request returns 403 with code `origin_not_allowed`.
+- No handler ran.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-404: A state-changing request with no Origin or with a loopback origin is not refused by the origin check
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-3
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `Host: 127.0.0.1:8000`; handlers stubbed to return 200.
+
+#### Steps
+1. Send `POST /api/acquisition-runs` with no `Origin`.
+2. Send it with `Origin: http://127.0.0.1:8000`, `http://localhost:8000` and `http://[::1]:8000`.
+
+#### Expected Result
+- None returns 403 `origin_not_allowed`; each reaches its handler.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-405: A GET with a foreign Origin is not refused by the origin check
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-3
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `Host: 127.0.0.1:8000`.
+
+#### Steps
+1. Send `GET /api/health` with `Origin: https://evil.example`.
+
+#### Expected Result
+- The response is health's normal response, not 403.
+
+#### Error / Edge Cases
+- `HEAD` and `OPTIONS` are exempt by the same rule (ingestion-api section 2.5a).
+
+### TC-COMP-406: A refused request is logged at warning with the request id and the rejected header, and no body or credential
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-4
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- Log capture on the structured logger; `FACTORFLOW_MASSIVE_API_KEY` set to a distinctive value.
+
+#### Steps
+1. Send `GET /api/health` with `Host: evil.example:8000`.
+2. Send `POST /api/instruments` with a JSON body and `Origin: https://evil.example`.
+
+#### Expected Result
+- Each refusal emits one `warning` record carrying the request id and the rejected `Host` or `Origin` value.
+- No record contains the request body or the API key value; each response carries the same request id.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-407: A refused POST /api/acquisition-runs creates no run
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-5
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- The run-creation service replaced by a double that records calls.
+
+#### Steps
+1. Send `POST /api/acquisition-runs` with `Host: 127.0.0.1:8000` and `Origin: https://evil.example`.
+
+#### Expected Result
+- The response is 403 `origin_not_allowed` and the run-creation service was never called.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-408: The release-source guard passes with the three loopback origin forms in api/app.py
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-6
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_release_excludes_test_paths.py` with the narrowed exemption.
+
+#### Steps
+1. Run `test_release_source_accepts_no_http_scheme` against `src/factorflow` with the middleware in place.
+
+#### Expected Result
+- The guard passes; the only `http://` string parts it accepts are `http://127.0.0.1:`, `http://localhost:` and `http://[::1]:` in `src/factorflow/api/app.py`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-409: The exemption is that narrow: the forms elsewhere, or a fourth http form in api/app.py, fail the guard
+
+**Scope:** component
+**Component(s):** ingestion-api
+**Traces to:** DAC-E1-S7-6
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- The guard's scan applied to synthetic source trees in a temporary directory.
+
+#### Steps
+1. Scan a tree where `http://127.0.0.1:` appears in a module other than `api/app.py`.
+2. Scan a tree where `api/app.py` also holds `http://example.com`.
+3. Scan a tree where any module compares a value with `"http"` or lists it.
+
+#### Expected Result
+- Each scan reports an offender, so the guard would fail.
+
+#### Error / Edge Cases
+- Hiding the scheme behind an indirection is out of scope by DAC-E1-S7-6 and is a review concern, not a test case.
+
+### TC-COMP-410: A loopback database URL loads with any sslmode
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-1
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_database_url_confinement.py`; name resolution patched so `localhost` returns only `127.0.0.1` and `::1`.
+
+#### Steps
+1. Load `DatabaseSettings` with `postgresql://u:p@127.0.0.1:5432/d`, `@[::1]` and `@localhost`, each with no `sslmode` and with `sslmode=disable`.
+
+#### Expected Result
+- Every value loads.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-411: A non-loopback or host-less URL without sslmode=verify-full is refused without echoing the value
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-2
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+
+#### Steps
+1. Load `DatabaseSettings` with `postgresql://u:p@db.example.com/d` and `@10.0.0.5`, each with no `sslmode`, `sslmode=prefer` and `sslmode=require`.
+2. Load a URL with no host (a Unix-socket path) and no `sslmode=verify-full`.
+
+#### Expected Result
+- Each raises `ConfigurationError` naming `FACTORFLOW_DATABASE_URL` and the rule.
+- No message contains the URL or `p`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-412: A non-loopback URL with sslmode=verify-full loads
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-2
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+
+#### Steps
+1. Load `DatabaseSettings` with `postgresql://u:p@db.example.com/d?sslmode=verify-full` and `@10.0.0.5` with the same.
+
+#### Expected Result
+- Both load.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-413: A loopback URL carrying another address route is refused
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-3
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+
+#### Steps
+1. Load `DatabaseSettings` with a loopback URL carrying `host=10.0.0.5`, then `hostaddr=10.0.0.5`, then `service=x`, then a second host.
+
+#### Expected Result
+- Each raises `ConfigurationError` naming `FACTORFLOW_DATABASE_URL`, without the value.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-414: A loopback URL is refused while a libpq address environment variable is set
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-3
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- A loopback `FACTORFLOW_DATABASE_URL`.
+
+#### Steps
+1. Load `DatabaseSettings` with each of `PGHOST`, `PGHOSTADDR`, `PGSERVICE` and `PGSERVICEFILE` set in turn.
+
+#### Expected Result
+- Each raises `ConfigurationError` naming the rule, without any value.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-415: localhost resolving to a non-loopback address is refused
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-4
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- Name resolution patched so `localhost` returns `127.0.0.1` and `192.0.2.10`.
+
+#### Steps
+1. Load `DatabaseSettings` with `postgresql://u:p@localhost/d` and no `sslmode`.
+
+#### Expected Result
+- Loading raises `ConfigurationError` without the value.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-416: The migrator exits 1 on a refused URL without connecting
+
+**Scope:** component
+**Component(s):** schema-migrator
+**Traces to:** DAC-E1-S8-5
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_migrate_main_confinement.py`; `psycopg.connect` patched to fail the test if called; log capture.
+
+#### Steps
+1. Run `migrate_main.main()` with `@10.0.0.5` and `@db.example.com` without `sslmode=verify-full`, a loopback URL with `host=10.0.0.5` or `hostaddr=10.0.0.5`, and a loopback URL while `PGHOST` is set.
+
+#### Expected Result
+- Each returns 1; `psycopg.connect` was never called.
+- The `error` record names `FACTORFLOW_DATABASE_URL` and contains neither the URL nor its password.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-417: The migrator exits 1 when FACTORFLOW_DATABASE_URL is unset
+
+**Scope:** component
+**Component(s):** schema-migrator
+**Traces to:** DAC-E1-S8-5
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `FACTORFLOW_DATABASE_URL` unset; `psycopg.connect` patched to fail if called.
+
+#### Steps
+1. Run `migrate_main.main()`.
+
+#### Expected Result
+- It returns 1 with a message naming the variable, and never connects.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-418: The migrator reaches run_migrations on a loopback URL
+
+**Scope:** component
+**Component(s):** schema-migrator
+**Traces to:** DAC-E1-S8-5
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `run_migrations` replaced by a recording double returning `(0, ...)`.
+
+#### Steps
+1. Run `migrate_main.main()` with `postgresql://u:p@127.0.0.1:5432/d`.
+
+#### Expected Result
+- `run_migrations` is called once with that URL and `MIGRATIONS_DIR`, and `main()` returns 0.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-419: MIGRATIONS_DIR resolves inside the package and the moved files keep their checksums
+
+**Scope:** component
+**Component(s):** schema-migrator
+**Traces to:** DAC-E1-S8-6
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_migrator_discover.py`; the four checksums recorded before the move.
+
+#### Steps
+1. Read `factorflow.db.migrate_main.MIGRATIONS_DIR`.
+2. Run `discover(MIGRATIONS_DIR)`.
+
+#### Expected Result
+- `MIGRATIONS_DIR` is the `migrations` directory beside `migrate_main.py`.
+- Versions 1 to 4 are returned with checksums equal to the recorded ones.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-420: No code or test computes a path to a repository-root migrations directory
+
+**Scope:** component
+**Component(s):** schema-migrator
+**Traces to:** DAC-E1-S8-7
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+
+#### Steps
+1. Scan `src/`, `tests/` and `scripts/` for path expressions ending in a top-level `migrations` directory (for example `parents[N] / "migrations"`) and confirm the repository root has no `migrations/` directory.
+
+#### Expected Result
+- No such expression exists and the directory is gone; `tests/fixtures/migrations_ok/` is unaffected.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-421: The ingestion process exits non-zero on a refused database URL before connecting
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-8
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_database_url_all_clients.py`; `psycopg.connect` and the pool constructor patched to fail if called; log or stderr capture.
+
+#### Steps
+1. Run `factorflow.ingestion_main.main()` with `FACTORFLOW_DATABASE_URL=postgresql://u:p@10.0.0.5/d`.
+
+#### Expected Result
+- It exits non-zero before any connection; the reported message names `FACTORFLOW_DATABASE_URL` and contains neither the URL nor its password.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-422: The API startup fails on a refused database URL before opening a pool
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-8
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- The pool constructor patched to fail if called.
+
+#### Steps
+1. Enter the application lifespan through `TestClient` with `FACTORFLOW_DATABASE_URL=postgresql://u:p@10.0.0.5/d`.
+
+#### Expected Result
+- Startup raises before a pool is constructed; the error names `FACTORFLOW_DATABASE_URL` and contains neither the URL nor its password.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-423: Only config/settings.py reads FACTORFLOW_DATABASE_URL from the environment
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S8-9
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+
+#### Steps
+1. Scan every module under `src/factorflow` for `os.environ` or `os.getenv` reads of `FACTORFLOW_DATABASE_URL` (directly or through a constant holding the name).
+
+#### Expected Result
+- The only module with such a read is `src/factorflow/config/settings.py`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-424: The Dockerfile builds the bundle, installs from the lock, runs the migrator first and copies no non-release path
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-1
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_release_excludes_test_paths.py` (extended; joins `\` continuation lines before `shlex`).
+
+#### Steps
+1. Parse the `Dockerfile` and `.dockerignore`.
+
+#### Expected Result
+- An `interface` stage runs `npm run build`; a `lock` stage runs `uv export --locked` and not `--frozen`.
+- The final stage installs with `--require-hashes`, then the project with `--no-deps`, copies the bundle from `interface`, and its `CMD` runs `python -m factorflow.db.migrate_main && exec python -m factorflow.app_main`.
+- No `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-425: The built wheel carries the interface bundle and the migrations, and nothing under tests
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-2
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_distribution_contents.py` (extended).
+
+#### Steps
+1. Copy `src/` and `pyproject.toml` to a temporary directory, write a stub `factorflow/api/static/index.html`, and run `uv build` there.
+2. List the wheel.
+
+#### Expected Result
+- The wheel contains `factorflow/api/static/index.html` and the four migrations, and no file under `tests/`; the test never relies on a prior `npm run build`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-426: compose.yaml keeps host networking, loopback listeners, scram-sha-256 and the start order
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-3
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- `tests/unit/test_compose_definition.py`, reading the file as text.
+
+#### Steps
+1. Read `compose.yaml`.
+
+#### Expected Result
+- Each of the three services has `network_mode: host`; there is no `ports:` key.
+- PostgreSQL's command sets `listen_addresses=127.0.0.1`; its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256` and `POSTGRES_INITDB_ARGS` with `--auth-host=scram-sha-256` and `--auth-local=scram-sha-256`.
+- The database URL's host is `127.0.0.1` and it sets `require_auth=scram-sha-256`; no service sets `FACTORFLOW_API_HOST`.
+- Every secret and the image tag are `${...:?...}` interpolations; `app` and `ingestion` name the same image; `ingestion` runs `python -m factorflow.ingestion_main`, is in the `ingestion` profile and depends on `app` being healthy.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-427: The smoke check accepts pg_hba.conf rules using only scram-sha-256, peer or reject
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-4
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- A stub `docker` on `PATH` returning healthy containers and a `pg_hba.conf` whose rules use `scram-sha-256`, `peer` and `reject`, with comment and blank lines.
+
+#### Steps
+1. Run check 1 of `scripts/deploy-smoke.sh`.
+
+#### Expected Result
+- Check 1 passes.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-428: The smoke check fails on a pg_hba.conf rule using any other method
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-4
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- The same stub, with one rule's method set in turn to `trust`, `password` and `md5`.
+
+#### Steps
+1. Run check 1 of `scripts/deploy-smoke.sh` for each.
+
+#### Expected Result
+- Each run fails check 1 and exits non-zero.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-429: The smoke check defaults to the factorflow project and makes proxy-free, redirect-free requests
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-5
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- Stub `docker` and `curl` on `PATH` recording their arguments.
+
+#### Steps
+1. Run `scripts/deploy-smoke.sh` with no argument.
+
+#### Expected Result
+- Every `docker ps` filter names `label=com.docker.compose.project=factorflow`.
+- Every `curl` call carries `--noproxy '*'` and `--proto =http` and no `-L`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-430: The smoke check targets the project named by its argument
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-5
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- Stub `docker` recording its arguments.
+
+#### Steps
+1. Run `scripts/deploy-smoke.sh factorflow-drill`.
+
+#### Expected Result
+- Every `docker ps` filter names `label=com.docker.compose.project=factorflow-drill`.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-431: The smoke check reads the expected schema version from the running image
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-6
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- Repository checkout; `uv run pytest -m 'not postgres'`, no container or network.
+- Stub `docker` that answers `docker exec <app> python -c ...discover(MIGRATIONS_DIR)...` with `5`; stub `curl` answering health with `schema_version` 4.
+
+#### Steps
+1. Run `scripts/deploy-smoke.sh`.
+
+#### Expected Result
+- Check 2 fails because health reports 4 where the image carries 5, showing the expected value came from the image, not a constant.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-432: The README's first-deployment procedure runs the smoke check before the interface or ingestion
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-7
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- The README's run section.
+
+#### Steps
+1. Read the first-deployment procedure.
+
+#### Expected Result
+- It names host networking as a precondition, generates the password with `openssl rand -hex 24` (at least 128 bits from a secure generator), and names the four variables.
+- It runs `docker compose up -d`, then `scripts/deploy-smoke.sh`, and only then opens `http://127.0.0.1:8000` and runs `docker compose --profile ingestion up -d`; it says to re-run the check after any change to the host's network configuration.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-433: The README's rollback procedure guards destructive steps and passes the password to every connecting exec
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-8
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- The README's rollback and drill sections.
+
+#### Steps
+1. Read the rollback-after-migration procedure and the drill clean-up.
+
+#### Expected Result
+- `dropdb` is preceded by the owner confirming the dump to restore.
+- Every `docker compose exec` that connects to PostgreSQL passes `-e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD"`.
+- `docker compose -p factorflow-drill down -v` is preceded by the owner confirming the project name.
+
+#### Error / Edge Cases
+- None stated.
+
+### TC-COMP-434: The backup and restore drill runs once before the first deployment and leaves coverage unchanged
+
+**Scope:** component
+**Component(s):** runtime-config
+**Traces to:** DAC-E1-S9-9
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Owner-run, during coding: Docker with host networking enabled; no `factorflow` deployment running; the owner's real provider key and a password generated with `openssl rand -hex 24`; the owner supplies the key and runs the commands that use it.
+
+#### Steps
+1. `docker compose -p factorflow-drill up -d`, then `scripts/deploy-smoke.sh factorflow-drill`.
+2. Open the interface, add an instrument, and start ingestion with `--profile ingestion up -d`; let one acquisition run complete; read coverage.
+3. Record the H6 and password-generation statements for the drill.
+4. Take a `pg_dump`, empty the database, restore the dump by the documented procedure, and read coverage again.
+5. Remove the volume with `down -v` after confirming the project name.
+
+#### Expected Result
+- The smoke check passes before any data enters; the run completes against the live provider.
+- Coverage after the restore equals coverage before it.
+- The smoke output, the two statements and the drill record are kept in the change set.
+
+#### Error / Edge Cases
+- A failed restore or changed coverage fails the drill and blocks the story.

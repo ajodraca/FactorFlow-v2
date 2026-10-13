@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-001-coverage-matrix
 artifact_type: coverage-matrix
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-09-06
-updated: 2026-10-11
+updated: 2026-10-12
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "2.1.290"
-  timestamp: 2026-10-11T03:27:07Z
+  tool_version: "2.1.296"
+  timestamp: 2026-10-13T03:23:07Z
   source_artifacts:
     - id: CAP-001
       version: "8"
     - id: CAP-001-system-design
-      version: "6"
+      version: "8"
     - id: CAP-001-E3-S6
       version: "3"
     - id: CAP-001-E3-S7
@@ -29,11 +29,23 @@ ai_provenance:
     - id: CAP-001-component-design-massive-client
       version: "13"
     - id: CAP-001-component-design-runtime-config
-      version: "11"
+      version: "14"
     - id: CAP-001-component-design-acquisition-runner
       version: "8"
     - id: CAP-001-component-design-market-data-store
       version: "7"
+    - id: CAP-001-E1
+      version: "3"
+    - id: CAP-001-E1-S7
+      version: "2"
+    - id: CAP-001-E1-S8
+      version: "2"
+    - id: CAP-001-E1-S9
+      version: "3"
+    - id: CAP-001-component-design-schema-migrator
+      version: "7"
+    - id: CAP-001-component-design-ingestion-api
+      version: "8"
   invoking_user: ajodraca
   correlation_id: 897301a9-a728-4cc4-ab48-f8bc82dd95e2
 ---
@@ -388,6 +400,13 @@ ai_provenance:
 | DAC-E1-15 | Derived | A failure to reach the API MUST render as a named unreachable state identifying the likely cause and where to look, rather than surfacing a transport failure, so that a refused start is legible rather than blank. | TC-COMP-306 | — | — | Covered |
 | DAC-E1-16 | Derived | `GET /api/health` MUST report liveness, database reachability, credential presence as a boolean and schema version. Its most-recent-run field is delivered by E7. | TC-COMP-307 | — | — | Covered |
 | DAC-E1-17 | Derived | The status region MUST render correctly before any run exists, since the shell ships before the EPICs that create runs. | TC-COMP-308 | — | — | Covered |
+| DAC-E1-18 | Derived | The API MUST answer a request whose `Host` is missing or not one of its loopback hosts with `400 host_not_allowed`, and a state-changing request carrying a foreign `Origin` with `403 origin_not_allowed`, before any route or the static mount runs. | TC-COMP-390 | — | — | Covered |
+| DAC-E1-19 | Derived | Every process that connects to the store MUST load its URL through `DatabaseSettings`, which refuses a plaintext URL to a non-loopback address and every libpq route to another address before any connection is opened. | TC-COMP-391 | — | — | Covered |
+| DAC-E1-20 | Derived | The installed distribution MUST carry the migration files, resolved next to the migrator, so that a deployed image applies them. | TC-COMP-392 | — | — | Covered |
+| DAC-E1-21 | Derived | The release image MUST carry the interface bundle and exactly the dependency versions `uv.lock` records, and MUST fail to build when the lock is out of date. | TC-COMP-393, TC-COMP-394 | — | — | Covered |
+| DAC-E1-22 | Derived | The deployment definition MUST run every service on the host network with nothing published, PostgreSQL on `127.0.0.1` only with `scram-sha-256` on every route, every secret interpolated from the owner's environment, and ingestion started only after the application is healthy. | TC-COMP-395, TC-COMP-396 | — | — | Covered |
+| DAC-E1-23 | Derived | A deployment smoke check MUST verify service health, schema version, the served interface, PostgreSQL's authentication methods and the absence of any off-host listener, and MUST be run after every deployment before the interface is used or ingestion started. | TC-COMP-397, TC-COMP-398 | — | — | Covered |
+| DAC-E1-24 | Derived | Every upgrade MUST take a database dump first, and a rollback after a migration MUST restore that dump before the older image starts; the procedure is rehearsed once before the first deployment. | TC-COMP-399, TC-COMP-400 | — | — | Covered |
 | DAC-E1-S1-1 | Derived | Given migration `0001`, When it is applied, Then the `btree_gist` extension is created, since `coverage_segment`'s exclusion constraint in a later migration depends on it. | TC-COMP-309 | — | — | Covered |
 | DAC-E1-S1-2 | Derived | Given the `instrument` table, When a row is inserted, Then `symbol` must be uppercase and match `^[A-Z][A-Z0-9.-]{0,15}$`, enforced by check constraints rather than by application code. | TC-COMP-310 | — | — | Covered |
 | DAC-E1-S1-3 | Derived | Given the `instrument` table, When `lifecycle` is written, Then it must be `active` or `retired`, and `retired_at` must be non-null if and only if `lifecycle` is `retired`. | TC-COMP-311 | — | — | Covered |
@@ -426,20 +445,47 @@ ai_provenance:
 | DAC-E1-S6-4 | Derived | Given the application factory, When it is constructed, Then it mounts the built frontend bundle from the API package's static directory. | TC-COMP-344 | — | — | Covered |
 | DAC-E1-S6-5 | Derived | Given request handling, When any request is served, Then middleware generates a request id and includes it in every log record for that request. | TC-COMP-345 | — | — | Covered |
 | DAC-E1-S6-6 | Derived | Given any endpoint in the application, When it is declared, Then it declares no authentication requirement, because the loopback binding is what makes that sound. | TC-COMP-346 | — | — | Covered |
+| DAC-E1-S7-1 | Derived | Given `ApiSettings.port` is `<port>`, When a request's `Host` is exactly `127.0.0.1:<port>`, `localhost:<port>` or `[::1]:<port>`, Then the host check passes; `Host: evil.example:8000`, `Host: 127.0.0.1:9999` and a request with no `Host` header each return `400` with the error envelope and code `host_not_allowed`, on an `/api/` path and on `/`, before any route handler or the static mount runs. | TC-COMP-401, TC-COMP-402 | — | — | Covered |
+| DAC-E1-S7-2 | Derived | Given a request whose method is not `GET`, `HEAD` or `OPTIONS`, When it carries an `Origin` header that is not exactly `http://127.0.0.1:<port>`, `http://localhost:<port>` or `http://[::1]:<port>`, Then it returns `403` with code `origin_not_allowed` and the handler does not run. This holds for each of the five state-changing routes: `POST /api/acquisition-runs`, `POST /api/acquisition-runs/{run_id}/cancel`, `PUT /api/settings/history-depth`, `POST /api/instruments`, `DELETE /api/instruments/{symbol}`, and for `Origin: null`. | TC-COMP-403 | — | — | Covered |
+| DAC-E1-S7-3 | Derived | Given a state-changing request with no `Origin` header, or with one of the three loopback origins, When it arrives, Then the origin check does not refuse it; and Given a `GET` with a foreign `Origin`, When it arrives, Then the origin check does not refuse it. | TC-COMP-404, TC-COMP-405 | — | — | Covered |
+| DAC-E1-S7-4 | Derived | Given a refused request, When the middleware answers it, Then a `warning` structured log record carries the request id and the rejected header's value, and no credential or request body is read or logged. | TC-COMP-406 | — | — | Covered |
+| DAC-E1-S7-5 | Derived | Given a refused `POST /api/acquisition-runs`, When the response is returned, Then no run is created. | TC-COMP-407 | — | — | Covered |
+| DAC-E1-S7-6 | Derived | Given the release-source guard `tests/unit/test_release_excludes_test_paths.py::test_release_source_accepts_no_http_scheme` (TC-COMP-364, DAC-E3-S6-17 (c), SEC-NDG-001), When it scans `src/factorflow`, Then it exempts only the loopback origin forms of this story's allow-list in `src/factorflow/api/app.py` (string parts exactly `http://127.0.0.1:`, `http://localhost:` and `http://[::1]:`, completed with `ApiSettings.port`), and still fails on any other `http://` constant, any comparison with or listing of the `http` scheme anywhere, and any of those three forms in another module. A new case in the same test module asserts that the exemption is that narrow: the three forms placed in another module, or a fourth `http://` form in `api/app.py`, fail the guard. | TC-COMP-408, TC-COMP-409 | — | — | Covered |
+| DAC-E1-S8-1 | Derived | Given `FACTORFLOW_DATABASE_URL` with host exactly `127.0.0.1` or `::1`, or `localhost` resolving only to loopback addresses, When `DatabaseSettings` loads, Then any `sslmode` is accepted. | TC-COMP-410 | — | — | Covered |
+| DAC-E1-S8-2 | Derived | Given a URL with any other host, or with no host, When it does not carry `sslmode=verify-full` (absent, `prefer` or `require`), Then loading raises `ConfigurationError` naming `FACTORFLOW_DATABASE_URL` and the rule, and the message contains neither the URL nor its password; with `sslmode=verify-full` it loads. | TC-COMP-411, TC-COMP-412 | — | — | Covered |
+| DAC-E1-S8-3 | Derived | Given a loopback URL, When it carries more than one host, or a `host`, `hostaddr` or `service` query parameter, or any of `PGHOST`, `PGHOSTADDR`, `PGSERVICE`, `PGSERVICEFILE` is set in the environment, Then loading raises `ConfigurationError` as in DAC-E1-S8-2. | TC-COMP-413, TC-COMP-414 | — | — | Covered |
+| DAC-E1-S8-4 | Derived | Given `localhost`, When name resolution returns a non-loopback address alongside `127.0.0.1`, Then loading raises. | TC-COMP-415 | — | — | Covered |
+| DAC-E1-S8-5 | Derived | Given `migrate_main.main()`, When `FACTORFLOW_DATABASE_URL` is unset or refused by `DatabaseSettings`, Then it returns 1, logs the model's message through the structured logger at `error` without the value, and never calls `psycopg.connect`; with a loopback URL it reaches `run_migrations`. | TC-COMP-416, TC-COMP-417, TC-COMP-418 | — | — | Covered |
+| DAC-E1-S8-6 | Derived | Given a source checkout and the installed package, When `MIGRATIONS_DIR` is read, Then both resolve `factorflow/db/migrations` next to `migrate_main.py`, and `discover(MIGRATIONS_DIR)` returns versions 1 to 4 with checksums identical to those before the move. | TC-COMP-419 | — | — | Covered |
+| DAC-E1-S8-7 | Derived | Given the repository after the move, When it is searched, Then no code or test computes a path to a repository-root `migrations/` directory. | TC-COMP-420 | — | — | Covered |
+| DAC-E1-S8-8 | Derived | Given `FACTORFLOW_DATABASE_URL` naming `10.0.0.5` without `sslmode=verify-full`, When `factorflow.ingestion_main.main()` runs, Then it exits non-zero before any database connection is opened; and When the API application starts (its lifespan, as `TestClient` enters it), Then startup fails before a connection pool is opened; in both cases the logged message names `FACTORFLOW_DATABASE_URL` and contains neither the URL nor its password. | TC-COMP-421, TC-COMP-422 | — | — | Covered |
+| DAC-E1-S8-9 | Derived | Given the source tree, When `src/factorflow` is scanned, Then no module reads `FACTORFLOW_DATABASE_URL` from the environment (`os.environ`, `os.getenv`) except `config/settings.py`, where `DatabaseSettings` loads it and the redaction filter masks it. | TC-COMP-423 | — | — | Covered |
+| DAC-E1-S9-1 | Derived | Given the `Dockerfile`, When it is read, Then it has an `interface` stage running `npm run build` and a `lock` stage running `uv export --locked` (not `--frozen`); the final stage installs with `--require-hashes` and the project with `--no-deps`, copies the bundle from `interface`, its `CMD` runs `python -m factorflow.db.migrate_main && exec python -m factorflow.app_main` (runtime-config section 2.8.2, AC-16), and no `COPY` names `tests/` or `migrations/`; `.dockerignore` lists `tests/` and `src/factorflow/api/static/`. | TC-COMP-424 | — | — | Covered |
+| DAC-E1-S9-2 | Derived | Given the built wheel (the `test_distribution_contents.py` build from a temporary copy with a stub `index.html`), When it is listed, Then it contains `factorflow/api/static/index.html` as well as the migrations, and nothing under `tests/`; the test never depends on a prior `npm run build`. | TC-COMP-425 | — | — | Covered |
+| DAC-E1-S9-3 | Derived | Given `compose.yaml` read as text, When checked, Then each of the three services has `network_mode: host`; the file has no `ports:` key; PostgreSQL's command sets `listen_addresses=127.0.0.1` and its environment sets `POSTGRES_HOST_AUTH_METHOD: scram-sha-256` and `POSTGRES_INITDB_ARGS` with both auth flags; the database URL's host is `127.0.0.1` with `require_auth=scram-sha-256`; no service sets `FACTORFLOW_API_HOST`; every secret and the image tag are `${...:?...}`; `app` and `ingestion` name the same image; `ingestion`'s command is `python -m factorflow.ingestion_main`, it is in the `ingestion` profile and depends on `app` healthy. | TC-COMP-426 | — | — | Covered |
+| DAC-E1-S9-4 | Derived | Given `scripts/deploy-smoke.sh`, When check 1 reads `pg_hba.conf`, Then every non-comment, non-blank rule's method must be `scram-sha-256`, `peer` or `reject`, and any other method (`trust`, `password`, `md5` or other) fails the check. | TC-COMP-427, TC-COMP-428 | — | — | Covered |
+| DAC-E1-S9-5 | Derived | Given `scripts/deploy-smoke.sh` with a project argument, When run, Then it finds containers by `com.docker.compose.project=<project>`, defaulting to `factorflow`, and every HTTP request it makes uses `curl --noproxy '*' --proto =http` without `-L`. | TC-COMP-429, TC-COMP-430 | — | — | Covered |
+| DAC-E1-S9-6 | Derived | Given the smoke check's check 2, When it decides the expected schema version, Then it reads it from the running image (`discover(MIGRATIONS_DIR)` inside the `app` container), not from a constant. | TC-COMP-431 | — | — | Covered |
+| DAC-E1-S9-7 | Derived | Given the README, When the owner follows it on a first deployment, Then the smoke check runs before the interface is opened at `http://127.0.0.1:8000` or ingestion is started, the password is generated with `openssl rand -hex 24` (at least 128 bits from a secure generator), and the four variables are named. | TC-COMP-432 | — | — | Covered |
+| DAC-E1-S9-8 | Derived | Given the README's rollback procedure after a migration, When followed, Then `dropdb` runs only after the owner confirms the dump to restore, every `docker compose exec` that connects passes `PGPASSWORD`, and the drill's `down -v` runs only after the owner confirms the project name. | TC-COMP-433 | — | — | Covered |
+| DAC-E1-S9-9 | Derived | Given no `factorflow` deployment running, When the drill runs once before the first deployment (runtime-config section 2.8.4), Then: `docker compose -p factorflow-drill up -d` starts PostgreSQL and the application only; `scripts/deploy-smoke.sh factorflow-drill` passes before the store takes any data; ingestion completes one acquisition run against the live provider; the owner records, for the drill, the H6 statement (no account outside the owner's control can run processes on the host) and the statement that the drill's database password was generated with `openssl rand -hex 24`, both of which runtime-config section 2.8.4 says cover the drill; a `pg_dump` is taken and restored into an emptied database by the documented procedure; the coverage read is unchanged after the restore; and the volume is removed with `down -v` only after the owner confirms the project name. The smoke check output and the drill record are kept in the change set. | TC-COMP-434 | — | — | Covered |
 
 ## Coverage Summary
 
-- **Total ACs:** 382 (capability: 26, derived: 356)
-- **Covered:** 382
+- **Total ACs:** 413 (capability: 26, derived: 387)
+- **Covered:** 413
 - **Gaps:** 0
-- **Component test cases:** 389
+- **Component test cases:** 434
 - **Integration test cases:** 27
 - **E2E test cases:** 12
 
 ### Coverage Notes
 
+- Refinement of 2026-10-12 (deployment stories): DAC-E1-18 to DAC-E1-24, DAC-E1-S7-1 to S7-6, DAC-E1-S8-1 to S8-9 and DAC-E1-S9-1 to S9-9 (31 criteria) were added as TC-COMP-390 to TC-COMP-434. TC-COMP-364 gained one edge case for the exemption DAC-E1-S7-6 makes in its guard; its assertions are unchanged. No integration or E2E case was added: every new criterion is a single component's behaviour, the existing integration and E2E suites already drive the interface from its loopback origins and would fail if the new middleware refused them, and the *Operate and upgrade* flow keeps exactly one happy-path and one error-path E2E case (TC-E2E-011, TC-E2E-012).
+- TC-COMP-393, TC-COMP-395 and TC-COMP-396 need Docker; they run where it is present and are recorded as not run otherwise, never as passed. TC-COMP-397 and TC-COMP-434 are owner-run during E1-S9's coding, on the owner's host with host networking and, for the drill, the live provider and the owner's key (E1-S9 *Owner-run items*). TC-COMP-399, TC-COMP-400, TC-COMP-432 and TC-COMP-433 verify README text.
+- `component-design-runtime-config.md` v14 section 7's `test_compose_definition.py` row does not assert the application healthcheck's `schema_version` or `restart: unless-stopped`, which E1-S9's AC-16 verification row cites (backlog review v15 FINDING-1 (a)). TC-COMP-426 follows the design row; the story's evidence wording is a backlog follow-up.
 - 2026-10-11: TC-COMP-389 adds `component-design-massive-client.md` v13's "Ratios are never requested" test to AC-3. CAP-001's company fundamentals are the three financial statements, and ratios are not acquired (owner decision of 2026-10-10, v13 section 14 item 7).
-- The approved market-data-store design identifies backup and restore as unspecified; this is a product-operability gap, not a CAP-001 acceptance criterion, so no scenario is invented for it.
+- ~~The approved market-data-store design identifies backup and restore as unspecified.~~ Superseded 2026-10-12: runtime-config v14 section 2.8.4 specifies it, and DAC-E1-24 and DAC-E1-S9-9 cover it (TC-COMP-399, TC-COMP-400, TC-COMP-434).
 - The provider's historical calendar limitation means market-wide outages are not detectable through gap analysis; the capability explicitly requires that limitation to be presented honestly.
 - Refinement of 2026-10-10 (unattended `$test-run`, DEC-0043): DAC-E3-S6-1 to S6-18, DAC-E3-S7-1 to S7-14 and DAC-E5-S1-8 to S1-11 were added as TC-COMP-347 to TC-COMP-388 and TC-INT-027, and the existing TC-INT-001 to TC-INT-026 were mapped to the criteria their own `Traces to:` lines name. No existing test case was changed.
 - `component-design-runtime-config.md` section 7 still lists `e2e-test-key` among the keys the test-only entry point refuses; DAC-E3-S7-8 drops it under DEC-0040 (specification review v7 FINDING-20). TC-COMP-376 follows the story.
