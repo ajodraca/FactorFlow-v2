@@ -13,6 +13,10 @@
 # 2026-10-10: CAP-001-E3-S7 gains CAP-001-E1-S3 and CAP-001-E3-S1
 # (implementation-planning: its test entry point imports config/settings.py and
 # its tests patch massive/client.py's RESTClient; both already transitive).
+# 2026-10-12: CAP-001-E1-S7, CAP-001-E1-S8 and CAP-001-E1-S9 added by
+# story-generation (deployment definition, release blockers B1, B3, B4); the
+# graph stays at version 1, since docs/story-dependencies.md moves it to
+# version 2 only through an audit of existing plans.
 dependency_contract: 1
 capability: CAP-001
 stories:
@@ -22,6 +26,9 @@ stories:
   CAP-001-E1-S4: []
   CAP-001-E1-S5: [CAP-001-E1-S4]
   CAP-001-E1-S6: [CAP-001-E1-S1, CAP-001-E1-S2, CAP-001-E1-S3]
+  CAP-001-E1-S7: [CAP-001-E1-S6, CAP-001-E2-S3, CAP-001-E3-S6, CAP-001-E5-S5, CAP-001-E7-S2]
+  CAP-001-E1-S8: [CAP-001-E1-S2, CAP-001-E1-S3, CAP-001-E1-S6, CAP-001-E4-S5]
+  CAP-001-E1-S9: [CAP-001-E1-S6, CAP-001-E1-S8, CAP-001-E3-S6, CAP-001-E4-S5]
   CAP-001-E2-S1: [CAP-001-E1-S1]
   CAP-001-E2-S2: [CAP-001-E1-S1]
   CAP-001-E2-S3: [CAP-001-E1-S6, CAP-001-E2-S1, CAP-001-E2-S2]
