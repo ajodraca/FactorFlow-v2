@@ -56,8 +56,8 @@ Adds one HTTP middleware to `src/factorflow/api/app.py` that refuses a request w
 
 **Purpose**: Make the existing API tests send a loopback `Host`, so they keep passing once the host check lands.
 
-- [ ] T001 Change every `TestClient(app, ...)` construction to pass `base_url="http://127.0.0.1:8000"`, assertions unchanged, in the 15 modules the story lists: `tests/integration/test_api_coverage.py`, `test_api_health.py`, `test_api_instruments.py`, `test_api_pagination.py`, `test_api_runs.py`, `test_api_settings.py`, `test_api_static_mount.py`; `tests/unit/test_api_coverage_routes.py`, `test_api_errors.py`, `test_api_instruments_error_mapping.py`, `test_api_instruments_query_mapping.py`, `test_api_no_secrets.py`, `test_api_request_id.py`, `test_api_request_id_redaction_composition.py`, `test_api_runs_routes.py`. Where a module builds the client in a fixture, change the fixture once. Any module that sets `FACTORFLOW_API_PORT` to another value uses that port in its `base_url` instead.
-- [ ] T002 Run `uv run pytest` and confirm the suite is green before any production change (the `base_url` change alone must not alter results).
+- [x] T001 Change every `TestClient(app, ...)` construction to pass `base_url="http://127.0.0.1:8000"`, assertions unchanged, in the 15 modules the story lists: `tests/integration/test_api_coverage.py`, `test_api_health.py`, `test_api_instruments.py`, `test_api_pagination.py`, `test_api_runs.py`, `test_api_settings.py`, `test_api_static_mount.py`; `tests/unit/test_api_coverage_routes.py`, `test_api_errors.py`, `test_api_instruments_error_mapping.py`, `test_api_instruments_query_mapping.py`, `test_api_no_secrets.py`, `test_api_request_id.py`, `test_api_request_id_redaction_composition.py`, `test_api_runs_routes.py`. Where a module builds the client in a fixture, change the fixture once. Any module that sets `FACTORFLOW_API_PORT` to another value uses that port in its `base_url` instead.
+- [x] T002 Run `uv run pytest` and confirm the suite is green before any production change (the `base_url` change alone must not alter results).
 
 **Checkpoint**: Full suite green with loopback `Host` headers everywhere.
 

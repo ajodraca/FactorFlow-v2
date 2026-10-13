@@ -41,7 +41,7 @@ def _app_with_pool(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
     app = create_app()
     app.state.db_pool = _FakePool()
-    return TestClient(app, raise_server_exceptions=False)
+    return TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False)
 
 
 # ---------------------------------------------------------------------------
@@ -359,7 +359,7 @@ def test_500_body_is_only_the_internal_error_code_and_request_id(
     app = _app_with_probe(monkeypatch, RuntimeError(_DRIVER_TEXT))
 
     with (
-        TestClient(app, raise_server_exceptions=False) as client,
+        TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False) as client,
         caplog.at_level(logging.INFO),
     ):
         caplog.clear()
@@ -413,7 +413,9 @@ def test_internal_error_code_is_literal_snake_case(monkeypatch: pytest.MonkeyPat
     # Implements TC-COMP-083
     app = _app_with_probe(monkeypatch, RuntimeError(_DRIVER_TEXT))
 
-    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+    resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+        "/api/probe"
+    )
 
     assert resp.status_code == 500
     code = resp.json()["error"]["code"]
@@ -429,7 +431,9 @@ def test_framework_http_error_code_does_not_change_with_detail_wording(
     codes = []
     for detail in ("wording one", "completely different wording"):
         app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=405, detail=detail))
-        resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+        resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+            "/api/probe"
+        )
         assert resp.status_code == 405
         codes.append(resp.json()["error"]["code"])
 
@@ -469,7 +473,9 @@ def test_raised_credential_never_reaches_the_response(
     monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", _SECRET)
     app = _app_with_probe(monkeypatch, exc)
 
-    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+    resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+        "/api/probe"
+    )
 
     assert resp.status_code == status
     _assert_secret_absent(resp)
@@ -557,7 +563,9 @@ def test_405_keeps_the_allow_header(monkeypatch: pytest.MonkeyPatch) -> None:
     exc = StarletteHTTPException(status_code=405, headers={"Allow": "GET"})
     app = _app_with_probe(monkeypatch, exc)
 
-    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+    resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+        "/api/probe"
+    )
 
     assert resp.status_code == 405
     assert resp.headers.get("Allow") == "GET"
@@ -569,7 +577,9 @@ def test_raised_404_still_goes_through_the_not_found_handler(
 ) -> None:
     app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=404, detail="gone"))
 
-    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+    resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+        "/api/probe"
+    )
 
     assert resp.status_code == 404
     error = resp.json()["error"]
@@ -580,7 +590,9 @@ def test_raised_404_still_goes_through_the_not_found_handler(
 def test_status_outside_http_status_yields_http_error(monkeypatch: pytest.MonkeyPatch) -> None:
     app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=599, detail="odd"))
 
-    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+    resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+        "/api/probe"
+    )
 
     assert resp.status_code == 599
     assert resp.json()["error"]["code"] == "http_error"
@@ -592,7 +604,9 @@ def test_framework_error_message_is_built_from_the_phrase_not_the_detail(
     detail = "a detail the owner must never see"
     app = _app_with_probe(monkeypatch, StarletteHTTPException(status_code=405, detail=detail))
 
-    resp = TestClient(app, raise_server_exceptions=False).get("/api/probe")
+    resp = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False).get(
+        "/api/probe"
+    )
 
     message = resp.json()["error"]["message"]
     assert "method not allowed" in message.lower()

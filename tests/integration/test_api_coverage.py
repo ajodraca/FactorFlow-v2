@@ -74,7 +74,7 @@ def coverage_env(
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", postgres_connection_string)
     seed_conn = psycopg.connect(postgres_connection_string)
     try:
-        with TestClient(create_app()) as client:
+        with TestClient(create_app(), base_url="http://127.0.0.1:8000") as client:
             yield client, seed_conn
     finally:
         seed_conn.close()

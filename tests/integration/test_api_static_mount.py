@@ -17,7 +17,7 @@ def client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestClient:
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
     monkeypatch.setattr(app_module, "_STATIC_DIR", tmp_path)
     app = create_app()
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as test_client:
         yield test_client
 
 
@@ -44,7 +44,7 @@ def client_with_bundle(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestC
     monkeypatch.setattr(app_module, "_STATIC_DIR", tmp_path)
 
     app = create_app()
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as test_client:
         yield test_client
 
 

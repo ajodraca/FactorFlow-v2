@@ -34,7 +34,7 @@ def test_retire_route_maps_instrument_not_found_to_404(monkeypatch) -> None:
     monkeypatch.setattr("factorflow.api.routes.instruments.retire_symbol", _raise_not_found)
 
     app = create_app()
-    with TestClient(app, raise_server_exceptions=False) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False) as client:
         app.state.db_pool = _FakePool()
         response = client.delete("/api/instruments/NOPE")
 
@@ -50,7 +50,7 @@ def test_retire_route_maps_already_retired_to_409(monkeypatch) -> None:
     monkeypatch.setattr("factorflow.api.routes.instruments.retire_symbol", _raise_already_retired)
 
     app = create_app()
-    with TestClient(app, raise_server_exceptions=False) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False) as client:
         app.state.db_pool = _FakePool()
         response = client.delete("/api/instruments/AAPL")
 

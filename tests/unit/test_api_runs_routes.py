@@ -25,7 +25,7 @@ def _client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused/unused")
     app = create_app()
     app.state.db_pool = _FakePool()
-    return TestClient(app, raise_server_exceptions=False)
+    return TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False)
 
 
 # ---------------------------------------------------------------------------

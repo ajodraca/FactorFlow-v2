@@ -49,7 +49,7 @@ def pagination_client(
     conn.close()
 
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", postgres_connection_string)
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(), base_url="http://127.0.0.1:8000") as client:
         yield client
 
 

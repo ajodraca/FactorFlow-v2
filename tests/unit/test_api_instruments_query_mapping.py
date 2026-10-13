@@ -37,7 +37,7 @@ def test_list_route_applies_default_page_size_when_limit_omitted(monkeypatch) ->
     monkeypatch.setattr("factorflow.api.routes.instruments.list_instruments", _capture)
 
     app = create_app()
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         app.state.db_pool = _FakePool()
         response = client.get("/api/instruments")
 
@@ -56,7 +56,7 @@ def test_list_route_forwards_explicit_query_parameters(monkeypatch) -> None:
     monkeypatch.setattr("factorflow.api.routes.instruments.list_instruments", _capture)
 
     app = create_app()
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         app.state.db_pool = _FakePool()
         response = client.get(
             "/api/instruments",
