@@ -53,3 +53,44 @@ cycles:
         against DAC-E1-S7-6, TC-COMP-364/408/409 and ingestion-api section 2.5a.
     tests_executed: true
     commit_hash: ee7180df70efa01b4296f9f33f898adf9cbc8b1d
+  - name: host-origin-middleware
+    tasks: [T003, T004, T005, T006, T007, T008, T011, T013]
+    status: green
+    diff_sha256: 250bcd6abc108781efa64026de40c298386e223eaaf05b2bfdd719a19ddb523f
+    red:
+      command: uv run pytest tests/unit/test_api_host_origin.py -q
+      result: >-
+        19 failed, 9 passed before T013: every refusal case (foreign,
+        wrong-port and missing Host; foreign and null Origin on the five
+        state-changing routes; the warning log; the refused run start; the
+        port-follows-settings refusal) failed, and the pass-through cases
+        passed on arrival. After the test rework, replacing the middleware
+        registration with a no-op again fails 19 of 28.
+    green:
+      command: uv run pytest; npm run test:e2e
+      result: >-
+        964 passed and 18 passed; the reworked module passes 28; ruff, ruff
+        format and mypy src clean.
+    deviation: >-
+      tests/integration/test_api_binding.py (not in the plan's file list)
+      starts the real server on a free port through build_server(port=...);
+      it now sets FACTORFLOW_API_PORT to that port and rebuilds
+      app_main.app, which is built at import, because the allowed hosts
+      follow ApiSettings.port. Production code is unchanged by this.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Independent reviewer approved the middleware (exact allowed sets from
+      ApiSettings.port, Host lower-cased, null Origin refused, %r logging,
+      registration order giving refusals the request id) and the reworked
+      tests, after independently confirming 19 of 28 fail without it.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Independent reviewer first found the pool double crashing health
+        (connection() took no timeout), so TC-COMP-390/405 never checked a
+        normal response and TC-COMP-402's nothing-ran assertion was vacuous,
+        then found no drift against DAC-E1-18, DAC-E1-S7-1 to S7-5,
+        TC-COMP-390/401-407 and ingestion-api section 2.5a; judged the
+        test_api_binding.py change consistent with section 2.5a.
+    tests_executed: true
+    commit_hash: 7511706564a6739f3c7a606914accbad86094f3a
