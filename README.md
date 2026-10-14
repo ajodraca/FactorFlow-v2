@@ -146,7 +146,7 @@ variable** — never its value.
 
 | Variable | Required | Default | Notes |
 |---|---|---|---|
-| `FACTORFLOW_DATABASE_URL` | yes | — | Held as a secret; never logged |
+| `FACTORFLOW_DATABASE_URL` | yes | — | Held as a secret; never logged. A plaintext channel is accepted only to `127.0.0.1`, `::1`, or a `localhost` that resolves only to loopback; any other host (or no host) requires `sslmode=verify-full`, and every libpq route to another address (`host`, `hostaddr`, `service`, multi-host, `PGHOST`, `PGHOSTADDR`, `PGSERVICE`, `PGSERVICEFILE`) is refused at start. See [Database URL confinement](#database-url-confinement) |
 | `FACTORFLOW_DATABASE_POOL_MIN` | no | `1` | Minimum 1 |
 | `FACTORFLOW_DATABASE_POOL_MAX` | no | `4` | Minimum 1 |
 | `FACTORFLOW_API_HOST` | no | `127.0.0.1` | Loopback only; a non-loopback address is rejected at start |
@@ -193,6 +193,50 @@ an API response. Three mechanisms enforce this together:
 Rotation needs no restart: `read_provider_credential()` re-reads the
 environment on every call, and `credential_fingerprint()` gives a short,
 non-reversible digest for detecting that the value changed.
+
+### Database URL confinement
+
+The database channel carries the database password and market data in
+plaintext on loopback (CONST-SEC 1.3 `SEC-ENC-001` host-local loopback
+exception, condition H7; `component-design-runtime-config.md` section 2.3;
+CAP-001-E1-S8). `DatabaseSettings` enforces that confinement before any of
+the three clients — `migrate_main`, the API's connection pool, or
+`ingestion_main` — opens a connection:
+
+- **Loopback hosts.** When the parsed host is `127.0.0.1`, `::1`, or
+  `localhost` whose every `socket.getaddrinfo` result is a loopback address,
+  any `sslmode` is accepted.
+- **Any other host, or no host.** A remote host, a `localhost` that resolves
+  to any non-loopback address, or a host-less Unix-socket URL must carry
+  `sslmode=verify-full`, or loading raises `ConfigurationError` naming
+  `FACTORFLOW_DATABASE_URL` and the rule, never the URL or its password
+  (AC-13).
+- **Alternate libpq address routes refused.** Because libpq can take the
+  peer address from outside the URL's host, loading also fails when any of
+  `PGHOST`, `PGHOSTADDR`, `PGSERVICE` or `PGSERVICEFILE` is set in the
+  environment (even to `""`), when `psycopg.conninfo.conninfo_to_dict` sees
+  a `hostaddr` or `service` parameter or a comma-separated host list, or
+  when the URI query string carries a `host` parameter (scanned on libpq's
+  terms, where `#` does not start a fragment).
+
+Only `src/factorflow/config/settings.py` reads `FACTORFLOW_DATABASE_URL`
+from `os.environ` (`DatabaseSettings` and the redaction filter);
+`tests/unit/test_database_url_all_clients.py` scans `src/factorflow` to keep
+it that way.
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E1-S8-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- `_confine_plaintext_to_loopback` is a `@model_validator(mode="after")`
+  raising `ValueError`, so Pydantic v2 formats `str(exc)` with a leading
+  `Value error, FACTORFLOW_DATABASE_URL: <rule>` prefix rather than starting
+  directly with the variable name (IR-001, low).
+- `tests/unit/test_distribution_contents.py` is not marked `slow` because
+  `uv build --wheel --offline` completes in ~0.4 s (task T004 made the
+  marker conditional on runtime), whereas
+  `component-design-runtime-config.md` section 7 states that the module is
+  marked `slow` (IR-002, low).
 
 ## History depth setting
 
@@ -1220,18 +1264,21 @@ current acceptance criterion:
 ## Running the migrator
 
 The application container runs the schema migrator before it starts serving,
-reading the database connection from the `FACTORFLOW_DATABASE_URL`
-environment variable:
+loading `FACTORFLOW_DATABASE_URL` through `DatabaseSettings` (see
+[Database URL confinement](#database-url-confinement)) and resolving this
+build's SQL files from `factorflow.db.migrate_main.MIGRATIONS_DIR`
+(`src/factorflow/db/migrations/`, shipped in the wheel as package data):
 
 ```bash
-FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
+FACTORFLOW_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/factorflow \
   uv run python -m factorflow.db.migrate_main
 ```
 
 Exit code 0 means the schema is current or was brought forward; 1–4 each
-name a distinct reason the store could not be brought forward (unreachable
-database, store ahead of this build, a tampered migration, or a migration
-that failed partway) and none of them start the API. Exit 4 also covers a
+name a distinct reason the store could not be brought forward (`FACTORFLOW_DATABASE_URL`
+unset or refused by `DatabaseSettings` before any connection is opened, or an
+unreachable database; store ahead of this build; a tampered migration; or a
+migration that failed partway) and none of them start the API. Exit 4 also covers a
 build whose migration files cannot be read: a missing migrations directory,
 a malformed filename or a repeated version, all reported before any
 connection is made.
@@ -1244,7 +1291,7 @@ authentication requirement. The loopback binding together with the
 Once the schema is current (see above), start it with:
 
 ```bash
-FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
+FACTORFLOW_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/factorflow \
 FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
   uv run python -m factorflow.app_main
 ```
@@ -1431,7 +1478,7 @@ database with it. The container image runs the migrator and the API
 (see [Layout](#layout)); the runner is started on its own:
 
 ```bash
-FACTORFLOW_DATABASE_URL=postgresql://user:pass@host:5432/factorflow \
+FACTORFLOW_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/factorflow \
 FACTORFLOW_MASSIVE_API_KEY=... \
 FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
   uv run python -m factorflow.ingestion_main
@@ -1880,7 +1927,11 @@ A test that drives the API through `TestClient` must pass a loopback
 (see [Host and Origin checks](#host-and-origin-checks)). The port must match
 `FACTORFLOW_API_PORT` as it was when the app was built (8000 by default).
 `tests/unit/test_api_host_origin.py` sends explicit `Host` and `Origin`
-headers to test the checks themselves.
+headers to test the checks themselves. Tests that set a placeholder
+`FACTORFLOW_DATABASE_URL` without connecting must likewise name a loopback
+host (for example `postgresql://unused@127.0.0.1/unused`), because
+`DatabaseSettings` refuses a non-loopback host without
+`sslmode=verify-full` (see [Database URL confinement](#database-url-confinement)).
 
 Tests marked `slow` are the volume and resumability suite (`test_runner_volume.py`,
 `test_runner_resume.py`) introduced in CAP-001-E4-S7. They require Docker and take
