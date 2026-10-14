@@ -112,7 +112,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/runs/` | Acquisition-run lifecycle: pure state primitives, the journal's request, claim, cancellation, and finalisation boundary, the stale-claim reclaim sweep, and the read-only journal query boundary. `states.py` exposes the allowed states and transitions plus `validate_transition()`, which raises `IllegalRunTransition` before an illegal transition can be persisted; `journal.py` records every run request as `requested` — reporting the active run it queues behind — claims the oldest requested run in one statement while none is running or cancelling, refreshes the claim's heartbeat, records a cancellation request cooperatively against a running run or directly against a queued run (raising `RunAlreadyTerminal` when the run has already ended), reports whether cancellation was requested, records how many instruments a claimed run's roster named, fails a run outright with a reason when the provider rejects the credential, and finalises a run by deriving its terminal state from the results written; `reclaim.py` finds claimed `running` or `cancelling` runs whose `heartbeat_at` is stale past the configured window and transitions them atomically to `abandoned`, clearing claim fields and setting `ended_at`; `queries.py` provides the read-only query boundary for the HTTP API — listing runs by `(requested_at, run_id) DESC` with an enum-validated state filter, and fetching a single run's summary, persisted and whole-run outcome counts, and paged per-instrument results with owner-readable symbols, failure-first ordering, and an enum-validated outcome filter, both using owner-confirmed versioned URL-safe opaque composite cursors, and reading the single most recent run for `GET /api/health` (`get_most_recent_run`) in the same order as the runs list. See [Run request and claim](#run-request-and-claim), [Stale-claim reclaim](#stale-claim-reclaim), and [Acquisition run API](#acquisition-run-api) |
 | `src/factorflow/instruments/` | Domain service for the owner-managed instrument list. `symbols.py` normalises supplied symbols and validates their database shape; `service.py` adds or reactivates symbols in one transaction, retires stored symbols without deletion, returns keyset-paged lists with lifecycle counts, and provides the active instrument IDs in symbol order; `settings.py` reads and writes the owner's stated history depth (`read_history_depth`, `write_history_depth`), held in `owner_setting` as a `jsonb` value under the fixed key `history_depth_years` — see [History depth setting](#history-depth-setting). Exposed over HTTP by `src/factorflow/api/routes/instruments.py` and `settings.py` |
 | `src/factorflow/coverage/` | The read-only coverage read. `service.py` declares `Presence`, `GapDetection`, `InstrumentCoverage` and `CoverageView` and exposes `read_coverage`, one symbol-keyset page of per-instrument coverage derived at read time, and `read_gap_dates`, one instrument's missing dates; `gaps.py` derives the trading-day set and each instrument's missing days (`detect_gaps`). `sql/coverage.sql`, `sql/never_acquired.sql`, `sql/gap_instrument.sql`, `sql/gap_range.sql` and `sql/gaps.sql` are their statements, loaded at import and shipped as package data (`[tool.setuptools.package-data]` in `pyproject.toml`). Exposed over HTTP by `src/factorflow/api/routes/coverage.py`. See [Coverage read](#coverage-read), [Gap detection](#gap-detection) and [Coverage API](#coverage-api) |
-| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
+| `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, the Host and Origin middleware it wraps (see [Host and Origin checks](#host-and-origin-checks)), exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
@@ -150,7 +150,7 @@ variable** — never its value.
 | `FACTORFLOW_DATABASE_POOL_MIN` | no | `1` | Minimum 1 |
 | `FACTORFLOW_DATABASE_POOL_MAX` | no | `4` | Minimum 1 |
 | `FACTORFLOW_API_HOST` | no | `127.0.0.1` | Loopback only; a non-loopback address is rejected at start |
-| `FACTORFLOW_API_PORT` | no | `8000` | 1–65535 |
+| `FACTORFLOW_API_PORT` | no | `8000` | 1–65535. Also fixes the `Host` and `Origin` values the API accepts, read once when the application is built. See [Host and Origin checks](#host-and-origin-checks) |
 | `FACTORFLOW_MASSIVE_API_KEY` | yes | — | Held as a secret. Supplied to both processes; the application reads only whether it is set |
 | `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | `https` only, with a host and nothing else: a query, fragment, userinfo, path, whitespace or control character, or a port outside 1–65535 is rejected at start, and so is `http`, loopback included. One trailing `/` is removed. The error names the variable and the broken rule, never the value. See [Massive historical client](#massive-historical-client) |
 | `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` | yes | — | No default: the budget is the owner's provider plan and cannot be guessed |
@@ -503,6 +503,14 @@ the tests are. None leaves an acceptance criterion unmet:
 - The source scan for `http` acceptance flags string constants, comparisons
   and collection literals. It would miss a `startswith("http")` or a `match`
   case (IR-003).
+
+  It has exactly one exemption (CAP-001-E1-S7, DAC-E1-S7-6). The constants
+  `http://127.0.0.1:`, `http://localhost:` and `http://[::1]:` are accepted
+  only in `src/factorflow/api/app.py`, where they build the
+  [Origin allow-list](#host-and-origin-checks). That module is matched by its
+  path under `src/factorflow`, not by its file name. Any other `http://`
+  constant there, those three anywhere else, and every comparison with or
+  listing of `"http"` still fail the scan.
 - The `Dockerfile` check reads `COPY`/`ADD` line by line. It would miss a
   continued line or the JSON array form (IR-004).
 
@@ -1231,7 +1239,8 @@ connection is made.
 ## Running the API
 
 The API binds to `127.0.0.1` only by default, and no endpoint declares an
-authentication requirement — the loopback binding is what makes that sound.
+authentication requirement. The loopback binding together with the
+[Host and Origin checks](#host-and-origin-checks) is what makes that sound.
 Once the schema is current (see above), start it with:
 
 ```bash
@@ -1301,6 +1310,54 @@ than the ingestion container, it continues operating when ingestion is stopped
 or crash-looping — the property that makes AC-20 hold for a crash-looping
 ingestion container.
 
+### Host and Origin checks
+
+Loopback binding alone does not keep other web pages out. The API is plain
+HTTP with no authentication, so any page the owner's browser loads can send
+it requests, and with DNS rebinding can also read the answers. One middleware
+in `app.py` (`_add_host_origin_middleware`, CAP-001-E1-S7) therefore checks
+every request before any route or the static mount runs (CONST-SEC 1.3
+condition H9; `component-design-ingestion-api.md` section 2.5a):
+
+- **Host.** `Host` must be exactly `127.0.0.1:<port>`, `localhost:<port>` or
+  `[::1]:<port>`. The host name is compared case-insensitively. A missing
+  `Host`, another name, or another port is answered `400 host_not_allowed`.
+- **Origin.** A request whose method is not `GET`, `HEAD` or `OPTIONS` and
+  that carries an `Origin` header must come from `http://127.0.0.1:<port>`,
+  `http://localhost:<port>` or `http://[::1]:<port>`. Any other origin,
+  `null` included, is answered `403 origin_not_allowed`. A request with no
+  `Origin` header (a script or `curl` on the machine) is not refused by this
+  check.
+
+`<port>` is `FACTORFLOW_API_PORT`, read once when `create_app()` runs. Open
+the interface at one of those three addresses on that port. Any other name
+for the machine, or a proxy that rewrites `Host`, is refused. The interface's
+own requests are same-origin and pass.
+
+A refusal runs neither the route nor the static mount, and reads neither the
+request body nor any setting other than the port. It is logged at `WARNING`
+on the `factorflow.api.app` logger with the rejected header's value and the
+request id, for example
+`request refused: Host 'evil.example:8000' not allowed (request_id=…)`. The
+request-id middleware wraps this one, so the refusal also carries
+`X-Request-Id` and `error.request_id`, as on every other error:
+
+```json
+{"error": {"code": "host_not_allowed",
+           "message": "The request's Host is not one of this API's loopback addresses.",
+           "resource": null, "request_id": "…"}}
+```
+
+**Accepted warning from implementation review v2**
+(`CAP-001-E1-S7-implementation-review-v2.md`, IR-001, low). The allowed hosts
+come from `ApiSettings.port` when `app_main` builds its module-level `app` at
+import. `build_server(port=...)` still accepts a port override, so a server
+built with a port other than `FACTORFLOW_API_PORT` binds that port but
+refuses every request with `400 host_not_allowed`. `main()` passes no
+override, so the release launch is unaffected.
+`tests/integration/test_api_binding.py` sets `FACTORFLOW_API_PORT` to its free
+port and rebuilds `app_main.app` before calling `build_server`.
+
 ### Error envelope and request correlation
 
 Every request gets a fresh UUID from `app.py`'s request-id middleware. It is
@@ -1312,6 +1369,8 @@ log (DAC-E7-6, DAC-E7-S2-3).
 
 | Failure | Status and `code` | `message` | `resource` |
 |---|---|---|---|
+| A missing or foreign `Host`, on any path including `/` (see [Host and Origin checks](#host-and-origin-checks)) | `400 host_not_allowed` | `The request's Host is not one of this API's loopback addresses.` | `null` |
+| A foreign `Origin` on a request other than `GET`, `HEAD` or `OPTIONS` | `403 origin_not_allowed` | `A state-changing request must come from this API's own origin.` | `null` |
 | A route's own error (`errors.py` `error_response`) | as the route chooses, e.g. `409 run_already_terminal` | the route's fixed sentence | the route's resource |
 | Unmatched path under `/api` | `404 not_found` | `No resource exists at this path.` | from the path, see below |
 | Request validation (`_validation_error_handler`) | `422 validation_error` | `The request did not match the expected shape`, then a colon and each offending field in backticks, e.g. ``: `years`.`` | from the path |
@@ -1814,6 +1873,14 @@ uv run pytest -m 'postgres and not slow'  # database tests excluding the long-ru
 
 Without a container runtime, run the `not postgres` variant and report the
 exclusion — a partial run is not a green suite.
+
+A test that drives the API through `TestClient` must pass a loopback
+`base_url`, such as `TestClient(app, base_url="http://127.0.0.1:8000")`.
+`TestClient`'s default `Host: testserver` is answered `400 host_not_allowed`
+(see [Host and Origin checks](#host-and-origin-checks)). The port must match
+`FACTORFLOW_API_PORT` as it was when the app was built (8000 by default).
+`tests/unit/test_api_host_origin.py` sends explicit `Host` and `Origin`
+headers to test the checks themselves.
 
 Tests marked `slow` are the volume and resumability suite (`test_runner_volume.py`,
 `test_runner_resume.py`) introduced in CAP-001-E4-S7. They require Docker and take
