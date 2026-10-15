@@ -1,0 +1,169 @@
+artifact_schema_version: 1
+artifact_id: CAP-001-E1-S9-tdd-evidence
+artifact_type: tdd-evidence
+artifact_version: 1
+story: CAP-001-E1-S9
+tasks_file: CAP-001-E1-S9-tasks.md
+decisions: []
+created: 2026-10-14
+updated: 2026-10-14
+
+baseline:
+  task: Phase 1
+  base_commit: 46815315ab7e7dc29818063ebb6da4e3ac67dfd4
+  seams_verified: >-
+    Dockerfile (single-stage python:3.12-slim), pyproject.toml package-data
+    (coverage/sql/*.sql and db/migrations/*.sql),
+    tests/unit/test_release_excludes_test_paths.py (with E1-S7 origin
+    allow-list exemption), tests/unit/test_distribution_contents.py (from
+    E1-S8), and tests/unit/test_no_committed_secrets.py.
+  commands:
+    - uv run pytest -m 'not postgres' -q (757 passed)
+  result: Green before any production change.
+
+cycles:
+  - name: release-image-and-wheel-bundle
+    tasks: [T001, T002, T011, T012]
+    status: green
+    diff_sha256: da994d1d06791f7be15b44a481d552197964e58998d1ba72b733f7552b70ae25
+    red:
+      command: >-
+        uv run pytest tests/unit/test_release_excludes_test_paths.py
+        tests/unit/test_distribution_contents.py -q
+      result: >-
+        3 failed, 9 passed before T011/T012: Dockerfile had 1 stage instead of
+        3, .dockerignore did not exist, and the built wheel lacked
+        factorflow/api/static/index.html. TC-COMP-394 (out-of-date uv.lock
+        fails uv export --locked) and the continuation-line parser test passed
+        on arrival.
+    green:
+      command: >-
+        uv run pytest tests/unit/test_release_excludes_test_paths.py
+        tests/unit/test_distribution_contents.py
+        tests/unit/test_migrations_location.py
+        tests/unit/test_ingestion_e2e_main.py -q
+      result: >-
+        90 passed (12 in the two cycle test modules, 15 in
+        test_migrations_location.py, plus 63 in test_ingestion_e2e_main.py);
+        ruff check and ruff format --check clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Reviewed staged diff (da994d1d...): Dockerfile matches runtime-config
+      section 2.8.2 verbatim; .dockerignore lists all 11 required entries;
+      pyproject.toml adds api/static/**/* to package-data; built_wheel fixture
+      clears any local static/ directory before writing stub index.html so the
+      wheel check never depends on a prior npm run build; COPY source check
+      uses first path segment so test_migrations_location.py (TC-COMP-420)
+      stays green.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Verified against DAC-E1-21, DAC-E1-S9-1, DAC-E1-S9-2, AC-15, AC-16,
+        TC-COMP-394, TC-COMP-424, TC-COMP-425, and component-design-runtime-config.md
+        sections 2.8.2 and 7. No drift detected.
+    tests_executed: true
+    commit_hash: stage
+  - name: compose-definition-and-secret-scan
+    tasks: [T003, T007, T010, T013]
+    status: green
+    diff_sha256: 470f49a283714dba5dc1489e195d36c6a5e19d86be12e143765ae02e41fcf01a
+    red:
+      command: uv run pytest tests/unit/test_compose_definition.py -q
+      result: >-
+        10 failed before T013: compose.yaml did not exist at the repository
+        root, and compose.yaml / .dockerignore / scripts/deploy-smoke.sh were
+        not covered by _in_scanned_scope in test_no_committed_secrets.py.
+    green:
+      command: >-
+        uv run pytest tests/unit/test_compose_definition.py
+        tests/unit/test_no_committed_secrets.py -q
+      result: >-
+        16 passed (10 in test_compose_definition.py including TC-COMP-395 and
+        the 4 parametrised cases of TC-COMP-396 against live docker compose
+        config, plus 6 in test_no_committed_secrets.py); ruff check and ruff
+        format --check clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Reviewed staged diff (470f49a2...): compose.yaml matches runtime-config
+      section 2.8.3 verbatim; all three services use network_mode: host and
+      restart: unless-stopped with no ports:; postgres listens on 127.0.0.1
+      with scram-sha-256 on host and local routes and local-socket pg_isready;
+      all four required variables use :? interpolation; test_no_committed_secrets.py
+      scans scripts/, compose.yaml, and .dockerignore.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Verified against AC-13, AC-14, AC-16, DAC-E1-22, DAC-E1-S9-3,
+        TC-COMP-395, TC-COMP-396, TC-COMP-426, and component-design-runtime-config.md
+        sections 2.8.3 and 7. No drift detected.
+    tests_executed: true
+    commit_hash: stage
+  - name: deploy-smoke-check-script
+    tasks: [T004, T005, T008, T009, T014]
+    status: green
+    diff_sha256: 4898d30ffb9b33e6349cde4244af10c8802ae1388e51bb06cc9146f448fb76aa
+    red:
+      command: uv run pytest tests/unit/test_deploy_smoke.py -q
+      result: >-
+        12 failed before T014: scripts/deploy-smoke.sh did not exist.
+    green:
+      command: >-
+        bash -n scripts/deploy-smoke.sh &&
+        uv run pytest tests/unit/test_deploy_smoke.py -q
+      result: >-
+        12 passed in test_deploy_smoke.py (TC-COMP-398, TC-COMP-427,
+        TC-COMP-428 x3, TC-COMP-429, TC-COMP-430, TC-COMP-431, check 3 HTML
+        verification, check 4 VM and host IPv4/IPv6/link-local probe, syntax
+        and static secret/run guard); bash -n, ruff check, and ruff format
+        --check clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Reviewed staged diff (4898d30f...): scripts/deploy-smoke.sh implements
+      checks 1-4 per runtime-config section 2.8.5; filters containers by
+      com.docker.compose.project=${PROJECT}; validates pg_hba.conf against
+      scram-sha-256/peer/reject; reads expected schema_version from the app
+      container via discover(MIGRATIONS_DIR); uses curl --noproxy '*'
+      --proto =http without -L; probes ports 8000 and 5432 on host IPv4, IPv6,
+      link-local (%zone) and Docker Desktop VM addresses; touches no secrets
+      and starts no run.
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Verified against AC-14, AC-18, DAC-E1-23, DAC-E1-S9-4, DAC-E1-S9-5,
+        DAC-E1-S9-6, TC-COMP-398, TC-COMP-427 to TC-COMP-431, and
+        component-design-runtime-config.md section 2.8.5. No drift detected.
+    tests_executed: true
+    commit_hash: stage
+  - name: readme-deployment-upgrade-and-rollback
+    tasks: [T006, T015]
+    status: green
+    diff_sha256: e6c1b963140b61ac50f449ed94bddffccb296af8224ba1ce57cb3635313c0ab4
+    red:
+      command: uv run pytest tests/unit/test_readme_deployment.py -q
+      result: >-
+        3 failed before T015: README.md still had source-checkout run
+        instructions and lacked the deployment, upgrade, backup, rollback, and
+        rehearsal sections.
+    green:
+      command: uv run pytest tests/unit/test_readme_deployment.py -q
+      result: >-
+        3 passed (TC-COMP-399, TC-COMP-400, TC-COMP-432, TC-COMP-433); ruff
+        check and ruff format --check clean.
+    code_review_verdict: APPROVED
+    code_review_evidence: >-
+      Reviewed staged diff (e6c1b963...): README.md updates Requirements (Node
+      22, Docker host networking) and Layout (Dockerfile, .dockerignore,
+      compose.yaml, scripts/deploy-smoke.sh), replaces source-checkout launch
+      commands with the compose deployment, smoke check, upgrade, backup, both
+      rollback branches, and factorflow-drill rehearsal procedures, while
+      preserving all existing sections (Database URL confinement, Host and
+      Origin checks, Error envelope and request correlation, etc.).
+    spec_drift:
+      drift_detected: false
+      evidence: >-
+        Verified against DAC-E1-24, DAC-E1-S9-7, DAC-E1-S9-8, DAC-E1-S9-9,
+        AC-14, TC-COMP-399, TC-COMP-400, TC-COMP-432, TC-COMP-433, and
+        component-design-runtime-config.md sections 2.8.3, 2.8.4, 2.8.5, and 9.
+        No drift detected.
+    tests_executed: true
+    commit_hash: stage

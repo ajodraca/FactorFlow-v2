@@ -71,9 +71,11 @@ implemented.
 
 - Python 3.12 or newer
 - [uv](https://docs.astral.sh/uv/) for dependency resolution
-- Node.js 18 or 20+ with npm, for the owner interface (Vite 5 requires
-  `^18.0.0 || >=20.0.0`; Node 19 is not supported)
-- Docker, for the `postgres`-marked test suite (see Testing)
+- Node.js 22 with npm, for the owner interface (matching `tech-stack.md` v5 and
+  the release image's `node:22-slim` stage)
+- Docker with host networking enabled (Linux, or Docker Desktop with host
+  networking enabled under Settings, Resources, Network), for deployment and
+  for the `postgres`-marked test suite (see [Deploying and operating FactorFlow](#deploying-and-operating-factorflow) and [Testing](#testing))
 
 ## Setup
 
@@ -104,7 +106,10 @@ files, since `index.html` references only the current ones.
 
 | Path | Contents |
 |------|----------|
-| `Dockerfile` | Application container image. Runs the schema migrator, then execs the API process (`python -m factorflow.app_main`), chained with `&&` so a failed migration prevents the API from ever binding |
+| `Dockerfile` | Three-stage release image (`component-design-runtime-config.md` section 2.8.2): stage 1 (`interface`, `node:22-slim`) runs `npm ci && npm run build`; stage 2 (`lock`, `python:3.12-slim` with `uv==0.12.10`) runs `uv export --locked --no-emit-project --format requirements.txt`; stage 3 (`python:3.12-slim`) installs requirements with `--require-hashes`, copies the built bundle from `interface`, and installs the package with `--no-deps`. Its `CMD` runs `python -m factorflow.db.migrate_main && exec python -m factorflow.app_main`, so a failed migration prevents the API from ever binding |
+| `.dockerignore` | Excludes `node_modules/`, `.venv/`, `dist/`, `build/`, `tests/`, `test-results/`, `playwright-report/`, `.git/`, `.env`, `.env.*`, and `src/factorflow/api/static/` so a local build or test file never enters the release build context |
+| `compose.yaml` | Production deployment definition (`component-design-runtime-config.md` section 2.8.3): `postgres:16`, `app`, and `ingestion` (under `profiles: [ingestion]`) all on `network_mode: host` with no published ports, `scram-sha-256` authentication on every route, required `${...:?...}` variable interpolations, and volume `factorflow-pgdata`. See [Deploying and operating FactorFlow](#deploying-and-operating-factorflow) |
+| `scripts/deploy-smoke.sh` | Deployment smoke check (`scripts/deploy-smoke.sh [project]`, default `factorflow`): verifies container health and `pg_hba.conf` methods (`scram-sha-256`, `peer`, `reject`), `GET /api/health` (`database == "reachable"` and `schema_version` equal to the running image's highest migration), `GET /` serving `index.html`, and the absence of any listener on port 8000 or 5432 across all non-loopback IPv4, IPv6, and link-local addresses of the host and Docker Desktop's VM |
 | `src/factorflow/` | The `factorflow` package (`src/` layout) |
 | `src/factorflow/config/` | Runtime configuration and the credential boundary. `settings.py` validates every environment variable at start and holds secrets in `SecretStr`; `redaction.py` scrubs known secret values from log records. See [Configuration](#configuration) |
 | `src/factorflow/db/` | Database definitions and the schema migrator. `applied_migrations.py` exports `APPLIED_MIGRATIONS_DDL`, the migration-tracking table the migrator creates before applying the first migration file. `migrator.py` discovers, checksums, and applies migration files under an advisory lock. `migrate_main.py` is the container entrypoint (`python -m factorflow.db.migrate_main`), mapping every outcome to an exit code 0–4 |
@@ -1261,18 +1266,227 @@ current acceptance criterion:
   `run_instrument_result` insertion would not be caught by these integration
   tests (IR-002, medium).
 
-## Running the migrator
+## Deploying and operating FactorFlow
 
-The application container runs the schema migrator before it starts serving,
-loading `FACTORFLOW_DATABASE_URL` through `DatabaseSettings` (see
-[Database URL confinement](#database-url-confinement)) and resolving this
-build's SQL files from `factorflow.db.migrate_main.MIGRATIONS_DIR`
-(`src/factorflow/db/migrations/`, shipped in the wheel as package data):
+Production runs only from the container image defined by `Dockerfile` and
+orchestrated by `compose.yaml` (`component-design-runtime-config.md` sections
+2.8.3, 2.8.4, 2.8.5, and 9; DEC-0034, DEC-0050). A source-checkout launch is
+never a production deployment.
+
+### First deployment
+
+**Preconditions:**
+
+- **Host networking** is required: Linux, or Docker Desktop with **host
+  networking enabled** (Settings → Resources → Network). Every service in
+  `compose.yaml` runs with `network_mode: host` and no `ports:` mapping.
+- **Ports `8000` and `5432` are free** on the host before the first `up`.
+
+**Step 1 — Generate the database password and export the four required variables.**
+
+Generate `FACTORFLOW_POSTGRES_PASSWORD` with `openssl rand -hex 24` (192 bits,
+satisfying H4's requirement of at least 128 bits from a cryptographically
+secure generator and using only URL-safe characters so it composes into
+`FACTORFLOW_DATABASE_URL` unencoded):
 
 ```bash
-FACTORFLOW_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/factorflow \
-  uv run python -m factorflow.db.migrate_main
+export FACTORFLOW_POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+export FACTORFLOW_MASSIVE_API_KEY="<your-massive-api-key>"
+export FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60
+export FACTORFLOW_IMAGE_TAG="0.1.0-$(git rev-parse --short HEAD)"
 ```
+
+All four variables (`FACTORFLOW_POSTGRES_PASSWORD`, `FACTORFLOW_MASSIVE_API_KEY`,
+`FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE`, and `FACTORFLOW_IMAGE_TAG`) use
+required `${VAR:?...}` interpolation in `compose.yaml`: a missing or empty
+variable stops `docker compose` before starting any container and names the
+variable. Every build uses an immutable `<version>-<shortsha>` tag (for example
+`0.1.0-ef2dd7c`) that is **never reused**, so the previous image remains
+available for rollback.
+
+**Step 2 — Build and start PostgreSQL and the application container.**
+
+```bash
+docker compose up -d
+```
+
+`ingestion` is in the `ingestion` profile, so `docker compose up -d` starts
+only `postgres` and `app`. Once `postgres` is healthy on its local Unix socket,
+`app` runs `python -m factorflow.db.migrate_main` to bring the store forward to
+the image's highest migration version before `exec`ing `python -m
+factorflow.app_main` on `127.0.0.1:8000` (AC-15, AC-16).
+
+**Step 3 — Run the deployment smoke check before using the interface or starting ingestion.**
+
+```bash
+scripts/deploy-smoke.sh
+```
+
+`scripts/deploy-smoke.sh` verifies that:
+
+1. `postgres` and `app` are healthy and every non-comment, non-blank rule in
+   `$PGDATA/pg_hba.conf` uses `scram-sha-256`, `peer`, or `reject`.
+2. `GET http://127.0.0.1:8000/api/health` returns `200` with
+   `database == "reachable"` and `schema_version` equal to the highest version
+   discovered inside the running `app` image.
+3. `GET http://127.0.0.1:8000/` returns `200` with the bundle's `index.html`.
+4. Neither port `8000` nor port `5432` accepts a connection on any non-loopback
+   IPv4, IPv6, or link-local address of the host or of Docker Desktop's virtual
+   machine.
+
+**Step 4 — Open the interface and start ingestion.**
+
+Only after `scripts/deploy-smoke.sh` passes, open the owner interface at
+`http://127.0.0.1:8000` and start the ingestion container from the same image:
+
+```bash
+docker compose --profile ingestion up -d
+```
+
+Re-run `scripts/deploy-smoke.sh` after every `docker compose up -d` and after
+any change to the host's network configuration, before using the interface or
+starting ingestion (SEC-ENC-001 host-local loopback exception condition H8).
+
+**Changing the database password.** `POSTGRES_PASSWORD` sets the role's
+password only when `factorflow-pgdata` is first initialised. To rotate
+`FACTORFLOW_POSTGRES_PASSWORD` later, run `ALTER ROLE` with the old password
+still exported in the shell:
+
+```bash
+docker compose exec -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+  postgres psql -U factorflow -d factorflow \
+  -c "ALTER ROLE factorflow PASSWORD '<new-password>'"
+```
+
+Then export the new `FACTORFLOW_POSTGRES_PASSWORD` and run `docker compose up -d`.
+
+### Upgrade, backup and rollback
+
+Every step runs on the deployment machine in a shell with the four required
+variables set. Dumps are written to `$FACTORFLOW_BACKUP_DIR`, a directory
+outside the repository chosen by the owner, and are never committed
+(`component-design-runtime-config.md` section 2.8.4, OPS-MIG-003).
+
+**Upgrade** from tag `<old>` to tag `<new>`:
+
+1. Back up:
+   ```bash
+   docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres pg_dump -U factorflow -d factorflow -Fc \
+     > "$FACTORFLOW_BACKUP_DIR/factorflow-<old>-$(date -u +%Y%m%dT%H%M%SZ).dump"
+   ```
+   A non-zero exit or an empty file stops the upgrade before any later step.
+2. Build: `FACTORFLOW_IMAGE_TAG=<new> docker compose build app`.
+3. Deploy: `FACTORFLOW_IMAGE_TAG=<new> docker compose stop ingestion`, then
+   `FACTORFLOW_IMAGE_TAG=<new> docker compose up -d`. The application container
+   migrates forward before serving (AC-15).
+4. Verify: run `scripts/deploy-smoke.sh`.
+5. Resume ingestion: `FACTORFLOW_IMAGE_TAG=<new> docker compose --profile ingestion up -d`.
+
+**Rollback when `<new>` applied no migration:** stop ingestion
+(`docker compose stop ingestion`), run
+`FACTORFLOW_IMAGE_TAG=<old> docker compose up -d`, run `scripts/deploy-smoke.sh`,
+then start ingestion with
+`FACTORFLOW_IMAGE_TAG=<old> docker compose --profile ingestion up -d`.
+
+**Rollback when `<new>` applied a migration.** The older build refuses a store
+ahead of its migrations (exit 2, AC-16), so the store is restored from the step
+1 dump before the older image starts. Step 2 destroys the current database, so
+the owner runs it only after confirming the dump to restore (OPS-DEST-001):
+
+1. `docker compose stop ingestion app`
+2. After confirming the dump to restore:
+   ```bash
+   docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres dropdb -U factorflow factorflow
+   docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres createdb -U factorflow factorflow
+   ```
+3. Restore the step 1 dump:
+   ```bash
+   docker compose exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres pg_restore -U factorflow -d factorflow --no-owner \
+     < "$FACTORFLOW_BACKUP_DIR/<the step 1 dump>"
+   ```
+4. `FACTORFLOW_IMAGE_TAG=<old> docker compose up -d`
+5. Run `scripts/deploy-smoke.sh`. Check 2 must report `<old>`'s highest schema
+   version.
+6. `FACTORFLOW_IMAGE_TAG=<old> docker compose --profile ingestion up -d`
+
+### Pre-release backup and restore drill
+
+Before the first deployment of `0.1.0`, the backup and restore procedure is
+rehearsed once under its own project name (`docker compose -p factorflow-drill`)
+and volume while no `factorflow` deployment is running (`component-design-runtime-config.md`
+section 2.8.4, DAC-E1-S9-9):
+
+1. With `FACTORFLOW_POSTGRES_PASSWORD` generated via `openssl rand -hex 24` and
+   the four variables exported, start PostgreSQL and the application only:
+   ```bash
+   docker compose -p factorflow-drill up -d
+   ```
+2. Run `scripts/deploy-smoke.sh factorflow-drill` before any data enters the
+   drill store and keep its output with the drill record.
+3. Open `http://127.0.0.1:8000`, set history depth and add an active instrument,
+   start ingestion with `docker compose -p factorflow-drill --profile ingestion up -d`,
+   let one acquisition run complete against the live provider, and read
+   `GET /api/coverage`.
+4. Back up the drill store, empty the database after confirming the dump to
+   restore, and restore the dump:
+   ```bash
+   docker compose -p factorflow-drill exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres pg_dump -U factorflow -d factorflow -Fc \
+     > "$FACTORFLOW_BACKUP_DIR/factorflow-drill.dump"
+   docker compose -p factorflow-drill stop ingestion app
+   docker compose -p factorflow-drill exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres dropdb -U factorflow factorflow
+   docker compose -p factorflow-drill exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres createdb -U factorflow factorflow
+   docker compose -p factorflow-drill exec -T -e PGPASSWORD="$FACTORFLOW_POSTGRES_PASSWORD" \
+     postgres pg_restore -U factorflow -d factorflow --no-owner \
+     < "$FACTORFLOW_BACKUP_DIR/factorflow-drill.dump"
+   docker compose -p factorflow-drill up -d
+   scripts/deploy-smoke.sh factorflow-drill
+   ```
+5. Read `GET /api/coverage` again and confirm the coverage response is
+   unchanged.
+6. Remove the drill containers and volume only after confirming the project name
+   `factorflow-drill` (OPS-DEST-001):
+   ```bash
+   docker compose -p factorflow-drill down -v
+   ```
+
+The executed pre-release rehearsal record for `0.1.0` (including the pre-data
+and post-restore `scripts/deploy-smoke.sh factorflow-drill` outputs, the owner's
+H6 and `openssl rand -hex 24` statements, the live-provider run, the `pg_dump` /
+`pg_restore` steps, the before/after `GET /api/coverage` comparison, and the
+confirmed `down -v` teardown) is recorded in
+`docs/releases/CAP-001-v0.1.0-drill-record.md`.
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E1-S9-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- `docs/releases/CAP-001-v0.1.0-drill-record.md` line 9 initially cited
+  repo-relative paths under `docs/constitution/standards/` rather than the
+  org-wide harness constitutions `CONST-SEC` 1.3 and `CONST-OPS` 1.3; resolved
+  in `docs/releases/CAP-001-v0.1.0-drill-record.md` during doc-sync (IR-001,
+  low).
+- `biome.json` `files.ignore` omits `"build/**"`. Because `pyproject.toml`
+  packages `"api/static/**/*"` into the wheel, running `uv build` when
+  `src/factorflow/api/static/assets/*.js` is populated leaves minified JS copies
+  under `build/lib/factorflow/api/static/assets/*.js` that match Biome's `*.js`
+  include pattern until `build/` is removed (IR-002, low).
+
+## Running the migrator
+
+Inside the application container (`compose.yaml`'s `app` service), the schema
+migrator (`python -m factorflow.db.migrate_main`) runs before the API starts
+serving, loading `FACTORFLOW_DATABASE_URL` through `DatabaseSettings` (see
+[Database URL confinement](#database-url-confinement)) and resolving this
+build's SQL files from `factorflow.db.migrate_main.MIGRATIONS_DIR`
+(`src/factorflow/db/migrations/`, shipped in the wheel as package data). See
+[Deploying and operating FactorFlow](#deploying-and-operating-factorflow).
 
 Exit code 0 means the schema is current or was brought forward; 1–4 each
 name a distinct reason the store could not be brought forward (`FACTORFLOW_DATABASE_URL`
@@ -1281,20 +1495,18 @@ unreachable database; store ahead of this build; a tampered migration; or a
 migration that failed partway) and none of them start the API. Exit 4 also covers a
 build whose migration files cannot be read: a missing migrations directory,
 a malformed filename or a repeated version, all reported before any
-connection is made.
+connection is made. Under `restart: unless-stopped` in `compose.yaml`, a
+non-zero exit shows as `Restarting (N)` and the application never becomes
+healthy, so `ingestion` never starts (AC-16); stop the loop with
+`docker compose stop app`.
 
 ## Running the API
 
-The API binds to `127.0.0.1` only by default, and no endpoint declares an
+The API (`python -m factorflow.app_main`, exec'd by the `app` container after
+`migrate_main` exits 0; see [Deploying and operating FactorFlow](#deploying-and-operating-factorflow))
+binds to `127.0.0.1` only by default, and no endpoint declares an
 authentication requirement. The loopback binding together with the
 [Host and Origin checks](#host-and-origin-checks) is what makes that sound.
-Once the schema is current (see above), start it with:
-
-```bash
-FACTORFLOW_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/factorflow \
-FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
-  uv run python -m factorflow.app_main
-```
 
 `GET /api/health` reports liveness, database reachability, whether the
 provider credential is set (a boolean, never the value), the highest
@@ -1473,15 +1685,14 @@ acceptance criterion:
 
 ## Running the acquisition runner
 
-The acquisition runner is a separate process from the API and shares only the
-database with it. The container image runs the migrator and the API
-(see [Layout](#layout)); the runner is started on its own:
+The acquisition runner (`python -m factorflow.ingestion_main`) is a separate
+process from the API and shares only the database with it. In production it runs
+as the `ingestion` service in `compose.yaml` from the same release image as
+`app`, started under its profile after `scripts/deploy-smoke.sh` passes (see
+[Deploying and operating FactorFlow](#deploying-and-operating-factorflow)):
 
 ```bash
-FACTORFLOW_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/factorflow \
-FACTORFLOW_MASSIVE_API_KEY=... \
-FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60 \
-  uv run python -m factorflow.ingestion_main
+docker compose --profile ingestion up -d
 ```
 
 It claims the next requested run, executes it, and — when nothing is
