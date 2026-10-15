@@ -1456,6 +1456,28 @@ section 2.8.4, DAC-E1-S9-9):
    docker compose -p factorflow-drill down -v
    ```
 
+The executed pre-release rehearsal record for `0.1.0` (including the pre-data
+and post-restore `scripts/deploy-smoke.sh factorflow-drill` outputs, the owner's
+H6 and `openssl rand -hex 24` statements, the live-provider run, the `pg_dump` /
+`pg_restore` steps, the before/after `GET /api/coverage` comparison, and the
+confirmed `down -v` teardown) is recorded in
+`docs/releases/CAP-001-v0.1.0-drill-record.md`.
+
+**Accepted warnings from implementation review v1**
+(`CAP-001-E1-S9-implementation-review-v1.md`) — none blocks a current
+acceptance criterion:
+
+- `docs/releases/CAP-001-v0.1.0-drill-record.md` line 9 initially cited
+  repo-relative paths under `docs/constitution/standards/` rather than the
+  org-wide harness constitutions `CONST-SEC` 1.3 and `CONST-OPS` 1.3; resolved
+  in `docs/releases/CAP-001-v0.1.0-drill-record.md` during doc-sync (IR-001,
+  low).
+- `biome.json` `files.ignore` omits `"build/**"`. Because `pyproject.toml`
+  packages `"api/static/**/*"` into the wheel, running `uv build` when
+  `src/factorflow/api/static/assets/*.js` is populated leaves minified JS copies
+  under `build/lib/factorflow/api/static/assets/*.js` that match Biome's `*.js`
+  include pattern until `build/` is removed (IR-002, low).
+
 ## Running the migrator
 
 Inside the application container (`compose.yaml`'s `app` service), the schema
