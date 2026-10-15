@@ -1,12 +1,13 @@
-"""The built distribution carries this build's migrations (CAP-001-E1-S8).
+"""The built distribution carries this build's migrations and interface bundle
+(CAP-001-E1-S8, CAP-001-E1-S9).
 
 Component designs: `component-design-schema-migrator.md` section 2.1 and
-`component-design-runtime-config.md` section 7 (release manifest v1, B1).
+`component-design-runtime-config.md` section 7 (release manifest v1, B1, B3).
 The wheel is built from a copy of `src/` and `pyproject.toml`, so a stale
-`dist/` or an editable install cannot make it pass. It is built with
-`uv build --wheel --offline`, the pattern `test_release_excludes_test_paths.py`
-uses (DEC-0045): `uv sync --all-extras` runs first and leaves the build backend
-in uv's cache.
+`dist/` or an editable install cannot make it pass. A stub
+`factorflow/api/static/index.html` is written into the temporary copy before
+running `uv build --wheel --offline`, so the test never depends on a prior
+`npm run build` on the checkout.
 """
 
 import shutil
@@ -26,6 +27,8 @@ _MIGRATIONS = (
     "0004_runs.sql",
 )
 
+_STUB_INDEX_HTML = "<!doctype html><html><body>stub</body></html>\n"
+
 
 @pytest.fixture(scope="module")
 def built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
@@ -38,6 +41,14 @@ def built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
         ignore=shutil.ignore_patterns("*.egg-info", "__pycache__", "build", "dist"),
     )
     assert not list((source / "src").glob("*.egg-info"))
+    # Clear any local `npm run build` output from the copy and write a fresh
+    # stub `index.html` so the test never relies on a prior `npm run build`.
+    static_dir = source / "src" / "factorflow" / "api" / "static"
+    if static_dir.exists():
+        shutil.rmtree(static_dir)
+    static_dir.mkdir(parents=True, exist_ok=True)
+    (static_dir / "index.html").write_text(_STUB_INDEX_HTML, encoding="utf-8")
+
     shutil.copy2(REPO_ROOT / "pyproject.toml", source / "pyproject.toml")
     out = tmp_path_factory.mktemp("dist")
     subprocess.run(
@@ -52,11 +63,15 @@ def built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 # Implements TC-COMP-392
+# Implements TC-COMP-425
 def test_wheel_carries_the_migrations_and_nothing_under_tests(built_wheel: Path) -> None:
-    names = zipfile.ZipFile(built_wheel).namelist()
-    for migration in _MIGRATIONS:
-        assert f"factorflow/db/migrations/{migration}" in names
-    assert [name for name in names if name.startswith("tests/")] == []
+    with zipfile.ZipFile(built_wheel) as zf:
+        names = zf.namelist()
+        for migration in _MIGRATIONS:
+            assert f"factorflow/db/migrations/{migration}" in names
+        assert "factorflow/api/static/index.html" in names
+        assert zf.read("factorflow/api/static/index.html").decode("utf-8") == _STUB_INDEX_HTML
+        assert [name for name in names if name.startswith("tests/")] == []
 
 
 # Implements TC-COMP-392

@@ -1,0 +1,58 @@
+name: factorflow
+
+x-factorflow-database: &database
+  FACTORFLOW_DATABASE_URL: postgresql://factorflow:${FACTORFLOW_POSTGRES_PASSWORD:?set FACTORFLOW_POSTGRES_PASSWORD}@127.0.0.1:5432/factorflow?require_auth=scram-sha-256
+
+services:
+  postgres:
+    image: postgres:16
+    network_mode: host
+    command: ["postgres", "-c", "listen_addresses=127.0.0.1", "-c", "port=5432"]
+    environment:
+      POSTGRES_DB: factorflow
+      POSTGRES_USER: factorflow
+      POSTGRES_PASSWORD: ${FACTORFLOW_POSTGRES_PASSWORD:?set FACTORFLOW_POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
+    volumes:
+      - factorflow-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "factorflow", "-d", "factorflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  app:
+    image: factorflow:${FACTORFLOW_IMAGE_TAG:?set FACTORFLOW_IMAGE_TAG}
+    build: .
+    network_mode: host
+    environment:
+      <<: *database
+      FACTORFLOW_MASSIVE_API_KEY: ${FACTORFLOW_MASSIVE_API_KEY:?set FACTORFLOW_MASSIVE_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import http.client,json,sys; c=http.client.HTTPConnection('127.0.0.1', 8000, timeout=3); c.request('GET', '/api/health'); r=c.getresponse(); h=json.loads(r.read()) if r.status == 200 else {}; sys.exit(0 if h.get('database') == 'reachable' and h.get('schema_version') is not None else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  ingestion:
+    image: factorflow:${FACTORFLOW_IMAGE_TAG:?set FACTORFLOW_IMAGE_TAG}
+    profiles: [ingestion]
+    network_mode: host
+    command: ["python", "-m", "factorflow.ingestion_main"]
+    environment:
+      <<: *database
+      FACTORFLOW_MASSIVE_API_KEY: ${FACTORFLOW_MASSIVE_API_KEY:?set FACTORFLOW_MASSIVE_API_KEY}
+      FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE: ${FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE:?set FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE}
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  factorflow-pgdata:

@@ -27,8 +27,15 @@ KEY_SHAPE = re.compile(r"\bsk-massive-[A-Za-z0-9_-]{16,}\b")
 # for, and this repository's own precedent (`.gitignore`, `pyproject.toml`'s
 # ruff `extend-exclude`) already treats `docs/` as carrying reviewed content
 # this package does not own.
-_SCANNED_PREFIXES = ("src/", "tests/")
-_SCANNED_FILES = {"pyproject.toml", "uv.lock", "Dockerfile", ".gitignore"}
+_SCANNED_PREFIXES = ("src/", "tests/", "scripts/")
+_SCANNED_FILES = {
+    "pyproject.toml",
+    "uv.lock",
+    "Dockerfile",
+    ".dockerignore",
+    "compose.yaml",
+    ".gitignore",
+}
 
 
 def _in_scanned_scope(rel_path: str) -> bool:
