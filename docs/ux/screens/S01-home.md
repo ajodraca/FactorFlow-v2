@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S01
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S01 Home — what needs you today"
 route: /home
 design_source: docs/ux/design-source/P01-Home.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -39,10 +39,10 @@ dashboard to stare at; every element links somewhere the owner acts.
 
 | Region | Milestone |
 |--------|-----------|
-| Page title, as-of line, data card, data-related *Needs you* items | M1 (CAP-002) |
+| Page title, as-of line, data card, data-related *Needs you* items | M1 (App shell & data health, D-8) |
 | Paper card, strategy-related items, *Your strategies* list, *+ New strategy* | M2 |
 | Live card | M6 |
-| *Ready* (promotion) items | M5 |
+| *Ready* (review) items | M5 |
 
 Regions not yet delivered are absent, not disabled. In M1 the summary row holds
 the data card alone, at one third width, with the *Needs you* list beside it.
@@ -58,7 +58,8 @@ Main region capped at 1180 px, `--space-5` padding, regions stacked with
 2. **Summary row.** Three `card` `metric` tiles in a three-column grid:
    - **Live** — `badge` `real-money` *LIVE · real money*; account value
      (`--text-2xl`, `--font-numeric`); today's change with sign and colour;
-     one line: strategies, positions, daily-loss limit use. Whole tile links to
+     one line: strategies, positions, and the highest daily-loss limit use
+     among its strategies (each strategy has its own limit, D-11). Whole tile links to
      `/portfolio/live`.
    - **Paper** — same shape, `badge` `paper`. Links to `/portfolio/paper`.
    - **Data** — `badge` with the worst current data tier and a short label;
@@ -94,7 +95,7 @@ Main region capped at 1180 px, `--space-5` padding, regions stacked with
 | `today` | session date + market state (`open`, `closed`, `holiday`) | trading calendar | Header and as-of line |
 | `pricesAsOf` | timestamp | market data | |
 | `nextRebalance` | timestamp or null | strategy schedules | Earliest across paper and live |
-| `live` | `{value, todayChange, todayChangePct, strategies, positions, dailyLossUsedPct}` or null | broker live account | Null hides the tile |
+| `live` | `{value, todayChange, todayChangePct, strategies, positions, maxStrategyDailyLossUsedPct}` or null | broker live account | Null hides the tile |
 | `paper` | same shape or null | broker paper account | Null hides the tile |
 | `data` | `{worstTier, label, currentCount, followedCount, scoresAsOf, pricesAsOf}` | coverage, classification run | |
 | `attention[]` | `{id, tier, tag, title, body, action: {label, href}}` | attention service (aggregates gate, limits, data, drafts, orders) | Server-sorted (blueprint §4.1) |
@@ -108,7 +109,7 @@ Main region capped at 1180 px, `--space-5` padding, regions stacked with
   a changed count politely. Polled freshness appears as *checked {time}* in the
   card header (STD-UI-25).
 - An item leaves the list only when its cause is resolved (for example a
-  successful retry), never because it was viewed.
+  successful download), never because it was viewed.
 
 ## 7. States
 
@@ -130,9 +131,9 @@ Main region capped at 1180 px, `--space-5` padding, regions stacked with
 | Header | *Thursday, 15 October* |
 | As-of line | *Market closed at 15:00 CDT · prices current to today's close · next rebalance Mon 2026-11-02 14:45 CST* |
 | Needs-you sub-line | *Most important first. Nothing here is urgent unless marked.* |
-| Ready item | *Quality Value Monthly is ready for a promotion review* / *63 paper trading days, tracking its backtest within 0.8 percentage points. Every gate criterion you set is met.* / **Review evidence** |
+| Ready item | *Quality Value Monthly is ready for your review* / *63 paper trading days, tracking its backtest within 0.8 percentage points. Every gate criterion you set is met.* / **Review evidence** |
 | Limit item | *Momentum Tilt hit its 8% per-stock limit on NVDA (paper)* / *Two buys today were trimmed to stay under the limit. Nothing failed; the strategy holds slightly less NVDA than its rules asked for.* / **See orders** |
-| Data item | *KO, TSLA and FBXX are missing today's data* / *Their scores stay at yesterday's and are marked that way. Strategies holding them won't trade them until data is complete.* / **Fix data** |
+| Data item | *KO, TSLA and FBXX are missing today's data* / *Their scores show as Incomplete until the data is complete. Strategies holding them won't trade them until then.* / **Fix data** |
 | Draft item | *Growth Momentum Blend has never been backtested* / **Run backtest** |
 
 ## 9. Accessibility

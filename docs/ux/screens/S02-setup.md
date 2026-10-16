@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S02
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S02 First-run setup"
 route: /setup
 design_source: docs/ux/design-source/P02-Setup.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
     - id: CAP-001
       version: "8"
   invoking_user: ajodraca
@@ -48,7 +48,8 @@ without losing input.
 | 4 Download data | M1 | CAP-001 run start, AC-23 queueing |
 | 5 Paper trading account | M2 | Broker port, paper credential presence |
 
-Before M2 the stepper shows four steps.
+Steps 1–4 are built by the M1 capability *App shell & data health* (blueprint
+D-8) on CAP-001's API as it is. Before M2 the stepper shows four steps.
 
 ## 3. Layout
 

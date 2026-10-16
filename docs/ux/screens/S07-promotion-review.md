@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S07
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S07 Promotion review — paper to live"
 route: /strategies/:id/review
 design_source: docs/ux/design-source/P07-Promote.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
     - id: STD-UI
       version: "6"
   invoking_user: ajodraca
@@ -124,8 +124,8 @@ history records what was on screen, not what is computed later.
 - If the evidence changes while the page is open (a new trading day), a
   `status-warning` banner says *The evidence was updated at {time}. Review it
   before going live.* and clears the acknowledgements.
-- After success: a `status-good` confirmation on this page (*Promoted. {name}
-  goes live at {time} with ${amount}. Your reasons are saved with this
+- After success: a `status-good` confirmation on this page (*{name} goes live
+  at {time} with ${amount}. Your reasons are saved with this
   decision.*), the strategy moves to Live on S04, and the environment region
   gains or increments the live chip.
 

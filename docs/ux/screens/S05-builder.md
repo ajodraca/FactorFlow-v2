@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S05
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S05 Strategy builder"
 route: /strategies/new, /strategies/:id/rules
 design_source: docs/ux/design-source/P05-Builder.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -66,7 +66,8 @@ in M2–M3 and **Run backtest** from M4.
      then *If it ran today* with the as-of line, the funnel *1,236 followed →
      86 pass → 20 held*, a `coverage-absent` badge *{n} skipped: incomplete
      {factor} score*, and the first eight picks (#, symbol, name, ranking
-     factor percentile, target weight) with *+ {n} more · open in Research*.
+     factor percentile with the blueprint §4.4 *Possibly restated* mark when it
+     carries one, target weight) with *+ {n} more · open in Research*.
 
 ## 4. Component mapping
 
@@ -89,14 +90,18 @@ in M2–M3 and **Run backtest** from M4.
 | `rules` | `{scope, conditions: [{factor, minPercentile}], rankBy, topN, weighting, maxPerStockPct, cashPct, rebalance: {cadence, day, time}, minTradePct, onIncomplete: skip/sell}` | strategy service (versioned) |
 | `rulesComplete` | boolean + `missing[]` | server validation |
 | `summary` | string | server-rendered from `rules`, so the sentence and the engine never disagree |
-| `preview` | `{scoresAsOf, followed, passing, held, skipped: {count, factor}, picks: [{symbol, name, rankPercentile, weight}]}` | strategy engine dry run on today's classifications |
+| `preview` | `{scoresAsOf, followed, passing, held, skipped: {count, factor}, picks: [{symbol, name, rankPercentile, restated, weight}]}` | strategy engine dry run on today's classifications |
 
 ## 6. Interactions
 
 - Every change autosaves after 800 ms of inactivity and updates *saved {time}*.
-  Saving a strategy that has been backtested or paper traded creates a new
-  version; the stepper falls back to Draft for that version and the previous
-  version keeps its evidence.
+  Saving a strategy that has been backtested, or is paper or live trading,
+  creates a new draft version (blueprint D-10). The stepper shows the draft
+  version at Draft, and a line under the header says what the running version
+  is doing: *Version {n} keeps paper trading (or: trading live) under its own
+  rules until this version replaces it.* The running version's stage, orders
+  and evidence do not change. The draft replaces it only through the stage's
+  own action: **Start paper trading** (paper) or go-live on S07 (live).
 - The preview recomputes after each save; while recomputing, the list dims and
   keeps its rows.
 - **+ condition** appends a sentence clause with a factor `select` focused.
@@ -140,8 +145,11 @@ in M2–M3 and **Run backtest** from M4.
 
 1. **S05-1** The plain-words summary is produced by the server from the saved
    rules.
-2. **S05-2** Editing a backtested or paper strategy creates a new version and
-   leaves the previous version's evidence intact.
+2. **S05-2** Editing a backtested, paper or live strategy creates a new draft
+   version; the running version keeps trading under its own rules and keeps
+   its stage and evidence.
+6. **S05-6** A preview pick whose ranking percentile carries the restatement
+   mark shows it (STD-UI-17).
 3. **S05-3** The preview names how many stocks were skipped for incomplete
    scores, and never ranks them.
 4. **S05-4** The primary action states what is missing while rules are

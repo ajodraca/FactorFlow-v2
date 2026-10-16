@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S06
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S06 Backtest result"
 route: /strategies/:id/backtests/:backtestId
 design_source: docs/ux/design-source/P06-Backtest.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---

@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S03
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S03 Research — screener and inspector"
 route: /research
 design_source: docs/ux/design-source/P03-Research.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
     - id: CAP-002
       version: "1, draft"
   invoking_user: ajodraca
@@ -39,7 +39,7 @@ panes: filters, results, inspector.
 
 ## 2. Delivered by
 
-M1, CAP-002 (AC-1 to AC-3, AC-9, AC-12, AC-14, AC-16, AC-17, AC-21). *Use in a
+M1, CAP-002 (AC-1 to AC-3, AC-9, AC-12, AC-14, AC-16, AC-17, AC-21, AC-23). *Use in a
 strategy* arrives in M2; before M2 it is absent.
 
 ## 3. Layout
@@ -49,17 +49,21 @@ Three panes in a wrapping flex row, `--space-4` apart, each a `card`.
 1. **Filters** (220–250 px): `h2` *Find stocks*, then sections separated by
    `--border`:
    - *Look in*: `select` (*All followed stocks · {n}* or a universe).
-   - *Percentile at least*: one row per factor (swatch, name, `input`
-     `numeric` 56 px, placeholder *any*), then the helper *70 means "scores
-     better than 70% of followed stocks".*
+   - *Thresholds*: one row per factor (swatch, name), each a sentence with
+     three blanks: *[percentile ▾] [at least ▾] [n]*. The first `select`
+     `inline` chooses *percentile* or *standardised score*, the second *at
+     least* or *at most*, and the `input` `numeric` (56 px, placeholder *any*)
+     the value (CAP-002 §2: above or below a chosen score or percentile). Helper:
+     *Percentile 70 means "scores better than 70% of the stocks scored on this
+     factor".*
    - `checkbox` *Hide stocks with an incomplete score* (default off) with the
      helper *They're shown by default so nothing disappears silently.*
-   - *Saved screens*: links.
 2. **Results** (fluid): header with `h1` *{n} stocks match* (`--text-lg`) and
    the as-of line *Scores from today 17:46 CDT · sorted by value*; right:
-   **Save screen** (`outline`), **Use in a strategy** (`default`). Then the
+   **Save these {n} as a universe…** (`outline`, CAP-002 AC-2), **Use in a
+   strategy** (`default`, M2). Then the
    virtualised table: checkbox · Symbol · Name · Value · Growth · Momentum
-   (blueprint §4.4 factor cells). Sorted column header shows the arrow and
+   (blueprint §4.4 factor cells, including the *Possibly restated* mark). Sorted column header shows the arrow and
    `aria-sort`. When one or more rows are checked, the selection tray
    (blueprint §4.6) pins to the bottom of the card.
 3. **Inspector** (300–340 px): symbol (`--text-xl`, `--font-numeric`) and name;
@@ -79,7 +83,8 @@ sits above the results header: *Showing scores produced {time} from download
 | Element | Component | Variant |
 |---------|-----------|---------|
 | Scope | `select` | `inline` |
-| Threshold inputs | `input` | `numeric` |
+| Threshold kind and direction | `select` | `inline` |
+| Threshold values | `input` | `numeric` |
 | Hide incomplete | `checkbox` | `default` |
 | Results table | `data-table` | `virtualised` (new, §13 of the blueprint), with the base contract's row checkboxes |
 | Factor cell | composition, blueprint §4.4 | — |
@@ -94,7 +99,7 @@ sits above the results header: *Showing scores produced {time} from download
 | Field | Type | Source |
 |-------|------|--------|
 | `scope` | `{kind: all/universe, id, label, count}` | universes |
-| `thresholds` | `{value?, growth?, momentum?}` percentile floors | URL query (shareable, back-button safe) |
+| `thresholds` | per factor `{measure: percentile/standardisedScore, direction: atLeast/atMost, value}` or absent | URL query (shareable, back-button safe) |
 | `hideIncomplete` | boolean | URL query |
 | `sort` | `{factor, direction}` | URL query |
 | `classificationSet` | `{producedAt, fromDownload, current: bool, updating: bool, failedReason?}` | CAP-002 classification runs |
@@ -114,7 +119,9 @@ sits above the results header: *Showing scores produced {time} from download
   checkbox checks it. The two never interfere: checking does not select.
 - **Use in a strategy** opens S05 with the current scope and thresholds as the
   rule's conditions.
-- **Save screen** stores scope and thresholds under a name (routine).
+- **Save these {n} as a universe…** opens a `dialog` `standard` asking for a
+  name and saves the current result's members as a new universe (routine).
+  Its membership does not change when scores change later (CAP-002 AC-2).
 - **Compare side by side** (tray) opens `/research/compare?symbols=…` with the
   checked rows (2–6). **Add to universe…** opens a `dialog` `standard` listing
   universes plus *New universe*.
@@ -139,7 +146,7 @@ sits above the results header: *Showing scores produced {time} from download
 |-----|------|
 | Results title | *{n} stocks match* |
 | Incomplete reason, example | *Incomplete: revenue for the quarter ending 2025-06-27 is missing, so growth can't be compared fairly. It isn't guessed.* |
-| Inspector footnote | *Percentile first: 88 means better than 88% of followed stocks. The small number is the standardised score.* |
+| Inspector footnote | *Percentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.* |
 | Results footnote (STD-UI-18) | *A score is shown only when every input is present and current. This checks presence and currency, not whether the provider's values are correct.* |
 
 ## 9. Accessibility
@@ -161,12 +168,21 @@ sits above the results header: *Showing scores produced {time} from download
    for any stock.
 5. **S03-5** Filters, sort and scope survive reload and back navigation (URL
    state).
-6. **S03-6** A *Possibly restated* mark shows in the inspector wherever the
-   classification carries it (CAP-002 AC-23).
+6. **S03-6** A *Possibly restated* mark shows on the percentile in the results
+   table and in the inspector wherever the classification carries it
+   (CAP-002 AC-23, STD-UI-17).
+7. **S03-7** **Save these {n} as a universe…** saves every matching stock, not
+   only the loaded page, and the universe keeps those members afterwards
+   (CAP-002 AC-2).
 
 ## 11. Differences from the canvas
 
 - The canvas omits the not-current banner and the *Possibly restated* mark;
   CAP-002 requires both (§3, S03-6).
 - The canvas renders only three factor columns; the *Marks* column from the
-  CAP-002 design is folded into the inspector to keep the table scannable.
+  CAP-002 design becomes the compact mark in each factor cell (blueprint §4.4),
+  so a restated percentile is never shown unmarked.
+- The canvas has *Save screen* and *Saved screens*; CAP-002 has no saved
+  screens, so they are replaced by **Save these {n} as a universe…**.
+- The canvas thresholds are percentile floors only; §3 adds *at most* and the
+  standardised score, as CAP-002 §2 requires.

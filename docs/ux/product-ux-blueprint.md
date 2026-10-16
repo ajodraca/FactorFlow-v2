@@ -2,13 +2,13 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX
 artifact_type: ux-blueprint
-artifact_version: 3
+artifact_version: 4
 id: PRODUCT-UX
 title: FactorFlow Owner Interface — Product UX Blueprint
 kind: blueprint
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 applies_to: every capability that delivers or modifies an owner-facing interface surface, M1 through M6
@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
@@ -46,8 +46,8 @@ ai_provenance:
 > page *Whole product · usability-first* as the guide for developing the
 > interface (2026-10-15). This blueprint turns that page into rules, routes,
 > patterns and per-screen specifications that the SDD pipeline can cite. All
-> seven owner decisions in §12 are decided: D-1, D-4 and D-5 through STD-UI v5,
-> and D-2, D-3, D-6 and D-7 directly.
+> eleven owner decisions in §12 are decided: D-1, D-4 and D-5 through STD-UI v5,
+> and D-2, D-3, D-6 to D-11 directly.
 
 ## 0. How to use this blueprint
 
@@ -107,7 +107,7 @@ capability's design has to choose.
    STD-UI-21, STD-UI-22.)*
 7. **Plain words over system words.** The interface speaks the owner's language
    ("followed stocks", "download", "Incomplete") while code, API and documents
-   keep the domain vocabulary. The mapping is fixed in §7 and in STD-UI-1 (v5).
+   keep the domain vocabulary. The mapping is fixed in §7 and in STD-UI-1 (v6).
 8. **Prompt, don't hunt.** Problems surface on Home as "Needs you" items with one
    action each. Nothing important exists only on a page the owner must remember
    to visit.
@@ -153,9 +153,9 @@ open "Needs you" items; Data health: stocks with problems). The chip is the
 | `/data/coverage` | Full coverage table (CAP-001 Coverage, restyled) | CAP-001 page | M1 |
 | `/data/followed` | Followed stocks (CAP-001 Instruments, restyled) | CAP-001 page | M1 |
 | `/data/downloads` and `/data/downloads/:id` | Download history + detail (CAP-001 Runs, Run detail) | CAP-001 pages | M1 |
-| `/settings` | Settings: history depth, provider key, broker, promotion gate, live limits | partially (CAP-001 Settings) | M1 |
+| `/settings` | Settings: history depth, provider key, broker, review gate, live limits | partially (CAP-001 Settings) | M1 |
 
-**Migration from the shipped CAP-001 routes.** `/coverage` → `/data/coverage`,
+**Migration from the existing CAP-001 routes.** `/coverage` → `/data/coverage`,
 `/instruments` → `/data/followed`, `/runs` → `/data/downloads`, `/runs/:runId`
 → `/data/downloads/:runId`. The old paths redirect permanently (client-side
 `Navigate replace`) for one release, then are removed. Tests in
@@ -166,8 +166,8 @@ open "Needs you" items; Data health: stocks with problems). The chip is the
 Four routes reuse layouts already designed on the CAP-001 and CAP-002 canvas
 pages, restyled into this shell: stock evidence, compare, universes, and the
 three Data sub-pages. Settings is drawn only as CAP-001's history-depth and
-credential form; the promotion-gate and live-limit sections are specified in
-S07 and S08 and get their own capability UX design when M5 and M6 arrive.
+credential form; the review-gate and live-limit sections are not specified
+here and get their own capability UX design when M5 and M6 arrive.
 
 ## 3. Application shell
 
@@ -231,13 +231,14 @@ the top bar.
 |-------|-----------|-----------|
 | Trading allowed | Dark button (`--foreground` fill, `--background` text) with a `--status-critical` octagon icon: **Stop all trading** | One activation stops trading. No confirmation, no dialog (STD-UI-21's documented departure from `edg-compliance`). Sends `POST` to the kill-switch endpoint and then re-reads the stored state |
 | Request in flight | Same button, label **Stopping…**, `aria-busy="true"` | The rendered state changes only when the stored state does. If the request fails, the button returns to its first state and a `toast` `error` names the operation, the resource and the reason |
-| Stopped | The button is replaced by a non-interactive status: octagon + **Trading stopped** in the `kill-switch` variant's stopped style, and a full-width banner directly under the top bar | Banner text: *All trading is stopped since {time}. No new orders are sent, in live or paper. What you hold stays held.* The banner's only control is **Resume trading…**, which is capital-at-risk (§9) and opens `dialog` `real-money` |
+| Stopped | The button is replaced by a non-interactive status: octagon + **Trading stopped** in the `kill-switch` variant's stopped style, and a full-width banner directly under the top bar | Banner text: *All trading is stopped since {time}. No new orders are sent, in live or paper. What you hold stays held.* The banner's only control is **Resume trading…** (§9): while no live strategy would resume it opens `dialog` `confirm` with the `paper` badge (M2 to M5); once any live strategy would resume it is capital-at-risk and opens `dialog` `real-money` (M6) |
 
-**Severity.** A stop the owner engaged is an outcome the owner intended, so it
-is tiered **neutral** (STD-UI-12) and made prominent by placement, size and
-words, not by fault colour. A stop the system engaged (daily-loss limit,
-broker-side limit) is tiered **serious** and says what triggered it. *This
-corrects the canvas, which draws the owner-engaged stop in critical red.*
+**Severity.** Only the owner stops all trading. That stop is an outcome the
+owner intended, so it is tiered **neutral** (STD-UI-12) and made prominent by
+placement, size and words, not by fault colour. *This corrects the canvas,
+which draws it in critical red.* A daily-loss limit stops one strategy, not all
+trading (D-11): it shows on that strategy as the serious *Stopped: daily-loss
+limit* badge (§4.3) and as a *Needs you* item, and never as this banner.
 
 **Reachability.** The kill switch renders in every shell state, including setup,
 error and unreachable. When the application API is unreachable, the button
@@ -306,7 +307,11 @@ fixed 22 px box, then a 52 px bar (`--seq-4` on `--seq-1`). The standardised
 score appears in the inspector and on evidence pages, never in place of the
 percentile in a list. Incomplete: `badge` `coverage-absent` labelled
 *Incomplete*, with the reason in a tooltip and in the inspector. Not enough
-stocks to rank: `badge` `coverage-unknown` labelled *Not enough to rank*. Column
+stocks to rank: `badge` `coverage-unknown` labelled *Not enough to rank*. A percentile carrying the
+STD-UI-17 restatement mark shows a compact *Possibly restated* mark after the
+number: a small `badge` `status-neutral` reading *R* whose accessible name is
+*Possibly restated*, with the explanation in the inspector. The mark appears
+wherever that percentile appears, in lists and previews too. Column
 headers carry the factor swatch (`--factor-value`, `--factor-growth`,
 `--factor-momentum`): the swatch is identity, the bar is magnitude, and they
 never swap (STD-UI-7, STD-UI-9).
@@ -395,35 +400,45 @@ confirm) → S04 Paper column, counting days toward the gate → when the gate i
 an S01 *Ready* item and the S04 *Ready for review* column → S07 → `dialog`
 `real-money` → S04 Live column and S08 live tab.
 
+**Changing a running strategy.** Editing the rules of a strategy that is paper
+or live trading never changes what trades (D-10). The edit is saved as a new
+draft version; the running version keeps its stage, its orders and its
+evidence. The draft version earns its own stages, and replaces the running
+version only through the action that earns the stage: **Start paper trading**
+for a paper strategy, S07's go-live for a live one.
+
 **Data problem.** A partial download → S01 *Data gap* item and a Data health
-count → S09 *Needs fixing* → retry, correct the symbol, or stop following. Every
+count → S09 *Needs fixing* → **Download now** again (CAP-001 AC-6 makes a re-run
+safe), or for a symbol the provider doesn't recognise, stop following it and
+follow the right one. Every
 screen that shows an affected stock shows it as *Incomplete*; every strategy
 holding it keeps holding it and does not trade it until it is complete.
 
 **Emergency stop.** The kill switch from any screen → stopped banner on every
 route → S08 shows *Not sent: trading stopped* on scheduled orders → **Resume
-trading…** → `dialog` `real-money` listing what will trade at the next
-rebalance → trading allowed.
+trading…** → a dialog listing what will trade at the next rebalance (`confirm`
+while only paper strategies would resume, `real-money` once a live one would)
+→ trading allowed.
 
 ## 7. Vocabulary
 
 The interface uses the display labels below. Code, API, database, logs and SDD
-documents keep the domain terms. STD-UI-1 (v5, 2026-10-15) makes this table
+documents keep the domain terms. STD-UI-1 (v6, 2026-10-15) makes this table
 normative: user-visible text uses the display label and never the domain term
 beside it.
 
 | Domain term (STD-UI-1) | Display label | Where it appears |
 |------------------------|---------------|------------------|
+| instrument | **stock** | Everywhere |
 | instrument on the acquisition list | **followed stock** | Setup, Data health, followed-stocks list |
 | retire (an instrument) | **stop following** | Data health, followed-stocks list |
 | acquisition run | **download** | Data health, Home, downloads list |
 | run outcome `succeeded` / `partial` / `failed` / `cancelled` / `abandoned` | **Complete** / **Partial** / **Failed** / **Cancelled by you** / **Interrupted** | Downloads list and detail |
-| coverage | **data** (as in "data current to …") on Data health; *coverage* stays on `/data/coverage` | Data health |
 | not classified (input missing or outdated) | **Incomplete** | Research, Builder, Universes |
 | not enough stocks to rank | **Not enough to rank** | Research |
 | classification | **score**, shown as a **percentile** and a **standardised score** (never shortened to *score*) | Research, Builder |
 | universe | **universe** (unchanged) | Research |
-| promotion | **review** (the step) / **go live** (the action) | Strategies, Promotion review |
+| promotion | **review** (the step) / **go live** (the action); the gate's settings section is *Review gate* | Strategies, review page, Settings |
 | kill switch | **Stop all trading** (the control) / **Trading stopped** (the state) | Shell |
 | paper / live | **Paper** · **Live · real money** | Shell, Portfolio |
 
@@ -464,9 +479,9 @@ serious: diamond; critical: square).
 | Order | partially filled, remainder cancelled → *Filled n of m* | warning |
 | Order | rejected by broker → *Rejected* | critical |
 | Order | not sent because trading is stopped → *Not sent: trading stopped* | neutral |
+| Order | not sent because its strategy hit its daily-loss limit → *Not sent: strategy stopped* | serious |
 | Order | trimmed by a per-stock limit → *Trimmed by the 8% limit* | warning |
 | Trading | stopped by you → *Trading stopped* | neutral (§3.3) |
-| Trading | stopped by a limit → *Stopped: {limit}* | serious |
 | Broker / provider | connected / key found → *Connected* / *Found* | good |
 | Broker / provider | missing or rejected → *Not connected* / *Rejected* | critical |
 
@@ -476,24 +491,26 @@ serious: diamond; critical: square).
 |--------|--------|------|--------------|
 | Follow stocks, paste or upload symbols | S02, followed list | routine | none |
 | Stop following a stock | S09, followed list | consequential | `dialog` `confirm`: *Stop following {SYMBOL}? Its history is kept, and strategies holding it keep holding it. You can follow it again later.* |
-| Download now, retry failed | S09 | routine | none |
+| Download now (also the retry after a failure) | S09 | routine | none |
 | Cancel a download | downloads | consequential | CAP-001 wording |
-| Save a screen, select, compare | S03 | routine | none |
+| Save results as a universe, select, compare | S03 | routine | none |
 | Create, rename a universe; add members | universes | routine | none |
 | Remove a member, retire a universe | universes | consequential | CAP-002 wording |
-| Edit strategy rules (autosaved, creates a version) | S05 | routine | none |
+| Edit strategy rules (autosaved, creates a version; a running version keeps trading, D-10) | S05 | routine | none |
 | Run a backtest | S05, S06 | routine | none |
 | Start paper trading | S06, S04 | consequential | `dialog` `confirm`: *Start paper trading {name} with ${amount} of practice money? Orders go to your Alpaca paper account from the next rebalance, {date}.* |
 | Pause a strategy | S08, S04 | consequential | `dialog` `confirm`: *Pause {name}? It sends no orders until you resume it. What it holds stays held.* |
 | Stop all trading | shell | protective, single action | none (STD-UI-21) |
-| Resume trading | shell banner | capital-at-risk | `dialog` `real-money` |
-| Go live (promotion) | S07 | capital-at-risk | evidence, acknowledgements and rationale on the page, then `dialog` `real-money` |
-| Change live allocation or live limits | Settings, S08 | capital-at-risk | `dialog` `real-money` |
+| Resume trading, while only paper strategies would resume | shell banner | consequential | `dialog` `confirm` with the `paper` badge: *Resume trading? {n} paper strategies send orders again from the next rebalance, {date}.* |
+| Resume trading, once a live strategy would resume | shell banner | capital-at-risk | `dialog` `real-money` |
+| Resume a paused paper strategy | S08 | consequential | `dialog` `confirm`: *Resume {name}? It sends paper orders again from the next rebalance, {date}.* |
+| Go live | S07 | capital-at-risk | evidence, acknowledgements and rationale on the page, then `dialog` `real-money` |
+| Change live allocation or live limits | Settings | capital-at-risk | `dialog` `real-money` |
 | Resume a paused live strategy | S08 | capital-at-risk | `dialog` `real-money` |
 
 Errors always name the operation, the resource and the reason, and offer the
 recovery action where one exists: *Downloading company financials for KO
-failed: the provider timed out 3 times. **Retry KO***.
+failed: the provider timed out 3 times. **Download now***.
 
 ## 10. Milestone map
 
@@ -502,14 +519,14 @@ UX brief claims rows from this table.
 
 | Milestone | Capability | Delivers |
 |-----------|------------|----------|
-| M1 | **Shell rework** (new, small; or folded into CAP-002) | §3 shell without the kill switch and environment region (no order path exists yet); rail and routes of §2; route migration; command palette with Stocks, Universes and Pages groups |
-| M1 | CAP-001 (shipped) | Restyle only: Coverage, Instruments, Runs, Run detail and Settings move under `/data/*` and `/settings` with §7 labels; S09 Data health built on CAP-001's API; S02 steps 1–4 |
-| M1 | CAP-002 (draft) | S03 Research with inspector and selection tray; stock evidence, compare and universes routes; S01 Home with the data card and data-related *Needs you* items only |
-| M2 | Strategies & paper trading | **Scheduled downloads** each trading day at 17:30 CT alongside on-demand ones, with a *Needs you* item when a scheduled download fails (D-2); S04 board without the Backtested and Review columns; S05 builder with *Start paper trading* as its primary action; S08 paper tab; S02 step 5; environment region (paper); **kill switch** (the first order path appears here, and STD-UI-21 applies to paper orders too); §4.2 stepper with Draft · Paper · Live |
+| M1 | **App shell & data health** (new capability, D-8) | §3 shell without the kill switch and environment region (no order path exists yet); rail and routes of §2; route migration; command palette with Stocks, Universes and Pages groups; CAP-001's Coverage, Instruments, Runs, Run detail and Settings restyled under `/data/*` and `/settings` with §7 labels; S09 Data health and S02 steps 1–4, both on CAP-001's API as it is; S01 Home with the data card and data-related *Needs you* items |
+| M1 | CAP-001 (approved v8) | No new work. Its API and pages are consumed unchanged by the row above |
+| M1 | CAP-002 (draft) | S03 Research with inspector and selection tray; stock evidence, compare and universes routes |
+| M2 | Strategies & paper trading | **Scheduled downloads** each trading day at 17:30 CT alongside on-demand ones, with a *Needs you* item when a scheduled download fails (D-2); S04 board without the Backtested and Review columns; S05 builder with *Start paper trading* as its primary action; S08 paper tab; S02 step 5; environment region (paper); **kill switch** (the first order path appears here, and STD-UI-21 applies to paper orders too) with **Resume trading** and resuming a paused paper strategy through `dialog` `confirm`; §4.2 stepper with Draft · Paper · Live |
 | M3 | Live market data | S09 *Live prices* card; S08 and S01 as-of lines move to intraday; *Reconnecting* and *Not streaming* states |
 | M4 | Backtesting | S06; S04 Backtested column; S05 *Run backtest* becomes primary; Backtest step added to the stepper |
-| M5 | Promotion gate | S07; S04 Ready-for-review column; *Ready* items on S01; Settings → Promotion gate; decision history |
-| M6 | Live trading | S08 live tab with limit meters; live environment chip; resume flow; system-engaged stops; Settings → live limits |
+| M5 | Promotion gate | S07; S04 Ready-for-review column; *Ready* items on S01; Settings → Review gate; decision history |
+| M6 | Live trading | S08 live tab with limit meters; live environment chip; resuming live strategies through `dialog` `real-money`; per-strategy daily-loss stops (D-11); Settings → live limits |
 
 ## 11. STD-UI conformance (product level)
 
@@ -518,7 +535,7 @@ already discharges each rule, so a capability can cite it.
 
 | Rule | Applies | Where satisfied |
 |------|---------|-----------------|
-| STD-UI-1 | yes | §7, the display labels STD-UI-1 v5 fixes |
+| STD-UI-1 | yes | §7, the display labels STD-UI-1 v6 fixes |
 | STD-UI-2 | yes | §9 confirmation wording; *stop following* keeps history and says so |
 | STD-UI-3 | yes | All figures `--font-numeric`, fixed precision per column; scores and returns carry an explicit sign |
 | STD-UI-4 | yes | §4.4 *Incomplete*; em dash for an absent value; blank only for not applicable |
@@ -534,7 +551,7 @@ already discharges each rule, so a capability can cite it.
 | STD-UI-14 | yes | §4.4 three states |
 | STD-UI-15 | yes | Screens show recorded values only; S05's *If it ran today* is labelled a preview of today's scores, not a holding |
 | STD-UI-16 | yes | Incomplete stocks are skipped, never filled; S01 and S09 say so |
-| STD-UI-17 | yes | *Possibly restated* mark on scores, on S06's limits box and as a required acknowledgement on S07 |
+| STD-UI-17 | yes | §4.4 *Possibly restated* mark on every percentile that carries it, in S03's list and inspector and S05's preview; S06's limits box; a required acknowledgement on S07 |
 | STD-UI-18 | yes | S03 footnote and S09: the check judges presence and currency, not correctness |
 | STD-UI-19 | yes | §9 |
 | STD-UI-20 | yes | S07: evidence, acknowledgements and a required rationale on one page; not a toggle |
@@ -560,6 +577,10 @@ already discharges each rule, so a capability can cite it.
 | D-5 | Allow the `--risk-paper` / `--risk-real-money` channel outside the environment region, for paper and live badges, tiles and column headers | S01, S04, S08 | **Decided 2026-10-15: allowed**, only to mark which environment a thing belongs to and always with words (STD-UI v5, A-4); `theme.css` comment corrected |
 | D-6 | The lifecycle stepper shows only the stages the product has (no Backtest step before M4, no Review step before M5) | S04, S05 | **Decided 2026-10-15: only shipped stages.** When a stage ships, strategies already past it are not grandfathered: a paper strategy with no backtest needs one before it can be reviewed |
 | D-7 | The kill switch ships in M2 with paper trading rather than in M6 | M2 scope | **Decided 2026-10-15: M2.** Paper orders reach a real broker environment (charter §3); the stored stop state checked before every order is built once, on paper, and reused by M6 |
+| D-8 | Which capability owns the M1 shell, route migration, S01 Home, S02 setup and S09 Data health | §10 M1 | **Decided 2026-10-16: a new capability, *App shell & data health*.** CAP-001 is approved and takes no new work; CAP-002 keeps Research and universes. The new capability is defined through the pipeline with its own acceptance criteria |
+| D-9 | What S09's recovery actions do | S09 | **Decided 2026-10-16: what CAP-001 provides.** Retrying is **Download now** over the followed list (CAP-001 AC-6 makes a re-run safe); a symbol the provider doesn't recognise is fixed by stopping following it and following the right one, two separate actions. A download scoped to failed stocks can come later, in a capability that specifies it |
+| D-10 | What editing the rules of a paper or live strategy does | S04, S05 | **Decided 2026-10-16: the running version keeps trading.** The edit is a new draft version that earns its own stages, and replaces the running version only through the stage's own action (Start paper trading, or go-live on S07) |
+| D-11 | Whether the daily-loss limit stops one strategy or all trading | S01, S07, S08 | **Decided 2026-10-16: one strategy.** A strategy that reaches its daily-loss limit stops itself; the others keep trading. Only the owner's kill switch stops all trading |
 
 ## 13. Design-system changes
 
@@ -597,6 +618,7 @@ its 11 px labels move to `--text-xs` (12 px).
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-16 | 4 | Fixed the HIGH findings of `specifications-review-report-v1.md`. Owner decisions D-8 (new M1 capability *App shell & data health*), D-9 (S09 recovery uses CAP-001 as it is), D-10 (editing a running strategy creates a draft version; the running one keeps trading) and D-11 (daily-loss limit stops one strategy). §7 drops *coverage → data*, adds *instrument → stock*, cites STD-UI v6; user-visible *promotion* replaced. §4.4 carries the restatement mark in lists. Resume trading and resuming paper strategies ship in M2 through `dialog` `confirm` |
 | 2026-10-15 | 3 | Closed D-2 (scheduled downloads from M2), D-3 (gate criteria are owner settings with the stated defaults), D-6 (stepper shows only shipped stages) and D-7 (kill switch in M2); §10 M2 gains scheduled downloads |
 | 2026-10-15 | 2 | Recorded the owner's acceptance of STD-UI v5: D-1, D-4 and D-5 decided; §7 vocabulary is normative; owner-engaged stop tiered neutral by STD-UI-12 itself (A-3) |
 | 2026-10-15 | 1 | First draft, from the canvas page *Whole product · usability-first*, which the owner chose as the development guide on 2026-10-15 |

@@ -2,14 +2,14 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S04
 artifact_type: ux-screen-spec
-artifact_version: 1
+artifact_version: 2
 parent: PRODUCT-UX
 title: "S04 Strategies — lifecycle board"
 route: /strategies
 design_source: docs/ux/design-source/P04-Strategies.dc.html
 status: draft
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 ai_provenance:
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:40:00Z
+  timestamp: 2026-10-16T03:39:39Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "3"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -56,13 +56,15 @@ columns, and *Start paper trading* sits on Draft cards.
    Draft*), count, one-line meaning; the Paper and Live headings use
    `--risk-paper` and `--risk-real-money` text plus their words.
 3. **Strategy card** (`card`, `--space-3` padding, `--space-3` gap): name (`h3`);
-   optional status badge at top right (*Limit hit*, *Gate met*, *LIVE*); the
+   optional status badge at top right (*Limit hit*, *Gate met*, *LIVE*); a
+   line *Draft changes: version {n}* with an **Edit** link when a draft version
+   exists beside the running one (D-10); the
    rule summary sentence (Draft, Backtested, Review); stage facts as a two-column
    key/value list; a `progress` toward the gate on Paper cards (*41 of 60 days
    toward review*); then one primary or outline action and at most one link.
    The Ready-for-review card is emphasised with a 1 px `--foreground` ring.
 4. **Footer line.** The owner's gate in words, with a link to Settings →
-   Promotion gate.
+   Review gate.
 
 ### Card facts per column
 
@@ -89,14 +91,16 @@ columns, and *Start paper trading* sits on Draft cards.
 | Field | Type | Source |
 |-------|------|--------|
 | `columns[]` | `{stage, count}` limited to delivered stages | strategy service |
-| `strategies[]` | `{id, name, stage, ruleSummary, rulesComplete, editedAt, backtest?: {cagr, worstDrop, vsBenchmarkPpPerYear}, paper?: {days, gateDays, sinceStartPct, trackingPp, limitHit}, review?: {gateMet}, live?: {value, sinceDate, sinceStartPct, dailyLossUsedPct}}` | strategy, backtest, broker services |
+| `strategies[]` | `{id, name, stage, runningVersion, draftVersion?, ruleSummary, rulesComplete, editedAt, backtest?: {cagr, worstDrop, vsBenchmarkPpPerYear}, paper?: {days, gateDays, sinceStartPct, trackingPp, limitHit}, review?: {gateMet}, live?: {value, sinceDate, sinceStartPct, dailyLossUsedPct}}` | strategy, backtest, broker services |
 | `gate` | `{paperDays, trackingPp}` | owner settings; defaults 60 and 2 (D-3) |
 | `stoppedCount` | integer | strategy service |
 
 ## 6. Interactions
 
 - Cards do not drag. A stage changes only through the action that earns it
-  (backtest, start paper trading, go live), never by moving a card.
+  (backtest, start paper trading, go live), never by moving a card or by
+  editing rules: an edit to a running strategy is a draft version, and the card
+  stays in the running version's column (D-10).
 - **Start paper trading** opens `dialog` `confirm` (blueprint §9) and, on
   confirm, moves the card to Paper trading.
 - The board refreshes every 60 s while visible (*checked {time}* under the
@@ -120,7 +124,7 @@ columns, and *Start paper trading* sits on Draft cards.
 | Key | Text |
 |-----|------|
 | Column meanings | Draft *Rules written, not yet tested* · Backtested *How it would have done, {years}* · Paper trading *Practice money, real broker, real fills* · Ready for review *Met your gate; waiting for your decision* · Live *Real money, inside your limits* |
-| Footer | *Your gate: a strategy is ready for review after 60 paper trading days while staying within 2 percentage points of its backtest. Change it in Settings → Promotion gate.* |
+| Footer | *Your gate: a strategy is ready for review after 60 paper trading days while staying within 2 percentage points of its backtest. Change it in Settings → Review gate.* |
 
 ## 9. Accessibility
 
