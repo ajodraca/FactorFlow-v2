@@ -2,12 +2,12 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-system-design
 artifact_type: system-design
-artifact_version: 1
+artifact_version: 2
 capability: CAP-002
 title: Universe & Factor Classification
 ui_facing: true
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: draft
@@ -17,7 +17,7 @@ ai_provenance:
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T04:24:00Z
+  timestamp: 2026-10-16T23:05:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
@@ -26,7 +26,11 @@ ai_provenance:
     - id: tech-stack
       version: "5, approved 2026-10-13"
     - id: STD-UI
-      version: "4"
+      version: "6"
+    - id: PRODUCT-UX
+      version: "6, approved 2026-10-16"
+    - id: PRODUCT-UX-S03
+      version: "4, approved 2026-10-16"
     - id: CAP-001-system-design
       version: "8, approved 2026-10-13"
   invoking_user: ajodraca
@@ -41,6 +45,18 @@ under `projects/factorflow-v2/decisions/` (DEC-0052 to DEC-0058) and marked
 **PROVISIONAL** where it rests on a derivation rather than an approved
 artifact. The owner upholds or reverts each with `scripts/sdd decisions`.
 
+**Version 2 (2026-10-16)** aligns the interface half of this design with the
+product UX blueprint (`PRODUCT-UX` v6) and its Research screen specification
+(`PRODUCT-UX-S03` v4), both approved on 2026-10-16 after version 1 was written,
+and with STD-UI v6. The computation, persistence and write semantics are
+unchanged: the blueprint changes no table, no factor and no universe rule. What
+changed is where the screens live (Sections 2, 4.1, 4.2 and 8 question 4), what
+the read surface carries so the Research screen and the shell capability's Home
+and Data health screens can render classification state (Sections 3.3 and 4.2),
+and the compare bound (Section 3.3). The decisions this version made are
+DEC-0068 to DEC-0071; DEC-0068 and DEC-0070 follow from approved artifacts,
+DEC-0069 and DEC-0071 are **PROVISIONAL**.
+
 ## 1. Design Overview
 
 This design turns the point-in-time market data the running product already
@@ -50,7 +66,10 @@ appended event, a factor engine that classifies every actively acquired stock by
 value, growth and momentum against one peer set, a scheduler that runs that
 engine after every acquisition run that ends succeeded or partial, and the JSON
 routes and screens through which the owner builds universes, compares stocks
-and inspects the inputs behind each result.
+and inspects the inputs behind each result. The screens are the blueprint's
+Research area: one screener-and-inspector screen (S03) at `/research`, and the
+stock evidence, compare and universes pages beneath it (blueprint §2.2, §10
+M1), reached from a single rail destination, Research.
 
 The shape follows the charter's modular monolith and the two-container topology
 the first capability delivered. Universe Definition and Factor Classification
@@ -86,8 +105,12 @@ Read Section 4 first: it is the vocabulary the rest of this document uses.
 
 The diagram shows the three deployed units and where this design's seven
 components sit among the twelve the architecture inventory already lists. In
-the browser, `classification-ui` is mounted inside the `owner-web-app` shell and
-talks only to the loopback JSON API. In the application container,
+the browser, `classification-ui` is mounted inside the `owner-web-app` shell as
+the client routes under `/research` behind one rail destination, Research, and
+talks only to the loopback JSON API; the shell it composes into is the delivered
+one until the shell capability the blueprint names (§12 D-8) replaces it, and
+the routes do not change when that happens (Section 8, question 4). In the
+application container,
 `classification-api` registers its routers on the application `ingestion-api`
 builds, and delegates to `universe-service` and `classification-reader`;
 `classification-scheduler` runs as a lifespan task beside the existing reclaim
@@ -102,8 +125,8 @@ this design depends on: a run's terminal state, read from the journal table.
 ```mermaid
 flowchart TB
     subgraph BROWSER["Browser (loopback only)"]
-        WEB["owner-web-app<br/>shell, rail, router"]
-        CUI["classification-ui<br/>Classifications, Universes,<br/>Compare, Evidence screens"]
+        WEB["owner-web-app<br/>shell, rail (+ Research), router"]
+        CUI["classification-ui<br/>/research (S03 screener + inspector),<br/>/research/stocks/:symbol, /research/compare,<br/>/research/universes[/:id]"]
     end
 
     subgraph APPC["Application container"]
@@ -126,7 +149,7 @@ flowchart TB
         RS[("research-store<br/>universe, universe_event,<br/>classification_set, factor_input,<br/>factor_classification")]
     end
 
-    WEB -->|"mounts screens and routes"| CUI
+    WEB -->|"mounts /research/* routes"| CUI
     CUI -->|"HTTP/JSON 127.0.0.1"| API
     API -->|"includes routers"| CAPI
     CAPI --> US
@@ -201,9 +224,9 @@ sequenceDiagram
         end
     end
 
-    U->>A: 15. GET /api/classifications (poll 10 s while building)
+    U->>A: 15. GET /api/classifications, GET /api/classifications/summary (poll 10 s while building)
     A->>T: 16. current set = latest complete; later set building or failed?
-    A-->>U: 17. set status, run id, classification date, stocks
+    A-->>U: 17. set status, run id, classification date, produced-at, stocks, match count
     U-->>U: 18. render previous set with not-current mark, or the new set, or the failure
 ```
 
@@ -311,13 +334,42 @@ Sorting and threshold filters are applied in SQL over the whole current set,
 never over a loaded page, with keyset pagination at the first capability's
 `DEFAULT_PAGE_SIZE` and `MAX_PAGE_SIZE` bounds (`component-design-ingestion-api.md`
 §2.4a); restricting to a universe joins the replayed current membership
-(AC-16). 16. Side-by-side comparison is the same read with an explicit `symbols`
-list, bounded by `MAX_PAGE_SIZE`, so a stock that is not classified on a factor
-appears with its reason rather than being dropped (AC-16, flow 4 step 5). 17.
+(AC-16). The response carries `match_count`, the count over the whole filtered
+set, so the screen's *{n} stocks match* heading never reports a page (S03 §5,
+S03-2). The Research screen's filter model — per factor a `{measure, direction,
+value}` sentence where the measure is percentile or standardised score and the
+direction is at-least or at-most (S03 §3, §5) — maps one-to-one onto the twelve
+threshold bounds the read already accepts, `{factor}_percentile_min`/`_max` and
+`{factor}_score_min`/`_max`; no new filter model is introduced, and the screen
+keeps thresholds, `hide_incomplete`, sort and scope in its URL query so they
+survive reload and back navigation (S03-5). `hide_incomplete` (default false)
+excludes stocks with any factor `not_classified`; by default they are listed,
+because a filter matches on stored values and a stock with no value on a factor
+simply fails that factor's threshold while passing every other (S03-1,
+DEC-0071, PROVISIONAL). 16. Side-by-side comparison is the same read with an
+explicit `symbols` list of 2 to `MAX_COMPARE_SYMBOLS` (6, from S03 §6:
+DEC-0070) stocks, so a stock that is not classified on a factor appears with
+its reason rather than being dropped (AC-16, flow 4 step 5). 17.
 `GET /api/classifications/stocks/{symbol}` returns every `factor_input` row of
 the current set for the stock — value, status, the period or session it came
-from, and the `known_on` date — and `/history` pages through the stock's rows in
-earlier sets (AC-17, AC-18).
+from, and the `known_on` date — together with the stock's current universe
+memberships, which is what the Research inspector shows beside each factor's
+inputs and their as-of (S03 §3, §5, S03-3); `/history` pages through the
+stock's rows in earlier sets (AC-17, AC-18). 18. `GET
+/api/classifications/summary` returns the current set's identity, state and
+currency, the per-factor counts and *how many followed stocks are current*,
+with no stock rows: it is the read the shell's Home and Data health screens
+consume for the score as-of, the set state and *{n} of {m} stocks current*
+(blueprint §8; S01 §5, S09 §5), and the one the Research header and
+not-current banner use. A stock is **current** when none of its `factor_input`
+rows in the current set is `missing` or `outdated` — AC-12's presence and
+AC-13's currency; `not_computable` is a data-shape condition and does not
+count against currency — and the denominator is the set's
+`active_instruments` (DEC-0071, PROVISIONAL). The set's three states render
+under the blueprint's display labels — `building` as *Updating*, a complete set
+with a later set building or failed as *Not reflecting the latest download*,
+the failed attempt as *Score update failed* (blueprint §8, STD-UI-1 v6) — while
+the API keeps the domain terms.
 
 ## 4. Components, Interfaces and Technology
 
@@ -328,9 +380,9 @@ earlier sets (AC-17, AC-18).
 | `universe-service` | Universe service | Creates, renames and retires universes and adds or removes members by appending events to the universe event log; derives current and as-of membership by replay; refuses empty universes, last-member removal and stocks acquisition does not cover; takes the server-side filter snapshot | this design |
 | `factor-engine` | Factor engine | Builds one classification set for one qualifying acquisition run: derives every factor input with its known-on date, decides present, missing, outdated or not computable per input, forms each factor's peer set, computes standardised scores and percentiles with SQL window functions, marks possible restatement, and appends the results | this design |
 | `classification-scheduler` | Classification scheduler | Asyncio loop in the application container that polls the run journal table for a succeeded or partial run without a classification set, creates the set, drives the factor engine off the event loop, records failure with its reason, and enforces one building set at a time | this design |
-| `classification-reader` | Classification reader | Read side of classification: resolves the current set and its currency, serves sorted and threshold-filtered lists over all classified stocks or one universe with keyset pagination, side-by-side comparison, per-stock evidence and classification history | this design |
+| `classification-reader` | Classification reader | Read side of classification: resolves the current set and its currency, serves sorted and threshold-filtered lists over all classified stocks or one universe with keyset pagination and a full-set match count, side-by-side comparison of 2 to 6 stocks, per-stock evidence with current universe memberships, classification history, and a set summary with per-factor counts and the current-stock count | this design |
 | `classification-api` | Classification JSON API | FastAPI routers for `/api/universes` and `/api/classifications`, registered on the application the ingestion API factory builds and therefore behind its request-id, Host and Origin middleware and error envelope | this design |
-| `classification-ui` | Classification interface | React screens and fetch layer for Classifications, Universes, universe detail, Compare and stock evidence, mounted in the owner interface shell as navigation destinations and client routes | this design |
+| `classification-ui` | Classification interface | React screens and fetch layer for the Research area of the product UX blueprint: the screener-and-inspector screen S03 at `/research` (filters pane, virtualised results table with selection tray, inspector, not-current banner) and the stock evidence, compare and universes pages at `/research/stocks/:symbol`, `/research/compare?symbols=`, `/research/universes` and `/research/universes/:universeId`, mounted in the owner interface shell as client routes behind the single Research rail destination; filter, sort and scope state lives in the URL query. User-visible labels follow STD-UI-1 v6 and blueprint §7 (*stock*, *download*, *Incomplete*, *Not enough to rank*, *percentile*, *standardised score*); the API keeps the domain terms | this design |
 | `research-store` | Research store | The PostgreSQL schema additions holding universes and their event log, classification sets, per-set factor counts, factor inputs and factor classifications; append-only history applied by numbered migrations `0005` onward | this design |
 
 Components reused from the architecture inventory, by their published
@@ -352,10 +404,19 @@ constraint 12). Every non-2xx response uses the error envelope of
 because the routers are registered behind that middleware; every state-changing
 route here uses `POST`, `PATCH` or `DELETE`, so the Origin check covers all of
 them. Pagination reuses `DEFAULT_PAGE_SIZE` (50) and `MAX_PAGE_SIZE` (500) and
-member lists reuse `MAX_SYMBOLS_PER_REQUEST` (1000) from its §2.4a; no new
-request bound is introduced except the universe name length, which is open
-(Section 8, question 2). The full request and response schemas are the
-component design's to fix; the rows below are the contract they must satisfy.
+member lists reuse `MAX_SYMBOLS_PER_REQUEST` (1000) from its §2.4a. Two bounds
+are this design's: `MAX_COMPARE_SYMBOLS` is 6 (S03 §6, DEC-0070), and the
+universe name length is open (Section 8, question 2). The full request and
+response schemas are the component design's to fix; the rows below are the
+contract they must satisfy.
+
+Two consumers in the rows below are not this design's. `owner-web-app` is the
+delivered shell, by its published identifier. The Home and Data health screens
+that consume the summary read belong to the *App shell & data health*
+capability the blueprint names (§12 D-8), whose system design does not exist
+and has published no component identifier; the interface is specified here and
+the consumer is written as `shell-home-and-data-health-ui (unpublished)` until
+that design names it (Section 8, question 10; skill constraint 6c).
 
 | Interface | Provider component | Consumer component | Shape | Auth | Status codes | Stability |
 |-----------|--------------------|--------------------|-------|------|--------------|-----------|
@@ -367,18 +428,19 @@ component design's to fix; the rows below are the contract they must satisfy.
 | `POST /api/universes/{id}/members` | `classification-api` | `classification-ui` | Request: `{"symbols": [...]}`, at most `MAX_SYMBOLS_PER_REQUEST`. Response: `added`, `already_member` | none, loopback only | `200`; `404`; `409` `universe_retired`; `409` `instrument_not_acquired`; `422` empty or oversize list | stable within this capability |
 | `DELETE /api/universes/{id}/members/{symbol}` | `classification-api` | `classification-ui` | Request: path `id`, `symbol`. Response: `removed_at` | none, loopback only | `200`; `404` `universe_not_found` or `not_a_member`; `409` `last_member` (message offers retirement, AC-5); `409` `universe_retired` | stable within this capability |
 | `DELETE /api/universes/{id}` | `classification-api` | `classification-ui` | Request: path `id`. Response: `lifecycle: retired`, `retired_at`. Retires, never deletes (AC-6, STD-UI-2) | none, loopback only | `200`; `404`; `409` `universe_retired` | stable within this capability |
-| `GET /api/classifications` | `classification-api` | `classification-ui` | Request: `universe_id`, `symbol` prefix, `symbols` explicit list (compare; at most `MAX_PAGE_SIZE`), `sort` from an allowlist (`symbol`, `{factor}_score`, `{factor}_percentile`), `order`, thresholds `{factor}_score_min`/`_max` and `{factor}_percentile_min`/`_max` (percentile 0–100), `limit`, `cursor`. Response: `set` (id, `classification_date`, `run_id`, `state`, `not_current` flag with the building or failed later set and its `failure_reason`) or `never_classified: true`; `factors` with `qualified_count` and `ranked` per factor; `stocks` each with lifecycle and per-factor status, score, percentile, `reason_code`, `reason_input`, `restated_possible`; `next_cursor` | none, loopback only | `200`; `404` `universe_not_found`; `422` malformed filter | stable within this capability |
+| `GET /api/classifications` | `classification-api` | `classification-ui` | Request: `universe_id`, `symbol` prefix, `symbols` explicit list (compare; 2 to `MAX_COMPARE_SYMBOLS` = 6, DEC-0070), `sort` from an allowlist (`symbol`, `{factor}_score`, `{factor}_percentile`), `order`, thresholds `{factor}_score_min`/`_max` and `{factor}_percentile_min`/`_max` (percentile 0–100; S03's per-factor measure, direction and value map onto these), `hide_incomplete` (boolean, default false: exclude stocks with any factor `not_classified`), `limit`, `cursor`. Response: `set` (id, `classification_date`, `run_id`, `state`, `ended_at`, `active_instruments`, `not_current` flag with the building or failed later set and its `failure_reason`) or `never_classified: true`; `factors` with `qualified_count` and `ranked` per factor; `match_count` over the whole filtered set; `stocks` each with lifecycle and per-factor status, score, percentile, `reason_code`, `reason_input`, `restated_possible`; `next_cursor` | none, loopback only | `200`; `404` `universe_not_found`; `422` malformed filter, or a `symbols` list outside 2–6 | stable within this capability |
+| `GET /api/classifications/summary` | `classification-api` | `classification-ui`; `shell-home-and-data-health-ui (unpublished)` — see Section 8, question 10 | Request: none. Response: the `set` block as above (or `never_classified: true`), `factors` with `qualified_count` and `ranked`, and `stocks_current` `{current_count, followed_count}` where a stock is current when none of its `factor_input` rows in the current set is `missing` or `outdated` (AC-12, AC-13) and `followed_count` is the set's `active_instruments`; no stock rows. Feeds the score as-of, the set state (*Updating* / *Not reflecting the latest download* / *Score update failed*, blueprint §8) and *{n} of {m} stocks current* on Home and Data health, and the Research header and banner (DEC-0071, PROVISIONAL) | none, loopback only | `200` | stable within this capability |
 | `GET /api/classifications/sets` | `classification-api` | `classification-ui` | Request: `limit`, `cursor`. Response: sets newest first with `state`, `classification_date`, `run_id`, `started_at`, `ended_at`, `failure_reason`, per-factor counts (AC-20, AC-21) | none, loopback only | `200` | stable within this capability |
 | `GET /api/classifications/sets/{set_id}` | `classification-api` | `classification-ui` | Request: path `set_id`. Response: one set as above | none, loopback only | `200`; `404` | stable within this capability |
-| `GET /api/classifications/stocks/{symbol}` | `classification-api` | `classification-ui` | Request: path `symbol`. Response: the stock's classification in the current set per factor, and every `factor_input` row — name, status, value, the period end or session date it came from, `known_on`, `restated_possible`, and the reason detail when missing (AC-17, AC-12) | none, loopback only | `200` (with `set: null` before any set exists); `404` `instrument_not_found` | stable within this capability |
+| `GET /api/classifications/stocks/{symbol}` | `classification-api` | `classification-ui` | Request: path `symbol`. Response: the stock's classification in the current set per factor, every `factor_input` row — name, status, value, the period end or session date it came from (`as_of`), `known_on`, `restated_possible`, and the reason detail when missing (AC-17, AC-12) — and `memberships`, the active universes the stock currently belongs to (`universe_id`, `name`), which the Research inspector and the evidence page show (S03 §5; DEC-0071, PROVISIONAL) | none, loopback only | `200` (with `set: null` before any set exists); `404` `instrument_not_found` | stable within this capability |
 | `GET /api/classifications/stocks/{symbol}/history` | `classification-api` | `classification-ui` | Request: path `symbol`, `limit`, `cursor`. Response: the stock's classifications in earlier sets, newest first, each with its set's `classification_date` and `run_id` (AC-18) | none, loopback only | `200`; `404` | stable within this capability |
 | `GET /api/instruments` | `ingestion-api` | `classification-ui` | Reused unchanged for picking members by symbol; see `component-design-ingestion-api.md` §11 | none, loopback only | `200` | stable, published by the first capability's design |
 | `GET /api/acquisition-runs/{id}` | `ingestion-api` | `classification-ui` | Reused unchanged to open the run a set reflects (AC-21) | none, loopback only | `200`; `404` | stable, published by the first capability's design |
 | Router registration | `classification-api` | `ingestion-api` | The application factory includes this design's two routers under `/api` before the static mount, so they sit behind the request-id, Host and Origin middleware and the error envelope | n/a — in-process | n/a | the one composition point in the API process; see Section 8 question 4 |
 | Scheduler start | `classification-scheduler` | `ingestion-api` | The application lifespan creates the scheduler task beside the reclaim loop and cancels it on shutdown | n/a — in-process | n/a | composition point; see Section 8 question 4 |
-| Screen registration | `classification-ui` | `owner-web-app` | Client routes `/classifications`, `/universes`, `/universes/:universeId`, `/compare`, `/stocks/:symbol` and two rail destinations, Classifications and Universes, added to the shell | n/a — in-browser | n/a | composition point; see Section 8 question 4 |
+| Screen registration | `classification-ui` | `owner-web-app` | Client routes `/research`, `/research/stocks/:symbol`, `/research/compare`, `/research/universes` and `/research/universes/:universeId` registered at the `routes.tsx` seam (blueprint §2.2; DEC-0068), and one rail destination, Research at `/research`, appended to the delivered rail as a minimal, reversible composition until the shell capability's rail replaces it (DEC-0069, PROVISIONAL) | n/a — in-browser | n/a | composition point; see Section 8 question 4 |
 | Universe operations | `universe-service` | `classification-api` | Python calls: create, rename, add members, remove member, retire, read current, read as-of, read events; refusals raised as typed exceptions mapped to the codes above | n/a — in-process | n/a | stable within this capability |
-| Classification queries | `classification-reader` | `classification-api` | Python calls: current set and currency, list with sort and thresholds, compare, stock evidence, stock history, set list | n/a — in-process | n/a | stable within this capability |
+| Classification queries | `classification-reader` | `classification-api` | Python calls: current set and currency, summary with per-factor counts and current-stock count, list with sort, thresholds, hide-incomplete and match count, compare, stock evidence with memberships, stock history, set list | n/a — in-process | n/a | stable within this capability |
 | Set build | `factor-engine` | `classification-scheduler` | `build(set_id)`: synchronous, dispatched off the event loop; returns the terminal set state | n/a — in-process | n/a | stable within this capability |
 | Qualifying-run read | `market-data-store` | `classification-scheduler` | SQL read of `acquisition_run` rows in `succeeded` or `partial` with no `classification_set` row, oldest `ended_at` first; read-only | n/a — in-process | n/a | depends on the published `acquisition_run` shape (migration `0004`) |
 | Observation read | `market-data-store` | `factor-engine` | SQL reads of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action` and `acquisition_state`; read-only, never an UPDATE or DELETE | n/a — in-process | n/a | depends on the published observation shapes (migration `0002`, `0003`) |
@@ -546,9 +608,11 @@ capability's own test module scans every `.sql` file and SQL string for one.
     (`^[A-Z][A-Z0-9.-]{0,15}$`, migration `0001`); names are trimmed and
     non-empty with a maximum length that is open (Section 8, question 2);
     percentile thresholds lie in 0–100; score thresholds are finite decimals;
-    `sort` resolves through an allowlist of column names, never interpolated;
-    dates are ISO-8601; list sizes and page sizes reuse the published bounds.
-    Every query is parameterised (SEC-INP-002).
+    `hide_incomplete` is a boolean; a compare `symbols` list holds 2 to
+    `MAX_COMPARE_SYMBOLS` (6) symbols (DEC-0070); `sort` resolves through an
+    allowlist of column names, never interpolated; dates are ISO-8601; list
+    sizes and page sizes reuse the published bounds. Every query is
+    parameterised (SEC-INP-002).
 16. **Data classification: Internal (SEC-DAT-001).** Universe names and
     membership describe the owner's research intent over public companies;
     classifications and inputs derive from market data already classified
@@ -567,12 +631,18 @@ capability's own test module scans every `.sql` file and SQL string for one.
     set is building or a run is non-terminal and stops otherwise (reused from
     the owner's 2026-09-05 run-progress cadence, DEC-0054, PROVISIONAL), and
     every polled region shows its last-updated time (STD-UI-25); the
-    classified-stock list is sized for 3000 rows with server-side sort and
-    filter and keyset pagination (STD-UI-30, inheriting the first capability's
-    partial conformance record for virtualisation); `not classified`,
-    `not enough stocks to rank`, `retired`, `updating`, `not reflecting the
-    latest acquisition` and `classification failed` are states mapped to
-    existing tiers in the UX brief (STD-UI-12); no chart is committed.
+    classified-stock list is sized for 3000 rows with server-side sort, filter
+    and count and renders through the design system's `data-table`
+    `virtualised` variant, added for the blueprint on 2026-10-15, which closes
+    the virtualisation gap the first capability's conformance record left open
+    (STD-UI-30, blueprint §13); the domain states `not_classified`,
+    `not_enough_stocks`, `retired`, `building`, not-current and `failed` keep
+    those names in the API and render under the display labels STD-UI-1 v6 and
+    blueprint §7 and §8 fix — *Incomplete*, *Not enough to rank*, *Updating*,
+    *Not reflecting the latest download*, *Score update failed* — at the
+    blueprint's tiers (STD-UI-12); a retired stock's cell is the one state the
+    blueprint does not name and stays this capability's to label in its UX
+    design; no chart is committed.
 19. **One owner-operator (C8).** No per-user ownership of universes, no
     sharing, no multi-tenancy, no horizontal scale.
 20. **Forward-only, additive schema evolution.** Migrations `0005` and `0006`
@@ -614,13 +684,29 @@ capability's own test module scans every `.sql` file and SQL string for one.
 6. **One owner-operator runs the containers on one machine they control**, as
    the first capability assumes; the SEC-ENC-001 exception's condition H6 rests
    on it.
+7. **The shell this capability's screens compose into will change under them
+   without changing them.** The blueprint assigns the §3 shell, the rail and
+   the routes of §2 to a new M1 capability, *App shell & data health* (§12
+   D-8), which is not yet defined. Until it lands, `classification-ui` composes
+   into the delivered shell with one appended Research destination; when it
+   lands, it takes the rail over, migrates nothing of this capability's because
+   the routes are already the blueprint's, and removes the appended entry
+   (DEC-0069, PROVISIONAL; Section 8, questions 4 and 10).
+8. **The Home and Data health screens consume classification state through the
+   summary read and nothing else.** Blueprint §10 says those screens run "on
+   CAP-002's classification state as it is"; this design reads that as the
+   `GET /api/classifications/summary` contract (Section 4.2), so that the
+   current-set rule and the current-stock count live in `classification-reader`
+   once (SA-DUP-001) rather than being re-derived by each consumer from
+   `/sets`. The consuming component is unnamed until that capability's design
+   publishes it (Section 8, question 10).
 
 ## 7. Traceability
 
 | AC # | Acceptance Criterion | Design Element(s) | Section |
 |------|---------------------|--------------------|---------|
 | AC-1 | Universe by hand; no uncovered stock | `POST /api/universes` with `symbols`; `universe-service` coverage check against `instrument` and `coverage_segment`; `409 instrument_not_acquired` refusing the whole request | 3.2 steps 4, 4a; 4.2; 5.13 |
-| AC-2 | Universe from a filter, membership fixed | `POST /api/universes` with `filter` and `set_id`; server-side snapshot; `409 classification_set_changed`; `filter_provenance` on the `created` event | 3.2 step 3a; 4.2; 4.4; 5.14 |
+| AC-2 | Universe from a filter, membership fixed | `POST /api/universes` with `filter` and `set_id`; server-side snapshot over the whole matching set, never the loaded page (S03-7); `422 empty_universe` when the filter matches nothing; `409 classification_set_changed`; `filter_provenance` on the `created` event | 3.2 step 3a; 4.2; 4.4; 5.14 |
 | AC-3 | Several universes; a stock in many | `universe` identity per universe; `member_added` events reference `instrument_id` without exclusivity; `GET /api/universes` | 4.2; 4.4 |
 | AC-4 | Add, remove, rename, retire without touching the store; rename keeps history | `PATCH`, `POST .../members`, `DELETE .../members/{symbol}`, `DELETE /api/universes/{id}`; `renamed` event changes nothing else | 3.2 steps 8, 11, 12; 4.2 |
 | AC-5 | No empty universe; last member not removable | `422 empty_universe`; `409 last_member` offering retirement | 3.2 step 7, 7a; 4.2; 5.13 |
@@ -630,18 +716,32 @@ capability's own test module scans every `.sql` file and SQL string for one.
 | AC-9 | Score and percentile | Re-standardised composite and `percent_rank() × 100` on `factor_classification` | 3.1 step 10a; 5.7 |
 | AC-10 | Automatic refresh; never after failed, cancelled, abandoned | `classification-scheduler` qualifying-run read; `classification_set.run_id` unique | 3.1 steps 4 to 7a, 19 to 21; 5.10 |
 | AC-11 | Up to date within 5 minutes for 3000 stocks | Poll interval default 5 s; SQL window functions over existing indexes; volume test at 3000 instruments | 3.1 steps 28 to 31; 4.3; 5.10 |
-| AC-12 | Like for like only; missing or outdated input named | `factor_input.status`; `factor_classification` `not_classified` with `reason_code` and `reason_input`; `GET /api/classifications/stocks/{symbol}` | 3.1 step 12; 4.4; 5.6 |
-| AC-13 | Outdated inputs | 6-month rule on latest fiscal period end; latest-trading-day rule on prices | 5.6; 5.8 |
+| AC-12 | Like for like only; missing or outdated input named | `factor_input.status`; `factor_classification` `not_classified` with `reason_code` and `reason_input`; `GET /api/classifications/stocks/{symbol}`; listed by default, hidden only by `hide_incomplete` (S03-1) | 3.1 step 12; 3.3 step 15; 4.4; 5.6 |
+| AC-13 | Outdated inputs | 6-month rule on latest fiscal period end; latest-trading-day rule on prices; the same rule defines a *current* stock in `GET /api/classifications/summary` | 3.3 step 18; 4.2; 5.6; 5.8 |
 | AC-14 | Enough stocks to rank | `classification_set_factor.qualified_count`, `ranked`; `not_enough_stocks` rows carrying the count | 3.1 steps 9, 11a; 4.4; 5.6 |
 | AC-15 | Retired stocks | Excluded from peer sets; `reason_code retired`; shown in universes as such; may still be a member | 3.2 step 10; 5.5 |
-| AC-16 | Sort, filter, side by side; all stocks or one universe | `GET /api/classifications` with `sort`, thresholds, `universe_id`, `symbols`; `classification-reader` applies them in SQL over the whole set | 3.3 steps 15, 16; 4.2 |
-| AC-17 | Evidence behind a result | `factor_input` rows with `value`, `as_of`, `known_on`, `detail`; `GET /api/classifications/stocks/{symbol}` | 3.3 step 17; 4.2; 4.4 |
+| AC-16 | Sort, filter, side by side; all stocks or one universe | `GET /api/classifications` with `sort`, thresholds (S03's measure, direction and value mapped onto the twelve bounds), `universe_id`, `symbols` of 2 to `MAX_COMPARE_SYMBOLS` = 6; `match_count`; `classification-reader` applies them in SQL over the whole set (S03-2); routes `/research`, `/research/compare?symbols=` | 3.3 steps 15, 16; 4.2 |
+| AC-17 | Evidence behind a result | `factor_input` rows with `value`, `as_of`, `known_on`, `detail`; `GET /api/classifications/stocks/{symbol}` with `memberships`; the Research inspector shows each factor's inputs' as-of (S03-3) and `/research/stocks/:symbol` every input | 3.3 step 17; 4.2; 4.4 |
 | AC-18 | Classification history, never overwritten | Append-only `factor_classification` per set; `GET /api/classifications/stocks/{symbol}/history` | 4.2; 4.4; 5.3 |
 | AC-19 | No backdating | `classification_date` fixed at set creation; inputs selected as known then; later observations affect later sets only | 3.1 steps 22 to 24; 5.4 |
-| AC-20 | Previous set while not current; failure shown | Current = latest `complete`; `building` and `failed` reported with reason; set rows committed with `complete` in one transaction | 3.1 steps 13 to 14b, 25 to 27; 3.3 step 13; 5.2; 5.11 |
-| AC-21 | Classification currency | `classification_date`, `run_id` on every set; `GET /api/classifications/sets`; reuse of `GET /api/acquisition-runs/{id}` | 3.3 step 13; 4.2 |
-| AC-22 | Honest empty state | `never_classified: true` before any complete set | 3.3 step 14; 5.11 |
-| AC-23 | Restatement mark | `restated_possible` on `factor_input` and `factor_classification`, derived from `provider_filing_date` against first fundamentals `observed_on`, retained in history | 4.4; 5.9 |
+| AC-20 | Previous set while not current; failure shown | Current = latest `complete`; `building` and `failed` reported with reason on the list read and `GET /api/classifications/summary`; set rows committed with `complete` in one transaction; rendered as S03's not-current banner and the blueprint §8 states | 3.1 steps 13 to 14b, 25 to 27; 3.3 steps 13, 18; 5.2; 5.11 |
+| AC-21 | Classification currency | `classification_date`, `run_id`, `ended_at` on every set; `GET /api/classifications/sets` and `/summary`; reuse of `GET /api/acquisition-runs/{id}` | 3.3 steps 13, 18; 4.2 |
+| AC-22 | Honest empty state | `never_classified: true` before any complete set, on the list and summary reads | 3.3 step 14; 5.11 |
+| AC-23 | Restatement mark | `restated_possible` on `factor_input` and `factor_classification`, derived from `provider_filing_date` against first fundamentals `observed_on`, retained in history; carried on every list, compare, universe and evidence read so the mark renders wherever the percentile does (S03-6, blueprint §4.4) | 4.2; 4.4; 5.9 |
+
+The Research screen specification's own acceptance checks (S03 §10) trace to
+the same elements; specification review checks the design against them as well
+as against the criteria above (`docs/ux/README.md`).
+
+| S03 check | Design element(s) | Section |
+|-----------|-------------------|---------|
+| S03-1 incomplete stocks listed unless hidden | `hide_incomplete` default false; filters match on stored values | 3.3 step 15; 4.2 |
+| S03-2 match count over the full set | `match_count` computed in SQL over the filtered set | 3.3 step 15; 4.2 |
+| S03-3 inputs' as-of in the inspector | `factor_input.as_of`, `known_on` on `GET /api/classifications/stocks/{symbol}` | 3.3 step 17; 4.2; 4.4 |
+| S03-4 no percentile below 30 qualifying stocks | `classification_set_factor.ranked`; `not_enough_stocks` rows with the count | 3.1 steps 9, 11a; 5.6 |
+| S03-5 filters, sort and scope survive reload | URL query state in `classification-ui`; every filter is a request parameter | 3.3 step 15; 4.1 |
+| S03-6 restatement mark wherever the percentile appears | `restated_possible` on every read | 4.2; 5.9 |
+| S03-7 save every matching stock, membership kept | Server-side filter snapshot against `set_id`; append-only membership | 3.2 step 3a; 5.14 |
 
 ## 8. Open Questions
 
@@ -669,15 +769,26 @@ capability's own test module scans every `.sql` file and SQL string for one.
 4. **The composition points in delivered components.** This design needs the
    application factory to include two routers and start one lifespan task
    (`src/factorflow/api/app.py`, owned by `ingestion-api`), and the shell to
-   add two rail destinations and five client routes (`web/src/app/shell.tsx`,
-   `web/src/app/routes.tsx`, owned by `owner-web-app`). AGT-SCOPE-002 forbids
-   writing an obligation into one capability that requires editing a delivered
-   one; registration of a new module into an existing composition root is read
-   here as this capability's own work at the seam, not an amendment to the
-   delivered behaviour, and every other touch is avoided (settings live in this
-   capability's own model; the append-only test is a new module). *Owner:
-   capability owner, to confirm the reading or to name a different seam.
-   Blocks: design decomposition's ownership of those two edits.*
+   register five client routes under `/research` and one rail destination,
+   Research (`web/src/app/routes.tsx`, `web/src/app/shell.tsx`, owned by
+   `owner-web-app`). AGT-SCOPE-002 forbids writing an obligation into one
+   capability that requires editing a delivered one; registration of a new
+   module into an existing composition root is read here as this capability's
+   own work at the seam, not an amendment to the delivered behaviour, and every
+   other touch is avoided (settings live in this capability's own model; the
+   append-only test is a new module). The blueprint complicates the shell half:
+   §12 D-8 gives the rail and the routes of §2 to the not-yet-defined *App
+   shell & data health* capability, and CAP-002 "keeps Research and
+   universes". The position taken, **PROVISIONAL** (DEC-0069, superseding
+   DEC-0064's shell part and, with DEC-0068, DEC-0061): `classification-ui`
+   registers its `/research/*` routes at the `routes.tsx` seam and appends
+   exactly one Research entry to the delivered rail so the capability is
+   reachable; the shell capability later takes the rail over, migrates nothing
+   of this capability's because the routes are already the blueprint's, and
+   removes that one entry. DEC-0064's assignments for `app.py`, the
+   `requestJson` export and the two migrations stand. *Owner: capability owner,
+   to confirm the reading and the interim composition, or to name a different
+   seam. Blocks: design decomposition's ownership of the shell edits.*
 5. **DEC-0058 extends DEC-0050's loopback-exception bookkeeping to this
    design.** The owner may uphold it or instead amend DEC-0050's `artifacts`
    and supersede DEC-0058. *Owner: capability owner. Blocks: nothing.*
@@ -702,6 +813,34 @@ capability's own test module scans every `.sql` file and SQL string for one.
    records meanwhile; the owner may promote either to a `decision-record`
    constitution artifact via `$constitution`. *Owner: capability owner. Blocks:
    nothing now.*
+10. **The dependency on the *App shell & data health* capability, and the name
+    of the component that consumes the summary read.** Blueprint §12 D-8
+    (decided 2026-10-16) places the shell, the rail and the route map with a
+    new M1 capability that has no definition yet, and §10 says its Home and
+    Data health screens run "on CAP-002's classification state as it is". Two
+    things follow that this design cannot settle. (a) Whether that capability
+    belongs in `Capability-CAP-002.md` §5.1 — most likely as `requires-runtime`
+    for the rail entry, since nothing in this design's contract depends on it
+    — is the owner's to decide, and only the owner edits that table; this
+    design assumes the interim composition of question 4 meanwhile. (b) Skill
+    constraint 6c requires the consumer of `GET /api/classifications/summary`
+    to be named by the identifier that capability's system design publishes;
+    no such design exists, so Section 4.2 names the interface and writes the
+    consumer as `shell-home-and-data-health-ui (unpublished)`. The
+    architecture inventory will list that row as an interface naming an
+    undeclared component until the identifier exists. `[REQUIRES INPUT: the
+    §5.1 row for the App shell & data health capability, if any, and — once its
+    design exists — the published identifier of the component that consumes
+    the summary read]`. *Owner: capability owner (§5.1); the shell capability's
+    system design (the identifier). Blocks: nothing in this design; the
+    consumer name in Section 4.2 and the architecture inventory's orphan
+    finding.*
+
+**Closed in version 2.** The compare bound: version 1 bounded a compare request
+by `MAX_PAGE_SIZE` and the component designs left `MAX_COMPARE_SYMBOLS` open;
+S03 §6 (approved) fixes it at 2 to 6 stocks, recorded as DEC-0070 (not
+provisional). Questions 1, 2 and 10 are the abstentions this version carries;
+the rest are positions taken and recorded for the owner's verdict.
 
 ## 9. Source Documents
 
@@ -710,7 +849,13 @@ capability's own test module scans every `.sql` file and SQL string for one.
 | Capability CAP-002 v1 (draft) | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` | 23 acceptance criteria; factor definitions, 30-stock threshold, 6-month and latest-trading-day outdatedness, 5-minute budget, all owner decisions of 2026-10-12; universes by hand or one-time filter snapshot; classification measured against all active instruments; loopback posture inherited; `requires-runtime` on the first capability's criteria; STD-UI conformance for 30 rules; assumption 1 unvalidated |
 | Product charter v2 | `docs/constitution/product-charter.md` | Modular monolith with ingestion split out; Universe Definition and Factor Classification are application modules; point-in-time append-only factor and universe history; one owner-operator; M1 Universe & Factors 2026-Q4; M4 backtesting depends on this history |
 | Tech stack v5 | `docs/constitution/tech-stack.md` | C1–C11; Python 3.12 / FastAPI / PostgreSQL 16 without ORM / numbered migrations; React 18 / Vite / Tailwind / shadcn/ui; `psycopg` 3, `pydantic-settings`; OQ-TS-3 deferred to this design; fundamentals not as-reported, restatement obligation; append-only factor and universe writes; validation commands |
-| STD-UI v4 | `docs/constitution/standards/ui-conventions.md` | Thirty rules; status tiers; America/Chicago; polled cadence must be recorded in the design (STD-UI-25); known limitations propagate (STD-UI-17); lists at committed volume (STD-UI-30) |
+| STD-UI v6 | `docs/constitution/standards/ui-conventions.md` | Thirty rules, numbering unchanged since v4; STD-UI-1 v6 separates each concept's domain term (kept in code, API, persistence and SDD documents) from its display label (*stock*, *download*, *Incomplete*, *Not enough to rank*, *score* as *percentile* and *standardised score*); status tiers; America/Chicago; polled cadence must be recorded in the design (STD-UI-25); known limitations propagate (STD-UI-17); lists at committed volume (STD-UI-30); §7 revision history for v5 and v6 |
+| Product UX blueprint `PRODUCT-UX` v6 (approved 2026-10-16) | `docs/ux/product-ux-blueprint.md` | §2.1 one Research rail destination; §2.2 route map giving CAP-002 `/research`, `/research/stocks/:symbol`, `/research/compare?symbols=`, `/research/universes[/:id]` as restyled CAP-002 pages; §3 shell and §3.5 "classifications updating / not current is shown where scores are shown, never in the shell"; §4.4 factor cell and restatement mark in lists; §4.5–4.8 inspector, selection tray, as-of line; §7 vocabulary; §8 score states *Updating* / *Not reflecting the latest download* / *Score update failed*; §9 action tiers for CAP-002's actions; §10 M1 row for CAP-002 and for the new *App shell & data health* capability; §12 D-8; §13 `data-table` `virtualised` and `checkbox` |
+| Research screen `PRODUCT-UX-S03` v4 (approved 2026-10-16) | `docs/ux/screens/S03-research.md` | Three panes; per-factor threshold sentence {measure, direction, value} mapping onto the twelve bounds; *Hide stocks with an incomplete score* default off; `h1` *{n} stocks match*; `data-table` `virtualised` with server-side filter, sort and count; selection tray with *Compare side by side* at 2–6 checked rows (the compare bound) and *Add to universe…*; inspector with memberships and each factor's inputs' as-of; not-current banner; §5 view model; §6 URL query state; §10 acceptance checks S03-1 to S03-7 |
+| Home `PRODUCT-UX-S01` v4 and Data health `PRODUCT-UX-S09` v4 (consumers) | `docs/ux/screens/S01-home.md`, `docs/ux/screens/S09-data-health.md` | Shell capability's screens on "CAP-002's classification state as it is": S01 §5 `data` `{currentCount, followedCount, scoresAsOf}`, S01-6, Stale state *Not reflecting the latest download*; S09 §5 `checks[]` *Factor scores* card with tier, label, result, as-of and exceptions; S09 §11 *Incomplete* wording; review v4 FINDING-32 ties *current* to AC-13 |
+| UX specifications review v4 | `docs/ux/specifications-review-report-v4.md` | READY verdict the blueprint and screens were approved on; open findings touching CAP-002: FINDING-32 (definition of *current*), FINDING-34 (the 2–6 is unsourced within the UX artifacts), FINDING-56 (restatement mark accessible name), FINDING-22 (search field), FINDING-55 (save at zero matches) — the last three are the UX design's |
+| Design system README and `data-table` spec | `design-system/README.md`, `design-system/components/data-table/design-spec.md` | Six components and four variants added 2026-10-15 at `status: beta` for the blueprint; `data-table` `virtualised`: windowed rows, server-side sort, filter and count at 3000 rows, row checkboxes and `aria-selected`, closing the STD-UI-30 gap; `checkbox` for row selection |
+| UX pipeline note | `docs/ux/README.md` | A capability's UX brief claims its rows from blueprint §10 and the UX design starts from the matching screen spec; specification review checks the design against the screen spec's acceptance checks |
 | Architecture inventory | `docs/architecture.md` | Twelve components and sixteen interfaces published by the first capability's design; identifiers reused here: `owner-web-app`, `ingestion-api`, `schema-migrator`, `market-data-store`, `run-journal`, `acquisition-runner`, `runtime-config` |
 | CAP-001 system design v8 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` | Two containers plus PostgreSQL; claimed-row handoff; `observed_on` is FactorFlow's date; trading days derived from acquired bars (constraint 5.5); loopback-only no-auth posture (5.11); reclaim sweep in the application container; terminal run states |
 | Component design: market data store v9 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` | Schema and sizing (3000 instruments, 252 sessions a year); append-only enforcement mechanisms (§2.5); data classified Internal (§4); dump-and-restore rollback (§6); open read-latency question (§14) |
@@ -724,10 +869,12 @@ capability's own test module scans every `.sql` file and SQL string for one.
 | Fixtures | `tests/fixtures/massive/financial_annual.json`, `tests/fixtures/massive/financial_quarterly.json` | Only four line items present; the factor inputs could not be validated from committed data |
 | Decision records | `projects/factorflow-v2/decisions/DEC-0001.md`, `DEC-0050.md` (harness repository) | Unadjusted bars with read-time adjustment (owner); loopback-exception reliance and its bookkeeping requirement (owner) |
 | Decision records written by this design | `projects/factorflow-v2/decisions/DEC-0052.md` to `DEC-0058.md` (harness repository) | OQ-TS-3 provisional resolution; composite method; scheduler and cadences; input derivation; backfill rule; universe semantics; loopback-exception extension |
+| Decision records read and superseded by version 2 | `projects/factorflow-v2/decisions/DEC-0061.md`, `DEC-0064.md` | Rail placement of two destinations (superseded by DEC-0068); seam ownership (shell part superseded by DEC-0069; `app.py`, `requestJson` and migrations stand) |
+| Decision records written by version 2 | `projects/factorflow-v2/decisions/DEC-0068.md` to `DEC-0071.md` | `/research/*` routes and one Research destination (from the approved blueprint); interim rail composition (PROVISIONAL); `MAX_COMPARE_SYMBOLS` = 6 (from approved S03); read-surface additions and the current-stock rule (PROVISIONAL) |
 
 ## 10. Design Readiness
 
-**Design Readiness Score: 82/100**
+**Design Readiness Score: 80/100**
 
 All ten sections carry substantive content. Section 4 declares seven
 components with stable identifiers, records every cross-boundary interface with
@@ -735,17 +882,26 @@ a named provider and consumer component — reusing seven of the first
 capability's published identifiers rather than declaring parallel ones — and
 names concrete approved technologies for both halves of the repository, so the
 design is implementable rather than technology-agnostic. Every acceptance
-criterion traces to a design element.
+criterion traces to a design element, and so does every acceptance check of the
+approved Research screen specification. Version 2 removed the one conflict with
+an approved artifact that version 1 carried — the routes, the two rail
+destinations and the compare bound now follow the blueprint and S03 — which is
+what the interface half needed before specification review.
 
-What keeps it below 90 is that two inputs are genuinely missing and are marked
-rather than invented: the mapping from the seven factor inputs to the
-provider's statement payload keys, which the capability itself asked to be
-validated during system design and which no committed artifact can settle, and
-the universe name bound. Neither changes the architecture; both block specific
-implementation work and are handed to the owner.
+What keeps it below 90 is that three inputs are genuinely missing and are
+marked rather than invented: the mapping from the seven factor inputs to the
+provider's statement payload keys, the universe name bound, and — new in this
+version — the dependency row and the consumer component identifier for the
+*App shell & data health* capability the blueprint names but nobody has
+defined (question 10). One interface in Section 4.2 therefore names a consumer
+that no design has published, and the architecture inventory says so. The
+score is two points lower than version 1's for that reason: the design is
+more aligned but has one more unresolvable reference until another
+capability exists.
 
-What keeps it below 100 is that seven design choices rest on derivations rather
+What keeps it below 100 is that nine design choices rest on derivations rather
 than approved artifacts and are recorded as **PROVISIONAL** agent decisions
-(DEC-0052 to DEC-0058), and that the design has been read by nobody but its
-author. Specification review, and the owner's verdict on each record, earn the
-remaining points.
+(DEC-0052 to DEC-0058, DEC-0069, DEC-0071), that the interim rail composition
+in particular is a position the owner may replace, and that the design has
+been read by nobody but its author. Specification review, and the owner's
+verdict on each record, earn the remaining points.
