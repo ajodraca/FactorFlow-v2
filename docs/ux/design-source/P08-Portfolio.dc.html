@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Portfolio — FactorFlow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--background:0 0% 100%;--surface:210 40% 98%;--foreground:222 47% 11%;--muted:210 40% 96%;--muted-foreground:215 16% 47%;--border:214 32% 91%;--input:214 32% 59%;--ring:222 47% 11%;--primary:222 47% 11%;--primary-foreground:210 40% 98%;--status-neutral:215 16% 44%;--status-neutral-muted:210 40% 96%;--status-active:217 91% 49%;--status-active-muted:217 91% 96%;--status-good:142 62% 30%;--status-good-muted:142 55% 95%;--status-warning:47 93% 20%;--status-warning-muted:45 95% 94%;--status-critical:0 72% 45%;--status-critical-muted:0 80% 96%;--gain:173 80% 27%;--loss:25 88% 37%;--risk-paper:199 72% 38%;--risk-paper-muted:199 72% 95%;--risk-real-money:349 75% 44%;--risk-real-money-muted:349 80% 96%;--seq-1:199 65% 93%;--seq-4:199 74% 44%;--font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-numeric:ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace}
+body{margin:0;background:hsl(var(--surface));color:hsl(var(--foreground));font-family:var(--font-sans);font-size:14px;line-height:1.4}
+a{color:hsl(var(--foreground))}a:hover{color:hsl(var(--status-active))}
+h1{margin:0;font-size:20px;line-height:1.25;font-weight:650;letter-spacing:-0.01em}
+h2{margin:0;font-size:15px;line-height:1.25;font-weight:600}
+.num{font-family:var(--font-numeric);font-variant-numeric:tabular-nums}
+.meta{font-size:12px;color:hsl(var(--muted-foreground))}
+.rail a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:hsl(var(--foreground));font-weight:500}
+.rail a svg{flex:none;color:hsl(var(--muted-foreground))}
+.rail a:hover{background:hsl(var(--muted));color:hsl(var(--foreground))}
+.rail a[aria-current="page"]{background:hsl(var(--background));box-shadow:0 0 0 1px hsl(var(--border))}
+.rail a[aria-current="page"] svg{color:hsl(var(--foreground))}
+.count{margin-left:auto;font:600 11px/18px var(--font-numeric);padding:0 6px;border-radius:999px;background:hsl(var(--status-warning-muted));color:hsl(var(--status-warning))}
+.b{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap}
+.b-good{color:hsl(var(--status-good));background:hsl(var(--status-good-muted))}
+.b-warning{color:hsl(var(--status-warning));background:hsl(var(--status-warning-muted))}
+.b-neutral{color:hsl(var(--status-neutral));background:hsl(var(--status-neutral-muted))}
+.b-critical{color:hsl(var(--status-critical));background:hsl(var(--status-critical-muted))}
+.ic{display:inline-block;width:8px;height:8px;flex:none;background:currentColor;box-sizing:border-box}
+.ic-good{border-radius:50%}
+.ic-warning{clip-path:polygon(50% 0,100% 100%,0 100%);width:9px}
+.ic-neutral{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.ic-critical{}
+.ic-live{transform:rotate(45deg);width:7px;height:7px}
+.ic-paper{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 12px;border-radius:8px;font:500 13px/1 var(--font-sans);border:1px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;box-sizing:border-box}
+.btn-outline{background:hsl(var(--background));border-color:hsl(var(--input));color:hsl(var(--foreground))}
+.card{background:hsl(var(--background));border:1px solid hsl(var(--border));border-radius:12px}
+.search{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 10px;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));color:hsl(var(--muted-foreground));font:13px var(--font-sans);cursor:pointer;min-width:260px}
+kbd{font:11px var(--font-numeric);padding:1px 5px;border:1px solid hsl(var(--border));border-radius:4px;background:hsl(var(--background));color:hsl(var(--muted-foreground))}
+.env{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-decoration:none}
+.env-live{color:hsl(var(--risk-real-money));background:hsl(var(--risk-real-money-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-real-money)/.35)}
+.env-paper{color:hsl(var(--risk-paper));background:hsl(var(--risk-paper-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-paper)/.35)}
+.kill{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:8px;border:0;background:hsl(var(--foreground));color:hsl(var(--background));font:600 13px/1 var(--font-sans);cursor:pointer;white-space:nowrap}
+.killed{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:8px;background:hsl(var(--status-critical-muted));color:hsl(var(--status-critical));font:700 13px/1 var(--font-sans);box-shadow:inset 0 0 0 1.5px hsl(var(--status-critical))}
+:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.tabs{display:inline-flex;gap:4px;padding:4px;border-radius:10px;background:hsl(var(--muted))}
+.tabs a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;color:hsl(var(--muted-foreground))}
+.tabs a[aria-current="page"]{background:hsl(var(--background));color:hsl(var(--risk-real-money));box-shadow:0 1px 2px hsl(222 47% 11% / .08)}
+.tile{padding:16px;display:flex;flex-direction:column;gap:6px}
+.meter{height:8px;border-radius:4px;background:hsl(var(--seq-1));overflow:hidden;position:relative}
+.meter>i{display:block;height:100%;background:hsl(var(--seq-4))}
+.pt{display:grid;grid-template-columns:80px 70px 100px 100px 120px minmax(150px,1fr) 130px;gap:8px;align-items:center;padding:8px 16px;border-top:1px solid hsl(var(--border));font-size:13px;min-width:820px}
+.pt>span:nth-child(n+2):not(:nth-child(6)){text-align:right;font-family:var(--font-numeric)}
+.ot{display:grid;grid-template-columns:150px 60px 70px 70px minmax(160px,1fr);gap:8px;align-items:center;padding:8px 16px;border-top:1px solid hsl(var(--border));font-size:13px}
+.pos{color:hsl(var(--gain))}.neg{color:hsl(var(--loss))}
+.wbar{display:inline-block;width:80px;height:6px;border-radius:3px;background:hsl(var(--seq-1));position:relative;vertical-align:middle}
+.wbar>i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:hsl(var(--seq-4))}
+.wbar>b{position:absolute;left:100%;top:-3px;bottom:-3px;width:2px;background:hsl(var(--foreground))}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; align-items: stretch">
+<aside class="rail" style="flex: 1 1 208px; box-sizing: border-box; border-right: 1px solid hsl(var(--border)); display: flex; flex-direction: column; padding: 16px 12px; gap: 2px">
+<div style="display: flex; align-items: center; gap: 8px; padding: 6px 12px 18px"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 14 L7 8 L10 11 L16 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-weight: 700; font-size: 15px">FactorFlow</span></div>
+<nav aria-label="Primary" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P01-Home.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7 L8 2 L14 7 V14 H10 V10 H6 V14 H2 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>Home<span class="count">4</span></a>
+<a href="P03-Research.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>Research</a>
+<a href="P04-Strategies.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4 H9 M2 8 H12 M2 12 H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="12" cy="4" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="12" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle></svg>Strategies</a>
+<a href="P08-Portfolio.dc.html" aria-current="page"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"></rect><path d="M6 5 V3 H10 V5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Portfolio</a>
+</nav>
+<div style="flex: 1; min-height: 24px"></div>
+<nav aria-label="Data and system" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P09-Data.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4" rx="5.5" ry="2" fill="none" stroke="currentColor" stroke-width="1.4"></ellipse><path d="M2.5 4 V12 C2.5 13.1 5 14 8 14 C11 14 13.5 13.1 13.5 12 V4 M2.5 8 C2.5 9.1 5 10 8 10 C11 10 13.5 9.1 13.5 8" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Data health<span class="count">1</span></a>
+<a href="P02-Setup.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4 H13 M3 8 H13 M3 12 H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="4" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="8" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="5" cy="12" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle></svg>Settings</a>
+</nav>
+</aside>
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+<header style="position: sticky; top: 0; z-index: 5; display: flex; flex-direction: column; background: hsl(var(--background)); border-bottom: 1px solid hsl(var(--border))">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 24px">
+<div style="flex: 1 1 160px; min-width: 0; font-weight: 600">Portfolio</div>
+<button type="button" class="search"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>Search stocks, strategies…<kbd style="margin-left: auto">⌘K</kbd></button>
+<div role="region" aria-label="Trading environment" style="display: flex; gap: 6px"><span class="env env-live"><span class="ic ic-live"></span>LIVE · 1 STRATEGY</span><span class="env env-paper"><span class="ic ic-paper"></span>PAPER · 3</span></div>
+<span aria-hidden="true" style="width: 1px; height: 28px; background: hsl(var(--border)); margin: 0 8px"></span>
+<sc-if value="{{running}}" hint-placeholder-val="{{true}}"><button type="button" class="kill" onClick="{{stop}}"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5 H10.5 L14.5 5.5 V10.5 L10.5 14.5 H5.5 L1.5 10.5 V5.5 Z" fill="hsl(var(--status-critical))"></path><path d="M5.5 8 H10.5" stroke="white" stroke-width="1.8" stroke-linecap="round"></path></svg>Stop all trading</button></sc-if>
+<sc-if value="{{stopped}}" hint-placeholder-val="{{false}}"><span class="killed" role="status"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5 H10.5 L14.5 5.5 V10.5 L10.5 14.5 H5.5 L1.5 10.5 V5.5 Z" fill="currentColor"></path></svg>TRADING STOPPED</span></sc-if>
+</div>
+<sc-if value="{{stopped}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 24px; background: hsl(var(--status-critical-muted)); border-top: 1px solid hsl(var(--status-critical) / 0.3); font-size: 13px">
+<span style="flex: 1 1 400px"><b>All trading is stopped</b> since <span class="num">18:52:07 CDT</span>, as recorded in the database and at the broker. No new orders are sent, in live or paper. What you hold stays held.</span>
+<button type="button" class="btn btn-outline" onClick="{{resume}}">Resume trading…</button>
+</div>
+</sc-if>
+</header>
+<main style="padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<nav class="tabs" aria-label="Environment"><a href="#" aria-current="page"><span class="ic ic-live"></span>Live · real money</a><a href="#"><span class="ic ic-paper"></span>Paper · practice</a></nav>
+<span class="meta">Alpaca live account · prices at today’s close, 2026-10-15 15:00 CDT · checked 18:52:14</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div class="card tile"><span class="meta">Account value</span><span class="num" style="font-size: 24px; font-weight: 600">$25,846.12</span><span class="meta">Cash <span class="num">$512.30</span></span></div>
+<div class="card tile"><span class="meta">Today</span><span class="num pos" style="font-size: 24px; font-weight: 600">+$118.40</span><span class="meta num">+0.46%</span></div>
+<div class="card tile"><span class="meta">Largest position vs 8% limit</span><span class="num" style="font-size: 18px; font-weight: 600">{{maxW}} <span class="meta">VZ</span></span><div class="meter" role="img" aria-label="{{maxW}} of an 8% limit"><i style="{{maxBar}}"></i></div></div>
+<div class="card tile"><span class="meta">Today’s loss vs 2% daily limit</span><span class="num" style="font-size: 18px; font-weight: 600">0.00%</span><div class="meter" role="img" aria-label="No loss today, limit 2%"><i style="width: 0%"></i></div><span class="meta">At 2% this strategy stops itself.</span></div>
+</div>
+<section class="card" aria-labelledby="st">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px">
+<div><h2 id="st">Deep Value Quarterly</h2><span class="meta">Live since 2026-08-03 · +6.12% · next rebalance <span class="num">Mon 2027-01-04 14:45 CST</span></span></div>
+<span style="display: flex; gap: 8px"><a href="P06-Backtest.dc.html" class="btn btn-outline">Evidence</a><span style="width: 24px"></span><button type="button" class="btn btn-outline">Pause this strategy…</button></span>
+</div>
+<div style="overflow-x: auto">
+<div class="pt meta" style="font-weight: 500"><span>Symbol</span><span>Shares</span><span>Avg cost</span><span>Close</span><span>Value</span><span>Weight · limit 8%</span><span>Unrealised</span></div>
+<sc-for list="{{pos}}" as="p" hint-placeholder-count="10">
+<div class="pt"><span class="num" style="font-weight: 600">{{p.sym}}</span><span>{{p.sh}}</span><span>{{p.avg}}</span><span>{{p.last}}</span><span>{{p.val}}</span><span style="display: flex; align-items: center; gap: 8px"><span class="num" style="width: 44px; text-align: right">{{p.w}}</span><span class="wbar" aria-hidden="true" style="width: 80px"><i style="{{p.wbar}}"></i></span></span><span class="{{p.pc}}">{{p.pl}}</span></div>
+</sc-for>
+<div style="padding: 10px 16px; border-top: 1px solid hsl(var(--border))" class="meta">Showing 10 of 18 positions</div>
+</div>
+</section>
+<section class="card" aria-labelledby="ord">
+<div style="padding: 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><h2 id="ord">Orders</h2><span class="meta">{{orderNote}}</span></div>
+<div class="ot meta" style="font-weight: 500"><span>Time (CDT)</span><span>Side</span><span>Symbol</span><span style="text-align: right">Shares</span><span>Outcome</span></div>
+<div class="ot"><span class="num meta">2026-10-01 14:45:12</span><span>Buy</span><span class="num">INTC</span><span class="num" style="text-align: right">72</span><span><span class="b b-good"><span class="ic ic-good"></span>Filled at $22.10</span></span></div>
+<div class="ot"><span class="num meta">2026-10-01 14:45:12</span><span>Buy</span><span class="num">VZ</span><span class="num" style="text-align: right">42</span><span><span class="b b-warning"><span class="ic ic-warning"></span>Filled 42 of 46 at $39.10 · rest cancelled at close</span></span></div>
+<div class="ot"><span class="num meta">2026-10-01 14:45:11</span><span>Sell</span><span class="num">WBA</span><span class="num" style="text-align: right">110</span><span><span class="b b-good"><span class="ic ic-good"></span>Filled at $11.96</span></span></div>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"killEngaged":{"editor":"boolean","default":false,"section":"States"},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { stopped: null }; }
+  renderVals() {
+    const stopped = this.state.stopped === null ? (this.props.killEngaged ?? false) : this.state.stopped;
+    const total = 25846.12;
+    const money = (v) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const D = [['VZ', 42, 39.10, 41.85], ['GM', 33, 48.10, 52.64], ['INTC', 72, 22.10, 23.94], ['BAC', 38, 42.90, 45.21], ['KO', 24, 69.80, 71.53], ['MO', 30, 52.80, 57.12], ['CVS', 25, 61.20, 68.40], ['CSCO', 29, 55.20, 58.77], ['PFE', 68, 25.40, 24.88], ['XOM', 15, 108.40, 112.30]];
+    let mx = 0;
+    const pos = D.map((d) => {
+      const val = d[1] * d[3], w = val / total, pl = (d[3] - d[2]) * d[1];
+      mx = Math.max(mx, w);
+      return { sym: d[0], sh: String(d[1]), avg: money(d[2]), last: money(d[3]), val: money(val), w: (w * 100).toFixed(2) + '%', wbar: 'width: ' + Math.min(100, w / 0.08 * 100).toFixed(1) + '%', pl: (pl >= 0 ? '+' : '−') + money(Math.abs(pl)), pc: pl >= 0 ? 'pos' : 'neg' };
+    }).sort((a, b) => parseFloat(b.w) - parseFloat(a.w));
+    return {
+      pos: pos, maxW: (mx * 100).toFixed(2) + '%', maxBar: 'width: ' + (mx / 0.08 * 100).toFixed(1) + '%',
+      running: !stopped, stopped: stopped,
+      stop: () => this.setState({ stopped: true }),
+      resume: () => this.setState({ stopped: false }),
+      orderNote: stopped ? 'Stopped: the next rebalance will not send orders until you resume.' : 'None today. Last rebalance 2026-10-01.'
+    };
+  }
+}
+</script>
+</body>
+</html>

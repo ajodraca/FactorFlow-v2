@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Strategies — FactorFlow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--background:0 0% 100%;--surface:210 40% 98%;--foreground:222 47% 11%;--muted:210 40% 96%;--muted-foreground:215 16% 47%;--border:214 32% 91%;--input:214 32% 59%;--ring:222 47% 11%;--primary:222 47% 11%;--primary-foreground:210 40% 98%;--status-neutral:215 16% 44%;--status-neutral-muted:210 40% 96%;--status-active:217 91% 49%;--status-active-muted:217 91% 96%;--status-good:142 62% 30%;--status-good-muted:142 55% 95%;--status-warning:47 93% 20%;--status-warning-muted:45 95% 94%;--status-critical:0 72% 45%;--gain:173 80% 27%;--loss:25 88% 37%;--risk-paper:199 72% 38%;--risk-paper-muted:199 72% 95%;--risk-real-money:349 75% 44%;--risk-real-money-muted:349 80% 96%;--seq-1:199 65% 93%;--font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-numeric:ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace}
+body{margin:0;background:hsl(var(--surface));color:hsl(var(--foreground));font-family:var(--font-sans);font-size:14px;line-height:1.4}
+a{color:hsl(var(--foreground))}a:hover{color:hsl(var(--status-active))}
+h1{margin:0;font-size:20px;line-height:1.25;font-weight:650;letter-spacing:-0.01em}
+h2{margin:0;font-size:14px;line-height:1.25;font-weight:600}
+h3{margin:0;font-size:14px;line-height:1.3;font-weight:600}
+.num{font-family:var(--font-numeric);font-variant-numeric:tabular-nums}
+.meta{font-size:12px;color:hsl(var(--muted-foreground))}
+.rail a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:hsl(var(--foreground));font-weight:500}
+.rail a svg{flex:none;color:hsl(var(--muted-foreground))}
+.rail a:hover{background:hsl(var(--muted));color:hsl(var(--foreground))}
+.rail a[aria-current="page"]{background:hsl(var(--background));box-shadow:0 0 0 1px hsl(var(--border))}
+.rail a[aria-current="page"] svg{color:hsl(var(--foreground))}
+.count{margin-left:auto;font:600 11px/18px var(--font-numeric);padding:0 6px;border-radius:999px;background:hsl(var(--status-warning-muted));color:hsl(var(--status-warning))}
+.b{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap}
+.b-good{color:hsl(var(--status-good));background:hsl(var(--status-good-muted))}
+.b-warning{color:hsl(var(--status-warning));background:hsl(var(--status-warning-muted))}
+.b-neutral{color:hsl(var(--status-neutral));background:hsl(var(--status-neutral-muted))}
+.ic{display:inline-block;width:8px;height:8px;flex:none;background:currentColor;box-sizing:border-box}
+.ic-good{border-radius:50%}
+.ic-warning{clip-path:polygon(50% 0,100% 100%,0 100%);width:9px}
+.ic-neutral{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.ic-live{transform:rotate(45deg);width:7px;height:7px}
+.ic-paper{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:0 12px;border-radius:8px;font:500 13px/1 var(--font-sans);border:1px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;box-sizing:border-box}
+.btn-primary{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+.btn-primary:hover{color:hsl(var(--primary-foreground))}
+.btn-outline{background:hsl(var(--background));border-color:hsl(var(--input));color:hsl(var(--foreground))}
+.search{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 10px;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));color:hsl(var(--muted-foreground));font:13px var(--font-sans);cursor:pointer;min-width:260px}
+kbd{font:11px var(--font-numeric);padding:1px 5px;border:1px solid hsl(var(--border));border-radius:4px;background:hsl(var(--background));color:hsl(var(--muted-foreground))}
+.env{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-decoration:none}
+.env-live{color:hsl(var(--risk-real-money));background:hsl(var(--risk-real-money-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-real-money)/.35)}
+.env-paper{color:hsl(var(--risk-paper));background:hsl(var(--risk-paper-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-paper)/.35)}
+.kill{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:8px;border:0;background:hsl(var(--foreground));color:hsl(var(--background));font:600 13px/1 var(--font-sans);cursor:pointer;white-space:nowrap;text-decoration:none}
+:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.col{display:flex;flex-direction:column;gap:10px;min-width:220px}
+.colh{display:flex;flex-direction:column;gap:2px;padding:4px 4px 8px;border-bottom:2px solid hsl(var(--border))}
+.sc{background:hsl(var(--background));border:1px solid hsl(var(--border));border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.sc .rule{font-size:13px;line-height:1.5;color:hsl(var(--muted-foreground))}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:12px}
+.kv span:nth-child(odd){color:hsl(var(--muted-foreground))}
+.kv span:nth-child(even){font-family:var(--font-numeric);text-align:right}
+.prog{height:6px;border-radius:3px;background:hsl(var(--seq-1));overflow:hidden}
+.prog>i{display:block;height:100%;background:hsl(var(--risk-paper))}
+.pos{color:hsl(var(--gain))}.neg{color:hsl(var(--loss))}
+.arrow{color:hsl(var(--muted-foreground));font-size:12px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; align-items: stretch">
+<aside class="rail" style="flex: 1 1 208px; box-sizing: border-box; border-right: 1px solid hsl(var(--border)); display: flex; flex-direction: column; padding: 16px 12px; gap: 2px">
+<div style="display: flex; align-items: center; gap: 8px; padding: 6px 12px 18px"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 14 L7 8 L10 11 L16 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-weight: 700; font-size: 15px">FactorFlow</span></div>
+<nav aria-label="Primary" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P01-Home.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7 L8 2 L14 7 V14 H10 V10 H6 V14 H2 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>Home<span class="count">4</span></a>
+<a href="P03-Research.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>Research</a>
+<a href="P04-Strategies.dc.html" aria-current="page"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4 H9 M2 8 H12 M2 12 H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="12" cy="4" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="12" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle></svg>Strategies</a>
+<a href="P08-Portfolio.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"></rect><path d="M6 5 V3 H10 V5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Portfolio</a>
+</nav>
+<div style="flex: 1; min-height: 24px"></div>
+<nav aria-label="Data and system" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P09-Data.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4" rx="5.5" ry="2" fill="none" stroke="currentColor" stroke-width="1.4"></ellipse><path d="M2.5 4 V12 C2.5 13.1 5 14 8 14 C11 14 13.5 13.1 13.5 12 V4 M2.5 8 C2.5 9.1 5 10 8 10 C11 10 13.5 9.1 13.5 8" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Data health<span class="count">1</span></a>
+<a href="P02-Setup.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4 H13 M3 8 H13 M3 12 H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="4" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="8" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="5" cy="12" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle></svg>Settings</a>
+</nav>
+</aside>
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+<header style="position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 24px; background: hsl(var(--background)); border-bottom: 1px solid hsl(var(--border))">
+<div style="flex: 1 1 160px; min-width: 0; font-weight: 600">Strategies</div>
+<button type="button" class="search"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>Search stocks, strategies…<kbd style="margin-left: auto">⌘K</kbd></button>
+<div role="region" aria-label="Trading environment" style="display: flex; gap: 6px"><a href="P08-Portfolio.dc.html" class="env env-live"><span class="ic ic-live"></span>LIVE · 1 STRATEGY</a><a href="P04-Strategies.dc.html" class="env env-paper"><span class="ic ic-paper"></span>PAPER · 3</a></div>
+<span aria-hidden="true" style="width: 1px; height: 28px; background: hsl(var(--border)); margin: 0 8px"></span>
+<a href="P08-Portfolio.dc.html" class="kill"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5 H10.5 L14.5 5.5 V10.5 L10.5 14.5 H5.5 L1.5 10.5 V5.5 Z" fill="hsl(var(--status-critical))"></path><path d="M5.5 8 H10.5" stroke="white" stroke-width="1.8" stroke-linecap="round"></path></svg>Stop all trading</a>
+</header>
+<main style="padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 80ch"><h1>Strategies</h1><span class="meta" style="font-size: 13px">Every strategy moves left to right. Nothing reaches real money without passing through paper trading and your review.</span></div>
+<span style="display: flex; gap: 8px"><a href="#" class="btn btn-outline">Stopped (2)</a><a href="P05-Builder.dc.html" class="btn btn-primary">+ New strategy</a></span>
+</div>
+<div style="overflow-x: auto; padding-bottom: 8px">
+<div style="display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: 16px; min-width: 1140px">
+<section class="col" aria-labelledby="c1">
+<div class="colh"><h2 id="c1">1 · Draft <span class="meta num">2</span></h2><span class="meta">Rules written, not yet tested</span></div>
+<article class="sc"><h3>Growth Momentum Blend</h3><p class="rule" style="margin: 0">Each month, hold the 25 followed stocks with the best average of growth and momentum percentiles.</p><div class="kv"><span>Edited</span><span>2026-10-12</span></div><a href="P06-Backtest.dc.html" class="btn btn-primary">Run backtest</a></article>
+<article class="sc"><h3>Small-Cap Value</h3><p class="rule" style="margin: 0">Top 30 by value within Small caps…</p><span class="b b-warning" style="align-self: flex-start"><span class="ic ic-warning"></span>No rebalance schedule yet</span><a href="P05-Builder.dc.html" class="btn btn-outline">Finish rules</a></article>
+</section>
+<section class="col" aria-labelledby="c2">
+<div class="colh"><h2 id="c2">2 · Backtested <span class="meta num">1</span></h2><span class="meta">How it would have done, 2021–2026</span></div>
+<article class="sc"><h3>Momentum Pure</h3><p class="rule" style="margin: 0">Each month, hold the top 20 by momentum, equal weight.</p><div class="kv"><span>Per year</span><span class="pos">+9.1%</span><span>Worst drop</span><span class="neg">−24.8%</span><span>vs benchmark</span><span class="neg">−1.4 pp/yr</span></div><a href="P06-Backtest.dc.html" class="btn btn-primary">Start paper trading</a><a href="P06-Backtest.dc.html" class="meta">See backtest</a></article>
+</section>
+<section class="col" aria-labelledby="c3">
+<div class="colh"><h2 id="c3" style="color: hsl(var(--risk-paper))">3 · Paper trading <span class="meta num">2</span></h2><span class="meta">Practice money, real broker, real fills</span></div>
+<article class="sc"><div style="display: flex; justify-content: space-between; gap: 8px"><h3>Momentum Tilt</h3><span class="b b-warning"><span class="ic ic-warning"></span>Limit hit</span></div><div style="display: flex; flex-direction: column; gap: 4px"><div class="prog" role="img" aria-label="41 of 60 paper trading days"><i style="width: 68%"></i></div><span class="meta"><span class="num">41</span> of <span class="num">60</span> days toward review</span></div><div class="kv"><span>Since start</span><span class="neg">−1.85%</span><span>Tracking backtest</span><span>within 1.2 pp</span></div><a href="P08-Portfolio.dc.html" class="btn btn-outline">Open</a></article>
+<article class="sc"><h3>Growth at a Price</h3><div style="display: flex; flex-direction: column; gap: 4px"><div class="prog" role="img" aria-label="12 of 60 paper trading days"><i style="width: 20%"></i></div><span class="meta"><span class="num">12</span> of <span class="num">60</span> days toward review</span></div><div class="kv"><span>Since start</span><span class="pos">+0.22%</span><span>Tracking backtest</span><span>within 0.4 pp</span></div><a href="P08-Portfolio.dc.html" class="btn btn-outline">Open</a></article>
+</section>
+<section class="col" aria-labelledby="c4">
+<div class="colh"><h2 id="c4">4 · Ready for review <span class="meta num">1</span></h2><span class="meta">Met your gate; waiting for your decision</span></div>
+<article class="sc" style="border-color: hsl(var(--foreground)); box-shadow: 0 0 0 1px hsl(var(--foreground))"><div style="display: flex; justify-content: space-between; gap: 8px"><h3>Quality Value Monthly</h3><span class="b b-good"><span class="ic ic-good"></span>Gate met</span></div><p class="rule" style="margin: 0">Each month, hold the 20 best value stocks whose momentum is above average.</p><div class="kv"><span>Paper days</span><span>63</span><span>Since start</span><span class="pos">+3.40%</span><span>Tracking backtest</span><span>within 0.8 pp</span></div><a href="P07-Promote.dc.html" class="btn btn-primary">Review evidence</a></article>
+</section>
+<section class="col" aria-labelledby="c5">
+<div class="colh"><h2 id="c5" style="color: hsl(var(--risk-real-money))">5 · Live <span class="meta num">1</span></h2><span class="meta">Real money, inside your limits</span></div>
+<article class="sc"><div style="display: flex; justify-content: space-between; gap: 8px"><h3>Deep Value Quarterly</h3><span class="env env-live" style="height: 22px"><span class="ic ic-live"></span>LIVE</span></div><div class="kv"><span>Value</span><span>$25,846.12</span><span>Since 2026-08-03</span><span class="pos">+6.12%</span><span>Daily-loss limit</span><span>2% · unused</span></div><a href="P08-Portfolio.dc.html" class="btn btn-outline">Monitor</a></article>
+</section>
+</div>
+</div>
+<p class="meta" style="margin: 0">Your gate: a strategy is ready for review after <b class="num">60</b> paper trading days while staying within <b class="num">2</b> percentage points of its backtest. Change it in Settings → Promotion gate.</p>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

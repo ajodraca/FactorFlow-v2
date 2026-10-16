@@ -83,7 +83,7 @@ The 12 components here cover the first UI capability of the original build, and 
 CAP-001 needs. `intake.md` describes how to grow the set, and most gaps turn out to be a new
 variant of an existing component rather than a new component.
 
-**One known gap for CAP-001 remains:** an indeterminate progress indicator, for an acquisition
+**One known gap for CAP-001 remained** (closed 2026-10-15 by `progress`, below): an indeterminate progress indicator, for an acquisition
 run whose duration cannot be estimated. It is genuinely new rather than a variant. It is
 deliberately not written here, because `intake.md` step 2.3 requires the interaction and
 accessibility contracts to be derived from the upstream Radix primitive documentation rather
@@ -97,6 +97,16 @@ could only specify adding symbols one at a time. Its `list` variant carries bulk
 shadcn/ui's Textarea is a styled native element rather than a Radix primitive, so its contracts
 derive from the HTML element and the WAI-ARIA text field pattern; the spec says so rather than
 citing a primitive that does not exist.
+
+**Six components and four variants were added on 2026-10-15**, all at `status: beta`, for the
+product UX blueprint (`docs/ux/product-ux-blueprint.md`, §13): `stepper` (lifecycle and multi-step
+setup, STD-UI-26), `progress` (whose `indeterminate` variant closes the CAP-001 gap above, and whose
+`meter` variant renders limit use), `checkbox` (including the `acknowledgement` variant STD-UI-20
+needs), `radio-group`, `toggle-group` (including the paper/live `environment` variant) and
+`command` (the ⌘K palette). New variants: `button` `kill-switch` (STD-UI-21), `chart` `sparkline`
+and period bands, and `data-table` `virtualised` (STD-UI-30). Interaction and accessibility
+contracts come from the Radix, cmdk and WAI-ARIA documentation each spec cites, as `intake.md`
+step 2.3 requires. No token was added.
 
 ## Financial tokens
 

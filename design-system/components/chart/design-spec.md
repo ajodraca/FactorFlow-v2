@@ -31,6 +31,10 @@ portfolio allocation, cumulative return.
 | `area` | A cumulative total over time where the magnitude matters |
 | `scatter` | Relationship between two factors across the universe |
 
+| `sparkline` | A single-series trend inside a list row or tile: no axes, no legend, 2 px line in `--chart-1`. Its accessible name states the direction and period (*Rising over 30 days*), and the row links to where the full series and its table live (STD-UI-28) |
+
+**Period bands** are an annotation available on `line`: named date ranges shaded in `--muted` behind the series, labelled at the top of the band in `--chart-axis` at `--text-xs`. They mark market periods (*2022 drawdown*) for comparison and are listed in the chart's table equivalent. A band never carries a series colour.
+
 There is no pie variant. Composition is read more accurately from a bar chart or a table with
 percentages, and allocation accuracy matters here.
 
