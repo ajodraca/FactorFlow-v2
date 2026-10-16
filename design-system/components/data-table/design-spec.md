@@ -33,6 +33,7 @@ component most screens are built around.
 | `holdings` | Portfolio positions; includes a totals row pinned to the bottom |
 | `history` | Immutable past records (executed trades); no row selection, no row actions |
 | `compact` | Embedded in a card or side panel; reduced row height, no pagination |
+| `virtualised` | Lists that can reach the committed volume (3,000 rows) and need search and filter rather than pagination (STD-UI-30). Rows render in a windowed list; sorting, filtering and counting run server-side over the full set. Row checkboxes and a selected row (`aria-selected`) are supported. Closes the gap CAP-001's conformance record notes against STD-UI-30 |
 | `expandable` | One row per record with a secondary level of detail behind per-row expansion. Rows are collapsed by default. Required wherever the row count can reach the volume a capability commits to and each row carries sub-records — an expanded-by-default view at that volume is unreadable (STD-UI-30) |
 
 ## 3. Anatomy

@@ -2,13 +2,13 @@
 artifact_schema_version: 1
 artifact_id: STD-UI
 artifact_type: constitution-artifact
-artifact_version: 4
+artifact_version: 6
 id: STD-UI
 title: Owner Interface Conventions
 kind: standard
 status: approved
 created: 2026-09-05
-updated: 2026-09-05
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 owning_capability: none
@@ -16,37 +16,42 @@ applies_to: every capability that delivers or modifies an owner-facing interface
 ai_provenance:
   agent_id: constitution-agent
   agent_version: "1.0"
-  model: claude-opus-5
-  tool: Claude (Cowork)
+  model: claude-opus-5-5
+  tool: Claude
   tool_version: unknown
-  timestamp: 2026-09-05T04:01:14Z
+  timestamp: 2026-10-16T02:12:00Z
   source_artifacts:
+    - id: STD-UI-v5-proposal
+      version: "1, accepted 2026-10-15"
+    - id: PRODUCT-UX
+      version: "3"
     - id: product-charter
       version: "2"
     - id: tech-stack
-      version: "2"
-    - id: CAP-001-ux-brief
       version: "5"
+    - id: CAP-001-ux-brief
+      version: "7"
     - id: edg-compliance
       version: "1.0"
     - id: factorflow-design-system
-      version: "ported from the first build, 2026-09-05"
+      version: "as of 2026-10-15"
   invoking_user: ajodraca
-  correlation_id: 6493d4a3-41a0-4991-9e37-c372f762c3d0
+  correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-09-05T04:06:20Z
-  reviewed_revision: sha256:ecce3693ba29720a0e24b9f5528be59b6d5e87d1160ab65615365f783307d39d
-  review_artifact: "docs/constitution/reviews/ui-conventions-review-v2.md"
+  approved_at: 2026-10-16T02:18:24Z
+  reviewed_revision: sha256:3ad42ff2ef4e3e4b1092009b6d96d5d00c7f70956115d902b5507e6008ab62ce
+  review_artifact: "docs/constitution/reviews/ui-conventions-review-v4.md"
 ---
 
 # Owner Interface Conventions
 
 ## 1. Purpose and Standing
 
-FactorFlow-v2 has no interface yet. `CAP-001-ux-brief` v1 records that no design
-system is configured for the project and that the patterns CAP-001 settles —
+When this standard was first written, FactorFlow-v2 had no interface.
+`CAP-001-ux-brief` v1 recorded that no design system was configured for the
+project and that the patterns CAP-001 settles —
 status vocabulary, empty and failure states, table shape — are inherited by every
 capability from M2 through M6. Before this standard, those patterns had no
 governed home: each UX brief would have re-derived them, and divergence between
@@ -142,21 +147,41 @@ Recorded as scope conditions so that a reviewer does not raise them as findings.
 
 ### STD-UI-1 — Product vocabulary
 
-**Rule:** User-visible text MUST use the product's domain vocabulary. It MUST NOT
-substitute generic terms — job, sync, import, task, item, object, entity, record,
-delete — for a named product concept. It MUST NOT surface implementation
-vocabulary (null, undefined, exception, timeout, 500).
+**Rule:** User-visible text MUST use the product vocabulary below. Each concept
+has one **domain term**, used in code, API, persistence, logs and SDD documents,
+and at most one **display label**, used in user-visible text. Where a display
+label is defined, user-visible text MUST use it and MUST NOT use the domain term
+or any other synonym. User-visible text MUST NOT substitute generic terms — job,
+sync, import, task, item, object, entity, record, delete — for a named concept,
+and MUST NOT surface implementation vocabulary (null, undefined, exception,
+timeout, 500).
 
-The vocabulary is: instrument, universe, acquisition run, coverage, observation,
-history depth, trading day, gap, retired, factor, classification, strategy,
-promotion, paper, live, kill switch.
+| Domain term | Display label |
+|-------------|---------------|
+| instrument | stock |
+| instrument (on the acquisition list) | followed stock |
+| retire (an instrument) | stop following |
+| acquisition run | download |
+| run outcome `succeeded` / `partial` / `failed` / `cancelled` / `abandoned` | Complete / Partial / Failed / Cancelled by you / Interrupted |
+| not classified | Incomplete |
+| not enough stocks to rank | Not enough to rank |
+| classification (a factor's result for one stock, as a whole) | score |
+| percentile rank (the component of a score, 0–100) | percentile |
+| standardised score (the component of a score, signed) | standardised score — never shortened to *score* |
+| promotion | review (the stage) / go live (the action) |
+| kill switch | Stop all trading (the control) / Trading stopped (the state) |
+| universe, coverage, observation, history depth, trading day, gap, factor, strategy, paper, live | unchanged: the domain term is the display label |
+| gate, rebalance, limit, benchmark, market period | new concepts: the domain term is the display label |
 
-**Authority:** Charter §1–§3, which names each of these; `edg-compliance`
-terminology principle.
+**Authority:** Charter §1–§3, which names each concept; `edg-compliance`
+terminology principle; owner decision of 2026-10-15 for the display labels
+(`docs/constitution/proposals/STD-UI-v5-proposal.md`, A-1).
 **Verification:** Reviewer reads every user-visible string in the capability's UX
-brief and implementation against this list.
-**Specialization:** permitted — a capability MAY add a term its domain
-introduces, recording it in its UX brief. It MAY NOT redefine a term above.
+brief and implementation against this table: display labels where defined, never
+the domain term beside them, no generic or implementation word.
+**Specialization:** permitted — a capability MAY add a concept its domain
+introduces, with its domain term and display label, recording both in its UX
+brief. It MAY NOT redefine a concept or a label above.
 
 ### STD-UI-2 — Words must describe actual behaviour
 
@@ -288,9 +313,17 @@ against its surface. The validation output MUST be recorded.
 persistent region present on every screen, which MUST NOT be dismissible and MUST
 NOT scroll out of view. The distinction MUST NOT rest on hue alone.
 
+The `--risk-paper` and `--risk-real-money` tokens MAY mark which environment a
+thing belongs to outside that region — a badge, a tile label, a column heading,
+an indicator of paper days — always alongside the environment in words. They
+MUST NOT be used for anything that is not tied to an environment.
+
 **Authority:** `tech-stack.md` v2 — the interface must never be styled
-identically for paper and live; charter §3, the paper-to-live gate.
-**Verification:** Every screenshot of every screen shows the environment.
+identically for paper and live; charter §3, the paper-to-live gate. Owner decision of 2026-10-15 for use of
+the environment tokens outside the region (A-4).
+**Verification:** Every screenshot of every screen shows the environment, and
+every use of a `--risk-*` token outside the region marks an environment and
+states it in words.
 **Specialization:** stricter-only.
 
 ### STD-UI-12 — Status form and severity
@@ -314,7 +347,13 @@ CAP-001's run lifecycle maps as: `requested` neutral, `running` active,
 `cancelling` warning, `succeeded` good, `partial` **warning — never good**,
 `failed` critical, `cancelled` **neutral — never critical**, `abandoned` serious.
 
-**Authority:** CAP-001 AC-9, AC-19, AC-20; `edg-compliance` principle 3
+Trading state maps as: stopped by the owner **neutral — never critical**, because
+the owner intended it; stopped by a limit or by the broker **serious**, with what
+triggered it. A neutral state that changes what the product does on every screen
+is made prominent by placement and words, not by fault colour.
+
+**Authority:** CAP-001 AC-9, AC-19, AC-20; owner decision of 2026-10-15 for the
+trading-state mapping (A-3); `edg-compliance` principle 3
 (severity levels visually distinct). **Departure:** this standard defines six
 tiers where EDG names three. The six are a strict refinement, and the mapping
 above is the reconciliation; a review against EDG's three levels is satisfied by
@@ -424,15 +463,14 @@ be a toggle, switch or setting.
 
 **Authority:** Charter §3 for the evidence, acknowledgement and
 not-a-toggle clauses: Persistence stores "the decision history behind
-promotions", and charter §1 makes the gate deliberate. **Internal policy for the
-rationale clause**, pending OQ-UI-5. The charter requires a decision history; it
-does not say the owner must state a reason, and reading one into it would
-attribute an obligation to a source that does not impose it. The clause stands on
-its own argument, that a decision history without reasons cannot be revisited
-when a promotion is questioned later, and the owner has not yet confirmed it.
+promotions", and charter §1 makes the gate deliberate. **Owner decision of
+2026-10-15 for the rationale clause** (OQ-UI-5, closed; A-2). The charter
+requires a decision history but does not itself require a stated reason; the
+owner has confirmed that one is required, on the argument that a decision
+history without reasons cannot be revisited when a promotion is questioned
+later.
 **Verification:** The promotion interaction is walked; each clause is observable.
-**Specialization:** stricter-only. The rationale requirement is open — see §5.3,
-OQ-UI-5.
+**Specialization:** stricter-only.
 
 ### STD-UI-21 — The kill switch
 
@@ -547,6 +585,9 @@ site; a correction belongs in the vendored component.
 **Authority:** Internal policy. `tech-stack.md` v2 vendors `shadcn/ui` into the
 repository, so its source is the product's to correct.
 **Verification:** No spacing, size or colour literal appears outside the theme.
+An alpha applied to an existing token — `hsl(var(--muted) / 0.5)` as a page
+ground — is not a new value, provided the text drawn on it uses pairs already
+validated under STD-UI-10 (A-5).
 **Specialization:** permitted — a capability MAY select a density tier from the
 defined set. It MAY NOT introduce a value.
 
@@ -616,7 +657,7 @@ rule it would amend.
 | OQ-UI-2 | Does the product ship a dark theme, and from which milestone? **Narrowed 2026-09-05:** the tokens exist — `theme.css` carries a full `.dark` block, stepped against the dark surface rather than inverted, which is what STD-UI-29 requires of a second theme. What remains is only whether M1 exposes a way to switch to it | STD-UI-29 |
 | ~~OQ-UI-3~~ | ~~Which single time zone does the product display, and do as-of dates and run timestamps share it?~~ **Closed 2026-09-05: America/Chicago, and they do not share it.** The owner chose US Central over exchange time and over UTC. The second half is settled on correctness rather than preference: a session date is a calendar date in the exchange's terms, so it is rendered unconverted while timestamps carry the zone. Note the consequence the owner accepted, that America/Chicago is not the exchange zone, so between 23:00 and 24:00 Central a run stamps `observed_on` one calendar day behind what America/New_York would record | STD-UI-5 |
 | OQ-UI-4 | Which density tier is the product default? `theme.css` currently resolves `--row-height` to `--row-height-comfortable`, which is a port-time placeholder rather than an owner decision; changing it is one token | STD-UI-29 |
-| OQ-UI-5 | Does the promotion gate capture a written rationale from the owner? Charter §3's "decision history behind promotions" is read here as requiring one; the charter does not say so in as many words | STD-UI-20 |
+| ~~OQ-UI-5~~ | ~~Does the promotion gate capture a written rationale from the owner?~~ **Closed 2026-10-15: yes.** The owner confirmed the rationale clause of STD-UI-20, which now rests on that decision rather than on internal policy | STD-UI-20 |
 
 The remaining questions can be settled against a working interface. OQ-UI-3 could
 not, because CAP-001's run history is the first surface that renders a timestamp,
@@ -626,20 +667,20 @@ and it was closed on 2026-09-05 before that screen was designed.
 
 | Entry | Authority | Location |
 |-------|-----------|----------|
-| STD-UI-1, STD-UI-2 | Charter §1–§3; CAP-001 AC-21; `edg-compliance` terminology | §3.1 |
+| STD-UI-1, STD-UI-2 | Charter §1–§3; CAP-001 AC-21; `edg-compliance` terminology; owner decision 2026-10-15 for STD-UI-1 display labels | §3.1 |
 | STD-UI-3, STD-UI-6 | Internal policy, on charter §2 | §3.2 |
 | STD-UI-4 | Charter §3; CAP-001 AC-17 | §3.2 |
 | STD-UI-5 | Charter §3, point-in-time history | §3.2 |
 | STD-UI-7, STD-UI-9 | Internal policy | §3.3 |
 | STD-UI-8, STD-UI-10 | `edg-compliance` principle 4; WCAG 2.1 AA 1.4.1, 1.4.3 | §3.3 |
-| STD-UI-11 | `tech-stack.md` v2; charter §3 | §3.3 |
-| STD-UI-12 | CAP-001 AC-9, AC-19, AC-20; `edg-compliance` principle 3 | §3.3 |
+| STD-UI-11 | `tech-stack.md` v2; charter §3; owner decision 2026-10-15 for the environment tokens outside the region | §3.3 |
+| STD-UI-12 | CAP-001 AC-9, AC-19, AC-20; `edg-compliance` principle 3; owner decision 2026-10-15 for the trading-state mapping | §3.3 |
 | STD-UI-13, STD-UI-16 | Charter §3, Persistence | §3.4 |
 | STD-UI-14, STD-UI-18 | CAP-001 system design constraint 5.5 | §3.4 |
 | STD-UI-15 | CAP-001 system design constraint 5.9 | §3.4 |
 | STD-UI-17 | `tech-stack.md` v2, Massive restatement limitation | §3.4 |
 | STD-UI-19 | `edg-compliance` principle 3; CAP-001 AC-10, AC-21 | §3.5 |
-| STD-UI-20 | Charter §3, decision history behind promotions | §3.5 |
+| STD-UI-20 | Charter §3, decision history behind promotions; owner decision 2026-10-15 for the rationale clause | §3.5 |
 | STD-UI-21 | Charter §3, kill switch outside application health | §3.5 |
 | STD-UI-22 | Internal policy | §3.5 |
 | STD-UI-23 | `edg-compliance` states checklist; CAP-001 AC-16, AC-17 | §3.6 |
@@ -656,6 +697,8 @@ and it was closed on 2026-09-05 before that screen was designed.
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-15 | 6 | Fixed the findings of `reviews/ui-conventions-review-v3.md` before approval. **FINDING-7:** STD-UI-1 splits *score* — the label for a whole classification — from its two components, *percentile* and *standardised score*, which is never shortened to *score*. **FINDING-12:** adds *instrument → stock*. **FINDING-9:** STD-UI-11's Verification now covers the environment-token restriction. **FINDING-11:** §1's opening sentence is no longer a dated claim. **FINDING-10:** the v5 proposal is now a plain record, not a schema-versioned artifact of an unregistered type. No rule obligation changed beyond the STD-UI-1 label rows; numbering unchanged |
+| 2026-10-15 | 5 | Accepted the five amendments of `proposals/STD-UI-v5-proposal.md`, required by the product UX blueprint (`docs/ux/product-ux-blueprint.md`). **A-1** STD-UI-1 separates each concept's domain term from its display label and fixes the labels (followed stock, stop following, download, Incomplete, score, review / go live, Stop all trading), adding gate, rebalance, limit, benchmark and market period. **A-2** closes OQ-UI-5: the rationale clause of STD-UI-20 is an owner decision. **A-3** STD-UI-12 maps trading stopped by the owner to neutral and by a limit to serious. **A-4** STD-UI-11 permits the environment tokens outside the region, only to mark an environment and always with words; `design-system/theme.css` is corrected to match. **A-5** STD-UI-29 records that an alpha of an existing token is not a new value. Numbering unchanged. Blast radius per §5.2: CAP-001 and CAP-002 record STD-UI-1 and STD-UI-12 as *yes* and are re-reviewed for those rules; no capability yet records STD-UI-11 or STD-UI-20 as applicable |
 | 2026-09-05 | 4 | Corrected STD-UI-20's authority on FINDING-1 of `reviews/ui-conventions-review-v1.md`. The rule attributed its written-rationale clause to Charter §3, which stores "the decision history behind promotions" but does not require the owner to state a reason; OQ-UI-5 had already conceded the charter "does not say so in as many words". The clause is now labelled internal policy pending OQ-UI-5 and rests on its own argument. No rule text, obligation, numbering or specialization posture changed, and the other three clauses keep their charter authority |
 | 2026-09-05 | 3 | Closed OQ-UI-3 on the owner's decision: the product displays **America/Chicago** throughout, and `observed_on` is computed in it. US Central was chosen over exchange time, which would have put run timestamps in the same frame as the session dates that dominate every screen, and over UTC, which would have matched the container logs a failed run is diagnosed against. The question's second half was settled on correctness rather than preference: a session date is a calendar date in the exchange's terms and is rendered unconverted, because converting one moves a bar onto the wrong day. STD-UI-5 now states both, and records the consequence that Central is not the exchange zone, so a run between 23:00 and 24:00 Central stamps a calendar day that America/New_York would call the next one. Also promoted the thirty rule headings from level four to level three so `scripts/check-capabilities.py` can extract them, which is a corrected reference rather than an amendment and changed no rule text |
 | 2026-09-05 | 2 | Closed OQ-UI-1: status owns red and green, market direction keeps a non-red/green diverging pair. Closed on precedent rather than on fresh reasoning — the first FactorFlow build had already made this assignment for the same colour-vision reason, and STD-UI-7 was written independently of it and agreed, so the rule now cites the standing decision alongside its own argument. Narrowed OQ-UI-2, whose tokens now exist. Recorded that `theme.css`'s current density default is a port-time placeholder, not an answer to OQ-UI-4. Updated §1.3 and §2.2: the design system is no longer absent — it was ported into `design-system/` and configured at `projects/factorflow-v2/design-system.yaml` on 2026-09-05, so this standard now states obligations that a resolvable artifact satisfies, and the two are ranked. Corrected a rule reference in §2.2 that named STD-UI-25 where STD-UI-29 governs |

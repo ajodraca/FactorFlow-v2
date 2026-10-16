@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home — FactorFlow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--background:0 0% 100%;--surface:210 40% 98%;--foreground:222 47% 11%;--muted:210 40% 96%;--muted-foreground:215 16% 47%;--border:214 32% 91%;--input:214 32% 59%;--ring:222 47% 11%;--primary:222 47% 11%;--primary-foreground:210 40% 98%;--status-neutral:215 16% 44%;--status-neutral-muted:210 40% 96%;--status-active:217 91% 49%;--status-active-muted:217 91% 96%;--status-good:142 62% 30%;--status-good-muted:142 55% 95%;--status-warning:47 93% 20%;--status-warning-muted:45 95% 94%;--status-serious:12 90% 20%;--status-serious-muted:30 92% 95%;--status-critical:0 72% 45%;--status-critical-muted:0 80% 96%;--value-missing:215 14% 47%;--value-missing-muted:210 30% 97%;--gain:173 80% 27%;--loss:25 88% 37%;--risk-paper:199 72% 38%;--risk-paper-muted:199 72% 95%;--risk-real-money:349 75% 44%;--risk-real-money-muted:349 80% 96%;--factor-value:199 72% 38%;--factor-growth:291 55% 48%;--factor-momentum:262 60% 52%;--chart-1:199 72% 40%;--chart-6:215 28% 32%;--chart-grid:214 32% 91%;--chart-axis:215 16% 47%;--seq-1:199 65% 93%;--seq-4:199 74% 44%;--font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-numeric:ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace}
+body{margin:0;background:hsl(var(--surface));color:hsl(var(--foreground));font-family:var(--font-sans);font-size:14px;line-height:1.4}
+a{color:hsl(var(--foreground))}a:hover{color:hsl(var(--status-active))}
+h1{margin:0;font-size:20px;line-height:1.25;font-weight:650;letter-spacing:-0.01em}
+h2{margin:0;font-size:16px;line-height:1.25;font-weight:600}
+h3{margin:0;font-size:14px;line-height:1.3;font-weight:600}
+.num{font-family:var(--font-numeric);font-variant-numeric:tabular-nums}
+.meta{font-size:12px;color:hsl(var(--muted-foreground))}
+.rail a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:hsl(var(--foreground));font-weight:500}
+.rail a svg{flex:none;color:hsl(var(--muted-foreground))}
+.rail a:hover{background:hsl(var(--muted));color:hsl(var(--foreground))}
+.rail a[aria-current="page"]{background:hsl(var(--background));box-shadow:0 0 0 1px hsl(var(--border))}
+.rail a[aria-current="page"] svg{color:hsl(var(--foreground))}
+.count{margin-left:auto;font:600 11px/18px var(--font-numeric);padding:0 6px;border-radius:999px;background:hsl(var(--status-warning-muted));color:hsl(var(--status-warning))}
+.b{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap;text-decoration:none}
+.b-neutral{color:hsl(var(--status-neutral));background:hsl(var(--status-neutral-muted))}
+.b-active{color:hsl(var(--status-active));background:hsl(var(--status-active-muted))}
+.b-good{color:hsl(var(--status-good));background:hsl(var(--status-good-muted))}
+.b-warning{color:hsl(var(--status-warning));background:hsl(var(--status-warning-muted))}
+.b-serious{color:hsl(var(--status-serious));background:hsl(var(--status-serious-muted))}
+.b-critical{color:hsl(var(--status-critical));background:hsl(var(--status-critical-muted))}
+.b-live{color:hsl(var(--risk-real-money));background:hsl(var(--risk-real-money-muted))}
+.b-paper{color:hsl(var(--risk-paper));background:hsl(var(--risk-paper-muted))}
+.ic{display:inline-block;width:8px;height:8px;flex:none;background:currentColor;box-sizing:border-box}
+.ic-good{border-radius:50%}
+.ic-neutral{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.ic-active{border-radius:50%;background:radial-gradient(currentColor 30%,transparent 36%);border:1.5px solid currentColor}
+.ic-warning{clip-path:polygon(50% 0,100% 100%,0 100%);width:9px}
+.ic-serious{transform:rotate(45deg);width:7px;height:7px}
+.ic-live{transform:rotate(45deg);width:7px;height:7px}
+.ic-paper{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:0 12px;border-radius:8px;font:500 13px/1 var(--font-sans);border:1px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;box-sizing:border-box}
+.btn-primary{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+.btn-primary:hover{color:hsl(var(--primary-foreground))}
+.btn-outline{background:hsl(var(--background));border-color:hsl(var(--input));color:hsl(var(--foreground))}
+.btn-ghost{background:transparent;color:hsl(var(--foreground))}
+.btn-ghost:hover{background:hsl(var(--muted))}
+.card{background:hsl(var(--background));border:1px solid hsl(var(--border));border-radius:12px}
+.search{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 10px;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));color:hsl(var(--muted-foreground));font:13px var(--font-sans);cursor:pointer;min-width:260px}
+kbd{font:11px var(--font-numeric);padding:1px 5px;border:1px solid hsl(var(--border));border-radius:4px;background:hsl(var(--background));color:hsl(var(--muted-foreground))}
+.env{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-decoration:none}
+.env-live{color:hsl(var(--risk-real-money));background:hsl(var(--risk-real-money-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-real-money)/.35)}
+.env-paper{color:hsl(var(--risk-paper));background:hsl(var(--risk-paper-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-paper)/.35)}
+.kill{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:8px;border:0;background:hsl(var(--foreground));color:hsl(var(--background));font:600 13px/1 var(--font-sans);cursor:pointer;white-space:nowrap}
+.pos{color:hsl(var(--gain))}.neg{color:hsl(var(--loss))}
+:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.item{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px 16px;border-top:1px solid hsl(var(--border))}
+.sev{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center}
+.row{display:grid;grid-template-columns:minmax(180px,1.4fr) 120px 110px minmax(120px,1fr) 120px;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid hsl(var(--border));font-size:13px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; align-items: stretch">
+<aside class="rail" style="flex: 1 1 208px; box-sizing: border-box; border-right: 1px solid hsl(var(--border)); display: flex; flex-direction: column; padding: 16px 12px; gap: 2px">
+<div style="display: flex; align-items: center; gap: 8px; padding: 6px 12px 18px"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 14 L7 8 L10 11 L16 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-weight: 700; font-size: 15px">FactorFlow</span></div>
+<nav aria-label="Primary" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P01-Home.dc.html" aria-current="page"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7 L8 2 L14 7 V14 H10 V10 H6 V14 H2 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>Home<span class="count">4</span></a>
+<a href="P03-Research.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>Research</a>
+<a href="P04-Strategies.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4 H9 M2 8 H12 M2 12 H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="12" cy="4" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="12" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle></svg>Strategies</a>
+<a href="P08-Portfolio.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"></rect><path d="M6 5 V3 H10 V5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Portfolio</a>
+</nav>
+<div style="flex: 1; min-height: 24px"></div>
+<nav aria-label="Data and system" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P09-Data.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4" rx="5.5" ry="2" fill="none" stroke="currentColor" stroke-width="1.4"></ellipse><path d="M2.5 4 V12 C2.5 13.1 5 14 8 14 C11 14 13.5 13.1 13.5 12 V4 M2.5 8 C2.5 9.1 5 10 8 10 C11 10 13.5 9.1 13.5 8" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Data health<span class="count">1</span></a>
+<a href="P02-Setup.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4 H13 M3 8 H13 M3 12 H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="4" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="8" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="5" cy="12" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle></svg>Settings</a>
+</nav>
+</aside>
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+<header style="position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 24px; background: hsl(var(--background)); border-bottom: 1px solid hsl(var(--border))">
+<div style="flex: 1 1 160px; min-width: 0; font-weight: 600">Home</div>
+<button type="button" class="search"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>Search stocks, strategies…<kbd style="margin-left: auto">⌘K</kbd></button>
+<div role="region" aria-label="Trading environment" style="display: flex; gap: 6px">
+<a href="P08-Portfolio.dc.html" class="env env-live"><span class="ic ic-live"></span>LIVE · 1 STRATEGY</a>
+<a href="P04-Strategies.dc.html" class="env env-paper"><span class="ic ic-paper"></span>PAPER · 3</a>
+</div>
+<span aria-hidden="true" style="width: 1px; height: 28px; background: hsl(var(--border)); margin: 0 8px"></span>
+<a href="P08-Portfolio.dc.html" class="kill" style="text-decoration: none"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5 H10.5 L14.5 5.5 V10.5 L10.5 14.5 H5.5 L1.5 10.5 V5.5 Z" fill="hsl(var(--status-critical))"></path><path d="M5.5 8 H10.5" stroke="white" stroke-width="1.8" stroke-linecap="round"></path></svg>Stop all trading</a>
+</header>
+<main style="padding: 24px; display: flex; flex-direction: column; gap: 20px; max-width: 1180px; width: 100%; box-sizing: border-box">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px"><h1>Thursday, 15 October</h1><span class="meta">Market closed at 15:00 CDT · prices current to today’s close · next rebalance Mon 2026-11-02 14:45 CST</span></div>
+<a href="P05-Builder.dc.html" class="btn btn-outline">+ New strategy</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<a href="P08-Portfolio.dc.html" class="card" style="padding: 16px; text-decoration: none; display: flex; flex-direction: column; gap: 8px">
+<span class="b b-live" style="align-self: flex-start; font-weight: 700"><span class="ic ic-live"></span>LIVE · real money</span>
+<span class="num" style="font-size: 24px; font-weight: 600">$25,846.12</span>
+<span style="font-size: 13px">Today <span class="num pos">+$118.40 (+0.46%)</span></span>
+<span class="meta">1 strategy · 18 positions · daily-loss limit unused</span>
+</a>
+<a href="P08-Portfolio.dc.html" class="card" style="padding: 16px; text-decoration: none; display: flex; flex-direction: column; gap: 8px">
+<span class="b b-paper" style="align-self: flex-start; font-weight: 700"><span class="ic ic-paper"></span>PAPER</span>
+<span class="num" style="font-size: 24px; font-weight: 600">$304,112.87</span>
+<span style="font-size: 13px">Today <span class="num neg">−$1,204.55 (−0.39%)</span></span>
+<span class="meta">3 strategies · 54 positions</span>
+</a>
+<a href="P09-Data.dc.html" class="card" style="padding: 16px; text-decoration: none; display: flex; flex-direction: column; gap: 8px">
+<span class="b b-warning" style="align-self: flex-start"><span class="ic ic-warning"></span>Data: 3 stocks need attention</span>
+<span style="font-size: 15px; font-weight: 600">1,233 of 1,236 stocks current</span>
+<span class="meta">Classifications produced today 17:46 CDT · prices to 2026-10-15 close</span>
+<span class="meta">Every other number on this page is as of those times.</span>
+</a>
+</div>
+<section class="card" aria-labelledby="needs">
+<div style="display: flex; align-items: baseline; justify-content: space-between; padding: 14px 16px"><h2 id="needs">Needs you <span class="num meta">· 4</span></h2><span class="meta">Most important first. Nothing here is urgent unless marked.</span></div>
+<sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+<div class="item">
+<span class="sev" style="{{it.sevStyle}}"><span class="ic {{it.ic}}"></span></span>
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><span class="b {{it.bc}}">{{it.tag}}</span><span style="font-weight: 600">{{it.title}}</span></div>
+<span class="meta" style="font-size: 13px; line-height: 1.5">{{it.body}}</span>
+</div>
+<a href="{{it.href}}" class="btn {{it.btn}}">{{it.cta}}</a>
+</div>
+</sc-for>
+</section>
+<section class="card" aria-labelledby="strats">
+<div style="display: flex; align-items: baseline; justify-content: space-between; padding: 14px 16px"><h2 id="strats">Your strategies</h2><a href="P04-Strategies.dc.html" class="meta">Open the board</a></div>
+<div class="row meta" style="font-weight: 500; padding-top: 6px; padding-bottom: 6px"><span>Strategy</span><span>Stage</span><span style="text-align: right">Since start</span><span>Last 30 days</span><span>Next step</span></div>
+<sc-for list="{{strats}}" as="s" hint-placeholder-count="5">
+<div class="row">
+<span style="display: flex; flex-direction: column; min-width: 0"><a href="P06-Backtest.dc.html" style="font-weight: 600; text-decoration: none">{{s.name}}</a><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.rule}}</span></span>
+<span><span class="b {{s.bc}}"><span class="ic {{s.ic}}"></span>{{s.stage}}</span></span>
+<span class="num {{s.retCls}}" style="text-align: right">{{s.ret}}</span>
+<span><svg width="120" height="28" viewBox="0 0 120 28" role="img" aria-label="{{s.sparkLabel}}"><path d="{{s.spark}}" fill="none" stroke="hsl(var(--chart-1))" stroke-width="1.6" stroke-linejoin="round"></path></svg></span>
+<span><a href="{{s.href}}" class="meta" style="color: hsl(var(--foreground))">{{s.next}}</a></span>
+</div>
+</sc-for>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const SEV = {
+      ready: { tag: 'Ready', bc: 'b-good', ic: 'ic-good', sevStyle: 'background: hsl(var(--status-good-muted)); color: hsl(var(--status-good))', btn: 'btn-primary' },
+      warn: { tag: 'Limit reached', bc: 'b-warning', ic: 'ic-warning', sevStyle: 'background: hsl(var(--status-warning-muted)); color: hsl(var(--status-warning))', btn: 'btn-outline' },
+      serious: { tag: 'Data gap', bc: 'b-serious', ic: 'ic-serious', sevStyle: 'background: hsl(var(--status-serious-muted)); color: hsl(var(--status-serious))', btn: 'btn-outline' },
+      todo: { tag: 'To do', bc: 'b-neutral', ic: 'ic-neutral', sevStyle: 'background: hsl(var(--status-neutral-muted)); color: hsl(var(--status-neutral))', btn: 'btn-outline' }
+    };
+    const items = [
+      Object.assign({}, SEV.ready, { title: 'Quality Value Monthly is ready for a promotion review', body: '63 paper trading days, tracking its backtest within 0.8 percentage points. Every gate criterion you set is met.', cta: 'Review evidence', href: 'P07-Promote.dc.html' }),
+      Object.assign({}, SEV.warn, { title: 'Momentum Tilt hit its 8% per-stock limit on NVDA (paper)', body: 'Two buys today were trimmed to stay under the limit. Nothing failed; the strategy holds slightly less NVDA than its rules asked for.', cta: 'See orders', href: 'P08-Portfolio.dc.html' }),
+      Object.assign({}, SEV.serious, { title: 'KO, TSLA and FBXX are missing today’s data', body: 'Their classifications stay at yesterday’s and are marked that way. Strategies holding them won’t trade them until data is complete.', cta: 'Fix data', href: 'P09-Data.dc.html' }),
+      Object.assign({}, SEV.todo, { title: 'Growth Momentum Blend has never been backtested', body: 'Drafted 2026-10-12. A backtest shows how it would have behaved across 2022’s drawdown and since.', cta: 'Run backtest', href: 'P06-Backtest.dc.html' })
+    ];
+    const spark = (seed, drift) => {
+      let v = 14, d = 'M0 ' + v.toFixed(1);
+      for (let i = 1; i <= 30; i++) { v += Math.sin(i * seed) * 1.6 - drift; v = Math.max(3, Math.min(25, v)); d += ' L' + (i * 4) + ' ' + v.toFixed(1); }
+      return d;
+    };
+    const ST = {
+      live: { stage: 'Live', bc: 'b-live', ic: 'ic-live' },
+      paper: { stage: 'Paper trading', bc: 'b-paper', ic: 'ic-paper' },
+      bt: { stage: 'Backtested', bc: 'b-neutral', ic: 'ic-good' },
+      draft: { stage: 'Draft', bc: 'b-neutral', ic: 'ic-neutral' }
+    };
+    const strats = [
+      Object.assign({ name: 'Deep Value Quarterly', rule: '15 cheapest by value score, quarterly, equal weight', ret: '+6.12%', retCls: 'pos', spark: spark(0.7, 0.18), sparkLabel: 'Rising over 30 days', next: 'Monitor', href: 'P08-Portfolio.dc.html' }, ST.live),
+      Object.assign({ name: 'Quality Value Monthly', rule: 'Top 20 by value, momentum above 0, monthly', ret: '+3.40%', retCls: 'pos', spark: spark(0.9, 0.12), sparkLabel: 'Rising over 30 days', next: 'Review for live', href: 'P07-Promote.dc.html' }, ST.paper),
+      Object.assign({ name: 'Momentum Tilt', rule: 'Top 25 by momentum within Large caps, monthly', ret: '−1.85%', retCls: 'neg', spark: spark(1.3, -0.05), sparkLabel: 'Falling over 30 days', next: 'Check limit hits', href: 'P08-Portfolio.dc.html' }, ST.paper),
+      Object.assign({ name: 'Growth at a Price', rule: 'Growth ≥ 70th, value ≥ 40th percentile, monthly', ret: '+0.22%', retCls: 'pos', spark: spark(1.1, 0.02), sparkLabel: 'Flat over 30 days', next: 'Keep paper trading', href: 'P04-Strategies.dc.html' }, ST.paper),
+      Object.assign({ name: 'Growth Momentum Blend', rule: 'Draft · not yet backtested', ret: '—', retCls: '', spark: 'M0 14 L120 14', sparkLabel: 'No history yet', next: 'Run backtest', href: 'P06-Backtest.dc.html' }, ST.draft)
+    ];
+    return { items: items, strats: strats };
+  }
+}
+</script>
+</body>
+</html>

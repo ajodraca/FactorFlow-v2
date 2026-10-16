@@ -33,6 +33,8 @@ consequential the action is.
 | `link` | Renders as text; use only inside prose |
 | `blocked` | An action that cannot yet be taken, with the reason stated inline beside it (STD-UI-19, STD-UI-23). Used where a precondition is unmet — history depth not stated, no instruments named. It stays focusable and exposes the reason through `aria-describedby`; a plain `disabled` button is not focusable, so the reason never reaches a keyboard or screen-reader user |
 
+| `kill-switch` | The product's single **Stop all trading** control (STD-UI-21). Fixed at the top right of every screen; one activation, no confirmation; rendered from the stored kill-switch state, never optimistically. Dark (`--foreground` fill, `--background` text) with a `--status-critical` octagon icon. While stopped, it is replaced by a non-interactive *Trading stopped* status. Exactly one instance per page; never used for any other action |
+
 There is no real-money button variant. Real-money confirmation is a property of `dialog`, not of
 the button that opens it — the button only opens the dialog, it never places the trade.
 
@@ -69,6 +71,7 @@ name and a tooltip.
 | Destructive background / text | `--destructive` / `--destructive-foreground` |
 | Border (outline) | `--input` |
 | Focus ring | `--ring` |
+| Kill switch background / text / icon | `--foreground` / `--background` / `--status-critical` |
 | Corner radius | `--radius` |
 
 ## 7. Content Guidelines
