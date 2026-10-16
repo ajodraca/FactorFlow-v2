@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX
 artifact_type: ux-blueprint
-artifact_version: 1
+artifact_version: 2
 id: PRODUCT-UX
 title: FactorFlow Owner Interface — Product UX Blueprint
 kind: blueprint
@@ -26,7 +26,7 @@ ai_provenance:
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: STD-UI
-      version: "4"
+      version: "5, approved 2026-10-15"
     - id: CAP-001
       version: "8, approved 2026-09-06"
     - id: CAP-002
@@ -44,9 +44,9 @@ ai_provenance:
 > **Status: draft, awaiting owner approval.** The owner chose the canvas page
 > *Whole product · usability-first* as the guide for developing the interface
 > (2026-10-15). This blueprint turns that page into rules, routes, patterns and
-> per-screen specifications that the SDD pipeline can cite. Approving it does not
-> approve the seven owner decisions in §12, several of which amend STD-UI or a
-> capability's scope and follow their own change control.
+> per-screen specifications that the SDD pipeline can cite. Of the seven owner
+> decisions in §12, D-1, D-4 and D-5 are **decided** (STD-UI v5, 2026-10-15);
+> D-2, D-3, D-6 and D-7 remain open and follow their own change control.
 
 ## 0. How to use this blueprint
 
@@ -106,8 +106,7 @@ capability's design has to choose.
    STD-UI-21, STD-UI-22.)*
 7. **Plain words over system words.** The interface speaks the owner's language
    ("followed stocks", "download", "Incomplete") while code, API and documents
-   keep the domain vocabulary. The mapping is fixed in §7 and is an STD-UI-1
-   amendment (D-1).
+   keep the domain vocabulary. The mapping is fixed in §7 and in STD-UI-1 (v5).
 8. **Prompt, don't hunt.** Problems surface on Home as "Needs you" items with one
    action each. Nothing important exists only on a page the owner must remember
    to visit.
@@ -408,8 +407,9 @@ rebalance → trading allowed.
 ## 7. Vocabulary
 
 The interface uses the display labels below. Code, API, database, logs and SDD
-documents keep the domain terms. This changes STD-UI-1 and is decision **D-1**;
-until it is approved, implement the domain-term column.
+documents keep the domain terms. STD-UI-1 (v5, 2026-10-15) makes this table
+normative: user-visible text uses the display label and never the domain term
+beside it.
 
 | Domain term (STD-UI-1) | Display label | Where it appears |
 |------------------------|---------------|------------------|
@@ -426,8 +426,8 @@ until it is approved, implement the domain-term column.
 | kill switch | **Stop all trading** (the control) / **Trading stopped** (the state) | Shell |
 | paper / live | **Paper** · **Live · real money** | Shell, Portfolio |
 
-New terms this blueprint introduces, each to be added to STD-UI-1: *gate* (the
-owner's promotion criteria), *rebalance*, *limit* (per-stock and daily-loss),
+New concepts this blueprint introduces, now in STD-UI-1: *gate* (the owner's
+promotion criteria), *rebalance*, *limit* (per-stock and daily-loss),
 *benchmark*, *market period*.
 
 ## 8. Status and severity map
@@ -517,7 +517,7 @@ already discharges each rule, so a capability can cite it.
 
 | Rule | Applies | Where satisfied |
 |------|---------|-----------------|
-| STD-UI-1 | yes | §7. Display labels are an amendment (D-1); until approved, domain terms are used |
+| STD-UI-1 | yes | §7, the display labels STD-UI-1 v5 fixes |
 | STD-UI-2 | yes | §9 confirmation wording; *stop following* keeps history and says so |
 | STD-UI-3 | yes | All figures `--font-numeric`, fixed precision per column; scores and returns carry an explicit sign |
 | STD-UI-4 | yes | §4.4 *Incomplete*; em dash for an absent value; blank only for not applicable |
@@ -536,7 +536,7 @@ already discharges each rule, so a capability can cite it.
 | STD-UI-17 | yes | *Possibly restated* mark on scores, on S06's limits box and as a required acknowledgement on S07 |
 | STD-UI-18 | yes | S03 footnote and S09: the check judges presence and currency, not correctness |
 | STD-UI-19 | yes | §9 |
-| STD-UI-20 | yes | S07: evidence, acknowledgements and rationale on one page; not a toggle. Rationale depends on D-4 |
+| STD-UI-20 | yes | S07: evidence, acknowledgements and a required rationale on one page; not a toggle |
 | STD-UI-21 | yes | §3.3 |
 | STD-UI-22 | yes | §4.9 |
 | STD-UI-23 | yes | §4.10, and a states table in every screen spec |
@@ -550,13 +550,13 @@ already discharges each rule, so a capability can cite it.
 
 ## 12. Owner decisions this blueprint depends on
 
-| ID | Decision | Blocks | Recommendation |
-|----|----------|--------|----------------|
-| D-1 | Adopt the display labels of §7 by amending STD-UI-1 | Copy in every screen | Adopt. Proposal in `docs/constitution/proposals/STD-UI-v5-proposal.md` |
+| ID | Decision | Blocks | Recommendation / outcome |
+|----|----------|--------|--------------------------|
+| D-1 | Adopt the display labels of §7 by amending STD-UI-1 | Copy in every screen | **Decided 2026-10-15: adopted** (STD-UI v5, A-1) |
 | D-2 | Downloads run on a schedule (each trading day, 17:30 CT) as well as on demand | S09 copy, S01 data card, M3 and M6 scope | Assign to M3 Live Market Data. CAP-001 deliberately made downloads owner-triggered, and a live strategy cannot trade on data nobody remembered to download |
 | D-3 | The promotion gate criteria and their values: minimum paper days, maximum distance from the backtest, minimum market periods beaten, zero rejected orders | S04, S07 | Make them owner settings with the canvas values as defaults; M5 capability decides |
-| D-4 | Close OQ-UI-5: promotion captures a written rationale | S07 | Yes. Proposal closes it |
-| D-5 | Allow the `--risk-paper` / `--risk-real-money` channel outside the environment region, for paper and live badges, tiles and column headers | S01, S04, S08 | Allow it, but only to mark which environment a thing belongs to. The `badge` spec already has `paper` and `real-money` variants; `theme.css`'s comment that nothing outside the region uses them is corrected |
+| D-4 | Close OQ-UI-5: promotion captures a written rationale | S07 | **Decided 2026-10-15: yes**; OQ-UI-5 closed (STD-UI v5, A-2) |
+| D-5 | Allow the `--risk-paper` / `--risk-real-money` channel outside the environment region, for paper and live badges, tiles and column headers | S01, S04, S08 | **Decided 2026-10-15: allowed**, only to mark which environment a thing belongs to and always with words (STD-UI v5, A-4); `theme.css` comment corrected |
 | D-6 | The lifecycle stepper shows only the stages the product has (no Backtest step before M4, no Review step before M5) | S04, S05 | Yes. A disabled *coming later* step teaches the owner a stage they cannot use |
 | D-7 | The kill switch ships in M2 with paper trading rather than in M6 | M2 scope | Yes. Paper orders reach a real broker environment (charter §3), and the habit of one fixed stop control should start before real money does |
 
@@ -596,4 +596,5 @@ its 11 px labels move to `--text-xs` (12 px).
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-15 | 2 | Recorded the owner's acceptance of STD-UI v5: D-1, D-4 and D-5 decided; §7 vocabulary is normative; owner-engaged stop tiered neutral by STD-UI-12 itself (A-3) |
 | 2026-10-15 | 1 | First draft, from the canvas page *Whole product · usability-first*, which the owner chose as the development guide on 2026-10-15 |

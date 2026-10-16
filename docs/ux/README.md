@@ -28,7 +28,8 @@ Related changes made with the blueprint:
   `checkbox`, `radio-group`, `toggle-group`, `command`) and new variants on
   `button`, `chart` and `data-table`.
 - `docs/constitution/proposals/STD-UI-v5-proposal.md` — the STD-UI amendments
-  the blueprint needs, for the owner's decision.
+  the blueprint needed, accepted by the owner on 2026-10-15 and applied as
+  STD-UI v5.
 
 ## How the pipeline uses this
 

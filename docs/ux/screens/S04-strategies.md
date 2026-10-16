@@ -140,4 +140,4 @@ columns, and *Start paper trading* sits on Draft cards.
 
 ## 11. Differences from the canvas
 
-- Column headings coloured with the environment tokens depend on D-5.
+- None beyond §2. Environment-coloured column headings are permitted by STD-UI-11 (v5), with the environment in words.

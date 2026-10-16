@@ -7,7 +7,7 @@ amends: STD-UI
 amends_version: "4"
 proposed_version: "5"
 title: "STD-UI v5 — amendments required by the product UX blueprint"
-status: proposed
+status: accepted
 created: 2026-10-15
 updated: 2026-10-15
 owner: Alvaro de Jodra
@@ -29,6 +29,11 @@ ai_provenance:
 ---
 
 # Proposal: STD-UI v5
+
+> **Accepted in full by the owner on 2026-10-15.** A-1 to A-5 are applied in
+> `docs/constitution/standards/ui-conventions.md` v5, and `design-system/theme.css`
+> is corrected per A-4. The *If rejected* notes below are kept as the record of
+> the alternatives that were considered.
 
 `docs/ux/product-ux-blueprint.md` (PRODUCT-UX v1) depends on four changes to
 STD-UI v4 and one correction to `design-system/theme.css`. STD-UI §5.1 requires
@@ -126,6 +131,16 @@ No rule change. Recorded so a reviewer does not raise it: the blueprint's page
 ground is `hsl(var(--muted) / 0.5)` over `--background`, an alpha of an existing
 token, not a new value. Text on it uses the same pairs validated against
 `--muted` and `--background` in `design-system/theme-validation.md`.
+
+## Decision
+
+| Amendment | Outcome | Applied in |
+|-----------|---------|------------|
+| A-1 STD-UI-1 display labels | Accepted 2026-10-15 | STD-UI-1 |
+| A-2 Close OQ-UI-5 | Accepted 2026-10-15 | STD-UI-20, §5.3 |
+| A-3 STD-UI-12 trading-state mapping | Accepted 2026-10-15 | STD-UI-12 |
+| A-4 STD-UI-11 environment tokens | Accepted 2026-10-15 | STD-UI-11, `theme.css` |
+| A-5 STD-UI-29 page ground | Accepted 2026-10-15 | STD-UI-29 verification |
 
 ## Revision of STD-UI on acceptance
 

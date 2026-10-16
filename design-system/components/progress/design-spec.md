@@ -72,7 +72,7 @@ when the track represents more than the limit.
 |---------|-------|
 | Track | `--seq-1` |
 | Indicator, `determinate` / `meter` | `--seq-4` |
-| Indicator, paper gate progress | `--risk-paper` (environment channel; blueprint D-5) |
+| Indicator, paper gate progress | `--risk-paper` (environment channel, permitted by STD-UI-11 v5) |
 | Indicator, download in progress | `--status-active` |
 | `indeterminate` with reduced motion | `--pattern-indeterminate` |
 | Limit tick | `--foreground` |

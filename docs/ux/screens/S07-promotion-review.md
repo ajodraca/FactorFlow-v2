@@ -23,7 +23,7 @@ ai_provenance:
     - id: PRODUCT-UX
       version: "1"
     - id: STD-UI
-      version: "4"
+      version: "5"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -166,7 +166,7 @@ history records what was on screen, not what is computed later.
 1. **S07-1** Evidence, acknowledgements, rationale and the action are on one
    page (STD-UI-20).
 2. **S07-2** The action is impossible until every acknowledgement is checked and
-   a rationale is entered (subject to D-4).
+   a rationale is entered (STD-UI-20, v5).
 3. **S07-3** Promotion requires the `real-money` dialog; no other path promotes.
 4. **S07-4** The dialog's initial focus is Cancel, and the go-live control is not
    adjacent to Keep paper trading (STD-UI-22).
