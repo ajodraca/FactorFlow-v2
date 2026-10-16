@@ -1,5 +1,4 @@
 ---
-artifact_schema_version: 1
 artifact_id: STD-UI-v5-proposal
 artifact_type: constitution-amendment-proposal
 artifact_version: 1

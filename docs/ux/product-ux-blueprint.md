@@ -26,7 +26,7 @@ ai_provenance:
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: STD-UI
-      version: "5, approved 2026-10-15"
+      version: "6"
     - id: CAP-001
       version: "8, approved 2026-09-06"
     - id: CAP-002
@@ -421,7 +421,7 @@ beside it.
 | coverage | **data** (as in "data current to …") on Data health; *coverage* stays on `/data/coverage` | Data health |
 | not classified (input missing or outdated) | **Incomplete** | Research, Builder, Universes |
 | not enough stocks to rank | **Not enough to rank** | Research |
-| classification | **score** (percentile and standardised score) | Research, Builder |
+| classification | **score**, shown as a **percentile** and a **standardised score** (never shortened to *score*) | Research, Builder |
 | universe | **universe** (unchanged) | Research |
 | promotion | **review** (the step) / **go live** (the action) | Strategies, Promotion review |
 | kill switch | **Stop all trading** (the control) / **Trading stopped** (the state) | Shell |

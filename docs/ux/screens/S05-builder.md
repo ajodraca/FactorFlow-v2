@@ -50,9 +50,9 @@ in M2–M3 and **Run backtest** from M4.
      new version.* Four numbered sections separated by `--border`:
      1. *Which stocks* — *Start from [scope], keep stocks whose [factor]
         percentile is at least [n] and whose [factor] percentile is at least
-        [n]. [+ condition]* then *Rank them by [factor score] and hold the top
+        [n]. [+ condition]* then *Rank them by [factor] and hold the top
         [n].*
-     2. *How much of each* — `toggle-group` *Equal weight* / *Tilt to score*
+     2. *How much of each* — `toggle-group` *Equal weight* / *Tilt to standardised score*
         with the resulting per-stock weight; *Never more than [8] % in one
         stock, and keep [2] % in cash.*
      3. *When to trade* — *Rebalance [monthly] on the [first trading day] at

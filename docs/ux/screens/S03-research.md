@@ -64,11 +64,11 @@ Three panes in a wrapping flex row, `--space-4` apart, each a `card`.
    (blueprint §4.6) pins to the bottom of the card.
 3. **Inspector** (300–340 px): symbol (`--text-xl`, `--font-numeric`) and name;
    memberships and holdings line; one block per factor (swatch, name,
-   percentile in weight 600, score in `--muted-foreground`, one line naming the
+   percentile in weight 600, standardised score in `--muted-foreground`, one line naming the
    inputs and their as-of date); an *Incomplete* explanation box when any
    factor is incomplete; **See every input and its date** (`outline`, to
    `/research/stocks/:symbol`) and **Start a strategy from this screen**
-   (`ghost`, M2); a footnote explaining percentile versus score.
+   (`ghost`, M2); a footnote explaining percentile versus standardised score.
 
 When classifications are not current (CAP-002 AC-20), a `status-warning` banner
 sits above the results header: *Showing scores produced {time} from download
@@ -99,7 +99,7 @@ sits above the results header: *Showing scores produced {time} from download
 | `sort` | `{factor, direction}` | URL query |
 | `classificationSet` | `{producedAt, fromDownload, current: bool, updating: bool, failedReason?}` | CAP-002 classification runs |
 | `peerCounts` | per factor `{qualified, followed}` | CAP-002 AC-14 |
-| `rows[]` | `{symbol, name, value, growth, momentum}` where each factor is `{state: classified/incomplete/notEnough/retired, percentile?, score?, reason?, restated: bool}` | CAP-002 |
+| `rows[]` | `{symbol, name, value, growth, momentum}` where each factor is `{state: classified/incomplete/notEnough/retired, percentile?, standardisedScore?, reason?, restated: bool}` | CAP-002 |
 | `matchCount` | integer | server-side filter over the full set |
 | `selected` | symbol | client |
 | `checked` | symbol[] | client, kept across filter changes |

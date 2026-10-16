@@ -2,13 +2,13 @@
 artifact_schema_version: 1
 artifact_id: STD-UI
 artifact_type: constitution-artifact
-artifact_version: 5
+artifact_version: 6
 id: STD-UI
 title: Owner Interface Conventions
 kind: standard
-status: draft
+status: approved
 created: 2026-09-05
-updated: 2026-10-15
+updated: 2026-10-16
 owner: Alvaro de Jodra
 owner_github: ajodraca
 owning_capability: none
@@ -19,7 +19,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T01:55:00Z
+  timestamp: 2026-10-16T02:12:00Z
   source_artifacts:
     - id: STD-UI-v5-proposal
       version: "1, accepted 2026-10-15"
@@ -37,14 +37,21 @@ ai_provenance:
       version: "as of 2026-10-15"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T02:18:24Z
+  reviewed_revision: sha256:3ad42ff2ef4e3e4b1092009b6d96d5d00c7f70956115d902b5507e6008ab62ce
+  review_artifact: "docs/constitution/reviews/ui-conventions-review-v4.md"
 ---
 
 # Owner Interface Conventions
 
 ## 1. Purpose and Standing
 
-FactorFlow-v2 has no interface yet. `CAP-001-ux-brief` v1 records that no design
-system is configured for the project and that the patterns CAP-001 settles —
+When this standard was first written, FactorFlow-v2 had no interface.
+`CAP-001-ux-brief` v1 recorded that no design system was configured for the
+project and that the patterns CAP-001 settles —
 status vocabulary, empty and failure states, table shape — are inherited by every
 capability from M2 through M6. Before this standard, those patterns had no
 governed home: each UX brief would have re-derived them, and divergence between
@@ -151,13 +158,16 @@ timeout, 500).
 
 | Domain term | Display label |
 |-------------|---------------|
+| instrument | stock |
 | instrument (on the acquisition list) | followed stock |
 | retire (an instrument) | stop following |
 | acquisition run | download |
 | run outcome `succeeded` / `partial` / `failed` / `cancelled` / `abandoned` | Complete / Partial / Failed / Cancelled by you / Interrupted |
 | not classified | Incomplete |
 | not enough stocks to rank | Not enough to rank |
-| classification | score |
+| classification (a factor's result for one stock, as a whole) | score |
+| percentile rank (the component of a score, 0–100) | percentile |
+| standardised score (the component of a score, signed) | standardised score — never shortened to *score* |
 | promotion | review (the stage) / go live (the action) |
 | kill switch | Stop all trading (the control) / Trading stopped (the state) |
 | universe, coverage, observation, history depth, trading day, gap, factor, strategy, paper, live | unchanged: the domain term is the display label |
@@ -311,7 +321,9 @@ MUST NOT be used for anything that is not tied to an environment.
 **Authority:** `tech-stack.md` v2 — the interface must never be styled
 identically for paper and live; charter §3, the paper-to-live gate. Owner decision of 2026-10-15 for use of
 the environment tokens outside the region (A-4).
-**Verification:** Every screenshot of every screen shows the environment.
+**Verification:** Every screenshot of every screen shows the environment, and
+every use of a `--risk-*` token outside the region marks an environment and
+states it in words.
 **Specialization:** stricter-only.
 
 ### STD-UI-12 — Status form and severity
@@ -685,6 +697,7 @@ and it was closed on 2026-09-05 before that screen was designed.
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-15 | 6 | Fixed the findings of `reviews/ui-conventions-review-v3.md` before approval. **FINDING-7:** STD-UI-1 splits *score* — the label for a whole classification — from its two components, *percentile* and *standardised score*, which is never shortened to *score*. **FINDING-12:** adds *instrument → stock*. **FINDING-9:** STD-UI-11's Verification now covers the environment-token restriction. **FINDING-11:** §1's opening sentence is no longer a dated claim. **FINDING-10:** the v5 proposal is now a plain record, not a schema-versioned artifact of an unregistered type. No rule obligation changed beyond the STD-UI-1 label rows; numbering unchanged |
 | 2026-10-15 | 5 | Accepted the five amendments of `proposals/STD-UI-v5-proposal.md`, required by the product UX blueprint (`docs/ux/product-ux-blueprint.md`). **A-1** STD-UI-1 separates each concept's domain term from its display label and fixes the labels (followed stock, stop following, download, Incomplete, score, review / go live, Stop all trading), adding gate, rebalance, limit, benchmark and market period. **A-2** closes OQ-UI-5: the rationale clause of STD-UI-20 is an owner decision. **A-3** STD-UI-12 maps trading stopped by the owner to neutral and by a limit to serious. **A-4** STD-UI-11 permits the environment tokens outside the region, only to mark an environment and always with words; `design-system/theme.css` is corrected to match. **A-5** STD-UI-29 records that an alpha of an existing token is not a new value. Numbering unchanged. Blast radius per §5.2: CAP-001 and CAP-002 record STD-UI-1 and STD-UI-12 as *yes* and are re-reviewed for those rules; no capability yet records STD-UI-11 or STD-UI-20 as applicable |
 | 2026-09-05 | 4 | Corrected STD-UI-20's authority on FINDING-1 of `reviews/ui-conventions-review-v1.md`. The rule attributed its written-rationale clause to Charter §3, which stores "the decision history behind promotions" but does not require the owner to state a reason; OQ-UI-5 had already conceded the charter "does not say so in as many words". The clause is now labelled internal policy pending OQ-UI-5 and rests on its own argument. No rule text, obligation, numbering or specialization posture changed, and the other three clauses keep their charter authority |
 | 2026-09-05 | 3 | Closed OQ-UI-3 on the owner's decision: the product displays **America/Chicago** throughout, and `observed_on` is computed in it. US Central was chosen over exchange time, which would have put run timestamps in the same frame as the session dates that dominate every screen, and over UTC, which would have matched the container logs a failed run is diagnosed against. The question's second half was settled on correctness rather than preference: a session date is a calendar date in the exchange's terms and is rendered unconverted, because converting one moves a bar onto the wrong day. STD-UI-5 now states both, and records the consequence that Central is not the exchange zone, so a run between 23:00 and 24:00 Central stamps a calendar day that America/New_York would call the next one. Also promoted the thirty rule headings from level four to level three so `scripts/check-capabilities.py` can extract them, which is a corrected reference rather than an amendment and changed no rule text |
