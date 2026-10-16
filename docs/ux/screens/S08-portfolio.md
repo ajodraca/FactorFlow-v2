@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S08
 artifact_type: ux-screen-spec
-artifact_version: 2
+artifact_version: 3
 parent: PRODUCT-UX
 title: "S08 Portfolio — live and paper"
 route: /portfolio/live, /portfolio/paper
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T03:39:39Z
+  timestamp: 2026-10-16T16:58:19Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "4"
+      version: "5"
     - id: STD-UI
       version: "6"
   invoking_user: ajodraca
@@ -114,7 +114,10 @@ orders until you resume.*
   (D-11). Its card shows `badge` `status-serious` *Stopped: daily-loss limit
   reached at {time}*, its unsent orders read *Not sent: strategy stopped*, and
   S01 gets a *Needs you* item. Other strategies and the trading-wide state are
-  unchanged.
+  unchanged. It stays stopped until the owner presses **Resume {name}…** on its
+  card (`dialog` `confirm` for paper, `real-money` for live). On the day of
+  the stop that button is `blocked` with *Today's loss is still at the limit.
+  You can resume after today's close.* (blueprint §3.3).
 - Limit meters change tier only by words and shape: below 80% of the limit no
   badge; 80–99% `status-warning` *Near limit*; at the limit `status-serious`
   *At limit*.

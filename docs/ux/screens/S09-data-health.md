@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S09
 artifact_type: ux-screen-spec
-artifact_version: 2
+artifact_version: 3
 parent: PRODUCT-UX
 title: "S09 Data health"
 route: /data
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T03:39:39Z
+  timestamp: 2026-10-16T16:58:19Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "4"
+      version: "5"
     - id: CAP-001
       version: "8"
   invoking_user: ajodraca

@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S01
 artifact_type: ux-screen-spec
-artifact_version: 2
+artifact_version: 3
 parent: PRODUCT-UX
 title: "S01 Home — what needs you today"
 route: /home
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T03:39:39Z
+  timestamp: 2026-10-16T16:58:19Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "4"
+      version: "5"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -135,6 +135,7 @@ Main region capped at 1180 px, `--space-5` padding, regions stacked with
 | Limit item | *Momentum Tilt hit its 8% per-stock limit on NVDA (paper)* / *Two buys today were trimmed to stay under the limit. Nothing failed; the strategy holds slightly less NVDA than its rules asked for.* / **See orders** |
 | Data item | *KO, TSLA and FBXX are missing today's data* / *Their scores show as Incomplete until the data is complete. Strategies holding them won't trade them until then.* / **Fix data** |
 | Draft item | *Growth Momentum Blend has never been backtested* / **Run backtest** |
+| Daily-loss stop item | *Momentum Tilt stopped at its 3% daily-loss limit (paper)* / *It sends no orders until you resume it. Other strategies keep trading.* / **Review and resume** (→ S08). Clears when the strategy is resumed, paused or retired |
 
 ## 9. Accessibility
 

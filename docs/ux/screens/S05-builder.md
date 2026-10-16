@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S05
 artifact_type: ux-screen-spec
-artifact_version: 2
+artifact_version: 3
 parent: PRODUCT-UX
 title: "S05 Strategy builder"
 route: /strategies/new, /strategies/:id/rules
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T03:39:39Z
+  timestamp: 2026-10-16T16:58:19Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "4"
+      version: "5"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -95,13 +95,14 @@ in M2–M3 and **Run backtest** from M4.
 ## 6. Interactions
 
 - Every change autosaves after 800 ms of inactivity and updates *saved {time}*.
-  Saving a strategy that has been backtested, or is paper or live trading,
-  creates a new draft version (blueprint D-10). The stepper shows the draft
-  version at Draft, and a line under the header says what the running version
-  is doing: *Version {n} keeps paper trading (or: trading live) under its own
-  rules until this version replaces it.* The running version's stage, orders
-  and evidence do not change. The draft replaces it only through the stage's
-  own action: **Start paper trading** (paper) or go-live on S07 (live).
+  Saving a Backtested strategy creates a new version; the stepper falls back
+  to Draft for that version and the previous version keeps its evidence.
+- A strategy that is paper or live trading opens read-only (blueprint D-10):
+  the blanks render as text, the footer bar reads *{name} is paper trading
+  (or: trading live). Its rules can't change while it trades.*, and the
+  primary action is **Edit as a new strategy** (`default`). That creates a new
+  Draft strategy *{name} (copy)* with the same rules and opens it here; nothing
+  about the original changes.
 - The preview recomputes after each save; while recomputing, the list dims and
   keeps its rows.
 - **+ condition** appends a sentence clause with a factor `select` focused.
@@ -145,9 +146,10 @@ in M2–M3 and **Run backtest** from M4.
 
 1. **S05-1** The plain-words summary is produced by the server from the saved
    rules.
-2. **S05-2** Editing a backtested, paper or live strategy creates a new draft
-   version; the running version keeps trading under its own rules and keeps
-   its stage and evidence.
+2. **S05-2** Editing a backtested strategy creates a new version and leaves
+   the previous version's evidence intact. A paper or live strategy's rules
+   can't be edited; **Edit as a new strategy** creates a separate Draft
+   strategy and leaves the original trading unchanged.
 6. **S05-6** A preview pick whose ranking percentile carries the restatement
    mark shows it (STD-UI-17).
 3. **S05-3** The preview names how many stocks were skipped for incomplete

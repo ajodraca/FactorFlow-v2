@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S04
 artifact_type: ux-screen-spec
-artifact_version: 2
+artifact_version: 3
 parent: PRODUCT-UX
 title: "S04 Strategies — lifecycle board"
 route: /strategies
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T03:39:39Z
+  timestamp: 2026-10-16T16:58:19Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "4"
+      version: "5"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -56,9 +56,8 @@ columns, and *Start paper trading* sits on Draft cards.
    Draft*), count, one-line meaning; the Paper and Live headings use
    `--risk-paper` and `--risk-real-money` text plus their words.
 3. **Strategy card** (`card`, `--space-3` padding, `--space-3` gap): name (`h3`);
-   optional status badge at top right (*Limit hit*, *Gate met*, *LIVE*); a
-   line *Draft changes: version {n}* with an **Edit** link when a draft version
-   exists beside the running one (D-10); the
+   optional status badge at top right (*Limit hit*, *Gate met*, *LIVE*,
+   *Stopped: daily-loss limit*); the
    rule summary sentence (Draft, Backtested, Review); stage facts as a two-column
    key/value list; a `progress` toward the gate on Paper cards (*41 of 60 days
    toward review*); then one primary or outline action and at most one link.
@@ -91,7 +90,7 @@ columns, and *Start paper trading* sits on Draft cards.
 | Field | Type | Source |
 |-------|------|--------|
 | `columns[]` | `{stage, count}` limited to delivered stages | strategy service |
-| `strategies[]` | `{id, name, stage, runningVersion, draftVersion?, ruleSummary, rulesComplete, editedAt, backtest?: {cagr, worstDrop, vsBenchmarkPpPerYear}, paper?: {days, gateDays, sinceStartPct, trackingPp, limitHit}, review?: {gateMet}, live?: {value, sinceDate, sinceStartPct, dailyLossUsedPct}}` | strategy, backtest, broker services |
+| `strategies[]` | `{id, name, stage, stoppedByLimitAt?, ruleSummary, rulesComplete, editedAt, backtest?: {cagr, worstDrop, vsBenchmarkPpPerYear}, paper?: {days, gateDays, sinceStartPct, trackingPp, limitHit}, review?: {gateMet}, live?: {value, sinceDate, sinceStartPct, dailyLossUsedPct}}` | strategy, backtest, broker services |
 | `gate` | `{paperDays, trackingPp}` | owner settings; defaults 60 and 2 (D-3) |
 | `stoppedCount` | integer | strategy service |
 
@@ -99,8 +98,11 @@ columns, and *Start paper trading* sits on Draft cards.
 
 - Cards do not drag. A stage changes only through the action that earns it
   (backtest, start paper trading, go live), never by moving a card or by
-  editing rules: an edit to a running strategy is a draft version, and the card
-  stays in the running version's column (D-10).
+  editing rules: a paper or live strategy's rules are read-only, and **Edit as
+  a new strategy** adds a separate card in Draft (D-10).
+- A strategy stopped by its daily-loss limit stays in its column with the
+  serious *Stopped: daily-loss limit* badge, and its action becomes **Open**
+  (→ S08, where **Resume {name}…** lives; blueprint §3.3).
 - **Start paper trading** opens `dialog` `confirm` (blueprint §9) and, on
   confirm, moves the card to Paper trading.
 - The board refreshes every 60 s while visible (*checked {time}* under the
