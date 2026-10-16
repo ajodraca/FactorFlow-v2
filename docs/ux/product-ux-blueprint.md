@@ -6,7 +6,7 @@ artifact_version: 3
 id: PRODUCT-UX
 title: FactorFlow Owner Interface — Product UX Blueprint
 kind: blueprint
-status: approved
+status: draft
 created: 2026-10-15
 updated: 2026-10-15
 owner: Alvaro de Jodra
@@ -37,16 +37,12 @@ ai_provenance:
       version: "12 components as of 2026-09-05, extended by this change"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-16T02:10:00Z
-  approved_revision: "PRODUCT-UX v3 with screen specs S01-S09 v1, PR #120"
 ---
 
 # Product UX Blueprint: FactorFlow Owner Interface
 
-> **Status: approved by the owner on 2026-10-15.** The owner chose the canvas
+> **Status: draft. The owner intends to approve it (2026-10-15); approval waits for a
+> review through the harness gate.** The owner chose the canvas
 > page *Whole product · usability-first* as the guide for developing the
 > interface (2026-10-15). This blueprint turns that page into rules, routes,
 > patterns and per-screen specifications that the SDD pipeline can cite. All
@@ -601,7 +597,6 @@ its 11 px labels move to `--text-xs` (12 px).
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-10-15 | 3 (approved) | Approved by the owner together with screen specs S01–S09, before merging PR #120. No content change |
 | 2026-10-15 | 3 | Closed D-2 (scheduled downloads from M2), D-3 (gate criteria are owner settings with the stated defaults), D-6 (stepper shows only shipped stages) and D-7 (kill switch in M2); §10 M2 gains scheduled downloads |
 | 2026-10-15 | 2 | Recorded the owner's acceptance of STD-UI v5: D-1, D-4 and D-5 decided; §7 vocabulary is normative; owner-engaged stop tiered neutral by STD-UI-12 itself (A-3) |
 | 2026-10-15 | 1 | First draft, from the canvas page *Whole product · usability-first*, which the owner chose as the development guide on 2026-10-15 |

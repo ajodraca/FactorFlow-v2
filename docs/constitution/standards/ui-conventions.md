@@ -6,7 +6,7 @@ artifact_version: 5
 id: STD-UI
 title: Owner Interface Conventions
 kind: standard
-status: approved
+status: draft
 created: 2026-09-05
 updated: 2026-10-15
 owner: Alvaro de Jodra
@@ -21,29 +21,22 @@ ai_provenance:
   tool_version: unknown
   timestamp: 2026-10-16T01:55:00Z
   source_artifacts:
-    - id: STD-UI
-      version: "4"
     - id: STD-UI-v5-proposal
       version: "1, accepted 2026-10-15"
     - id: PRODUCT-UX
-      version: "1, draft"
+      version: "3"
     - id: product-charter
       version: "2"
     - id: tech-stack
-      version: "2"
-    - id: CAP-001-ux-brief
       version: "5"
+    - id: CAP-001-ux-brief
+      version: "7"
     - id: edg-compliance
       version: "1.0"
     - id: factorflow-design-system
       version: "as of 2026-10-15"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-16T01:54:00Z
-  decision_record: "docs/constitution/proposals/STD-UI-v5-proposal.md"
 ---
 
 # Owner Interface Conventions

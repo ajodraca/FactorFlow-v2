@@ -10,7 +10,7 @@ owner decisions it depends on.
 
 | Path | What it is |
 |------|------------|
-| `product-ux-blueprint.md` | `PRODUCT-UX`, the blueprint (approved 2026-10-15) |
+| `product-ux-blueprint.md` | `PRODUCT-UX`, the blueprint (draft; approval pending review) |
 | `screens/S01-home.md` | Home — what needs you today |
 | `screens/S02-setup.md` | First-run setup |
 | `screens/S03-research.md` | Research — screener and inspector |
