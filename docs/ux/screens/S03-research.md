@@ -21,7 +21,7 @@ ai_provenance:
   timestamp: 2026-10-16T01:40:00Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "1"
+      version: "3"
     - id: CAP-002
       version: "1, draft"
   invoking_user: ajodraca

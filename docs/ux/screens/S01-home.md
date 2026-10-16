@@ -21,7 +21,7 @@ ai_provenance:
   timestamp: 2026-10-16T01:40:00Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "1"
+      version: "3"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
