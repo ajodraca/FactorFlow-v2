@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Backtest — FactorFlow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--background:0 0% 100%;--surface:210 40% 98%;--foreground:222 47% 11%;--muted:210 40% 96%;--muted-foreground:215 16% 47%;--border:214 32% 91%;--input:214 32% 59%;--ring:222 47% 11%;--primary:222 47% 11%;--primary-foreground:210 40% 98%;--status-neutral:215 16% 44%;--status-neutral-muted:210 40% 96%;--status-active:217 91% 49%;--status-active-muted:217 91% 96%;--status-good:142 62% 30%;--status-good-muted:142 55% 95%;--status-warning:47 93% 20%;--status-warning-muted:45 95% 94%;--status-critical:0 72% 45%;--gain:173 80% 27%;--loss:25 88% 37%;--risk-paper:199 72% 38%;--risk-paper-muted:199 72% 95%;--risk-real-money:349 75% 44%;--risk-real-money-muted:349 80% 96%;--chart-1:199 72% 40%;--chart-6:215 28% 32%;--chart-grid:214 32% 91%;--chart-axis:215 16% 47%;--font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-numeric:ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace}
+body{margin:0;background:hsl(var(--surface));color:hsl(var(--foreground));font-family:var(--font-sans);font-size:14px;line-height:1.4}
+a{color:hsl(var(--foreground))}a:hover{color:hsl(var(--status-active))}
+h1{margin:0;font-size:20px;line-height:1.25;font-weight:650;letter-spacing:-0.01em}
+h2{margin:0;font-size:15px;line-height:1.25;font-weight:600}
+.num{font-family:var(--font-numeric);font-variant-numeric:tabular-nums}
+.meta{font-size:12px;color:hsl(var(--muted-foreground))}
+.rail a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:hsl(var(--foreground));font-weight:500}
+.rail a svg{flex:none;color:hsl(var(--muted-foreground))}
+.rail a:hover{background:hsl(var(--muted));color:hsl(var(--foreground))}
+.rail a[aria-current="page"]{background:hsl(var(--background));box-shadow:0 0 0 1px hsl(var(--border))}
+.rail a[aria-current="page"] svg{color:hsl(var(--foreground))}
+.count{margin-left:auto;font:600 11px/18px var(--font-numeric);padding:0 6px;border-radius:999px;background:hsl(var(--status-warning-muted));color:hsl(var(--status-warning))}
+.b{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap}
+.b-good{color:hsl(var(--status-good));background:hsl(var(--status-good-muted))}
+.b-neutral{color:hsl(var(--status-neutral));background:hsl(var(--status-neutral-muted))}
+.ic{display:inline-block;width:8px;height:8px;flex:none;background:currentColor;box-sizing:border-box}
+.ic-good{border-radius:50%}
+.ic-serious{transform:rotate(45deg);width:6px;height:6px}
+.ic-live{transform:rotate(45deg);width:7px;height:7px}
+.ic-paper{border-radius:50%;background:transparent;border:1.5px solid currentColor}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:8px;font:500 13px/1 var(--font-sans);border:1px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;box-sizing:border-box}
+.btn-primary{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+.btn-primary:hover{color:hsl(var(--primary-foreground))}
+.btn-outline{background:hsl(var(--background));border-color:hsl(var(--input));color:hsl(var(--foreground))}
+.card{background:hsl(var(--background));border:1px solid hsl(var(--border));border-radius:12px}
+.search{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 10px;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));color:hsl(var(--muted-foreground));font:13px var(--font-sans);cursor:pointer;min-width:260px}
+kbd{font:11px var(--font-numeric);padding:1px 5px;border:1px solid hsl(var(--border));border-radius:4px;background:hsl(var(--background));color:hsl(var(--muted-foreground))}
+.env{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-decoration:none}
+.env-live{color:hsl(var(--risk-real-money));background:hsl(var(--risk-real-money-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-real-money)/.35)}
+.env-paper{color:hsl(var(--risk-paper));background:hsl(var(--risk-paper-muted));box-shadow:inset 0 0 0 1px hsl(var(--risk-paper)/.35)}
+.kill{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:8px;border:0;background:hsl(var(--foreground));color:hsl(var(--background));font:600 13px/1 var(--font-sans);cursor:pointer;white-space:nowrap;text-decoration:none}
+:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.steps{display:flex;list-style:none;margin:0;padding:0;gap:0;flex-wrap:wrap}
+.steps li{flex:1 1 120px;display:flex;align-items:center;gap:8px;font-size:13px;color:hsl(var(--muted-foreground))}
+.steps li::after{content:"";flex:1;height:2px;background:hsl(var(--border));margin:0 10px}
+.steps li:last-child::after{display:none}
+.steps li.done::after{background:hsl(var(--foreground))}
+.dot{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:600 11px var(--font-numeric);border:1.5px solid hsl(var(--border));background:hsl(var(--background));box-sizing:border-box;flex:none}
+.steps .done .dot{background:hsl(var(--foreground));border-color:hsl(var(--foreground));color:hsl(var(--background))}
+.steps .done{color:hsl(var(--foreground))}
+.steps .now{color:hsl(var(--foreground));font-weight:600}
+.steps .now .dot{border-color:hsl(var(--status-active));color:hsl(var(--status-active));box-shadow:0 0 0 3px hsl(var(--status-active-muted))}
+.tile{padding:16px;display:flex;flex-direction:column;gap:4px}
+.tile .v{font:600 24px var(--font-numeric)}
+.pos{color:hsl(var(--gain))}.neg{color:hsl(var(--loss))}
+.rg{display:grid;grid-template-columns:minmax(160px,1.2fr) 200px repeat(3,110px);gap:8px;align-items:center;padding:8px 16px;border-top:1px solid hsl(var(--border));font-size:13px;min-width:680px}
+.rg>span:nth-child(n+3){text-align:right;font-family:var(--font-numeric)}
+.leg{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.leg i{display:inline-block;width:16px;height:2px;border-radius:1px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; align-items: stretch">
+<aside class="rail" style="flex: 1 1 208px; box-sizing: border-box; border-right: 1px solid hsl(var(--border)); display: flex; flex-direction: column; padding: 16px 12px; gap: 2px">
+<div style="display: flex; align-items: center; gap: 8px; padding: 6px 12px 18px"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 14 L7 8 L10 11 L16 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-weight: 700; font-size: 15px">FactorFlow</span></div>
+<nav aria-label="Primary" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P01-Home.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7 L8 2 L14 7 V14 H10 V10 H6 V14 H2 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>Home<span class="count">4</span></a>
+<a href="P03-Research.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>Research</a>
+<a href="P04-Strategies.dc.html" aria-current="page"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4 H9 M2 8 H12 M2 12 H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="12" cy="4" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="12" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"></circle></svg>Strategies</a>
+<a href="P08-Portfolio.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"></rect><path d="M6 5 V3 H10 V5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Portfolio</a>
+</nav>
+<div style="flex: 1; min-height: 24px"></div>
+<nav aria-label="Data and system" style="display: flex; flex-direction: column; gap: 2px">
+<a href="P09-Data.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4" rx="5.5" ry="2" fill="none" stroke="currentColor" stroke-width="1.4"></ellipse><path d="M2.5 4 V12 C2.5 13.1 5 14 8 14 C11 14 13.5 13.1 13.5 12 V4 M2.5 8 C2.5 9.1 5 10 8 10 C11 10 13.5 9.1 13.5 8" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>Data health<span class="count">1</span></a>
+<a href="P02-Setup.dc.html"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4 H13 M3 8 H13 M3 12 H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="4" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="10" cy="8" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle><circle cx="5" cy="12" r="1.6" fill="hsl(var(--surface))" stroke="currentColor" stroke-width="1.4"></circle></svg>Settings</a>
+</nav>
+</aside>
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+<header style="position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 24px; background: hsl(var(--background)); border-bottom: 1px solid hsl(var(--border))">
+<div style="flex: 1 1 160px; min-width: 0; font-weight: 600"><a href="P04-Strategies.dc.html" style="color: hsl(var(--muted-foreground)); text-decoration: none; font-weight: 500">Strategies</a> / Cheap Momentum</div>
+<button type="button" class="search"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>Search stocks, strategies…<kbd style="margin-left: auto">⌘K</kbd></button>
+<div role="region" aria-label="Trading environment" style="display: flex; gap: 6px"><a href="P08-Portfolio.dc.html" class="env env-live"><span class="ic ic-live"></span>LIVE · 1 STRATEGY</a><a href="P04-Strategies.dc.html" class="env env-paper"><span class="ic ic-paper"></span>PAPER · 3</a></div>
+<span aria-hidden="true" style="width: 1px; height: 28px; background: hsl(var(--border)); margin: 0 8px"></span>
+<a href="P08-Portfolio.dc.html" class="kill"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5 H10.5 L14.5 5.5 V10.5 L10.5 14.5 H5.5 L1.5 10.5 V5.5 Z" fill="hsl(var(--status-critical))"></path><path d="M5.5 8 H10.5" stroke="white" stroke-width="1.8" stroke-linecap="round"></path></svg>Stop all trading</a>
+</header>
+<main style="padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between">
+<div style="display: flex; align-items: center; gap: 10px"><h1>Cheap Momentum</h1><span class="b b-good"><span class="ic ic-good"></span>Backtest complete · v1</span></div>
+<ol class="steps" aria-label="Strategy lifecycle" style="flex: 1 1 560px; max-width: 720px"><li class="done"><span class="dot">✓</span>Draft</li><li class="now" aria-current="step"><span class="dot">2</span>Backtest</li><li><span class="dot">3</span>Paper</li><li><span class="dot">4</span>Review</li><li><span class="dot">5</span>Live</li></ol>
+</div>
+<section class="card" style="padding: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between">
+<p style="margin: 0; font-size: 16px; line-height: 1.6; max-width: 75ch">Over five years, <b>$10,000</b> would have grown to <b class="num">{{endS}}</b>, against <span class="num">{{endB}}</span> for the benchmark. Its worst drop was <b class="num neg">{{ddS}}</b>, versus <span class="num neg">{{ddB}}</span>.</p>
+<span style="display: flex; gap: 8px"><a href="P05-Builder.dc.html" class="btn btn-outline">Edit rules</a><a href="P04-Strategies.dc.html" class="btn btn-primary">Start paper trading</a></span>
+</section>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div class="card tile"><span class="meta">Growth per year</span><span class="v pos">{{cagrS}}</span><span class="meta">Benchmark <span class="num">{{cagrB}}</span></span></div>
+<div class="card tile"><span class="meta">Worst drop, peak to low</span><span class="v neg">{{ddS}}</span><span class="meta">Benchmark <span class="num">{{ddB}}</span></span></div>
+<div class="card tile"><span class="meta">Ups and downs (yearly volatility)</span><span class="v">{{volS}}</span><span class="meta">Benchmark <span class="num">{{volB}}</span></span></div>
+<div class="card tile"><span class="meta">Market periods it beat the benchmark</span><span class="v">{{beat}} <span class="meta" style="font-size: 14px">of 6</span></span><span class="meta">See the table below</span></div>
+</div>
+<section class="card" aria-labelledby="ch" style="padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: baseline">
+<div><h2 id="ch">Growth of $10,000</h2><span class="meta">Month-end value in USD · 2021-10-29 to 2026-09-30 · n = 60 month-ends · after an assumed 0.05% cost per trade</span></div>
+<span style="display: flex; gap: 16px; align-items: center"><span class="leg"><i style="background: hsl(var(--chart-1))"></i>Cheap Momentum</span><span class="leg"><i style="background: hsl(var(--chart-6))"></i>Benchmark: all followed stocks, equal weight</span><a href="#rt" class="meta">View as table</a></span>
+</div>
+<svg viewBox="0 0 960 290" role="img" aria-label="Line chart. Cheap Momentum ends at {{endS}}, the benchmark at {{endB}}. Shaded periods mark the 2022 drawdown and the April 2025 shock." style="width: 100%; height: auto; display: block">
+<rect x="98.9" y="20" width="128.7" height="240" fill="hsl(var(--muted))"></rect>
+<rect x="649.7" y="20" width="14.3" height="240" fill="hsl(var(--muted))"></rect>
+<text x="104" y="34" font-size="11" fill="hsl(var(--chart-axis))" font-family="ui-sans-serif, system-ui, sans-serif">2022 drawdown</text>
+<text x="668" y="34" font-size="11" fill="hsl(var(--chart-axis))" font-family="ui-sans-serif, system-ui, sans-serif">Apr 2025 shock</text>
+<line x1="56" x2="900" y1="225.7" y2="225.7" stroke="hsl(var(--chart-grid))"></line>
+<line x1="56" x2="900" y1="157.1" y2="157.1" stroke="hsl(var(--chart-grid))"></line>
+<line x1="56" x2="900" y1="88.6" y2="88.6" stroke="hsl(var(--chart-grid))"></line>
+<line x1="56" x2="900" y1="20" y2="20" stroke="hsl(var(--chart-grid))"></line>
+<line x1="56" x2="900" y1="260" y2="260" stroke="hsl(var(--chart-axis))"></line>
+<g font-size="11" fill="hsl(var(--chart-axis))" font-family="ui-monospace, Menlo, monospace" text-anchor="end">
+<text x="48" y="229.7">$8,000</text><text x="48" y="161.1">$12,000</text><text x="48" y="92.6">$16,000</text><text x="48" y="24">$20,000</text>
+</g>
+<g font-size="11" fill="hsl(var(--chart-axis))" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">
+<text x="98.9" y="278">2022</text><text x="270.6" y="278">2023</text><text x="442.2" y="278">2024</text><text x="613.9" y="278">2025</text><text x="785.6" y="278">2026</text>
+</g>
+<path d="{{pathB}}" fill="none" stroke="hsl(var(--chart-6))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+<path d="{{pathS}}" fill="none" stroke="hsl(var(--chart-1))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+<circle cx="900" cy="{{yS}}" r="4" fill="hsl(var(--chart-1))" stroke="hsl(var(--background))" stroke-width="2"></circle>
+<circle cx="900" cy="{{yB}}" r="4" fill="hsl(var(--chart-6))" stroke="hsl(var(--background))" stroke-width="2"></circle>
+<text x="908" y="{{ySl}}" font-size="11" font-weight="600" fill="hsl(var(--foreground))" font-family="ui-monospace, Menlo, monospace">{{endS}}</text>
+<text x="908" y="{{yBl}}" font-size="11" fill="hsl(var(--muted-foreground))" font-family="ui-monospace, Menlo, monospace">{{endB}}</text>
+</svg>
+</section>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<section id="rt" class="card" aria-labelledby="rg" style="flex: 999 1 640px; min-width: 0; overflow-x: auto">
+<div style="padding: 16px"><h2 id="rg">By market period</h2><span class="meta">Total return within each period. A strategy that only works in one kind of market shows it here.</span></div>
+<div class="rg meta" style="font-weight: 500"><span>Period</span><span>Dates</span><span>Strategy</span><span>Benchmark</span><span>Difference</span></div>
+<sc-for list="{{regimes}}" as="r" hint-placeholder-count="6">
+<div class="rg"><span style="font-weight: 600">{{r.name}}</span><span class="meta num" style="text-align: left">{{r.dates}}</span><span class="{{r.sc}}">{{r.s}}</span><span class="{{r.bc}}">{{r.b}}</span><span class="{{r.dc}}">{{r.d}}</span></div>
+</sc-for>
+</section>
+<section class="card" aria-labelledby="lim" style="flex: 1 1 320px; max-width: 420px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<h2 id="lim">What this can’t tell you</h2>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.5">
+<li>Every decision used only data <b>as it was known on that date</b>. Nothing from later leaks in.</li>
+<li><span class="b b-neutral" style="vertical-align: 1px"><span class="ic ic-serious"></span>Possibly restated</span> 31% of value scores before 2024 came from fundamentals downloaded later, which may include corrections the market didn’t have then.</li>
+<li>Stocks only count from the date you started following them, so the early years see a smaller list.</li>
+<li>Costs are an assumption (0.05% per trade). Paper trading measures the real ones.</li>
+</ul>
+</section>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const N = 60;
+    const regimeOf = (i) => i <= 2 ? 0 : i <= 12 ? 1 : i <= 26 ? 2 : i <= 41 ? 3 : i === 42 ? 4 : 5;
+    const RB = [0.020, -0.022, 0.020, 0.015, -0.070, 0.014];
+    const RS = [0.016, -0.010, 0.018, 0.010, -0.050, 0.016];
+    const rb = [0], rs = [0];
+    for (let i = 1; i < N; i++) {
+      const g = regimeOf(i), n = 0.008 * Math.sin(1.7 * i);
+      rb.push(RB[g] + n);
+      rs.push(RS[g] + n + 0.004 * Math.cos(2.3 * i));
+    }
+    const vb = [10000], vs = [10000];
+    for (let i = 1; i < N; i++) { vb.push(vb[i - 1] * (1 + rb[i])); vs.push(vs[i - 1] * (1 + rs[i])); }
+    const x = (i) => 56 + i * (844 / 59);
+    const y = (v) => 260 - (v - 6000) / 14000 * 240;
+    const path = (vals) => vals.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    const dd = (vals) => { let pk = vals[0], m = 0; vals.forEach((v) => { pk = Math.max(pk, v); m = Math.min(m, v / pk - 1); }); return m; };
+    const vol = (r) => { const a = r.slice(1), mu = a.reduce((s, v) => s + v, 0) / a.length; return Math.sqrt(a.reduce((s, v) => s + (v - mu) * (v - mu), 0) / (a.length - 1)) * Math.sqrt(12); };
+    const pct = (v, sign) => (sign ? (v >= 0 ? '+' : '−') : (v < 0 ? '−' : '')) + Math.abs(v * 100).toFixed(1) + '%';
+    const usd = (v) => '$' + Math.round(v).toLocaleString('en-US');
+    const cagr = (vals) => Math.pow(vals[N - 1] / vals[0], 12 / 59) - 1;
+    const names = [['Late 2021', '2021-11 → 2021-12'], ['2022 drawdown', '2022-01 → 2022-10'], ['2023 recovery', '2022-11 → 2023-12'], ['2024 mega-cap rally', '2024-01 → 2025-03'], ['Apr 2025 shock', '2025-04'], ['Broad rally', '2025-05 → 2026-09']];
+    let beat = 0;
+    const regimes = names.map((nm, g) => {
+      let s = 1, b = 1;
+      for (let i = 1; i < N; i++) if (regimeOf(i) === g) { s *= 1 + rs[i]; b *= 1 + rb[i]; }
+      s -= 1; b -= 1; const d = s - b; if (d > 0) beat++;
+      return { name: nm[0], dates: nm[1], s: pct(s, true), b: pct(b, true), d: (d >= 0 ? '+' : '−') + Math.abs(d * 100).toFixed(1) + ' pp', sc: s >= 0 ? 'pos' : 'neg', bc: b >= 0 ? 'pos' : 'neg', dc: d >= 0 ? 'pos' : 'neg' };
+    });
+    const yS = y(vs[N - 1]), yB = y(vb[N - 1]);
+    const apart = Math.abs(yS - yB) < 14;
+    return {
+      pathS: path(vs), pathB: path(vb), yS: yS, yB: yB,
+      ySl: (apart && yS <= yB ? yS - 4 : yS + 4), yBl: (apart && yS <= yB ? yB + 12 : yB + 4),
+      endS: usd(vs[N - 1]), endB: usd(vb[N - 1]),
+      endSk: '$' + (vs[N - 1] / 1000).toFixed(1) + 'k', endBk: '$' + (vb[N - 1] / 1000).toFixed(1) + 'k',
+      cagrS: pct(cagr(vs), true), cagrB: pct(cagr(vb), true),
+      ddS: pct(dd(vs)), ddB: pct(dd(vb)),
+      volS: pct(vol(rs)), volB: pct(vol(rb)),
+      beat: beat, regimes: regimes
+    };
+  }
+}
+</script>
+</body>
+</html>
