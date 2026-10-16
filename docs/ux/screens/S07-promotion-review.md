@@ -103,7 +103,7 @@ click-outside; initial focus on **Cancel**):
 | Field | Type | Source |
 |-------|------|--------|
 | `strategy` | `{id, name, version}` | strategy service |
-| `gate` | `{evaluatedAt, criteria: [{id, text, observed, state: met/notMet/needsAck, ackId?}]}` | promotion service (D-3) |
+| `gate` | `{evaluatedAt, criteria: [{id, text, observed, state: met/notMet/needsAck, ackId?}]}` | promotion service, evaluating the owner's gate settings (D-3) |
 | `comparison` | `{start, end, days, paper: {...}, backtest: {...}, uncoveredRegimes: []}` | promotion service |
 | `marks` | `[{id, text}]` from STD-UI-17 sources (restated holdings) | promotion service |
 | `live` | `{unallocatedCash, nextRebalance, limits: {perStockPct, dailyLossPct}, broker: {name, connected}}` | broker + settings |

@@ -90,7 +90,7 @@ columns, and *Start paper trading* sits on Draft cards.
 |-------|------|--------|
 | `columns[]` | `{stage, count}` limited to delivered stages | strategy service |
 | `strategies[]` | `{id, name, stage, ruleSummary, rulesComplete, editedAt, backtest?: {cagr, worstDrop, vsBenchmarkPpPerYear}, paper?: {days, gateDays, sinceStartPct, trackingPp, limitHit}, review?: {gateMet}, live?: {value, sinceDate, sinceStartPct, dailyLossUsedPct}}` | strategy, backtest, broker services |
-| `gate` | `{paperDays, trackingPp}` | settings (D-3) |
+| `gate` | `{paperDays, trackingPp}` | owner settings; defaults 60 and 2 (D-3) |
 | `stoppedCount` | integer | strategy service |
 
 ## 6. Interactions

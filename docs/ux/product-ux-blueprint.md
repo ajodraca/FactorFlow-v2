@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX
 artifact_type: ux-blueprint
-artifact_version: 2
+artifact_version: 3
 id: PRODUCT-UX
 title: FactorFlow Owner Interface — Product UX Blueprint
 kind: blueprint
@@ -44,9 +44,10 @@ ai_provenance:
 > **Status: draft, awaiting owner approval.** The owner chose the canvas page
 > *Whole product · usability-first* as the guide for developing the interface
 > (2026-10-15). This blueprint turns that page into rules, routes, patterns and
-> per-screen specifications that the SDD pipeline can cite. Of the seven owner
-> decisions in §12, D-1, D-4 and D-5 are **decided** (STD-UI v5, 2026-10-15);
-> D-2, D-3, D-6 and D-7 remain open and follow their own change control.
+> per-screen specifications that the SDD pipeline can cite. All seven owner
+> decisions in §12 are **decided** (2026-10-15): D-1, D-4 and D-5 through
+> STD-UI v5, and D-2, D-3, D-6 and D-7 directly. The blueprint itself still
+> awaits approval as a whole.
 
 ## 0. How to use this blueprint
 
@@ -504,7 +505,7 @@ UX brief claims rows from this table.
 | M1 | **Shell rework** (new, small; or folded into CAP-002) | §3 shell without the kill switch and environment region (no order path exists yet); rail and routes of §2; route migration; command palette with Stocks, Universes and Pages groups |
 | M1 | CAP-001 (shipped) | Restyle only: Coverage, Instruments, Runs, Run detail and Settings move under `/data/*` and `/settings` with §7 labels; S09 Data health built on CAP-001's API; S02 steps 1–4 |
 | M1 | CAP-002 (draft) | S03 Research with inspector and selection tray; stock evidence, compare and universes routes; S01 Home with the data card and data-related *Needs you* items only |
-| M2 | Strategies & paper trading | S04 board without the Backtested and Review columns; S05 builder with *Start paper trading* as its primary action; S08 paper tab; S02 step 5; environment region (paper); **kill switch** (the first order path appears here, and STD-UI-21 applies to paper orders too); §4.2 stepper with Draft · Paper · Live |
+| M2 | Strategies & paper trading | **Scheduled downloads** each trading day at 17:30 CT alongside on-demand ones, with a *Needs you* item when a scheduled download fails (D-2); S04 board without the Backtested and Review columns; S05 builder with *Start paper trading* as its primary action; S08 paper tab; S02 step 5; environment region (paper); **kill switch** (the first order path appears here, and STD-UI-21 applies to paper orders too); §4.2 stepper with Draft · Paper · Live |
 | M3 | Live market data | S09 *Live prices* card; S08 and S01 as-of lines move to intraday; *Reconnecting* and *Not streaming* states |
 | M4 | Backtesting | S06; S04 Backtested column; S05 *Run backtest* becomes primary; Backtest step added to the stepper |
 | M5 | Promotion gate | S07; S04 Ready-for-review column; *Ready* items on S01; Settings → Promotion gate; decision history |
@@ -553,12 +554,12 @@ already discharges each rule, so a capability can cite it.
 | ID | Decision | Blocks | Recommendation / outcome |
 |----|----------|--------|--------------------------|
 | D-1 | Adopt the display labels of §7 by amending STD-UI-1 | Copy in every screen | **Decided 2026-10-15: adopted** (STD-UI v5, A-1) |
-| D-2 | Downloads run on a schedule (each trading day, 17:30 CT) as well as on demand | S09 copy, S01 data card, M3 and M6 scope | Assign to M3 Live Market Data. CAP-001 deliberately made downloads owner-triggered, and a live strategy cannot trade on data nobody remembered to download |
-| D-3 | The promotion gate criteria and their values: minimum paper days, maximum distance from the backtest, minimum market periods beaten, zero rejected orders | S04, S07 | Make them owner settings with the canvas values as defaults; M5 capability decides |
+| D-2 | Downloads run on a schedule (each trading day, 17:30 CT) as well as on demand | S09 copy, S01 data card, M2 scope | **Decided 2026-10-15: from M2**, with paper trading. Paper evidence feeds the promotion gate, so it must never rest on data nobody remembered to download. CAP-001's out-of-scope note already assigns "data kept current" to the first capability that needs it; that is M2's. On-demand downloads and their queueing are unchanged |
+| D-3 | The promotion gate criteria and their values: minimum paper days, maximum distance from the backtest, minimum market periods beaten, zero rejected orders | S04, S07 | **Decided 2026-10-15: owner settings**, defaults 60 paper trading days, within 2 percentage points of the backtest, backtest beats the benchmark in at least half its market periods, 0 rejected orders. Changes are recorded with their date. The gate only makes a review available; going live always needs the owner's review |
 | D-4 | Close OQ-UI-5: promotion captures a written rationale | S07 | **Decided 2026-10-15: yes**; OQ-UI-5 closed (STD-UI v5, A-2) |
 | D-5 | Allow the `--risk-paper` / `--risk-real-money` channel outside the environment region, for paper and live badges, tiles and column headers | S01, S04, S08 | **Decided 2026-10-15: allowed**, only to mark which environment a thing belongs to and always with words (STD-UI v5, A-4); `theme.css` comment corrected |
-| D-6 | The lifecycle stepper shows only the stages the product has (no Backtest step before M4, no Review step before M5) | S04, S05 | Yes. A disabled *coming later* step teaches the owner a stage they cannot use |
-| D-7 | The kill switch ships in M2 with paper trading rather than in M6 | M2 scope | Yes. Paper orders reach a real broker environment (charter §3), and the habit of one fixed stop control should start before real money does |
+| D-6 | The lifecycle stepper shows only the stages the product has (no Backtest step before M4, no Review step before M5) | S04, S05 | **Decided 2026-10-15: only shipped stages.** When a stage ships, strategies already past it are not grandfathered: a paper strategy with no backtest needs one before it can be reviewed |
+| D-7 | The kill switch ships in M2 with paper trading rather than in M6 | M2 scope | **Decided 2026-10-15: M2.** Paper orders reach a real broker environment (charter §3); the stored stop state checked before every order is built once, on paper, and reused by M6 |
 
 ## 13. Design-system changes
 
@@ -596,5 +597,6 @@ its 11 px labels move to `--text-xs` (12 px).
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-15 | 3 | Closed D-2 (scheduled downloads from M2), D-3 (gate criteria are owner settings with the stated defaults), D-6 (stepper shows only shipped stages) and D-7 (kill switch in M2); §10 M2 gains scheduled downloads |
 | 2026-10-15 | 2 | Recorded the owner's acceptance of STD-UI v5: D-1, D-4 and D-5 decided; §7 vocabulary is normative; owner-engaged stop tiered neutral by STD-UI-12 itself (A-3) |
 | 2026-10-15 | 1 | First draft, from the canvas page *Whole product · usability-first*, which the owner chose as the development guide on 2026-10-15 |

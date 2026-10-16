@@ -43,7 +43,7 @@ needs fixing, each with its fix. It is the front door to CAP-001's surfaces
 | Title verdict, Daily prices, Company financials, Factor scores cards, Needs fixing, Recent downloads, What you follow | M1 (CAP-001 API, CAP-002 classification state) |
 | Live prices card | M3 |
 | Broker row in *What you follow* | M2 |
-| Scheduled-download line in *Recent downloads* | depends on D-2 |
+| Scheduled downloads and the schedule line in *Recent downloads* | M2 (D-2) |
 
 ## 3. Layout
 
@@ -149,5 +149,6 @@ Reading width (1180 px cap).
 
 ## 11. Differences from the canvas
 
-- The canvas's *Recent downloads* sub-line assumes a daily schedule (D-2); until
-  D-2 is decided it reads *Starts when you press Download now*.
+- None in content. Before M2, when no schedule exists yet, the *Recent
+  downloads* sub-line reads *Starts when you press Download now*; from M2 it
+  names the schedule as the canvas does (D-2).
