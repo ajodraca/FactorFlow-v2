@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S04
 artifact_type: ux-screen-spec
-artifact_version: 3
+artifact_version: 4
 parent: PRODUCT-UX
 title: "S04 Strategies — lifecycle board"
 route: /strategies
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T16:58:19Z
+  timestamp: 2026-10-16T18:00:01Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "5"
+      version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---
@@ -49,8 +49,8 @@ columns, and *Start paper trading* sits on Draft cards.
 
 1. **Header row.** `h1` *Strategies* and the sub-line *Every strategy moves left
    to right. Nothing reaches real money without passing through paper trading and
-   your review.* Right: **Stopped ({n})** (`outline`, opens the stopped and
-   retired list) and **+ New strategy** (`default`).
+   your review.* Right: **Stopped ({n})** (`outline`, opens the list of paused
+   and retired strategies; retiring happens on S08, blueprint D-12) and **+ New strategy** (`default`).
 2. **Board.** Columns in a grid of `minmax(220px, 1fr)`, `--space-4` gap,
    horizontally scrollable below 1140 px. Each column: numbered heading (*1 ·
    Draft*), count, one-line meaning; the Paper and Live headings use

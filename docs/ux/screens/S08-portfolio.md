@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S08
 artifact_type: ux-screen-spec
-artifact_version: 3
+artifact_version: 4
 parent: PRODUCT-UX
 title: "S08 Portfolio — live and paper"
 route: /portfolio/live, /portfolio/paper
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T16:58:19Z
+  timestamp: 2026-10-16T18:00:01Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "5"
+      version: "6"
     - id: STD-UI
       version: "6"
   invoking_user: ajodraca
@@ -64,12 +64,19 @@ route redirects to paper.
 3. **One card per strategy** in the environment: header with name, stage facts
    (*Live since {date} · {return} · next rebalance {time}*) and actions:
    **Evidence** (`outline`) then, separated by `--space-5`, **Pause this
-   strategy…** (`outline`, consequential), or **Resume {name}…** when paused.
+   strategy…** (`outline`, consequential), or **Resume {name}…** when paused
+   or stopped by its limit, then **Retire {name}…** (`ghost`, separated by
+   `--space-5`; blueprint D-12).
    Under the header, that strategy's daily-loss meter (*Today −0.4% of its 3%
    limit*). Body: positions table — Symbol,
    Shares, Avg cost, Close (or Last), Value, Weight with limit bar, Unrealised
    (signed). Footer *Showing {n} of {m} positions*.
-4. **Orders card.** Time, Side, Symbol, Shares, Outcome (§8 of the blueprint).
+4. **Not managed by a strategy** (`card`, only when non-empty). Positions
+   kept when a strategy was retired with *Keep the holdings* (D-12): Symbol,
+   Shares, Value, the strategy that held them, retired date, and the line
+   *FactorFlow won't trade these. Sell them at the broker if you want to.*
+   Their value is included in *Account value*.
+5. **Orders card.** Time, Side, Symbol, Shares, Outcome (§8 of the blueprint).
    Header note states the next scheduled orders, or that trading is stopped.
 
 When trading is stopped, the shell banner (blueprint §3.3) sits above this
@@ -107,6 +114,12 @@ orders until you resume.*
   `/portfolio/paper`), so the browser's back button and links preserve it.
 - Summary, positions and orders poll every 30 s while the market is open and
   every 5 minutes when closed; *checked {time}* updates (STD-UI-25).
+- **Retire {name}…** opens the blueprint §9 dialog with its required choice
+  (D-12). After *Sell everything*, the card shows *Retiring: selling {n}
+  positions at the next open* until the sells settle, then leaves the page; a
+  sell that fails stays on the Orders card with its outcome, and S01 gets a
+  *Needs you* item. After *Keep the holdings*, the card leaves at once and its
+  positions appear under *Not managed by a strategy*.
 - **Pause this strategy…** opens `dialog` `confirm`. Resuming a paused paper
   strategy opens `dialog` `confirm` (M2, blueprint §9); resuming a paused
   **live** strategy opens `dialog` `real-money` (M6).
@@ -164,6 +177,9 @@ orders until you resume.*
 5. **S08-5** Pause is not adjacent to a routine action without separation.
 6. **S08-6** A strategy at its daily-loss limit stops alone; other strategies
    keep trading and the stopped banner does not appear.
+7. **S08-7** Retiring requires an explicit choice between selling and keeping
+   the holdings; kept holdings are listed as not managed and are never traded
+   by FactorFlow.
 
 ## 11. Differences from the canvas
 

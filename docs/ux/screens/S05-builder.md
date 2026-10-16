@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX-S05
 artifact_type: ux-screen-spec
-artifact_version: 3
+artifact_version: 4
 parent: PRODUCT-UX
 title: "S05 Strategy builder"
 route: /strategies/new, /strategies/:id/rules
@@ -18,10 +18,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T16:58:19Z
+  timestamp: 2026-10-16T18:00:01Z
   source_artifacts:
     - id: PRODUCT-UX
-      version: "5"
+      version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
 ---

@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: PRODUCT-UX
 artifact_type: ux-blueprint
-artifact_version: 5
+artifact_version: 6
 id: PRODUCT-UX
 title: FactorFlow Owner Interface — Product UX Blueprint
 kind: blueprint
@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude
   tool_version: unknown
-  timestamp: 2026-10-16T16:58:19Z
+  timestamp: 2026-10-16T18:00:01Z
   source_artifacts:
     - id: product-charter
       version: "2, approved 2026-09-03"
@@ -46,8 +46,8 @@ ai_provenance:
 > page *Whole product · usability-first* as the guide for developing the
 > interface (2026-10-15). This blueprint turns that page into rules, routes,
 > patterns and per-screen specifications that the SDD pipeline can cite. All
-> eleven owner decisions in §12 are decided: D-1, D-4 and D-5 through STD-UI v5,
-> and D-2, D-3, D-6 to D-11 directly.
+> twelve owner decisions in §12 are decided: D-1, D-4 and D-5 through STD-UI v5,
+> and D-2, D-3, D-6 to D-12 directly.
 
 ## 0. How to use this blueprint
 
@@ -419,6 +419,18 @@ card and holds nothing at first; the original keeps trading unchanged until
 the owner pauses or retires it. Only one version of a strategy ever trades, so
 no screen shows two running versions.
 
+**Retiring a strategy (D-12).** **Retire {name}…** on its S08 card ends a
+strategy for good. The dialog asks what happens to its holdings, with no
+default: **Sell everything at the next open** (the strategy sends sell orders
+for all its positions at the next market open, then retires), or **Keep the
+holdings** (the strategy retires at once; its positions stay in the account,
+are listed on S08 under *Not managed by a strategy*, and are never traded by
+FactorFlow again; the owner sells them at the broker). Retiring ends a pause or
+a daily-loss stop. The sell orders are ordinary orders: while all trading is
+stopped they are *Not sent: trading stopped* and go at the next open after the
+owner resumes trading. The retired strategy moves to S04's *Stopped* list with
+the `secondary` *Retired* badge; its evidence and decision history are kept.
+
 **Data problem.** A partial download → S01 *Data gap* item and a Data health
 count → S09 *Needs fixing* → **Download now** again (CAP-001 AC-6 makes a re-run
 safe), or for a symbol the provider doesn't recognise, stop following it and
@@ -521,6 +533,8 @@ serious: diamond; critical: square).
 | Change live allocation or live limits | Settings | capital-at-risk | `dialog` `real-money` |
 | Resume a paused live strategy, or one stopped by its daily-loss limit | S08 | capital-at-risk | `dialog` `real-money` |
 | Resume a paper strategy stopped by its daily-loss limit | S08 | consequential | `dialog` `confirm`, as for a paused paper strategy |
+| Retire a paper strategy | S08 | consequential | `dialog` `confirm` with the `paper` badge: *Retire {name}?* and a required `radio-group` `cards` choice, no default: *Sell everything at the next open, {date}* / *Keep the holdings in the paper account; FactorFlow won't trade them again* (D-12) |
+| Retire a live strategy | S08 | capital-at-risk | `dialog` `real-money` with the same required choice; the sell option states the positions and their value at the last close |
 
 Errors always name the operation, the resource and the reason, and offer the
 recovery action where one exists: *Downloading company financials for KO
@@ -536,11 +550,11 @@ UX brief claims rows from this table.
 | M1 | **App shell & data health** (new capability, D-8) | §3 shell without the kill switch and environment region (no order path exists yet); rail and routes of §2; route migration; command palette with Stocks, Universes and Pages groups; CAP-001's Coverage, Instruments, Runs, Run detail and Settings restyled under `/data/*` and `/settings` with §7 labels; S09 Data health and S02 steps 1–4, both on CAP-001's API as it is; S01 Home with the data card and data-related *Needs you* items |
 | M1 | CAP-001 (approved v8) | No new work. Its API and pages are consumed unchanged by the row above |
 | M1 | CAP-002 (draft) | S03 Research with inspector and selection tray; stock evidence, compare and universes routes |
-| M2 | Strategies & paper trading | **Scheduled downloads** each trading day at 17:30 CT alongside on-demand ones, with a *Needs you* item when a scheduled download fails (D-2); S04 board without the Backtested and Review columns; S05 builder with *Start paper trading* as its primary action; S08 paper tab; S02 step 5; environment region (paper); **kill switch** (the first order path appears here, and STD-UI-21 applies to paper orders too) with **Resume trading** and resuming a paused paper strategy through `dialog` `confirm`; §4.2 stepper with Draft · Paper · Live |
+| M2 | Strategies & paper trading | **Scheduled downloads** each trading day at 17:30 CT alongside on-demand ones, with a *Needs you* item when a scheduled download fails (D-2); S04 board without the Backtested and Review columns; S05 builder with *Start paper trading* as its primary action; S08 paper tab; S02 step 5; environment region (paper); **kill switch** (the first order path appears here, and STD-UI-21 applies to paper orders too) with **Resume trading**, resuming a paused paper strategy and retiring a paper strategy (D-12) through `dialog` `confirm`; §4.2 stepper with Draft · Paper · Live |
 | M3 | Live market data | S09 *Live prices* card; S08 and S01 as-of lines move to intraday; *Reconnecting* and *Not streaming* states |
 | M4 | Backtesting | S06; S04 Backtested column; S05 *Run backtest* becomes primary; Backtest step added to the stepper |
 | M5 | Promotion gate | S07; S04 Ready-for-review column; *Ready* items on S01; Settings → Review gate; decision history |
-| M6 | Live trading | S08 live tab with limit meters; live environment chip; resuming live strategies through `dialog` `real-money`; per-strategy daily-loss stops (D-11); Settings → live limits |
+| M6 | Live trading | S08 live tab with limit meters; retiring live strategies through `dialog` `real-money`; live environment chip; resuming live strategies through `dialog` `real-money`; per-strategy daily-loss stops (D-11); Settings → live limits |
 
 ## 11. STD-UI conformance (product level)
 
@@ -595,6 +609,7 @@ already discharges each rule, so a capability can cite it.
 | D-9 | What S09's recovery actions do | S09 | **Decided 2026-10-16: what CAP-001 provides.** Retrying is **Download now** over the followed list (CAP-001 AC-6 makes a re-run safe); a symbol the provider doesn't recognise is fixed by stopping following it and following the right one, two separate actions. A download scoped to failed stocks can come later, in a capability that specifies it |
 | D-10 | What editing the rules of a paper or live strategy does | S04, S05 | **Decided 2026-10-16: an edit makes a new strategy.** A paper or live strategy's rules are read-only; **Edit as a new strategy** copies them into a new Draft strategy that goes through the normal stages on its own card. The original keeps trading until the owner pauses or retires it; holdings are not carried over. (Revised the same day from "a draft version replaces the running one", which left the replacement undesigned: review v2 FINDING-51) |
 | D-11 | Whether the daily-loss limit stops one strategy or all trading | S01, S07, S08 | **Decided 2026-10-16: one strategy, and it stays stopped until the owner resumes it.** The limit is today's loss as a % of the strategy's value at the previous close, an owner setting with default 3% (§3.3). The others keep trading. Only the owner's kill switch stops all trading |
+| D-12 | What retiring a strategy does to its holdings | S04, S08 | **Decided 2026-10-16: the owner chooses at retire time**, with no default: sell everything at the next open, or keep the holdings unmanaged in the account for the owner to sell at the broker. `dialog` `confirm` for paper, `real-money` for live; offered on the S08 card (§6, §9). Review v3 FINDING-65 |
 
 ## 13. Design-system changes
 
@@ -632,6 +647,7 @@ its 11 px labels move to `--text-xs` (12 px).
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-16 | 6 | Fixed the HIGH finding of `specifications-review-report-v3.md`: D-12 defines retiring a strategy and what happens to its holdings (FINDING-65); §6, §9, §10 |
 | 2026-10-16 | 5 | Fixed the two HIGH findings of `specifications-review-report-v2.md`. D-10 revised: editing a paper or live strategy makes a new strategy (FINDING-51). D-11 completed: the daily-loss limit's measure and default, and a stopped strategy stays stopped until the owner resumes it (FINDING-52); §3.3, §9 |
 | 2026-10-16 | 4 | Fixed the HIGH findings of `specifications-review-report-v1.md`. Owner decisions D-8 (new M1 capability *App shell & data health*), D-9 (S09 recovery uses CAP-001 as it is), D-10 (editing a running strategy creates a draft version; the running one keeps trading) and D-11 (daily-loss limit stops one strategy). §7 drops *coverage → data*, adds *instrument → stock*, cites STD-UI v6; user-visible *promotion* replaced. §4.4 carries the restatement mark in lists. Resume trading and resuming paper strategies ship in M2 through `dialog` `confirm` |
 | 2026-10-15 | 3 | Closed D-2 (scheduled downloads from M2), D-3 (gate criteria are owner settings with the stated defaults), D-6 (stepper shows only shipped stages) and D-7 (kill switch in M2); §10 M2 gains scheduled downloads |
