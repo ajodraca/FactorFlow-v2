@@ -10,10 +10,11 @@ system design's Section 4 and regenerate.
 | Capability | Title | Design |
 |---|---|---|
 | `CAP-001` | Market Data Acquisition Foundation | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/system-design.md` |
+| `CAP-002` | Universe & Factor Classification | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
 
 ## Components
 
-12 declared across 1 design(s).
+19 declared across 2 design(s).
 
 | Component | Name | Responsibility | Introduced by |
 |---|---|---|---|
@@ -29,6 +30,13 @@ system design's Section 4 and regenerate.
 | `run-journal` | Run journal | Owns the acquisition run record and its lifecycle — requested, running, cancelling, succeeded, partial, failed, cancelled, abandoned — including cancellation requests and reclaim of runs whose runner died | `CAP-001` |
 | `runtime-config` | Runtime configuration | Loads and validates configuration and the provider credential from the environment; redacts secrets; owns the deployment definition (`Dockerfile`, `compose.yaml`, `.dockerignore`) | `CAP-001` |
 | `schema-migrator` | Schema migrator | Applies numbered forward-only SQL migrations and maintains `applied_migrations | `CAP-001` |
+| `classification-api` | Classification JSON API | FastAPI routers for `/api/universes` and `/api/classifications`, registered on the application the ingestion API factory builds and therefore behind its request-id, Host and Origin middleware and error envelope | `CAP-002` |
+| `classification-reader` | Classification reader | Read side of classification: resolves the current set and its currency, serves sorted and threshold-filtered lists over all classified stocks or one universe with keyset pagination, side-by-side comparison, per-stock evidence and classification history | `CAP-002` |
+| `classification-scheduler` | Classification scheduler | Asyncio loop in the application container that polls the run journal table for a succeeded or partial run without a classification set, creates the set, drives the factor engine off the event loop, records failure with its reason, and enforces one building set at a time | `CAP-002` |
+| `classification-ui` | Classification interface | React screens and fetch layer for Classifications, Universes, universe detail, Compare and stock evidence, mounted in the owner interface shell as navigation destinations and client routes | `CAP-002` |
+| `factor-engine` | Factor engine | Builds one classification set for one qualifying acquisition run: derives every factor input with its known-on date, decides present, missing, outdated or not computable per input, forms each factor's peer set, computes standardised scores and percentiles with SQL window functions, marks possible restatement, and appends the results | `CAP-002` |
+| `research-store` | Research store | The PostgreSQL schema additions holding universes and their event log, classification sets, per-set factor counts, factor inputs and factor classifications; append-only history applied by numbered migrations `0005` onward | `CAP-002` |
+| `universe-service` | Universe service | Creates, renames and retires universes and adds or removes members by appending events to the universe event log; derives current and as-of membership by replay; refuses empty universes, last-member removal and stocks acquisition does not cover; takes the server-side filter snapshot | `CAP-002` |
 
 ## Interfaces
 
@@ -50,6 +58,36 @@ system design's Section 4 and regenerate.
 | `PUT /api/settings/history-depth` | `ingestion-api` | `owner-web-app` | Request: `{"years": <positive integer>}`. Response: `years`, `updated_at`. Full schema: ingestion-api §11 | `CAP-001` |
 | `Provider reads` | `Massive REST API (external)` | `massive-client` | HTTPS/JSON; ticker reference, daily aggregates, financials, corporate actions. Full schema: not yet available, tracked by `component-design-massive-client.md` §14 | `CAP-001` |
 | `Run request claim` | `run-journal` | `acquisition-runner` | PostgreSQL transaction claims the oldest `requested` row only when no row is `running`; the only cross-container handoff and the FIFO queue boundary | `CAP-001` |
+| `Classification append` | `research-store` | `factor-engine` | SQL `INSERT` into `classification_set_factor`, `factor_input`, `factor_classification`; `UPDATE` of `classification_set` state fields only (`building` to `complete` or `failed`) | `CAP-002` |
+| `Classification queries` | `classification-reader` | `classification-api` | Python calls: current set and currency, list with sort and thresholds, compare, stock evidence, stock history, set list | `CAP-002` |
+| `Classification read` | `research-store` | `classification-reader` | SQL reads over the five research tables joined to `instrument` and the replayed membership | `CAP-002` |
+| `Coverage check` | `market-data-store` | `universe-service` | SQL read: does an `instrument` row with at least one `coverage_segment` exist for the symbol | `CAP-002` |
+| `DELETE /api/universes/{id}` | `classification-api` | `classification-ui` | Request: path `id`. Response: `lifecycle: retired`, `retired_at`. Retires, never deletes (AC-6, STD-UI-2) | `CAP-002` |
+| `DELETE /api/universes/{id}/members/{symbol}` | `classification-api` | `classification-ui` | Request: path `id`, `symbol`. Response: `removed_at | `CAP-002` |
+| `GET /api/acquisition-runs/{id}` | `ingestion-api` | `classification-ui` | Reused unchanged to open the run a set reflects (AC-21) | `CAP-002` |
+| `GET /api/classifications` | `classification-api` | `classification-ui` | Request: `universe_id`, `symbol` prefix, `symbols` explicit list (compare; at most `MAX_PAGE_SIZE`), `sort` from an allowlist (`symbol`, `{factor}_score`, `{factor}_percentile`), `order`, thresholds `{factor}_score_min`/`_max` and `{factor}_percentile_min`/`_max` (percentile 0–100), `limit`, `cursor`. Response: `set` (id, `classification_date`, `run_id`, `state`, `not_current` flag with the building or failed later set and its `failure_reason`) or `never_classified: true`; `factors` with `qualified_count` and `ranked` per factor; `stocks` each with lifecycle and per-factor status, score, percentile, `reason_code`, `reason_input`, `restated_possible`; `next_cursor | `CAP-002` |
+| `GET /api/classifications/sets` | `classification-api` | `classification-ui` | Request: `limit`, `cursor`. Response: sets newest first with `state`, `classification_date`, `run_id`, `started_at`, `ended_at`, `failure_reason`, per-factor counts (AC-20, AC-21) | `CAP-002` |
+| `GET /api/classifications/sets/{set_id}` | `classification-api` | `classification-ui` | Request: path `set_id`. Response: one set as above | `CAP-002` |
+| `GET /api/classifications/stocks/{symbol}` | `classification-api` | `classification-ui` | Request: path `symbol`. Response: the stock's classification in the current set per factor, and every `factor_input` row — name, status, value, the period end or session date it came from, `known_on`, `restated_possible`, and the reason detail when missing (AC-17, AC-12) | `CAP-002` |
+| `GET /api/classifications/stocks/{symbol}/history` | `classification-api` | `classification-ui` | Request: path `symbol`, `limit`, `cursor`. Response: the stock's classifications in earlier sets, newest first, each with its set's `classification_date` and `run_id` (AC-18) | `CAP-002` |
+| `GET /api/instruments` | `ingestion-api` | `classification-ui` | Reused unchanged for picking members by symbol; see `component-design-ingestion-api.md` §11 | `CAP-002` |
+| `GET /api/universes` | `classification-api` | `classification-ui` | Request: `lifecycle` (`active` default, `retired`, `all`), `limit`, `cursor`. Response: universes with `universe_id`, `name`, `lifecycle`, `member_count`, `created_at`, `retired_at`, and `next_cursor | `CAP-002` |
+| `GET /api/universes/{id}` | `classification-api` | `classification-ui` | Request: path `id`; optional `as_of` date. Response: the universe, its members on `as_of` (default now) each with instrument lifecycle and `member_since`, and each member's classification per factor from the current set (status, score, percentile, reason, restatement mark) | `CAP-002` |
+| `GET /api/universes/{id}/events` | `classification-api` | `classification-ui` | Request: path `id`, `limit`, `cursor`. Response: events newest first — type, name or symbol, `recorded_at` — and `next_cursor` (AC-6, flow 6 step 3) | `CAP-002` |
+| `Migration application` | `research-store` | `schema-migrator` | Numbered files `0005_universes.sql` and `0006_classifications.sql`, applied and recorded in `applied_migrations` like the first four | `CAP-002` |
+| `Observation read` | `market-data-store` | `factor-engine` | SQL reads of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action` and `acquisition_state`; read-only, never an UPDATE or DELETE | `CAP-002` |
+| `PATCH /api/universes/{id}` | `classification-api` | `classification-ui` | Request: `{"name": ...}`. Response: the universe (AC-4) | `CAP-002` |
+| `POST /api/universes` | `classification-api` | `classification-ui` | Request: `{"name": ..., "symbols": [...]}` to build by hand, or `{"name": ..., "filter": {thresholds}, "set_id": ...}` to save a filter result (AC-2). Response: the universe with its members | `CAP-002` |
+| `POST /api/universes/{id}/members` | `classification-api` | `classification-ui` | Request: `{"symbols": [...]}`, at most `MAX_SYMBOLS_PER_REQUEST`. Response: `added`, `already_member | `CAP-002` |
+| `Qualifying-run read` | `market-data-store` | `classification-scheduler` | SQL read of `acquisition_run` rows in `succeeded` or `partial` with no `classification_set` row, oldest `ended_at` first; read-only | `CAP-002` |
+| `Router registration` | `classification-api` | `ingestion-api` | The application factory includes this design's two routers under `/api` before the static mount, so they sit behind the request-id, Host and Origin middleware and the error envelope | `CAP-002` |
+| `Scheduler start` | `classification-scheduler` | `ingestion-api` | The application lifespan creates the scheduler task beside the reclaim loop and cancels it on shutdown | `CAP-002` |
+| `Screen registration` | `classification-ui` | `owner-web-app` | Client routes `/classifications`, `/universes`, `/universes/:universeId`, `/compare`, `/stocks/:symbol` and two rail destinations, Classifications and Universes, added to the shell | `CAP-002` |
+| `Set build` | `factor-engine` | `classification-scheduler` | build(set_id)`: synchronous, dispatched off the event loop; returns the terminal set state | `CAP-002` |
+| `Set claim` | `research-store` | `classification-scheduler` | SQL `INSERT` of one `classification_set` in `building`, refused by the partial unique index when one is already building | `CAP-002` |
+| `Universe event append` | `research-store` | `universe-service` | SQL `INSERT` into `universe` and `universe_event`; no UPDATE or DELETE | `CAP-002` |
+| `Universe event read` | `research-store` | `universe-service` | SQL reads over `universe_event` for replay | `CAP-002` |
+| `Universe operations` | `universe-service` | `classification-api` | Python calls: create, rename, add members, remove member, retire, read current, read as-of, read events; refusals raised as typed exceptions mapped to the codes above | `CAP-002` |
 
 ## Findings
 
