@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S06 Backtest result"
 route: /strategies/:id/backtests/:backtestId
 design_source: docs/ux/design-source/P06-Backtest.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -24,6 +24,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:31Z
+  reviewed_revision: sha256:fd9b3cff39dbe040cf36460260252ee60fde3d9a53cd544e39a06bf3f80401e2
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S06 Backtest result

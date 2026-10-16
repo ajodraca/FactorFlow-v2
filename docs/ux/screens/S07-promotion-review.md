@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S07 Promotion review — paper to live"
 route: /strategies/:id/review
 design_source: docs/ux/design-source/P07-Promote.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -26,6 +26,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:32Z
+  reviewed_revision: sha256:220f10b1fe14b3c6de12f8f95c38791340ef16d72aa4859dac4ecf42a302f603
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S07 Promotion review — paper to live

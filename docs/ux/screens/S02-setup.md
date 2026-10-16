@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S02 First-run setup"
 route: /setup
 design_source: docs/ux/design-source/P02-Setup.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -26,6 +26,12 @@ ai_provenance:
       version: "8"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:30Z
+  reviewed_revision: sha256:22c58f8c9b66ad79dd5fba1728f67756d4c13b1ce559fa589e1e35026394e8e0
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S02 First-run setup

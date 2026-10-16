@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S01 Home — what needs you today"
 route: /home
 design_source: docs/ux/design-source/P01-Home.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -24,6 +24,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:29Z
+  reviewed_revision: sha256:65e3245260d015016a2c9b5022e0bf38243f0f4ca34c2c3273cd4e37a5749736
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S01 Home — what needs you today

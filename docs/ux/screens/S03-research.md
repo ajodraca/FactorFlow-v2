@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S03 Research — screener and inspector"
 route: /research
 design_source: docs/ux/design-source/P03-Research.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -26,6 +26,12 @@ ai_provenance:
       version: "1, draft"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:30Z
+  reviewed_revision: sha256:1563200b2bbbbd33aae8934c8891572fdba6ff84a62aaefcec8f5005c4943a9a
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S03 Research — screener and inspector

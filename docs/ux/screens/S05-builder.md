@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S05 Strategy builder"
 route: /strategies/new, /strategies/:id/rules
 design_source: docs/ux/design-source/P05-Builder.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -24,6 +24,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:31Z
+  reviewed_revision: sha256:9bc4c1c928c702e695237a0b1e4b234bab288fbc796219d572fdbc5fe0bc68b7
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S05 Strategy builder

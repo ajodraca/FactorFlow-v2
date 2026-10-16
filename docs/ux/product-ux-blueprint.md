@@ -6,7 +6,7 @@ artifact_version: 6
 id: PRODUCT-UX
 title: FactorFlow Owner Interface — Product UX Blueprint
 kind: blueprint
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -37,6 +37,12 @@ ai_provenance:
       version: "12 components as of 2026-09-05, extended by this change"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:29Z
+  reviewed_revision: sha256:98e19ab089cc064c72f939c58968e29842b3c8de308000f4c854c7d9c120c656
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # Product UX Blueprint: FactorFlow Owner Interface

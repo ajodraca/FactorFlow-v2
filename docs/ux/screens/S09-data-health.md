@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S09 Data health"
 route: /data
 design_source: docs/ux/design-source/P09-Data.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -26,6 +26,12 @@ ai_provenance:
       version: "8"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:32Z
+  reviewed_revision: sha256:80cd17bf543472046573c09465bd593d25b305cd64e4e2159fa4b2bf481b32c0
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S09 Data health

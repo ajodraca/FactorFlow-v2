@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S08 Portfolio — live and paper"
 route: /portfolio/live, /portfolio/paper
 design_source: docs/ux/design-source/P08-Portfolio.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -26,6 +26,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:32Z
+  reviewed_revision: sha256:c5b342279e7dd9ea7269f09b9bb21ad22f53d3dc77449190e8293d3184dfdc7d
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S08 Portfolio — live and paper

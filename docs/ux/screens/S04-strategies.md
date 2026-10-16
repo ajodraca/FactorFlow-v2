@@ -7,7 +7,7 @@ parent: PRODUCT-UX
 title: "S04 Strategies — lifecycle board"
 route: /strategies
 design_source: docs/ux/design-source/P04-Strategies.dc.html
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-16
 owner: Alvaro de Jodra
@@ -24,6 +24,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: c32bf5a2-35d1-4c15-8990-f31681cbfcc8
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-16T18:17:30Z
+  reviewed_revision: sha256:f520b54818b8029a73e5181128df603c0a5967ae1cea1b7aa355926446d6aa6f
+  review_artifact: "docs/ux/specifications-review-report-v4.md"
 ---
 
 # S04 Strategies — lifecycle board
