@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-backlog
 artifact_type: backlog
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T12:52:50Z
+  timestamp: 2026-10-17T15:03:38Z
   source_artifacts:
     - id: CAP-002
       version: "1"
@@ -67,7 +67,9 @@ universe-scope replay, and E1's own filter-save story depends back on E3's
 cycle at the EPIC level. E4 owns the one shell-composition seam every screen
 in E1 and E5 renders inside; E3 owns the API-side seam (`app.py`: the two routers
 and the scheduler start, DAC-E3-13), which E1's and E3's endpoints and E2's
-refresh all need at runtime, and which lands after E2's scheduler story.
+refresh all need at runtime. That composition story lands last on the API side:
+it imports E1's and E3's router modules and E2's scheduler, so it depends on
+all three stories and nothing depends on it at build time.
 
 ```
 E2 ──────────────────────────┐
