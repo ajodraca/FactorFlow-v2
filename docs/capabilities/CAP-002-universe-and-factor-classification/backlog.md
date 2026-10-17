@@ -2,19 +2,19 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-backlog
 artifact_type: backlog
-artifact_version: 3
+artifact_version: 4
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
 updated: 2026-10-17
 ai_provenance:
-  agent_id: epic-generation-agent
+  agent_id: story-generation-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-sonnet-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T15:03:38Z
+  timestamp: 2026-10-17T15:40:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
@@ -43,17 +43,17 @@ ai_provenance:
 **Capability:** CAP-002
 **Generated:** 2026-10-17
 **Total EPICs:** 5
-**Total Stories:** to be populated by the story generation agent
+**Total Stories:** 37 (206 points)
 
 ## EPICs
 
 | EPIC ID | Jira Key | Title | Estimate | Stories | Total Points |
 |---------|----------|-------|----------|---------|-------------|
-| [CAP-002-E1](epics/universe-definition-and-maintenance/CAP-002-E1.md) | N/A | Universe Definition and Maintenance | L | — | — |
-| [CAP-002-E2](epics/automatic-factor-classification-engine/CAP-002-E2.md) | N/A | Automatic Factor Classification Engine | XL | — | — |
-| [CAP-002-E3](epics/classification-read-api/CAP-002-E3.md) | N/A | Classification Read API: Scoring, Currency and Evidence | L | — | — |
-| [CAP-002-E4](epics/research-screen-scores-and-filtering/CAP-002-E4.md) | N/A | Research Screen: Scores and Filtering | L | — | — |
-| [CAP-002-E5](epics/compare-stock-evidence-and-diagnosis/CAP-002-E5.md) | N/A | Compare, Stock Evidence and Insufficient-Evidence Diagnosis | M | — | — |
+| [CAP-002-E1](epics/universe-definition-and-maintenance/CAP-002-E1.md) | N/A | Universe Definition and Maintenance | L | 9 | 54 |
+| [CAP-002-E2](epics/automatic-factor-classification-engine/CAP-002-E2.md) | N/A | Automatic Factor Classification Engine | XL | 9 | 50 |
+| [CAP-002-E3](epics/classification-read-api/CAP-002-E3.md) | N/A | Classification Read API: Scoring, Currency and Evidence | L | 6 | 34 |
+| [CAP-002-E4](epics/research-screen-scores-and-filtering/CAP-002-E4.md) | N/A | Research Screen: Scores and Filtering | L | 10 | 52 |
+| [CAP-002-E5](epics/compare-stock-evidence-and-diagnosis/CAP-002-E5.md) | N/A | Compare, Stock Evidence and Insufficient-Evidence Diagnosis | M | 3 | 16 |
 
 ## Sequencing
 
@@ -102,30 +102,38 @@ No cross-capability blockers constrain this EPIC breakdown: CAP-001 is
 `tech-stack.md` and `STD-UI` are `conforms-to`, designed against rather than
 waited on.
 
+## Story-Level Ordering
+
+Story generation recorded the hard dependencies in `dependencies.yaml` by what each story imports (DEC-0086, `DEC-0087`; backlog review v3 FINDING-11 and FINDING-12). Where this differs from the EPIC-level prose above, the story graph governs scheduling:
+
+- Each API router is mounted by the story that builds it (CAP-002-E1-S6 mounts `universes`, CAP-002-E3-S5 mounts `classifications`); CAP-002-E3-S6 then starts the scheduler and extends the no-secrets test, depending on both and on CAP-002-E2-S9.
+- CAP-002-E4-S10 (shell composition) depends on the Research, Universes, Compare and Stock evidence screen stories, because `routes.tsx` imports each; the `requestJson` export is made by CAP-002-E4-S1.
+- Deliberate cross-EPIC edges: E1-S5 on E3-S2 (`evaluate_filter`); E1-S7, S8, S9 on E4-S1 to S6 (fetch layer, patterns, table); E4-S10 on E5-S1 and E5-S3; E2-S1 on E1-S1 (migration numbering has no gaps); E3-S2, S3 on E1-S2 (`membership_as_of`).
+
 ## Full Traceability
 
 | Capability AC | System Design Element | Component Design Element | EPIC | Story |
 |--------------|----------------------|--------------------------|------|-------|
-| AC-1 | 3.2 steps 4, 4a; 4.2; 5.13 | universe-service 2.3-2.5 | CAP-002-E1 | |
-| AC-2 | 3.2 step 3a; 3.3 step 15; 4.2; 4.4; 5.14 | universe-service 2.3, 2.4; classification-ui 2.7 | CAP-002-E1, CAP-002-E4 | |
-| AC-3 | 4.2; 4.4 | universe-service 2.3 | CAP-002-E1 | |
-| AC-4 | 3.2 steps 8, 11, 12; 4.2 | universe-service 2.3, 2.4 | CAP-002-E1 | |
-| AC-5 | 3.2 step 7, 7a; 4.2; 5.13 | universe-service 2.4, 2.8; classification-ui 2.7 | CAP-002-E1, CAP-002-E4 | |
-| AC-6 | 4.2; 4.4; 5.3 | universe-service 2.5 | CAP-002-E1 | |
-| AC-7 | 3.1 steps 8a-10a; 5.7; 5.8 | factor-engine 2.4, 2.5 | CAP-002-E2 | |
-| AC-8 | 5.5 | factor-engine 2.5 | CAP-002-E2 | |
-| AC-9 | 3.1 step 10a; 3.3 step 15; 5.7 | factor-engine 2.5; classification-reader 2.3, 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | |
-| AC-10 | 3.1 steps 4-7a, 19-21; 5.10; 4.2 (Scheduler start) | classification-scheduler 2.3, 2.4; factor-engine 2.3; classification-api 2.3 | CAP-002-E2, CAP-002-E3 | |
-| AC-11 | 3.1 steps 28-31; 4.3; 5.10 | factor-engine 2.3, 5; classification-scheduler 2.3, 5; classification-ui 2.5, 5 | CAP-002-E2, CAP-002-E4 | |
-| AC-12 | 3.1 step 12; 3.3 step 15; 4.4; 5.6 | factor-engine 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | |
-| AC-13 | 3.3 step 18; 4.2; 5.6; 5.8 | factor-engine 2.4; classification-reader 2.4; classification-ui 10 | CAP-002-E2, CAP-002-E3, CAP-002-E5 | |
-| AC-14 | 3.1 steps 9, 11a; 4.4; 5.6 | factor-engine 2.3, 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | |
-| AC-15 | 3.2 step 10; 5.5 | universe-service 2.4; factor-engine 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E1, CAP-002-E2, CAP-002-E3, CAP-002-E5 | |
-| AC-16 | 3.3 steps 15, 16; 4.2 | classification-reader 2.3, 2.5; classification-api 2.4, 2.7; classification-ui 2.4, 2.5 | CAP-002-E3, CAP-002-E4, CAP-002-E5 | |
-| AC-17 | 3.3 step 17; 4.2; 4.4 | classification-reader 2.6; classification-ui 2.5, 10 | CAP-002-E3, CAP-002-E5 | |
-| AC-18 | 4.2; 4.4; 5.3 | classification-reader 2.6; classification-ui 10 | CAP-002-E3, CAP-002-E5 | |
-| AC-19 | 3.1 steps 22-24; 5.4 | factor-engine 2.3; classification-ui 2.4, 10 | CAP-002-E2, CAP-002-E5 | |
-| AC-20 | 3.1 steps 13-14b, 25-27; 3.3 steps 13, 14, 18; 5.2; 5.11 | factor-engine 2.3, 2.6; classification-scheduler 2.4; classification-reader 2.4; classification-ui 2.6 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | |
-| AC-21 | 3.3 steps 13, 18; 8 question 11 | classification-reader 2.4, 2.6; classification-ui 2.6 | CAP-002-E3, CAP-002-E4 | |
-| AC-22 | 3.3 step 14; 5.11; 5.18 | classification-reader 2.4; classification-ui 2.4, 2.6 | CAP-002-E3, CAP-002-E4 | |
-| AC-23 | 4.2; 4.4; 5.9 | factor-engine 2.4, 2.5; classification-reader 2.5, 2.6; classification-ui 2.5, 10 | CAP-002-E2, CAP-002-E3, CAP-002-E5 | |
+| AC-1 | 3.2 steps 4, 4a; 4.2; 5.13 | universe-service 2.3-2.5 | CAP-002-E1 | CAP-002-E1-S3, CAP-002-E1-S6, CAP-002-E1-S7 |
+| AC-2 | 3.2 step 3a; 3.3 step 15; 4.2; 4.4; 5.14 | universe-service 2.3, 2.4; classification-ui 2.7 | CAP-002-E1, CAP-002-E4 | CAP-002-E1-S5, CAP-002-E4-S8 |
+| AC-3 | 4.2; 4.4 | universe-service 2.3 | CAP-002-E1 | CAP-002-E1-S1, CAP-002-E1-S3, CAP-002-E1-S7 |
+| AC-4 | 3.2 steps 8, 11, 12; 4.2 | universe-service 2.3, 2.4 | CAP-002-E1 | CAP-002-E1-S4, CAP-002-E1-S6, CAP-002-E1-S8, CAP-002-E1-S9 |
+| AC-5 | 3.2 step 7, 7a; 4.2; 5.13 | universe-service 2.4, 2.8; classification-ui 2.7 | CAP-002-E1, CAP-002-E4 | CAP-002-E1-S3, CAP-002-E1-S4, CAP-002-E1-S5, CAP-002-E1-S6, CAP-002-E1-S7, CAP-002-E1-S8, CAP-002-E1-S9, CAP-002-E4-S8 |
+| AC-6 | 4.2; 4.4; 5.3 | universe-service 2.5 | CAP-002-E1 | CAP-002-E1-S1, CAP-002-E1-S2, CAP-002-E1-S4, CAP-002-E1-S6, CAP-002-E1-S8, CAP-002-E1-S9 |
+| AC-7 | 3.1 steps 8a-10a; 5.7; 5.8 | factor-engine 2.4, 2.5 | CAP-002-E2 | CAP-002-E2-S2, CAP-002-E2-S3, CAP-002-E2-S4 |
+| AC-8 | 5.5 | factor-engine 2.5 | CAP-002-E2 | CAP-002-E2-S5 |
+| AC-9 | 3.1 step 10a; 3.3 step 15; 5.7 | factor-engine 2.5; classification-reader 2.3, 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | CAP-002-E2-S5, CAP-002-E3-S2, CAP-002-E3-S5, CAP-002-E4-S2, CAP-002-E4-S3, CAP-002-E4-S6, CAP-002-E4-S9 |
+| AC-10 | 3.1 steps 4-7a, 19-21; 5.10; 4.2 (Scheduler start) | classification-scheduler 2.3, 2.4; factor-engine 2.3; classification-api 2.3 | CAP-002-E2, CAP-002-E3 | CAP-002-E2-S1, CAP-002-E2-S2, CAP-002-E2-S8, CAP-002-E2-S9, CAP-002-E3-S6 |
+| AC-11 | 3.1 steps 28-31; 4.3; 5.10 | factor-engine 2.3, 5; classification-scheduler 2.3, 5; classification-ui 2.5, 5 | CAP-002-E2, CAP-002-E4 | CAP-002-E2-S2, CAP-002-E2-S7, CAP-002-E2-S9, CAP-002-E4-S6, CAP-002-E4-S9 |
+| AC-12 | 3.1 step 12; 3.3 step 15; 4.4; 5.6 | factor-engine 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | CAP-002-E2-S3, CAP-002-E2-S5, CAP-002-E4-S3, CAP-002-E4-S6, CAP-002-E4-S9 |
+| AC-13 | 3.3 step 18; 4.2; 5.6; 5.8 | factor-engine 2.4; classification-reader 2.4; classification-ui 10 | CAP-002-E2, CAP-002-E3, CAP-002-E5 | CAP-002-E2-S3, CAP-002-E2-S4, CAP-002-E3-S1, CAP-002-E3-S5, CAP-002-E5-S3 |
+| AC-14 | 3.1 steps 9, 11a; 4.4; 5.6 | factor-engine 2.3, 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | CAP-002-E2-S5, CAP-002-E4-S3, CAP-002-E4-S6, CAP-002-E4-S9 |
+| AC-15 | 3.2 step 10; 5.5 | universe-service 2.4; factor-engine 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E1, CAP-002-E2, CAP-002-E3, CAP-002-E5 | CAP-002-E1-S2, CAP-002-E1-S3, CAP-002-E1-S8, CAP-002-E2-S2, CAP-002-E2-S5, CAP-002-E3-S3, CAP-002-E5-S1, CAP-002-E5-S2, CAP-002-E5-S3 |
+| AC-16 | 3.3 steps 15, 16; 4.2 | classification-reader 2.3, 2.5; classification-api 2.4, 2.7; classification-ui 2.4, 2.5 | CAP-002-E3, CAP-002-E4, CAP-002-E5 | CAP-002-E3-S2, CAP-002-E3-S3, CAP-002-E3-S5, CAP-002-E3-S6, CAP-002-E4-S1, CAP-002-E4-S2, CAP-002-E4-S5, CAP-002-E4-S6, CAP-002-E4-S7, CAP-002-E4-S9, CAP-002-E5-S1 |
+| AC-17 | 3.3 step 17; 4.2; 4.4 | classification-reader 2.6; classification-ui 2.5, 10 | CAP-002-E3, CAP-002-E5 | CAP-002-E3-S3, CAP-002-E3-S5, CAP-002-E5-S3 |
+| AC-18 | 4.2; 4.4; 5.3 | classification-reader 2.6; classification-ui 10 | CAP-002-E3, CAP-002-E5 | CAP-002-E3-S4, CAP-002-E3-S5, CAP-002-E5-S2 |
+| AC-19 | 3.1 steps 22-24; 5.4 | factor-engine 2.3; classification-ui 2.4, 10 | CAP-002-E2, CAP-002-E5 | CAP-002-E2-S1, CAP-002-E2-S2, CAP-002-E2-S7, CAP-002-E5-S2 |
+| AC-20 | 3.1 steps 13-14b, 25-27; 3.3 steps 13, 14, 18; 5.2; 5.11 | factor-engine 2.3, 2.6; classification-scheduler 2.4; classification-reader 2.4; classification-ui 2.6 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | CAP-002-E2-S1, CAP-002-E2-S2, CAP-002-E2-S8, CAP-002-E2-S9, CAP-002-E3-S1, CAP-002-E3-S5, CAP-002-E4-S1, CAP-002-E4-S4, CAP-002-E4-S9 |
+| AC-21 | 3.3 steps 13, 18; 8 question 11 | classification-reader 2.4, 2.6; classification-ui 2.6 | CAP-002-E3, CAP-002-E4 | CAP-002-E3-S1, CAP-002-E3-S5, CAP-002-E4-S4, CAP-002-E4-S9 |
+| AC-22 | 3.3 step 14; 5.11; 5.18 | classification-reader 2.4; classification-ui 2.4, 2.6 | CAP-002-E3, CAP-002-E4 | CAP-002-E3-S1, CAP-002-E3-S5, CAP-002-E4-S1, CAP-002-E4-S4, CAP-002-E4-S9 |
+| AC-23 | 4.2; 4.4; 5.9 | factor-engine 2.4, 2.5; classification-reader 2.5, 2.6; classification-ui 2.5, 10 | CAP-002-E2, CAP-002-E3, CAP-002-E5 | CAP-002-E2-S6, CAP-002-E3-S2, CAP-002-E3-S4, CAP-002-E5-S1, CAP-002-E5-S2, CAP-002-E5-S3 |
