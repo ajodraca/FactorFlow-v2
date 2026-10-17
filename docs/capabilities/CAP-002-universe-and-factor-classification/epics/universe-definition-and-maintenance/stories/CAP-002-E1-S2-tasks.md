@@ -1,0 +1,198 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-002-E1-S2-tasks
+artifact_type: story-tasks
+artifact_version: 1
+status: draft
+owner: Alvaro de Jodra
+owner_github: ajodraca
+created: 2026-10-17
+updated: 2026-10-17
+ai_provenance:
+  agent_id: implementation-planning-agent
+  agent_version: "1.0"
+  model: claude-sonnet-5-5
+  tool: Claude Code
+  tool_version: "unknown"
+  timestamp: 2026-10-17T21:18:00Z
+  source_artifacts:
+    - id: CAP-002-E1-S2
+      version: "1"
+    - id: CAP-002-component-design-universe-service
+      version: "2"
+    - id: CAP-002-component-design-research-store
+      version: "2"
+  invoking_user: ajodraca
+  correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+---
+
+# Tasks: CAP-002-E1-S2 — Universe Replay: Current State, Membership As Of a Date and Event History
+
+**Story**: `docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S2.md`
+**Component**: `FactorFlow-v2` (module `universe-service`, read half only)
+**Branch**: `usr/alvaro-de-jodra/CAP-002-E1-tasks`
+**Date**: 2026-10-17
+
+## Summary
+
+Deliver the read half of `universe-service`: the new package `src/factorflow/universes/` with `replay.py` (membership as of a date, current state, the events page, the universe page), the four SQL files `current_state.sql`, `membership_as_of.sql`, `events_page.sql` and `list_universes.sql`, and the three tests the story names (`tests/unit/test_universe_replay.py`, `tests/integration/test_universe_as_of.py`, `tests/unit/test_universe_sql_safety.py`). Membership is always replayed from the append-only `universe_event` log, by `event_id`, at the `recorded_on` (America/Chicago) grain; a retired instrument stays a member and replays with `lifecycle: retired`. `service.py` is CAP-002-E1-S3's file, so the dataclasses and the paged reads that S2's ACs test live in `replay.py` and S3 re-exports them (DEC-0093). No migration, no write path, no HTTP.
+
+## Acceptance Criteria Traceability
+
+| AC | Description | Tasks |
+|----|-------------|-------|
+| AC-6 | Dated membership retained; members on any past date visible | T002, T003, T004, T005, T008, T009, T010 |
+| AC-15 | A retired instrument stays a member (membership side) | T003, T010 |
+| DAC-E1-8 | Members as of an America/Chicago date equal the `member_added`/`member_removed` events recorded on or before it; before `created` returns none, flagged, with the creation date | T002, T003, T008, T009, T010 |
+| DAC-E1-9 | A covered retired instrument stays a member, replaying `lifecycle: retired` | T003, T010 |
+| DAC-E1-S2-1 | Add and remove on one `recorded_on` date is not membership; add on D is a member as of D onward until removed (TC-COMP-049) | T002, T003, T008, T009 |
+| DAC-E1-S2-2 | Date before `created`: no members, `as_of_before_creation: true`, creation date (TC-COMP-050) | T002, T003, T008, T010 |
+| DAC-E1-S2-3 | Retired instrument replays with `lifecycle: retired`, current or past member (TC-COMP-117) | T003, T008 |
+| DAC-E1-S2-4 | Events page by `event_id DESC` with a stable cursor (TC-COMP-051) | T004, T006, T008, T009, T010 |
+| DAC-E1-S2-5 | Every statement parameterised and loaded once at import from a `.sql` file (TC-COMP-052) | T005, T008, T009 |
+
+Mapped component test cases (coverage-matrix rows DAC-E1-S2-1 to -5): TC-COMP-049, TC-COMP-050, TC-COMP-051, TC-COMP-052, TC-COMP-117. Five TCs, all `Covered`. DAC-E1-8 also maps TC-COMP-055 and -056 (`classification-ui`, CAP-002-E1-S8) and TC-INT-019/-020 (API, CAP-002-E1-S6); DAC-E1-9 also maps TC-COMP-118 (S3) and -119 (S8); none is planned here. TC-COMP-054 (S4) is satisfied for free by the scan T005 writes, because it globs the SQL directory.
+
+## Phase 1: Setup
+
+**Purpose**: Make the package importable so the tests fail on missing behaviour, not on a missing directory.
+
+- [ ] T001 Create `src/factorflow/universes/__init__.py` containing only a module docstring (follow `src/factorflow/coverage/__init__.py`'s style; check it first). It exports nothing: `service.py` and its public names are CAP-002-E1-S3's. Do not create `src/factorflow/universes/sql/` here; T008 creates it with its files. `pyproject.toml` already ships `universes/sql/*.sql` (CAP-002-E1-S1, DEC-0088), so it is not edited.
+
+**Checkpoint**: `import factorflow.universes` works; nothing else exists yet.
+
+---
+
+## Phase 2: Tests (TDD)
+
+**Purpose**: Write failing tests that define the replay rules from the ACs. All new test modules are new files (DEC-0064: delivered tests are not edited); `tests/conftest.py` is not on DEC-0084's list and is not edited, so integration tests build their own migrated database from the `postgres_connection_string` fixture exactly as CAP-002-E1-S1's `tests/integration/test_research_constraints.py` does (`discover(MIGRATIONS_DIR)` filtered to versions 1 to 5 plus `apply_pending`, so CAP-002-E2-S1's `0006` cannot change these tests).
+
+### Mandatory Component Tests
+
+- [ ] T002 [P] Implement TC-COMP-049 (Same-day add and remove is not membership; add day counts), unit tier, in `tests/unit/test_universe_replay.py` (`# Implements TC-COMP-049`). Tests the pure function `fold_members(events, as_of)` that T009 adds to `replay.py` over in-memory `ReplayEvent` rows (`event_id`, `event_type`, `instrument_id`, `recorded_at`, `recorded_on`). Cases, each asserting the mapping `instrument_id -> member_since`: add and remove on the same `recorded_on` -> not a member as of that date; add on D -> member as of D and of D+1 and D+30, until a `member_removed` on a later date E, then not a member as of E but still a member as of E-1; add, remove, add again -> member, with `member_since` the second add's `recorded_at`; the `event_id` order decides, not `recorded_at` (give the later event the earlier `recorded_at`) and not list order (pass the events shuffled); events recorded after `as_of` are ignored; `created`, `renamed` and `retired` events never add or remove a member (a retired universe keeps its members); an empty sequence gives no members. Fails now: `factorflow.universes.replay` does not exist.
+- [ ] T003 [P] Implement TC-COMP-049 (integration tier), TC-COMP-050 (Membership before creation is empty and flagged) and TC-COMP-117 (Retired instrument member replays with lifecycle retired) in `tests/integration/test_universe_as_of.py`, marked `pytest.mark.postgres` (`# Implements TC-COMP-049, TC-COMP-050, TC-COMP-117`). The module holds helpers that INSERT instruments, `universe` rows and `universe_event` rows directly with explicit `recorded_on` and `recorded_at` (the store test fixtures are not production code, so raw `INSERT`s are fine; they never UPDATE or DELETE). Cases: (a) differential: build one scripted history (three instruments, adds, a removal, a re-add, events on days D1 to D4) and assert `replay.membership_as_of(conn, universe_id, as_of)` equals `fold_members` over the same events for every date from D1-1 to D4+1 (one definition of the rule, two implementations kept honest); (b) DAC-E1-S2-1 same-day add and remove; (c) DAC-E1-S2-2: `current_state(conn, universe_id, as_of=D1-1)` returns `members == []`, `as_of_before_creation is True` and `created_on == D1` (the creation date), while `as_of=D1` returns `as_of_before_creation is False`; (d) DAC-E1-S2-3 and DAC-E1-9: a `lifecycle='retired'` instrument (insert it with `retired_at` set to satisfy `instrument_retired_at_agrees`) that was added before it was retired is returned by the current read and by a past `as_of` with `lifecycle == 'retired'`, and is never filtered out; (e) a universe with a `retired` event still replays its members and its `lifecycle == 'retired'` with a non-null `retired_at` (AC-6); (f) current membership uses today's America/Chicago date: insert an event whose `recorded_on` is `SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date` and assert it is a current member; one recorded the next day is not (DEC-0065); (g) `current_state` for an unknown `universe_id` returns `None`; (h) rename: after a `renamed` event `name` is the latest renamed name, and `as_of` in the past still returns the current name (DEC-0093); (i) a `created` event with `filter_provenance` yields an `Origin` with `kind == 'from_filter'` and the set id, classification date, `Decimal` bounds, `hide_incomplete` and `symbol` read back (null symbol -> `None`), and one without yields `kind == 'by_hand'` with every other field `None`; (j) `member_since` equals the selected `member_added` event's `recorded_at`. Fails now: `replay` does not exist.
+- [ ] T004 Implement TC-COMP-051 (list_events orders by event_id DESC with stable cursor) in `tests/integration/test_universe_as_of.py` (same file as T003, so it follows it; `# Implements TC-COMP-051`). The component design's table puts this test in `test_universe_maintenance.py`, which CAP-002-E1-S4 creates; S2 owns the AC and ships first, so it lives here (see Resolved Conflicts). Calls `replay.list_events(conn, universe_id, limit, cursor)` (T010). Cases: a universe with 7 events and `limit=3` yields pages of 3, 3, 1 in strictly descending `event_id`, `next_cursor` is `None` exactly on the last page, the concatenation equals all events newest first, and each `UniverseEvent` carries `event_id`, `event_type`, `name`, `symbol` (the instrument symbol for member events, else `None`), `recorded_at`, `recorded_on`; stability: after the first page is read, append two newer events and read the second page with the first page's cursor, the second page is unchanged (no repeat, no skip); events of another universe never appear; a universe with no events yields `([], None)`; `limit` of 0 and `MAX_PAGE_SIZE + 1` raise `ValueError`; a malformed or wrong-version cursor raises `CursorError`. Also a short test of `replay.list_universe_rows` (T010) that executes `list_universes.sql`: three universes (one retired, one renamed, created on distinct timestamps), `lifecycle` `active`/`retired`/`all` selects the right sets, `name_prefix` matches the replayed current name case-sensitively as given, order is `(created_at, universe_id)` descending, and two pages with `limit=2` have a stable cursor. Fails now: `list_events` does not exist.
+- [ ] T005 [P] Implement TC-COMP-052 (Membership SQL is parameterised and loaded once from files) in `tests/unit/test_universe_sql_safety.py` (`# Implements TC-COMP-052`; also names DAC-E1-10 and TC-COMP-054, which S4 relies on). This is the module the story says is created here and that CAP-002-E1-S3 and S4 extend by adding statements, so it must discover statements rather than list them. (a) For every `*.sql` under `src/factorflow/universes/sql/` (`glob`, at least one found, so the scan cannot pass vacuously): `prohibited_research_mutations(text)` imported from `tests.unit.test_research_sql_is_append_only` (CAP-002-E1-S1 T003) returns `[]`; and every `%` in the file is the start of a named placeholder `%(name)s` (regex `%(?!\(\w+\)s)` finds none), so no positional or literal-interpolated value is possible and the statement is parameterised. (b) For every `*.py` under `src/factorflow/universes/`, parse with `ast` and assert: no `execute` / `executemany` call receives an `ast.JoinedStr`, a `.format(...)` call, or a `%` `BinOp` as its first argument (the pattern of `tests/unit/test_history_depth_sql_safety.py`, reimplemented for `execute` and `executemany` and for every `.py` in the directory); `read_text` is called only at module level, never inside a function or class body, which is what "loaded once at import" means; and each `*.sql` file in the directory is read by exactly one module-level `read_text` somewhere in the package (a `.sql` file nothing loads fails the test). (c) Detection tests on synthetic source strings prove each check fires (an f-string argument, a `%` argument, a `read_text` inside a function, an `UPDATE universe_event`, an unnamed `%s`) so the scan is shown to fail. (d) `replay.MEMBERSHIP_AS_OF_SQL` exists, is a `str`, and equals the text of `membership_as_of.sql` byte for byte (CAP-002-E3-S2 imports it rather than restating the replay, SA-DUP-001). Fails now: `universes/sql/` has no files.
+
+### Additional Unit Tests
+
+- [ ] T006 Additional unit tests in `tests/unit/test_universe_replay.py` (same file as T002, so it follows it): (a) cursor round trip: `encode_event_cursor(event_id)` then `decode_event_cursor` returns the same id; `encode_universe_cursor(created_at, universe_id)` then `decode_universe_cursor` round-trips; both are URL-safe opaque strings (`base64.urlsafe_b64decode` works, no padding assumptions), follow the CAP-001 contract of `factorflow.runs.queries` (versioned JSON payload `{"v": 1, ...}`), and raise `factorflow.runs.queries.CursorError` for an empty string, non-base64, a non-object payload, a wrong version and a missing field; (b) `origin_from_provenance(None)` is `Origin(kind='by_hand', ...)` with every other field `None`, and a full provenance dict maps to `Origin` with `thresholds` values as `Decimal` built from `str(value)` (so a JSON `80` and `0.5` do not become binary floats) and `set_id` a `UUID`, `classification_date` a `date`; a provenance with an empty `thresholds` object gives `{}`, not `None`; (c) `fold_members` is a pure function: it neither mutates its input nor depends on the order of equal-date events; (d) `list_events` and `list_universe_rows` reject an out-of-range `limit` before touching the connection (pass `None` as the connection to prove it). Fails now: `replay` does not exist.
+
+**Checkpoint**: All tests written and failing (no production code yet), for the right reason: `ModuleNotFoundError: factorflow.universes.replay` and an empty `universes/sql/` directory.
+
+---
+
+## Phase 3: Core Implementation
+
+**Purpose**: Make the tests pass with four SQL files and one module.
+
+- [ ] T007 [P] Create `src/factorflow/universes/sql/membership_as_of.sql` containing exactly the ```sql block of `component-design-universe-service.md` section 2.5 (copy it verbatim, comment header included; do not reword it). Parameters `%(universe_id)s` and `%(as_of)s`. It orders `DISTINCT ON (instrument_id) ... ORDER BY instrument_id, event_id DESC` and joins `instrument` for `symbol` and `lifecycle`; it never consults the instrument lifecycle to exclude (AC-15). The named placeholders are the only `%` in the file.
+- [ ] T008 [P] Create the other three statements in `src/factorflow/universes/sql/`, all with named placeholders and no `UPDATE`/`DELETE`, no interpolation, and a leading `--` comment citing the design section and DEC:
+  - `current_state.sql` (design 2.5: "`created` event (name, provenance), latest `renamed` event (name), and `retired` event (lifecycle, `retired_at`) in one query"). Parameter `%(universe_id)s`. Returns zero rows for an unknown universe, otherwise one row with: the `created` event's `recorded_at` and `recorded_on` (as `created_at` and `created_on`), `filter_provenance`, the name (latest `renamed` event's `name` by `event_id DESC`, else the `created` name), the `retired` event's `recorded_at` (null if none), and `(CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date AS today`, the same rule the column default of `recorded_on` uses, so the current date is computed in SQL beside the data and no Python timezone logic exists. A lateral subquery or `DISTINCT ON` over `idx_universe_event_universe` is appropriate; do not select from `universe.created_at` (the event is the source).
+  - `events_page.sql`: parameters `%(universe_id)s`, `%(before_event_id)s` (nullable), `%(limit)s`. Selects `event_id`, `event_type`, `name`, the instrument `symbol` (`LEFT JOIN instrument`), `recorded_at`, `recorded_on` from `universe_event` where `universe_id` matches and (`%(before_event_id)s IS NULL` or `event_id < %(before_event_id)s`), `ORDER BY event_id DESC LIMIT %(limit)s`. Add the cast the parameter needs (`%(before_event_id)s::bigint`).
+  - `list_universes.sql` (DEC-0094): parameters `%(lifecycle)s` (`active`, `retired` or `all`), `%(name_prefix)s` (nullable), `%(after_created_at)s` and `%(after_universe_id)s` (both nullable together), `%(limit)s`. Returns `universe_id`, replayed current `name`, `lifecycle`, `created_at` (the `created` event's `recorded_at`), `retired_at`, ordered `(created_at, universe_id)` descending, keyset-paged. The name filter is applied to the replayed current name using `starts_with(name, %(name_prefix)s)` (not `LIKE`, so `%` and `_` in a prefix are literals; the `%` inside a parameter value is not in the file). No `member_count` (DEC-0094).
+- [ ] T009 Create `src/factorflow/universes/replay.py` (module docstring citing design sections 2.1/2.5 and DEC-0065/0093/0094). Module level: `_SQL_DIR = Path(__file__).parent / "sql"` and one `Final` constant per file read once with `read_text()` exactly as `src/factorflow/coverage/service.py` does, with `MEMBERSHIP_AS_OF_SQL` public (name chosen to match the reader design's "importable as a SQL constant", classification-reader section 14) and the other three private. Types, with the design's section 2.3 fields unchanged (DEC-0093): frozen dataclasses `Member`, `Origin`, `Universe`, `UniverseEvent`; `Universe` gains a trailing `created_on: date | None = None` (DEC-0094); plus `ReplayEvent` (the input row of `fold_members`) and `UniverseRow` (id, name, lifecycle, created_at, retired_at). Pure functions: `fold_members(events, as_of) -> dict[int, datetime]` (per instrument the highest `event_id` among `member_added`/`member_removed` with `recorded_on <= as_of`; a member iff that event is `member_added`; value is its `recorded_at`; no I/O), `origin_from_provenance(provenance) -> Origin`, and the cursor codecs `encode_event_cursor`, `decode_event_cursor`, `encode_universe_cursor`, `decode_universe_cursor`, which follow `factorflow.runs.queries` (versioned JSON, URL-safe base64) and raise its public `CursorError`. Do not import the private helpers of `runs.queries`; copy the few lines. Depends on T007, T008.
+- [ ] T010 In `src/factorflow/universes/replay.py` add the connection-using functions, all taking a `psycopg.Connection`, passing parameters as a dict to `conn.execute`/`cursor.execute` with the constant as the first argument (never formatted), and mapping rows with `psycopg.rows.dict_row` or tuple indexing as the delivered code does (check `coverage/service.py`): `membership_as_of(conn, universe_id, as_of: date) -> list[Member]` (runs `membership_as_of.sql`; `Member.symbol`/`lifecycle` from the join, `member_since` from the selected event; order by symbol as the SQL does); `current_state(conn, universe_id, as_of: date | None = None) -> Universe | None` (one `current_state.sql` row; `None` when no row, which the S3 service turns into `UniverseNotFound`; `as_of` defaults to the row's `today`; when `as_of < created_on` returns `members=[]`, `as_of_before_creation=True` and `created_on` filled, without running the membership query; otherwise the members come from `membership_as_of`; `name` and `lifecycle` are current whatever `as_of` is; `lifecycle` is `retired` iff the retired timestamp is set; `origin` from `origin_from_provenance`); `list_events(conn, universe_id, limit, cursor) -> tuple[list[UniverseEvent], str | None]` (validate `1 <= limit <= factorflow.api.bounds.MAX_PAGE_SIZE` before any query, fetch `limit + 1` rows to know whether another page exists, `next_cursor` is the last returned row's `event_id` encoded, `None` on the last page); `list_universe_rows(conn, lifecycle, name_prefix, limit, cursor) -> tuple[list[UniverseRow], str | None]` with the same paging rules and `lifecycle` validated against `{'active','retired','all'}` (`ValueError` otherwise, SEC-INP-002). `as_of` is a `date`, never a datetime (design 3). Nothing here writes: the module issues no `INSERT`, `UPDATE` or `DELETE`. Depends on T009.
+
+**Checkpoint**: `uv run pytest -m 'not postgres' tests/unit/test_universe_replay.py tests/unit/test_universe_sql_safety.py` and `uv run pytest -m postgres tests/integration/test_universe_as_of.py` pass.
+
+---
+
+## Phase 4: Integration
+
+Skipped: S2 adds no wiring. `service.py` (CAP-002-E1-S3) is the only importer of `replay.py` inside this story's epic, the API routes are CAP-002-E1-S6, and the SQL already ships through the package-data glob CAP-002-E1-S1 added (T011 checks it).
+
+---
+
+## Phase 5: Polish
+
+**Purpose**: Final checks and cross-cutting concerns.
+
+- [ ] T011 Confirm packaging and the cross-story guards. Run `uv run pytest tests/unit/test_package_data_ships_sql.py` (CAP-002-E1-S1 T002: `universes/sql/*.sql` now has files and every one matches a glob) and `uv run pytest tests/unit/test_research_sql_is_append_only.py` (its whole-tree scan now covers `universes/sql/*.sql` and `replay.py`). Do not edit either file. Check `git status` shows only the files T001 to T010 name, plus this task file, `CAP-002-E1-S2-tdd-evidence.yaml` and the story's frontmatter status line.
+- [ ] T012 Run every command in the Validation Plan from the repository root and fix any failure T001 to T010 introduced, including `uv run ruff format --check .` on the new modules and `uv run mypy src` (strict: annotate `replay.py` fully; `psycopg` row typing needs `Any` narrowing at the row boundary, not `# type: ignore` without a code).
+- [ ] T013 After each TDD cycle in T002–T012 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-002-E1-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC). Suggested cycles: (1) T001, T002, T006 with the pure part of T009 (`fold_members`, `origin_from_provenance`, cursors); (2) T003, T004 with T007, T008 and the SQL-backed T010; (3) T005 with its confirmation that every statement is named-parameter and loaded at import (RED evidence: the scan fails on the empty directory before T007/T008 exist, or on its synthetic detection cases).
+
+**Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
+
+---
+
+## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-002-E1-S3 | reverse | Creates `service.py`, which imports `replay.current_state` and delegates `list_events`/`list_universes` to the functions defined here; re-exports `Member`, `Origin`, `Universe`, `UniverseEvent`. Graph: `E1-S3: [E1-S1, E1-S2]` |
+| CAP-002-E1-S4 | reverse | Extends `service.py` and the `tests/unit/test_universe_sql_safety.py` scan created here (TC-COMP-054). Graph: `E1-S4: [E1-S3]` |
+| CAP-002-E3-S2 | reverse | Imports `replay.MEMBERSHIP_AS_OF_SQL` for universe-scoped list reads (SA-DUP-001). Graph: `E3-S2: [E3-S1, E1-S2]` |
+| CAP-002-E3-S3 | reverse | Imports `membership_as_of` for the memberships read (it is mentioned in the notes below). Graph: `E3-S3: [E3-S2, E1-S2]` |
+| CAP-002-E1-S6 | reverse | `classification-api` routes call `service.py`, which delegates to this story's replay (TC-INT-019/-020). Graph: `E1-S6: [E1-S3, E1-S4, E1-S5]` |
+| CAP-002-E1-S8 | context | `classification-ui` owns TC-COMP-055/-056/-119 that share DAC-E1-8/-9 with this story; it consumes the API, never `replay.py`. Graph: `E1-S8` does not list `E1-S2` |
+| CAP-002-E2-S1 | context | Adds migration `0006` and extends S1's guards; named only to say this story's integration tests use versions 1 to 5. Graph: `E2-S1: [E1-S1]` |
+
+CAP-002-E1-S1 is an existing hard edge (the `universe` and `universe_event` tables from `0005`, the `universes/sql/*.sql` package-data glob, `prohibited_research_mutations` in `tests/unit/test_research_sql_is_append_only.py`). No new hard edge: the plan imports nothing else another story creates, so `dependencies.yaml` is unchanged. The producers it uses are delivered CAP-001 code (`factorflow.runs.queries.CursorError`, `factorflow.api.bounds.MAX_PAGE_SIZE`, the migrator and `conftest.py` fixtures).
+
+### Task Dependencies
+- T001: no dependencies.
+- T002, T003, T005: no dependencies on each other (separate files); T006 follows T002 and T004 follows T003 (same file).
+- T007, T008: can run in parallel, after Phase 2.
+- T009: depends on T007, T008 (it reads the files at import). T010 depends on T009.
+- T011: depends on T010. T012: depends on T011.
+- T013: interleaved — runs after every TDD cycle, before the next cycle begins.
+
+### Parallel Opportunities
+- Phase 2: T002, T003, T005 in parallel; T006 and T004 after their files.
+- Phase 3: T007 and T008 in parallel.
+
+### Phase dependencies
+Phase 1 before Phase 2; Phase 2 before Phase 3; Phase 5 after Phase 3. Phase 4 is skipped.
+
+---
+
+## Validation Plan
+
+### Constitution-Defined Commands
+- Build: `uv build` (not affected; CAP-002-E1-S1's wheel test shows the SQL ships)
+- Test: `uv run pytest -m postgres` and `uv run pytest -m 'not postgres'`
+- Lint: `uv run ruff check .`
+- Format: `uv run ruff format --check .`
+- Type check: `uv run mypy src`
+
+### Story-Specific Validation
+- DAC-E1-S2-1: T002 (pure fold) and T003 (b) (SQL) pass, and T003 (a) shows the SQL and the fold agree on every date of a scripted history.
+- DAC-E1-S2-2: T003 (c) shows `members == []`, `as_of_before_creation is True` and the creation date for a date before `created`, and `False` on the creation date itself.
+- DAC-E1-S2-3 / DAC-E1-9: T003 (d) shows a retired instrument replays with `lifecycle == 'retired'` for the current read and a past `as_of`.
+- DAC-E1-S2-4: T004 shows pages of 3, 3, 1 newest first, a stable cursor across an interleaved append, and a clean last page.
+- DAC-E1-S2-5: T005 passes on the real tree and fails on each synthetic violation.
+- AC-6 / DAC-E1-8: T003 (a), (e), (f).
+- Mutation safety: T011 shows the whole-tree append-only scan still passes with the new files present.
+
+---
+
+## Notes
+
+### Resolved Conflicts
+
+- **Where `list_events` and the dataclasses live.** Story S2 (Description, ACs, `events_page.sql`, `list_universes.sql`) owns the events page and DAC-E1-S2-4 names `list_events`; the component design (2.1, 2.3) defines `list_events`, `list_universes` and `Member`/`Origin`/`Universe`/`UniverseEvent` in `service.py`, which story S3 delivers and which imports S2's `replay.py` (graph: `E1-S3: [E1-S1, E1-S2]`). Governing rule: story ACs outrank design placement prose, and the graph fixes the order. Resolution (DEC-0093): the types and the paged reads live in `replay.py`; S3's `service.py` re-exports the types and delegates, so every design name `factorflow.universes.service.*` still resolves. The interface (fields, signatures) is unchanged; only the defining module differs. No source edit to an approved artifact is required, but S3's planner must know (see Other Notes).
+- **Which test file hosts the events-page test.** Component design section 7 puts "Events page newest first" in `tests/integration/test_universe_maintenance.py`, which CAP-002-E1-S4 creates; S2 owns DAC-E1-S2-4 and the story's Implementation names only `test_universe_as_of.py`, `test_universe_replay.py` and `test_universe_sql_safety.py`. Story ACs outrank the design's test table, and a test cannot live in a file that does not exist yet. TC-COMP-051 is implemented in `test_universe_as_of.py` (T004); the trace comment carries the TC-ID, so coverage is unaffected.
+- **"Replay semantics on in-memory event sequences" versus "the replay module is the only reader of `universe_event`" (design 2.2).** The unit tier needs a function over in-memory events, while the SQL is the production definition. Both statements hold: the pure `fold_members` reads nothing, and T003 (a) proves it and `membership_as_of.sql` agree on a scripted history. It is a test oracle, not a second reader; the production path never calls it.
+- **Stale labels.** The design body says `**Status:** draft` while front matter is `approved`; front matter governs. `universe-service` section 12 cites research-store v1; the approved version is v2. No behavioural effect.
+
+### Open Gaps
+
+- **Creation date field (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** DAC-E1-S2-2 and design 2.5 require the before-creation result to carry "the creation date", rendered as an America/Chicago date, but `Universe` has only `created_at: datetime`. The plan adds a trailing defaulted field `created_on: date | None = None`, set from the `created` event's `recorded_on`. Derivation: `recorded_on` is the as-of grain (DEC-0065), so the same grain gives the date without repeating the timezone rule in Python; an additive defaulted field leaves every declared signature untouched (constraint 9a). Recorded as DEC-0094. Follow-up: `component-design-universe-service.md` section 2.3 gains the field at its next revision.
+- **`list_universes.sql` shape (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** The design fixes only paging by `(created_at, universe_id)`, the versioned cursor and filtering by lifecycle and replayed name prefix. Direction, `lifecycle` values and columns are undetermined. The plan adopts newest first, `lifecycle` in `active`/`retired`/`all` (system design 4.2 `GET /api/universes`), the columns `universe_id`, `name`, `lifecycle`, `created_at`, `retired_at`, and no `member_count` (S3 counts `membership_as_of` rows, so membership keeps one definition, DEC-0065). Derivation: the CAP-001 cursor contract (`runs/queries.py`) and the events read are newest first. Recorded as DEC-0094. Follow-up: design 2.5 states direction and columns at its next revision.
+- **Placement of types and paged reads in `replay.py`, and `current_state` returning `None` for an unknown universe (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** Not settled by any artifact once the story and design disagree on file ownership; adopted as DEC-0093 with the derivation above. `name` and `lifecycle` are the current ones whatever `as_of` is (design 2.5's `current_state.sql` reads the latest `renamed` and `retired` events); only members vary with `as_of`. An `as_of` after today is not refused; it returns the current membership (no later event can exist). Follow-up: design 2.1/2.3 name `replay.py` as the defining module at its next revision.
+- **`MEMBERSHIP_AS_OF_SQL` as the exported constant name.** The reader design (section 14 assumption) says `membership_as_of.sql` is "importable from `factorflow.universes.replay` as a SQL constant" without naming it. This plan names it `MEMBERSHIP_AS_OF_SQL`; CAP-002-E3-S2 must import that name. A genuine minor gap (no artifact fixes the identifier); no owner decision is involved.
+- **Universe name maximum length** is undecided (system design section 8 question 2). Nothing in this read half depends on it.
+- **No read-latency target** exists for universe reads (design section 5): none is asserted; the 3000-member volume test is CAP-002-E1-S3's.
+
+### Other Notes
+
+- The resolution register `logs/runs/run-20261017T210926Z/resolution-register-CAP-002-E1.md` was right on the module map, SQL file names, and the pinned `membership_as_of.sql` and `coverage_check.sql` texts. It did not carry: the ownership conflict over `list_events` and the dataclasses (above), the fact that `list_universes.sql` has no pinned shape, and the home of TC-COMP-051; the register has been corrected.
+- For CAP-002-E1-S3's planner: `service.py` imports `Member`, `Origin`, `Universe`, `UniverseEvent` from `replay.py` and re-exports them, raises `UniverseNotFound` when `replay.current_state` returns `None`, and delegates `list_events` and `list_universes` (composing `list_universe_rows` with `membership_as_of` per row). `UniverseNotFound` and the other exceptions stay in `service.py` per design 2.3.
+- CAP-002-E3-S2 and CAP-002-E3-S3 consume this story's `MEMBERSHIP_AS_OF_SQL` and `membership_as_of`; their planners should import those names and not restate the replay.
+- `membership_as_of.sql` returns the instrument's `lifecycle` as stored; the "not classified because it is retired" display is the reader's and the UI's (AC-15), not this module's.
+- Integration tests insert `universe_event` rows directly to control `recorded_on`. That is test setup against a throwaway database and never an `UPDATE` or `DELETE`; the append-only guards scan `src/factorflow/`, not `tests/`.
+- `tests/unit/test_universe_sql_safety.py` imports `prohibited_research_mutations` from CAP-002-E1-S1's module; if S1's helper is renamed, update this import (hard edge `E1-S2: [E1-S1]` already covers it).
+- Unattended run: DEC-0093 and DEC-0094 are agent decisions with `owner_reviewed: false`; the commit carrying this plan carries `Decision-Id: DEC-0093` and `Decision-Id: DEC-0094`.
