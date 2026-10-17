@@ -1,0 +1,202 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-002-E4-S4-tasks
+artifact_type: story-tasks
+artifact_version: 1
+status: draft
+owner: Alvaro de Jodra
+owner_github: ajodraca
+created: 2026-10-17
+updated: 2026-10-17
+ai_provenance:
+  agent_id: implementation-planning-agent
+  agent_version: "1.0"
+  model: claude-sonnet-5-5
+  tool: Claude Code
+  tool_version: "unknown"
+  timestamp: 2026-10-17T23:58:00Z
+  source_artifacts:
+    - id: CAP-002-E4-S4
+      version: "1"
+    - id: CAP-002-component-design-classification-ui
+      version: "3"
+    - id: CAP-002-component-design-classification-api
+      version: "3"
+  invoking_user: ajodraca
+  correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+---
+
+# Tasks: CAP-002-E4-S4 — Not-Current Banner, As-Of Line and the Score-Set Poll with Refresh-Once
+
+**Story**: `repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4.md`
+**Component**: `FactorFlow-v2` (web interface, `web/src/`)
+**Branch**: `usr/alvaro-de-jodra/CAP-002-E4-tasks`
+**Date**: 2026-10-17
+
+## Summary
+
+Delivers the score-set state every scored CAP-002 surface shows: `web/src/components/patterns/not-current-banner.tsx` (the `status-warning` *Not reflecting the latest download* banner while a later set builds, the `status-critical` *Score update failed* banner with the recorded reason and no retry, nothing otherwise), `web/src/components/patterns/as-of-line.tsx` (*Scores from {time} from the download started {time}* with the start time as the link to run detail, the *Updating* badge and *checked {time}* while a set builds, the *Complete*/*Partial* outcome badge, *Could not check for newer scores.* with **Try again**, and a polite live region for the completion announcement) and `web/src/screens/research/use-score-set-poll.ts` (polls `getClassificationSummary` from first load every 10 seconds while `later.state` is `building` or the shell health reports a non-terminal `most_recent_run`, and on a new set announces once and calls the host's `onNewSet` once). No screen, table or dialog is built here: E4-S9 composes these three into the Research screen and owns the never-populated body (DAC-E4-S9-1), the set-history dialog and the table reload that `onNewSet` triggers; the banner and the line are reused by universe detail, Compare and Stock evidence.
+
+## Acceptance Criteria Traceability
+
+| AC | Description | Tasks |
+|----|-------------|-------|
+| AC-20 | Until a new set is complete the previous set is shown marked as not reflecting the latest acquisition; a failure shows its reason | T001, T002, T007, T011, T014 |
+| AC-21 | The owner can see when the current classifications were produced and which acquisition run they reflect | T003, T008, T012 |
+| AC-22 | Before any classification exists the product says no stocks have been classified (the poll that learns the first set completed or failed) | T006, T009, T013 |
+| DAC-E4-2 | Never-populated: the first set's *Updating* or *Score update failed* comes from the same `later` block a populated screen uses (the hook and banner supply that block; the body is E4-S9's) | T006, T007, T013 |
+| DAC-E4-4 | While a set builds the current set stays, with a warning banner and *Updating*; a failed attempt reads the recorded reason and offers nothing to retry; completion refreshes exactly once, announced, selection preserved by the host | T001, T002, T004, T005, T007, T008, T009, T011, T012, T013 |
+| DAC-E4-S4-1 | `later` null: no banner; `building`: `status-warning` *Not reflecting the latest download* and *Updating* on the as-of line | T001, T007, T008, T011, T012 |
+| DAC-E4-S4-2 | Failed attempt: *Score update failed* with the recorded reason, previous set kept, nothing to retry | T002, T007, T011 |
+| DAC-E4-S4-3 | As-of line: *Scores from {time}* from the download started {time} in America/Chicago, linked to run detail, no number or UUID | T003, T008, T012 |
+| DAC-E4-S4-4 | Failed poll: banner stays, **Try again** offered | T004, T009, T012, T013 |
+| DAC-E4-S4-5 | New complete set: exactly one announcement and one reload, no second | T005, T009, T013 |
+| DAC-E4-S4-6 | Never-populated store: polls from first load; first completion renders the populated state | T006, T009, T013 |
+
+Mapped test cases (from `tests/component/classification-ui-tests.md`, confirmed in `tests/coverage-matrix.md` lines 216-221): TC-COMP-174 (DAC-E4-S4-1), TC-COMP-175 (DAC-E4-S4-2), TC-COMP-179 (DAC-E4-S4-3), TC-COMP-176 (DAC-E4-S4-4), TC-COMP-177 (DAC-E4-S4-5), TC-COMP-184 (DAC-E4-S4-6). No other component TC traces to a DAC-E4-S4-* criterion (TC-COMP-180, the Earlier sets dialog, traces to E4-S9). Each spec body is one generic line ("The banner renders", "Rendered") with no fixture or steps; the plan sharpens each into concrete assertions from the AC and classification-ui 2.6 and UX design 1.2.
+
+## Phase 1: Setup
+
+Skipped. No dependency or configuration change. `web/src/screens/research/` is created by E4-S2 (`copy.ts`, `format.ts`) and `web/src/components/patterns/` by E4-S3 or, if S4 is coded first, by T011 (a directory is created by its first file; vitest, biome, `tsc` and Tailwind `content` globs already cover it). Types (`ClassificationSummary`, `CurrentSet`, `LaterSet`) and `getClassificationSummary` come from `web/src/api/classification-types.ts` and `classification-client.ts` (CAP-002-E4-S1); formatting and strings from `web/src/screens/research/format.ts` and `copy.ts` (CAP-002-E4-S2). The shell health seam is the delivered `useHealth` in `web/src/app/status-region.tsx`.
+
+---
+
+## Phase 2: Tests (TDD)
+
+**Purpose**: Write failing tests for the banner, the line and the hook. Three files: `web/src/components/patterns/not-current-banner.test.tsx`, `web/src/components/patterns/as-of-line.test.tsx` and `web/src/screens/research/use-score-set-poll.test.ts` (the paths the story names; none exists). Follow `web/src/screens/coverage/badges.test.tsx` for badge assertions (`data-variant`, word plus aria-hidden shape) and `web/src/screens/coverage/coverage.polling.test.tsx` for fake timers (`vi.useFakeTimers({ shouldAdvanceTime: true })`, `vi.setSystemTime`, `act(async () => vi.advanceTimersByTimeAsync(...))`). Fixtures are local plain objects typed with S1's `ClassificationSummary`, `CurrentSet` and `LaterSet` (`runStartedAt: "2026-10-15T22:30:00Z"` renders `2026-10-15 17:30 CDT`; `endedAt: "2026-10-15T22:46:00Z"` renders `2026-10-15 17:46 CDT`). Hook tests mock `../../api/classification-client` (`getClassificationSummary`) and `../../app/status-region` (`useHealth`) with `vi.mock`, and drive the hook with `renderHook`. Each mandatory test carries a traceability comment (`// Implements TC-COMP-174`). Component tests render inside `MemoryRouter` because the start-time link is a router link.
+
+### Mandatory Component Tests
+
+- [ ] T001 [P] Implement TC-COMP-174 (Banner absent when later null; warning banner when building) in `web/src/components/patterns/not-current-banner.test.tsx`: `later: null` with a current `set` renders nothing (`container` is empty, no `role`, no badge); `later.state: "building"` renders one `status-warning` badge reading *Not reflecting the latest download* (with its warning-triangle shape `aria-hidden`) and the body *Showing scores produced {time} from the download started {time}. A newer set is being produced and replaces this one when complete.* with times from `formatTimestamp` (UX design 1.2 table); the wording is whatever the shipped S2 `copy.ts` exports, so the test imports the copy builder rather than restating the sentence, and also asserts the two literal phrases *Not reflecting the latest download* and *replaces this one when complete* once so a copy drift is caught. The *Updating* mark half of DAC-E4-S4-1 is asserted on the as-of line in T008. No button, link or `onClick` exists in the banner
+- [ ] T002 [P] Implement TC-COMP-175 (Failed attempt banner shows recorded reason, no retry) in `web/src/components/patterns/not-current-banner.test.tsx`: `later: { state: "failed", failureReason: "Factor engine could not read prices", endedAt: "2026-10-15T23:03:00Z", ... }` with a current `set` renders one `status-critical` badge reading *Score update failed* (square shape `aria-hidden`) and a body that contains `Score update failed 2026-10-15 18:03 CDT: Factor engine could not read prices. Showing scores produced 2026-10-15 17:46 CDT from the download started 2026-10-15 17:30 CDT. The next complete download will try again.`; the reason is the recorded `failureReason` verbatim (a reason containing `<b>x</b>` renders as text, no HTML); `screen.queryByRole("button")` and `queryByRole("link")` are null (nothing to retry, STD-UI-2); the previous set is not the banner's concern (it renders no table); a `failed` `later` with `failureReason: null` renders the generic clause from `copy.ts` and never `null` or `undefined`
+- [ ] T003 [P] Implement TC-COMP-179 (As-of line shows times in America/Chicago with run link) in `web/src/components/patterns/as-of-line.test.tsx`: with `set.endedAt: "2026-10-15T22:46:00Z"` and `set.runStartedAt: "2026-10-15T22:30:00Z"` the line's text reads `Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT`; the start time is a link (`getByRole("link")`) whose accessible name is `Open the download started 2026-10-15 17:30 CDT` and whose `href` is `/runs/{runId}` built from the `SHELL_ROUTES` entry S2 ships, with `runId` the fixture's UUID; the whole text content (including the link text) contains no `#`, no UUID (regex `[0-9a-f]{8}-[0-9a-f]{4}-`) and no `run_id`; a winter instant (`2026-01-15T23:00:00Z`) renders `CST`, a summer instant `CDT`, never the viewing machine's zone. With `sortLabel="value"` the line ends `· sorted by value`; without `sortLabel` the clause is absent (compare and evidence)
+- [ ] T004 [P] Implement TC-COMP-176 (Failed poll keeps banner and offers Try again), component half, in `web/src/components/patterns/as-of-line.test.tsx`: with `pollFailed` true the line renders *Could not check for newer scores.* and a **Try again** button (`getByRole("button", { name: "Try again" })`) that calls `onTryAgain` once per click; the set sentence, the *Updating* badge when `later` is `building` and the outcome badge are all still present (a failure never clears a mark); with `pollFailed` false there is no such text and no button. The banner half (the banner stays when a poll fails) is asserted in T009 at the hook (the hook keeps `summary`) and here by rendering `NotCurrentBanner` and `AsOfLine` together with `later` building and `pollFailed` true: the banner text is still present
+- [ ] T005 [P] Implement TC-COMP-177 (New complete set triggers exactly one announcement and reload), hook half, in `web/src/screens/research/use-score-set-poll.test.ts`: first fetch returns `set` A with `later` building (`setId: "A"`), the next poll returns `set` B (`setId: "B"`), `later` null; the hook's `announcement` becomes the S2 copy builder's *Scores updated to {time} from the download started {time}* for B's `endedAt` and `runStartedAt`; `onNewSet` is a `vi.fn()` called exactly once with B's summary; advance 60 further seconds with the mock returning B every time (or, once polling has stopped, not being called at all): `onNewSet` is still called once and `announcement` unchanged; a poll returning B a second time never re-fires; a later poll returning set C fires a second, separate announcement and call (one per new set, DEC-0153). The component half (the line renders the announcement in a polite live region and nothing else is live) is asserted in T008
+- [ ] T006 [P] Implement TC-COMP-184 (Never-populated store polls from first load) in `web/src/screens/research/use-score-set-poll.test.ts`: first fetch returns `neverClassified: true`, `set: null`, `later: { state: "building", setId: "A", ... }`; `getClassificationSummary` was called once on mount before any timer advance (polling begins at first load, not after 10 s); advance 10 s: called twice, 20 s: three times (continuation because `later.state` is `building` with `set` null); the poll then returns `set: A`, `later: null`: `onNewSet` is called once (the null-to-first-set transition counts), `announcement` is set, and the returned `summary.set` is non-null so the host renders the populated state without a reload; a second case where the first read returns `later.state: "failed"` with a reason and `most_recent_run` terminal: one call on mount, no further calls after 60 s, and `summary.later.failureReason` is available for the host's never-populated body (DAC-E4-2); a third case where `set` and `later` are both null and `most_recent_run.state` is `running`: polling continues every 10 s (download non-terminal), and stops after `useHealth` is changed to return `succeeded` and a rerender (after one further read)
+
+### Additional Unit Tests
+
+- [ ] T007 [P] Banner details in `web/src/components/patterns/not-current-banner.test.tsx` (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-2; Open Gap 3): a never-scored summary (`set: null`) renders no banner for either `later` state, because the never-populated body renders the first set's *Updating* or *Score update failed* from `later` itself (UX design 1.2, States: "no as-of line"; E4-S9 owns that body); `set` present with `later: null` and `notCurrent: false` renders nothing; the banner reads only `set` and `later` (props `{ set, later }`), never `notCurrent`, so the two reads' shared shape is the one source (DEC-0082); the banner is a `card` container with the badge as its first child, the words as text, and its container is not a live region (the as-of line owns announcing); the warning and critical badges use the delivered `status-warning-muted` and `status-critical-muted` tokens as full literal class strings and no polarity colour appears in a data value
+- [ ] T008 [P] As-of line details in `web/src/components/patterns/as-of-line.test.tsx` (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3; Open Gaps 2 and 4): `later` null and `checkedAt` null: no *Updating* badge and no *checked*; `later.state: "building"` adds a `status-active` badge reading *Updating* (ringed-dot shape `aria-hidden`) and `checked 2026-10-15 17:52:10 CDT` from `checkedAt` (seconds shown, STD-UI-25) , and the checked time is outside the live region so the 10-second tick is not announced; `later.state: "failed"` adds no *Updating* badge; `set.runOutcome: "succeeded"` renders a `status-good` badge *Complete* and `"partial"` a `status-warning` badge *Partial* (word plus shape, STD-UI-8); the *Earlier sets…* ghost button renders only when `onOpenEarlierSets` is given and calls it once per click, and is absent otherwise; `announcement` text renders inside exactly one `role="status"` (`aria-live="polite"`, `aria-atomic`) element, an empty `announcement` renders that region empty but present (so the first announcement is read), and nothing else in the line is inside a live region; `set` null renders nothing (the never-populated state has no line), and `loading` true renders a skeleton block of the line's final height so the table does not shift (UX design 1.2, Loading)
+- [ ] T009 [P] Hook behaviour in `web/src/screens/research/use-score-set-poll.test.ts` (AC-20, AC-22, DAC-E4-4, DAC-E4-S4-4 to DAC-E4-S4-6; DEC-0153, DEC-0155): (a) cadence: with `later.state: "building"` the mock is called at 0, 10, 20 s and not at 9 s; (b) stop: `later` null and `most_recent_run` null or terminal (`succeeded`, `partial`, `failed`, `cancelled`, `abandoned`) means no call after the mount fetch, however long the timers run; non-terminal (`requested`, `running`, `cancelling`) keeps polling; (c) `checkedAt` is a `Date` set after each successful read and `null` before the first; (d) failure: a rejected read sets `pollFailed` true, keeps the previous `summary` (and the banner input) unchanged, stops the timer (no call in the next 30 s, DEC-0155), `tryAgain()` performs exactly one read, clears `pollFailed` on success and resumes the 10 s cadence while a condition holds; a rejected first read leaves `summary` null and `pollFailed` true; (e) unmount clears the timer (no read afterwards) and an in-flight read resolving after unmount calls neither `onNewSet` nor sets state; (f) `React.StrictMode` double mount does not call `onNewSet` twice and does not leave two intervals (count reads over 30 s); (g) a read slower than 10 s is not overlapped by the next tick (at most one in flight); (h) the hook reads `useHealth()` from the delivered shell and issues no `fetch` of its own for health; `onNewSet` is read from the latest render (a changed callback identity does not restart polling)
+
+**Checkpoint**: All tests written and failing (`./not-current-banner`, `./as-of-line` and `./use-score-set-poll` do not exist). No production code yet.
+
+---
+
+## Phase 3: Core Implementation
+
+**Purpose**: Make the tests pass with three new files and no edit to any delivered file; `copy.ts` is touched only if S2 shipped without a string these components need (T010).
+
+- [ ] T010 Reconcile the strings with S2's shipped `web/src/screens/research/copy.ts` and `format.ts` (depends on CAP-002-E4-S1 and CAP-002-E4-S2 being on the branch). Read both files and use their exports for: the badge words *Not reflecting the latest download*, *Score update failed*, *Updating*, *Complete*, *Partial*; the two banner sentences; the announcement *Scores updated to {time} from the download started {time}*; *Scores from … · from the download started …* and *· sorted by {label}*; *checked {time}*; *Could not check for newer scores.*; *Try again*; *Earlier sets…*; *Open the download started {time}*; the `SHELL_ROUTES` run-detail target; and `formatTimestamp` (its `{ seconds: true }` option for *checked*). S2's T012 harvests all of these from the designs; where one is absent or takes arguments this plan does not fit, add it to `copy.ts` verbatim from UX design 1.2 with a doc comment citing the section and one anchor in `copy.test.ts`, changing no existing export (S2's Open Gap 6), and record the addition in this plan's Notes. If S2 ships only date-and-time formatting, every time in the banner is date and time (Open Gap 4). No new formatter is invented
+- [ ] T011 [P] Create `web/src/components/patterns/not-current-banner.tsx` (depends on T001, T002, T007, T010; imports only React, S1 types and `copy.ts`/`format.ts`): export `NotCurrentBanner({ set, later })` returning `null` when `later` is null or `set` is null, a `status-warning` banner for `building` and a `status-critical` banner for `failed`, each a `card` container with the badge (word plus `aria-hidden` shape: triangle for warning, square for critical, as the delivered `web/src/screens/coverage/badges.tsx` draws them) and the sentence. `failureReason` is rendered as a text child, never `dangerouslySetInnerHTML`. No button, link, handler or live region. Every Tailwind class is a full literal string. Makes T001, T002 and T007 pass
+- [ ] T012 Create `web/src/components/patterns/as-of-line.tsx` (depends on T003, T004, T008, T010): export `AsOfLine({ set, later, checkedAt, pollFailed, onTryAgain, announcement = null, sortLabel, onOpenEarlierSets, loading = false })` per DEC-0154: returns `null` when `set` is null (unless `loading`, then a fixed-height skeleton); a `p`/`div` in `text-xs text-muted-foreground` with the set sentence, the start time as a react-router `Link` (`to` from the `SHELL_ROUTES` run-detail entry, `aria-label` *Open the download started {time}*, `font-numeric`), the outcome badge from `set.runOutcome`, *Updating* and *checked {time}* while `later.state === "building"`, the optional *sorted by* clause and *Earlier sets…* `button` (variant ghost, as the delivered buttons are written), and, when `pollFailed`, *Could not check for newer scores.* with a **Try again** `button` calling `onTryAgain`. The `announcement` renders in one `output`/`role="status"` element (`aria-live="polite"`) that contains the announcement and the *Updating* badge only; the checked time and the link sit outside it. No run number or UUID is ever printed. Makes T003, T004 and T008 pass
+- [ ] T013 Create `web/src/screens/research/use-score-set-poll.ts` (depends on T005, T006, T009, T010 and the S1 client): export `useScoreSetPoll({ onNewSet }: { onNewSet: (summary: ClassificationSummary) => void })` returning `{ summary, checkedAt, pollFailed, tryAgain, announcement }` per DEC-0153 and DEC-0155. Behaviour: one `useEffect` that fetches `getClassificationSummary()` on mount, then runs a `setInterval` of `POLL_INTERVAL_MS = 10_000` (exported constant, STD-UI-25, mirroring `HEALTH_POLL_INTERVAL_MS` in `status-region.tsx`) only while `summary?.later?.state === "building"` or `useHealth().health?.most_recent_run?.state` is `requested`, `running` or `cancelling`; the continuation condition is recomputed from the latest summary and health, the timer is cleared when it stops and on unmount, and a `inFlight` ref prevents overlapping reads. A `lastSetId` ref holds the last seen `set?.setId ?? null`; a read whose `set.setId` is non-null and differs from it sets `announcement` from the `copy.ts` builder, calls `onNewSet(summary)` once (through a ref holding the latest callback) and updates the ref; the first read initialises the ref without firing unless it follows a read that had `set` null (the ref distinguishes "not yet read" from "read, no set"). A rejected read sets `pollFailed`, keeps `summary`, stops the timer; `tryAgain` performs one read and resumes. A `mountedRef` guards every state update and callback after unmount. No `fetch` call of its own, no `localStorage`, no module-level state. Makes T005, T006 and T009 pass
+
+**Checkpoint**: Every test in the three files passes; `npx tsc --noEmit` is clean; `git diff --name-status` shows only the three new source files, their tests and any `copy` additions from T010.
+
+---
+
+## Phase 4: Integration
+
+**Purpose**: Show the three files sit beside the delivered code without changing it.
+
+- [ ] T014 Confirm the delivered surface is unchanged (depends on T010 to T013): run the whole existing web suite (`client.*.test.ts`, `render.test.tsx`, the shell and routes tests, the status-region tests, the screen tests, and S1 to S3's tests where present) without editing any of them; `git diff --stat` shows only `not-current-banner.tsx`, `not-current-banner.test.tsx`, `as-of-line.tsx`, `as-of-line.test.tsx`, `use-score-set-poll.ts`, `use-score-set-poll.test.ts`, `copy.ts` and `copy.test.ts` (only if T010 added strings), this story's `-tasks.md`, `-tdd-evidence.yaml` and the story's `status:` line; `dependencies.yaml` does not change. `useHealth` is imported, not modified, so the shell's single 30-second health interval is unchanged (a second `HEALTH_POLL_INTERVAL_MS` interval would appear only if no `HealthProvider` is above the hook; the screen is rendered inside the shell, which supplies one). Nothing imports the three files yet (the first importer is CAP-002-E4-S9; universe detail E1-S8, Compare and Stock evidence later). Confirm `web/src/api/render.test.tsx` still finds no `dangerouslySetInnerHTML`
+
+**Checkpoint**: Only the new files, any `copy` additions and the status line differ from `HEAD`; every delivered test is green.
+
+---
+
+## Phase 5: Polish
+
+**Purpose**: Final refinements and cross-cutting concerns.
+
+- [ ] T015 Run `npm run format` (a check; `biome format .` does not write), fix any report by running `npx biome format --write` on the touched files only, then `npm run lint`, `npx tsc --noEmit`, `npm run test` and `npm run build`. Confirm the built CSS contains the classes the two components use (`bg-status-warning-muted`, `bg-status-critical-muted`, `bg-status-active-muted`, `bg-status-good-muted`, `text-muted-foreground`, `font-numeric`) by building and searching `dist` for one of each, because Tailwind drops a class it cannot see as a literal; write each class as a full literal string. Add short doc comments on each export naming the DAC it serves, in the style of `web/src/app/status-region.tsx`. No behaviour change
+- [ ] T016 After each TDD cycle in T001-T015 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-002-E4-S4-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC). The three cycles are listed in Other Notes
+
+**Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
+
+---
+
+## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-002-E4-S1 | hard | `use-score-set-poll.ts` imports `getClassificationSummary` from `web/src/api/classification-client.ts` and the banner and line import `ClassificationSummary`, `CurrentSet`, `LaterSet` from `classification-types.ts`, all created by S1; existing graph edge `CAP-002-E4-S4: [CAP-002-E4-S1, CAP-002-E4-S2]` |
+| CAP-002-E4-S2 | hard | the three files import `formatTimestamp`, `SHELL_ROUTES` and the banner, line and announcement strings from `web/src/screens/research/format.ts` and `copy.ts`, created by S2; same graph edge |
+| CAP-002-E4-S3 | context | S3 creates `web/src/components/patterns/` and the factor cell; S4 imports nothing from it and a directory is created by its first file, so either order works; no implementation prerequisite |
+| CAP-002-E4-S9 | reverse | S9's results pane composes the banner, line and hook and supplies `onNewSet`; graph edge `CAP-002-E4-S9: [CAP-002-E4-S4, ...]` |
+| CAP-002-E1-S8 | reverse | The universe detail screen reuses the banner and line (UX design 1.2, "universe detail, compare and stock evidence"); not a graph edge here, listed in the E1 story's own entry |
+| CAP-002-E5-S1 | reverse | Compare reuses the banner, line and poll (same UX design 1.2 sentence) |
+
+No new hard edge was found; `dependencies.yaml` already lists `CAP-002-E4-S4: [CAP-002-E4-S1, CAP-002-E4-S2]` and needs no change.
+
+### Task Dependencies
+
+- T001 to T009: no dependencies (three files, written as three TDD cycles)
+- T010: depends on S1 and S2 existing on the branch; precedes T011 to T013
+- T011: depends on T001, T002, T007, T010
+- T012: depends on T003, T004, T008, T010
+- T013: depends on T005, T006, T009, T010
+- T014: depends on T010-T013
+- T015: depends on T014
+- T016: interleaved, runs after every TDD cycle and before the next begins
+
+### Parallel Opportunities
+
+- Phase 2: the three test files are independent and can be assigned to three agents
+- Phase 3: T011, T012 and T013 touch different files and follow T010
+
+---
+
+## Validation Plan
+
+### Constitution-Defined Commands
+- Build: `npm run build`
+- Test: `npm run test` (single file while iterating: `npx vitest run web/src/screens/research/use-score-set-poll.test.ts`)
+- Lint: `npm run lint`
+- Format: `npm run format` (check only)
+- Type check: `npx tsc --noEmit` (named in the story's Technical Details; not in the tech-stack table)
+
+Working directory is the repository root `repos/factorflow-v2/FactorFlow-v2`. The tech-stack Validation Commands table lists `npm run build`, `npm run test`, `npm run test:e2e`; lint and format come from `package.json` and the story. `npm run test:e2e` is not run (no screen exists).
+
+### Story-Specific Validation
+- DAC-E4-S4-1: T001 and T008 show no banner for `later` null, the warning banner for `building`, and *Updating* on the line
+- DAC-E4-S4-2: T002 shows the critical banner with the recorded reason and no button or link
+- DAC-E4-S4-3: T003 shows the line in America/Chicago with the linked start time and no number or UUID
+- DAC-E4-S4-4: T004 and T009 show the banner kept and **Try again** offered after a failed poll
+- DAC-E4-S4-5: T005 shows one announcement and one `onNewSet` per new set, none on repeated reads
+- DAC-E4-S4-6: T006 shows a read on mount, continuation while building with `set` null, and the first completion reaching `onNewSet`
+- Delivered surface: T014's `git diff --stat` shows no modified delivered file
+
+---
+
+## Notes
+
+### Resolved Conflicts
+
+1. **"Offers nothing to retry" (DAC-E4-4, DAC-E4-S4-2) against a **Try again** control (DAC-E4-S4-4).** They concern different failures: a failed classification attempt (the recorded `failureReason`; the scheduler does not retry it, so the banner has no control, STD-UI-2) and a failed status read (a transport failure of the summary call; the owner can re-ask). Established by UX design 1.2 ("Failure", "Error" state) and the test coverage matrix note 7 (`tests/coverage-matrix.md` line 319). The banner has no control; **Try again** lives in the as-of line (design 2.6: "adds *Could not check for newer scores.* with **Try again** under the as-of line"). No gap.
+2. **"A new `set`, `later` null" (design 2.6, UX 1.2) against detecting completion on `setId` alone.** Completion is a `set.setId` change; the extra "later null" condition is a rationale of the common case and would miss a set that completes while another already builds, or the first set arriving. The two coincide in every sequence the tests name. Settled by the precedence ladder (the AC says "a new complete set" and "exactly one", DAC-E4-S4-5); recorded as DEC-0153.
+3. **Banner time as `17:46 CDT` (UX 1.2 examples) against the as-of line's `2026-10-15 17:46 CDT`.** STD-UI-5 requires a time with its zone; S2 ships one formatter. Open Gap 4.
+4. **Banner for a never-scored store.** UX design 1.2 says the never-scored condition "replaces the results body rather than heading it" with "no as-of line", and classification-ui 2.6 renders *Updating* or *Score update failed* inside that body from `later`. Hence the banner and the line render nothing when `set` is null; the body is E4-S9's (DAC-E4-S9-1). Established by the designs; no gap.
+5. **The story cites classification-ui sections 2.3, 2.6, 7.** Section 2.3 holds the cadence, section 2.6 the behaviour and the as-of line text, section 7 the testing; the banner wording is in UX design 1.2. The story's source line should add UX design 1.2 at its next revision. Not a conflict.
+
+### Open Gaps
+
+1. **Hook interface, health seam and new-set trigger. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0153.** No artifact fixes `use-score-set-poll`'s signature or how the host learns of completion. Adopted: `useScoreSetPoll({ onNewSet })` returning `{ summary, checkedAt, pollFailed, tryAgain, announcement }`, health through the delivered `useHealth()`, completion on a `set.setId` change, `onNewSet` once per new set. Follow-up: classification-ui 2.6 should state the hook's contract at its next revision.
+2. **Banner and as-of line props, and what S4 omits. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0154.** `NotCurrentBanner({ set, later })`; `AsOfLine({ set, later, checkedAt, pollFailed, onTryAgain, announcement?, sortLabel?, onOpenEarlierSets?, loading? })`; the dialog is E4-S9's, so *Earlier sets…* is an optional callback and `sortLabel` is optional (omitted on compare and evidence). Follow-up: classification-ui 2.6 should state the props.
+3. **Poll failure stops automatic polling. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0155.** The design adds **Try again** to a failed poll but does not say whether the timer continues. Adopted: stop until **Try again**. Follow-up: classification-ui 2.6 should say so.
+4. **Time format in the banner (derived default, covered by DEC-0154).** Date and time with zone via `formatTimestamp`, unless S2's shipped `copy.ts` supplies a time-only helper, which then governs. T010 decides by reading the shipped file.
+5. **Names of S1 and S2 exports.** Both stories are planned but not coded (`web/src/api/classification-client.ts`, `classification-types.ts`, `web/src/screens/research/` do not exist yet). Names this plan relies on are those the S1 and S2 plans fix (`getClassificationSummary`, `ClassificationSummary`, `CurrentSet`, `LaterSet`, `formatTimestamp`, `SHELL_ROUTES`); every `copy.ts` export name is read from the shipped file at T010.
+
+### Other Notes
+
+- **Cycle plan for T016.** Three TDD cycles, each RED then GREEN, each reviewed before the next: (1) T001, T002, T007 then T010 (strings) and T011 (`not-current-banner.tsx`); (2) T003, T004, T008 then T012 (`as-of-line.tsx`); (3) T005, T006, T009 then T013 (`use-score-set-poll.ts`). Cycle 1 carries any `copy.ts` additions.
+- **Code order.** S4 is coded after S1 and S2 (hard dependencies). The tests mock the S1 client and `useHealth`, so vitest would run without the shipped client, but `npx tsc --noEmit` and the string assertions need both.
+- **Story status.** The story's `status` moves from `todo` to `planning` in this change, as the S1 to S3 plans did; no other story line is touched.
+- **The host reload is not built here.** Dimming the table, reloading page 1 and preserving sort, thresholds, scope, hide-incomplete, search, selection and checked rows by symbol (DEC-0062) are the host's (E4-S6 table, E4-S9 screen) and run from `onNewSet`; this story proves the callback fires once.
+- **Other stories.** CAP-002-E4-S3 shares only the `web/src/components/patterns/` directory (T011 and T012 create it if S3 has not); CAP-002-E1-S8 (universe detail) and CAP-002-E5-S1 (Compare) reuse the banner, line and hook later and add no prerequisite to this plan.
+- **Live regions.** Only the announcement and the *Updating* badge are announced; the 10-second *checked {time}* tick sits outside the region so the owner is not interrupted every 10 seconds (STD-UI-24).
+- **Risk.** The `copy.ts` surface: S2's catalogue may shape the banner and announcement builders differently from T001, T002 and T005's expected strings. T010 reconciles it in one place; the shipped catalogue governs wording and the tests import its builders, pinning only the key phrases.
