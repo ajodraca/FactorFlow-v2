@@ -2,26 +2,30 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-universe-service
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 ai_provenance:
   agent_id: design-decomposition-agent
-  agent_version: "1.0"
+  agent_version: "1.1"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T06:50:00Z
+  timestamp: 2026-10-17T02:35:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "1"
+      version: "3"
     - id: CAP-002-ux-design
-      version: "1"
+      version: "3"
+    - id: CAP-002-specification-review
+      version: "2"
+    - id: STD-UI
+      version: "6"
     - id: tech-stack
       version: "5"
     - id: CAP-001-component-design-instrument-list-service
@@ -35,12 +39,33 @@ ai_provenance:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-17
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
 (DEC-0064 to DEC-0067) and marked **PROVISIONAL**; DEC-0057, which fixed the
 universe semantics in the system design, is honoured, not re-decided.
+
+**Version 2 (2026-10-17)** is the consistency pass the owner directed on
+specification review v2
+(`docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md`)
+and applies three of its findings to this design. FINDING-4 and FINDING-5:
+`create_from_filter` accepts `classification-reader`'s `Thresholds` object, the
+twelve bounds, `hide_incomplete` and the *Find a stock* `symbol` prefix, in
+place of a map of Decimal bounds; `Origin` gains `hide_incomplete`, `symbol` and
+the set's `classification_date`; `filter_provenance` records all of them; and
+the snapshot tests cover `hide_incomplete`, the prefix and the search-then-save
+case (sections 1, 2.3, 2.4, 3, 4, 7, 8, 9, 10, 11, 12, 13). This is the edit
+DEC-0079 (f) assumed unnecessary, as FINDING-4 found; DEC-0085 (PROVISIONAL)
+records it and supersedes DEC-0079 (f). FINDING-15: the pins move
+to system design v3, UX design v3 and STD-UI v6. The resolutions are system
+design v3's (section 3.3 step 15, section 4.2 `POST /api/universes` and
+"Universe operations", section 4.4); what the snapshot includes follows
+DEC-0081 (a threshold excludes only stocks classified on that factor), DEC-0079
+(a) (`hide_incomplete` means input reasons only) and DEC-0076 (one predicate
+for the list and the saved snapshot), none of which this design re-decides.
+Review v2's other findings naming this component, FINDING-9, FINDING-32 and
+FINDING-34, are carried, not fixed, here.
 
 ## 1. Overview
 
@@ -66,7 +91,8 @@ Use cases addressed:
 
 - Build a universe by hand from stocks acquisition covers (AC-1, AC-3, flow 2).
 - Save a reviewed filter result as a universe whose membership never changes
-  afterwards (AC-2, flow 3).
+  afterwards, and whose members are exactly the stocks the results header
+  counted, search prefix and hidden stocks included (AC-2, S03-7, flow 3).
 - Add and remove members, rename, retire, each as appended events, with
   history retained (AC-4, AC-6, flow 6).
 - Refuse an empty universe and the removal of a last member in favour of
@@ -81,9 +107,9 @@ writes universes.
 
 Dependencies: `research-store` migration `0005`; `market-data-store` tables
 `instrument` and `coverage_segment` (migrations `0001`, `0003`); `psycopg` 3;
-`classification-reader` for the threshold evaluation behind the filter
-snapshot (section 2.4); the symbol shape helper of
-`src/factorflow/instruments/symbols.py`, imported, not copied.
+`classification-reader` v3 for the `Thresholds` type and the `evaluate_filter`
+evaluation behind the filter snapshot (sections 2.3 and 2.4); the symbol shape
+helper of `src/factorflow/instruments/symbols.py`, imported, not copied.
 
 ## 2. Design Details
 
@@ -144,7 +170,7 @@ flowchart TB
         INS[("instrument")]
         COV[("coverage_segment")]
     end
-    CR["classification-reader<br/>evaluate_filter(set_id, thresholds)"]
+    CR["classification-reader<br/>Thresholds; evaluate_filter(conn, set_id, thresholds)"]
 
     R --> W
     R --> Q
@@ -170,6 +196,8 @@ from decimal import Decimal
 from uuid import UUID
 
 import psycopg
+
+from factorflow.classification.reader import Thresholds   # the reader's type, not redefined here
 
 UNIVERSE_WRITE_LOCK_KEY = 2002_0001  # one key for every universe write (DEC-0065)
 
@@ -198,7 +226,10 @@ class Member:
 class Origin:
     kind: str                      # by_hand | from_filter
     set_id: UUID | None
-    thresholds: dict[str, Decimal] | None
+    classification_date: date | None   # the set's; the origin line's "on {date}"
+    thresholds: dict[str, Decimal] | None   # the bounds that were set, by query-parameter name
+    hide_incomplete: bool | None   # "stocks with an incomplete score hidden" when true
+    symbol: str | None             # the Find a stock prefix; None when no search was active
 
 
 @dataclass(frozen=True)
@@ -226,7 +257,7 @@ class UniverseEvent:
 
 def create_by_hand(conn: psycopg.Connection, name: str, symbols: list[str]) -> Universe: ...
 def create_from_filter(conn: psycopg.Connection, name: str, set_id: UUID,
-                       thresholds: dict[str, Decimal]) -> Universe: ...
+                       thresholds: Thresholds) -> Universe: ...
 def rename(conn: psycopg.Connection, universe_id: UUID, name: str) -> Universe: ...
 def add_members(conn: psycopg.Connection, universe_id: UUID,
                 symbols: list[str]) -> tuple[list[str], list[str]]:      # added, already_member
@@ -251,14 +282,28 @@ against the instrument symbol shape through
 `factorflow.instruments.symbols`, the same helper CAP-001's service uses, so
 the two never disagree.
 
+`Thresholds` is `classification-reader`'s frozen dataclass (its section 2.3):
+the twelve optional bounds `{factor}_score_min`/`_max` and
+`{factor}_percentile_min`/`_max`, `hide_incomplete` (default false) and
+`symbol: str | None`, the *Find a stock* prefix, which classification-reader v3
+adds (review v2 FINDING-5). This module imports the type and defines no filter
+type of its own, so the list query, the save and the provenance are one object
+(DEC-0076, DEC-0085, superseding DEC-0079 (f); system design v3 section 3.3
+step 15). The API model
+validates the object before it reaches this module; `Origin` is its stored
+form read back, flattened beside the `set_id` and the set's
+`classification_date` (system design v3 section 4.2 `POST /api/universes`).
+
 ### 2.4 Write flow
 
 The flowchart below is system design 3.2 made concrete for this module: one
 shape for all six operations, with the checks in the order that makes each
 refusal name exactly one cause. The write lock comes first so that two
 concurrent creates cannot both find a name free. The filter path calls
-`classification-reader.evaluate_filter` inside the same transaction so the
-membership saved is the result against the named set, and refuses when that
+`classification-reader.evaluate_filter` inside the same transaction with the
+whole `Thresholds` the owner reviewed, bounds, `hide_incomplete` and the search
+prefix alike, so the membership saved is the result against the named set and
+exactly the stocks the results header counted (S03-7), and refuses when that
 set is no longer the current complete set (AC-2, DEC-0057). The last-member
 check is a replay of current membership after the proposed removal. The
 expected outcome is one transaction of appended events per successful call
@@ -268,7 +313,7 @@ and nothing written on any refusal.
 flowchart TD
     A["1. BEGIN; pg_advisory_xact_lock(UNIVERSE_WRITE_LOCK_KEY)"] --> B["2. Normalise symbols, trim name; shape failures raise ValueError (422)"]
     B --> C{"3. create_from_filter?"}
-    C -->|yes| C1["3a. classification-reader.evaluate_filter(set_id, thresholds)<br/>current complete set != set_id: ClassificationSetChanged (409)<br/>no match: EmptyUniverse (422)"]
+    C -->|yes| C1["3a. classification-reader.evaluate_filter(conn, set_id, thresholds)<br/>bounds, hide_incomplete, symbol prefix, one predicate with the list<br/>current complete set != set_id: ClassificationSetChanged (409)<br/>no match: EmptyUniverse (422)"]
     C1 --> D
     C -->|no| D{"4. Every symbol covered?<br/>coverage_check.sql"}
     D -->|no| D1["4a. InstrumentNotAcquired(all uncovered) (409); nothing written"]
@@ -288,7 +333,7 @@ Event rows per operation:
 | Operation | Events appended, in `event_id` order |
 |-----------|--------------------------------------|
 | `create_by_hand` | `created` (name), then one `member_added` per distinct symbol |
-| `create_from_filter` | `created` (name, `filter_provenance = {"set_id", "thresholds"}`), then one `member_added` per matching instrument, in symbol order |
+| `create_from_filter` | `created` (name, `filter_provenance = {"set_id", "classification_date", "thresholds", "hide_incomplete", "symbol"}`), then one `member_added` per matching instrument, in symbol order |
 | `rename` | `renamed` (name) |
 | `add_members` | one `member_added` per symbol not already a member; symbols already members are returned as `already_member`, not errored (AC-4) |
 | `remove_member` | one `member_removed`; `NotAMember` when the symbol is not a current member |
@@ -297,6 +342,32 @@ Event rows per operation:
 A symbol that acquisition covers but whose `instrument.lifecycle` is `retired`
 may be added and remains a member (AC-15, system design 3.2 step 10); the
 service never consults the instrument lifecycle for a write, only coverage.
+
+`filter_provenance` is the filter as evaluated and the set it was evaluated
+against, written once on the `created` event:
+
+```json
+{"set_id": "6f1c...", "classification_date": "2026-10-15",
+ "thresholds": {"value_percentile_min": 80, "momentum_score_min": 0},
+ "hide_incomplete": true, "symbol": "AA"}
+```
+
+`thresholds` holds only the bounds that were set, under the query-parameter
+names of `GET /api/classifications`; `hide_incomplete` is always present;
+`symbol` is null when no search was active; `classification_date` is read
+from the named set inside the same transaction, which step 3a has just
+confirmed is the current complete set. The origin line, *saved from a filter on
+{date}: {bounds}; search "{prefix}"; stocks with an incomplete score hidden*,
+each clause only when it applies, is rendered from this object alone (UX design
+v3 section 1.3; system design v3 section 4.4), and `Origin` is its typed form.
+What the snapshot excludes is the reader's rule, not this module's: a threshold
+excludes only stocks classified on that factor that fail the bound, so a stock
+incomplete on a thresholded factor is saved unless `hide_incomplete` is on
+(DEC-0081); `hide_incomplete` removes stocks whose `not_classified` reason on
+any factor is `input_missing`, `input_outdated` or `input_not_computable`,
+never `not_enough_stocks` and never `retired` (DEC-0079 (a)); the prefix keeps
+the symbols that start with it. This module passes the object through and
+records it (review v2 FINDING-4, FINDING-5).
 
 ### 2.5 Replay
 
@@ -369,8 +440,14 @@ interface learns of a write from the response it receives.
   trimming; a retired universe's name may be reused (DEC-0057).
 - **The filter snapshot is evaluated on the server against the named set**
   (constraint 14, DEC-0057), inside the writing transaction, through
-  `classification-reader`, so the saved members equal what the owner reviewed
-  and the two components share one definition of a threshold match.
+  `classification-reader`, with the whole filter the owner reviewed, bounds,
+  `hide_incomplete` and the *Find a stock* prefix (system design v3 section
+  3.3 step 15, section 4.2), so the saved members equal what the owner
+  reviewed and the two components share one definition of a threshold match.
+- **The filter type is the reader's.** `Thresholds` is imported from
+  `classification-reader`; this module defines no bounds type and applies no
+  filter predicate of its own, so what a saved universe contains is by
+  construction what the list showed (DEC-0076; review v2 FINDING-4).
 - **As-of membership is end-of-day in America/Chicago** (DEC-0065,
   PROVISIONAL); the service accepts a date, never a timestamp.
 - **Bounds are the first capability's.** At most `MAX_SYMBOLS_PER_REQUEST`
@@ -390,9 +467,11 @@ interface learns of a write from the response it receives.
 - **Input validation (SEC-INP-001).** Symbols are validated against
   `^[A-Z][A-Z0-9.-]{0,15}$`, the shape migration `0001` enforces, after upper
   casing; names are trimmed and non-empty; list sizes are bounded at 1000;
-  `as_of` is a parsed `date`; `lifecycle` filters are an enumeration;
-  thresholds are `Decimal` values validated by the API model before reaching
-  this module. The length bound on names is pending the owner (section 14).
+  `as_of` is a parsed `date`; `lifecycle` filters are an enumeration; the
+  filter is the reader's `Thresholds`, its bounds `Decimal` values in range,
+  `hide_incomplete` a boolean and `symbol` a prefix of the symbol shape, all
+  validated by the API model before reaching this module. The length bound on
+  names is pending the owner (section 14).
 - **Injection (SEC-INP-002).** Every statement is parameterised; symbol lists
   are passed as a `text[]` parameter to `unnest`, never interpolated. No
   dynamic SQL exists in this module. `tests/unit/test_universe_sql_safety.py`
@@ -470,7 +549,9 @@ the rules are exercised without a container.
 | Name in use among active universes | `tests/integration/test_universe_create.py` | Creating a second active universe with the same trimmed name raises `UniverseNameInUse`; after retiring the first, the name is accepted (DEC-0057) |
 | Concurrent creates cannot share a name | `tests/integration/test_universe_create.py` | Two connections creating the same name serialise on the lock and exactly one succeeds (DEC-0065) |
 | A retired instrument may be a member | `tests/integration/test_universe_create.py` | A covered, retired symbol is accepted and replays with `lifecycle: retired` (AC-15) |
-| Filter snapshot equals the reviewed result | `tests/integration/test_universe_filter_snapshot.py` | Members equal `evaluate_filter`'s result for the named set; `filter_provenance` carries thresholds and `set_id` (AC-2) |
+| Filter snapshot equals the reviewed result | `tests/integration/test_universe_filter_snapshot.py` | Members equal `evaluate_filter`'s result for the named set and the same `Thresholds`; `filter_provenance` carries the bounds, `hide_incomplete`, `symbol`, `set_id` and the set's `classification_date`; `get_universe` returns an `Origin` with the same values (AC-2, S03-7) |
+| Hidden stocks are not saved | `tests/integration/test_universe_filter_snapshot.py` | A stock incomplete on one factor (an input reason) that the bounds admit is a member with `hide_incomplete` false and is not a member with it true; `filter_provenance.hide_incomplete` and `Origin.hide_incomplete` read back the value used (DEC-0079 (a), DEC-0081; review v2 FINDING-4) |
+| Search then save | `tests/integration/test_universe_filter_snapshot.py` | With `symbol` `"AA"`, the members are exactly the matching stocks whose symbol starts with `AA` and `filter_provenance.symbol` is `"AA"`; with no prefix the members are every matching stock and `symbol` is null (S03-7; review v2 FINDING-5) |
 | Snapshot refused when the set changed | `tests/integration/test_universe_filter_snapshot.py` | With a newer complete set, the named `set_id` raises `ClassificationSetChanged`; nothing written (AC-2, constraint 14) |
 | Snapshot of nothing is refused | `tests/integration/test_universe_filter_snapshot.py` | Thresholds matching no stock raise `EmptyUniverse` (AC-5, flow 3 step 5) |
 | Membership does not follow later classifications | `tests/integration/test_universe_filter_snapshot.py` | After a new set changes which stocks match, the universe's members are unchanged (AC-2) |
@@ -496,8 +577,10 @@ the rules are exercised without a container.
 4. A create or rename to a name held by an active universe raises
    `UniverseNameInUse`; the name of a retired universe may be reused.
 5. A filter snapshot against the current complete set saves exactly its
-   matching stocks with the thresholds and `set_id` as provenance, and raises
-   `ClassificationSetChanged` when that set is no longer current.
+   matching stocks, bounds, `hide_incomplete` and search prefix applied, with
+   the bounds, `hide_incomplete`, `symbol`, `set_id` and `classification_date`
+   as provenance, and raises `ClassificationSetChanged` when that set is no
+   longer current.
 6. Renaming appends one event and changes no identity, membership or history.
 7. Removing a member keeps both membership events; removing the sole member
    raises `LastMember`.
@@ -515,9 +598,9 @@ the rules are exercised without a container.
 
 - **Build a universe by hand** (flow 2): `create_by_hand`; step 4's refusal is
   `InstrumentNotAcquired`.
-- **Build a universe from a factor filter** (flow 3): `create_from_filter`;
-  step 5's refusal is `EmptyUniverse`; step 4's fixed membership is the
-  snapshot.
+- **Build a universe from a factor filter** (flow 3): `create_from_filter`
+  with the `Thresholds` the list was read with; step 5's refusal is
+  `EmptyUniverse`; step 4's fixed membership is the snapshot.
 - **Compare stocks and inspect the evidence** (flow 4 step 1): `get_universe`
   supplies the members `classification-reader` scopes to.
 - **Maintain universes over time** (flow 6): `add_members`, `remove_member`,
@@ -535,8 +618,11 @@ request is refused when any symbol is uncovered, and the exception carries
 every such symbol so the dialog can name them all (UX design section 1.3);
 `already_member` is returned, not raised, so the interface reports it in a
 polite line rather than an error (section 1.4); and `Origin` is returned on
-every `get_universe` so the origin line needs no walk of the event log
-(section 1.3, DEC-0065). No internationalization.
+every `get_universe` so the origin line needs no walk of the event log and
+carries everything the line says, *saved from a filter on {classification_date}:
+{bounds}; search "{symbol}"; stocks with an incomplete score hidden*, each
+clause only when it applies (section 1.3, DEC-0065; system design v3 section
+4.2). No internationalization.
 
 ## 11. API Endpoints
 
@@ -547,7 +633,7 @@ the SQL interfaces of `research-store` and `market-data-store`.
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
 | `create_by_hand` | Python call | in-process | `name`, `symbols` | `Universe` | raises `InstrumentNotAcquired`, `EmptyUniverse`, `UniverseNameInUse` |
-| `create_from_filter` | Python call | in-process | `name`, `set_id`, `thresholds` | `Universe` | raises `ClassificationSetChanged`, `EmptyUniverse`, `UniverseNameInUse` |
+| `create_from_filter` | Python call | in-process | `name`, `set_id`, `thresholds` (the reader's `Thresholds`: bounds, `hide_incomplete`, `symbol` prefix) | `Universe` with `origin` | raises `ClassificationSetChanged`, `EmptyUniverse`, `UniverseNameInUse` |
 | `rename` | Python call | in-process | `universe_id`, `name` | `Universe` | raises `UniverseNotFound`, `UniverseRetired`, `UniverseNameInUse` |
 | `add_members` | Python call | in-process | `universe_id`, `symbols` | `(added, already_member)` | raises `UniverseNotFound`, `UniverseRetired`, `InstrumentNotAcquired` |
 | `remove_member` | Python call | in-process | `universe_id`, `symbol` | `removed_at` | raises `UniverseNotFound`, `UniverseRetired`, `NotAMember`, `LastMember` |
@@ -563,20 +649,22 @@ the SQL interfaces of `research-store` and `market-data-store`.
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | AC-1 to AC-6, AC-15; flows 2, 3, 6 | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v1 | Section 3.2 universe writes; 4.2 universe operations; constraints 13, 14; section 8 question 2 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
-| UX design | CAP-002 UX design v1 | Sections 1.3, 1.4: refusal wording, already-member, origin line, as-of before creation | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-design.md` |
+| System design | CAP-002 system design v3 | Section 3.2 universe writes; 3.3 step 15, the filter as one object (bounds, `hide_incomplete`, `symbol` prefix) and its three rules; 4.2 `POST /api/universes` and universe operations; 4.4 `filter_provenance`; constraints 13, 14; section 8 question 2 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| UX design | CAP-002 UX design v3 | Sections 1.3, 1.4: refusal wording, already-member, the origin line's clauses (bounds, search prefix, hidden stocks), as-of before creation | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-design.md` |
+| Specification review | CAP-002 specification review v2 | FINDING-4, FINDING-5 and FINDING-15 applied in version 2; FINDING-9, FINDING-32 and FINDING-34 carried | `docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md` |
+| Standard | STD-UI v6 | Display labels in owner-facing text (STD-UI-1: *stock*, *Incomplete*); America/Chicago dates (STD-UI-5) | `docs/constitution/standards/ui-conventions.md` |
 | Component design | CAP-001 instrument list service | The domain-module shape, symbol normalisation, per-symbol disposition this design deliberately departs from | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-instrument-list-service.md` |
 | Component design | CAP-002 research store v1 | Migration `0005`, replay indexes | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-research-store.md` |
-| Component design | CAP-002 classification reader v1 | `evaluate_filter` | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-classification-reader.md` |
+| Component design | CAP-002 classification reader v3 | `Thresholds` (twelve bounds, `hide_incomplete`, `symbol` prefix) and `evaluate_filter`, the one filter predicate | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-classification-reader.md` |
 | Implemented code | `src/factorflow/instruments/symbols.py`, `src/factorflow/runs/queries.py` | Symbol shape helper; the versioned opaque cursor contract (owner, 2026-09-17) | `src/factorflow/` |
-| Decision records | DEC-0057, DEC-0065 | Universe semantics; replay semantics | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decision records | DEC-0057, DEC-0065, DEC-0076, DEC-0079, DEC-0081 | Universe semantics; replay semantics; one predicate for the list and the snapshot; `hide_incomplete` as input reasons only, `Thresholds` as the shared object; a threshold excludes only stocks classified on that factor | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
 | AC-1 | Coverage check; `409 instrument_not_acquired` refusing whole | `coverage_check.sql` over the batch; `InstrumentNotAcquired` with every symbol | 2.4, 2.5 |
-| AC-2 | Server-side snapshot; `409 classification_set_changed`; `filter_provenance` | `create_from_filter` calling `evaluate_filter` in the writing transaction; provenance on `created` | 2.4 |
+| AC-2 | Server-side snapshot with the filter as one object (bounds, `hide_incomplete`, `symbol` prefix); `409 classification_set_changed`; `filter_provenance` with `set_id` and `classification_date` | `create_from_filter` with the reader's `Thresholds`, calling `evaluate_filter` in the writing transaction; provenance on `created`; `Origin` read back | 2.3, 2.4 |
 | AC-3 | Universe identity; member events without exclusivity | `create_by_hand` per universe; no cross-universe check on members | 2.4 |
 | AC-4 | `PATCH`, members add and remove, retire; `renamed` changes nothing else | `rename`, `add_members`, `remove_member`, `retire`; `already_member` | 2.4 |
 | AC-5 | `422 empty_universe`, `409 last_member` | `EmptyUniverse`; `LastMember` by replay after the proposed removal | 2.4 |

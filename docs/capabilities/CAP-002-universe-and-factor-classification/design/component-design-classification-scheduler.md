@@ -2,24 +2,28 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-classification-scheduler
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T07:10:00Z
+  timestamp: 2026-10-17T02:35:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "1"
+      version: "3"
+    - id: CAP-002-specification-review
+      version: "2"
+    - id: STD-UI
+      version: "6"
     - id: tech-stack
       version: "5"
     - id: CAP-001-component-design-runtime-config
@@ -35,7 +39,7 @@ ai_provenance:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-17
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
@@ -44,6 +48,41 @@ scheduler in the application container at a 5-second poll, is honoured, not
 re-decided. One reliability gap in the system design is surfaced in section
 14 for the owner's assessment (AGT-SPEC-002), with a provisional mitigation
 recorded as DEC-0067.
+
+**Version 2 (2026-10-17)** is the consistency pass the owner directed on
+specification review v2 (`specifications-review-report-v2.md`), and it applies
+one finding to this design: FINDING-15, which found that this v1 still pinned
+system design v1 and STD-UI v4 after both moved. The pins now name system
+design v3 and STD-UI v6, and add the review as a source. Nothing
+else in the design changes, because none of the changes in system design v2 and
+v3 lands on this component. Version 2 of the system design (DEC-0068 to
+DEC-0071) aligned the interface half with the product UX blueprint: the
+Research screens and routes (Sections 2, 4.1, 4.2, question 4), the `later`
+block and the summary read the interface renders from, and the compare bound
+(Sections 3.3 and 4.2); all of that is `classification-ui`, `classification-api`
+and `classification-reader`. Version 3 (DEC-0081 to DEC-0084) changed what a
+threshold excludes (3.3 step 15), the one `set` + `later` shape on both reads
+(3.3, 4.2), `hide_incomplete` and the *Find a stock* prefix in the saved filter
+and its provenance (3.2, 3.3, 4.2, 4.4), the download named by its start time
+(3.3, 4.2, question 11) and the complete edit list for delivered files
+(question 4); each of those lands on the reader, the API, the UI or
+`universe-service`, and none touches a row this scheduler reads or writes. The
+rows this design relies on are unchanged: Section 3.1 steps 4 to 7a and 19 to 31
+(only the interface steps 15 to 18 were rewritten), constraints 1, 10 and 17,
+the `Qualifying-run read`, `Set claim` and `Set build` rows of Section 4.2, and
+the `classification_set` row of Section 4.4 (this component inserts the set;
+`factor-engine` transitions it). The `later` block the reader serves is read
+from the `classification_set` rows this component inserts, in the shape it
+already inserts them, so the claim, the 5-second poll and the interrupted-set
+reclaim (DEC-0067) are unaffected. STD-UI v5 and v6 changed display labels; the
+only owner-facing string this component writes is the fixed reclaim
+`failure_reason`, and it uses none of the relabelled terms (*stock*, *download*,
+*Incomplete*, *score*). Review v2's other findings naming
+this component, FINDING-1 (the first-deployment backlog), FINDING-19
+(`SEC-ENC-001` bookkeeping in Section 4), FINDING-20 (the build timeout equals
+the budget) and FINDING-34 (provenance timestamp), are carried, not fixed:
+FINDING-1 is the owner's decision, and the rest of the design is as version 1
+left it.
 
 ## 1. Overview
 
@@ -492,10 +531,10 @@ interface of system design section 4.2 and consumes `Set build`,
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | AC-10, AC-11, AC-20; section 2 refresh rules | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v1 | Section 3.1 steps 4 to 7a, 19 to 31; constraints 1, 10, 17; section 4.4 set states | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| System design | CAP-002 system design v3 | Section 3.1 steps 4 to 7a, 19 to 31; constraints 1, 10, 17; section 4.4 set states | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
 | Component design | CAP-001 runtime config v14 | Sections 2.2, 2.2a settings conventions and the 5-second idle poll; 2.8.4 rollback | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Component design | CAP-001 run journal | Terminal states; section 2.6 reclaim sweep, the precedent for reclaiming a dead process's claim | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-run-journal.md` |
-| Component design | CAP-002 factor engine v1 | `build` contract | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-factor-engine.md` |
+| Component design | CAP-002 factor engine v2 | `build` contract | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-factor-engine.md` |
 | Implemented code | `src/factorflow/api/app.py` lines 104 to 203 | The reclaim loop and lifespan this design mirrors | `src/factorflow/api/app.py` |
 | Implemented code | `src/factorflow/config/settings.py` | `_EnvNamedSettings`, `RunSettings` | `src/factorflow/config/settings.py` |
 | Implemented tests | `tests/unit/test_api_reclaim_lifespan.py` | The loop-testing pattern reused | `tests/unit/` |

@@ -2,26 +2,30 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-research-store
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 ai_provenance:
   agent_id: design-decomposition-agent
-  agent_version: "1.0"
+  agent_version: "1.1"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T06:40:00Z
+  timestamp: 2026-10-17T02:35:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "1"
+      version: "3"
     - id: CAP-002-ux-design
-      version: "1"
+      version: "3"
+    - id: CAP-002-specification-review
+      version: "2"
+    - id: STD-UI
+      version: "6"
     - id: tech-stack
       version: "5"
     - id: CAP-001-component-design-market-data-store
@@ -35,13 +39,29 @@ ai_provenance:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-17
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
 (DEC-0064 to DEC-0067) and marked **PROVISIONAL**; the system design's own
 decisions (DEC-0052 to DEC-0058) and the UX decisions (DEC-0059 to DEC-0063)
 are honoured, not re-decided.
+
+**Version 2 (2026-10-17)** is the consistency pass the owner directed on
+specification review v2
+(`docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md`).
+It applies FINDING-15, re-pinning this design to system design v3, UX design v3
+and STD-UI v6, and FINDING-4 in the one place it names this component: the
+`COMMENT ON COLUMN universe_event.filter_provenance` in section 2.3, and the
+sentence beneath it, now name what the saved filter records, the twelve
+threshold bounds, `hide_incomplete`, the *Find a stock* `symbol` prefix, the
+`set_id` and the set's `classification_date` (system design v3 section 4.2
+`POST /api/universes`, section 4.4; DEC-0076, DEC-0085, which supersedes
+DEC-0079 (f)). No table, column,
+constraint, index or test changes: the column was already `jsonb`, so the
+richer object is a content change in `universe-service`, not a schema change.
+Review v2's other findings naming this component, FINDING-1, FINDING-17,
+FINDING-19, FINDING-33 and FINDING-34, are carried, not fixed, here.
 
 ## 1. Overview
 
@@ -202,7 +222,10 @@ CREATE UNIQUE INDEX idx_universe_event_single_retired
 COMMENT ON COLUMN universe_event.recorded_on IS
     'The America/Chicago date the event was recorded; the as-of grain for AC-6 (DEC-0065).';
 COMMENT ON COLUMN universe_event.filter_provenance IS
-    'Only on a created event taken from a filter: {"set_id": uuid, "thresholds": {...}} (AC-2).';
+    'Only on a created event taken from a filter: the filter as evaluated and the set it was evaluated against, '
+    '{"set_id": uuid, "classification_date": date, "thresholds": {the twelve bounds that were set, '
+    '{factor}_score_min/_max and {factor}_percentile_min/_max, by query-parameter name}, '
+    '"hide_incomplete": bool, "symbol": text or null (the Find a stock prefix)} (AC-2, S03-7).';
 ```
 
 Column meanings follow system design section 4.4. `universe` holds identity
@@ -210,11 +233,17 @@ only (DEC-0057). `event_id` is the replay order and the cursor for the events
 read (DEC-0065, PROVISIONAL): it is monotonic within the single writer and
 cannot tie, where `recorded_at` can. `recorded_on` is stamped by the same rule
 as `observed_on` in migration `0002` (STD-UI-5) and is the grain at which AC-6's
-"on any past date" is answered. `filter_provenance` carries the thresholds and
-`set_id` of the filter a universe was saved from, as `{"set_id": "...",
-"thresholds": {"value_percentile_min": 80, ...}}`, using the query-parameter
-names of `GET /api/classifications` so the provenance reads back with the same
-vocabulary the owner used. Two partial unique indexes make a second `created`
+"on any past date" is answered. `filter_provenance` carries the whole filter a
+universe was saved from and the set it was evaluated against, as
+`{"set_id": "...", "classification_date": "2026-10-15", "thresholds":
+{"value_percentile_min": 80, ...}, "hide_incomplete": true, "symbol": "AA"}`:
+the bounds that were set, under the query-parameter names of
+`GET /api/classifications` so the provenance reads back with the same
+vocabulary the owner used, `hide_incomplete` always, `symbol` (the *Find a
+stock* prefix) null when no search was active, and the set's
+`classification_date` so the origin line is rendered from the event alone
+(system design v3 section 4.4; `universe-service` section 2.4 writes it;
+review v2 FINDING-4, FINDING-5). Two partial unique indexes make a second `created`
 or `retired` event for one universe impossible by shape. The name's maximum
 length is the owner's open question (system design section 8 question 2) and
 is enforced at the API boundary once known; this migration adds no length
@@ -686,7 +715,9 @@ system design section 4.2 names, consumed in-process.
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | AC-3 to AC-6, AC-9, AC-10, AC-12, AC-14, AC-15, AC-17 to AC-20, AC-23; section 5.3 point-in-time constraint | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v1 | Section 4.4 persistent data and migration strategy; constraints 2, 3, 10, 20; section 8 questions 2 and 8 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| System design | CAP-002 system design v3 | Section 4.4 persistent data and migration strategy, `filter_provenance`; 4.2 `POST /api/universes`; constraints 2, 3, 10, 20; section 8 questions 2 and 8 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| Specification review | CAP-002 specification review v2 | FINDING-4 (provenance comment) and FINDING-15 applied in version 2; FINDING-1, FINDING-17, FINDING-19, FINDING-33 and FINDING-34 carried | `docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md` |
+| Standard | STD-UI v6 | America/Chicago dates (STD-UI-5) for `recorded_on` and `classification_date`; product vocabulary in `reason_detail` (STD-UI-1) | `docs/constitution/standards/ui-conventions.md` |
 | Component design | CAP-001 market data store v9 | Schema conventions, append-only enforcement (2.5), sizing (5), rollback (6) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Component design | CAP-001 runtime config v14 | Section 2.8.4 upgrade, backup and rollback | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-runtime-config.md` |
 | Implemented schema | Migrations `0001` to `0004` | The `instrument` and `acquisition_run` tables referenced here; the partial-unique-index device | `src/factorflow/db/migrations/` |

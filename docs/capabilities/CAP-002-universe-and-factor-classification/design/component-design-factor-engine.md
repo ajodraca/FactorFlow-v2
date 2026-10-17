@@ -2,24 +2,28 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-factor-engine
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T07:00:00Z
+  timestamp: 2026-10-17T02:35:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "1"
+      version: "3"
+    - id: CAP-002-specification-review
+      version: "2"
+    - id: STD-UI
+      version: "6"
     - id: tech-stack
       version: "5"
     - id: CAP-001-component-design-market-data-store
@@ -35,7 +39,7 @@ ai_provenance:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-17
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
@@ -44,6 +48,46 @@ DEC-0052 (SQL window functions), DEC-0053 (composite construction), DEC-0055
 (input derivation) and DEC-0056 (backfill rule) are honoured, not re-decided.
 One owner question blocks part of this component and is carried, not answered:
 the Massive payload keys for the seven line items (section 14).
+
+**Version 2 (2026-10-17)** is the consistency pass the owner directed on
+specification review v2 (`specifications-review-report-v2.md`), and it applies
+one finding to this design: FINDING-15, which found that this v1 still pinned
+system design v1 and STD-UI v4 after both moved. The pins now name system
+design v3 and STD-UI v6, and add the review as a source. Nothing
+else in the design changes, because none of the changes in system design v2 and
+v3 lands on this component. Version 2 of the system design (DEC-0068 to
+DEC-0071) aligned the interface half with the product UX blueprint: the
+Research screens and routes (Sections 2, 4.1, 4.2, question 4), the `later`
+block and the summary read the interface renders from, and the compare bound
+(Sections 3.3 and 4.2); all of that is `classification-ui`, `classification-api`
+and `classification-reader`. Version 3 (DEC-0081 to DEC-0084) changed what a
+threshold excludes (3.3 step 15), the one `set` + `later` shape on both reads
+(3.3, 4.2), `hide_incomplete` and the *Find a stock* prefix in the saved filter
+and its provenance (3.2, 3.3, 4.2, 4.4), the download named by its start time
+(3.3, 4.2, question 11) and the complete edit list for delivered files
+(question 4); each of those lands on the reader, the API, the UI or
+`universe-service`. The reader applies the new threshold and `hide_incomplete`
+rules to `factor_classification` rows exactly as this component already writes
+them (`classified` and `not_classified`, with `reason_code` in `input_missing`,
+`input_outdated`, `input_not_computable`, `not_enough_stocks`, `retired`), so
+no row, status or reason this component appends changes. The rows this design
+relies on are unchanged: Section 3.1 steps 8 to 14b and 22 to 31 (only the
+interface steps 15 to 18 were rewritten), constraints 2 and 4 to 10, assumptions 1 to 6
+of Section 6 (7 and 8 are new and concern the shell and the summary read),
+questions 1, 6, 7 and 9 of Section 8, the `Observation read`, `Set build` and
+`Classification append` rows of Section 4.2, and the `classification_set_factor`,
+`factor_input` and `factor_classification` rows of Section 4.4. STD-UI v5 and
+v6 changed display labels (*stock*, *download*, *Incomplete*, *score* split from
+*percentile* and *standardised score*); the owner-facing strings this component
+writes (`reason_detail`, `failure_reason`, `detail`) already use that vocabulary
+or are carried by FINDING-11 below. Review v2's other findings naming this
+component, FINDING-1 (first-deployment backlog, Section 6), FINDING-2 (the
+Massive line-item mapping), FINDING-11 (the failure reason is the exception
+class and message), FINDING-17 (append-only scan scope), FINDING-19
+(`SEC-ENC-001` bookkeeping in Section 4), FINDING-21 (arithmetic definitions),
+FINDING-30 (`hypothesis` is not in `tech-stack.md` v5) and FINDING-34
+(provenance timestamp), are carried, not fixed: FINDING-1 and FINDING-2 are the
+owner's, and the rest of the design is as version 1 left it.
 
 ## 1. Overview
 
@@ -729,10 +773,10 @@ of system design section 4.2 and consumes the SQL interfaces of
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | Section 2 factor definitions; AC-7 to AC-15, AC-17, AC-19, AC-23; section 6 assumptions | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v1 | Section 3.1 steps 8 to 14b, 22 to 31; constraints 2, 4 to 10; section 6; section 8 questions 1, 6, 7, 9 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| System design | CAP-002 system design v3 | Section 3.1 steps 8 to 14b, 22 to 31; constraints 2, 4 to 10; section 6; section 8 questions 1, 6, 7, 9 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
 | Component design | CAP-001 market data store v9 | Table shapes, sizing basis, append-only enforcement | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Component design | CAP-001 massive client | Section 2.5 statement and corporate-action fields; line items not enumerated | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-massive-client.md` |
-| Component design | CAP-002 research store v1 | Migration `0006` | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-research-store.md` |
+| Component design | CAP-002 research store v2 | Migration `0006` | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-research-store.md` |
 | Implemented code | `src/factorflow/ingestion/writer.py`, `src/factorflow/ingestion/massive/models.py` | `fiscal_period` derivation; payload shapes for statements and actions | `src/factorflow/ingestion/` |
 | Implemented schema | Migrations `0001` to `0003` | Columns read | `src/factorflow/db/migrations/` |
 | Decision records | DEC-0001, DEC-0052, DEC-0053, DEC-0055, DEC-0056, DEC-0066, DEC-0067 | Unadjusted bars; SQL arithmetic; composite; inputs; backfill; engine mechanics; timeout | `projects/factorflow-v2/decisions/` (harness repository) |

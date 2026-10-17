@@ -2,28 +2,30 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-classification-api
 artifact_type: component-design
-artifact_version: 2
+artifact_version: 3
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T23:55:00Z
+  timestamp: 2026-10-17T02:45:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
+      version: "3"
+    - id: CAP-002-specification-review
       version: "2"
     - id: CAP-002-ux-brief
-      version: "2"
+      version: "3"
     - id: CAP-002-ux-design
-      version: "2"
+      version: "3"
     - id: PRODUCT-UX-S03
       version: "4, approved 2026-10-16"
     - id: tech-stack
@@ -39,7 +41,7 @@ ai_provenance:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-17
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/` and
@@ -61,6 +63,36 @@ step 15). Write semantics, the error envelope, the bounds the first capability
 fixed and the edit to `app.py` are unchanged. The read-side mechanics the
 system design leaves to the component designs are DEC-0079 (PROVISIONAL).
 
+**Version 3 (2026-10-17)** is the consistency pass the owner directed on
+specification review v2
+(`docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md`)
+and applies seven of its findings to this design, each exactly as the system
+design v3 (pinned here) resolved it: FINDING-3 (`hide_incomplete` excludes
+input reasons only and the unscoped list is the active roster, now stated by
+the system design, which supersedes DEC-0071 (1) on this point by DEC-0079 (a)
+and (b); sections 3, 14), FINDING-4 (the `filter` reaches `universe-service`
+v2 as the reader's `Thresholds` object and `origin` carries `hide_incomplete`,
+`symbol` and `classification_date`; sections 2.4, 2.6, 2.7; DEC-0085),
+FINDING-5 (`Thresholds` gains the *Find a stock* `symbol` prefix; the save
+posts it; tests gain the search-then-save case; sections 2.4, 2.7, 7, 10),
+FINDING-6 (a threshold excludes only stocks classified on that factor that
+fail it; sections 3, 7; DEC-0081), FINDING-7 (one `set` plus `later` shape on
+`ClassificationListResponse` and `ClassificationSummaryResponse`,
+`not_current` true exactly when `later` is non-null; sections 2.7, 5, 7;
+DEC-0082), FINDING-8 (`run_started_at` on every set block and set row; the
+download named by its start time, never a number or the raw `run_id`;
+sections 2.7, 10, 14; DEC-0083) and FINDING-12 (this component's two delivered
+files, `app.py` and `tests/unit/test_api_no_secrets.py`, named from the one
+list the owner confirms; sections 1, 2.1, 3, 4, 7; DEC-0084). The records are
+the system design v3's and are cited, not re-decided: DEC-0081 follows from
+the approved S03-1 and supersedes the threshold-exclusion statements of
+DEC-0071 and DEC-0076; DEC-0082, DEC-0083 (superseding DEC-0079 (e)),
+DEC-0084 (superseding DEC-0069's "nothing else in the shell is edited" and
+extending DEC-0064) and DEC-0085 (the filter as one object end to end,
+superseding DEC-0079 (f)) are **PROVISIONAL**. Review v2's other findings
+naming this design (FINDING-13, FINDING-19, FINDING-22, FINDING-25) are
+carried, not fixed. This version records no decision of its own.
+
 ## 1. Overview
 
 The classification API is the pair of FastAPI routers that give the owner
@@ -77,8 +109,11 @@ rule and no classification arithmetic of its own.
 It is also, by DEC-0064 (PROVISIONAL; the `app.py` assignment stands under
 DEC-0069), the one owner of CAP-002's edit to `src/factorflow/api/app.py`: two
 `include_router` calls and the creation and cancellation of the classification
-scheduler task in the lifespan, placed beside the reclaim task. Nothing else in
-the delivered API changes.
+scheduler task in the lifespan, placed beside the reclaim task, and of the
+extension to the delivered `tests/unit/test_api_no_secrets.py`. Those two are
+this component's share of the nine delivered files CAP-002 edits (DEC-0084,
+PROVISIONAL; the list is system design v3 §8 question 4); no delivered route,
+model or behaviour changes.
 
 Use cases addressed:
 
@@ -86,7 +121,8 @@ Use cases addressed:
   every refusal naming its operation, resource and reason (AC-1 to AC-6,
   STD-UI-19).
 - Save a reviewed result as a universe, incomplete stocks included unless the
-  owner hid them (AC-2, S03-7).
+  owner hid them and only the stocks a search matched when one was active
+  (AC-2, S03-7).
 - Read the Research list with sort, thresholds, search, scope, hide-incomplete,
   the full-set match count and paging; read 2 to 6 stocks side by side; read
   one stock's evidence with its memberships and its history; read sets (AC-9,
@@ -116,7 +152,8 @@ src/factorflow/api/routes/classifications.py       GET /api/classifications, /su
                                                    /stocks/{symbol}, /stocks/{symbol}/history
 src/factorflow/api/classification_models.py        Pydantic request and response models for both routers
 src/factorflow/api/classification_bounds.py        MAX_UNIVERSE_NAME_LENGTH (owner input), MIN_COMPARE_SYMBOLS = 2, MAX_COMPARE_SYMBOLS = 6
-src/factorflow/api/app.py                          two include_router calls; scheduler task in _lifespan (DEC-0064)
+src/factorflow/api/app.py                          two include_router calls; scheduler task in _lifespan (DEC-0064, DEC-0084)
+tests/unit/test_api_no_secrets.py                  delivered; extended with the same no-credential assertion over the new routes (DEC-0084)
 tests/unit/test_api_universes_routes.py
 tests/unit/test_api_classifications_routes.py
 tests/unit/test_api_classification_models.py
@@ -130,8 +167,9 @@ tests/integration/test_api_classification_host_origin.py
 
 `classification_models.py` is a new module rather than an addition to the
 delivered `api/models.py`, and `classification_bounds.py` a new module beside
-`bounds.py`, so the only delivered file this component edits is `app.py`
-(DEC-0064). `/summary` is declared before `/stocks/{symbol}` and `/sets/{set_id}`
+`bounds.py`, so the delivered files this component edits are `app.py` and
+`tests/unit/test_api_no_secrets.py` and no other (DEC-0064; DEC-0084; section
+3). `/summary` is declared before `/stocks/{symbol}` and `/sets/{set_id}`
 in the router so the literal segment is never captured by a path parameter.
 
 ### 2.2 Component block diagram
@@ -207,7 +245,7 @@ path and avoids a second edit to delivered code.
 
 ### 2.4 Request bounds and validation
 
-Every bound is the first capability's unless stated (system design v2 4.2):
+Every bound is the first capability's unless stated (system design v3 4.2):
 
 | Bound | Value | Applies to | Source |
 |-------|-------|-----------|--------|
@@ -215,11 +253,11 @@ Every bound is the first capability's unless stated (system design v2 4.2):
 | `MAX_PAGE_SIZE` | 500 | every paginated route | `bounds.py` |
 | `MAX_SYMBOLS_PER_REQUEST` | 1000 | `symbols` on `POST /api/universes` and `POST /api/universes/{id}/members` | `bounds.py`; system design 4.2 |
 | `MAX_UNIVERSE_NAME_LENGTH` | `[REQUIRES INPUT: maximum universe name length in characters]` | `name` on `POST` and `PATCH /api/universes` | system design section 8 question 2, abstained; section 14 |
-| `MIN_COMPARE_SYMBOLS`, `MAX_COMPARE_SYMBOLS` | 2, 6 | `symbols` on `GET /api/classifications`; a list outside the bound is `422 validation_error` naming `symbols` | S03 §6 (approved); system design v2 3.3 step 16, constraint 15; DEC-0070 |
-| Symbol shape | `^[A-Z][A-Z0-9.-]{0,15}$` after upper casing | every symbol, incl. the `symbol` prefix | migration `0001`; system design constraint 15 |
+| `MIN_COMPARE_SYMBOLS`, `MAX_COMPARE_SYMBOLS` | 2, 6 | `symbols` on `GET /api/classifications`; a list outside the bound is `422 validation_error` naming `symbols` | S03 §6 (approved); system design v3 3.3 step 16, constraint 15; DEC-0070 |
+| Symbol shape | `^[A-Z][A-Z0-9.-]{0,15}$` after upper casing | every symbol, incl. the `symbol` prefix on `GET /api/classifications` and `filter.symbol` on `POST /api/universes` | migration `0001`; system design constraint 15 |
 | Percentile thresholds | 0 to 100 inclusive | `{factor}_percentile_min`, `_max` | AC-9; constraint 15 |
 | Score thresholds | finite decimal | `{factor}_score_min`, `_max` | constraint 15 |
-| `hide_incomplete` | boolean, default `false` | `GET /api/classifications`; `filter.hide_incomplete` on `POST /api/universes` | system design v2 3.3 step 15; constraint 15; DEC-0071, DEC-0076 |
+| `hide_incomplete` | boolean, default `false` | `GET /api/classifications`; `filter.hide_incomplete` on `POST /api/universes` | system design v3 3.3 step 15; constraint 15; DEC-0079 (a), DEC-0076 |
 | `sort` | `symbol`, `{factor}_score`, `{factor}_percentile` | `GET /api/classifications` | constraint 15 allowlist |
 | `order` | `asc`, `desc` | `GET /api/classifications` | |
 | `lifecycle` | `active`, `retired`, `all` | `GET /api/universes` | system design 4.2 |
@@ -237,26 +275,28 @@ factor sentence *[percentile | standardised score] [at least | at most] [n]*
 `percentile` + `at least` → `{factor}_percentile_min`, `percentile` + `at
 most` → `{factor}_percentile_max`, `standardised score` + `at least` →
 `{factor}_score_min`, `standardised score` + `at most` → `{factor}_score_max`
-(system design v2 §3.3 step 15). The interface performs the mapping in its URL
-codec; this API accepts the twelve bounds and `hide_incomplete` and nothing
-else, so the `filter` a universe is saved from and the query the list was read
-with are the same `Thresholds` object (DEC-0076).
+(system design v3 §3.3 step 15). The interface performs the mapping in its URL
+codec; this API accepts the twelve bounds, `hide_incomplete` and the *Find a
+stock* `symbol` prefix and nothing else, so the `filter` a universe is saved
+from and the query the list was read with are the same `Thresholds` object
+(DEC-0076; DEC-0085; review v2 FINDING-5).
 
 Request models (`classification_models.py`):
 
 ```python
-class Thresholds(BaseModel):                     # the twelve bounds, all optional, plus hide_incomplete
+class Thresholds(BaseModel):                     # mirrors the reader's Thresholds: twelve optional bounds, hide_incomplete, symbol
     value_score_min: Decimal | None = None       # finite
     value_score_max: Decimal | None = None
     value_percentile_min: Decimal | None = None  # 0..100
     value_percentile_max: Decimal | None = None
     # growth_*, momentum_* likewise
-    hide_incomplete: bool = False                # exclude stocks incomplete on any factor (DEC-0071, DEC-0076)
+    hide_incomplete: bool = False                # exclude stocks whose not_classified reason on any factor is an input reason (DEC-0079 (a), DEC-0076)
+    symbol: str | None = None                    # the Find a stock prefix, shape-checked, upper-cased; null when none (DEC-0074; review v2 FINDING-5)
 
 class CreateUniverseRequest(BaseModel):
     name: str                                    # trimmed, non-empty; max length pending (section 14)
     symbols: list[str] | None = None             # by hand: 1 to MAX_SYMBOLS_PER_REQUEST, upper-cased, shape-checked
-    filter: Thresholds | None = None             # from a result: exactly one of symbols or filter; carries hide_incomplete
+    filter: Thresholds | None = None             # from a result: exactly one of symbols or filter; carries hide_incomplete and symbol
     set_id: UUID | None = None                   # required with filter
 
 class RenameUniverseRequest(BaseModel):
@@ -267,11 +307,10 @@ class AddMembersRequest(BaseModel):
 
 class ClassificationListQuery(BaseModel):        # GET /api/classifications query parameters
     universe_id: UUID | None = None
-    symbol: str | None = None                    # prefix, shape-checked
     symbols: list[str] | None = None             # compare: MIN_COMPARE_SYMBOLS to MAX_COMPARE_SYMBOLS (2 to 6)
     sort: Literal["symbol", "value_score", ...] = "symbol"
     order: Literal["asc", "desc"] = "asc"
-    thresholds: Thresholds                       # flattened from the query; hide_incomplete included
+    thresholds: Thresholds                       # flattened from the query: the twelve bounds, hide_incomplete and the symbol prefix
     limit: int = DEFAULT_PAGE_SIZE               # 1..MAX_PAGE_SIZE
     cursor: str | None = None
 ```
@@ -281,6 +320,19 @@ neither, and a `filter` without `set_id`, as `422 validation_error` naming the
 field (system design 4.2). `symbols` on the list read with 1 or with 7 or more
 entries is `422 validation_error` naming `symbols` (DEC-0070). Every model is
 `extra="forbid"`.
+
+**The handshake with `universe-service`** (review v2 FINDING-4; DEC-0085,
+PROVISIONAL). The route converts `CreateUniverseRequest.filter` field for
+field into `classification-reader`'s `Thresholds` dataclass (bounds,
+`hide_incomplete`, `symbol`) and passes that object, with `set_id`, to
+`universe-service` v2's `create_from_filter`, which accepts the reader's type
+in place of version 1's `dict[str, Decimal]`, hands it unchanged to
+`evaluate_filter(conn, set_id, thresholds)` and serialises it whole, with the
+set's `classification_date`, into the `created` event's `filter_provenance`
+(system design v3 §4.2 *Universe operations*, §4.4). Nothing is dropped at
+this boundary, so the saved members are exactly the stocks the results header
+counted (S03-7; DEC-0076). DEC-0079 (f), under which the service needed no
+edit, is superseded by DEC-0085.
 
 ### 2.5 Error mapping
 
@@ -321,9 +373,10 @@ response, and it is system design 3.2 seen from the HTTP boundary. The
 middleware refuses a foreign Host or Origin before the route runs; the model
 refuses a malformed body before the service is called; the service's typed
 exception, if any, is mapped to one code. For a save from a result the
-`filter` carries the thresholds and `hide_incomplete` the owner reviewed, so
-the snapshot `universe-service` takes through `classification-reader`'s
-`evaluate_filter` is exactly the displayed result (S03-7). The decision points
+`filter` carries the thresholds, `hide_incomplete` and the *Find a stock*
+prefix the owner reviewed, as one `Thresholds` object, so the snapshot
+`universe-service` takes through `classification-reader`'s `evaluate_filter`
+is exactly the displayed result (S03-7; DEC-0085). The decision points
 are the three refusals, each of which writes nothing. The expected outcome is a
 `201` whose body is the replayed universe, which the interface confirms by a
 toast linking to it (DEC-0076).
@@ -336,18 +389,18 @@ sequenceDiagram
     participant S as universe-service
     participant DB as PostgreSQL
 
-    W->>M: POST /api/universes {name, symbols | filter(thresholds, hide_incomplete)+set_id}
+    W->>M: POST /api/universes {name, symbols | filter(bounds, hide_incomplete, symbol)+set_id}
     alt foreign Host or Origin
         M-->>W: 400 host_not_allowed | 403 origin_not_allowed
     else
         M->>R: request with request_id
         R->>R: CreateUniverseRequest validation (422 validation_error)
-        R->>S: create_by_hand | create_from_filter (one transaction; evaluate_filter(set_id, thresholds))
+        R->>S: create_by_hand | create_from_filter(name, thresholds: reader Thresholds, set_id) (one transaction; evaluate_filter(set_id, thresholds))
         alt typed refusal
             S-->>R: InstrumentNotAcquired | EmptyUniverse | UniverseNameInUse | ClassificationSetChanged
             R-->>W: 409 | 422 envelope with code, message, resource, request_id
         else created
-            S->>DB: INSERT universe, universe_event rows (filter_provenance incl. hide_incomplete); COMMIT
+            S->>DB: INSERT universe, universe_event rows (filter_provenance: bounds, hide_incomplete, symbol, set_id, classification_date); COMMIT
             S-->>R: Universe
             R-->>W: 201 UniverseResponse
         end
@@ -364,15 +417,17 @@ interface's (STD-UI-1 v6).
 **`UniverseResponse`** (`GET /api/universes/{id}`, `POST`, `PATCH`, `DELETE`):
 `universe_id`, `name`, `lifecycle`, `created_at`, `retired_at`, `member_count`,
 `as_of`, `as_of_before_creation`, `origin {kind, set_id, classification_date,
-thresholds, hide_incomplete}`, `members[] {symbol, name, lifecycle,
+thresholds, hide_incomplete, symbol}`, `members[] {symbol, name, lifecycle,
 member_since, factors {value, growth, momentum: FactorCellResponse}}`, and
 `set` (the current set block of `ClassificationListResponse`, or null) so
-members' cells are dated. `origin` is DEC-0065's addition (PROVISIONAL);
-`classification_date` inside it is read from the set the filter was evaluated
-against and `hide_incomplete` from the `filter_provenance` of the `created`
-event, for the origin line *Saved on 2026-10-15 from the scores of 2026-10-15:
-value percentile at least 80, …, stocks with an incomplete score hidden* (UX
-design §1.3, §1.4; DEC-0076).
+members' cells are dated. `origin` is DEC-0065's addition (PROVISIONAL); its
+`classification_date`, `thresholds`, `hide_incomplete` and `symbol` (null when
+no search was active) are the `Origin` `universe-service` v2 replays from the
+`created` event's `filter_provenance`, which records all of them (system
+design v3 §4.2, §4.4; DEC-0085; review v2 FINDING-4, FINDING-5), for the
+origin line *saved from a filter on 2026-10-15: value percentile at least 80,
+…; search "AA"; stocks with an incomplete score hidden*, each clause only when
+it applies (UX design v3 §1.3, §1.4; DEC-0076).
 
 **`UniverseListResponse`** (`GET /api/universes`): `universes[] {universe_id,
 name, lifecycle, member_count, created_at, retired_at}`, `active_count`,
@@ -385,15 +440,27 @@ recorded_at, recorded_on, filter_provenance}`, `next_cursor`.
 `removed_at`. **`RetireUniverseResponse`**: `lifecycle: "retired"`, `retired_at`.
 
 **`SetBlock`**, shared by the list, summary, evidence and universe reads:
-`{set_id, classification_date, run_id, run_outcome, state, started_at,
-ended_at, latest_trading_day, active_instruments, not_current {set_id, state,
-run_id, started_at, ended_at, failure_reason} | null}`. `ended_at` is the
-as-of line's *Scores from {date} {time}* and `active_instruments` is S03's
+`{set_id, classification_date, run_id, run_started_at, run_outcome, state,
+started_at, ended_at, latest_trading_day, active_instruments, not_current:
+bool}`. `ended_at` is the as-of line's *Scores from {date} {time}*,
+`run_started_at` (`acquisition_run.started_at`) is how every surface names the
+download, *from the download started 2026-10-15 17:30 CDT*, linked to
+`/runs/:runId` (DEC-0083), and `active_instruments` is S03's
 `peerCounts.followed` and the summary's `followed_count` (DEC-0071).
 
+**`LaterBlock`**, carried beside `set` by the list and the summary as `later`
+(DEC-0082, PROVISIONAL; system design v3 §3.3 steps 13, 14, 18, §4.2): the
+most recent set newer than `set`, or the first set while none is complete, as
+`{set_id, state: building | failed, started_at, ended_at, failure_reason,
+run_id, run_started_at}`, or null when no such set exists. `set.not_current`
+is true exactly when `later` is non-null, and `never_classified` exactly when
+`set` is null, so the interface and the shell's screens read one shape before
+and after the first set.
+
 **`ClassificationListResponse`** (`GET /api/classifications`): `never_classified`;
-`set` (`SetBlock`, null when never classified); `factors {value, growth,
-momentum: {qualified_count, ranked, min_peer_set_size}}`; `match_count`, the
+`set` (`SetBlock`, null when never classified); `later` (`LaterBlock` or
+null); `factors {value, growth, momentum: {qualified_count, ranked,
+min_peer_set_size}}`; `match_count`, the
 count of stocks matching the scope, thresholds, search and `hide_incomplete`
 over the whole set, never the page (S03-2; 0 when never classified);
 `stocks[] {symbol, name, lifecycle, factors {value, growth, momentum:
@@ -406,18 +473,23 @@ the interface's (DEC-0063) and sort and thresholds run on stored values.
 
 **`ClassificationSummaryResponse`** (`GET /api/classifications/summary`;
 DEC-0071, PROVISIONAL): `never_classified`; `set` (`SetBlock` or null);
-`factors {... {qualified_count, ranked, min_peer_set_size}}`;
-`stocks_current {current_count, followed_count} | null`, where a stock is
-current when none of its `factor_input` rows in the current set is `missing`
-or `outdated` (AC-12 presence, AC-13 currency; `not_computable` does not count
-against currency) and `followed_count` is the set's `active_instruments`
-(system design v2 §3.3 step 18). No stock rows. It is the read the Research
-as-of line, banner and 10-second poll use, and the one the shell capability's
-Home and Data health screens consume (system design v2 §4.2:
+`later` (`LaterBlock` or null, exactly as on the list read); `factors {...
+{qualified_count, ranked, min_peer_set_size}}`; `stocks_current
+{current_count, followed_count} | null`, where a stock is current when none of
+its `factor_input` rows in the current set is `missing` or `outdated` (AC-12
+presence, AC-13 currency; `not_computable` does not count against currency)
+and `followed_count` is the set's `active_instruments` (system design v3 §3.3
+step 18). No stock rows. It is the read the Research as-of line, banner and
+10-second poll use, polled from first load while `later.state` is `building`
+or the latest download is non-terminal, and the one the shell capability's
+Home and Data health screens consume (system design v3 §4.2:
 `shell-home-and-data-health-ui (unpublished)`, §8 question 10). While a first
-set is still `building` and none is complete, `never_classified` is true and
-`set` carries the building set's identity in `not_current` so the Research
-never-populated state can say a set is being produced (AC-22).
+set is `building` or has `failed` and none is complete, `never_classified` is
+true, `set` is null and `later` carries that set, so the Research
+never-populated state and S01 Home render *Updating* or *Score update failed*
+with its `failure_reason` from the same field as a later set's (AC-20, AC-22;
+DEC-0082, closing review v2 FINDING-7). Version 2's shape, the building set
+nested in `set.not_current` while `set` was otherwise null, is withdrawn.
 
 **`StockEvidenceResponse`** (`GET /api/classifications/stocks/{symbol}`):
 `symbol`, `name`, `lifecycle`, `set` (`SetBlock`, or null), `factors {...
@@ -430,9 +502,11 @@ name}`, the active universes the stock currently belongs to, in name order
 run_id, run_outcome, ended_at, factors {...}}`, `next_cursor`.
 
 **`SetListResponse`** and **`SetResponse`**: `set_id`, `state`,
-`classification_date`, `run_id`, `run_outcome`, `started_at`, `ended_at`,
-`failure_reason`, `latest_trading_day`, `active_instruments`, `factors {...
-{qualified_count, ranked, min_peer_set_size}}`, plus `next_cursor` on the list.
+`classification_date`, `run_id`, `run_started_at`, `run_outcome`, `started_at`,
+`ended_at`, `failure_reason`, `latest_trading_day`, `active_instruments`,
+`factors {... {qualified_count, ranked, min_peer_set_size}}`, plus
+`next_cursor` on the list; `run_started_at` is the download's start time, by
+which the set history dialog names it (DEC-0083).
 
 Dates are ISO-8601 dates; timestamps are ISO-8601 with offset; zone rendering
 is the interface's (STD-UI-5).
@@ -462,21 +536,30 @@ interface polls the summary read (UX design section 1.2).
 - **Bounds are the first capability's**, imported from `bounds.py`, never
   redeclared; this design's two constants are the compare bound (2 to 6,
   DEC-0070) and the name length, which is the owner's.
-- **No new filter model** (system design v2 §3.3 step 15). S03's sentences are
-  the interface's mapping onto the twelve bounds; `hide_incomplete` is the
-  one addition, and it travels inside `Thresholds` so the saved `filter` and
-  the list query are one object (DEC-0076).
-- **The edit to `app.py` is this component's and is three insertions**
-  (DEC-0064, PROVISIONAL; stands under DEC-0069). No other delivered file is
-  edited.
+- **No new filter model** (system design v3 §3.3 step 15). S03's sentences are
+  the interface's mapping onto the twelve bounds; `hide_incomplete` and the
+  `symbol` prefix are the two additions, and both travel inside `Thresholds`
+  so the saved `filter`, the list query and the provenance are one object
+  (DEC-0076; DEC-0085).
+- **This component edits two delivered files**, and the list the owner
+  confirms under AGT-SCOPE-002 is system design v3 §8 question 4 (DEC-0084,
+  PROVISIONAL, superseding DEC-0069's "nothing else in the shell is edited"
+  and extending DEC-0064; review v2 FINDING-13 stays the owner's):
+  `src/factorflow/api/app.py`, three insertions (section 2.3; DEC-0064,
+  standing under DEC-0069), and `tests/unit/test_api_no_secrets.py`, which
+  gains the same no-credential assertion over the new routes (sections 4 and
+  7). The other seven delivered files CAP-002 edits are `classification-ui`'s.
 - **Settings for the scheduler are constructed here**, in the lifespan, from
   `ClassificationSettings()`, as `RunSettings()` is for the reclaim task.
-- **Two read semantics the reader refines against the system design** are
-  surfaced here without being decided here (DEC-0079, PROVISIONAL; section
-  14): `hide_incomplete` excludes stocks whose `not_classified` reason is an
-  input reason, and the unscoped list excludes retired instruments. The API
-  documents both in the route's OpenAPI description so a consumer reads the
-  same meaning the reader implements.
+- **Three read semantics, stated by the system design v3 and implemented by
+  the reader**, are documented in the route's OpenAPI description so a
+  consumer reads the one meaning: `hide_incomplete` excludes stocks whose
+  `not_classified` reason is an input reason only, never `not_enough_stocks`
+  and never `retired`, and the unscoped list is active instruments only
+  (DEC-0079 (a), (b), PROVISIONAL; system design v3 §3.3 step 15 and §4.2,
+  which supersede DEC-0071 (1) on this point); and a threshold excludes only
+  stocks classified on that factor that fail it, never a stock incomplete or
+  unranked on it (DEC-0081, from the approved S03-1).
 - **Python 3.12, FastAPI, Pydantic, `pytest` with `TestClient`** (tech stack).
   `TestClient` instances pass `base_url="http://127.0.0.1:8000"` as the fifteen
   delivered test modules do, so the Host check passes.
@@ -518,9 +601,11 @@ interface polls the summary read (UX design section 1.2).
   privilege or configuration change. Every write is an appended, timestamped
   event in the store and a log line with the request id.
 - **SAST and SCA.** FastAPI, Starlette and Pydantic are already scanned;
-  `ruff` and `mypy` are blocking. `tests/unit/test_api_no_secrets.py`'s
-  inspection of response models covers the new module when it is added to its
-  module list by the implementing story.
+  `ruff` and `mypy` are blocking. The delivered
+  `tests/unit/test_api_no_secrets.py` holds one test that builds the app and
+  asserts `GET /api/health` never echoes the credential, and no module list;
+  this component extends that file so the new CAP-002 routes' responses are
+  checked the same way (DEC-0084; section 7).
 - **Crypto usage: none. Privacy impact: none.**
 
 ## 5. Scalability and Performance
@@ -531,8 +616,10 @@ interface polls the summary read (UX design section 1.2).
   50 to 500 rows, with a full-set count per request; the reader sizes it (its
   section 5).
 - **Polling.** The interface polls `GET /api/classifications/summary`, not the
-  list, every 10 seconds while a set is building or a download is non-terminal
-  and stops otherwise (DEC-0054; UX design §1.2); each poll is the set probe,
+  list, every 10 seconds from first load, including before any set exists,
+  while `later.state` is `building` or the latest download is non-terminal,
+  and stops otherwise (DEC-0054; DEC-0082; UX design v3 §1.2); each poll is
+  the set probe,
   three factor rows and one aggregate over the set's `factor_input` rows, no
   stock rows (DEC-0071). The shell capability's screens add at most the same
   cadence.
@@ -559,7 +646,9 @@ interface polls the summary read (UX design section 1.2).
   (system design 4.2). Version 2 adds, within the schemas the system design
   delegates to this design, `match_count`, `hide_incomplete`, `name` on stock
   rows, `memberships` and `origin.hide_incomplete`, and one route, `/summary`;
-  nothing shipped under version 1, so nothing is migrated. Adding a field
+  version 3 adds `later` on the list and summary reads, `run_started_at` on
+  every set block and set row, and `symbol` in `Thresholds` and `origin`;
+  nothing shipped under either, so nothing is migrated. Adding a field
   later is compatible, removing one is breaking.
 - **Data migration: none owned here.**
 - **Behaviour change after upgrade.** The two new paths answer; `GET
@@ -585,8 +674,9 @@ S03-derived checks: contract-level checks here, rendering checks in
 |------|------|----------------|
 | Create by hand | `tests/integration/test_api_universes.py` | `201` with the universe and members; the interface can route to detail from the body (AC-1) |
 | Create refused whole on an unfollowed symbol | `tests/integration/test_api_universes.py` | `409 instrument_not_acquired` naming every unfollowed symbol in `symbols`; no universe created (AC-1) |
-| Create from a result | `tests/integration/test_api_universes.py` | `{"name", "filter", "set_id"}` saves exactly the thresholded result; a stock incomplete on an unthresholded factor is a member; `origin.kind = from_filter` with thresholds, `hide_incomplete` and date (AC-2, S03-7; DEC-0076) |
-| Create from a result with hide-incomplete | `tests/integration/test_api_universes.py` | `filter.hide_incomplete: true` saves only stocks complete on every factor; the `created` event's `filter_provenance` carries `hide_incomplete` (S03-7; DEC-0076) |
+| Create from a result | `tests/integration/test_api_universes.py` | `{"name", "filter", "set_id"}` saves exactly the thresholded result, the same ids `GET /api/classifications` returned; a stock incomplete on an unthresholded factor is a member and so is one incomplete on a thresholded factor (DEC-0081); `origin.kind = from_filter` with `thresholds`, `hide_incomplete`, `symbol` null and `classification_date` (AC-2, S03-7; DEC-0076, DEC-0085) |
+| Create from a result with hide-incomplete | `tests/integration/test_api_universes.py` | `filter.hide_incomplete: true` saves only stocks with no input reason on any factor; the `created` event's `filter_provenance` carries `hide_incomplete` (S03-7; DEC-0076) |
+| Create from a result under a search | `tests/integration/test_api_universes.py` | `filter.symbol: "AA"` with the same bounds saves only the matching stocks whose symbol carries the prefix; the universe's `member_count` equals the list's `match_count` for the same query; `origin.symbol` and the event's `filter_provenance` carry the prefix (S03-7; review v2 FINDING-5; DEC-0085) |
 | Filter against a stale set | `tests/integration/test_api_universes.py` | `409 classification_set_changed` (AC-2) |
 | Empty create | `tests/integration/test_api_universes.py` | No symbols, or a filter matching nothing: `422 empty_universe` (AC-5) |
 | Both or neither of symbols and filter | `tests/unit/test_api_classification_models.py` | `422 validation_error` naming the fields |
@@ -598,51 +688,56 @@ S03-derived checks: contract-level checks here, rendering checks in
 | As-of membership | `tests/integration/test_api_universes.py` | `?as_of=` returns the members on that date; a date before creation returns none with `as_of_before_creation: true`; a malformed date is `422` (AC-6) |
 | Universe list filters | `tests/integration/test_api_universes.py` | `lifecycle` default `active`; `retired`, `all`; counts; paging |
 | Symbol list bounds | `tests/unit/test_api_classification_models.py` | 1000 symbols accepted, 1001 refused naming the cap; malformed symbols `422`; upper casing applied |
-| Classification list shape | `tests/integration/test_api_classifications.py` | `set` with `ended_at`, `active_instruments` and `not_current`, `factors` with `min_peer_set_size` 30, `match_count`, `stocks` cells with `name`, `next_cursor` (AC-9, AC-14, AC-20, AC-21; S03 §5) |
+| Classification list shape | `tests/integration/test_api_classifications.py` | `set` with `ended_at`, `run_started_at`, `active_instruments` and `not_current`, `later` null when nothing newer exists, `factors` with `min_peer_set_size` 30, `match_count`, `stocks` cells with `name`, `next_cursor` (AC-9, AC-14, AC-20, AC-21; S03 §5; DEC-0082, DEC-0083) |
 | Match count is over the whole set | `tests/integration/test_api_classifications.py` | 120 matching rows at `limit=50`: `match_count` is 120 on every page; thresholds and `hide_incomplete` change it; `symbol` prefix changes it (S03-2) |
-| Hide incomplete | `tests/integration/test_api_classifications.py` | Default lists a stock incomplete on one factor; `hide_incomplete=true` excludes it; a stock unranked on a factor below 30 is not excluded by it (S03-1, AC-12; DEC-0079) |
-| Never classified | `tests/integration/test_api_classifications.py` | `never_classified: true`, `set: null`, `match_count: 0`, `stocks: []` (AC-22) |
+| Hide incomplete and the threshold rule | `tests/integration/test_api_classifications.py` | Default lists a stock incomplete on one factor, under a threshold on that factor included; `hide_incomplete=true` excludes it; a stock unranked on a factor below 30 is not excluded by either (S03-1, AC-12; DEC-0079, DEC-0081) |
+| Never classified | `tests/integration/test_api_classifications.py` | `never_classified: true`, `set: null`, `match_count: 0`, `stocks: []`; `later: null` with no set at all, and `later {state: building, run_started_at, …}` while the first set builds (AC-22; DEC-0082) |
 | Sort and thresholds pass through | `tests/integration/test_api_classifications.py` | `sort=value_score&order=desc` and twelve bounds reach the reader; `sort=other` is `422`; a percentile of 101 is `422` (AC-16, constraint 15) |
 | Universe scope | `tests/integration/test_api_classifications.py` | `universe_id` scopes and keeps a retired member; unknown id `404 universe_not_found`; the unscoped list omits retired instruments (AC-15, AC-16; DEC-0073, DEC-0079) |
 | Compare bound | `tests/unit/test_api_classification_models.py`, `tests/integration/test_api_classifications.py` | `symbols=` with 2 and with 6 entries returns every instrument symbol with its cells and `unknown_symbols`; 1 entry and 7 entries are `422 validation_error` naming `symbols` (AC-16; DEC-0070) |
 | Evidence with memberships | `tests/integration/test_api_classifications.py` | Inputs with labels and dates; `memberships` lists the stock's active universes in name order and omits retired universes and universes it was removed from; `set: null` before any set; unknown symbol `404 instrument_not_found` (AC-17, AC-23; S03-3; DEC-0071) |
 | History | `tests/integration/test_api_classifications.py` | Newest first with `ended_at`; unknown symbol `404` (AC-18) |
 | Summary shape and current count | `tests/integration/test_api_classification_summary.py` | `set`, `factors` and `stocks_current {current_count, followed_count}`; a stock with one `missing` or `outdated` input is not current, one with only `not_computable` is; `followed_count` equals `active_instruments`; no stock rows (AC-12, AC-13, AC-21; DEC-0071) |
-| Summary currency and emptiness | `tests/integration/test_api_classification_summary.py` | `not_current` with `building` or `failed` and `failure_reason`; `never_classified: true` with `stocks_current: null` before any complete set, the building set visible in `not_current` (AC-20, AC-22) |
+| Summary currency and emptiness | `tests/integration/test_api_classification_summary.py` | `later` with `building` or `failed`, `failure_reason` and `run_started_at`, and `set.not_current` true exactly then, identical to the list read's; `never_classified: true`, `set: null` and `stocks_current: null` before any complete set, with the first set in `later` as `building` or `failed` (AC-20, AC-22; DEC-0082, DEC-0083) |
 | Summary route precedence | `tests/unit/test_api_classifications_routes.py` | `GET /api/classifications/summary` reaches the summary handler, not `/stocks/{symbol}` or `/sets/{set_id}` |
-| Sets | `tests/integration/test_api_classifications.py` | List newest first with reasons; `get` of an unknown id `404 classification_set_not_found` (AC-20, AC-21) |
+| Sets | `tests/integration/test_api_classifications.py` | List newest first with reasons and `run_started_at` on every row; `get` of an unknown id `404 classification_set_not_found` (AC-20, AC-21; DEC-0083) |
 | Cursor misuse | `tests/unit/test_api_classifications_routes.py` | A cursor from another sort is `422 cursor_stale` |
 | Page bounds | `tests/integration/test_api_classifications.py` | `limit` default 50, `500` accepted, `501` is `422` (section 2.4a precedent) |
 | Error mapping is complete | `tests/unit/test_api_classification_error_mapping.py` | Every typed exception in `universe-service` and `classification-reader` maps to exactly one code; an unmapped exception reaches `internal_error` |
 | Routers registered behind middleware | `tests/unit/test_api_classification_lifespan.py` | `create_app()` serves both routers; a foreign `Host` is `400` on a CAP-002 path; the SPA fallback is not reached for an unknown `/api/universes/...` path |
 | Scheduler task lifecycle | `tests/unit/test_api_classification_lifespan.py` | The lifespan creates the classification task with the pool and settings and cancels and awaits it before `pool.close()`, as `test_api_reclaim_lifespan.py` proves for the reclaim task |
 | Host and Origin on CAP-002 routes | `tests/integration/test_api_classification_host_origin.py` | `POST /api/universes` with `Origin: https://evil.example` is `403 origin_not_allowed` and creates nothing; `GET /api/classifications` and `GET /api/classifications/summary` with `Host: evil.example:8000` are `400 host_not_allowed` (H9) |
-| No provider import, no secret field | existing `tests/unit/test_api_isolation.py`, `tests/unit/test_api_no_secrets.py` | Extended to the new modules by the implementing story |
+| No provider import | existing `tests/unit/test_api_isolation.py`, unchanged | Its assertion that nothing under `api/` imports the Massive client covers the new modules the day they exist |
+| No credential in any CAP-002 response | delivered `tests/unit/test_api_no_secrets.py`, extended | The delivered test builds the app and asserts `GET /api/health` never echoes the credential; it gains the same assertion over `GET /api/universes`, `GET /api/classifications` and `GET /api/classifications/summary` (DEC-0084; review v2 FINDING-12) |
 
 ## 8. Acceptance Criteria
 
 1. `POST /api/universes` with followed symbols returns `201` and the universe;
    with any unfollowed symbol returns `409 instrument_not_acquired` naming
    each and creates nothing.
-2. `POST /api/universes` with `filter` (thresholds and `hide_incomplete`) and
-   `set_id` saves exactly the stocks the list read would return for the same
-   filter against that set, and returns `409 classification_set_changed` when
-   the set is no longer current.
+2. `POST /api/universes` with `filter` (the twelve bounds, `hide_incomplete`
+   and the `symbol` prefix) and `set_id` saves exactly the stocks the list
+   read would return for the same filter against that set, a search included,
+   and returns `409 classification_set_changed` when the set is no longer
+   current.
 3. A create with no members or an empty filter result returns
    `422 empty_universe`; removing a last member returns `409 last_member`.
 4. `PATCH`, `POST .../members`, `DELETE .../members/{symbol}` and
    `DELETE /api/universes/{id}` behave as section 2.5 maps, and every write to
    a retired universe returns `409 universe_retired`.
 5. `GET /api/universes/{id}?as_of=` returns membership on that date and flags a
-   date before creation; `origin` names the filter, `hide_incomplete` and the
-   scores' date for a universe saved from a result.
-6. `GET /api/classifications` returns the current set with its currency,
-   counts and `match_count` over the whole filtered set, or `never_classified:
-   true`, sorts only by allowlisted keys, applies thresholds, `symbol` and
-   `hide_incomplete` server-side, scopes to a universe, and compares an
-   explicit list of 2 to 6 symbols, refusing any other size with `422`.
-7. `GET /api/classifications/summary` returns the set block, the per-factor
-   counts and `stocks_current` under the AC-13 rule, with no stock rows.
+   date before creation; `origin` names the filter, `hide_incomplete`, the
+   `symbol` prefix and the scores' date for a universe saved from a result.
+6. `GET /api/classifications` returns the current set with `run_started_at`,
+   its `later` block, counts and `match_count` over the whole filtered set, or
+   `never_classified: true` with the first set in `later`, sorts only by
+   allowlisted keys, applies thresholds (excluding only stocks classified on
+   that factor that fail them), `symbol` and `hide_incomplete` server-side,
+   scopes to a universe, and compares an explicit list of 2 to 6 symbols,
+   refusing any other size with `422`.
+7. `GET /api/classifications/summary` returns the `set` and `later` blocks
+   exactly as the list read does, the per-factor counts and `stocks_current`
+   under the AC-13 rule, with no stock rows.
 8. `GET /api/classifications/stocks/{symbol}` returns cells, inputs with dates
    and marks, and the stock's active universe memberships; `/history` returns
    earlier sets newest first.
@@ -660,11 +755,13 @@ S03-derived checks: contract-level checks here, rendering checks in
 - **Build a universe by hand** (flow 2): `POST /api/universes` with `symbols`;
   step 4 is `409 instrument_not_acquired`.
 - **Build a universe from a factor filter** (flow 3): `GET /api/classifications`
-  with thresholds and `hide_incomplete`, then `POST /api/universes` with the
-  same `filter` and `set_id`; step 5 is `422 empty_universe`.
+  with thresholds, `hide_incomplete` and the `symbol` prefix, then `POST
+  /api/universes` with the same `filter` and `set_id`; step 5 is `422
+  empty_universe`.
 - **See stocks scored after a download** (flow 1): `GET
-  /api/classifications/summary`, polled while building; `GET
-  /api/classifications` once on completion.
+  /api/classifications/summary`, polled from first load while `later.state`
+  is `building` or a download is non-terminal; `GET /api/classifications`
+  once on completion.
 - **Compare stocks and inspect the evidence** (flow 4): `GET /api/classifications`
   with `universe_id`, `sort`, thresholds and `symbols` (2 to 6); `GET
   /api/classifications/stocks/{symbol}` for the inspector and each compare
@@ -692,14 +789,24 @@ Couplings tight enough to record, so the API and the copy stay one fact:
 - **`hide_incomplete`** is the *Hide stocks with an incomplete score* checkbox
   and travels in the saved `filter`, so the origin line can say *stocks with an
   incomplete score hidden* (S03-1, S03-7; DEC-0076).
+- **`filter.symbol`** is the *Find a stock* prefix, saved with the filter so
+  the saved members are the stocks the header counted under a search and the
+  origin line can say *search "AA"* (S03-7; DEC-0085; review v2 FINDING-5).
 - **`memberships`** is the inspector's *In Tech and Dividend growers* line
   (S03 §5; DEC-0071).
-- **`SetBlock.ended_at`, `run_id`, `run_outcome`** are the as-of line *Scores
-  from {date} {time} {zone}, download …* with its *Complete* or *Partial*
-  badge; `not_current` with `started_at` and `failure_reason` feeds the banner's
-  *Not reflecting the latest download* and *Score update failed {time}:
-  {reason}* (blueprint §8; DEC-0072, DEC-0073). No download number exists on
-  the wire; `run_id` is what the interface shows (DEC-0079; section 14).
+- **`SetBlock.ended_at`, `run_started_at`, `run_id`, `run_outcome`** are the
+  as-of line *Scores from 2026-10-15 17:46 CDT · from the download started
+  2026-10-15 17:30 CDT* with its *Complete* or *Partial* badge, the start time
+  being the link to `/runs/:runId`; `later` with `state`, `started_at`,
+  `failure_reason` and `run_started_at` feeds the banner *Showing scores
+  produced {time} from the download started {time}. A newer set is being
+  produced and replaces this one when complete.* and *Score update failed
+  {time}: {reason}*, and the never-populated state's *Updating* or *Score
+  update failed* (blueprint §8; DEC-0072, DEC-0073, DEC-0082). No download
+  number exists on the wire and none is rendered: every surface names a
+  download by its start time in America/Chicago, never by a number and never
+  by the raw `run_id` (DEC-0083, superseding DEC-0079 (e); system design v3
+  §8 question 11).
 - **`stocks_current`** is S01's *{n} of {m} stocks current* and S09's *Factor
   scores* card result; its meaning is AC-13's (DEC-0071).
 - **`instrument_not_acquired` carries `symbols`**, so the dialog names every
@@ -724,17 +831,17 @@ the interface's (STD-UI-5).
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
 | `/api/universes` | GET | none, loopback only | `lifecycle` (`active` default, `retired`, `all`), `name` prefix, `limit` (default 50, max 500), `cursor` | `200` `UniverseListResponse` | AC-3, AC-4 |
-| `/api/universes` | POST | none | `CreateUniverseRequest`: `{"name", "symbols"}` or `{"name", "filter": {twelve bounds, "hide_incomplete"}, "set_id"}` | `201` `UniverseResponse`; `422` `empty_universe`, `validation_error`; `409` `universe_name_in_use`, `instrument_not_acquired` (with `symbols`), `classification_set_changed` | AC-1, AC-2, AC-5, S03-7; section 2.4 bounds; DEC-0076 |
+| `/api/universes` | POST | none | `CreateUniverseRequest`: `{"name", "symbols"}` or `{"name", "filter": {twelve bounds, "hide_incomplete", "symbol"}, "set_id"}` | `201` `UniverseResponse` with `origin` incl. `hide_incomplete`, `symbol`, `classification_date`; `422` `empty_universe`, `validation_error`; `409` `universe_name_in_use`, `instrument_not_acquired` (with `symbols`), `classification_set_changed` | AC-1, AC-2, AC-5, S03-7; section 2.4 bounds; DEC-0076, DEC-0085 |
 | `/api/universes/{id}` | GET | none | path `id` (uuid); `as_of` date | `200` `UniverseResponse` with members, cells, `origin`; `404` `universe_not_found`; `422` malformed date | AC-3, AC-6, AC-15 |
 | `/api/universes/{id}` | PATCH | none | `{"name"}` | `200` `UniverseResponse`; `404`; `409` `universe_retired`, `universe_name_in_use`; `422` | AC-4 |
 | `/api/universes/{id}` | DELETE | none | path `id` | `200` `{"lifecycle": "retired", "retired_at"}`; `404`; `409` `universe_retired` | AC-4, AC-6; retires, never deletes (STD-UI-2) |
 | `/api/universes/{id}/events` | GET | none | `limit`, `cursor` | `200` `UniverseEventsResponse` newest first; `404` | AC-6 |
 | `/api/universes/{id}/members` | POST | none | `{"symbols"}`, 1 to 1000 | `200` `{"added", "already_member"}`; `404`; `409` `universe_retired`, `instrument_not_acquired`; `422` | AC-1, AC-4 |
 | `/api/universes/{id}/members/{symbol}` | DELETE | none | path `id`, `symbol` | `200` `{"removed_at"}`; `404` `universe_not_found`, `not_a_member`; `409` `last_member`, `universe_retired` | AC-4, AC-5, AC-6 |
-| `/api/classifications` | GET | none | `universe_id`, `symbol` prefix, `symbols` (2 to 6), `sort` (allowlist), `order`, twelve threshold bounds, `hide_incomplete` (default false), `limit`, `cursor` | `200` `ClassificationListResponse` with `match_count`; `404` `universe_not_found`; `422` malformed filter, a `symbols` list outside 2 to 6, `cursor_invalid`, `cursor_stale` | AC-9, AC-12, AC-14 to AC-16, AC-20 to AC-23; S03-1, S03-2; DEC-0070, DEC-0071 |
-| `/api/classifications/summary` | GET | none | none | `200` `ClassificationSummaryResponse` | AC-13, AC-20 to AC-22; consumers `classification-ui` and `shell-home-and-data-health-ui (unpublished)` (system design v2 §4.2, §8 question 10); DEC-0071 |
-| `/api/classifications/sets` | GET | none | `limit`, `cursor` | `200` `SetListResponse` newest first | AC-20, AC-21 |
-| `/api/classifications/sets/{set_id}` | GET | none | path `set_id` | `200` `SetResponse`; `404` `classification_set_not_found` | AC-21 |
+| `/api/classifications` | GET | none | `universe_id`, `symbol` prefix, `symbols` (2 to 6), `sort` (allowlist), `order`, twelve threshold bounds, `hide_incomplete` (default false), `limit`, `cursor` | `200` `ClassificationListResponse` with `set`, `later` and `match_count`; `404` `universe_not_found`; `422` malformed filter, a `symbols` list outside 2 to 6, `cursor_invalid`, `cursor_stale` | AC-9, AC-12, AC-14 to AC-16, AC-20 to AC-23; S03-1, S03-2; DEC-0070, DEC-0071, DEC-0081, DEC-0082 |
+| `/api/classifications/summary` | GET | none | none | `200` `ClassificationSummaryResponse` with the same `set` and `later` blocks | AC-13, AC-20 to AC-22; consumers `classification-ui` and `shell-home-and-data-health-ui (unpublished)` (system design v3 §4.2, §8 question 10); DEC-0071, DEC-0082 |
+| `/api/classifications/sets` | GET | none | `limit`, `cursor` | `200` `SetListResponse` newest first, `run_started_at` on every row | AC-20, AC-21; DEC-0083 |
+| `/api/classifications/sets/{set_id}` | GET | none | path `set_id` | `200` `SetResponse` with `run_started_at`; `404` `classification_set_not_found` | AC-21; DEC-0083 |
 | `/api/classifications/stocks/{symbol}` | GET | none | path `symbol` | `200` `StockEvidenceResponse` with `memberships` (`set: null` before any set); `404` `instrument_not_found` | AC-12, AC-17, AC-23; S03-3; DEC-0071 |
 | `/api/classifications/stocks/{symbol}/history` | GET | none | path `symbol`, `limit`, `cursor` | `200` `StockHistoryResponse` newest first; `404` | AC-18, AC-19 |
 
@@ -748,27 +855,28 @@ No external integration.
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | AC-1 to AC-6, AC-9, AC-12, AC-14 to AC-23; section 5.3 loopback posture | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v2 | §3.3 steps 13 to 18 (match count, hide-incomplete, the twelve-bound mapping, compare 2 to 6, memberships, the summary read and the current-stock rule); §4.2 interfaces, codes and consumers; §3.2; constraints 12, 15; §8 questions 2, 4, 10 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| System design | CAP-002 system design v3 | §3.3 steps 13 to 18 (the `set` and `later` blocks, match count, the filter as one object of twelve bounds, `hide_incomplete` and the `symbol` prefix with its three rules, compare 2 to 6, memberships, the summary read, the current-stock rule, `run_started_at`); §4.2 interfaces, codes and consumers, the `POST /api/universes` filter and `origin`, the universe operations handshake; §4.4 `filter_provenance`; §3.2; constraints 12, 15; §8 questions 2, 4 (the delivered-file list), 10, 11 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| Specification review | CAP-002 specification review v2 | FINDING-3 to FINDING-8 and FINDING-12 applied here; FINDING-13, 19, 22, 25 carried | `docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md` |
 | Screen specification | `PRODUCT-UX-S03` v4 (approved) | §5 view model (`matchCount`, `hideIncomplete`, `thresholds`, `inspector.memberships`); §6 compare 2 to 6; §10 checks S03-1, S03-2, S03-3, S03-7 | `docs/ux/screens/S03-research.md` |
-| UX brief | CAP-002 UX brief v2 | §2.1 the view model mapped to the reads; §2.2 what the shell's screens read | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-brief.md` |
-| UX design | CAP-002 UX design v2 | Error wording by code; the as-of line and banner fields; the origin line; the save and add dialogs; compare entry | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-design.md` |
+| UX brief | CAP-002 UX brief v3 | §2.1 the view model mapped to the reads, the save carrying the prefix; §2.2 what the shell's screens read | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-brief.md` |
+| UX design | CAP-002 UX design v3 | Error wording by code; the as-of line and banner from `set` and `later`, the download named by its start time; the origin line with the search clause; the save dialog naming the search; the never-populated state from `later`; compare entry | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-design.md` |
 | Component design | CAP-001 ingestion API v8 | Sections 2.3 envelope, 2.4a bounds, 2.5 SPA mount, 2.5a Host and Origin, 11 endpoint table | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-ingestion-api.md` |
-| Component design | CAP-002 universe service v1, classification reader v2, classification scheduler v1 | Exceptions mapped here; `evaluate_filter` taking the `Thresholds` incl. `hide_incomplete`; the summary and memberships reads; loop started here | `docs/capabilities/CAP-002-universe-and-factor-classification/design/` |
+| Component design | CAP-002 universe service v2, classification reader v3, classification scheduler v1 | Exceptions mapped here; `create_from_filter` accepting the reader's `Thresholds` (bounds, `hide_incomplete`, `symbol`) and `Origin` carrying them with `classification_date`; the reader's `Thresholds`, `LaterSet`, `run_started_at`, the summary and memberships reads; loop started here | `docs/capabilities/CAP-002-universe-and-factor-classification/design/` |
 | Implemented code | `src/factorflow/api/app.py`, `errors.py`, `bounds.py`, `routes/instruments.py` | The factory, envelope, bounds and route shape followed | `src/factorflow/api/` |
-| Decision records | DEC-0050, DEC-0058, DEC-0064, DEC-0065, DEC-0069, DEC-0070, DEC-0071, DEC-0076, DEC-0079, DEC-0080 | Loopback exception; seam ownership; `origin` field; compare bound; read surface; hide-incomplete in the snapshot; read-side mechanics; test placement | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decision records | DEC-0050, DEC-0058, DEC-0064, DEC-0065, DEC-0069, DEC-0070, DEC-0071, DEC-0074, DEC-0076, DEC-0079, DEC-0080, DEC-0081, DEC-0082, DEC-0083, DEC-0084, DEC-0085 | Loopback exception; seam ownership (extended by DEC-0084); `origin` field; compare bound; read surface (superseded on `hide_incomplete`'s meaning and the threshold rule); the search field; hide-incomplete in the snapshot; read-side mechanics ((e) and (f) superseded); test placement; the threshold rule from approved S03-1; one `set` plus `later` shape; a download named by its start time; the delivered files CAP-002 edits; the filter as one object end to end | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
 | AC-1 | `POST /api/universes` with `symbols`; `409 instrument_not_acquired` | `CreateUniverseRequest`; mapping with `symbols` in the envelope | 2.4, 2.5, 11 |
-| AC-2 | `POST` with `filter` and `set_id`; `409 classification_set_changed`; S03-7 | `Thresholds` incl. `hide_incomplete` as the `filter`; `origin` carrying it | 2.4, 2.5, 2.7 |
+| AC-2 | `POST` with `filter` and `set_id`; `409 classification_set_changed`; S03-7 | `Thresholds` incl. `hide_incomplete` and `symbol` as the `filter`, passed to `universe-service` as the reader's type; `origin` carrying them with `classification_date` | 2.4, 2.5, 2.7 |
 | AC-3 | `GET /api/universes` | `UniverseListResponse` | 2.7, 11 |
 | AC-4 | `PATCH`, members, `DELETE` | Four routes and their codes | 11 |
 | AC-5 | `422 empty_universe`, `409 last_member` | Mapping; message offering retirement | 2.5 |
 | AC-6 | `GET .../events`; `as_of` | Events route; `as_of` query with `as_of_before_creation` | 2.7, 11 |
 | AC-9 | Score and percentile in responses | `FactorCellResponse` at stored precision | 2.7 |
-| AC-12 | Reason code and input in responses; S03-1 | `FactorCellResponse`; `hide_incomplete` default false | 2.4, 2.7 |
+| AC-12 | Reason code and input in responses; S03-1 | `FactorCellResponse`; `hide_incomplete` default false; a threshold never removes a stock incomplete on that factor (DEC-0081) | 2.4, 2.7, 3 |
 | AC-13 | The current-stock rule on the summary read | `ClassificationSummaryResponse.stocks_current` | 2.7, 11 |
 | AC-14 | `factors` with counts | `factors {qualified_count, ranked, min_peer_set_size}` on list and summary | 2.7 |
 | AC-15 | Lifecycle on stocks and members | `lifecycle` on `stocks[]` and `members[]` | 2.7 |
@@ -776,17 +884,17 @@ No external integration.
 | AC-17 | `GET .../stocks/{symbol}` with `memberships`; S03-3 | `StockEvidenceResponse.inputs`, `.memberships` | 2.7, 11 |
 | AC-18 | `GET .../history` | `StockHistoryResponse` | 2.7, 11 |
 | AC-19 | Rows as recorded | No computation in this component | 3 |
-| AC-20 | `set.not_current` with reason on list and summary | `SetBlock.not_current` | 2.7 |
-| AC-21 | `classification_date`, `ended_at`, `run_id`; sets | `SetBlock`; `/sets` routes | 2.7, 11 |
-| AC-22 | `never_classified: true` on list and summary | `never_classified` with `match_count: 0` and `stocks_current: null` | 2.7 |
+| AC-20 | `set` and `later` blocks, one shape on list and summary (DEC-0082) | `LaterBlock` as `later`; `SetBlock.not_current` true exactly then | 2.7 |
+| AC-21 | `classification_date`, `ended_at`, `run_id`, `run_started_at`; sets (DEC-0083) | `SetBlock`, `LaterBlock`; `/sets` routes with `run_started_at` | 2.7, 11 |
+| AC-22 | `never_classified: true` on list and summary, the first set in `later` | `never_classified` with `set: null`, `later`, `match_count: 0` and `stocks_current: null` | 2.7 |
 | AC-23 | `restated_possible` | On cells and inputs | 2.7 |
 
 | S03 check | Component Design Element | Section |
 |-----------|--------------------------|---------|
-| S03-1 | `hide_incomplete` query parameter, default false | 2.4, 11 |
+| S03-1 | `hide_incomplete` query parameter, default false; the threshold rule documented (DEC-0081) | 2.4, 3, 11 |
 | S03-2 | `match_count` over the whole filtered set | 2.7, 7 |
 | S03-3 | `inputs[].as_of`, `known_on` on the stock read | 2.7 |
-| S03-7 | `filter.hide_incomplete` saved with the thresholds; `origin.hide_incomplete` | 2.4, 2.7, 7 |
+| S03-7 | `filter.hide_incomplete` and `filter.symbol` saved with the thresholds as one object; `origin.hide_incomplete`, `origin.symbol` | 2.4, 2.7, 7 |
 
 ## 14. Open Questions
 
@@ -797,26 +905,31 @@ No external integration.
    rename routes otherwise proceed with trimmed, non-empty validation.*
 2. **The composition edit to `app.py`** is this component's by DEC-0064
    (PROVISIONAL), which DEC-0069 leaves standing for `app.py`, pending the
-   owner's confirmation of the system design's reading of AGT-SCOPE-002
-   (section 8 question 4). *Owner: capability owner. Blocks: the story that
-   edits `app.py`, not the routes.*
+   owner's confirmation of the system design's reading of AGT-SCOPE-002 over
+   the complete delivered-file list of system design v3 §8 question 4
+   (DEC-0084; review v2 FINDING-13). *Owner: capability owner. Blocks: the
+   stories that edit `app.py` and `tests/unit/test_api_no_secrets.py`, not the
+   routes.*
 3. **The consumer identifier for the summary read.** Written as
-   `shell-home-and-data-health-ui (unpublished)` after the system design v2
+   `shell-home-and-data-health-ui (unpublished)` after the system design v3
    (§4.2, §8 question 10) until the *App shell & data health* capability's
    design publishes one. *Owner: that capability's system design. Blocks:
    nothing here.*
-4. **Two read semantics for the system-design owner** (DEC-0079, PROVISIONAL):
-   `hide_incomplete` excludes stocks whose `not_classified` reason is an input
-   reason only, and the unscoped list excludes retired instruments. This API
-   documents the reader's meaning; the system design v2 §3.3 step 15 and §4.2
-   say "any factor `not_classified`" and do not mention retired instruments.
-   *Owner: system-design owner. Blocks: nothing.*
-5. **No download number on the wire.** The as-of line's *download #{n}* has no
-   source; `run_id` is what this API carries (DEC-0079; `classification-ui`
-   section 14). *Owner: capability owner with the shell capability. Blocks:
-   nothing here.*
+4. **Closed in version 3** (the two read semantics; see below).
+5. **Closed in version 3** (the download number; see below).
 6. **No API latency target** at 3000 rows (system design section 8 question
    8). *Owner: capability owner. Blocks: a performance acceptance criterion.*
 
 **Closed in version 2.** The compare cap: `MAX_COMPARE_SYMBOLS` is 6 and the
 read accepts 2 to 6 (DEC-0070, from approved S03 §6).
+
+**Closed in version 3.** Question 4, the two read semantics: version 2 asked
+which rule wins between the system design v2's "any factor `not_classified`"
+and DEC-0079 (a), (b); the system design v3 §3.3 step 15 and §4.2 now state
+the reader's meaning and record that DEC-0071 (1) is superseded on this point
+by DEC-0079 (review v2 FINDING-3). Question 5, the download number: no number
+exists on the wire and none is invented; every surface names a download by
+`run_started_at` in America/Chicago, linked to the run detail (DEC-0083,
+PROVISIONAL, superseding DEC-0079 (e)), and whether downloads gain a short
+visible number, and which capability owns it, is the owner's abstention in
+system design v3 §8 question 11, not this design's question.
