@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-backlog
 artifact_type: backlog
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -11,10 +11,10 @@ updated: 2026-10-17
 ai_provenance:
   agent_id: epic-generation-agent
   agent_version: "1.0"
-  model: claude-sonnet-5
+  model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T03:56:44Z
+  timestamp: 2026-10-17T12:52:50Z
   source_artifacts:
     - id: CAP-002
       version: "1"
@@ -65,7 +65,9 @@ and the read side (E4, E5): it depends on E2 for data and on E1 for the
 universe-scope replay, and E1's own filter-save story depends back on E3's
 `evaluate_filter` — a deliberate cross-EPIC ordering at the story level, not a
 cycle at the EPIC level. E4 owns the one shell-composition seam every screen
-in E1 and E5 renders inside.
+in E1 and E5 renders inside; E3 owns the API-side seam (`app.py`: the two routers
+and the scheduler start, DAC-E3-13), which E1's and E3's endpoints and E2's
+refresh all need at runtime, and which lands after E2's scheduler story.
 
 ```
 E2 ──────────────────────────┐
@@ -111,7 +113,7 @@ waited on.
 | AC-7 | 3.1 steps 8a-10a; 5.7; 5.8 | factor-engine 2.4, 2.5 | CAP-002-E2 | |
 | AC-8 | 5.5 | factor-engine 2.5 | CAP-002-E2 | |
 | AC-9 | 3.1 step 10a; 3.3 step 15; 5.7 | factor-engine 2.5; classification-reader 2.3, 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | |
-| AC-10 | 3.1 steps 4-7a, 19-21; 5.10 | classification-scheduler 2.3, 2.4; factor-engine 2.3 | CAP-002-E2 | |
+| AC-10 | 3.1 steps 4-7a, 19-21; 5.10; 4.2 (Scheduler start) | classification-scheduler 2.3, 2.4; factor-engine 2.3; classification-api 2.3 | CAP-002-E2, CAP-002-E3 | |
 | AC-11 | 3.1 steps 28-31; 4.3; 5.10 | factor-engine 2.3, 5; classification-scheduler 2.3, 5; classification-ui 2.5, 5 | CAP-002-E2, CAP-002-E4 | |
 | AC-12 | 3.1 step 12; 3.3 step 15; 4.4; 5.6 | factor-engine 2.5; classification-reader 2.5; classification-ui 2.5 | CAP-002-E2, CAP-002-E3, CAP-002-E4 | |
 | AC-13 | 3.3 step 18; 4.2; 5.6; 5.8 | factor-engine 2.4; classification-reader 2.4; classification-ui 10 | CAP-002-E2, CAP-002-E3, CAP-002-E5 | |
