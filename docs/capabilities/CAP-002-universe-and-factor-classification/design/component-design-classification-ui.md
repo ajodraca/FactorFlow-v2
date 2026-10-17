@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-classification-ui
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -10,28 +10,32 @@ created: 2026-10-16
 updated: 2026-10-16
 ai_provenance:
   agent_id: design-decomposition-agent
-  agent_version: "1.0"
+  agent_version: "1.1"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T07:40:00Z
+  timestamp: 2026-10-16T23:55:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "1"
+      version: "2"
     - id: CAP-002-ux-brief
-      version: "1"
+      version: "2"
     - id: CAP-002-ux-design
-      version: "1"
+      version: "2"
+    - id: PRODUCT-UX
+      version: "6, approved 2026-10-16"
+    - id: PRODUCT-UX-S03
+      version: "4, approved 2026-10-16"
     - id: STD-UI
-      version: "4"
+      version: "6"
     - id: tech-stack
       version: "5"
     - id: CAP-001-component-design-owner-web-app
       version: "4"
     - id: factorflow-design-system
-      version: "ported from the first build, 2026-09-05; textarea added 2026-09-05"
+      version: "as of 2026-10-15; checkbox and data-table virtualised added for the blueprint"
   invoking_user: ajodraca
   correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
 ---
@@ -44,25 +48,45 @@ ai_provenance:
 **Last Updated:** 2026-10-16
 
 This design was produced in an unattended `$design-run`. Choices no artifact
-fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
-(DEC-0064 to DEC-0067) and marked **PROVISIONAL**; the UX decisions DEC-0059
-to DEC-0063 are honoured, not re-decided. Two owner questions are carried, not
-answered: the Compare cap and the universe name length (section 14).
+fixes are recorded as decisions under `projects/factorflow-v2/decisions/` and
+marked **PROVISIONAL**; the UX decisions DEC-0060, DEC-0062, DEC-0063 and
+DEC-0072 to DEC-0078 are honoured, not re-decided.
+
+**Version 2 (2026-10-16)** aligns this design with the product UX blueprint
+(`PRODUCT-UX` v6) and its Research screen specification (`PRODUCT-UX-S03` v4),
+both approved on 2026-10-16 after version 1 was written, with STD-UI v6, and
+with the system design v2, UX brief v2 and UX design v2 refined for the same
+reason. Version 1's six screens, five routes and two rail destinations become
+S03 Research at `/research` plus four restyled pages under `/research/*`
+behind one rail destination (DEC-0068); the Classifications screen and its
+Classification currency region are folded into S03's Results pane, banner and
+as-of line (UX design v2 §1.1, §1.2); the `data-table` `expandable` list with
+its Marks column becomes the `virtualised` variant with the blueprint §4.4
+factor cell; the threshold toolbar panel becomes S03's Filters pane; the
+composition seam is re-stated per DEC-0069; the fetch layer follows the v2
+reads (`hide_incomplete`, `match_count`, `memberships`, compare 2 to 6, the
+summary read); Section 10 is regenerated from UX design v2; the tests follow.
+Version 1's open Compare cap is closed (DEC-0070). The two decisions this
+version records are DEC-0079 (read-side mechanics the system design leaves to
+the component designs) and DEC-0080 (test placement), both **PROVISIONAL**.
 
 ## 1. Overview
 
 The classification UI is the set of React screens and the fetch layer through
-which the owner reads classifications, builds and maintains universes,
-compares stocks and inspects the evidence behind every result. It is six
-screens, five client routes and two rail destinations mounted into the shell
-CAP-001 delivered: Classifications (`/classifications`), the classification
-currency region composed into every classification-bearing screen, Universes
-(`/universes`), Universe detail (`/universes/:universeId`), Compare
-(`/compare`) and Stock evidence (`/stocks/:symbol`). It is built from the UX
-design, which fixes every screen, state, component and token; this design
-translates that into a file structure, a data-fetching strategy, the
-composition into the delivered shell and a test plan, and changes nothing the
-UX design decided.
+which the owner reads scores, builds and maintains universes, compares stocks
+and inspects the evidence behind every result. It is the Research area of the
+product UX blueprint: one screener-and-inspector screen, S03 Research at
+`/research` (Filters pane, virtualised results table with selection tray,
+Inspector, not-current banner and as-of line), and the three pages blueprint
+§2.2 calls "CAP-002 page, restyled into this shell": Universes
+(`/research/universes`) and Universe detail (`/research/universes/:universeId`),
+Compare (`/research/compare?symbols=`) and Stock evidence
+(`/research/stocks/:symbol`), reached from a single rail destination, Research
+(blueprint §2.1, §2.2, §10 M1; DEC-0068). It is built from the UX design v2,
+which fixes every screen, state, component and token starting from S03; this
+design translates that into a file structure, a data-fetching strategy, the
+composition into the shell and a test plan, and changes nothing the UX design
+decided.
 
 CAP-002 is the first FactorFlow surface that renders a derived number. The
 acceptance criteria that exist because a plausible interface would lie,
@@ -73,144 +97,193 @@ colour alone, and nothing is asserted beyond a recorded row.
 
 Use cases addressed:
 
-- See every active stock classified after an acquisition, or told plainly
-  why not, under a dated currency statement (AC-9, AC-12, AC-14, AC-20 to
+- See every followed stock scored after a download, or told plainly why not,
+  under a dated as-of line naming the download (AC-9, AC-12, AC-14, AC-20 to
   AC-23; flow 1).
-- Build a universe by hand or save a reviewed filter result (AC-1, AC-2, AC-5;
-  flows 2, 3).
-- Sort, filter, compare and open the evidence, across all stocks or within a
-  universe (AC-16, AC-17; flow 4).
+- Build a universe by hand or save a reviewed result as a universe (AC-1,
+  AC-2, AC-5; flows 2, 3).
+- Sort, filter, search, compare and open the evidence, across all followed
+  stocks or within a universe (AC-16, AC-17; flow 4).
 - Understand and fix insufficient evidence (AC-13; flow 5).
 - Maintain universes over time with history kept and visible (AC-3, AC-4,
   AC-6, AC-15; flow 6).
 
 Support matrix: a modern desktop browser on the owner's machine, reaching
-`http://127.0.0.1:8000` only, as CAP-001 fixed; no mobile layout is specified.
-No authentication, no account area (capability section 5.3).
+`http://127.0.0.1:8000` only, as CAP-001 fixed; the design width is at least
+1280 px, the inspector moves below the list between 1024 and 1279 px and
+nothing is unreachable below 768 px (blueprint §3.1). No authentication, no
+account area (capability section 5.3).
 
 Dependencies: React 18, Vite, TypeScript 5.x, Tailwind CSS, `react-router-dom`,
-shadcn/ui on Radix primitives, the twelve component specifications under
-`design-system/components/` and `design-system/theme.css`; the delivered
-shell, `ScreenState` union, fetch helpers and windowed-table pattern of
-`owner-web-app`; the `classification-api` contract; CAP-001's `GET
-/api/instruments` and `GET /api/acquisition-runs/{id}` unchanged. TradingView
+shadcn/ui on Radix primitives, the eighteen component specifications under
+`design-system/components/` as of 2026-10-15 (twelve used, UX design v2 §3) and
+`design-system/theme.css`; the delivered shell, `ScreenState` union, fetch
+helpers and windowed-table pattern of `owner-web-app`; the `classification-api`
+contract (its section 2.7); CAP-001's `GET /api/instruments`,
+`GET /api/acquisition-runs/{id}` and `GET /api/health` unchanged. TradingView
 `lightweight-charts` is in the stack and **not used**: CAP-002 commits to no
 chart (STD-UI-9, 27, 28 not applicable).
+
+**Vocabulary.** User-visible text uses the STD-UI-1 v6 display labels
+(blueprint §7; DEC-0072): *stock*, *followed stock*, *stop following* and *Not
+followed*, *download*, *Complete* and *Partial*, *Incomplete*, *Not enough to
+rank*, and a factor's *score* shown as a *percentile* and a *standardised
+score* (never shortened to *score*). Code, API fields, URL query keys and this
+document keep the domain terms (`instrument`, `acquisition_run`,
+`not_classified`, `classification`); `copy.ts` is the one place the two meet.
 
 ## 2. Design Details
 
 ### 2.1 Placement
 
 ```
-web/src/app/shell.tsx                               + two DESTINATIONS entries (DEC-0064)
-web/src/app/routes.tsx                              + five Route elements (DEC-0064)
-web/src/api/client.ts                               + export on requestJson (DEC-0064)
+web/src/app/shell.tsx                               + one DESTINATIONS entry, Research (DEC-0069, PROVISIONAL)
+web/src/app/routes.tsx                              + five Route elements under /research (DEC-0068)
+web/src/api/client.ts                               + export on requestJson (DEC-0064, stands)
 web/src/api/classification-client.ts                typed fetch layer for /api/universes and /api/classifications
 web/src/api/classification-types.ts                 response types mirroring classification-api section 2.7
-web/src/screens/classifications/index.tsx           UX design 1.1
-web/src/screens/classifications/classification-table.tsx   the shared composition, used by 1.1 and 1.4
-web/src/screens/classifications/factor-cells.tsx    classified, not-classified, not-ranked, retired cell renderings
-web/src/screens/classifications/threshold-panel.tsx twelve bounds, Apply, summary, Clear
-web/src/screens/classifications/selection-bar.tsx   Compare selected, Create universe from selected, Clear
-web/src/screens/classifications/save-filter-dialog.tsx
-web/src/screens/classifications/currency-region.tsx UX design 1.2, composed into 1.1, 1.4, 1.5, 1.6
-web/src/screens/classifications/set-history.tsx
-web/src/screens/classifications/use-classification-poll.ts  the 10-second poll and refresh-once (DEC-0054, DEC-0062)
-web/src/screens/classifications/format.ts           DEC-0063 precision, sign, dates, zone
-web/src/screens/classifications/copy.ts             every owner-facing string, keyed by error code and state
-web/src/screens/universes/index.tsx                 UX design 1.3
-web/src/screens/universes/universe-table.tsx
-web/src/screens/universes/create-dialog.tsx         name + textarea list; prefill from a selection
-web/src/screens/universes/detail/index.tsx          UX design 1.4
-web/src/screens/universes/detail/summary-header.tsx inline rename, Add stocks, Retire
-web/src/screens/universes/detail/members-tab.tsx    classification-table scoped + As of + Remove
-web/src/screens/universes/detail/history-tab.tsx
-web/src/screens/universes/detail/add-stocks-dialog.tsx
-web/src/screens/universes/detail/remove-dialog.tsx  confirm, never destructive
-web/src/screens/universes/detail/retire-dialog.tsx  confirm, never destructive
-web/src/screens/compare/index.tsx                   UX design 1.5
-web/src/screens/compare/compare-table.tsx           native table composition, pinned row headers
-web/src/screens/stocks/index.tsx                    UX design 1.6
-web/src/screens/stocks/factor-card.tsx
-web/src/screens/stocks/history-tab.tsx
-tests/e2e/classifications-after-run.spec.ts
+web/src/api/research-query.ts                       URL query <-> ResearchQuery (thresholds, scope, hide_incomplete, symbol, sort), S03 §5
+web/src/components/patterns/factor-cell.tsx         blueprint §4.4 cell: percentile, bar, Incomplete, Not enough to rank, Not followed
+web/src/components/patterns/restated-mark.tsx       the Possibly restated mark (DEC-0075)
+web/src/components/patterns/inspector-panel.tsx     blueprint §4.5
+web/src/components/patterns/selection-tray.tsx      blueprint §4.6
+web/src/components/patterns/as-of-line.tsx          blueprint §4.8, specialised by DEC-0073
+web/src/components/patterns/not-current-banner.tsx  S03 §3, §4; DEC-0073
+web/src/components/patterns/comparison-table.tsx    UX design 1.5, native <table> composition
+web/src/screens/research/index.tsx                  UX design 1.1 (S03)
+web/src/screens/research/filters-pane.tsx           Find a stock, Look in, threshold sentences, Hide incomplete, Clear filters
+web/src/screens/research/threshold-sentence.tsx     blueprint §4.7 sentence builder, one per factor
+web/src/screens/research/results-pane.tsx           banner, h1, as-of line, Save as universe, table, STD-UI-18 footnote
+web/src/screens/research/results-table.tsx          data-table virtualised composition, shared with 1.4
+web/src/screens/research/save-as-universe-dialog.tsx
+web/src/screens/research/add-to-universe-dialog.tsx
+web/src/screens/research/set-history-dialog.tsx     DEC-0073, DEC-0078
+web/src/screens/research/use-score-set-poll.ts      the 10-second summary poll and refresh-once (DEC-0054, DEC-0062)
+web/src/screens/research/format.ts                  DEC-0063 precision, sign, dates, zone
+web/src/screens/research/copy.ts                    every owner-facing string, keyed by error code and state; display labels only
+web/src/screens/research/universes/index.tsx        UX design 1.3
+web/src/screens/research/universes/universe-table.tsx
+web/src/screens/research/universes/create-dialog.tsx
+web/src/screens/research/universes/detail/index.tsx UX design 1.4
+web/src/screens/research/universes/detail/summary-header.tsx   inline rename, Add stocks, Retire
+web/src/screens/research/universes/detail/members-tab.tsx      results-table scoped + Members as of + Remove
+web/src/screens/research/universes/detail/history-tab.tsx
+web/src/screens/research/universes/detail/add-stocks-dialog.tsx
+web/src/screens/research/universes/detail/remove-dialog.tsx    confirm, never destructive
+web/src/screens/research/universes/detail/retire-dialog.tsx    confirm, never destructive
+web/src/screens/research/compare/index.tsx          UX design 1.5
+web/src/screens/research/stocks/index.tsx           UX design 1.6
+web/src/screens/research/stocks/factor-card.tsx
+web/src/screens/research/stocks/history-tab.tsx
+tests/e2e/research-after-download.spec.ts
 tests/e2e/universe-by-hand.spec.ts
-tests/e2e/universe-from-filter.spec.ts
+tests/e2e/universe-from-result.spec.ts
 tests/e2e/compare-and-evidence.spec.ts
 tests/e2e/fix-insufficient-evidence.spec.ts
 tests/e2e/universe-maintenance.spec.ts
-tests/e2e/classifications-accessibility.spec.ts
-tests/e2e/classifications-volume.spec.ts
+tests/e2e/research-url-state.spec.ts
+tests/e2e/research-accessibility.spec.ts
+tests/e2e/research-volume.spec.ts
 ```
 
-Bulk symbol parsing reuses `web/src/screens/instruments/parse-bulk-symbols.ts`
-by import, so the recognised and rejected counts behave as CAP-001's *Add
-many* does (UX design section 1.3). Vendored shadcn/ui components live where
-`owner-web-app` placed them; none is added or overridden at a call site
-(STD-UI-29).
+`web/src/components/patterns/` is where UX design v2 §3 places the six
+compositions built once from existing components and tokens
+(`design-system/intake.md` step 1.3). The directory does not exist in the
+delivered tree today (`owner-web-app` §2.1 names `web/src/components/` for the
+vendored shadcn/ui sources; the delivered screens keep their cells and badges
+beside them), so this component creates it; nothing delivered moves. Bulk
+symbol parsing reuses `web/src/screens/instruments/parse-bulk-symbols.ts` by
+import, so the recognised and rejected counts behave as CAP-001's *Add many*
+does (UX design §1.3). Vendored shadcn/ui components live where
+`owner-web-app` placed them; none is overridden at a call site (STD-UI-29).
 
-### 2.2 Composition into the delivered shell
+### 2.2 Composition into the shell
 
-The three edits to delivered files are this component's (DEC-0064,
-PROVISIONAL) and change no delivered behaviour:
+The blueprint's §3 shell, its rail and the routes of §2 belong to the *App
+shell & data health* capability (§12 D-8), which is not yet defined. Until it
+lands, this component composes into the delivered CAP-001 shell at two seams
+and one export, as system design v2 §4.2 (Screen registration) and §8 question
+4 state (DEC-0068; DEC-0069, PROVISIONAL; DEC-0064's `requestJson` assignment
+stands). The three edits change no delivered behaviour:
 
 ```typescript
-// web/src/app/shell.tsx: two entries appended to DESTINATIONS, order fixed by DEC-0061
+// web/src/app/shell.tsx: exactly one entry appended to DESTINATIONS (DEC-0069).
+// The shell capability removes or replaces this line when it delivers the blueprint's rail.
 const DESTINATIONS = [
   { label: "Coverage", to: "/coverage" },
   { label: "Instruments", to: "/instruments" },
   { label: "Runs", to: "/runs" },
   { label: "Settings", to: "/settings" },
-  { label: "Classifications", to: "/classifications" },
-  { label: "Universes", to: "/universes" },
+  { label: "Research", to: "/research" },
 ] as const;
 
-// web/src/app/routes.tsx: five routes added before the catch-all
-<Route path="/classifications" element={<ClassificationsScreen />} />
-<Route path="/universes" element={<UniversesScreen />} />
-<Route path="/universes/:universeId" element={<UniverseDetailScreen />} />
-<Route path="/compare" element={<CompareScreen />} />
-<Route path="/stocks/:symbol" element={<StockEvidenceScreen />} />
+// web/src/app/routes.tsx: five routes added before the catch-all (DEC-0068, blueprint §2.2)
+<Route path="/research" element={<ResearchScreen />} />
+<Route path="/research/stocks/:symbol" element={<StockEvidenceScreen />} />
+<Route path="/research/compare" element={<CompareScreen />} />
+<Route path="/research/universes" element={<UniversesScreen />} />
+<Route path="/research/universes/:universeId" element={<UniverseDetailScreen />} />
 
-// web/src/api/client.ts: one keyword, so the envelope handling is shared, not copied
+// web/src/api/client.ts: one keyword, so the envelope handling is shared, not copied (DEC-0064)
 export async function requestJson<T>(input: string, init?: RequestInit): Promise<T> { ... }
 ```
 
 The landing redirect, the status region, the 30-second health poll, the
-unreachable state and the `ScreenState` union are untouched (UX design section
-0; AGT-SCOPE-002). The currency region is a CAP-002 composition inside CAP-002
-screens, never a third line in the shell's status region.
+unreachable state and the `ScreenState` union are untouched (UX design §0;
+AGT-SCOPE-002). Score-set state is shown where scores are shown, never in the
+shell (blueprint §3.5): no third line in the status region.
+
+**When the blueprint's shell lands** (UX design §0), nothing in this
+component's routes changes, because they are already the blueprint's. The shell
+capability removes the one appended `DESTINATIONS` entry, provides the top-bar
+title or breadcrumb (*Research*, *Research › Universes › Tech*, *Research ›
+AAPL*, *Research › Compare*) from the route, and migrates three link targets
+this component points at CAP-001 routes meanwhile: *download #{n}* and *Open
+Data health* (`/runs/:runId`, `/runs` today; `/data/downloads/:id`, `/data`
+then) and the followed-stocks link in refusals (`/instruments` today;
+`/data/followed` then). Those targets live in one map in `copy.ts`
+(`SHELL_ROUTES`), so the migration is one edit by the shell capability, not a
+search. Under the delivered shell the page ground is `--background`; under the
+blueprint's it is `hsl(var(--muted) / 0.5)`; the regions sit on `card`s in
+both, so no layout changes.
 
 ### 2.3 Screen and data-fetch map
 
 The diagram below shows which screen reads which endpoint and at what cadence,
-because cadence is specified behaviour under STD-UI-25. Only the currency
-region polls, every 10 seconds while a set is building or any run is
-non-terminal, and it stops otherwise (DEC-0054); universe, compare and
-evidence reads are on demand; row expansion and the origin line fetch once per
-interaction. The status region's 30-second health poll is CAP-001's and tells
-the region whether a run is non-terminal through `most_recent_run`. The
-expected outcome is an interface that is current where a set is being built
-and quiet everywhere else.
+because cadence is specified behaviour under STD-UI-25. Only the score-set
+state polls, `GET /api/classifications/summary` every 10 seconds while a later
+set is `building` or any download is non-terminal, and it stops otherwise
+(DEC-0054; system design v2 constraint 18; UX design §1.2). The list read, the
+universe reads, compare and evidence are on demand; the inspector reads one
+stock on each selection after the 150 ms debounce (S03 §6), because the list
+read carries no input rows (system design v2 §3.3 step 17). The status
+region's 30-second health poll is CAP-001's and tells the poll hook whether a
+download is non-terminal through `most_recent_run`. `GET
+/api/classifications/summary` is also the read the shell capability's Home and
+Data health screens consume (system design v2 §4.2, §8 question 10); this
+component consumes it for S03's header, banner and poll and does not render
+those screens. The expected outcome is an interface that is current where a
+set is being built and quiet everywhere else.
 
 ```mermaid
 flowchart LR
-    subgraph SHELL["Delivered shell (owner-web-app)"]
-        NAV["Rail: Coverage, Instruments, Runs, Settings,<br/>Classifications, Universes"]
+    subgraph SHELL["Delivered shell (owner-web-app), one appended destination"]
+        NAV["Rail: Coverage, Instruments, Runs, Settings, Research"]
         ST["Status region, health poll 30s"]
     end
-    subgraph SCREENS["CAP-002 screens"]
-        CL["1.1 Classifications<br/>on demand"]
-        CU["1.2 Currency region<br/>poll 10s while building or run non-terminal"]
+    subgraph SCREENS["CAP-002 screens under /research"]
+        RS["1.1 Research (S03)<br/>list on demand; inspector per selection"]
+        SS["1.2 Score-set state (as-of line, banner)<br/>summary poll 10s while building or download non-terminal"]
         UN["1.3 Universes<br/>on demand"]
-        UD["1.4 Universe detail<br/>on demand"]
+        UD["1.4 Universe detail<br/>on demand; members = 1.1 scoped"]
         CO["1.5 Compare<br/>on demand"]
         SE["1.6 Stock evidence<br/>on demand"]
     end
     subgraph API["classification-api"]
-        GC["GET /api/classifications"]
+        GC["GET /api/classifications<br/>(+hide_incomplete, match_count; symbols 2–6)"]
+        GSUM["GET /api/classifications/summary"]
         GS["GET /api/classifications/sets"]
-        GE["GET /api/classifications/stocks/{symbol}"]
+        GE["GET /api/classifications/stocks/{symbol}<br/>(+memberships)"]
         GH["GET .../stocks/{symbol}/history"]
         GU["GET/POST /api/universes"]
         GUD["GET/PATCH/DELETE /api/universes/{id}"]
@@ -221,23 +294,30 @@ flowchart LR
         GI["GET /api/instruments"]
         GR["GET /api/acquisition-runs/{id}"]
     end
-    NAV --> CL & UN
-    CL --> GC
-    CL -->|row expansion| GE
-    CL -->|Save as universe| GU
-    CU --> GC
-    CU --> GS
-    CU -->|run link| GR
+    subgraph SHELLCAP["App shell & data health (undefined; not this design's)"]
+        HOME["Home S01, Data health S09<br/>shell-home-and-data-health-ui (unpublished)"]
+    end
+    NAV --> RS
+    RS --> GC
+    RS -->|Look in options| GU
+    RS -->|inspector, per selection| GE
+    RS -->|Save as universe; Add to universe| GU & GUM
+    SS --> GSUM
+    SS -->|Earlier sets…| GS
+    SS -->|download link| GR
     UN --> GU
-    UN -->|origin on expansion| GUD
+    UN -->|origin on expansion| GUE
     UD --> GUD & GUE & GUM
     UD -->|members table| GC
+    UD -->|inspector| GE
     CO --> GC
     CO -->|per column| GE
     SE --> GE & GH
-    ST -.->|most_recent_run non-terminal| CU
-    CL & UD --> CO
-    CL & UD & CO --> SE
+    ST -.->|most_recent_run non-terminal| SS
+    RS & UD & CO & SE --- SS
+    RS & UD --> CO
+    RS & UD & CO --> SE
+    HOME -.->|consumes| GSUM
 ```
 
 ### 2.4 State rendering and the fetch layer
@@ -245,12 +325,13 @@ flowchart LR
 Every fetched region renders the `ScreenState` union `owner-web-app` section
 2.4 fixed, reused by import from `web/src/api/types.ts`: `loading`,
 `empty-never-populated`, `empty-no-match`, `populated`, `partial`,
-`unavailable`, `error`, `unreachable`. The two empty variants are kept apart
+`unavailable`, `error`, `unreachable`, as UX design v2 enumerates them per
+screen (S03 §7 for Research). The two empty variants are kept apart
 everywhere both can occur: `never_classified: true` is `empty-never-populated`
-and a threshold or search matching nothing is `empty-no-match` (AC-22). A
-not-ranked factor is `unavailable` per column pair, never per screen (AC-14,
-STD-UI-14). A `not_current` set is rendered as `populated` with the currency
-region in its stale state, because the data is real and marked (AC-20).
+and thresholds or a search matching nothing is `empty-no-match` (AC-22). A
+not-ranked factor is `unavailable` per column, never per screen (AC-14,
+STD-UI-14). A `not_current` set is rendered as `populated` with the banner in
+its stale state, because the data is real and marked (AC-20).
 
 `classification-client.ts` wraps every CAP-002 endpoint over the exported
 `requestJson`, so a transport failure is `ApiUnreachableError` (the shell's
@@ -258,12 +339,12 @@ unreachable state) and a non-2xx status is `ApiError` with its `code`, never
 conflated. It maps snake_case to camelCase field by field, as `client.ts`
 does, and keeps dates as the wire's `YYYY-MM-DD` strings, never parsed into
 `Date` (STD-UI-5). `ApiError` is read by `code` only; `message` is never
-rendered (UX design section 4), and `copy.ts` holds one owner-facing sentence
-per code and state. The `instrument_not_acquired` envelope's `symbols` field is
-exposed on the error so the dialogs name every uncovered stock.
+rendered (UX design §4), and `copy.ts` holds one owner-facing sentence per code
+and state in display labels. The `instrument_not_acquired` envelope's `symbols`
+field is exposed on the error so the dialogs name every unfollowed stock.
 
 ```typescript
-// web/src/api/classification-types.ts (excerpt)
+// web/src/api/classification-types.ts (excerpt; mirrors classification-api section 2.7)
 export type FactorName = "value" | "growth" | "momentum";
 export type ReasonCode =
   | "input_missing" | "input_outdated" | "input_not_computable" | "not_enough_stocks" | "retired";
@@ -284,115 +365,292 @@ export interface CurrentSet {
   runId: string;
   runOutcome: "succeeded" | "partial";
   startedAt: string;
-  endedAt: string;
+  endedAt: string;               // the as-of line's "Scores from {date} {time}" (DEC-0073)
+  activeInstruments: number;     // peerCounts.followed (S03 §5)
   notCurrent: { setId: string; state: "building" | "failed"; runId: string;
                 startedAt: string; endedAt: string | null; failureReason: string | null } | null;
 }
 
 export interface FactorSummary { qualifiedCount: number; ranked: boolean; minPeerSetSize: number }
+
+export interface ClassificationList {
+  neverClassified: boolean;
+  set: CurrentSet | null;
+  factors: Record<FactorName, FactorSummary>;
+  matchCount: number;            // over the whole filtered set, never the page (S03-2)
+  stocks: StockRow[];
+  unknownSymbols: string[];      // compare only
+  nextCursor: string | null;
+}
+
+export interface ClassificationSummary {          // GET /api/classifications/summary (DEC-0071)
+  neverClassified: boolean;
+  set: CurrentSet | null;
+  factors: Record<FactorName, FactorSummary>;
+  stocksCurrent: { currentCount: number; followedCount: number } | null;
+}
+
+export interface Membership { universeId: string; name: string }
+
+export interface StockEvidence {
+  symbol: string; name: string; lifecycle: "active" | "retired";
+  set: CurrentSet | null;
+  factors: Record<FactorName, FactorCell>;
+  inputs: InputRow[];            // factor, inputName, label, status, value, asOf, knownOn, restatedPossible, detail
+  memberships: Membership[];     // the inspector's "In Tech and Dividend growers" line
+}
 ```
+
+**URL query state** (`research-query.ts`; S03 §5, S03-5; UX design §0). On
+Research and on a universe's Members tab, every filter is in the URL query and
+nowhere else: `scope` (`all`, or a `universe_id`; absent on universe detail,
+where the route is the scope), the three threshold sentences as
+`{factor}.measure`, `{factor}.direction`, `{factor}.value`, `hide_incomplete`,
+`symbol` (the *Find a stock* prefix, DEC-0074) and `sort`/`order`. The module
+is a pure, round-trippable codec from `URLSearchParams` to a `ResearchQuery`
+and to the list read's request parameters: a sentence `{measure, direction,
+value}` becomes exactly one of the twelve bounds (`percentile` + `atLeast` →
+`{factor}_percentile_min`, `standardisedScore` + `atMost` →
+`{factor}_score_max`, and so on; system design v2 §3.3 step 15), so no new
+filter model exists and the saved `filter` of a universe is the same object
+the URL carried (DEC-0076). Checked rows (`checked: symbol[]`) and the selected
+row are client state kept by symbol across filter, sort and scope changes and
+across the set refresh (S03 §5; DEC-0062); the as-of date and active tab on
+universe detail and the active tab on evidence are in the URL per the `tabs`
+contract; the compared symbols are the `symbols` query on compare.
 
 `format.ts` is the one place numbers and dates become text (STD-UI-3,
 DEC-0063): `formatScore` gives two decimals with an explicit `+` or `−` and
 `0.00` unsigned; `formatPercentile` a whole number 0 to 100 with no sign and
 no `%`; `formatRatio` two decimals; `formatRate` a signed percentage at two
 decimals; `formatAmount` whole currency units with thousands separators and no
-abbreviation (STD-UI-6); `formatTimestamp` America/Chicago with the zone shown;
-dates pass through unconverted. Sorting and thresholds never touch rendered
-text: they are requests.
+abbreviation (STD-UI-6); `formatTimestamp` America/Chicago with the zone shown
+(*CDT* or *CST* as the instant falls); dates pass through unconverted. Sorting
+and thresholds never touch rendered text: they are requests.
 
-### 2.5 The classification table and its cells
+### 2.5 The results table, the factor cell and the panes
 
-`classification-table.tsx` is the one composition behind Classifications and
-the Members tab (UX design section 1.4: *the Section 1.1 composition scoped to
-this universe*), parameterised by scope (`universeId` or none), the extra
-Member since column and Remove action, and whether Save as universe is
-offered. It is the `data-table` `expandable` variant with row selection,
-rendered as a keyset-paginated list with windowed rendering over the loaded
-pages, exactly as `owner-web-app` section 2.6 implemented the coverage table,
-at `DEFAULT_PAGE_SIZE` 50 and `MAX_PAGE_SIZE` 500 (STD-UI-30; the
-specification's pagination-not-virtualisation gap is inherited and recorded in
-section 14). Sort, thresholds, scope and search are URL state and become
-request parameters; nothing is sorted or filtered in the browser.
+`results-table.tsx` is the one composition behind S03's Results pane and the
+Members tab (UX design §1.4: *S03's results pane and inspector scoped to the
+universe*), parameterised by scope (`universeId` or none), the extra **Member
+since** column and in-row **Remove…**, and whether **Save these {n} as a
+universe…** is offered. It is the `data-table` `virtualised` variant with the
+base contract's row checkboxes (S03 §4; design system `data-table` §2):
+windowed rows over keyset pages at `DEFAULT_PAGE_SIZE` 50 and `MAX_PAGE_SIZE`
+500, sorting, filtering and counting server-side over the full set (S03 §6;
+STD-UI-30, now discharged by the variant, UX brief v2 §12.1). Columns: checkbox
+(*Select {SYMBOL}*, 24 px target) · Symbol (row header, `--font-numeric`,
+sortable, default ascending; not a link, because click and `Enter` on the row
+select it into the inspector) · Name · Value · Growth · Momentum, each factor
+header carrying its swatch (`--factor-*`) and name, sortable on percentile and
+through the allowlist on standardised score, with the arrow and `aria-sort`.
+The `h1` reads *{n} stocks match* from `matchCount` (S03 §3, S03-2), or *{n} of
+{m} members match* on universe detail.
 
-`factor-cells.tsx` renders the four cell kinds the UX design fixes, and
-`tests/unit`-level Vitest tests pin each:
+`factor-cell.tsx` (`web/src/components/patterns/`) renders blueprint §4.4, and
+Vitest tests pin each rendering:
 
 | Cell | Rendering | Tokens |
 |------|-----------|--------|
-| Classified | score cell `formatScore`, percentile cell `formatPercentile`, both `--font-numeric`, right- and decimal-aligned; `badge` `outline` *Possibly restated* with icon on value and growth cells where `restatedPossible` (AC-23, STD-UI-17) | `--foreground`, `--border` |
-| Not classified (`input_missing`, `input_outdated`, `input_not_computable`) | the pair merged (`colspan` 2, headed by both headers): em dash in `--value-missing`, `badge` `status-warning` *Not classified*, the input named from `reasonDetail` in product vocabulary; never `0.00` (AC-12, STD-UI-4) | `--status-warning` on `--status-warning-muted`, `--value-missing` |
-| Retired (`retired`) | the pair merged: `badge` `status-neutral` *Retired* and *Not classified, retired* (AC-15, DEC-0059) | `--status-neutral` on `--status-neutral-muted` |
-| Not ranked (`ranked: false` for the factor) | stated once in the pair's header: `badge` `status-serious` *Not ranked*, *18 of 30 stocks qualified* from `qualifiedCount` and `minPeerSetSize`; every cell in the pair merged with `--pattern-indeterminate` over `--value-indeterminate-muted` and the text *Not ranked*; the pair's sort controls removed (AC-14, STD-UI-14) | `--status-serious`, `--value-indeterminate`, `--pattern-indeterminate` |
+| Scored (`classified`) | the percentile in `--font-numeric` weight 600, right-aligned in a fixed 22 px box, then a 52 px bar filled to the percentile, `aria-hidden`; the standardised score never appears in the list (inspector and evidence only); the *Possibly restated* mark after the number where `restatedPossible` (AC-23, S03-6) | `--foreground`; `--seq-4` on `--seq-1` |
+| Incomplete (`not_classified`, reason `input_missing`, `input_outdated`, `input_not_computable`) | `badge` `coverage-absent` *Incomplete* in place of number and bar; the S03 §8 sentence as the cell's tooltip (*Incomplete: revenue for the quarter ending 2025-06-27 is missing, so growth can't be compared fairly. It isn't guessed.*, with *is outdated* or *couldn't be computed*), inputs named in product vocabulary from `reasonInput`; never a number, never `0` (AC-12, STD-UI-4, STD-UI-14; DEC-0072) | `--value-missing` on `--value-missing-muted` |
+| Not enough to rank (`ranked: false` for the factor; reason `not_enough_stocks`) | `badge` `coverage-unknown` *Not enough to rank* in every cell of the column; the column header adds *{n} qualified, 30 needed* from `qualifiedCount` and `minPeerSetSize`, so a screen reader hears the count once; the column's sort control is removed (AC-14, S03-4, S03 §7 *Unavailable*) | `--value-indeterminate` on `--value-indeterminate-muted` with `--pattern-indeterminate` |
+| Not followed (`lifecycle` retired; reason `retired`) | `badge` `status-neutral` *Not followed* in every factor cell, tooltip *Not followed since {date}. Earlier scores stand.*; neutral, never a fault (AC-15; DEC-0073). Such a stock appears only under a universe scope, on universe detail, compare and evidence, never under *All followed stocks* | `--status-neutral` on `--status-neutral-muted` |
 
-A measured zero renders `0.00`; blank means only that a column does not apply
-to the row (Lifecycle on an active instrument). No `--gain`, `--loss` or
-`--factor-*` token is used anywhere (DEC-0060; UX design section 1.1).
+`restated-mark.tsx` is the DEC-0075 composition (PROVISIONAL, resolving review
+v4 FINDING-56): an inline element carrying the `badge` `status-neutral` tokens
+(`--status-neutral` on `--status-neutral-muted`, `--radius`, `--text-xs`) whose
+text content is *Possibly restated*, rendered visually hidden, with the glyph
+*R* drawn `aria-hidden` beside it. Its accessible name is therefore the words,
+no `badge` component is used and no accessible-name override is needed (badge
+specification §5). It renders on every percentile that carries the mark, in
+the results, the inspector, universe detail, compare, evidence and history
+(S03-6, STD-UI-17); the explanation sentence lives in the inspector and on the
+evidence page, never in the cell. A measured `0.00` renders as such in the
+inspector and evidence; blank means only that a column does not apply (Member
+since on Research). No `--gain`, `--loss` or `--factor-*` token is applied to a
+value (DEC-0060); the swatch is identity in headers only (STD-UI-7).
 
-### 2.6 Polling, currency and refresh-once
+**The Filters pane** (`filters-pane.tsx`; S03 §3; UX design §1.1), top to
+bottom: *Find a stock* (`input` `text`, placeholder *Symbol*, DEC-0074,
+PROVISIONAL, a recorded departure from S03 for STD-UI-30, matching the symbol
+prefix through the list read's `symbol` parameter); *Look in* (`select`
+`inline`, *All followed stocks · {n}* from `activeInstruments` and each active
+universe from `GET /api/universes`); three `threshold-sentence.tsx` rows
+(blueprint §4.7: swatch and name, then `select` `inline` *percentile* |
+*standardised score*, `select` `inline` *at least* | *at most*, `input`
+`numeric` 56 px placeholder *any*, accessible names *Measure for value*,
+*Direction for value*, *Value threshold*), validated on blur (percentile 0 to
+100, finite standardised score; field error in `--destructive` before any
+request; system design v2 constraint 15), a blank value meaning no threshold on
+that measure; `checkbox` `default` *Hide stocks with an incomplete score*
+(default off, helper *They're shown by default so nothing disappears
+silently.*); **Clear filters** (`button` `ghost`, DEC-0078) at the foot,
+rendered whenever any filter is active, resetting the URL query to the defaults
+and leaving the sort. On universe detail the pane has no *Look in* and gains
+*Members as of* (`form` `inline`, `input` `text`, ISO-8601) above **Clear
+filters**. Every change applies on selection or blur as a request; rows stay
+visible and dimmed while the new result loads; focus does not move; the new
+match count is announced politely (`data-table` contract).
 
-The sequence below shows the currency region's behaviour from a run ending to
-the screen showing the new set, which is flow 1 step 3's *without any further
-action* and AC-20's honesty made concrete. The region starts polling when the
-set block reports `notCurrent.state === "building"` or the shell's health
-reports a non-terminal `most_recent_run`, and stops when neither holds; while
-polling it shows *Last checked* with the zone (STD-UI-25). The decision point
-is the poll that reports the building set complete: the region announces
-politely, and the host table dims, reloads once from its first page with sort,
-thresholds, scope, expansion and selection preserved by symbol (DEC-0062), and
-no further automatic replacement happens until another set completes. A failed
-attempt leaves the previous set, the warning mark and adds the critical badge
-with the recorded reason and the next-run sentence; nothing is offered to
-retry (system design 3.1 step 27, STD-UI-2).
+**Selecting and checking** (S03 §6) never interfere: click or `Enter` on a row
+selects it into the inspector (`aria-selected`, 3 px inset `--status-active`
+edge on `--status-active-muted`); `Space` on its checkbox checks it (the
+table's `--muted` background); `↑`/`↓` move the selection and the inspector
+follows after a 150 ms debounce, which is when the stock read is issued, so
+holding an arrow key does not issue a request per row. Checking never selects.
+
+**The selection tray** (`selection-tray.tsx`; blueprint §4.6) pins to the foot
+of the Results card when one or more rows are checked: `--foreground` fill
+with `--background` text, `role="region"` labelled *Selection*, announced
+politely as *{n} selected*; **Compare side by side** is enabled while 2 to 6
+rows are checked (S03 §6; DEC-0070) and otherwise renders `button` `blocked`
+with *Check 2 to 6 stocks to compare them.*; **Add to universe…** opens its
+dialog (section 2.7).
+
+**The inspector** (`inspector-panel.tsx`; blueprint §4.5; S03 §3; `card`
+`summary`, `section` labelled *Selected stock*) renders *Select a stock to see
+why it scores as it does.* when nothing is selected and otherwise, from one
+`GET /api/classifications/stocks/{symbol}` per selection: the symbol at
+`--text-xl` `--font-numeric` and name (with `badge` `status-neutral` *Not
+followed* where it applies); the memberships line *In Tech and Dividend
+growers* with each name a link to `/research/universes/:universeId`, or *In no
+universe* (`memberships`, DEC-0071); one block per factor with the percentile
+in weight 600 (and the mark), the standardised score in `--muted-foreground`
+signed at two decimals (DEC-0063), and one `--text-xs` line naming the inputs
+and their `as_of` and `known_on` dates (S03-3); the *Incomplete* explanation
+box when any factor is incomplete, carrying the S03 §8 sentence per factor,
+the *Not followed since {date}. Earlier scores stand.* sentence for a stock no
+longer followed, and the STD-UI-17 sentence where a mark appears; **See every
+input and its date** (`button` `outline` rendered as a link to
+`/research/stocks/:symbol`); the S03 §8 footnote. The holdings line and **Start
+a strategy from this screen** are M2 and absent, not disabled (UX design
+§1.1). Below 1280 px the panel moves below the list (blueprint §4.5).
+
+### 2.6 Score-set state, polling and refresh-once
+
+The sequence below shows the as-of line and banner's behaviour from a download
+ending to the screen showing the new set, which is flow 1 step 3's *without
+any further action* and AC-20's honesty made concrete (UX design §1.2;
+DEC-0054; DEC-0062, PROVISIONAL; DEC-0073, PROVISIONAL). `use-score-set-poll.ts`
+starts polling `GET /api/classifications/summary` when the set block reports
+`notCurrent.state === "building"` or the shell's health reports a non-terminal
+`most_recent_run`, and stops when neither holds; while polling the as-of line
+shows *checked {time}* (STD-UI-25). The decision point is the poll that
+reports the building set complete: the as-of line announces politely *Scores
+updated to {date} {time} {zone}, download #{n}*, the banner leaves, and the
+host table dims and reloads once from its first page with sort, thresholds,
+scope, hide-incomplete, search, the selected row and the checked rows preserved
+by symbol (DEC-0062), and no further automatic replacement happens until
+another set completes. A failed attempt leaves the previous set, replaces the
+warning banner with the `status-critical` *Score update failed {time}:
+{reason}. Showing scores produced {time} from download #{n}. The next complete
+download will try again.* banner (DEC-0073), and offers nothing to retry
+(system design 3.1 step 27, STD-UI-2). The summary read is chosen for the poll
+because it carries the set block and no stock rows (DEC-0071), so the poll
+never reloads the page it is watching.
 
 ```mermaid
 sequenceDiagram
-    participant R as acquisition run
-    participant C as currency-region (use-classification-poll)
+    participant R as download (acquisition run)
+    participant P as use-score-set-poll (as-of line, banner)
     participant A as classification-api
-    participant T as classification-table
+    participant T as results-table / host screen
 
     R->>R: ends succeeded | partial
-    Note over C: health poll reports most_recent_run terminal; set block not yet building
-    C->>A: GET /api/classifications (poll 10 s)
-    A-->>C: set, notCurrent {state: building, startedAt}
-    C->>C: badges Not reflecting the latest acquisition + Updating; Last checked hh:mm:ss America/Chicago
+    Note over P: health poll reports most_recent_run terminal; set block not yet building
+    P->>A: GET /api/classifications/summary (poll 10 s)
+    A-->>P: set, notCurrent {state: building, startedAt}
+    P->>P: banner status-warning Not reflecting the latest download; as-of line adds Updating + checked hh:mm:ss CDT
     loop every 10 s while building
-        C->>A: GET /api/classifications
+        P->>A: GET /api/classifications/summary
     end
     alt building set complete
-        A-->>C: set is the new set, notCurrent null
-        C->>C: announce politely: Classifications updated to <date>, from acquisition run ...
-        C->>T: refresh once (dim, reload page 1, keep sort, thresholds, scope, expansion, selection by symbol)
-        C->>C: stop polling
+        A-->>P: set is the new set, notCurrent null
+        P->>P: announce politely: Scores updated to <date> <time> <zone>, download #<n>; banner leaves
+        P->>T: refresh once (dim, reload page 1, keep sort, thresholds, scope, hide-incomplete, search, selection, checked by symbol)
+        P->>P: stop polling
     else attempt failed
-        A-->>C: previous set, notCurrent {state: failed, failureReason}
-        C->>C: keep warning; add Classification failed with the reason and the next-run sentence; stop polling
+        A-->>P: previous set, notCurrent {state: failed, failureReason}
+        P->>P: banner status-critical Score update failed <time>: <reason>; stop polling
     end
 ```
 
-A poll that fails leaves the displayed set and its mark in place and sets the
-region's own Error state with a retry; it never clears a mark (UX design
-section 1.2).
+A poll that fails leaves the displayed set and its banner in place and adds
+*Could not check for newer scores.* with **Try again** under the as-of line;
+it never clears a mark (UX design §1.2). On the universes list, which shows no
+score, no poll runs; a set completing or failing while the owner is there
+surfaces once as `toast` `info` or `error`.
 
-### 2.7 Dialogs and refusals
+**The as-of line** (`as-of-line.tsx`; blueprint §4.8; DEC-0073) reads *Scores
+from 2026-10-15 17:46 CDT, download #412 · sorted by value*, from `endedAt`,
+`runId` and the current sort, with the download's outcome as `badge`
+`status-good` *Complete* or `status-warning` *Partial* (`runOutcome`), the
+*sorted by* clause omitted on compare and evidence, and **Earlier sets…**
+(`button` `ghost`, DEC-0078) at its end opening `set-history-dialog.tsx`
+(`dialog` `standard` with a `data-table` `history` over `GET
+/api/classifications/sets`: State, Scores date, Download, Started, Ended, three
+qualified counts, Reason). The download link's accessible name is *Open
+download …*. **The download's visible identifier** is the one open gap in the
+line: S03 and the UX design write *download #{n}*, and no artifact or table
+supplies a download number (`acquisition_run.run_id` is a UUID, migration
+`0004`; the delivered run detail titles a run by its full id). Until a number
+exists, the link text is *download {run_id}* in `--font-numeric`, the same
+identifier the destination page shows, so the two agree and nothing is
+invented (DEC-0079, PROVISIONAL; section 14).
 
-Every write follows the UX design's wording and tier (UX brief section 3,
-STD-UI-19): creating, renaming and adding members are routine; removing a
-member and retiring a universe are consequential and take `dialog` `confirm`,
-never `destructive` (STD-UI-2). Every precondition the interface can know
-renders `button` `blocked` with its reason, focusable and exposed through
-`aria-describedby`, with the server's code as the backstop: no symbol
-entered, no stock matching the filter, the sole member, more than 1000
-symbols, more than 500 compared. Refusals from the server render by code
-through `copy.ts`: `instrument_not_acquired` names every symbol from the
-envelope's `symbols` and links to Instruments; `universe_name_in_use` attaches
-to the Name field; `classification_set_changed` keeps the dialog open and
-replaces Save with *Review new result*; `last_member` keeps the dialog open
-with a *Retire universe* action; `universe_retired` states that the universe
-cannot be changed and that its history is viewable. Success routes or changes
-the table in view, so no `toast` is used (UX design section 3, the disagreement
-with the brief recorded there and honoured here).
+### 2.7 Dialogs, confirmations and refusals
+
+Every write follows the UX design's wording and the blueprint's tier (§9;
+DEC-0072; STD-UI-19): saving a result as a universe, selecting, comparing,
+creating, renaming and adding members are routine with no confirmation;
+removing a member and retiring a universe are consequential and take `dialog`
+`confirm`, never `destructive` (STD-UI-2). Every precondition the interface
+can know renders `button` `blocked` with its reason, focusable and exposed
+through `aria-describedby`, with the server's code as the backstop: no symbol
+entered, zero matches (*No stocks match these filters, so there is nothing to
+save.*, DEC-0076), the sole member, more than 1000 symbols, fewer than 2 or
+more than 6 compared (DEC-0070).
+
+**Save these {n} as a universe…** (`save-as-universe-dialog.tsx`; AC-2, S03
+§6, S03-7; DEC-0076, PROVISIONAL) is `dialog` `standard` with `form` `dialog`:
+title *Save these {n} stocks as a universe*, the description *{n} stocks,
+including {m} with an incomplete score* when m > 0 plus the scope and
+thresholds in words, one name field, confirm **Save**. The request posts
+`{"name", "filter", "set_id"}` where `filter` is the `ResearchQuery`'s
+thresholds **and `hide_incomplete`** and `set_id` is the set on screen, so the
+server's snapshot equals the displayed result: a stock incomplete on an
+unthresholded factor is a member, hidden stocks are not. On `201` the dialog
+closes and `toast` `success` *Saved {n} stocks as {name}* links to the new
+universe (STD-UI-24). `409 universe_name_in_use` attaches to the name field;
+`409 classification_set_changed` keeps the dialog open with *Could not save
+these stocks as a universe: the scores changed while you were reviewing them.
+Review the new result, then save again.* and replaces the confirm with
+**Review new result**, which closes onto the already-refreshed table. The
+control is not offered under a universe scope (the save carries thresholds
+only, system design v2 §4.2). `m` is counted client-side over the loaded rows
+only when every matching row is loaded; otherwise the sentence omits the
+*including* clause rather than guessing (STD-UI-15).
+
+**Add to universe…** (`add-to-universe-dialog.tsx`) is `dialog` `standard` with
+a `select` `default` of active universes plus *New universe* (revealing a name
+field); it posts `POST /api/universes/{id}/members` or `POST /api/universes`;
+`toast` `success` *Added {n} stocks to {name}* with *, and {m} were already
+members* when m > 0 (AC-4; `already_member` is reported, never errored).
+
+Refusals render by code through `copy.ts`: `instrument_not_acquired` names
+every symbol from the envelope's `symbols` (*Could not create the universe:
+FactorFlow doesn't follow MSFT, TSLA. Follow them on Data health, then try
+again.*) and links to the followed-stocks page, keeping the entered list;
+`universe_name_in_use` attaches to the Name field; `last_member` keeps the
+remove dialog open with a **Retire…** action; `universe_retired` reads *This
+universe is retired and can't be changed. Its members and history are still
+viewable.*; `instrument_not_found` on compare is the field error *FactorFlow
+doesn't follow a stock named XYZ.*. Creating by hand routes to the new
+universe's detail with no toast, because the result is on screen (`toast`
+contract); removal, retirement and the two bulk actions confirm by `toast`
+`success` (DEC-0076). Version 1's no-toast position is withdrawn with the UX
+design's (its §3).
 
 ### 2.8 Messages
 
@@ -404,35 +662,58 @@ interface learns of state change by polling at the cadence in section 2.6
 
 - **Loopback only, no authentication** (capability section 5.3). Nothing in
   these screens assumes a principal.
-- **STD-UI v4 is binding.** The capability's section 5.4 and the UX brief's
-  section 12 record which rules apply and where each is satisfied; this design
-  implements that record.
-- **The UX design is the contract.** Screens, states, components, variants,
-  tokens, copy and accessibility are the UX design's; where this design names
-  a file or a hook it changes none of them.
-- **Composition, not amendment** (AGT-SCOPE-002; DEC-0064). Two destinations
-  appended after Settings in the order Classifications, Universes (DEC-0061);
-  five routes; one export. Nothing else in `owner-web-app` changes.
+- **STD-UI v6 is binding.** The capability's section 5.4 and the UX brief v2's
+  section 12 record which rules apply and where each is satisfied against v6,
+  citing blueprint §11 where the blueprint discharges a rule; this design
+  implements that record. STD-UI-30 is discharged, not partial: the
+  `data-table` `virtualised` variant plus *Find a stock* and the Filters pane.
+- **The UX design v2 is the contract, and S03 beneath it.** Screens, states,
+  components, variants, tokens, copy and accessibility are the UX design's;
+  departures from S03 are the UX design's recorded ones (DEC-0073 to
+  DEC-0078), and this design adds none. The M2 controls S03 names (**Use in a
+  strategy**, **Start a strategy from this screen**, the holdings line) are
+  absent, not disabled.
+- **Composition, not amendment** (AGT-SCOPE-002; DEC-0069, PROVISIONAL). One
+  destination appended after Settings; five routes under `/research`; one
+  export. Nothing else in `owner-web-app` changes, and the shell capability
+  removes the appended entry (section 2.2). The dependency on that capability
+  is the owner's to record in the capability's §5.1 (section 14).
+- **Display labels, never domain terms, in user-visible text** (STD-UI-1 v6;
+  DEC-0072). `copy.ts` is reviewed against blueprint §7; code, URL keys and
+  API fields keep the domain terms.
 - **No chart** (STD-UI-9, 27, 28 not applicable). `lightweight-charts` is not
   imported.
-- **No `toast`** in this capability (UX design section 3).
-- **Numbers render at DEC-0063's precision**, signed scores, whole-number
-  percentiles, no polarity colour (DEC-0060), tabular figures (STD-UI-3).
+- **Numbers render at DEC-0063's precision**, signed standardised scores,
+  whole-number percentiles, no polarity colour (DEC-0060), tabular figures
+  (STD-UI-3); the standardised score renders in `--muted-foreground` and never
+  in a list cell (blueprint §4.4).
 - **Dates and timestamps**: ISO-8601, America/Chicago with the zone shown,
   session and period dates unconverted (STD-UI-5).
-- **Server-side everything**: sort, thresholds, search, scope, paging are
-  requests (STD-UI-30); nothing is computed in the browser beyond formatting.
-- **Interim threshold composition.** The threshold panel is `input` `numeric`
-  fields in a `form` `inline` disclosed from a toolbar control, the brief's
-  interim for the one COMPONENT-SPEC-GAP; when the design system gains a
-  numeric toolbar filter the panel maps to it and nothing else changes.
+- **Server-side everything**: sort, thresholds, search, scope, hide-incomplete,
+  count and paging are requests (STD-UI-30, S03 §6); nothing is computed in
+  the browser beyond formatting.
+- **URL query is the filter state** (S03 §5, S03-5): a request parameter and a
+  URL key exist for every filter; checked rows and the selected row are client
+  state.
 - **Density tier is inherited** (OQ-UI-4), as CAP-001 did; no token is
-  introduced (STD-UI-29).
-- **Bounds are the API's**: 1000 symbols per submission, 500 compared, pages
-  of 50 to 500; the universe name length is open (section 14).
+  introduced (STD-UI-29); the pixel widths S03 fixes (220 to 250, 300 to 340,
+  22, 52, 56 px) bind the layout, not the theme.
+- **Bounds are the API's**: 1000 symbols per submission, 2 to 6 compared
+  (DEC-0070), pages of 50 to 500; the universe name length is open (section
+  14).
+- **The system design is read with two component-level refinements the UX
+  design requires**, flagged for the system-design owner rather than applied
+  there (section 14; DEC-0079): `hide_incomplete` hides stocks whose
+  `not_classified` reason is an input reason (`input_missing`,
+  `input_outdated`, `input_not_computable`), not `not_enough_stocks` and not
+  `retired`, otherwise one unranked factor would empty the list; and the
+  unscoped list excludes retired instruments (DEC-0073), while a universe scope
+  keeps them.
 - **Assumption: one browser tab**, as CAP-001 assumed.
 - **Assumption: `parse-bulk-symbols.ts` is importable** from the universes
   screens; it is a pure module.
+- **Assumption: `web/src/components/patterns/` is new** and this component
+  creates it (section 2.1).
 - **TypeScript 5.x, React 18, Vite, Tailwind, shadcn/ui on Radix, Vitest with
   React Testing Library, Playwright, Biome** (tech stack); accessibility is
   enforced by review, since Biome has no `jsx-a11y` equivalent.
@@ -449,37 +730,42 @@ interface learns of state change by polling at the cadence in section 2.6
 - **Same-origin only.** The bundle is served by the same process as the API;
   every request is relative; no cross-origin configuration exists to widen.
   The browser's own requests carry the API's origin and pass H9's Origin check.
-- **No client-side storage of anything sensitive.** URL state only; no
+- **No client-side storage of anything sensitive.** URL query state only; no
   `localStorage` beyond, at most, interface preferences.
 - **No credential anywhere.** No field, no value, no presence indicator in
   CAP-002 screens.
 - **Data classification.** Everything rendered is Internal.
 - **Dependency posture (SEC-DEP-001, SEC-DEP-003).** No new npm dependency;
-  the vendored shadcn/ui sources are reviewed as first-party code.
+  the vendored shadcn/ui sources, including the `checkbox` added for the
+  blueprint, are reviewed as first-party code.
 - **Input validation at the boundary.** Symbols are parsed and shape-checked
-  before a request; threshold bounds are validated on blur (percentiles 0 to
-  100, finite scores) so the server's `422` is a backstop; dates are checked
-  for the ISO-8601 shape.
+  before a request; threshold values are validated on blur (percentiles 0 to
+  100, finite standardised scores) so the server's `422` is a backstop; dates
+  are checked for the ISO-8601 shape; a URL query that decodes to an invalid
+  `ResearchQuery` is rendered as the defaults with the offending key dropped,
+  never sent.
 - **Privacy impact: none.** No PII, no analytics, no telemetry.
 - **Accessibility enforcement is human review**, as the tech stack records.
 
 ## 5. Scalability and Performance
 
-- **The sizing case is 3000 rows** in the classified-stock list and a
-  3000-member universe (AC-11, CAP-001 AC-4). Keyset pagination plus windowed
-  rendering bounds the DOM regardless of result size (STD-UI-30).
-- **Every filter is a request.** Sort, thresholds, search and scope run in SQL
-  over the whole set; the interface never sorts or filters a loaded page.
+- **The sizing case is 3000 rows** in the results and a 3000-member universe
+  (AC-11, CAP-001 AC-4). The `virtualised` variant's windowed rows over keyset
+  pages bound the DOM regardless of result size (STD-UI-30).
+- **Every filter is a request.** Sort, thresholds, search, scope and
+  hide-incomplete run in SQL over the whole set and `match_count` is counted
+  there (S03-2); the interface never sorts, filters or counts a loaded page.
 - **Rows stay visible and dimmed during a refresh** under the `data-table`
-  contract, which also avoids a full re-render on every poll.
-- **Row expansion fetches once per expansion**, `GET /api/classifications/stocks/{symbol}`,
+  contract, which also avoids a full re-render on every poll; the poll reads
+  the summary, not the list.
+- **The inspector fetches once per selection**, after the 150 ms debounce,
   rather than pre-loading inputs for 3000 rows; the origin line fetches once
   per universe row expansion.
-- **Polling cost.** 10 seconds while a set is building, on one bounded read;
-  stopped otherwise. The health poll is CAP-001's.
-- **Compare** reads one list call and one evidence call per column, bounded
-  at 500 columns by the API; the layout degrades honestly with horizontal
-  scroll inside the table and pinned row headers (UX design section 1.5).
+- **Polling cost.** 10 seconds while a set is building, on one bounded read
+  with no stock rows; stopped otherwise. The health poll is CAP-001's.
+- **Compare** reads one list call with 2 to 6 `symbols` and one evidence call
+  per column; six columns fit the design width with no horizontal scroll
+  (UX design §1.5).
 - **Bundle.** One Vite bundle, code-split by route; no size target is stated
   by any artifact, so none is asserted.
 - **Concurrency: none.** One user, one tab.
@@ -493,11 +779,14 @@ interface learns of state change by polling at the cadence in section 2.6
   together and there is no skew between the interface and the contracts it
   consumes (`owner-web-app` section 6).
 - **Data migration: none.** The interface stores nothing durable.
-- **Behaviour change after upgrade.** Two new rail destinations; the landing
-  screen is unchanged.
+- **Behaviour change after upgrade.** One new rail destination, Research; the
+  landing screen is unchanged.
 - **Manual actions required: none.** The owner reloads the page.
 - **Rollback (OPS-MIG-003).** Reverting the application image reverts the
   interface and the API together.
+- **The shell capability's arrival** removes the appended destination and
+  migrates the three link targets in `SHELL_ROUTES` (section 2.2); CAP-002's
+  routes and screens do not change.
 - **A response-shape change in a later capability** is a breaking change for
   this component and must be treated as one in that capability's design.
 - **Forward compatibility.** The status region's reserved third line stays
@@ -505,209 +794,284 @@ interface learns of state change by polling at the cadence in section 2.6
 
 ## 7. Testing
 
-Vitest with React Testing Library for component and screen tests; Playwright
-for end to end against the real API, a real PostgreSQL container and the stub
-provider the delivered E2E stack already runs (`tests/e2e/support/`). Fixture
-responses mirror `classification-api` section 2.7.
+Vitest with React Testing Library for pattern, component and screen tests;
+Playwright for end to end against the real API, a real PostgreSQL container
+and the stub provider the delivered E2E stack already runs
+(`tests/e2e/support/`). Fixture responses mirror `classification-api` section
+2.7. S03's seven acceptance checks are placed as follows (DEC-0080,
+PROVISIONAL): checks about one rendering or one request (S03-1, S03-3, S03-4,
+S03-6) are Vitest component tests with doubled reads; checks that cross the
+API or the browser's history (S03-2 against a real set, S03-5, S03-7) are
+Playwright specs, each also pinned at the component level where a unit can be
+isolated. Pattern tests sit beside their pattern in
+`web/src/components/patterns/`.
 
 | Test | File | What it proves |
 |------|------|----------------|
-| Three renderings never confused | `web/src/screens/classifications/factor-cells.test.tsx` | `0.00` for a measured zero; em dash plus *Not classified* and the input for an absent score; hatch plus *Not ranked* for a not-determinable one; blank only where the column does not apply (STD-UI-4, STD-UI-14, AC-12, AC-14) |
-| Score and percentile precision | `web/src/screens/classifications/format.test.ts` | `+1.27`, `−0.45`, `0.00` unsigned; percentile `84` with no sign or `%`; ratios 2 dp; rates `+12.40%`; amounts in full with separators; timestamps in America/Chicago with zone; dates unconverted (DEC-0063, STD-UI-3, STD-UI-5, STD-UI-6) |
-| Not ranked stated once | `web/src/screens/classifications/classification-table.test.tsx` | The header carries *Not ranked* and *18 of 30 stocks qualified* from `qualifiedCount` and `minPeerSetSize`; every cell in the pair is the indeterminate marker; the pair's sort controls are absent |
-| Status without colour | `web/src/screens/classifications/factor-cells.test.tsx` | Every status badge carries text and an icon or pattern; no `--gain` or `--loss` class on any value (STD-UI-8, DEC-0060) |
-| Restatement mark propagates | `web/src/screens/classifications/factor-cells.test.tsx`, `web/src/screens/stocks/factor-card.test.tsx` | *Possibly restated* on value and growth cells, inputs, compare cells and history rows where `restatedPossible`; never on momentum (AC-23) |
-| Never classified is not nothing found | `web/src/screens/classifications/classifications.test.tsx` | `neverClassified` replaces table and currency with the stated sentence and a Runs link; a filter matching nothing renders the reset state (AC-22) |
-| Currency headline states | `web/src/screens/classifications/currency-region.test.tsx` | Current; building with *Updating* and start time; failed with the recorded reason and the next-run sentence; run outcome badge `succeeded` good, `partial` warning (AC-20, AC-21, DEC-0059) |
-| Poll cadence and stop | `web/src/screens/classifications/use-classification-poll.test.ts` | 10-second interval while building or a run is non-terminal; stops otherwise; *Last checked* with zone; a failed poll keeps the mark (STD-UI-25) |
-| Refresh once on completion | `web/src/screens/classifications/use-classification-poll.test.ts` | On the poll reporting complete: one announcement, one reload, sort, thresholds, scope, expanded rows and selection preserved by symbol; no second reload (DEC-0062) |
-| Sorting is a request | `web/src/screens/classifications/classification-table.test.tsx` | Activating a column sort issues a request with `sort` and `order`; focus does not move; the new row count is announced; the header describes that unclassified rows sort last (STD-UI-24, STD-UI-4) |
-| Thresholds validate on blur and submit at once | `web/src/screens/classifications/threshold-panel.test.tsx` | Percentile 101 and a non-finite score are field errors before any request; Apply sends all twelve bounds; the summary line and Clear render; `Enter` applies |
-| Save as universe | `web/src/screens/classifications/save-filter-dialog.test.tsx` | Offered only with thresholds active and scope all stocks; `blocked` when nothing matches; request carries thresholds and `setId`; `201` routes to detail; `universe_name_in_use` attaches to the field; `classification_set_changed` swaps Save for *Review new result* (AC-2, AC-5) |
-| Selection and Compare | `web/src/screens/classifications/selection-bar.test.tsx` | Selection survives sort, thresholds, scope and refresh; Compare selected routes with the symbols in the query; `blocked` above 500 (AC-16) |
-| Create by hand | `web/src/screens/universes/create-dialog.test.tsx` | `blocked` until one symbol parses and above 1000; recognised and rejected counts as CAP-001's parse; `instrument_not_acquired` names every symbol, links to Instruments and keeps the list; `201` routes to detail (AC-1, AC-5) |
-| Universes list | `web/src/screens/universes/universes.test.tsx` | Active default, retired separated by the lifecycle select, counts; never-populated and nothing-found distinct; origin line on expansion |
-| Remove uses confirm, not destructive | `web/src/screens/universes/detail/remove-dialog.test.tsx` | Variant `confirm`, wording that history stays, initial focus on Cancel; `blocked` on the sole member with Retire adjacent; `last_member` keeps the dialog with a Retire action (AC-5, AC-6, STD-UI-2) |
-| Retire uses confirm | `web/src/screens/universes/detail/retire-dialog.test.tsx` | Variant `confirm`; after `200` the header shows retired and the actions leave (AC-4, AC-6) |
-| Rename inline | `web/src/screens/universes/detail/summary-header.test.tsx` | `Enter` submits `PATCH`, `Esc` cancels; `universe_name_in_use` as a field error; empty after trimming is a field error (AC-4) |
-| Add stocks | `web/src/screens/universes/detail/add-stocks-dialog.test.tsx` | `already_member` reported politely, not as an error; `universe_retired` wording; whole-request refusal names every symbol (AC-4) |
-| As-of membership | `web/src/screens/universes/detail/members-tab.test.tsx` | *View members as of this event* sets `as_of` and the label; a typed date works; before creation renders the did-not-exist sentence; malformed date is a field error (AC-6) |
-| Retired member stays | `web/src/screens/universes/detail/members-tab.test.tsx` | A retired instrument remains in the table marked and `status-neutral` on every factor (AC-15) |
-| Compare keeps columns | `web/src/screens/compare/compare-table.test.tsx` | A stock not classified on a factor keeps its column with status and input; not ranked stated once per group; row and column headers programmatic; unknown symbol is a field error and no column (AC-16, flow 4 step 5) |
-| Evidence three-part statements | `web/src/screens/stocks/factor-card.test.tsx` | Outdated names the period end and the 6-month rule against the classification date with the next-run recovery; provider holds no data offers no recovery; STD-UI-18 sentence once per screen; restatement meaning beside the first mark (AC-12, AC-13, AC-17, STD-UI-17, STD-UI-18) |
-| History as recorded | `web/src/screens/stocks/history-tab.test.tsx` | Newest first, each row one set's result, the later-data sentence once; no earlier set is distinct from never classified (AC-18, AC-19) |
-| Shell composition | `web/src/app/shell.test.tsx`, `web/src/app/routes.test.tsx` | Six destinations in the fixed order; five routes render inside the shell; landing unchanged; the unreachable state takes every CAP-002 route (DEC-0061, AGT-SCOPE-002) |
-| No raw HTML | existing `web/src/api/render.test.tsx` | `dangerouslySetInnerHTML` appears nowhere, including the new screens |
-| After an acquisition | `tests/e2e/classifications-after-run.spec.ts` | A stub-provider run ends succeeded; Classifications shows *Updating*, then the new set without any owner action; the run link opens run detail (flow 1, AC-10, AC-21) |
-| Universe by hand | `tests/e2e/universe-by-hand.spec.ts` | Create with a covered and an uncovered symbol, refusal naming it, fix, create, detail shows members with classifications (flow 2) |
-| Universe from a filter | `tests/e2e/universe-from-filter.spec.ts` | Thresholds, review, save, detail shows the origin line and exactly the reviewed members; a later set does not change them (flow 3) |
-| Compare and evidence | `tests/e2e/compare-and-evidence.spec.ts` | Sort, thresholds, select, Compare, open evidence, read inputs and dates (flow 4) |
-| Fix insufficient evidence | `tests/e2e/fix-insufficient-evidence.spec.ts` | A missing input named, a second run, the input present and the earlier result in History (flow 5) |
+| Four cell renderings never confused | `web/src/components/patterns/factor-cell.test.tsx` | Percentile and bar for a scored factor, the bar `aria-hidden`; `coverage-absent` *Incomplete* with the reason tooltip for an absent score; `coverage-unknown` *Not enough to rank* for a not-determinable one; `status-neutral` *Not followed* for a retired stock; never `0`, never a bare number for an unscored factor (STD-UI-4, STD-UI-14, AC-12, AC-14, AC-15; DEC-0072, DEC-0073) |
+| The mark's accessible name | `web/src/components/patterns/restated-mark.test.tsx` | The element's accessible name and text content are *Possibly restated*; the *R* glyph is `aria-hidden`; the `status-neutral` tokens are applied; it renders wherever `restatedPossible` and never on momentum (AC-23, S03-6, STD-UI-17; DEC-0075) |
+| Score and percentile precision | `web/src/screens/research/format.test.ts` | `+1.27`, `−0.45`, `0.00` unsigned; percentile `84` with no sign or `%`; ratios 2 dp; rates `+12.40%`; amounts in full with separators; timestamps in America/Chicago with zone; dates unconverted (DEC-0063, STD-UI-3, STD-UI-5, STD-UI-6) |
+| Display labels only | `web/src/screens/research/copy.test.ts` | No owner-facing string in `copy.ts` contains *instrument*, *acquisition run*, *not classified*, *retire* or a bare *score* where *percentile* or *standardised score* is meant (STD-UI-1 v6, blueprint §7; DEC-0072) |
+| URL query round trip | `web/src/api/research-query.test.ts` | Every `ResearchQuery` encodes to a query and decodes back equal; each threshold sentence maps to exactly one of the twelve bounds and back; `hide_incomplete`, `symbol`, `scope`, `sort` and `order` survive; an invalid key is dropped, not sent (S03-5; system design v2 §3.3 step 15) |
+| Threshold sentences validate on blur | `web/src/screens/research/threshold-sentence.test.tsx` | Percentile 101 and a non-finite standardised score are field errors before any request; a blank value is no threshold; accessible names read as the blanks (blueprint §4.7; constraint 15) |
+| Filters are requests, in the URL | `web/src/screens/research/filters-pane.test.tsx` | Changing scope, a threshold, hide-incomplete or the search issues one list request with the mapped parameters and updates the URL; **Clear filters** resets all of them and keeps the sort; the pane on universe detail has no *Look in* (S03 §5, §6; DEC-0074, DEC-0078) |
+| Not enough to rank stated once | `web/src/screens/research/results-table.test.tsx` | The header carries *{n} qualified, 30 needed* from `qualifiedCount` and `minPeerSetSize`; every cell in the column is *Not enough to rank*; the column's sort control is absent (S03-4, AC-14) |
+| Incomplete stocks listed unless hidden | `web/src/screens/research/results-table.test.tsx` | A stock incomplete on one factor renders with two percentiles and one *Incomplete*; with the checkbox on, the request carries `hide_incomplete=true` and the row is absent from the doubled response (S03-1, AC-12) |
+| Match count is the server's | `web/src/screens/research/results-pane.test.tsx` | The `h1` renders `matchCount`, not the loaded row count, and *{n} of {m} members match* on universe detail (S03-2) |
+| Sorting is a request | `web/src/screens/research/results-table.test.tsx` | Activating a column sort issues a request with `sort` and `order`; `aria-sort` follows; focus does not move; the new match count is announced; the header describes that incomplete rows sort last (STD-UI-24, STD-UI-4) |
+| Selecting and checking never interfere | `web/src/screens/research/results-table.test.tsx` | Click and `Enter` select (`aria-selected`) and do not check; `Space` on the checkbox checks and does not select; `↑`/`↓` move the selection and one stock read is issued after 150 ms with fake timers; checked rows survive sort, filter, scope and refresh (S03 §6, §5) |
+| Selection tray and Compare bound | `web/src/components/patterns/selection-tray.test.tsx` | The region appears at one checked row and announces *{n} selected*; **Compare side by side** is `blocked` with its reason at 1 and at 7 checked, enabled at 2 and 6, and routes to `/research/compare?symbols=` with the checked symbols (DEC-0070, AC-16) |
+| Inspector content | `web/src/components/patterns/inspector-panel.test.tsx` | Memberships line with links or *In no universe*; per factor the percentile, signed standardised score and the inputs' `as_of` and `known_on` line; the explanation box with the S03 §8 sentence; **See every input and its date** is a link; the empty sentence when nothing is selected (S03-3, AC-17; DEC-0071) |
+| Never scored is not nothing found | `web/src/screens/research/research.test.tsx` | `neverClassified` replaces the results body with *No stocks have been scored yet.*, the latest download's state and an *Open Data health* link; a filter matching nothing renders *No stocks match these filters.* with **Clear filters** (AC-22, S03 §7) |
+| Banner and as-of line states | `web/src/components/patterns/not-current-banner.test.tsx`, `as-of-line.test.tsx` | No banner when current; `status-warning` *Not reflecting the latest download* with the S03 §3 sentence and *Updating* on the line while building; `status-critical` *Score update failed {time}: {reason}* with the previous set kept when failed; outcome badge *Complete* good, *Partial* warning; **Earlier sets…** opens the history dialog and focus returns to it (AC-20, AC-21; DEC-0072, DEC-0073, DEC-0078) |
+| Poll cadence and stop | `web/src/screens/research/use-score-set-poll.test.ts` | 10-second interval on the summary read while building or a download is non-terminal; stops otherwise; *checked {time}* with zone; a failed poll keeps the banner and offers **Try again** (STD-UI-25) |
+| Refresh once on completion | `web/src/screens/research/use-score-set-poll.test.ts` | On the poll reporting complete: one announcement, one reload, sort, thresholds, scope, hide-incomplete, search, selection and checked rows preserved by symbol; no second reload (DEC-0062) |
+| Save as universe | `web/src/screens/research/save-as-universe-dialog.test.tsx` | Offered only under *All followed stocks*; `blocked` with its reason at zero matches; the request carries the thresholds, `hide_incomplete` and `setId`; `201` closes and toasts with a link; `universe_name_in_use` attaches to the field; `classification_set_changed` swaps Save for **Review new result** (AC-2, AC-5, S03-7; DEC-0076) |
+| Add to universe | `web/src/screens/research/add-to-universe-dialog.test.tsx` | Lists active universes plus *New universe*; posts members or creates; toasts *Added {n} stocks to {name}* with the already-member clause; `universe_retired` wording (AC-4; DEC-0076) |
+| Create by hand | `web/src/screens/research/universes/create-dialog.test.tsx` | `blocked` until one symbol parses and above 1000; recognised and rejected counts as CAP-001's parse; `instrument_not_acquired` names every symbol, links to the followed-stocks page and keeps the list; `201` routes to detail without a toast (AC-1, AC-5) |
+| Universes list | `web/src/screens/research/universes/universes.test.tsx` | Active default, retired separated by the lifecycle select with `badge` `secondary` *Retired*; never-populated and nothing-found distinct; origin line incl. *stocks with an incomplete score hidden* on expansion (DEC-0076) |
+| Remove uses confirm, not destructive | `web/src/screens/research/universes/detail/remove-dialog.test.tsx` | Variant `confirm`, wording that history stays, initial focus on Cancel; `blocked` on the sole member with **Retire…** adjacent; `last_member` keeps the dialog with a Retire action; success toasts (AC-5, AC-6, STD-UI-2) |
+| Retire uses confirm | `web/src/screens/research/universes/detail/retire-dialog.test.tsx` | Variant `confirm`; after `200` the header shows *Retired* and the actions leave (AC-4, AC-6) |
+| Rename inline | `web/src/screens/research/universes/detail/summary-header.test.tsx` | `Enter` submits `PATCH`, `Esc` cancels; `universe_name_in_use` as a field error; empty after trimming is a field error (AC-4) |
+| Add stocks | `web/src/screens/research/universes/detail/add-stocks-dialog.test.tsx` | `already_member` reported politely, not as an error; `universe_retired` wording; whole-request refusal names every symbol (AC-4) |
+| As-of membership | `web/src/screens/research/universes/detail/members-tab.test.tsx` | *View members as of this event* sets `as_of` and the label; a typed date works; before creation renders the did-not-exist sentence; malformed date is a field error (AC-6) |
+| Not followed member stays | `web/src/screens/research/universes/detail/members-tab.test.tsx` | A retired instrument remains in the member table with *Not followed* on every factor; the same row never appears under *All followed stocks* (AC-15; DEC-0073) |
+| Compare keeps columns | `web/src/components/patterns/comparison-table.test.tsx` | A stock incomplete on a factor keeps its column with *Incomplete* and the input named; not enough to rank stated once per group; per-input status per DEC-0077 (*Missing* badge, *Outdated* badge, *Couldn't be computed* text); row and column headers programmatic; the dates disclosure expands a row (AC-16, flow 4 step 5; DEC-0077, DEC-0078) |
+| Compare entry bound | `web/src/screens/research/compare/compare.test.tsx` | **Add** is `blocked` at six columns with *A comparison holds up to 6 stocks.*; `instrument_not_found` is a field error and no column; fewer than two symbols renders *Choose 2 to 6 stocks to compare.* (DEC-0070) |
+| Evidence three-part statements | `web/src/screens/research/stocks/factor-card.test.tsx` | Outdated names the period end and the 6-month rule against the scores' date with the next-download recovery; provider holds no data offers no recovery; STD-UI-18 sentence once per screen; restatement meaning beside the first mark; per-input status per DEC-0077 (AC-12, AC-13, AC-17, STD-UI-17, STD-UI-18) |
+| History as recorded | `web/src/screens/research/stocks/history-tab.test.tsx` | Newest first, each row one set's result with the mark where it applied, the later-data sentence once; *No earlier scores* distinct from never scored (AC-18, AC-19) |
+| Shell composition | `web/src/app/shell.test.tsx`, `web/src/app/routes.test.tsx` | Five destinations in the fixed order ending in Research; five `/research/*` routes render inside the shell; landing unchanged; the unreachable state takes every CAP-002 route; `SHELL_ROUTES` targets the delivered routes (DEC-0068, DEC-0069, AGT-SCOPE-002) |
+| No raw HTML | existing `web/src/api/render.test.tsx` | `dangerouslySetInnerHTML` appears nowhere, including the new screens and patterns |
+| After a download | `tests/e2e/research-after-download.spec.ts` | A stub-provider download ends Complete; Research shows the banner and *Updating*, then the new set without any owner action; *download …* opens run detail (flow 1, AC-10, AC-21) |
+| Universe by hand | `tests/e2e/universe-by-hand.spec.ts` | Create with a followed and an unfollowed symbol, refusal naming it, fix, create, detail shows members with scores (flow 2) |
+| Universe from a result | `tests/e2e/universe-from-result.spec.ts` | Thresholds and hide-incomplete at a real set of more than one page, **Save these {n} as a universe…**, the detail's member count equals the header's `match_count`, the origin line names the filter, a later set does not change the members (flow 3, S03-7, S03-2) |
+| URL state survives | `tests/e2e/research-url-state.spec.ts` | Set thresholds, scope, hide-incomplete, search and sort; reload; navigate to compare and back: every filter restored from the URL (S03-5) |
+| Compare and evidence | `tests/e2e/compare-and-evidence.spec.ts` | Sort, thresholds, check 3 rows, Compare, open evidence from a column header, read inputs and dates (flow 4) |
+| Fix insufficient evidence | `tests/e2e/fix-insufficient-evidence.spec.ts` | A missing input named, a second download, the input present and the earlier result under Earlier scores (flow 5) |
 | Maintain universes | `tests/e2e/universe-maintenance.spec.ts` | Add, remove, rename, retire, history, as-of view, last-member refusal (flow 6) |
-| Keyboard-only traversal | `tests/e2e/classifications-accessibility.spec.ts` | Every CAP-002 operation reachable and operable by keyboard; focus returned after dialogs; polled updates announced; `blocked` controls focusable with their reason (STD-UI-24) |
-| Volume | `tests/e2e/classifications-volume.spec.ts` | 3000 classified stocks render, sort, filter and scroll without the DOM growing with the result set or the page scrolling horizontally (AC-11, STD-UI-30) |
+| Keyboard-only traversal | `tests/e2e/research-accessibility.spec.ts` | Every CAP-002 operation reachable and operable by keyboard; selection by arrows and checking by `Space` independent; focus returned after dialogs; polled updates and the tray announced; `blocked` controls focusable with their reason (STD-UI-24, S03 §9) |
+| Volume | `tests/e2e/research-volume.spec.ts` | 3000 scored stocks render, sort, filter, search and scroll in the `virtualised` table without the DOM growing with the result set or the page scrolling horizontally; the `h1` reads 3000 (AC-11, STD-UI-30, S03-2) |
 
 ## 8. Acceptance Criteria
 
-1. Before any classification exists, Classifications states that no stocks
-   have been classified, with a Runs link, and this is visibly different from
-   a filter that matched nothing.
-2. A classified cell shows a signed two-decimal score and a whole-number
-   percentile; an absent score shows the em dash, *Not classified* and the
-   input named; a not-ranked factor shows the hatch and the count once in its
-   header; a measured zero shows `0.00`.
-3. Every status carries a word and an icon or pattern, and no value carries a
-   polarity colour.
-4. While a later set builds, the current set stays on every screen with the
-   not-current mark, *Updating*, the start time and *Last checked*; when it
-   completes the screen refreshes once, announced, with sort, thresholds,
-   scope, expansion and selection kept.
-5. When the latest attempt failed, the previous set stays with its mark, the
-   failure and its recorded reason are shown, and nothing offers to retry.
-6. The rail reads Coverage, Instruments, Runs, Settings, Classifications,
-   Universes, and the landing screen is unchanged.
-7. Create and Add refuse the whole request on an uncovered symbol, naming every
-   such symbol with an Instruments link and keeping the entered list.
-8. Remove and Retire use the confirm dialog with wording that history stays;
-   Remove on the sole member is blocked with Retire beside it.
-9. A retired instrument stays in its universe marked retired with
-   `status-neutral` on every factor.
-10. Compare keeps a column for a stock not classified on a factor and states
-    its reason; Compare selected is blocked above 500.
-11. Evidence states, per factor, whether the stock is classified and which
-    input fell short and why, with the recovery where one exists, the
-    STD-UI-18 statement once, and the restatement meaning beside the first
-    mark.
-12. Failure scenario: a `500` from any endpoint leaves the screen's title,
-    toolbar and currency region rendered and replaces the body with an error
-    and a retry.
-13. Failure scenario: 3000 classified stocks render and filter without the DOM
+1. Before any score exists, Research states that no stocks have been scored,
+   with the latest download's state and a Data health link, and this is
+   visibly different from a filter that matched nothing.
+2. A scored factor cell shows a whole-number percentile and a bar; the
+   standardised score appears signed at two decimals in the inspector and on
+   evidence; an incomplete factor shows *Incomplete* and names its input; a
+   factor below 30 qualifying stocks shows *Not enough to rank* in every cell
+   and the count once in its header; a measured `0.00` renders as such.
+3. Every status carries a word and a shape or pattern, the *Possibly restated*
+   mark exposes its words, and no value carries a polarity colour.
+4. The `h1` *{n} stocks match* is the server's count over the whole filtered
+   set, and thresholds, scope, hide-incomplete, search and sort survive reload
+   and back navigation from the URL.
+5. While a later set builds, the current set stays on every scored surface
+   with the *Not reflecting the latest download* banner, *Updating* and
+   *checked {time}*; when it completes the screen refreshes once, announced,
+   with sort, thresholds, scope, hide-incomplete, search, selection and
+   checked rows kept.
+6. When the latest attempt failed, the previous set stays with the *Score
+   update failed* banner and its recorded reason, and nothing offers to retry.
+7. The rail reads Coverage, Instruments, Runs, Settings, Research, and the
+   landing screen is unchanged.
+8. Click or `Enter` selects a row into the inspector and `Space` checks it;
+   the two never interfere; the inspector shows each factor's inputs and their
+   as-of dates and the stock's universe memberships.
+9. **Save these {n} as a universe…** is blocked at zero matches, posts the
+   thresholds, `hide_incomplete` and the set on screen, and the saved universe
+   holds exactly the counted stocks.
+10. Create and Add refuse the whole request on an unfollowed symbol, naming
+    every such symbol with a followed-stocks link and keeping the entered
+    list.
+11. Remove and Retire use the confirm dialog with wording that history stays;
+    Remove on the sole member is blocked with Retire beside it.
+12. A stock the owner stopped following stays in its universe marked *Not
+    followed* on every factor and is not listed under *All followed stocks*.
+13. Compare keeps a column for a stock incomplete on a factor and states its
+    reason; **Compare side by side** and **Add** are blocked outside 2 to 6
+    stocks.
+14. Evidence states, per factor, whether the stock is scored and which input
+    fell short and why, with the recovery where one exists, the STD-UI-18
+    statement once, and the restatement meaning beside the first mark.
+15. Failure scenario: a `500` from any endpoint leaves the screen's title,
+    Filters pane, banner and as-of line rendered and replaces the body with
+    the operation, resource, reason and **Try again**.
+16. Failure scenario: 3000 scored stocks render and filter without the DOM
     growing with the result set.
 
 ## 9. Workflows
 
 Every user flow in the capability passes through this component.
 
-- **See stocks classified after an acquisition** (flow 1): Classifications
-  with the currency region; the run link crosses into CAP-001's run detail.
-- **Build a universe by hand** (flow 2): Universes, Create universe, detail.
-- **Build a universe from a factor filter** (flow 3): Classifications,
-  Thresholds, Save as universe, detail with the origin line.
-- **Compare stocks and inspect the evidence** (flow 4): Classifications or
-  Universe detail, sort and thresholds, selection, Compare, Stock evidence.
+- **See stocks scored after a download** (flow 1): Research with the banner
+  and as-of line; the download link crosses into CAP-001's run detail
+  (the blueprint's downloads detail once the shell capability lands).
+- **Build a universe by hand** (flow 2): Universes, **New universe…**, detail.
+- **Build a universe from a factor filter** (flow 3): Research, the Filters
+  pane, **Save these {n} as a universe…**, the toast's link to detail with the
+  origin line.
+- **Compare stocks and inspect the evidence** (flow 4): Research or Universe
+  detail, sort and thresholds, checked rows, **Compare side by side**, the
+  inspector, Stock evidence.
 - **Understand and fix insufficient evidence** (flow 5): Stock evidence names
-  the input and the recovery and links to Runs; CAP-002 never starts a run.
+  the input and the recovery and links to Data health; CAP-002 never starts a
+  download.
 - **Maintain universes over time** (flow 6): Universe detail's header
   actions, Members tab, History tab, as-of view.
-- **Intersection with CAP-001.** Instruments is where an uncovered stock is
-  added; Runs is where a run is started; both are reached by link. The
-  unreachable state is CAP-001's and takes every CAP-002 route.
+- **Intersection with CAP-001.** Instruments (the followed-stocks page) is
+  where an unfollowed stock is followed; Runs (Data health) is where a download
+  is started; both are reached by link through `SHELL_ROUTES`. The unreachable
+  state is CAP-001's and takes every CAP-002 route.
+- **Intersection with the App shell & data health capability.** Its Home and
+  Data health screens consume `GET /api/classifications/summary`; this
+  component consumes the same read for S03's header, banner and poll and
+  renders neither screen.
 
 ## 10. UX / GUI
 
-This component is the UX surface, so the whole UX design applies; this section
-records the mapping an implementer needs in one place.
+This component is the UX surface, so the whole UX design v2 applies; this
+section records the mapping an implementer needs in one place, regenerated
+from UX design v2 (§0, §1.1 to §1.6, §5).
 
-**Shell and type.** Six destinations in the rail of `--space-7`; main region
-padding `--space-5`; dense table regions at `--space-3` internally and
-`--space-5` between stacked regions; `--text-base` default, `--text-sm` for
-dense table bodies, `--text-xs` for timestamps and table metadata, `--text-lg`
-for region and row-group headings, `--text-xl` for screen titles. Every table
-consumes `--row-height`, `--cell-padding-x` and `--cell-padding-y`; the
-density tier is inherited (OQ-UI-4). No spacing, size or colour literal appears
-anywhere (STD-UI-29).
+**Shell and type.** Five destinations in the delivered rail of `--space-7`
+until the shell capability's 208 px rail replaces it; main region padding
+`--space-5`; the Research screen, the universe tables and compare use the full
+width, the evidence page caps at 1180 px (blueprint §3.1); panes `--space-4`
+apart, stacked regions `--space-5`; `--text-base` default, `--text-sm` for
+dense table bodies, `--text-xs` for the as-of line, helpers, footnotes and
+table metadata, `--text-lg` for the results `h1` and row-group headings,
+`--text-xl` for page titles and the inspector symbol. Every table consumes
+`--row-height`, `--cell-padding-x` and `--cell-padding-y`; the density tier is
+inherited (OQ-UI-4). No spacing, size or colour literal appears anywhere
+(STD-UI-29).
 
 **Component mapping**, the UX design's, reproduced because it is the contract
 this component implements:
 
 | Screen | Element | Component | Variant |
 |--------|---------|-----------|---------|
-| 1.1 Classifications | Classified-stock table | `data-table` | `expandable`, with row selection |
-| 1.1 | Symbol search | `data-table` toolbar filter | n/a |
-| 1.1 | Scope, all stocks or one universe | `select` | `inline` |
-| 1.1 | Thresholds control | `button` | `outline` |
-| 1.1 | Threshold panel, twelve bounds | `form` + `input` | `inline` + `numeric` |
-| 1.1 | Apply thresholds | `button` | `secondary` |
-| 1.1 | Clear thresholds; Clear selection | `button` | `ghost` |
-| 1.1 | Save as universe; Compare selected | `button` | `default`, or `blocked` with the reason |
-| 1.1 | Create universe from selected | `button` | `secondary` |
-| 1.1 | Save as universe dialog | `dialog` + `form` + `input` | `standard` + `dialog` + `text` |
-| 1.1, 1.4, 1.5, 1.6 | Not classified; Retired, in a merged cell | `badge` | `status-warning`; `status-neutral` |
-| 1.1, 1.4, 1.5, 1.6 | Not ranked, in a column-pair or group header | `badge` | `status-serious` |
-| 1.1, 1.4, 1.5, 1.6 | Possibly restated | `badge` | `outline`, with icon and label |
-| 1.1, 1.3, 1.4, 1.5, 1.6 | Retired instrument or universe marker | `badge` | `secondary` |
-| 1.1, 1.3, 1.4, 1.5 | Symbol or name, opening evidence or detail | link | n/a, per the `button` specification |
-| 1.2 Currency | Region | composition | `design-system/intake.md` step 1.3 |
-| 1.2 | Not reflecting the latest acquisition; Updating; Classification failed | `badge` | `status-warning`; `status-active`; `status-critical` |
-| 1.2 | Run outcome the set reflects | `badge` | `status-good` or `status-warning` |
-| 1.2 | Set history control; set history list | `button`; `data-table` | `ghost`; `history` |
+| 1.1 Research | Filters, Results and Inspector panes | `card` | `default`; `summary` for the inspector |
+| 1.1 | Find a stock (DEC-0074) | `input` | `text` |
+| 1.1 | Look in; threshold measure and direction | `select` | `inline` |
+| 1.1 | Threshold value, 56 px, placeholder *any* | `input` | `numeric` |
+| 1.1 | Hide stocks with an incomplete score | `checkbox` | `default` |
+| 1.1, 1.4 | Clear filters; Earlier sets… (DEC-0078) | `button` | `ghost` |
+| 1.1, 1.4 | Results table | `data-table` | `virtualised`, with the base contract's row checkboxes |
+| 1.1, 1.4 | Row selection | `checkbox` | `default`, named *Select {SYMBOL}* |
+| 1.1, 1.4, 1.5, 1.6 | Factor cell, incl. the Possibly restated mark | composition, blueprint §4.4 (DEC-0075) | `web/src/components/patterns/factor-cell.tsx`, `restated-mark.tsx` |
+| 1.1, 1.4, 1.5, 1.6 | Incomplete; Missing (input) | `badge` | `coverage-absent` |
+| 1.1, 1.4, 1.5, 1.6 | Not enough to rank | `badge` | `coverage-unknown` |
+| 1.1 (universe scope), 1.4, 1.5, 1.6 | Not followed (DEC-0073) | `badge` | `status-neutral` |
+| 1.5, 1.6 | Outdated (input) (DEC-0077) | `badge` | `status-warning` |
+| 1.5, 1.6 | Couldn't be computed (input) (DEC-0077) | plain text in `--status-warning` with the tier's triangle `aria-hidden` | n/a |
+| 1.1 | Save these {n} as a universe… | `button` | `outline`; `blocked` at zero matches (DEC-0076) |
+| 1.1, 1.4 | Save-as-universe; Add-to-universe dialogs | `dialog` + `form` | `standard` + `dialog` |
+| 1.1 | Universe to add to | `select` | `default` |
+| 1.1, 1.4 | Selection tray | composition, blueprint §4.6 | `selection-tray.tsx` |
+| 1.1, 1.4 | Compare side by side; Add to universe… | `button` | `outline`; `blocked` outside 2 to 6 checked |
+| 1.1, 1.4 | Inspector | composition, blueprint §4.5 | `inspector-panel.tsx` on `card` `summary` |
+| 1.1 | See every input and its date | `button` | `outline`, rendered as a link |
+| 1.1 to 1.6 | Memberships; download link; symbol links | link | n/a, per the `button` specification |
+| 1.2 | As-of line | composition, blueprint §4.8 (DEC-0073) | `as-of-line.tsx` |
+| 1.2 | Not-current banner | `badge` inside a `card` | `status-warning` / `status-critical` inside `default` |
+| 1.2 | Updating; download outcome | `badge` | `status-active`; `status-good` *Complete* / `status-warning` *Partial* |
+| 1.2 | Set history dialog; set history list | `dialog`; `data-table` | `standard`; `history` |
+| 1.1, 1.3, 1.4 | Saved, added, removed, retired; set completed or failed on an unscored route | `toast` | `success`; `info`, `error` |
 | 1.3 Universes | Universe list | `data-table` | `expandable` |
 | 1.3 | Lifecycle filter | `select` | `inline` |
-| 1.3 | Create universe; create dialog | `button`; `dialog` + `form` | `default`; `standard` + `dialog` |
+| 1.3 | New universe…; create dialog | `button`; `dialog` + `form` | `default`; `standard` + `dialog` |
 | 1.3, 1.4 | Universe name; bulk symbol entry | `input`; `textarea` | `text`; `list` |
 | 1.3, 1.4 | Create or Add with no stock or beyond the bound | `button` | `blocked` |
+| 1.3, 1.4 | Retired universe | `badge` | `secondary` |
 | 1.4 Universe detail | Summary header | `card` | `summary` |
 | 1.4 | Inline rename; Rename | `form` + `input`; `button` | `inline` + `text`; `secondary` |
-| 1.4 | Add stocks; Retire universe | `button` | `default`; `secondary` |
+| 1.4 | Add stocks…; Retire… | `button` | `default`; `secondary` |
 | 1.4 | Members and History | `tabs` | `default`, active tab in the URL |
 | 1.4 | Members as of | `form` + `input` | `inline` + `text` |
-| 1.4 | Remove, in row; on the sole member | `button` | `ghost`; `blocked` |
+| 1.4 | Remove…, in row; on the sole member | `button` | `ghost`; `blocked` |
 | 1.4 | Remove and Retire confirmations | `dialog` | `confirm`, never `destructive` |
 | 1.4 | Event history | `data-table` | `history` |
-| 1.5 Compare | Comparison table | composition on native `<table>` with the `data-table` token set | n/a |
-| 1.5 | Add a stock; Add; Remove from comparison | `form` + `input`; `button`; `button` | `inline` + `text`; `secondary`; `ghost` |
-| 1.6 Stock evidence | Current evidence and History | `tabs` | `default`, active tab in the URL |
+| 1.5 Compare | Comparison table | composition on native `<table>` with the `data-table` token set | `comparison-table.tsx` |
+| 1.5 | Add a stock; Add; Remove from comparison; dates disclosure | `form` + `input`; `button`; `button` | `inline` + `text`; `secondary` or `blocked` at six; `ghost` |
+| 1.6 Stock evidence | Now and Earlier scores | `tabs` | `default`, active tab in the URL |
 | 1.6 | Per-factor evidence group | `card` | `summary` |
-| 1.6 | Input missing; outdated or not computable | `badge` | `coverage-absent`; `status-warning` |
 | 1.6 | Input detail disclosure | `button` | `ghost`, `aria-expanded` |
-| 1.6 | Classification history | `data-table` | `history` |
+| 1.6 | Earlier scores | `data-table` | `history` |
 
-Ten of the twelve components are used; `chart` and `toast` are not, for the
-reasons the UX design section 3 records. Four usages are load-bearing and must
-survive implementation unchanged: `blocked`, not `disabled`, for every
-precondition-gated action; `confirm`, never `destructive`, for removal and
-retirement; links, not row clicks or buttons, for navigation; the threshold
-panel as the interim composition for the one COMPONENT-SPEC-GAP.
+Twelve of the eighteen components are used; `chart`, `command`, `progress`,
+`stepper`, `radio-group` and `toggle-group` are not, for the reasons UX design
+§3 records. Of the used ones, the `badge` factor variants, `badge` `outline`
+for the mark (version 1), `dialog` `destructive`, `input` `percentage` and
+`data-table` `expandable` for any list that can reach 3000 rows are not used.
+Five usages are load-bearing and must survive implementation unchanged:
+`blocked`, not `disabled`, for every precondition-gated action; `confirm`,
+never `destructive`, for removal and retirement; links, not row clicks or
+buttons, for navigation; `virtualised`, not `expandable`, for the results and
+member tables; the mark as a composition with the words as its text, not a
+`badge` with an accessible-name override.
 
-**Tokens.** Status uses the six tiers as `--status-<tier>` on
-`--status-<tier>-muted`; presence uses `--value-missing`,
-`--value-indeterminate` on `--value-indeterminate-muted` with
-`--pattern-indeterminate`; numerals use `--font-numeric`; table separators
-`--border`, header text `--muted-foreground`, hover and selected rows
-`--muted`; primary actions `--primary` on `--primary-foreground`; secondary
-`--secondary` on `--secondary-foreground`; dialogs `--popover`; fields
+**Tokens.** Status uses the tiers as `--status-<tier>` on
+`--status-<tier>-muted`; presence uses `--value-missing` on
+`--value-missing-muted` (*Incomplete*, *Missing*) and `--value-indeterminate`
+on `--value-indeterminate-muted` with `--pattern-indeterminate` (*Not enough
+to rank*); the percentile bar is `--seq-4` on `--seq-1`; factor identity is
+`--factor-value`, `--factor-growth`, `--factor-momentum` in headers and
+threshold rows only; numerals use `--font-numeric`; table separators
+`--border`, header text `--muted-foreground`, hover and checked rows
+`--muted`; the selected row `--status-active` edge on `--status-active-muted`;
+the tray `--foreground` fill with `--background` text; primary actions
+`--primary` on `--primary-foreground`; secondary `--secondary` on
+`--secondary-foreground`; dialogs and toasts `--popover` /
+`--popover-foreground` with the success accent `--status-good`; fields
 `--input` and `--ring`; field errors `--destructive`; cards `--card` and
-`--card-foreground`. `--gain`, `--loss`, `--neutral-value` and the
-`--factor-*` tokens are not used (DEC-0060). No token is introduced.
+`--card-foreground`; the page ground `hsl(var(--muted) / 0.5)` under the
+blueprint's shell and `--background` under the delivered one. `--gain`,
+`--loss` and `--neutral-value` are not used (DEC-0060). No token is
+introduced.
 
-**Numbers and dates** (DEC-0063, STD-UI-3, STD-UI-5, STD-UI-6). Scores signed
-at two decimals, `0.00` unsigned; percentiles whole numbers with no sign or
-`%`; ratios two decimals; rates signed percentages at two decimals; amounts in
-whole currency units with separators, never abbreviated; every numeric column
-right- and decimal-aligned at one precision per column or per Compare row.
-Dates ISO-8601 unconverted; timestamps America/Chicago with the zone shown.
+**Numbers and dates** (DEC-0063, STD-UI-3, STD-UI-5, STD-UI-6). Percentiles
+whole numbers with no sign or `%`; standardised scores signed at two decimals,
+`0.00` unsigned, in `--muted-foreground`; ratios two decimals; rates signed
+percentages at two decimals; amounts in whole currency units with separators,
+never abbreviated; every numeric column right- and decimal-aligned at one
+precision per column or per compare row. Dates ISO-8601 unconverted;
+timestamps America/Chicago with the zone shown; the as-of line reads *Scores
+from {date} {time} {zone}, download #{n} · sorted by {column}* and adds
+*checked {time}* while polling.
 
-**State tiers** (DEC-0059): classified renders as its value; not classified
-`warning`; not enough stocks to rank `serious` with the indeterminate marker in
-cells; retired `neutral`; updating `active`; not reflecting the latest
-acquisition `warning`; classification failed `critical`; run outcome
-`succeeded` good, `partial` warning.
+**State tiers** (blueprint §8; DEC-0072, DEC-0073, DEC-0077; UX design §5):
+*Updating* active; *Not reflecting the latest download* warning; *Score update
+failed* critical; the download the set reflects *Complete* good or *Partial*
+warning; a scored factor carries no badge; *Incomplete* and *Missing* are
+presence-absent (`coverage-absent`); *Not enough to rank* is presence-not-
+determinable (`coverage-unknown`); *Not followed* neutral; *Outdated* warning;
+*Couldn't be computed* warning as text; a retired universe *Retired* is a
+lifecycle (`secondary`), not a status; *Possibly restated* neutral tokens on
+the composition.
 
-**Accessibility (STD-UI-24, WCAG 2.1 AA).** Column and row headers
-programmatically associated on every table, merged cells headed by both of
-their pair's headers, the not-ranked count in the header so it is heard once;
-every status carries text plus icon or pattern; sorting, filtering, scope
-change and the set refresh never move focus and announce the new row count and
-the new classification date politely; the currency region is a polite live
-region; dialogs trap focus and return it to their trigger, with Cancel first
-in DOM order for confirmations; `blocked` controls stay focusable and expose
-their reason through `aria-describedby`; accessible names identify their row
-(*Select AAPL*, *Show inputs for AAPL*, *Remove AAPL from Tech*, *Open
-acquisition run ... on the Runs screen*); controls are at least 24 by 24 CSS
-pixels (`--control-min-target`); wide tables scroll horizontally inside their
-own focusable container, never the page; the evidence page outline reads
-Symbol, Value, Growth, Momentum as headings. Text at 4.5:1, large text and
-boundaries at 3:1; the warm tiers read dark, as `design-system/theme-validation.md`
+**Accessibility (S03 §9; STD-UI-24, WCAG 2.1 AA).** The three panes are
+`section`s labelled *Filters*, *Results* and *Selected stock*; the table
+follows the `data-table` contract with row headers on Symbol, `aria-sort` on
+the sorted column, `aria-selected` on the selected row and every column header
+programmatically associated with its cells; factor bars are `aria-hidden` and
+the percentile is the text; the mark exposes *Possibly restated*; the *{n}
+qualified, 30 needed* count lives in the header so it is heard once; the tray
+is a `role="region"` labelled *Selection* announced politely as *{n}
+selected*; every threshold control's accessible name reads as its blank;
+sorting, filtering, scope change and the set refresh never move focus and
+announce the new match count and, on refresh, the new date and download
+politely; the as-of line is a polite live region; dialogs trap focus and
+return it to their trigger, with Cancel first in DOM order for confirmations;
+`blocked` controls stay focusable and expose their reason through
+`aria-describedby`; accessible names identify their row (*Select AAPL*,
+*Remove AAPL from Tech*, *Remove AAPL from comparison*, *Show dates for
+book-to-price*, *Open download …*); controls are at least 24 by 24 CSS pixels
+(`--control-min-target`); wide tables scroll horizontally inside their own
+focusable container, never the page; the evidence page outline reads Symbol,
+Value, Growth, Momentum as headings. Text at 4.5:1, large text and boundaries
+at 3:1; the warm tiers read dark, as `design-system/theme-validation.md`
 darkened them.
 
 **Internationalization.** None. One locale, one owner, one zone; ISO-8601 is
@@ -719,90 +1083,121 @@ This component consumes the API and exposes none.
 
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
-| `/api/classifications` | GET | none, loopback | scope, search, sort, thresholds, `symbols`, cursor | set, currency, factors, stocks | Classifications and Members tab on demand; currency region every 10 s while building or a run is non-terminal (STD-UI-25); Compare with `symbols` |
-| `/api/classifications/sets` | GET | none | cursor | sets newest first | Set history disclosure |
-| `/api/classifications/stocks/{symbol}` | GET | none | path symbol | cells and inputs | Row expansion; Compare per column; Stock evidence |
-| `/api/classifications/stocks/{symbol}/history` | GET | none | cursor | earlier sets | Stock evidence History tab, loaded on first activation |
-| `/api/universes` | GET, POST | none | lifecycle, name, cursor; `{name, symbols}` or `{name, filter, set_id}` | list; the universe | Universes screen; Create universe; Save as universe; Create from selected |
-| `/api/universes/{id}` | GET, PATCH, DELETE | none | `as_of`; `{name}`; none | universe with members, cells, origin; universe; retired | Universe detail; inline rename; Retire |
-| `/api/universes/{id}/events` | GET | none | cursor | events newest first | History tab |
-| `/api/universes/{id}/members` | POST | none | `{symbols}` | added, already_member | Add stocks dialog |
-| `/api/universes/{id}/members/{symbol}` | DELETE | none | path | `removed_at` | Remove dialog |
+| `/api/classifications` | GET | none, loopback | `universe_id`, `symbol` prefix, `sort`, `order`, the twelve threshold bounds, `hide_incomplete`, `symbols` (2 to 6), `limit`, `cursor` | set, factors, `match_count`, stocks, `next_cursor` | Research and the Members tab on demand, every filter from the URL query; Compare with `symbols` |
+| `/api/classifications/summary` | GET | none | none | set block or `never_classified`, factors, `stocks_current` | The as-of line and banner, polled every 10 s while a set is building or a download is non-terminal (STD-UI-25); also consumed by the shell capability's Home and Data health (`shell-home-and-data-health-ui (unpublished)`, system design v2 §4.2, §8 question 10), which this component does not render |
+| `/api/classifications/sets` | GET | none | cursor | sets newest first | **Earlier sets…** dialog |
+| `/api/classifications/stocks/{symbol}` | GET | none | path symbol | cells, inputs, `memberships` | Inspector per selection after 150 ms; Compare per column; Stock evidence |
+| `/api/classifications/stocks/{symbol}/history` | GET | none | cursor | earlier sets | Earlier scores tab, loaded on first activation |
+| `/api/universes` | GET, POST | none | lifecycle, cursor; `{name, symbols}` or `{name, filter (thresholds + hide_incomplete), set_id}` | list; the universe | *Look in* options; Universes screen; **New universe…**; **Save these {n} as a universe…**; **Add to universe…** with *New universe* |
+| `/api/universes/{id}` | GET, PATCH, DELETE | none | `as_of`; `{name}`; none | universe with members, cells, origin; universe; retired | Universe detail; inline rename; **Retire…** |
+| `/api/universes/{id}/events` | GET | none | cursor | events newest first | History tab; the origin line on the universes list |
+| `/api/universes/{id}/members` | POST | none | `{symbols}` | added, already_member | **Add stocks…**; **Add to universe…** |
+| `/api/universes/{id}/members/{symbol}` | DELETE | none | path | `removed_at` | **Remove…** |
 | `/api/instruments` | GET | none | prefix, cursor | instruments | Reused unchanged; not required by any CAP-002 screen in the UX design, available for symbol entry |
-| `/api/acquisition-runs/{id}` | GET | none | path id | run detail | Reused unchanged; the currency region's run link opens CAP-001's run detail screen |
-| `/api/health` | GET | none | none | liveness, `most_recent_run` | CAP-001's 30-second poll, read to know whether a run is non-terminal |
+| `/api/acquisition-runs/{id}` | GET | none | path id | run detail | Reused unchanged; the as-of line's download link opens CAP-001's run detail meanwhile |
+| `/api/health` | GET | none | none | liveness, `most_recent_run` | CAP-001's 30-second poll, read to know whether a download is non-terminal |
 
 ## 12. References
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | All 23 acceptance criteria; six flows; section 5.4 STD-UI conformance | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| UX design | CAP-002 UX design v1 | Sections 0 to 7: composition, six screens, navigation, gaps, EDG, traceability, open questions | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-design.md` |
-| UX brief | CAP-002 UX brief v1 | Interactions and tiers (section 3), conformance record (section 12), state coverage (12.4) | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-brief.md` |
-| System design | CAP-002 system design v1 | Section 4.2 screen registration and interfaces; constraint 18 cadence; section 8 question 4 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
-| Standard | STD-UI v4 | Thirty owner-interface rules | `docs/constitution/standards/ui-conventions.md` |
-| Design system | Component specifications and theme | Twelve specifications, ten used; every token named | `design-system/components/`, `design-system/theme.css`, `design-system/theme-validation.md` |
+| UX design | CAP-002 UX design v2 | §0 composition into both shells; §1.1 S03 delivered; §1.2 score-set state; §1.3 to §1.6 restyled pages; §2 navigation; §3 compositions and unused components; §5 traceability incl. S03-1 to S03-7; §7 open questions | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-design.md` |
+| UX brief | CAP-002 UX brief v2 | §2.1 the ten items CAP-002 adds to S03; §3 interactions and tiers; §4 components and compositions; §5 constraints; §12 conformance record against STD-UI v6 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-brief.md` |
+| System design | CAP-002 system design v2 | §3.3 steps 13 to 18 (the v2 reads); §4.2 interfaces and screen registration; constraint 18 cadence; §8 questions 4 and 10 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| Screen specification | `PRODUCT-UX-S03` v4 (approved) | §3 layout; §4 components; §5 view model; §6 interactions; §7 states; §8 copy; §9 accessibility; §10 checks S03-1 to S03-7 | `docs/ux/screens/S03-research.md` |
+| Product UX blueprint | `PRODUCT-UX` v6 (approved) | §2.1, §2.2 destination and routes; §3 shell and §3.5; §4.4 to §4.8 patterns; §7 vocabulary; §8 status map; §9 action tiers; §12 D-8 | `docs/ux/product-ux-blueprint.md` |
+| Standard | STD-UI v6 | Thirty owner-interface rules; STD-UI-1 display labels; STD-UI-30 virtualised with search and filter | `docs/constitution/standards/ui-conventions.md` |
+| Design system | Component specifications and theme | Eighteen specifications, twelve used; `data-table` `virtualised`; `checkbox`; every token named | `design-system/components/`, `design-system/theme.css`, `design-system/theme-validation.md`, `design-system/intake.md` |
 | Component design | CAP-001 owner web app v4 | Shell, `ScreenState`, fetch layer, windowed rendering, desktop target, open questions inherited | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-owner-web-app.md` |
-| Component design | CAP-002 classification API v1 | Section 2.7 response shapes; 2.5 error codes | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-classification-api.md` |
-| Implemented code | `web/src/app/shell.tsx`, `web/src/app/routes.tsx`, `web/src/api/client.ts`, `web/src/api/types.ts`, `web/src/screens/instruments/parse-bulk-symbols.ts` | The composition points, the fetch helpers and union reused, the parser reused | `web/src/` |
+| Component design | CAP-002 classification API v2 | Section 2.7 response shapes incl. `match_count`, `memberships`, the summary; 2.4 bounds; 2.5 error codes | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-classification-api.md` |
+| Implemented code | `web/src/app/shell.tsx`, `web/src/app/routes.tsx`, `web/src/api/client.ts`, `web/src/api/types.ts`, `web/src/screens/instruments/parse-bulk-symbols.ts`, `web/src/screens/runs/detail/index.tsx` | The composition points, the fetch helpers and union reused, the parser reused, how a run is titled | `web/src/` |
+| Implemented schema | `src/factorflow/db/migrations/0004_runs.sql` | `acquisition_run.run_id` is a UUID; no download number exists | `src/factorflow/db/migrations/` |
 | Constitution | Tech stack v5 | React 18, Vite, Tailwind, shadcn/ui on Radix, `react-router-dom`, Vitest, Playwright, Biome; a11y by review | `docs/constitution/tech-stack.md` |
-| Decision records | DEC-0054, DEC-0059 to DEC-0064 | Cadence; tiers; no polarity colour; rail order; refresh once; precision; seam ownership | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decision records | DEC-0054, DEC-0060, DEC-0062, DEC-0063, DEC-0064, DEC-0068 to DEC-0080 | Cadence; no polarity colour; refresh once; precision; `requestJson` export; routes and destination; interim seam; compare bound; read surface; labels and tiers; unspecified renderings; search; the mark; save rules; input status; placements; read-side mechanics; test placement | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
-| AC-1 | `POST /api/universes` with `symbols`; whole refusal | Create dialog with bulk entry; `instrument_not_acquired` naming every symbol; Create from selected | 2.7, 10 |
-| AC-2 | Filter save with `set_id`; `classification_set_changed` | Save as universe dialog; origin line read as history | 2.7, 10 |
-| AC-3 | `GET /api/universes` | Universes list; scope select listing universes | 2.3, 10 |
-| AC-4 | Rename, members, retire routes | Summary header actions, Add stocks, Remove, History tab | 2.7, 10 |
+| AC-1 | `POST /api/universes` with `symbols`; whole refusal | Create dialog with bulk entry; `instrument_not_acquired` naming every symbol; **Add to universe…** from checked rows | 2.7, 10 |
+| AC-2 | Filter save with `set_id`; `classification_set_changed`; S03-7 | **Save these {n} as a universe…** posting thresholds, `hide_incomplete` and `set_id`; origin line read as history | 2.4, 2.7 |
+| AC-3 | `GET /api/universes` | Universes list; *Look in* listing universes; memberships line | 2.3, 2.5, 10 |
+| AC-4 | Rename, members, retire routes | Summary header actions, **Add stocks…**, **Remove…**, History tab; toasts confirming | 2.7, 10 |
 | AC-5 | `empty_universe`, `last_member` | `blocked` on no symbol, zero matches and the sole member; server backstops | 2.7 |
-| AC-6 | Events read; `as_of` | History tab, *View members as of this event*, Members as of | 10 |
-| AC-9 | Score and percentile | `formatScore`, `formatPercentile`, classified cell | 2.4, 2.5 |
-| AC-10 | Scheduler and poll | Currency region refresh without owner action | 2.6 |
-| AC-11 | 3000 rows; 10-second poll | Windowed rendering over keyset pages; poll while building | 2.5, 2.6, 5 |
-| AC-12 | `not_classified` with reason and input | Merged not-classified cell; evidence three-part statement | 2.5, 10 |
-| AC-13 | Outdated rules | Evidence statement naming the rule and the date | 7, 10 |
-| AC-14 | `qualified_count`, `ranked`, `min_peer_set_size` | Not-ranked header and hatched cells | 2.5 |
-| AC-15 | Lifecycle on stocks and members | Retired marker and `status-neutral` cells; member kept | 2.5, 10 |
-| AC-16 | Sort, thresholds, scope, `symbols` | Sort controls, threshold panel, scope select, selection bar, Compare | 2.5, 2.7, 10 |
-| AC-17 | Evidence read | Row expansion; factor cards with inputs, dates and detail disclosure | 2.3, 10 |
-| AC-18 | History read | Stock evidence History tab | 10 |
+| AC-6 | Events read; `as_of` | History tab, *View members as of this event*, *Members as of* | 2.5, 10 |
+| AC-9 | Score and percentile | `factor-cell.tsx` percentile and bar; `formatScore` in inspector and evidence | 2.4, 2.5 |
+| AC-10 | Scheduler and poll | Summary poll and refresh once without owner action | 2.6 |
+| AC-11 | 3000 rows; 10-second poll | `virtualised` table over keyset pages; summary poll while building; *Find a stock* | 2.5, 2.6, 5 |
+| AC-12 | `not_classified` with reason and input; S03-1 | *Incomplete* cell with tooltip; inspector explanation box; evidence three-part statement; hide-incomplete default off | 2.5, 10 |
+| AC-13 | Outdated rules; summary's current-stock rule | Evidence statement naming the rule and the date; *Outdated* on the input; the summary read consumed for the header and banner | 2.6, 7, 10 |
+| AC-14 | `qualified_count`, `ranked`, `min_peer_set_size`; S03-4 | *Not enough to rank* cells and the header count once | 2.5 |
+| AC-15 | Lifecycle on stocks and members | *Not followed* on every factor under a universe scope, detail, compare, evidence; excluded from *All followed stocks* | 2.5, 10 |
+| AC-16 | Sort, thresholds, scope, `symbols` 2 to 6; S03-2 | Sort controls, threshold sentences, *Look in*, tray, Compare; `match_count` in the `h1` | 2.4, 2.5, 2.7, 10 |
+| AC-17 | Evidence read with `memberships`; S03-3 | Inspector per selection with inputs' as-of; factor cards with inputs, dates and detail disclosure | 2.3, 2.5, 10 |
+| AC-18 | History read | Earlier scores tab | 10 |
 | AC-19 | Rows as recorded | History sentence; nothing recomputed in the browser | 2.4, 10 |
-| AC-20 | `not_current` | Currency region's three headline states; previous set kept | 2.6 |
-| AC-21 | `classification_date`, `run_id`, run outcome; sets | Dated sentence with run link and outcome badge; set history | 2.6, 10 |
-| AC-22 | `never_classified` | `empty-never-populated` replacing table and region | 2.4 |
-| AC-23 | `restated_possible` | *Possibly restated* on every presentation; meaning stated once per screen | 2.5, 10 |
+| AC-20 | `not_current`; summary read | Banner's warning and critical states; previous set kept | 2.6 |
+| AC-21 | `classification_date`, `ended_at`, `run_id`, run outcome; sets | As-of line with the download link and outcome badge; **Earlier sets…** dialog | 2.6, 10 |
+| AC-22 | `never_classified` | `empty-never-populated` replacing the results body | 2.4, 7 |
+| AC-23 | `restated_possible`; S03-6 | `restated-mark.tsx` on every percentile that carries it; meaning stated once per screen | 2.5, 10 |
+
+| S03 check | Component Design Element | Section |
+|-----------|--------------------------|---------|
+| S03-1 | Hide-incomplete checkbox default off mapping to `hide_incomplete`; incomplete rows rendered with *Incomplete* cells | 2.5, 7 |
+| S03-2 | `h1` from `matchCount`, never the loaded rows | 2.4, 2.5, 7 |
+| S03-3 | Inspector line per factor naming the inputs and their `as_of` and `known_on` | 2.5, 7 |
+| S03-4 | *Not enough to rank* in every cell, the count in the header, sort control removed | 2.5, 7 |
+| S03-5 | `research-query.ts` round trip; every filter a URL key and a request parameter | 2.4, 7 |
+| S03-6 | `restated-mark.tsx` in the results and the inspector, and on every other percentile | 2.5, 7 |
+| S03-7 | The save posts thresholds, `hide_incomplete` and `set_id`; the e2e check compares the detail's member count to the header | 2.7, 7 |
 
 ## 14. Open Questions
 
-1. **Is there a maximum number of stocks in the side-by-side view?** Carried
-   from the UX brief section 9 and UX design section 7, **abstained in those
-   runs and in this one**. `[REQUIRES INPUT: maximum number of stocks compared
-   side by side, or confirmation that the API bound of 500 is the only one]`.
-   *Owner: capability owner. Blocks: nothing; Compare proceeds with no cap
-   below 500, horizontal scroll inside the table and pinned row headers, and
-   the `blocked` reason changes to the cap if one is given.*
-2. **What is the maximum length of a universe name?** Carried from system
-   design section 8 question 2. `[REQUIRES INPUT: maximum universe name length
-   in characters]`. *Owner: capability owner. Blocks: the name field's stated
-   bound and client-side check in the create, save and rename forms; nothing
-   else.*
-3. **STD-UI-30 is only partially discharged**, inherited from CAP-001: the
-   `data-table` specification offers pagination and not virtualisation, so the
-   component does not discharge the rule alone; this design implements
-   windowed rendering over keyset pages as CAP-001 did. *Owner: design system
-   owner with the capability owner. Blocks: a clean conformance record, not
-   the implementation.*
-4. **The numeric threshold toolbar filter is a COMPONENT-SPEC-GAP** (UX design
-   section 3); the interim composition is implemented here. *Owner: design
-   system owner, through `design-system/intake.md`. Blocks: nothing.*
+1. **What is the maximum length of a universe name?** Carried from system
+   design section 8 question 2 through the brief and the UX design.
+   `[REQUIRES INPUT: maximum universe name length in characters]`. *Owner:
+   capability owner. Blocks: the name field's stated bound and client-side
+   check in the create, save and rename forms; nothing else.* **Abstained in
+   this run.**
+2. **The dependency on the *App shell & data health* capability** (blueprint
+   §12 D-8; system design v2 §8 question 10). Whether it belongs in
+   `Capability-CAP-002.md` §5.1 (most likely `requires-runtime` for the rail
+   entry) is the owner's; only the owner edits that table. Meanwhile the
+   interim composition of DEC-0069 holds (section 2.2). `[REQUIRES INPUT: the
+   §5.1 row for the App shell & data health capability, if any]`. *Owner:
+   capability owner. Blocks: nothing in this design.* **Abstained in this
+   run.**
+3. **The download's visible identifier.** S03 §3 and UX design v2 write
+   *download #{n}*, and no artifact or table supplies a download number
+   (`acquisition_run.run_id` is a UUID). This design renders *download
+   {run_id}*, the identifier the destination page shows (DEC-0079,
+   PROVISIONAL). `[REQUIRES INPUT: whether downloads gain a short visible
+   number, and where it lives (the run journal is CAP-001's, the downloads list
+   is the shell capability's)]`. *Owner: capability owner with the shell
+   capability's design. Blocks: the as-of line's exact text, not its
+   behaviour.*
+4. **Two read semantics this design refines against the system design**, for
+   the system-design owner (DEC-0079, PROVISIONAL): `hide_incomplete` excludes
+   stocks whose `not_classified` reason is an input reason only, and the
+   unscoped list excludes retired instruments. Section 3 states both; the
+   recommendations are in the decomposition report. *Owner: system-design
+   owner. Blocks: nothing; the component designs are explicit.*
 5. **Which density tier is the default?** Carried from CAP-001 and STD-UI's
    OQ-UI-4; inherited. *Owner: design system owner. Blocks: nothing.*
-6. **No mobile or narrow-viewport layout is specified**, as CAP-001 recorded.
-   *Owner: capability owner. Blocks: nothing.*
-7. **The composition edits to `shell.tsx`, `routes.tsx` and `client.ts`** are
-   this component's by DEC-0064 (PROVISIONAL), pending the owner's
-   confirmation of the system design's reading of AGT-SCOPE-002 (section 8
-   question 4). *Owner: capability owner. Blocks: the story that makes those
-   edits, not the screens.*
+6. **No narrow-viewport layout below 768 px is specified beyond
+   reachability** (blueprint §3.1). *Owner: capability owner. Blocks:
+   nothing.*
+7. **Reaching a universe's `created` event for the origin line** uses the
+   events read, which is newest first; a universe with many events pages to
+   its oldest. This design reads `origin` from `GET /api/universes/{id}`
+   (classification-api §2.7, DEC-0065) on detail and pages the events only on
+   the list's row expansion. *Owner: none; recorded so the UX design's §7 note
+   has an answer.*
+
+**Closed in version 2.** The Compare cap (DEC-0070, from approved S03 §6: 2 to
+6); the numeric threshold toolbar COMPONENT-SPEC-GAP (resolved by S03's
+Filters pane, UX design §3); the STD-UI-30 partial (resolved by the
+`data-table` `virtualised` variant); the restatement mark's accessible name
+(DEC-0075, as a composition); the composition seam (DEC-0069 supersedes
+DEC-0064's shell part; the `requestJson` export stands).
