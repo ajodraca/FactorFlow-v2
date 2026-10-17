@@ -1,0 +1,203 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-002-E1-S7-tasks
+artifact_type: story-tasks
+artifact_version: 1
+status: draft
+owner: Alvaro de Jodra
+owner_github: ajodraca
+created: 2026-10-17
+updated: 2026-10-17
+ai_provenance:
+  agent_id: implementation-planning-agent
+  agent_version: "1.0"
+  model: claude-sonnet-5-5
+  tool: Claude Code
+  tool_version: "unknown"
+  timestamp: 2026-10-17T22:40:00Z
+  source_artifacts:
+    - id: CAP-002-E1-S7
+      version: "1"
+    - id: CAP-002-component-design-classification-ui
+      version: "3"
+    - id: CAP-002-ux-design
+      version: "3"
+    - id: CAP-002-component-design-classification-api
+      version: "3"
+  invoking_user: ajodraca
+  correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+---
+
+# Tasks: CAP-002-E1-S7 — Universes List Screen and Create-by-Hand Dialog
+
+**Story**: `docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7.md`
+**Component**: `FactorFlow-v2` (module `classification-ui`, Universes screen)
+**Branch**: `usr/alvaro-de-jodra/CAP-002-E1-tasks`
+**Date**: 2026-10-17
+
+## Summary
+
+Build the Universes list screen of the Research area: `web/src/screens/research/universes/index.tsx` (the screen, default export `UniversesScreen`), `universe-table.tsx` (the expandable table with the origin line) and `create-dialog.tsx` (the New universe dialog, UX design 1.3). The list shows active universes by default and separates retired ones under the lifecycle select with a `secondary` *Retired* badge; the never-populated and nothing-found states are distinct; expanding a row reads the universe's `created` event and renders the origin line, each clause only when it applies. The dialog parses pasted symbols with the delivered `web/src/screens/instruments/parse-bulk-symbols.ts` (imported, not copied), blocks **Create** (focusable, with its reason) at zero or more than 1000 recognised symbols, names every uncovered symbol on `instrument_not_acquired` with a link to the followed-stocks page while keeping the owner's list, and on `201` routes to the new universe's detail with no toast. The story consumes `/api/universes` through E4-S1's fetch layer and E4-S2's `copy.ts` and `format.ts`; it registers no route (CAP-002-E4-S10) and builds no detail screen (CAP-002-E1-S8 and CAP-002-E1-S9), and it develops against the `/api/universes` contract that CAP-002-E1-S6 implements.
+
+## Acceptance Criteria Traceability
+
+| AC | Description | Tasks |
+|----|-------------|-------|
+| AC-1 | Create a named universe from stocks acquisition covers; an uncovered stock cannot be added | T004, T005, T009, T013, T014 |
+| AC-3 | Several universes held at once; list, lifecycle separation, origin line, distinct empty states | T006, T007, T008, T010, T012, T014 |
+| AC-5 | No empty universe: create blocked at zero symbols | T003, T009, T013 |
+| DAC-E1-1 | Whole request refused naming every uncovered symbol, nothing written (client half: the names, the link, the kept list) | T004, T013 |
+| DAC-E1-S7-1 | Submit `blocked` with its reason and focusable at zero or over 1000 recognised symbols (TC-COMP-042) | T003, T013 |
+| DAC-E1-S7-2 | `instrument_not_acquired` names every uncovered symbol, links to the followed-stocks page, keeps the list (TC-COMP-006) | T004, T013 |
+| DAC-E1-S7-3 | `201` navigates to the new universe's detail with no toast (TC-COMP-007) | T005, T013, T014 |
+| DAC-E1-S7-4 | Retired universes only under the lifecycle select, `secondary` *Retired* badge (TC-COMP-020) | T006, T012, T014 |
+| DAC-E1-S7-5 | Origin line names the filter, `search "AA"` and `stocks with an incomplete score hidden` only when applied (TC-COMP-021) | T007, T012 |
+| DAC-E1-S7-6 | Never-populated state distinct from a lifecycle filter that matches nothing (TC-COMP-022) | T008, T014 |
+
+## Phase 1: Setup
+
+**Purpose**: Confirm the producers this story imports exist and bind the exact names this plan leaves to them.
+
+- [ ] T001 Verify, without editing, that the producers exist, and record the exact names every later task uses. If any item in (a) or (b) is missing, STOP: the hard edges E4-S1 and E4-S2 are unmet and this plan must not be coded yet. (a) E4-S1: `web/src/api/classification-client.ts` and `web/src/api/classification-types.ts` exist and `requestJson` is exported from `web/src/api/client.ts`. Record: the function that lists universes (`GET /api/universes` with `lifecycle`, `limit`, `cursor`) and the shape it returns (`universes[] {universe_id, name, lifecycle, member_count, created_at, retired_at}`, `active_count`, `retired_count`, `next_cursor`, mapped to camelCase); the function that creates one (`POST /api/universes` with `{name, symbols}`) and the field carrying the new `universe_id`; the function that reads `GET /api/universes/{id}/events` (`limit`, `cursor`) and its event type (`event_type`, `filter_provenance`, `recorded_at`, `recorded_on`, `next_cursor`), including whether the keys inside `filter_provenance.thresholds` stay as the wire's query-parameter names (`value_percentile_min` and so on) or are camel-cased; the error class the layer throws and the way it exposes `code` and the `symbols` of `instrument_not_acquired`. (b) E4-S2: `web/src/screens/research/copy.ts` (record which keys already hold the strings in T011's list, and the exact `SHELL_ROUTES` key for the followed-stocks page), `web/src/screens/research/format.ts` (record `formatScore`, `formatPercentile`, `formatTimestamp` and their parameter types, and whether a helper returns the America/Chicago calendar date of a timestamp). (c) Delivered: `web/src/screens/instruments/parse-bulk-symbols.ts` exports `parseBulkSymbols`/`ParsedSymbol`; `web/src/api/types.ts` exports `ScreenState`; `react-router-dom` is a dependency. (d) `git status` shows none of this story's files and no directory `web/src/screens/research/universes/` beyond what E4 stories created.
+
+**Checkpoint**: Every name later tasks import is recorded; nothing is edited.
+
+---
+
+## Phase 2: Tests (TDD)
+
+**Purpose**: Write failing tests that define the screen and dialog from the acceptance criteria.
+
+### Mandatory Component Tests
+
+Both files are new (DEC-0064 applies to test files: no delivered test file is edited). Conventions follow `web/src/screens/instruments/bulk-add.test.tsx`: Vitest and React Testing Library, `userEvent.setup()`, the fetch layer replaced with `vi.mock("../../../api/classification-client", async () => ({ ...(await vi.importActual(...)), <listFn>: vi.fn(), <createFn>: vi.fn(), <eventsFn>: vi.fn() }))` using the names T001 recorded, and a `// Implements TC-COMP-0NN` comment on each test. Every render sits in a `MemoryRouter`. Assert literal owner-facing strings from UX design 1.3, not imports from `copy.ts`.
+
+- [ ] T003 [P] Implement TC-COMP-042 (Create dialog submit blocked for zero or over 1000 symbols; DAC-E1-S7-1, AC-5) in `web/src/screens/research/universes/create-dialog.test.tsx`. Render `CreateDialog`. (a) With the Stocks field empty, **Create** is `data-variant="blocked"`, is focusable (`tabIndex` 0, `toBeEnabled()`, not a bare `disabled`), `aria-describedby` points at an element reading *Enter at least one stock.*, and clicking it calls the create function zero times. (b) Paste 1001 valid symbols (generate `A0001`..`A1001`-style shapes that match `^[A-Z][A-Z0-9.-]{0,15}$`), blur: **Create** is blocked with *Up to 1000 stocks can be added in one request.*; paste exactly 1000 and it is not blocked. (c) Only malformed entries (`1BAD`, `zzzz zz`) leave it blocked with *Enter at least one stock.*; malformed entries do not count toward 1000. (d) Duplicates count per recognised entry (1001 entries of which 2 repeat are still blocked; DEC-0104). Fails now: `create-dialog.tsx` does not exist.
+- [ ] T004 Implement TC-COMP-006 (Create dialog names every uncovered symbol and keeps the list; DAC-E1-S7-2, DAC-E1-1, AC-1) in `web/src/screens/research/universes/create-dialog.test.tsx` (same file as T003, applied after it). Fill Name `Tech`, paste `AAPL, MSFT, TSLA`, make the create function reject with the error T001 recorded, code `instrument_not_acquired`, `symbols: ["MSFT", "TSLA"]`. Assert: the dialog stays open; an assertive live region (`role="alert"`) reads *Could not create the universe: FactorFlow doesn't follow MSFT, TSLA. Follow them on Data health, then try again.*; it contains a link (`getByRole("link")`) whose `href` equals the `SHELL_ROUTES` followed-stocks target T001 recorded; the Stocks field still holds `AAPL`, `MSFT`, `TSLA` and the Name field still holds `Tech`; nothing navigates. Also: a single uncovered symbol reads without a comma, and the error's `message` text from the envelope is never rendered (give the thrown error a message `RAW-SERVER-PROSE` and assert it is absent). Fails now: no dialog.
+- [ ] T005 Implement TC-COMP-007 (Successful create navigates to the new universe without toast; DAC-E1-S7-3, AC-1) in `web/src/screens/research/universes/create-dialog.test.tsx` (same file, applied after T004). Render `UniversesScreen` from `./index` inside `MemoryRouter initialEntries={["/research/universes"]}` with `<Routes>` containing `/research/universes` (the screen) and `/research/universes/:universeId` (a stub `<p>Detail {id}</p>` reading `useParams`), list function resolved with one universe so the screen is populated. Open **New universe…**, fill Name and `AAPL, MSFT`, press **Create**, resolve the create function with the new `universe_id`. Assert: the create function was called once with `{ name: "<trimmed name>", symbols: ["AAPL", "MSFT"] }` (distinct, upper-cased); the stub detail for that id is rendered; no dialog remains; there is no `role="status"` or `role="alert"` element and no text matching `/created|saved/i` outside the stub (no toast). Fails now: no screen.
+- [ ] T006 [P] Implement TC-COMP-020 (Retired universes appear only under the lifecycle select; DAC-E1-S7-4, AC-3) in `web/src/screens/research/universes/universes.test.tsx`. The list function double answers by `lifecycle`: `active` returns `Tech` and `Dividend growers`, `retired` returns `Old ideas`, `all` returns all three; counts `active_count: 2, retired_count: 1` on every answer. Assert: first request carries `lifecycle: "active"`; `Old ideas` is absent; the combobox named *Show: Active* offers *Active*, *Retired*, *All*; selecting *Retired* issues a request with `lifecycle: "retired"`, shows `Old ideas` with a badge whose text is *Retired* and `data-variant="secondary"` (`getByText("Retired", { selector: "[data-variant=secondary]" })`), and the active names are gone; selecting *All* shows all three and the badge only on `Old ideas`; the active rows carry no badge. The header reads *2 active, 1 retired* in every selection. Fails now: no screen.
+- [ ] T007 Implement TC-COMP-021 (Filter-origin line names search and hidden-incomplete only when applied; DAC-E1-S7-5, AC-3) in `web/src/screens/research/universes/universes.test.tsx` (same file as T006, applied after it). The events function double returns, newest first and across two pages (the first page `member_added` events with `next_cursor: "c2"`, the second page ending with the `created` event), so the test also proves paging to the oldest event. Cases, each a separate universe expanded with the toggle named *Show details for {name}* (`aria-expanded` flips to `true`): (a) `filter_provenance` `{ set_id, classification_date: "2026-10-15", thresholds: { value_percentile_min: 80, momentum_score_min: 0 }, hide_incomplete: true, symbol: "AA" }` renders exactly `Saved from a filter on 2026-10-15: value percentile at least 80, momentum standardised score at least 0.00; search "AA"; stocks with an incomplete score hidden`; (b) thresholds only, `hide_incomplete: false`, `symbol: null` renders `Saved from a filter on 2026-10-15: value percentile at least 80, momentum standardised score at least 0.00` with no `search` and no `hidden` text; (c) `hide_incomplete: true` with `thresholds: {}` and `symbol: null` renders `Saved from a filter on 2026-10-15; stocks with an incomplete score hidden`; (d) `thresholds: { growth_percentile_max: 20, value_score_max: -1.5 }` renders `Saved from a filter on 2026-10-15: value standardised score at most −1.50, growth percentile at most 20` (factor order value then growth, with the minus sign `format.ts` produces); (e) `filter_provenance: null` renders `Created by hand`. Also assert the events function is called once per expansion (collapse and re-expand do not call it again) and that the line is plain text children (no HTML). Fails now: no table.
+- [ ] T008 Implement TC-COMP-022 (Never-populated state distinct from empty lifecycle filter; DAC-E1-S7-6, AC-3) in `web/src/screens/research/universes/universes.test.tsx` (same file, applied after T007). (a) Never populated: the list function returns `universes: []`, `active_count: 0`, `retired_count: 0`: the screen shows *No universes yet. Create one by picking stocks, or save a result on Research.*, a link to `/research`, and **New universe…** has focus; no table; the text *No retired universes.* is absent. (b) Nothing found: `active_count: 2, retired_count: 0`; select *Retired*, the answer is `universes: []`: the screen shows *No retired universes.* with a **Reset** control that returns the select to *Active* (one more request with `lifecycle: "active"`), the table header and the *2 active, 0 retired* line stay, and the never-populated sentence is absent. (c) `active_count: 0, retired_count: 1` under *Active*: *No active universes.* with a control that selects *All* (DEC-0103); still not the never-populated sentence. Fails now: no screen.
+
+### Additional Unit Tests
+
+- [ ] T009 [P] Additional create-dialog tests in `web/src/screens/research/universes/create-dialog.test.tsx` (same file as T003 to T005, applied after T005): (a) the Stocks field has accessible name *Stocks to include*; blur parses and a polite live region reports *12 symbols recognised, 1 not recognised* for 12 valid and one malformed entry, lists the rejected entry with *zzzz: not a valid symbol format*, and keeps the accepted ones; parsing runs on blur and on paste, not per keystroke; (b) blur rewrites the field to the upper-cased entries one per line, while typing never changes case; (c) initial focus is the Name field, Cancel precedes **Create** in DOM order, Esc calls `onCancel`, Tab from **Create** wraps to Name and Shift+Tab from Name wraps to **Create** (focus trap, as `retire-dialog.tsx`), and focus returns to **New universe…** on close; (d) `universe_name_in_use` attaches to the Name field (`aria-invalid`, `aria-describedby` message), not to a summary, and the list is kept; (e) a name empty after trimming shows a Name field error on submit and sends no request, with no maximum-length text anywhere (DEC-0104); (f) a rejection with an unknown code, or a transport failure, shows the generic *Could not create the universe* sentence from `copy.ts`, never the envelope `message`; (g) while the request is in flight **Create** and Cancel cannot start a second request and the dialog stays open until the result is known; (h) `role="dialog"`, `aria-modal="true"`, `aria-labelledby` the title *New universe*. Fails now: no dialog.
+- [ ] T010 [P] Additional list-screen tests in `web/src/screens/research/universes/universes.test.tsx` (same file as T006 to T008, applied after T008): (a) loading renders *Loading…* with `aria-live="polite"` and a rejected list read renders the error state with the header kept and a **Try again** that re-requests, showing the code-keyed sentence and never the raw `message`; (b) paging: a first answer with `next_cursor: "p2"` triggers a second request with `cursor: "p2"` and `limit: 500`, rows from both appear, and the first request also carries `limit: 500` (DEC-0101); (c) columns: Name (row header, a link whose `href` is `/research/universes/{id}`, accessible name the universe name alone), Lifecycle, Members (right-aligned whole number), Created; Created shows the America/Chicago calendar date of `created_at` (a `2026-10-16T02:30:00Z` instant shows `2026-10-15`; DEC-0103); (d) the Name header is a sortable button with `aria-sort`: first activation ascending case-insensitive, second descending, with no further request; (e) expanding shows the full `created_at` and, for a retired universe, `retired_at`, each through `formatTimestamp` with the zone; (f) a failed events read shows an inline alert with **Try again** and no origin text; (g) **New universe…** is `data-variant="default"`, opens the dialog and focus returns to it on Cancel; (h) `unreachable` state renders nothing from this screen (the shell owns it). Fails now: no screen.
+
+**Checkpoint**: All tests written and failing (no production code yet); `npm run test -- universes` fails only because the modules do not exist.
+
+---
+
+## Phase 3: Core Implementation
+
+**Purpose**: Make the tests pass with the three files the design names and the strings they need.
+
+- [ ] T011 Add the owner-facing strings this story needs to `web/src/screens/research/copy.ts` only where T001 found a key missing (E4-S2 owns the file; "Later stories import strings from this catalogue and do not add to it unless a design message is missing"). Strings, all in display labels: page title *Universes*; *{n} active, {m} retired*; lifecycle options *Active*, *Retired*, *All* and the select label *Show: {option}*; **New universe…**; dialog title *New universe*; field labels *Name* and *Stocks to include* and the placeholder `AAPL, MSFT, NVDA`; *{n} symbols recognised, {m} not recognised*; *{entry}: not a valid symbol format*; blocked reasons *Enter at least one stock.* and *Up to 1000 stocks can be added in one request.*; **Create** and **Cancel**; the `instrument_not_acquired` summary *Could not create the universe: FactorFlow doesn't follow {symbols}. Follow them on Data health, then try again.* and a generic *Could not create the universe.*; a Name-required field error; the `universe_name_in_use` field error; never-populated *No universes yet. Create one by picking stocks, or save a result on Research.*; *No retired universes.*, *No active universes.* and their reset controls; the origin lead *Saved from a filter on {date}*, *Created by hand*, *search "{prefix}"*, *stocks with an incomplete score hidden*, the factor labels *value*, *growth*, *momentum*, measure labels *percentile*, *standardised score*, direction labels *at least*, *at most*; the expander name *Show details for {name}* and *Hide details for {name}*; *Loading…*; the list and origin error sentences. Keep each as one keyed entry; reuse any key T001 found. After adding, run `npm run test -- copy` and confirm E4-S2's scan still passes: its forbidden word *retire* targets the instrument sense (STD-UI-1 *stop following*), and the universe lifecycle words *Retired*, *retired* are mandated by this story's AC and by design 2.7's `universe_retired` wording, so if the scan flags only those strings, narrow the scan's matcher in `copy.test.ts` to exempt universe wording and say so in the TDD evidence (precedence: story AC over the design's test-table prose). Depends on T001.
+- [ ] T012 Create `web/src/screens/research/universes/universe-table.tsx`. Exports `UniverseTable` and `universeDetailPath(id) => "/research/universes/${id}"`. A native `<table>` in the `data-table` `expandable` pattern of `web/src/screens/coverage/coverage-table.tsx` (row-header cell holding the expander button `aria-expanded`/`aria-controls`/`aria-label` *Show details for {name}*, `▸`/`▾` `aria-hidden`), with `data-variant="expandable"`. Columns: Name (row header, `Link` from `react-router-dom` to `universeDetailPath`, sortable via a header button with `aria-sort`; client-side, case-insensitive, over the loaded rows; DEC-0101), Lifecycle (a `secondary` badge reading *Retired* styled as `badges.tsx` does, `data-variant="secondary"`, text plus icon; blank for active), Members (right, `font-numeric`, whole number), Created (the America/Chicago calendar date of `createdAt`, from `format.ts` if T001 found a helper, otherwise `Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" })`; DEC-0103). A retired universe's name uses `text-muted-foreground`. Expansion reveals `createdAt` and, when set, `retiredAt` through `formatTimestamp`, and the origin line, read once per expansion: page the events function at `limit` 500 (the API's `MAX_PAGE_SIZE`; classification-api section 2.4) following `nextCursor` until an event with `eventType === "created"` is found, then render it; cache the result in the row's state so collapse and re-expand does not re-read; a failed read renders an inline `role="alert"` with **Try again**. Origin text (pure function `describeOrigin(provenance)` in this file; DEC-0102): `null` provenance gives *Created by hand*; otherwise `Saved from a filter on {classification_date}` followed, only when present, by `: {bounds}` (bounds in factor order value, growth, momentum, percentile before standardised score, minimum before maximum, each `{factor} {measure} at least|at most {number}`, joined `, `; a bound key not matching `^(value|growth|momentum)_(score|percentile)_(min|max)$` is dropped, never printed raw; percentile numbers through `formatPercentile`, score numbers through `formatScore`, each fed `String(value)` since the stored bound arrives as a JSON number), `; search "{symbol}"` when `symbol` is a non-empty string, and `; stocks with an incomplete score hidden` when `hide_incomplete === true`; when there are no bounds the `: ` is omitted. The dates pass through unconverted (STD-UI-5). Plain text children only (no `dangerouslySetInnerHTML`). Depends on T001, T011; makes T006, T007 and part of T010 pass.
+- [ ] T013 Create `web/src/screens/research/universes/create-dialog.tsx`. Exports `CreateDialog({ onCreated, onCancel })`. A native `<dialog open aria-modal="true" aria-labelledby>` with `data-variant="standard"` built on the pattern of `web/src/screens/instruments/retire-dialog.tsx` (manual Tab-cycle between first and last control, Esc cancels, focus restored to the previously focused element on unmount), but with initial focus on the Name field. Fields: Name (`input` `text`, `aria-invalid` and `aria-describedby` on error) and Stocks (`textarea` `data-variant="list"`, `rows={4}`, as `bulk-add.tsx`; accessible name *Stocks to include*; placeholder `AAPL, MSFT, NVDA`). Parse with `parseBulkSymbols` imported from `../../instruments/parse-bulk-symbols` on blur and on paste (never per keystroke), rewrite the field on blur to the upper-cased entries one per line, show the polite live region *{n} symbols recognised, {m} not recognised* and the rejected list with *{entry}: not a valid symbol format* (marker token `--status-warning`), and keep the accepted ones. **Create** is `data-variant="blocked"` (never a bare `disabled`; `tabIndex={0}`, click does nothing, `aria-describedby` the reason) while recognised entries are zero (*Enter at least one stock.*) or above 1000 (*Up to 1000 stocks can be added in one request.*), counting entries not distinct symbols (DEC-0104); the submit handler re-parses the current text so a stale preview cannot send. Submit: trim the name; an empty trimmed name is a Name field error and no request; otherwise call the create function with `{ name, symbols }` where `symbols` are the distinct normalised recognised symbols; while in flight, Create is natively disabled and the dialog stays open (dialog contract: never close before the result is known). On success call `onCreated(universeId)`; the dialog raises no toast. Errors by code through `copy.ts` and never `message`: `instrument_not_acquired` renders the assertive summary naming every symbol from the error's `symbols`, comma-separated, with a `Link` to the followed-stocks `SHELL_ROUTES` target, keeping both fields; `universe_name_in_use` attaches to the Name field; anything else renders the generic sentence. No maximum name length is stated or enforced (DEC-0104; Open Gaps). Depends on T001, T011; makes T003 to T005 and T009 pass.
+- [ ] T014 Create `web/src/screens/research/universes/index.tsx` with `export default function UniversesScreen()`, mirroring `web/src/screens/instruments/index.tsx`. State `ScreenState<{ universes; activeCount; retiredCount }>` plus the lifecycle selection (default `active`); on mount and on each selection change, read every page at `limit` 500 until `nextCursor` is null, with a `cancelled` flag, then set `populated`, or `empty-never-populated` when `activeCount + retiredCount === 0`, or `empty-no-match` when the selection returned no rows but the counts are not both zero; a rejection becomes `error` (code-keyed sentence, **Try again**, header kept); `unreachable` renders nothing (the shell owns it). Layout: one `card`-styled region (`rounded border border-border`, tokens only from `theme.css`; STD-UI-29), `h1` *Universes* at `text-lg`, the count *{n} active, {m} retired* in `text-muted-foreground`, a labelled `select` (aria-label *Show: {selected}*) with Active, Retired, All, and **New universe…** (`data-variant="default"`). The never-populated state shows the sentence, a `Link` to `/research`, and focuses **New universe…** on mount. The nothing-found states show *No retired universes.* with a control selecting *Active*, and *No active universes.* with a control selecting *All* (DEC-0103). **New universe…** opens `CreateDialog`; `onCreated` closes it and calls `useNavigate()` to `universeDetailPath(id)`; `onCancel` closes it and returns focus to **New universe…**. The screen performs no write other than through the dialog and offers no delete (STD-UI-2). Depends on T012, T013; makes T005, T008 and the rest of T010 pass.
+
+**Checkpoint**: `npm run test -- web/src/screens/research/universes` passes; every test from T003 to T010 is green.
+
+---
+
+## Phase 4: Integration
+
+**Purpose**: Confirm the story plugs into what E4-S10 will import, and touches nothing else.
+
+- [ ] T015 Confirm integration without editing outside the story: (a) `index.tsx` has a default export named `UniversesScreen`, the import form `routes.tsx` uses for the delivered screens (`import CoverageScreen from "../screens/coverage"`), and `universeDetailPath` produces the route E4-S10 registers (`/research/universes/:universeId`); (b) `git status` lists only the five new files under `web/src/screens/research/universes/`, the one possible additive edit to `web/src/screens/research/copy.ts` (and at most the narrowing in `copy.test.ts` named in T011), this plan, and the TDD-evidence file; no change to `web/src/app/*`, `web/src/api/*` or the delivered `parse-bulk-symbols.ts`; (c) `npm run test -- render` (the existing `web/src/api/render.test.tsx`) still finds no `dangerouslySetInnerHTML`. Depends on T014.
+
+**Checkpoint**: The screen is importable by the route table and the change set is limited to the files above.
+
+---
+
+## Phase 5: Polish
+
+**Purpose**: Whole-suite validation and TDD evidence.
+
+- [ ] T016 Run every command in the Validation Plan from the repository root and fix any failure T003 to T015 introduced, including `npm run format` (Biome format check, no modification: format with `npx biome format --write` on the new files only if it reports differences) and `npx tsc --noEmit` under the repo's `strict`, `noUnusedLocals` and `noUnusedParameters`. Report the exclusions plainly if a command cannot run (`docs/constitution/tech-stack.md` notes: do not report a partial run as green).
+- [ ] T017 After each TDD cycle in T003–T016 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-002-E1-S7-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC). Suggested cycles: (1) T003 with the blocking part of T013 and T011 (TC-COMP-042); (2) T004 with the error handling of T013 (TC-COMP-006); (3) T006 with T012's table and badge and T014's list reading (TC-COMP-020); (4) T007 with T012's `describeOrigin` and event paging (TC-COMP-021); (5) T008 with T014's empty states (TC-COMP-022); (6) T005 with T014's navigation (TC-COMP-007); (7) the remaining additional tests T009, T010 with their implementation.
+
+**Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
+
+---
+
+## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-002-E1-S6 | soft | Serves `/api/universes`; this story develops against the response shapes of classification-api section 2.7 through E4-S1's doubled client and imports nothing from the Python side. Contract is approved, so both can proceed concurrently (the story's own Dependencies section) |
+| CAP-002-E1-S8 | context | Builds the Members and History tabs of the universe detail this screen navigates to; reached only by URL, no import |
+| CAP-002-E1-S9 | context | Builds the detail header, dialogs and the rest of the detail route; reached only by URL |
+| CAP-002-E4-S10 | reverse | `routes.tsx` imports `UniversesScreen` (T015) and registers `/research/universes`; the story's description and E4-S10's Ordering decision say so. Graph: `E4-S10: [E4-S9, E1-S7, E1-S9, E5-S1, E5-S3]` |
+
+Hard edges already in the graph and used: `CAP-002-E4-S1` (T001a: the fetch layer, types and error class, imported by T012 to T014 and mocked in T003 to T010) and `CAP-002-E4-S2` (T001b: `copy.ts`, `format.ts`, `SHELL_ROUTES`, imported by T011 to T014). No new hard dependency was found, so `dependencies.yaml` is unchanged (`CAP-002-E1-S7: [CAP-002-E4-S1, CAP-002-E4-S2]`). The delivered `parse-bulk-symbols.ts` is CAP-001's and already on the branch.
+
+### Task Dependencies
+- T001: no dependencies (verification).
+- T003, T006: depend on T001 only; different files, can run in parallel. T004, T005, T009 follow T003 in `create-dialog.test.tsx`; T007, T008, T010 follow T006 in `universes.test.tsx`.
+- T011: depends on T001; independent of the test tasks.
+- T012: depends on T001, T011. T013: depends on T001, T011. T012 and T013 touch different files and may run in parallel.
+- T014: depends on T012, T013.
+- T015: depends on T014. T016: depends on T015.
+- T017: interleaved, after every TDD cycle, before the next begins.
+
+### Parallel Opportunities
+- Phase 2: the `create-dialog.test.tsx` chain (T003, T004, T005, T009) and the `universes.test.tsx` chain (T006, T007, T008, T010) are independent of each other; tasks inside a chain share a file and are applied in order.
+- Phase 3: T012 and T013 can run in parallel once T011 exists.
+
+### Phase dependencies
+Phase 1 before Phase 2; Phase 2 before Phase 3; Phase 3 before Phase 4; Phase 5 after Phase 4.
+
+---
+
+## Validation Plan
+
+### Constitution-Defined Commands
+- Build: `npm run build`
+- Test: `npm run test`
+- Lint: `npm run lint`
+- Format: `npm run format`
+- Type check: `npx tsc --noEmit`
+
+(`npm run test:e2e` is not part of this story: the Playwright specs `tests/e2e/universe-by-hand.spec.ts` and the TC-E2E cases belong to later automation work. Python commands are unaffected.)
+
+### Story-Specific Validation
+- DAC-E1-S7-1 / AC-5: T003 shows **Create** blocked, focusable and described by its reason at zero, malformed-only and 1001 recognised entries, enabled at 1000, and no request sent while blocked.
+- DAC-E1-S7-2 / DAC-E1-1 / AC-1: T004 shows every uncovered symbol named, the followed-stocks link at the `SHELL_ROUTES` target, both fields kept, and no raw envelope message rendered.
+- DAC-E1-S7-3 / AC-1: T005 shows one `{name, symbols}` request, navigation to the new universe's detail, and no toast or status element.
+- DAC-E1-S7-4 / AC-3: T006 shows retired universes only under *Retired* or *All*, with the `secondary` *Retired* badge and unchanged header counts.
+- DAC-E1-S7-5 / AC-3: T007 shows the exact origin line in the all-clauses, thresholds-only, hidden-only, ordered-bounds and by-hand cases, with paging to the `created` event and one read per expansion.
+- DAC-E1-S7-6 / AC-3: T008 shows the never-populated sentence with focus on **New universe…**, distinct from *No retired universes.* and *No active universes.*.
+- Scope: T015 shows the only files touched are this story's five new files, the additive `copy.ts` keys and this plan.
+
+---
+
+## Notes
+
+### Resolved Conflicts
+
+- **How the origin line is read: list response versus events.** `GET /api/universes` returns no `origin` (classification-api 2.7: `universes[] {universe_id, name, lifecycle, member_count, created_at, retired_at}`), `GET /api/universes/{id}` returns it but with every member and its cells. UX design 1.3 and the classification-ui diagram (2.3, `UN -->|origin on expansion| GUE`) and its Open Question 7 say the list row reads the universe's `created` event through the events read on expansion. The design's normative prose governs over the unwritten alternative; the plan pages events at the API maximum until the `created` event. Cost: a universe with *m* member events takes about *m*/500 reads, once per expansion. No source edit required.
+- **Vocabulary scan versus the Retired label.** classification-ui section 7 (and TC-COMP-072) say no `copy.ts` string contains *retire*; the same design's 2.7 mandates *This universe is retired and can't be changed.*, and this story's AC mandates a badge reading Retired. Precedence: story AC and the design's normative prose over the test-table summary; STD-UI-1's *retire* rule concerns stopping to follow a stock (*stop following*), not a universe lifecycle. T011 handles the case where E4-S2's delivered scan flags the universe wording. No source edit required.
+- **shadcn/ui and Radix versus the delivered tree.** The story and design name shadcn/ui on Radix, but the repo vendors none (no `web/src/components/`, no Radix dependency in `package.json`); every delivered screen builds native elements carrying the design-system contract (`data-variant`, `aria-*`, token classes), e.g. `retire-dialog.tsx`, `bulk-add.tsx`. Following the local precedent (constraint 9, step 5) the plan builds native elements the same way and adds no dependency. The design's statement that vendored components live "where `owner-web-app` placed them" is satisfied vacuously.
+- **Stale self-labels.** Both designs say `**Status:** draft` in the body while front matter is `approved`; front matter governs. No behavioural effect.
+
+### Open Gaps
+
+- **Maximum universe name length (genuine owner gap, no value adopted).** System design section 8 question 2 and classification-ui Open Question 1 are abstained; UX design 1.3 says the field "states its maximum length once that bound is known". The dialog states and enforces none; only a non-empty trimmed name is checked client-side (DEC-0104). This is not marked PROVISIONAL because no value is adopted, and deriving one would invent a bound (AGT-EVIDENCE-002). Follow-up: owner answers; UX design 1.3, classification-ui 2.7 and classification-api 2.4 absorb it together, and the dialog gains one `maxLength` and one message.
+- **List loading and Name sort (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** No artifact says how many pages the Universes list reads or how Name sorts (the API has no sort parameter). The plan reads every page at `limit` 500 and sorts in the browser, case-insensitively, ascending first. Derivation: UX design 1.3 commits to no volume and the S6 plan expects tens of universes; 500 is CAP-001's `MAX_PAGE_SIZE`; a client sort over a partial page would be wrong. Decision: DEC-0101. Follow-up: UX design 1.3 may state the loading rule, or classification-api may add a sort.
+- **Origin line clause order and number text (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** The UX example shows one ordering and one number. The plan orders bounds value, growth, momentum, percentile before standardised score, minimum before maximum, writes `at least` and `at most`, and renders numbers through `formatPercentile` and `formatScore`. Derivation: the Filters pane's direction select offers *at least* and *at most* and `0.00` in the example is `formatScore` output (DEC-0063, STD-UI-3). Decision: DEC-0102. Follow-up: UX design 1.3 may state the order and the wording of a maximum.
+- **Created column date and the nothing-found variants (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** The list read returns `created_at` as a timestamp while the column is an ISO date; and only *No retired universes.* is specified. The plan shows the America/Chicago calendar date of `created_at` (the rule of `recorded_on`, DEC-0065, STD-UI-5) and adds *No active universes.* with a reset to *All*. Decision: DEC-0103. Follow-up: UX design 1.3 may state the date rule and the second sentence.
+- **Symbol count rule and empty name (PROVISIONAL — awaiting owner confirmation (2026-10-17)).** DAC-E1-S7-1 does not say whether duplicates count toward 1000. The plan counts recognised entries as parsed (the literal reading and CAP-001's recognised count), sends distinct symbols, and treats an empty trimmed name as a client field error without a request. Decision: DEC-0104. Follow-up: UX design 1.3 may state the counting rule.
+- **Names the producers fix, not this plan.** The fetch-layer function names, the error class and the `SHELL_ROUTES` and `copy.ts` keys belong to unplanned E4-S1 and E4-S2 and are not pinned by any approved artifact. T001 reads them from the delivered files instead of this plan inventing them; if E4-S1's events type camel-cases the keys inside `filter_provenance.thresholds`, `describeOrigin`'s pattern follows what T001 recorded. Not an owner decision.
+- **Threshold values arrive as JSON numbers in events.** `filter_provenance` is the stored jsonb passed through, so a bound is `80` or `0.5`, whereas `origin.thresholds` on the universe read is a decimal string. The plan feeds `String(value)` to the formatters so both forms render the same. Recorded so the interface reads one format.
+
+### Other Notes
+
+- No story status change was made: the invoking instruction was to leave stories untouched, so the story's `status: todo` stays for the owner or driver to move to `planning`.
+- The origin line is plain text children; the `describeOrigin` function drops any bound key it does not recognise rather than printing a raw name (STD-UI-1).
+- The create dialog renders no overlay element and does not close on outside click, matching the delivered `retire-dialog.tsx`; the `dialog` spec's overlay-click behaviour for `standard` is a gap shared with CAP-001's dialogs and is not widened here.
+- Playwright specs for flow 2 (`tests/e2e/universe-by-hand.spec.ts`, TC-E2E-003 and TC-E2E-004) are not in this story's scope; they need the real API, the route (E4-S10) and the detail screen (E1-S9).
+- Decision records under this plan: DEC-0101, DEC-0102, DEC-0103, DEC-0104 (all agent-decided, contained, provisional). A commit carrying this plan carries `Decision-Id:` trailers for all four.
