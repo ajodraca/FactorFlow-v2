@@ -2,11 +2,11 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-ux-design
 artifact_type: ux-design
-artifact_version: 2
+artifact_version: 3
 capability_id: CAP-002
 title: Universe & Factor Classification
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
@@ -17,17 +17,19 @@ design_system: FactorFlow Design System (shadcn/ui + Radix)
 theme: design-system/theme.css
 ai_provenance:
   agent_id: ux-design-agent
-  agent_version: "1.1"
+  agent_version: "1.2"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-16T23:20:00Z
+  timestamp: 2026-10-17T02:40:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "2"
+      version: "3"
     - id: CAP-002-ux-brief
+      version: "3"
+    - id: CAP-002-specification-review
       version: "2"
     - id: PRODUCT-UX
       version: "6, approved 2026-10-16"
@@ -52,7 +54,7 @@ ai_provenance:
 # UX Design: Universe & Factor Classification
 
 **Capability:** CAP-002
-**Design Source:** Generated from UX brief v2, starting from the approved Research screen specification `docs/ux/screens/S03-research.md` (`PRODUCT-UX-S03` v4) as the blueprint's §0 requires. No Figma frames exist: `design-system/component-map.json` carries a null Figma file key because shadcn/ui publishes no official kit. The canvas source for S03 is `docs/ux/design-source/P03-Research.dc.html`; where it and the specification disagree, the specification wins (S03 §11). This is the Path B automated design.
+**Design Source:** Generated from UX brief v3, starting from the approved Research screen specification `docs/ux/screens/S03-research.md` (`PRODUCT-UX-S03` v4) as the blueprint's §0 requires. No Figma frames exist: `design-system/component-map.json` carries a null Figma file key because shadcn/ui publishes no official kit. The canvas source for S03 is `docs/ux/design-source/P03-Research.dc.html`; where it and the specification disagree, the specification wins (S03 §11). This is the Path B automated design.
 **Approved By:** Pending review
 **Approval Date:** none
 **Design System:** FactorFlow Design System (shadcn/ui + Radix), 18 component specifications as of 2026-10-15, all read; 12 used, 6 unused with reasons in Section 3
@@ -82,6 +84,32 @@ banner and as-of line; its two rail destinations and five routes are withdrawn
 The brief's decisions are honoured, not re-decided. This version adds two of
 its own, DEC-0077 and DEC-0078, for renderings and control placements that S03,
 the blueprint and the brief leave open; DEC-0063 (numeric precision) stands.
+
+**Version 3 (2026-10-17)** is the consistency pass the owner directed on
+specification review v2
+(`docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md`)
+and applies four of its findings to this design, each exactly as the system
+design v3 and the UX brief v3 (both pinned here) resolved it: FINDING-5 (the
+*Find a stock* prefix travels in the saved filter with the twelve bounds and
+`hide_incomplete`, the save dialog names the search, and the saved members are
+exactly the stocks the results header counts; Sections 1.1, 1.3, 1.4, 5),
+FINDING-6 (a threshold excludes only stocks classified on that factor that
+fail the bound; a stock incomplete on that factor stays listed as *Incomplete*
+unless *Hide stocks with an incomplete score* is on, so S03-1 is satisfied
+without exception; Sections 1.1, 4, 5; DEC-0081), FINDING-7 (one `set` plus
+`later` shape before and after the first set, polling from first load, and
+*Updating* or *Score update failed* in the never-populated state; Sections
+1.1, 1.2, 1.6, 5; DEC-0082) and FINDING-8 (a download is named by its start
+time in America/Chicago, the time being the link to the run detail, never by a
+number and never by the raw `run_id`; S03 §3's *#{n}* is a recorded departure;
+Sections 0, 1.1, 1.2, 1.6, 2, 4, 5, 7; DEC-0083). The records are the system
+design v3's and are cited, not re-decided: DEC-0081 follows from the approved
+S03 and supersedes the threshold-exclusion statements of DEC-0071 and
+DEC-0076; DEC-0082 and DEC-0083 (superseding DEC-0079 (e)) are
+**PROVISIONAL**; DEC-0084 (the delivered files CAP-002 edits) was read and
+bears on Section 0's citation only. This version records no decision of its
+own. Review v2's other findings on this design (FINDING-9, 11, 25, 26, 32)
+and elsewhere are carried, not fixed, here; nothing else changes.
 
 **Vocabulary in this document.** As STD-UI-1 v6 and blueprint §7 require, every
 string the owner reads uses the display labels: *stock*, *followed stock*,
@@ -129,8 +157,9 @@ the *App shell & data health* capability delivers the §3 shell,
 `classification-ui` appends exactly one destination, **Research** at
 `/research`, after the four delivered CAP-001 destinations (Coverage,
 Instruments, Runs, Settings) in `web/src/app/shell.tsx`, and registers its five
-routes at the `web/src/app/routes.tsx` seam (system design v2 §4.2, screen
-registration; §8 question 4). Nothing else in the delivered shell is edited: the
+routes at the `web/src/app/routes.tsx` seam (system design v3 §4.2, screen
+registration; §8 question 4, which lists every delivered file the composition
+edits, DEC-0084). Nothing else in the delivered shell is edited: the
 fixed rail, the status region pinned to its foot (reserved for STD-UI-11's
 environment indicator), the 30-second health poll, the `ScreenState` union, the
 unreachable state and the landing rule stay CAP-001's
@@ -140,7 +169,8 @@ still sit on `card`s, so the screens change no layout when the blueprint's shell
 replaces it; the shell capability removes or replaces the one appended entry and
 migrates nothing of CAP-002's, because the routes are already the blueprint's.
 Where a CAP-002 link targets a blueprint route the shell capability will
-deliver (*download #{n}* to `/data/downloads/:id`; Data health at `/data`;
+deliver (the download's start time in the as-of line to `/data/downloads/:id`;
+Data health at `/data`;
 followed stocks at `/data/followed`), it targets the delivered CAP-001 route
 meanwhile (`/runs/:runId`, `/runs`, `/instruments`) and is changed by the shell
 capability's route migration (blueprint §2.2), not by CAP-002.
@@ -170,7 +200,15 @@ No percentile or standardised score carries a polarity colour: `--gain` and
 score renders in `--muted-foreground` (blueprint §4.4). The as-of line
 (blueprint §4.8) sits in `--text-xs` `--muted-foreground` directly under the
 region title on every scored surface and reads *Scores from {date} {time}
-{zone}, download #{n} · sorted by {column}* (DEC-0073, PROVISIONAL); timestamps
+{zone} · from the download started {date} {time} {zone} · sorted by {column}*
+(DEC-0073, PROVISIONAL, with the download named as DEC-0083 fixes it). **A
+download is named by its start time in America/Chicago, with the zone, and the
+start time is the link to that download's detail**: no table or artifact
+numbers downloads (`acquisition_run.run_id` is the only identifier), so no
+download number and no raw `run_id` appears on any CAP-002 surface, and S03
+§3's *from download #{n}* is a departure from the approved copy, recorded with
+that reason (DEC-0083, PROVISIONAL, superseding DEC-0079 (e); system design v3
+§3.3 step 18, §8 question 11; review v2 FINDING-8; Section 7). Timestamps
 are America/Chicago with the zone shown (*CDT* or *CST* as the instant falls),
 `classification_date`, `known_on` and `recorded_on` are ISO-8601 dates, and
 `as_of` on an input is a fiscal period end or a session date rendered
@@ -240,7 +278,11 @@ then sections separated by `--border`, top to bottom:
    and filter*, and S03 as approved has no search field (review v4 FINDING-22,
    open). It matches the symbol only; search by symbol and name product-wide is
    the shell's command palette (blueprint §3.4). `Esc` clears it (`input`
-   contract).
+   contract). The prefix is part of the filter, not only of the view: it
+   travels into **Save these {n} as a universe…** with the twelve bounds and
+   `hide_incomplete`, so a search narrows what is saved exactly as it narrows
+   what is counted (system design v3 §3.3 step 15, §4.2 `POST /api/universes`;
+   brief v3 §2.1 items 3 and 6; review v2 FINDING-5).
 2. **Look in**: `select` `inline` whose options are *All followed stocks ·
    {n}* and each active universe by name (S03 §3; `GET /api/universes`). The
    trigger's accessible name reads *Look in: All followed stocks* (`select`
@@ -258,14 +300,26 @@ then sections separated by `--border`, top to bottom:
    *Percentile 70 means "scores better than 70% of the stocks scored on this
    factor".* (S03 §3). Validation runs on blur: a percentile outside 0 to 100
    or a non-finite standardised score is a field error in `--destructive`
-   before any request (`input` contract; system design v2 constraint 15); a
+   before any request (`input` contract; system design v3 constraint 15); a
    blank value means no threshold on that measure. The three blanks map
    one-to-one onto the twelve read bounds `{factor}_percentile_min/_max`,
-   `{factor}_score_min/_max` (system design v2 §3.3 step 15); no new filter
-   model exists.
+   `{factor}_score_min/_max` (system design v3 §3.3 step 15); no new filter
+   model exists. **A threshold on a factor excludes only stocks that are
+   classified on that factor and fail the bound.** A stock incomplete on that
+   factor stays listed, rendered *Incomplete*, and stays in the count unless
+   **Hide incomplete** is on; a stock unranked on it (*Not enough to rank*) is
+   likewise not excluded by the threshold. This is S03-1's approved text and
+   blueprint §1 principle 5, and it is what makes the helper sentence true
+   (DEC-0081, from the approved S03, superseding the threshold-exclusion
+   reading in DEC-0071 and DEC-0076; system design v3 §3.3 step 15; review v2
+   FINDING-6).
 4. **Hide incomplete**: `checkbox` `default` *Hide stocks with an incomplete
    score*, default off, helper *They're shown by default so nothing disappears
-   silently.* (S03 §3; `hide_incomplete`).
+   silently.* (S03 §3; `hide_incomplete`). With it on, stocks whose
+   `not_classified` reason on any factor is an input reason (missing,
+   outdated or not computable) leave the list and the count; it is the only
+   control that removes an incomplete stock (S03-1; DEC-0081; system design v3
+   §3.3 step 15).
 5. **Clear filters** (DEC-0078, PROVISIONAL; a placement S03 leaves open):
    `button` `ghost` at the pane's foot, rendered whenever any threshold, the
    search, a universe scope or hide-incomplete is active, resetting all of them
@@ -275,9 +329,13 @@ then sections separated by `--border`, top to bottom:
 **Results** (fluid; `section` labelled *Results*). The not-current banner, when
 it applies, sits first (Section 1.2). Then the header: `h1` *{n} stocks match*
 at `--text-lg` (S03 §3, §8), its count `match_count` over the whole filtered
-set, never the page (S03-2); under it the as-of line *Scores from 2026-10-15
-17:46 CDT, download #412 · sorted by value* (Section 0; S03 §3 as specialized
-by DEC-0073), where *download #412* is a link to that download's detail and the
+set, never the page (S03-2), counting every stock the scope, the thresholds,
+the search and hide-incomplete leave listed, incomplete ones included unless
+hidden (DEC-0081); under it the as-of line *Scores from 2026-10-15 17:46 CDT ·
+from the download started 2026-10-15 17:30 CDT · sorted by value* (Section 0;
+S03 §3 as specialized by DEC-0073 and DEC-0083), where the download's start
+time *2026-10-15 17:30 CDT* is the link to that download's detail (no number
+and no raw `run_id` is shown: DEC-0083, PROVISIONAL) and the
 line ends with **Earlier sets…** (`button` `ghost`, DEC-0078) opening the set
 history dialog of Section 1.2. Right of the header: **Save these {n} as a
 universe…** (`button` `outline`, S03 §3; DEC-0076 rules below). Then the table,
@@ -288,7 +346,7 @@ currency, not whether the provider's values are correct.* (S03 §8).
 **The table** is `data-table` `virtualised` with the base contract's row
 checkboxes (S03 §4): windowed rows over keyset pages at `DEFAULT_PAGE_SIZE` 50
 and `MAX_PAGE_SIZE` 500, sorting, filtering and counting server-side over the
-full set (S03 §6; system design v2 §3.3 step 15). Columns, left to right:
+full set (S03 §6; system design v3 §3.3 step 15). Columns, left to right:
 
 | Column | Alignment | Content |
 |--------|-----------|---------|
@@ -326,7 +384,9 @@ missing, so growth can't be compared fairly. It isn't guessed.*, with *is
 outdated* or *couldn't be computed* for the other reason codes; inputs named
 in product vocabulary, brief §2.1 item 9). Never a number, never `0`. A row
 incomplete on one factor and scored on two reads as two percentiles and one
-word, not as a row-level failure (AC-12).
+word, not as a row-level failure (AC-12). A threshold on that factor does not
+remove the row: it stays listed as *Incomplete* until *Hide stocks with an
+incomplete score* is on (S03-1; DEC-0081).
 
 **A factor below 30 qualifying stocks** (`ranked = false`, AC-14, S03-4):
 every cell in that column renders `badge` `coverage-unknown` *Not enough to
@@ -423,7 +483,7 @@ top to bottom:
 | Selection tray | composition, blueprint §4.6 | n/a | `design-system/intake.md` step 1.3 |
 | Compare side by side; Add to universe… (tray) | `button` | `outline`; `blocked` outside 2 to 6 checked | `design-system/components/button/design-spec.md` |
 | See every input and its date | `button` | `outline` (S03 §3), as a link | `design-system/components/button/design-spec.md` |
-| Inspector memberships; download #{n} in the as-of line | link | n/a | `design-system/components/button/design-spec.md`, which directs navigation to a link |
+| Inspector memberships; the download's start time in the as-of line (DEC-0083) | link | n/a | `design-system/components/button/design-spec.md`, which directs navigation to a link |
 | As-of line | composition, blueprint §4.8 | n/a | `design-system/intake.md` step 1.3 |
 | Saved {n} stocks as {name}; Added {n} stocks to {name} (DEC-0076) | `toast` | `success` | `design-system/components/toast/design-spec.md` |
 | Not-current banner; Score update failed | Section 1.2 | | |
@@ -433,7 +493,7 @@ top to bottom:
 **Reading scores** (AC-9, AC-12, AC-21). No interaction is required for the
 primary judgement: each row carries three percentiles, or *Incomplete* / *Not
 enough to rank* in a cell's place, under the match count and the as-of line
-naming the scores' date and download.
+naming the scores' date and the download by its start time (DEC-0083).
 
 **Filtering, sorting, scope and search** (S03 §6, AC-16). Every change applies
 on selection or on blur, runs server-side over the full set, and updates the
@@ -443,7 +503,10 @@ match count is announced politely (`data-table` contract). `Enter` or `Space`
 on a column's sort control cycles ascending, descending, unsorted; the as-of
 line's *sorted by {column}* follows. Stocks incomplete on the sorted factor
 sort after every scored row in both directions, so an absent percentile never
-sorts as zero (STD-UI-4); the header's description says so. Nothing found
+sorts as zero (STD-UI-4); the header's description says so. A threshold never
+removes a stock incomplete on that factor: it stays listed as *Incomplete*,
+and counted, until *Hide stocks with an incomplete score* is on (S03-1;
+DEC-0081). Nothing found
 renders *No stocks match these filters.* with **Clear filters** (S03 §7).
 
 **Selecting and checking** (S03 §6). Click or `Enter` on a row selects it into
@@ -451,21 +514,28 @@ the inspector; `Space` on its checkbox checks it; the two never interfere.
 `↑`/`↓` move the selection and the inspector follows after a 150 ms debounce
 (S03 §6). The inspector's content is read once per selection from
 `GET /api/classifications/stocks/{symbol}`, because the list read carries no
-input rows (system design v2 §3.3 step 17).
+input rows (system design v3 §3.3 step 17).
 
 **Saving the result as a universe** (AC-2, S03 §6, S03-7; DEC-0076,
 PROVISIONAL; routine, blueprint §9). **Save these {n} as a universe…** opens
 `dialog` `standard`, title *Save these {n} stocks as a universe*, whose
 description states *{n} stocks, including {m} with an incomplete score* when
-m > 0 and the scope and thresholds in words (*All followed stocks · value
-percentile at least 80 · momentum standardised score at least 0.00 · stocks
-with an incomplete score hidden*), and whose one field is the universe name
-(`input` `text`, maximum length stated once it is known, Section 7). The
-confirm label is **Save**; initial focus is the name field (`dialog` contract
-for `standard`). The request posts `filter` (the thresholds, the scope and
-`hide_incomplete`) and the `set_id` on screen, so the snapshot equals the
-displayed result: a stock incomplete on a factor that carries no threshold is a
-member, because thresholds match on stored values; hidden stocks are not. On
+m > 0, then the thresholds, the search when one is active and the
+hide-incomplete state in words (*value percentile at least 80 · momentum
+standardised score at least 0.00 · search "AA" · stocks with an incomplete
+score hidden*, each clause only when it applies), and whose one field is the
+universe name (`input` `text`, maximum length stated once it is known, Section
+7). The confirm label is **Save**; initial focus is the name field (`dialog`
+contract for `standard`). The request posts `filter`, the one object the list
+was read with (the twelve threshold bounds, `hide_incomplete` and the *Find a
+stock* `symbol` prefix, null when none), and the `set_id` on screen; the
+server evaluates all three against that set with the predicate the list uses,
+so **the saved members are exactly the stocks the results header counts**
+(S03-7; system design v3 §3.3 step 15, §4.2 `POST /api/universes`; brief v3
+§2.1 item 6; review v2 FINDING-5). Three rules fix who is a member, and they
+are the list's: a stock incomplete on a factor, thresholded or not, is a
+member unless hidden (DEC-0081); a search keeps only the stocks it matched;
+hidden stocks are not members. On
 `201` the dialog closes and `toast` `success` *Saved {n} stocks as {name}*
 carries a link to `/research/universes/:universeId` (STD-UI-24; FINDING-42).
 On `409 universe_name_in_use` the error attaches to the name field and the
@@ -476,8 +546,8 @@ is replaced by **Review new result**, which closes the dialog onto the
 already-refreshed table (DEC-0062). At zero matches the control renders
 `button` `blocked` with *No stocks match these filters, so there is nothing to
 save.* beside it (AC-5); `422 empty_universe` is the backstop. The control is
-not offered while the scope is a universe: the save carries thresholds only
-(system design v2 §4.2).
+not offered while the scope is a universe: the saved filter carries the
+bounds, `hide_incomplete` and the prefix, no scope (system design v3 §4.2).
 
 **Comparing** (S03 §6, AC-16; DEC-0070). **Compare side by side** routes to
 `/research/compare?symbols=…` with the checked rows, 2 to 6. Outside that
@@ -502,17 +572,17 @@ the new date and download politely, the table dims and reloads once under the
 the selected row and the checked rows are kept by symbol. The owner takes no
 action (flow "See stocks classified" step 3).
 
-**Opening the download and the set history** (AC-21; DEC-0073). *download
-#{n}* in the as-of line opens that download's detail (Section 0 names the
-route under each shell). **Earlier sets…** opens the set history dialog of
-Section 1.2.
+**Opening the download and the set history** (AC-21; DEC-0073, DEC-0083). The
+download's start time in the as-of line (*from the download started 2026-10-15
+17:30 CDT*) opens that download's detail (Section 0 names the route under each
+shell). **Earlier sets…** opens the set history dialog of Section 1.2.
 
 #### States (S03 §7, with CAP-002's specializations)
 
 | State | Rendering |
 |-------|-----------|
 | Loading | Table skeleton at 12 rows; inspector skeleton (S03 §7) |
-| Empty, never populated | `never_classified: true`: the results body reads *No stocks have been scored yet.* followed by the latest download's state (*The latest download, #412, is Downloading* / *ended Complete at {time}* / *ended Failed at {time}: {reason}*) and a link *Open Data health* (S03 §7, AC-22); never an empty table. The Filters pane renders with its controls `blocked`-free but inert; the inspector reads its empty sentence |
+| Empty, never populated | `never_classified: true` (`set` null): the results body reads *No stocks have been scored yet.* and then, from the `later` block, the first set's state: `badge` `status-active` *Updating* with *The first set of scores is being produced from the download started {time}.* while it builds, or `badge` `status-critical` *Score update failed* with *Score update failed {time}: {reason}. The next complete download will try again.* if the first attempt failed (AC-20); beneath it the latest download's state (*The latest download, started {time}, is Downloading* / *ended Complete at {time}* / *ended Failed at {time}: {reason}*, the start time linked to its detail) and a link *Open Data health* (S03 §7, AC-22; DEC-0082, PROVISIONAL; DEC-0083). The body polls every 10 s from first load while the first set builds or the latest download is non-terminal (Section 1.2), so the first scores appear without a reload (flow "See stocks classified" step 3); never an empty table, never the download's state in place of the set's. The Filters pane renders with its controls `blocked`-free but inert; the inspector reads its empty sentence |
 | Empty, nothing found | *No stocks match these filters.* with **Clear filters** (S03 §7); a search matching no symbol is this state |
 | Partial | *Incomplete* cells inline; header counts unchanged (S03 §7, AC-12). A set built after a *Partial* download says so in the as-of line (Section 1.2) |
 | Stale | Not-current banner above the results header (S03 §3; Section 1.2), `status-warning`; the `status-critical` rendering when the update failed (DEC-0073); *checked {time}* on the as-of line (AC-20) |
@@ -584,16 +654,33 @@ designed here.
 
 #### Page Layout
 
-**The as-of line** (blueprint §4.8; DEC-0073, PROVISIONAL), directly under the
-region title in `--text-xs` `--muted-foreground`: *Scores from 2026-10-15 17:46
-CDT, download #412 · sorted by value*, where *download #412* is a link to the
-download's detail (Section 0) and the download's outcome follows it as `badge`
-`status-good` *Complete* or `status-warning` *Partial* (blueprint §8), because a
-set built after a partial download carries more *Incomplete* cells and the
-owner should know why (AC-10). On a surface with no sort (compare, evidence)
-the *sorted by* clause is omitted. While a later set builds, the line adds
-`badge` `status-active` *Updating* and *checked 17:52:10 CDT* (STD-UI-25). It
-ends with **Earlier sets…** (`button` `ghost`, DEC-0078).
+**The state comes from one shape** (DEC-0082, PROVISIONAL; system design v3
+§3.3 steps 13, 14 and 18, §4.2). Both `GET /api/classifications` and
+`GET /api/classifications/summary` carry `set`, the current complete set or
+null, and `later`, the most recent set newer than `set`, or the first set
+while none is complete, with its `set_id`, `state` (`building` or `failed`),
+`started_at`, `ended_at`, `failure_reason`, `run_id` and `run_started_at`, or
+null when no such set exists. `not_current` is true exactly when `later` is
+non-null, so every rendering below reads from `later` alone, on whichever of
+the two reads the host screen holds, before and after the first set.
+
+**The as-of line** (blueprint §4.8; DEC-0073, PROVISIONAL; DEC-0083,
+PROVISIONAL), directly under the region title in `--text-xs`
+`--muted-foreground`: *Scores from 2026-10-15 17:46 CDT · from the download
+started 2026-10-15 17:30 CDT · sorted by value*, where *2026-10-15 17:30 CDT*,
+the download's start time (`run_started_at`, America/Chicago with the zone,
+STD-UI-5), is the link to the download's detail (Section 0) and the download's
+outcome follows it as `badge` `status-good` *Complete* or `status-warning`
+*Partial* (blueprint §8), because a set built after a partial download carries
+more *Incomplete* cells and the owner should know why (AC-10). A download is
+named by its start time on every CAP-002 surface, never by a number and never
+by the raw `run_id`: no table or artifact numbers downloads, so S03 §3's
+*#{n}* is a recorded departure and the number is the owner's (DEC-0083,
+superseding DEC-0079 (e); system design v3 §3.3 step 18; Section 7). On a
+surface with no sort (compare, evidence) the *sorted by* clause is omitted.
+While a later set builds, the line adds `badge` `status-active` *Updating* and
+*checked 17:52:10 CDT* (STD-UI-25). It ends with **Earlier sets…** (`button`
+`ghost`, DEC-0078).
 
 **The not-current banner** (S03 §3, §4: a `badge` inside a `card`), a
 full-width `card` above the results header, carrying the badge and one or two
@@ -602,8 +689,8 @@ sentences at `--text-base`:
 | Condition | Badge | Text |
 |-----------|-------|------|
 | The current set reflects the latest qualifying download | no banner; the as-of line alone | |
-| A later set is `building` | `badge` `status-warning` *Not reflecting the latest download*; the as-of line carries *Updating* | *Showing scores produced 17:46 CDT from download #412. A newer set is being produced and replaces this one when complete.* (S03 §3, verbatim) |
-| The latest attempt `failed` | `badge` `status-critical` *Score update failed* (DEC-0073) | *Score update failed 18:03 CDT: {failure_reason as recorded}. Showing scores produced 17:46 CDT from download #412. The next complete download will try again.* |
+| `later.state` is `building` | `badge` `status-warning` *Not reflecting the latest download*; the as-of line carries *Updating* | *Showing scores produced 17:46 CDT from the download started 2026-10-15 17:30 CDT. A newer set is being produced and replaces this one when complete.* (S03 §3, with the download named by its start time, DEC-0083) |
+| `later.state` is `failed` | `badge` `status-critical` *Score update failed* (DEC-0073) | *Score update failed 18:03 CDT: {failure_reason as recorded}. Showing scores produced 17:46 CDT from the download started 2026-10-15 17:30 CDT. The next complete download will try again.* |
 
 Labels and tiers are blueprint §8's (DEC-0072); the previous set stays on
 screen, marked, in both non-current conditions (AC-20). The reason is the
@@ -611,8 +698,11 @@ recorded `failure_reason`, never a stack trace. Nothing is offered to retry,
 because the scheduler does not retry a failed set and a control implying
 otherwise would describe behaviour the product does not have (STD-UI-2).
 
-A fourth condition, never scored, replaces the results body rather than heading
-it (Section 1.1 States, AC-22). There is no progress indicator for a building
+A fourth condition, never scored (`set` null), replaces the results body rather
+than heading it (Section 1.1 States, AC-22) and renders *Updating* or *Score
+update failed* with its reason from the same `later` block, so a first set
+that builds or fails is shown exactly as a later one is (AC-20; DEC-0082).
+There is no progress indicator for a building
 set: the engine runs as SQL and reports no per-stock progress (system design
 §3.1 step 8), so `progress` `indeterminate` is not used and the banner carries
 the set's start time in the *Updating* badge's tooltip and the dialog below.
@@ -620,7 +710,8 @@ the set's start time in the *Updating* badge's tooltip and the dialog below.
 **The set history** (DEC-0073) is a `dialog` `standard` titled *Earlier sets*
 holding a `data-table` `history`: State (`badge` `status-good` *Complete*,
 `status-active` *Updating*, `status-critical` *Failed*), Scores date, Download
-(link, with its outcome badge), Started, Ended (blank for a building set: the
+(its start time, linked to its detail, with its outcome badge; DEC-0083),
+Started, Ended (blank for a building set: the
 column does not yet apply), Value qualified, Growth qualified, Momentum
 qualified, Reason. Newest first, keyset paged (`GET /api/classifications/sets`).
 A qualified count below 30 is followed by *Not enough to rank* in text. The
@@ -629,8 +720,9 @@ sets…** on close.
 
 **What S01 Home and S09 Data health consume** (blueprint §10, "on CAP-002's
 classification state as it is"; DEC-0071, PROVISIONAL). Both read
-`GET /api/classifications/summary` (system design v2 §4.2): the set block or
-`never_classified`, the per-factor `qualified_count` and `ranked`, and
+`GET /api/classifications/summary` (system design v3 §4.2): the `set` and
+`later` blocks, one shape before and after the first set (DEC-0082), the
+per-factor `qualified_count` and `ranked`, and
 `stocks_current {current_count, followed_count}`. S01's data tile renders the
 score as-of and *{n} of {m} stocks current* (S01 §3, §5, S01-6) and the badge
 *Not reflecting the latest download* when stale (S01 §7); S09's *Factor
@@ -650,7 +742,7 @@ identifier is unpublished (Section 7).
 | Not-current banner | `badge` inside a `card` | `status-warning` / `status-critical` inside `default` (S03 §4) | `design-system/components/badge/design-spec.md`, `design-system/components/card/design-spec.md` |
 | Updating, on the as-of line | `badge` | `status-active` | `design-system/components/badge/design-spec.md` |
 | Download outcome the set reflects | `badge` | `status-good` *Complete*; `status-warning` *Partial* (blueprint §8) | `design-system/components/badge/design-spec.md` |
-| download #{n} | link | n/a | `design-system/components/button/design-spec.md`, which directs navigation to a link |
+| The download's start time, linked to its detail (DEC-0083) | link | n/a | `design-system/components/button/design-spec.md`, which directs navigation to a link |
 | Earlier sets… | `button` | `ghost` (DEC-0078) | `design-system/components/button/design-spec.md` |
 | Set history dialog | `dialog` | `standard` (DEC-0073) | `design-system/components/dialog/design-spec.md` |
 | Set history list | `data-table` | `history` | `design-system/components/data-table/design-spec.md` |
@@ -659,17 +751,21 @@ identifier is unpublished (Section 7).
 
 #### Interaction Flows
 
-**Polling** (STD-UI-25; system design v2 constraint 18; DEC-0054). Every scored
-surface polls `GET /api/classifications/summary` every 10 seconds while a later
-set is `building` or any download is non-terminal, and stops otherwise. The
+**Polling** (STD-UI-25; system design v3 constraint 18 and §3.3 step 14;
+DEC-0054; DEC-0082, PROVISIONAL). Every scored surface polls
+`GET /api/classifications/summary` every 10 seconds, **from first load and
+before any set exists**, while `later.state` is `building` or the latest
+download is non-terminal, and stops otherwise; the never-populated state
+therefore learns that the first set completed or failed without a reload. The
 cadence is the owner's 2026-09-05 run-progress cadence, reused. While polling,
 the as-of line shows *checked {time}*. A poll that fails leaves the displayed
 set and its banner in place and adds *Could not check for newer scores.* with
 **Try again** under the as-of line; it never clears a mark.
 
 **Completion** (DEC-0062, PROVISIONAL). When a poll reports the building set
-`complete`, the as-of line announces politely *Scores updated to 2026-10-16
-17:48 CDT, download #413*, the banner leaves, and the host screen's table or
+complete (a new `set`, `later` null), the as-of line announces politely
+*Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16
+17:30 CDT*, the banner leaves, and the host screen's table or
 cards dim and reload once with every filter, sort, selection and checked row
 kept by symbol. The replacement is dated and announced at the point of display
 (STD-UI-16). On the universes list, which shows no score, no poll runs; a set
@@ -687,7 +783,7 @@ download starts a new attempt (AC-10); the banner says so.
 | State | Rendering |
 |-------|-----------|
 | Loading | The as-of line renders its skeleton at final height so the table beneath does not shift |
-| Empty, never populated | Never scored: the host region's never-populated state (Section 1.1), with no as-of line (AC-22) |
+| Empty, never populated | Never scored (`set` null): the host region's never-populated state (Section 1.1), with no as-of line, rendering *Updating* or *Score update failed* with its reason from `later` (AC-20, AC-22; DEC-0082) |
 | Empty, nothing found | n/a: a set exists or none does |
 | Partial | A set built after a *Partial* download: the outcome badge on the as-of line says so |
 | Stale | The banner, with *Updating* or *Score update failed*; the state this composition exists to show (AC-20) |
@@ -710,8 +806,9 @@ is announced without stealing focus (STD-UI-24). Each badge carries its word
 and the tier shape (warning triangle, critical square, active ringed dot, good
 filled circle; blueprint §8). The warm tiers read dark rather than amber because
 `design-system/theme-validation.md` darkened them for contrast; the design
-relies on the words. The download link's accessible name is *Open download
-#412*. The dialog is `role="dialog"` with `aria-modal`, labelled by its title,
+relies on the words. The download link's accessible name is *Open the download
+started 2026-10-15 17:30 CDT*. The dialog is `role="dialog"` with `aria-modal`,
+labelled by its title,
 focus trapped and returned on close.
 
 ### 1.3 Universes (`/research/universes`, restyled)
@@ -740,11 +837,13 @@ header, a link to `/research/universes/:universeId`, sortable); Lifecycle
 thing, §4.3; blank for active because blank means the column does not apply);
 Members (right, whole number, `--font-numeric`); Created (ISO-8601 date).
 Expanding a row reveals the full `created_at` and `retired_at` timestamps with
-zone and the universe's origin line, *Created by hand* or *Saved on 2026-10-15
-from the scores of 2026-10-15: value percentile at least 80, momentum
-standardised score at least 0.00, stocks with an incomplete score hidden*,
-read once per expansion from the universe's `created` event
-(`filter_provenance`, system design §4.4; DEC-0076). Active and retired
+zone and the universe's origin line, *Created by hand* or *Saved from a filter
+on 2026-10-15: value percentile at least 80, momentum standardised score at
+least 0.00; search "AA"; stocks with an incomplete score hidden*, each clause
+only when it applies, read once per expansion from the universe's `created`
+event (`filter_provenance`, which records the bounds, `hide_incomplete`, the
+*Find a stock* prefix and the set's `classification_date`; system design v3
+§4.2, §4.4; DEC-0076; review v2 FINDING-5). Active and retired
 universes are one table with a lifecycle column, not two tables; retirement is a
 lifecycle, not an archive (STD-UI-2, AC-6).
 
@@ -857,8 +956,9 @@ retired universe both are absent and the header states *This universe is
 retired. Its members and history stay viewable.*
 
 **A universe saved from a result is a snapshot, and the header says so** (AC-2,
-STD-UI-15). The Origin line reads as history, names the thresholds, the
-hide-incomplete state and the scores' date they were evaluated against, and no
+STD-UI-15). The Origin line reads as history, names the thresholds, the search
+when one applied, the hide-incomplete state and the scores' date they were
+evaluated against, and no
 control re-evaluates it. A member whose score has since changed stays a member.
 
 **The Members panel** is Section 1.1's three panes scoped to this universe
@@ -869,7 +969,7 @@ as-of line, the `data-table` `virtualised` table, the factor cells and the
 selection tray, and the Inspector. Three differences: the results `h1` reads
 *{n} of {m} members match* (the match count against the member count); there
 is no **Save these {n} as a universe…**, because the save carries thresholds
-only (system design v2 §4.2); and the table gains **Member since** (timestamp
+only (system design v3 §4.2); and the table gains **Member since** (timestamp
 with zone, `--text-xs`) after Name and an in-row **Remove…** (`button`
 `ghost`, accessible name *Remove AAPL from Tech*) as the last cell. A member
 the owner has stopped following stays in the table with `badge`
@@ -1211,8 +1311,9 @@ been reported before FactorFlow began following this stock, so they may
 reflect later restatements.*
 
 **The Earlier scores panel** is a `data-table` `history` of the stock's
-classifications in earlier sets, newest first: Scores date, Download (link,
-with its outcome badge), then Value, Growth and Momentum as blueprint §4.4
+classifications in earlier sets, newest first: Scores date, Download (its
+start time, linked to its detail, with its outcome badge; DEC-0083), then
+Value, Growth and Momentum as blueprint §4.4
 cells with the standardised score in `--muted-foreground` beneath the
 percentile and the *Possibly restated* mark where it applied. Each row is one
 set's complete result for the stock as recorded; a backfill observed later
@@ -1233,7 +1334,7 @@ not change it.*
 | Outdated (input) | `badge` | `status-warning` (DEC-0077) | `design-system/components/badge/design-spec.md` |
 | Input detail disclosure | `button` | `ghost` | `design-system/components/button/design-spec.md` |
 | Earlier scores | `data-table` | `history` | `design-system/components/data-table/design-spec.md` |
-| Memberships; download #{n} | link | n/a | `design-system/components/button/design-spec.md`, which directs navigation to a link |
+| Memberships; the download's start time (DEC-0083) | link | n/a | `design-system/components/button/design-spec.md`, which directs navigation to a link |
 | Not-current banner and as-of line | Section 1.2 | | |
 
 #### Interaction Flows
@@ -1262,7 +1363,7 @@ the `data-table` contract with keyset cursors.
 | State | Rendering |
 |-------|-----------|
 | Loading | Skeleton matching the three cards' final layout, so the page does not resize |
-| Empty, never populated | `set: null`: *AAPL has no score yet because no stocks have been scored.* with the latest download's state and a link to Data health (AC-22). Earlier scores: *No earlier scores for AAPL.*, distinct from never scored |
+| Empty, never populated | `set: null`: *AAPL has no score yet because no stocks have been scored.* with the first set's *Updating* or *Score update failed* and its reason from `later` (DEC-0082), the latest download's state and a link to Data health (AC-20, AC-22). Earlier scores: *No earlier scores for AAPL.*, distinct from never scored |
 | Empty, nothing found | n/a: no filter on either panel |
 | Partial | Some factors scored, some *Incomplete*; each incomplete factor names its input (AC-12) |
 | Stale | Score-set banner and as-of line as Section 1.2 |
@@ -1302,8 +1403,9 @@ is rendered as a link styled `outline`.
 
 **After a download** (flow "See stocks classified"). The owner opens Research
 from the rail. If a set is building, the banner says so and the screen
-refreshes once when it completes (DEC-0062). *download #{n}* in the as-of line
-crosses into the download's detail (CAP-001's run detail meanwhile, blueprint
+refreshes once when it completes (DEC-0062). The download's start time in the
+as-of line (DEC-0083) crosses into the download's detail (CAP-001's run detail
+meanwhile, blueprint
 `/data/downloads/:id` once the shell capability lands); nothing crosses back
 except the rail.
 
@@ -1409,11 +1511,11 @@ added is the blueprint's own (§2.1).
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Consistency with product patterns | pass | S03 is delivered as approved, with its three panes, components, copy, states, accessibility and acceptance checks; the three other pages are restyled into the blueprint's §3 shell with the §4 patterns, §7 labels, §8 status map and §9 tiers, and compose into the delivered CAP-001 shell meanwhile with one appended destination (DEC-0069). Departures from S03 are recorded with their reasons: the search field (DEC-0074), the renderings S03 leaves unspecified (DEC-0073, DEC-0077), the control placements it leaves open (DEC-0078), the restatement mark's composition (DEC-0075); the M2 controls are absent, not disabled. `blocked` not disabled; `confirm` not `destructive`; link not button for navigation; rows dimmed on refresh; polled regions announce politely and show *checked {time}* |
+| Consistency with product patterns | pass | S03 is delivered as approved, with its three panes, components, copy, states, accessibility and acceptance checks; the three other pages are restyled into the blueprint's §3 shell with the §4 patterns, §7 labels, §8 status map and §9 tiers, and compose into the delivered CAP-001 shell meanwhile with one appended destination (DEC-0069). Departures from S03 are recorded with their reasons: the search field (DEC-0074), the renderings S03 leaves unspecified (DEC-0073, DEC-0077), the control placements it leaves open (DEC-0078), the restatement mark's composition (DEC-0075), and the download named by its start time where S03 §3 prints *from download #{n}*, because nothing numbers downloads (DEC-0083, Section 7); the M2 controls are absent, not disabled. The threshold rule is S03-1's own: a threshold removes no stock incomplete on the factor, so S03-1 is satisfied without exception and no departure is recorded for it (DEC-0081; review v2 FINDING-6). `blocked` not disabled; `confirm` not `destructive`; link not button for navigation; rows dimmed on refresh; polled regions announce politely and show *checked {time}* |
 | Progressive disclosure | pass | Blueprint principle 4 and S03: the row answers "how does this stock score" with three percentiles; the standardised score, the inputs' as-of dates and the reasons are one selection away in the inspector; the full inputs one link away on evidence; component periods one disclosure further. A factor below 30 is stated once in its header. Thresholds are sentences in one pane. Compare shows percentiles first, standardised scores beneath, dates behind a disclosure. The set history is behind one control |
 | Error clarity | pass | Every refusal in Sections 1.1 to 1.6 names the operation, the stock or universe and the reason, and offers the recovery where one exists and says when none does (STD-UI-19): follow the stock on Data health, review and save again, retire instead, wait for the next download. The error envelope's `code` selects the wording and `message` is never shown raw; no payload key, exception or status code reaches the owner (STD-UI-1) |
 | Accessibility | pass | WCAG 2.1 AA per STD-UI-24, specified per screen and by S03 §9: labelled `section`s, programmatic row and column headers wherever a cell's meaning depends on both, `aria-sort` and `aria-selected`, polite announcement of every polled or refreshed change and of the tray, focus managed on dialogs and disclosures, accessible names that identify the row and read as the blank, `blocked` controls that stay focusable, every status in words plus shape or pattern, the restatement mark's words exposed (DEC-0075), no colour encoding polarity (DEC-0060). Enforcement is human review, which the standard and tech stack acknowledge |
-| States and feedback (empty, loading, error, success, partial) | pass | All five, plus stale, unavailable and unreachable (STD-UI-23), enumerated per screen with inapplicable ones reasoned; S03 §7 governs Research. Never-scored and nothing-found are distinct everywhere both can occur (AC-22); stale is the marked not-current set (AC-20); unavailable is the factor below 30 (AC-14); success is confirmed by `toast` where the result is on another route (DEC-0076) and is visible on screen otherwise; a building set has no progress indicator because none can be honest, and carries its start time instead |
+| States and feedback (empty, loading, error, success, partial) | pass | All five, plus stale, unavailable and unreachable (STD-UI-23), enumerated per screen with inapplicable ones reasoned; S03 §7 governs Research. Never-scored and nothing-found are distinct everywhere both can occur (AC-22); stale is the marked not-current set (AC-20), and the never-populated state shows a first set building or failed from the same `later` block (DEC-0082); unavailable is the factor below 30 (AC-14); success is confirmed by `toast` where the result is on another route (DEC-0076) and is visible on screen otherwise; a building set has no progress indicator because none can be honest, and carries its start time instead |
 
 ## 5. Traceability
 
@@ -1423,17 +1525,17 @@ the status tier table.
 | AC ID | Capability AC | UX Design Element | Component + Variant |
 |-------|---------------|-------------------|-------------------------|
 | AC-1 | Universe by hand; no unfollowed stock | 1.3 create dialog with bulk entry; `409 instrument_not_acquired` refusing the whole request with every symbol named and a followed-stocks link; 1.1 and 1.4 **Add to universe…** from checked rows | `dialog` `standard` + `form` `dialog` + `input` `text` + `textarea` `list`; `button` `blocked`; `select` `default` |
-| AC-2 | Universe from a filter, membership fixed | 1.1 **Save these {n} as a universe…** posting the thresholds, scope, `hide_incomplete` and `set_id`; `409 classification_set_changed` handling; 1.3 and 1.4 Origin line read as history, no re-evaluation (DEC-0076) | `button` `outline`; `dialog` `standard` + `form` `dialog`; `toast` `success`; `card` `summary` |
+| AC-2 | Universe from a filter, membership fixed | 1.1 **Save these {n} as a universe…** posting the one filter the list was read with (the twelve bounds, `hide_incomplete`, the *Find a stock* prefix) and `set_id`, so the members are exactly the header's count (system design v3 §4.2; DEC-0076, DEC-0081); `409 classification_set_changed` handling; 1.3 and 1.4 Origin line read as history, naming the search when one applied, no re-evaluation | `button` `outline`; `dialog` `standard` + `form` `dialog`; `toast` `success`; `card` `summary` |
 | AC-3 | Several universes; a stock in many | 1.3 list of universes; 1.1 *Look in* listing every active universe; 1.1 and 1.6 memberships line naming several; no exclusivity anywhere | `data-table` `expandable`; `select` `inline` |
 | AC-4 | Add, remove, rename, retire; rename keeps history | 1.4 **Add stocks…**, **Remove…**, inline rename, **Retire…**; the *Renamed* event in History; already-member stocks reported, never errored | `button` `default` / `ghost` / `secondary`; `dialog` `standard` / `confirm`; `form` `inline` + `input` `text`; `data-table` `history`; `toast` `success` |
 | AC-5 | No empty universe; last member not removable | 1.3 **Create** `blocked` until one symbol; 1.1 **Save these 0 as a universe…** `blocked` (DEC-0076); 1.4 **Remove…** `blocked` on the sole member with **Retire…** adjacent; `422 empty_universe` and `409 last_member` backstops | `button` `blocked` |
 | AC-6 | Membership history; members on any past date | 1.4 History tab, *View members as of this event*, *Members as of* date entry, as-of label; removal and retirement worded as keeping history | `data-table` `history`; `form` `inline` + `input` `text`; `dialog` `confirm` |
 | AC-7 | Factor definitions | 1.5 and 1.6 name exactly the defined inputs per factor in product vocabulary; 1.1 inspector names them per factor | composition; `card` `summary` |
 | AC-8 | One peer set | 1.1 and 1.4 render the same per-stock score whether scoped or not; *Look in* changes which rows, never their values; S03 §3 helper and §8 footnote say "of the stocks scored on this factor" | `data-table` `virtualised`; `select` `inline` |
-| AC-9 | Standardised score and percentile | 1.1 percentile in the factor cell, standardised score in the inspector (blueprint §4.4); 1.5 both as rows; 1.6 both in the result block; DEC-0063 precision | composition (factor cell); `card` `summary` |
+| AC-9 | Standardised score and percentile | 1.1 percentile in the factor cell, standardised score in the inspector (blueprint §4.4); a stock incomplete on one factor keeps its row and its other percentiles under any threshold (DEC-0081); 1.5 both as rows; 1.6 both in the result block; DEC-0063 precision | composition (factor cell); `card` `summary` |
 | AC-10 | Automatic refresh; never after failed, cancelled, abandoned | 1.2 polls and refreshes once on completion without owner action (DEC-0062); the download outcome shown on the as-of line is only *Complete* or *Partial*; the failed banner names the next download as the retry | composition (as-of line); `badge` `status-good` / `status-warning` |
 | AC-11 | Up to date within 5 minutes for 3000 stocks | 1.1 and 1.4 `virtualised` table over keyset pages; 1.2 10-second poll while building so completion is seen within the budget; *Find a stock* for STD-UI-30 (DEC-0074) | `data-table` `virtualised`; `input` `text` |
-| AC-12 | Like for like only; missing or outdated input named | 1.1 *Incomplete* cell with the reason tooltip and inspector sentence naming the input; 1.5 column kept with status and input; 1.6 three-part statement per factor (DEC-0072) | `badge` `coverage-absent`; `card` `summary` |
+| AC-12 | Like for like only; missing or outdated input named | 1.1 *Incomplete* cell with the reason tooltip and inspector sentence naming the input, the row kept under a threshold on that factor until hidden (S03-1; DEC-0081); 1.5 column kept with status and input; 1.6 three-part statement per factor (DEC-0072) | `badge` `coverage-absent`; `card` `summary` |
 | AC-13 | Outdated inputs | 1.6 statement naming the 6-month rule against the scores' date, or the latest-trading-day rule, with the input's *As of*; *Outdated* on the input (DEC-0077); 1.2 the current-stock count's meaning for S01 and S09 (DEC-0071) | `badge` `status-warning`; `card` `summary` |
 | AC-14 | Enough stocks to rank | 1.1 and 1.4 column header *{n} qualified, 30 needed* and every cell *Not enough to rank*; 1.5 group header; 1.6 card statement (S03-4) | `badge` `coverage-unknown` |
 | AC-15 | Retired stocks | 1.1 under a universe scope, 1.4, 1.5 and 1.6 *Not followed* on every factor with *Not followed since {date}. Earlier scores stand.*; member kept in its universe; not listed under *All followed stocks* (DEC-0073) | `badge` `status-neutral` |
@@ -1441,22 +1543,22 @@ the status tier table.
 | AC-17 | Evidence behind a result | 1.1 inspector line per factor naming the inputs and their as-of (S03-3); 1.6 per-input value, status, *As of*, *Known on*, detail disclosure; 1.5 dates disclosure | `card` `summary`; `button` `ghost`; composition |
 | AC-18 | Classification history, never overwritten | 1.6 Earlier scores tab, newest first, each row one set's result; 1.1 and 1.6 *Earlier scores stand.* for a stock no longer followed | `tabs` `default`; `data-table` `history` |
 | AC-19 | No backdating | 1.6 Earlier scores statement that later data does not change a row; *Known on* shown per input; 1.2 set dated by production | `data-table` `history`; `card` `summary` |
-| AC-20 | Previous set while not current; failure shown | 1.2 banner: *Not reflecting the latest download* while a later set builds, *Score update failed {time}: {reason}* when the attempt failed, the previous set kept on screen in both (DEC-0072, DEC-0073) | `badge` `status-warning` / `status-active` / `status-critical` inside `card` `default` |
-| AC-21 | Classification currency | 1.2 as-of line *Scores from {date} {time} {zone}, download #{n}* with the download link and outcome badge; set history dialog (DEC-0073) | composition (as-of line); link; `dialog` `standard`; `data-table` `history` |
-| AC-22 | Honest empty state | 1.1, 1.5 and 1.6 never-scored statements with the latest download's state and a Data health link, replacing the body; distinct from nothing-found on every screen (S03 §7) | `data-table` empty state; composition |
+| AC-20 | Previous set while not current; failure shown | 1.2 banner from the `later` block: *Not reflecting the latest download* while a later set builds, *Score update failed {time}: {reason}* when the attempt failed, the previous set kept on screen in both (DEC-0072, DEC-0073); 1.1 and 1.6 never-populated state showing a first set as *Updating* or *Score update failed* with its reason, polled from first load (DEC-0082) | `badge` `status-warning` / `status-active` / `status-critical` inside `card` `default` |
+| AC-21 | Classification currency | 1.2 as-of line *Scores from {date} {time} {zone} · from the download started {date} {time} {zone}*, the start time linked to the download's detail, with the outcome badge; set history dialog naming each set's download the same way (DEC-0073, DEC-0083) | composition (as-of line); link; `dialog` `standard`; `data-table` `history` |
+| AC-22 | Honest empty state | 1.1, 1.5 and 1.6 never-scored statements with the first set's state from `later` (*Updating*, or *Score update failed* with its reason), the latest download's state and a Data health link, replacing the body, polled from first load so the first scores appear without a reload (DEC-0082); distinct from nothing-found on every screen (S03 §7) | `data-table` empty state; composition |
 | AC-23 | Restatement mark | 1.1, 1.4, 1.5 and 1.6 *Possibly restated* on every percentile that carries it, lists, inspector, compare, evidence and history; on each backfilled input; its meaning stated once per screen (S03-6; DEC-0075) | composition (factor-cell mark with `status-neutral` tokens) |
 
 **S03 acceptance checks** (S03 §10), each satisfied by this design:
 
 | Check | S03 text | UX Design Element |
 |-------|----------|-------------------|
-| S03-1 | A stock with any incomplete factor is listed unless *Hide stocks with an incomplete score* is on | 1.1 Filters: `checkbox` *Hide stocks with an incomplete score*, default off, mapping to `hide_incomplete` (default false); 1.1 table lists incomplete stocks with *Incomplete* cells |
-| S03-2 | The match count reflects the full set, not the loaded page | 1.1 `h1` *{n} stocks match* from `match_count`, computed server-side over the whole filtered set (system design v2 §3.3 step 15) |
+| S03-1 | A stock with any incomplete factor is listed unless *Hide stocks with an incomplete score* is on | 1.1 Filters: `checkbox` *Hide stocks with an incomplete score*, default off, mapping to `hide_incomplete` (default false); 1.1 table lists incomplete stocks with *Incomplete* cells; a threshold on a factor excludes only stocks classified on that factor that fail it, so an incomplete stock stays listed and counted until the checkbox is on (system design v3 §3.3 step 15; DEC-0081). Satisfied without exception; version 2 traced it while its threshold rule contradicted it (review v2 FINDING-6) |
+| S03-2 | The match count reflects the full set, not the loaded page | 1.1 `h1` *{n} stocks match* from `match_count`, computed server-side over the whole filtered set (system design v3 §3.3 step 15), counting the incomplete stocks the thresholds leave listed and only the stocks a search matched (DEC-0081) |
 | S03-3 | The inspector shows the as-of date for each factor's inputs | 1.1 Inspector, one line per factor naming the inputs and their as-of and known-on dates from `GET /api/classifications/stocks/{symbol}` |
 | S03-4 | A factor with fewer than 30 qualifying stocks shows no percentile for any stock | 1.1 every cell in that column *Not enough to rank*, header *{n} qualified, 30 needed*, sort control removed; 1.4, 1.5, 1.6 likewise |
 | S03-5 | Filters, sort and scope survive reload and back navigation (URL state) | Section 0 and 1.1: thresholds, scope, hide-incomplete, search and sort in the URL query; checked rows client state |
 | S03-6 | A *Possibly restated* mark shows on the percentile in the results table and in the inspector wherever the classification carries it | 1.1 factor cell and inspector block carry the mark (DEC-0075); also 1.4, 1.5, 1.6 |
-| S03-7 | **Save these {n} as a universe…** saves every matching stock, not only the loaded page, and the universe keeps those members afterwards | 1.1 the save posts the filter (thresholds, scope, `hide_incomplete`) and `set_id`; the server snapshots every matching stock, incomplete ones included unless hidden; 1.4 Origin line shows the snapshot as history (DEC-0076) |
+| S03-7 | **Save these {n} as a universe…** saves every matching stock, not only the loaded page, and the universe keeps those members afterwards | 1.1 the save posts the filter the list was read with (the twelve bounds, `hide_incomplete` and the *Find a stock* prefix) and `set_id`; the server snapshots every matching stock with the list's predicate, incomplete ones included unless hidden, only the stocks a search matched when one is active, so the members are exactly the header's count (system design v3 §4.2; DEC-0076, DEC-0081; review v2 FINDING-5); 1.4 Origin line shows the snapshot as history, the search named when one applied |
 
 **Status tier table** (STD-UI-12; brief §12.2), reproduced because this design
 is where it is rendered. The blueprint governs where it names the state
@@ -1467,9 +1569,9 @@ compare is DEC-0077's.
 
 | State | Display label | Tier | `badge` variant | Rendered in |
 |-------|---------------|------|-----------------|-------------|
-| A later set is building | *Updating* | active | `status-active` | 1.2 as-of line; set history |
+| A later set is building (`later.state` building, the first set included) | *Updating* | active | `status-active` | 1.2 as-of line; 1.1 and 1.6 never-populated state (DEC-0082); set history |
 | The shown set does not reflect the latest download | *Not reflecting the latest download* | warning | `status-warning` | 1.2 banner |
-| The latest attempt failed | *Score update failed* | critical | `status-critical`, with the reason | 1.2 banner; set history (*Failed*) |
+| The latest attempt failed (`later.state` failed, the first set included) | *Score update failed* | critical | `status-critical`, with the reason | 1.2 banner; 1.1 and 1.6 never-populated state (DEC-0082); set history (*Failed*) |
 | Download the set reflects: `succeeded` / `partial` | *Complete* / *Partial* | good / warning, never good | `status-good` / `status-warning` | 1.2 as-of line; set history |
 | Factor scored (`classified`) | the percentile and bar | none | none | 1.1, 1.4, 1.5, 1.6 |
 | Factor not scored (`not_classified`) | *Incomplete* | presence: absent (STD-UI-14) | `coverage-absent` | 1.1, 1.4, 1.5, 1.6 |
@@ -1489,9 +1591,10 @@ compare is DEC-0077's.
 | Product UX blueprint `PRODUCT-UX` v6 (approved) | `docs/ux/product-ux-blueprint.md` | Text reference. §0 how a design uses it; §2.1, §2.2 destination and routes (Section 0, Section 2); §3 shell and §3.5 (Section 0, Section 1.2); §4.4 factor cell, §4.5 inspector, §4.6 tray, §4.7 sentence builder, §4.8 as-of line, §4.10 states (Sections 1.1, 1.2); §7 vocabulary throughout; §8 status map (Section 5); §9 action tiers (Sections 1.1, 1.4); §10 the M1 row; §12 D-8 (Section 0); §13 `checkbox`, `data-table` `virtualised` | 2026-10-16 |
 | Home `PRODUCT-UX-S01` v4 and Data health `PRODUCT-UX-S09` v4 | `docs/ux/screens/S01-home.md`, `docs/ux/screens/S09-data-health.md` | Text reference. S01 §3, §5, §7, S01-6 and S09 §3, §5, §11 read for what the summary read must mean (Section 1.2); not designed here | 2026-10-16 |
 | Canvas source for S03 | `docs/ux/design-source/P03-Research.dc.html` | Text reference, through S03 §11: the specification wins on the banner, the mark, the saved-screens controls and the threshold measures; no element was taken from the canvas directly | 2026-10-16 |
-| UX brief v2 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-brief.md` | Text reference. §1 screens and routes; §2.1 the ten items CAP-002 adds to S03 and §2.2 to §2.6 the restyled pages, all implemented; §3 interactions and tiers; §4 components; §5 constraints; §6 accessibility; §9 open questions; §12 conformance, tier table and eight-state table honoured | 2026-10-16 |
+| UX brief v3 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/ux-brief.md` | Text reference. §1 screens and routes; §2.1 the ten items CAP-002 adds to S03 and §2.2 to §2.6 the restyled pages, all implemented, with items 1, 3 and 6, §2.2, §3 and §9 as version 3 revised them for review v2 FINDING-5, 6 and 8 (the prefix in the saved filter, the threshold rule, the download named by its start time); §4 components; §5 constraints; §6 accessibility; §12 conformance, tier table and eight-state table honoured | 2026-10-17 |
 | Capability CAP-002 v1 | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` | Text reference. All 23 acceptance criteria traced in Section 5; six flows walked in Sections 1 and 2; §5.4 conformance mirrored | 2026-10-16 |
-| System design v2 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` | Text reference. §3.3 read flow (steps 13 to 18: `match_count`, `hide_incomplete`, the twelve bounds, compare 2 to 6, memberships, the summary read and the current-stock rule); §4.2 interfaces, error codes, bounds and screen registration; constraint 18 poll cadence; §8 questions 4 and 10 and the abstentions carried in Section 7 | 2026-10-16 |
+| System design v3 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` | Text reference. §3.3 read flow (steps 13 to 18: the `set` and `later` blocks and polling from first load, the never-populated state, `match_count`, the filter as one object of twelve bounds, `hide_incomplete` and the `symbol` prefix with its three rules, compare 2 to 6, memberships, the summary read, the current-stock rule and the download named by its start time); §4.2 interfaces (`POST /api/universes` with the filter and `origin`, the list and summary rows, `run_started_at`), error codes, bounds and screen registration; §4.4 `filter_provenance`; constraint 18 poll cadence; §8 questions 4, 10 and 11 and the abstentions carried in Section 7 | 2026-10-17 |
+| Specification review v2 | `docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v2.md` | Text reference. Findings Summary Table rows FINDING-5 to FINDING-8 and the UX Design section; the four findings applied in version 3 exactly as the consistency pass fixed them (DEC-0081 to DEC-0083); its other findings on this design (FINDING-9, 11, 25, 26, 32) carried, not fixed | 2026-10-17 |
 | STD-UI v6 | `docs/constitution/standards/ui-conventions.md` | Text reference. Approved 2026-10-16; all 30 rules read; STD-UI-1 v6 display labels applied to every user-visible string; those governing this design cited where they decide something | 2026-10-16 |
 | UX specifications review v4 | `docs/ux/specifications-review-report-v4.md` | Text reference. Open S03 findings acted on: FINDING-22 (DEC-0074), 23 (DEC-0073), 42 and 55 (DEC-0076), 45 (holdings line M2, absent), 56 (DEC-0075), 57 (S03 §11 honoured); FINDING-54 is M2's (Section 7); FINDING-32 is DEC-0071's | 2026-10-16 |
 | CAP-001 UX design v5 | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` | Text reference. The delivered shell composed into meanwhile (Section 0); `confirm` not `destructive`; `blocked` not disabled; link not row click; no date input; polled regions announce politely | 2026-10-16 |
@@ -1500,15 +1603,16 @@ compare is DEC-0077's.
 | Theme tokens | `design-system/theme.css` | Text reference. Every token named in this design verified to exist, checked mechanically; no literal introduced; the page-ground alpha is STD-UI-29 A-5's case | 2026-10-16 |
 | Component map and intake | `design-system/component-map.json`, `design-system/intake.md` | Text reference. Null Figma file key and empty map, so no frame to cite; intake step 1.3 applied to the six compositions | 2026-10-16 |
 | UX pipeline note | `docs/ux/README.md` | Text reference. The UX design starts from the matching screen spec and delivers the regions it assigns to the capability's milestone | 2026-10-16 |
-| Decision records read | `projects/factorflow-v2/decisions/DEC-0054.md`, `DEC-0057.md`, `DEC-0059.md` to `DEC-0063.md`, `DEC-0068.md` to `DEC-0076.md` (harness repository) | Text reference. Poll cadence and universe semantics; tier mapping where not superseded, no polarity colour, refresh-once, precision; routes and destination, interim composition, compare bound, read surface; blueprint labels and tiers, the renderings S03 leaves unspecified, the search field, the mark composition, the save rules | 2026-10-16 |
-| Decision records written by this version | `projects/factorflow-v2/decisions/DEC-0077.md`, `DEC-0078.md` (harness repository) | Per-input status renderings on evidence and compare; the control placements S03 leaves open (both PROVISIONAL) | 2026-10-16 |
+| Decision records read | `projects/factorflow-v2/decisions/DEC-0054.md`, `DEC-0057.md`, `DEC-0059.md` to `DEC-0063.md`, `DEC-0068.md` to `DEC-0076.md`, `DEC-0079.md`, `DEC-0081.md` to `DEC-0084.md` (harness repository) | Text reference. Poll cadence and universe semantics; tier mapping where not superseded, no polarity colour, refresh-once, precision; routes and destination, interim composition, compare bound, read surface; blueprint labels and tiers, the renderings S03 leaves unspecified, the search field, the mark composition, the save rules; DEC-0079 (a), (b) for `hide_incomplete` and scope, (e) as superseded; DEC-0081 (the threshold rule, from the approved S03, superseding DEC-0071 and DEC-0076 on that point), DEC-0082 (one `set` plus `later` shape, polling from first load; PROVISIONAL), DEC-0083 (a download named by its start time; PROVISIONAL, superseding DEC-0079 (e)), DEC-0084 (the delivered files CAP-002 edits; cited in Section 0, bears on the system design and the component designs) | 2026-10-17 |
+| Decision records written by this design | `projects/factorflow-v2/decisions/DEC-0077.md`, `DEC-0078.md` (harness repository) | Version 2: per-input status renderings on evidence and compare; the control placements S03 leaves open (both PROVISIONAL). Version 3 records none: every resolution it applies is the system design v3's | 2026-10-17 |
 
 No Figma frame, image or diagram was used. This is the Path B automated design.
 
 ## 7. Open Questions
 
 Decisions this design rests on are not listed here; they are DEC-0059 (where
-not superseded), DEC-0060, DEC-0062, DEC-0063, DEC-0068 to DEC-0078, cited
+not superseded), DEC-0060, DEC-0062, DEC-0063, DEC-0068 to DEC-0078 and, from
+the system design v3, DEC-0081 to DEC-0083, cited
 where they apply. The owner upholds or reverts each with
 `scripts/sdd decisions`. What follows is what no artifact derives, and what is
 now closed.
@@ -1544,7 +1648,23 @@ now closed.
   published identifier of the component that consumes the summary read]`.
   *Owner: capability owner (§5.1); the shell capability's system design (the
   identifier). Blocks: nothing in this design.* **Abstained in this run,
-  carried from system design v2 §8 question 10 through the brief.**
+  carried from system design v3 §8 question 10 through the brief.**
+- **Do downloads gain a short visible number, and which capability owns it?**
+  The approved S03 §3 banner prints *from download #{n}*, and version 2 of this
+  design printed a sample download number, but no table or artifact numbers downloads
+  (`acquisition_run.run_id` is the only identifier, migration `0004`). Until
+  the owner decides, every CAP-002 surface names a download by its start time
+  in America/Chicago, the time being the link to its detail (Sections 0, 1.1,
+  1.2, 1.6; DEC-0083, PROVISIONAL, superseding DEC-0079 (e)), and S03 §3's
+  *#{n}* is a recorded departure from the approved copy with that reason.
+  `[REQUIRES INPUT: whether downloads gain a short visible number; if so,
+  which capability defines and stores it, likely *App shell & data health*,
+  whose S09 lists *Recent downloads*, and its format]`. *Owner: capability
+  owner, with the PRODUCT-UX change process for S03 §3's copy. Blocks: nothing
+  in this design; the as-of line, banner, set history and Earlier scores copy
+  in Sections 0, 1.1, 1.2 and 1.6 change when the number exists.* **Abstained
+  in this run, carried from system design v3 §8 question 11 through the
+  brief.**
 - **Which Massive statement payload keys supply each factor input?** Carried
   from the system design's §8 question 1. It bears on this design only in
   vocabulary: every input is named in product terms (Sections 1.1, 1.5, 1.6)
@@ -1569,7 +1689,10 @@ membership, DEC-0076), FINDING-56 (restatement mark, DEC-0075). FINDING-25 (the
 restyled pages have no source) is answered by Sections 1.3 to 1.6. FINDING-32
 (*current* means AC-13) is the system design's DEC-0071. FINDING-57 (canvas
 differences) is the screen specification's own; this design took nothing from
-the canvas directly.
+the canvas directly. Specification review v2's FINDING-5, FINDING-6, FINDING-7
+and FINDING-8 are applied in this version as the consistency pass fixed them
+(DEC-0081 to DEC-0083); its other findings that name this design (FINDING-9,
+FINDING-11, FINDING-25, FINDING-26, FINDING-32) are carried, not fixed, here.
 
 This design was generated without any human designer or visual design tool. It
 should be reviewed before decomposition.
