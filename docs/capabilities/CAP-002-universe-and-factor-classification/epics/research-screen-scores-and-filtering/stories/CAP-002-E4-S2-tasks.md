@@ -1,0 +1,199 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-002-E4-S2-tasks
+artifact_type: story-tasks
+artifact_version: 1
+status: draft
+owner: Alvaro de Jodra
+owner_github: ajodraca
+created: 2026-10-17
+updated: 2026-10-17
+ai_provenance:
+  agent_id: implementation-planning-agent
+  agent_version: "1.0"
+  model: claude-sonnet-5-5
+  tool: Claude Code
+  tool_version: "unknown"
+  timestamp: 2026-10-17T23:55:00Z
+  source_artifacts:
+    - id: CAP-002-E4-S2
+      version: "1"
+    - id: CAP-002-component-design-classification-ui
+      version: "3"
+    - id: CAP-002-component-design-classification-api
+      version: "3"
+  invoking_user: ajodraca
+  correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+---
+
+# Tasks: CAP-002-E4-S2 — URL Query Model, Display Formatting and the Owner-Facing Copy Catalogue
+
+**Story**: `repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2.md`
+**Component**: `FactorFlow-v2` (web interface, `web/src/`)
+**Branch**: `usr/alvaro-de-jodra/CAP-002-E4-tasks`
+**Date**: 2026-10-17
+
+## Summary
+
+Delivers the three pure modules every Research screen reads through and none of them renders: `web/src/api/research-query.ts` (a round-trippable codec between `URLSearchParams` and a `ResearchQuery`, the mapping of each threshold sentence onto exactly one of the twelve read bounds, the list-read parameters and the save-as-universe payload, with invalid keys dropped rather than sent); `web/src/screens/research/format.ts` (DEC-0063 precision: signed two-decimal standardised scores, whole-number percentiles, two-decimal ratios, signed percentage rates, whole-unit amounts, America/Chicago timestamps with the zone, dates passed through); and `web/src/screens/research/copy.ts` (every owner-facing message of the CAP-002 designs keyed by error code and state, plus the `SHELL_ROUTES` map). No component, hook or request is built here. Later E4 stories import from these modules and do not add to the catalogue unless a design message is missing.
+
+## Acceptance Criteria Traceability
+
+| AC | Description | Tasks |
+|----|-------------|-------|
+| AC-9 | Standardised score and percentile are displayed as formatted values (display side) | T001, T005, T008 |
+| AC-16 | Sort, threshold, scope and search controls are expressible as a URL query and as list-read parameters | T002, T003, T006, T009, T010 |
+| DAC-E4-1 | The words for a scored cell, *Incomplete*, *Not enough to rank* with the count stated once, are in the catalogue | T004, T007, T011, T012 |
+| DAC-E4-3 | Sort, thresholds, scope, hide-incomplete and search live in the URL and survive reload; the heading's count wording is in the catalogue | T002, T006, T009, T010, T012 |
+| DAC-E4-S2-1 | Any `ResearchQuery` round-trips; each sentence maps to one of the twelve bounds; an invalid key is dropped, not sent | T002, T006, T009, T010 |
+| DAC-E4-S2-2 | The save payload is the twelve bounds, `hide_incomplete` and `symbol` | T003, T010 |
+| DAC-E4-S2-3 | `+1.27`, `-0.45`, `0.00`, percentile `84`, ratios 2 dp, rates `+12.40%`, Chicago timestamps with zone, dates unconverted | T001, T005, T008 |
+| DAC-E4-S2-4 | `copy.ts` contains no instrument, acquisition run, not classified, retire (of a stock) or bare score | T004, T007, T011, T012 |
+
+Mapped test cases (all from `tests/component/classification-ui-tests.md`, confirmed in `tests/coverage-matrix.md` lines 208-211): TC-COMP-071 (DAC-E4-S2-3), TC-COMP-072 (DAC-E4-S2-4), TC-COMP-132 (DAC-E4-S2-1), TC-COMP-133 (DAC-E4-S2-2). No other component TC traces to a DAC-E4-S2-* criterion. Each of the four spec bodies is a single generic line ("Encoded and decoded", "Formatted", "Scanned"); the plan below sharpens each into concrete assertions from the AC and the design sections cited (Phase 2).
+
+## Phase 1: Setup
+
+Skipped. No dependency, configuration or existing file changes. `web/src/api/` exists. `web/src/screens/research/` does not exist yet; it is created by the first file written into it (T001). vitest, biome and `tsc` are already configured (`vitest.config.ts` root `web`, `tsconfig.json` includes `web/src`). Type imports (`Thresholds`, `ClassificationListParams`, `FactorName`, `ClassificationOperation`, `ClassificationResource`) come from `web/src/api/classification-types.ts`, which CAP-002-E4-S1 delivers (hard dependency, already in `dependencies.yaml`). Read that shipped file before T009: use its exact camelCase names for the twelve bounds (the wire names `value_percentile_min` ... `momentum_score_max` in camelCase, for example `valuePercentileMin`), `hideIncomplete` and `symbol`; if S1 shipped different names, S1's file governs and this plan's examples follow it.
+
+---
+
+## Phase 2: Tests (TDD)
+
+**Purpose**: Write failing tests that define each module's behaviour from the acceptance criteria. One test file per module: `web/src/screens/research/format.test.ts`, `web/src/api/research-query.test.ts`, `web/src/screens/research/copy.test.ts` (the paths the story names; none exists yet). Follow the style of the delivered colocated `*.test.ts` files (`web/src/screens/instruments/parse-bulk-symbols.test.ts` for a pure-module table test). Each mandatory test carries a traceability comment (`// Implements TC-COMP-071`). No network, no DOM, no fake timers needed: all three modules are pure.
+
+### Mandatory Component Tests
+
+- [ ] T001 [P] Implement TC-COMP-071 (Score, percentile, ratio, rate and date formatting) in `web/src/screens/research/format.test.ts`, one assertion per DAC-E4-S2-3 clause, against `formatScore`, `formatPercentile`, `formatRatio`, `formatRate`, `formatAmount`, `formatTimestamp`, `formatDate`: decimal-string inputs as the API sends them (`"1.2700000000"`, `"-0.4500000000"`, `"0E-10"`, `"84.0000000000"`). Expected: `formatScore("1.2700000000")` is `"+1.27"`, `formatScore("-0.4500000000")` is `"-0.45"` with an ASCII hyphen-minus U+002D (Resolved Conflict 2), `formatScore("0.0000000000")` is `"0.00"` with no sign; `formatPercentile("84.0000000000")` is `"84"` (no sign, no `%`); `formatRatio("1.2345")` is `"1.23"`; `formatRate("0.1240")` is `"+12.40%"` and `formatRate("-0.0500")` is `"-5.00%"`; `formatTimestamp("2026-10-15T22:46:00Z")` is `"2026-10-15 17:46 CDT"` and `formatTimestamp("2026-01-15T23:46:00Z")` is `"2026-01-15 17:46 CST"` (zone as the instant falls); `formatDate("2026-10-15")` is `"2026-10-15"` for any ISO date including `"2026-03-08"` (the US daylight-saving change day), proving no conversion through `Date`
+- [ ] T002 [P] Implement TC-COMP-132 (ResearchQuery URL round-trip; one sentence per bound) in `web/src/api/research-query.test.ts`: build a table of `ResearchQuery` objects that covers every combination the type allows (each of the three factors with each of the four measure-and-direction pairs and a value; no sentence; all three sentences at once; scope `all` and a universe id; `hideIncomplete` true and false; `symbol` null and `"AA"`; each of the seven sort keys with each order; unsorted) and assert `decodeResearchQuery(encodeResearchQuery(q))` deep-equals `q` for every row. Assert the sentence-to-bound mapping is one-to-one over all twelve: for each factor, `percentile`+`atLeast` yields only `{factor}PercentileMin`, `percentile`+`atMost` only `{factor}PercentileMax`, `standardisedScore`+`atLeast` only `{factor}ScoreMin`, `standardisedScore`+`atMost` only `{factor}ScoreMax`, the other eleven bounds absent, and the twelve results are all distinct. Assert an invalid key is dropped, not sent: `?value.measure=percentile&value.direction=atLeast&value.value=101` decodes to a query with no value sentence and `toListParams` of it carries none of the twelve bounds
+- [ ] T003 [P] Implement TC-COMP-133 (Save payload is twelve bounds, hide_incomplete and symbol) in `web/src/api/research-query.test.ts`: for a query with a value percentile sentence, a momentum standardised-score sentence, `hideIncomplete` true, `symbol` `"AA"`, a universe-free scope and a sort, `toThresholds(query)` has no key outside the fourteen allowed (the twelve bounds, `hideIncomplete`, `symbol`), always carries `hideIncomplete` (boolean) and `symbol` (`null` when no search is active), carries exactly the bounds the sentences set, and never carries `scope`, `sort`, `order`, `universeId`, `limit` or `cursor`. Assert `toThresholds(q)` deep-equals the thresholds part of `toListParams(q)` (the one object the list read and the save share; classification-ui section 2.7, DEC-0085)
+- [ ] T004 [P] Implement TC-COMP-072 (copy.ts contains no forbidden vocabulary) in `web/src/screens/research/copy.test.ts`: flatten every exported value of `copy.ts` into the list of owner-facing strings (string constants, nested object values, and the result of calling each template function with representative arguments: a symbol list, a name, a count, a timestamp, a reason). Keys, URLs and the `SHELL_ROUTES` targets are not owner-facing and are excluded. Assert, case-insensitively and on word boundaries, that no string contains `instrument`, `acquisition run`, `not classified`, or `retire` / `retired` / `retiring` unless the string is on the named universe-lifecycle allow-list (Open Gap 1; each allowed string is asserted to contain none of `stock`, `instrument`, `follow`), and that no string contains a bare `score` by the Open Gap 2 rule. Include self-checks that the scanner works: it flags `"Retire this instrument"`, `"Value score at least 80"`, `"Not classified"`, `"acquisition run 3"` and passes `"momentum standardised score at least 0.00"`, `"Score update failed"`, `"Scores from 2026-10-15 17:46 CDT"`, `"Hide stocks with an incomplete score"`
+
+### Additional Unit Tests
+
+- [ ] T005 [P] Formatting edge cases in `web/src/screens/research/format.test.ts` (AC-9, DAC-E4-S2-3; Open Gap 3): rounding is half away from zero on the decimal string, not through a float (`formatScore("0.0050000000")` is `"+0.01"`, `formatScore("-0.0050000000")` is `"-0.01"`, `formatScore("1.0050000000")` is `"+1.01"`, where `toFixed` gets it wrong); a value that rounds to zero is unsigned (`formatScore("-0.0040000000")` is `"0.00"`, never `"-0.00"` or `"+0.00"`); `formatPercentile("87.5000000000")` is `"88"`, `"99.5000000000"` is `"100"`, `"0.0000000000"` is `"0"`, `"100.0000000000"` is `"100"`; `formatRatio` of a negative value keeps `-` and of `"0.004"` is `"0.00"`; `formatRate("0.0000")` is `"0.00%"` unsigned; `formatAmount("1234567.5")` is `"1,234,568"`, `"-9876543"` is `"-9,876,543"`, `"999"` is `"999"`, with no currency symbol and no `K`/`M`/`B` abbreviation (STD-UI-6); non-decimal input (`""`, `"abc"`, `"NaN"`, `"Infinity"`, `"1e3"`, `"1,5"`) throws `RangeError` and never returns `"0.00"`, `"NaN"` or an empty string (STD-UI-4); `formatTimestamp` takes an ISO-8601 instant string, renders minutes by default and `HH:mm:ss` when called with `{ seconds: true }` (the `checked 17:52:10 CDT` clause), maps midnight to `00` not `24`, and an instant across the autumn change (`2026-11-01T06:30:00Z` is `CDT`, `2026-11-01T07:30:00Z` is `CST`) takes the zone as it falls; the result is the same under `TZ=Asia/Tokyo` and `TZ=UTC` (set `process.env.TZ` in a nested `describe` or assert the formatter does not read the machine zone)
+- [ ] T006 [P] Query codec edge cases in `web/src/api/research-query.test.ts` (AC-16, DAC-E4-3, DAC-E4-S2-1; Open Gap 4): empty input decodes to the default query (all followed stocks, no sentences, `hideIncomplete` false, `symbol` null, unsorted) and the default query encodes to the empty string, so defaults are never written; unknown keys (`foo=1`, `tab=history`, `symbols=AAPL,MSFT`) are ignored on decode and left untouched when `applyResearchQuery(params, query)` writes into an existing `URLSearchParams`, while every key the codec owns is overwritten or removed; each invalid input is dropped (not repaired, not sent): a sentence missing any of its three keys, `measure=bogus`, `direction=bogus`, a percentile value of `-1` and `101` (`0` and `100` accepted), a standardised-score value of `abc`, `NaN`, `Infinity`, `1e3` and the empty string (`-0.45` and `+1.27` accepted), `sort=bogus`, an `order` with no `sort` (dropped), `order=bogus` with a valid `sort` (order falls to `asc`), a `symbol` of `"1!"` (dropped) and of `"aa"` (accepted and upper-cased to `"AA"`), `hide_incomplete=false` and `hide_incomplete=1` (both mean false: only the literal `true` is true); values are preserved as the strings given (`"80.0"` round-trips as `"80.0"`, never normalised to `"80"`); `toListParams` sends only the bounds that are set, `hideIncomplete` only when true, `symbol` only when set, `universeId` only for a universe scope, `sort` and `order` only when sorted; and a table of the seven sort keys (`symbol`, `value_score`, `value_percentile`, `growth_score`, `growth_percentile`, `momentum_score`, `momentum_percentile`) matches the API allowlist of classification-api section 2.4
+- [ ] T007 [P] Catalogue completeness and keying in `web/src/screens/research/copy.test.ts` (DAC-E4-1, DAC-E4-S2-4; Open Gaps 5 and 6): (a) every error code in classification-api section 2.5 (`instrument_not_acquired`, `empty_universe`, `universe_name_in_use`, `classification_set_changed`, `universe_not_found`, `universe_retired`, `not_a_member`, `last_member`, `instrument_not_found`, `cursor_invalid`, `cursor_stale`, `classification_set_not_found`, `validation_error`, `internal_error`) has exactly one sentence, and an unknown code falls back to a generic sentence that does not contain the code, the word `error`, or any envelope text passed in; (b) `instrument_not_acquired` names every symbol in the order given and reads as the design sentence (`Could not create the universe: FactorFlow doesn't follow MSFT, TSLA. Follow them on Data health, then try again.`); (c) each `ClassificationOperation` and `ClassificationResource` literal from S1's types has a label (a `Record` typed over the union makes a missing key a compile error; assert at runtime too); (d) anchor strings: a table of verbatim design messages (at least these: `No stocks have been scored yet.`, `No stocks match these filters.`, `Not reflecting the latest download`, `Could not check for newer scores.`, `Choose 2 to 6 stocks to compare.`, `A comparison holds up to 6 stocks.`, `Select a stock to see why it scores as it does.`, `Incomplete`, `Not enough to rank`, `Not followed`, `Possibly restated`, `Outdated`, `Couldn't be computed`, `This universe is retired and can't be changed. Its members and history are still viewable.`, `This is the last member. Retire the universe instead.`, `Enter at least one stock.`, `Up to 1000 stocks can be added in one request.`, `No earlier scores for` as a prefix) each occurs as a value of the catalogue, and the templated ones (`{n} qualified, 30 needed`, `Saved {n} stocks as {name}`, `Added {n} stocks to {name}`, the already-member clause, `Scores from {date} {time} {zone} · from the download started ...`) render the design's example text for the design's example arguments; (e) no catalogue string contains a raw snake_case identifier, an `[REQUIRES INPUT]` marker, or any STD-UI-1 implementation or generic word (`null`, `undefined`, `exception`, `timeout`, `500`, `job`, `sync`, `import`, `task`, `entity`, `delete`); (f) `SHELL_ROUTES` targets exist in the delivered router: read `web/src/app/routes.tsx` with `node:fs` and assert the download link resolves to a `path` there (`/runs/:runId`), as do the Data health link (`/runs`) and the followed-stocks link (`/instruments`); and the file the test reads is not edited
+
+**Checkpoint**: All tests written and failing (`./format`, `./research-query` and `./copy` do not exist). No production code yet.
+
+---
+
+## Phase 3: Core Implementation
+
+**Purpose**: Make the tests pass with three new modules and no edit to any delivered file.
+
+- [ ] T008 [P] Create `web/src/screens/research/format.ts` (DEC-0063, STD-UI-3, STD-UI-5, STD-UI-6; Open Gap 3), no React and no import except types. Exports `formatScore`, `formatPercentile`, `formatRatio`, `formatRate`, `formatAmount`, `formatTimestamp(value: string, options?: { seconds?: boolean })`, `formatDate(value: string)`. Decimal strings are rounded with string arithmetic (split sign, integer and fraction digits, round half away from zero, carry), never `Number`, `toFixed` or `parseFloat`; a plain-decimal pattern guard (`^[+-]?\d+(\.\d+)?$`, plus the `0E-10` zero spelling the store can emit) throws `RangeError` otherwise. `formatScore` signs `+`/`-` (ASCII hyphen-minus) and leaves a rounded zero unsigned; `formatPercentile` is a whole number with no sign and no `%`; `formatRatio` two decimals, negative keeps `-`, zero unsigned; `formatRate` multiplies the engine's fraction by 100 by decimal shift (the factor engine defines growth and total return as `x / y - 1`), two decimals, signed, `%` suffix; `formatAmount` whole units, `,` separators, no symbol, no abbreviation. `formatTimestamp` builds the date and clock from `Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour12: false, timeZoneName: "short", ... }).formatToParts` as `status-region.tsx` does (hour `24` becomes `00`), and prints `YYYY-MM-DD HH:mm CDT` (`:ss` with `seconds: true`); it never reads the machine zone. `formatDate` returns the `YYYY-MM-DD` string untouched after a shape check and never constructs a `Date` (STD-UI-5). Do not import or edit the shell's own `formatTimestamp` in `web/src/app/status-region.tsx`: it prints the IANA name and seconds, which this design replaces with the zone abbreviation (Resolved Conflict 3). Makes T001 and T005 pass
+- [ ] T009 Create `web/src/api/research-query.ts`, types and decode (depends on T002 to T003 existing and on the S1 types): export `Measure` (`"percentile" | "standardisedScore"`), `Direction` (`"atLeast" | "atMost"`), `ThresholdSentence { measure; direction; value: string }`, `SortKey` (the seven allowlist values), `Order`, and `ResearchQuery { scope: string | null` (`null` is all followed stocks; a universe id otherwise)`; sentences: Partial<Record<FactorName, ThresholdSentence>>; hideIncomplete: boolean; symbol: string | null; sort: { key: SortKey; order: Order } | null }`, with a `DEFAULT_RESEARCH_QUERY`. `decodeResearchQuery(params: URLSearchParams): ResearchQuery` reads only `scope`, `{factor}.measure`, `{factor}.direction`, `{factor}.value`, `hide_incomplete`, `symbol`, `sort`, `order`; ignores every other key; validates and drops per Open Gap 4 (a sentence is kept only when its three parts are valid; values stay the strings given); uses the first value of a repeated key. `FactorName` comes from `classification-types.ts`; do not redefine it. Pure: no `window`, no `Date`. Makes the decode half of T002 and T006 pass
+- [ ] T010 Complete `web/src/api/research-query.ts`, encode and request builders (depends on T009): `encodeResearchQuery(q): URLSearchParams` and `applyResearchQuery(params: URLSearchParams, q): URLSearchParams` (copy of `params` with only the codec's owned keys rewritten or deleted, every other key preserved in place; defaults never written; `order` omitted when `asc`; `hide_incomplete` written only as `true`); `sentenceToBound(factor, sentence): [BoundKey, string]` over a single `const` table of the four measure-and-direction pairs, so each sentence maps to exactly one of the twelve bounds and no bound is built by string concatenation elsewhere; `toThresholds(q): Thresholds` (the set bounds, `hideIncomplete`, `symbol: string | null`; the object the save posts, DEC-0085); `toListParams(q, paging?): ClassificationListParams` (`toThresholds` plus `universeId` for a universe scope, `sort` and `order` as the API names them, snake_case conversion left to S1's client). No filter model beyond `ResearchQuery` and `Thresholds` is introduced (classification-api section 2.4: "a mapping, not a model"). Makes T002, T003 and T006 pass
+- [ ] T011 Create `web/src/screens/research/copy.ts`, the structure and the failure messages (depends on T004 and T007 existing; imports `ClassificationOperation` and `ClassificationResource` types from `../../api/classification-types`): exports `SHELL_ROUTES` (the three CAP-002 link targets to delivered CAP-001 routes: the download's detail `(runId: string) => \`/runs/${runId}\`` for the as-of line, Data health `/runs`, followed stocks `/instruments`; one map, so the shell capability's migration is one edit, classification-ui section 2.2; the routes exist in `web/src/app/routes.tsx` lines 24-27); `ERROR_SENTENCES` keyed by the fourteen codes of classification-api section 2.5 as functions of a context (`symbols`, `name`) with one `FALLBACK_ERROR` sentence for any other code; `OPERATION_LABELS` and `RESOURCE_LABELS` as `Record`s over S1's two unions (Open Gap 5); and `failureSentence({ operation, resource, code, symbols })`, which composes the STD-UI-19 statement of operation, resource and reason from those maps and **never reads `message`**. Every export has a doc comment naming the design section its wording comes from. Makes T007 (a) to (c) pass
+- [ ] T012 Complete `web/src/screens/research/copy.ts`, the state and screen messages (depends on T011): harvest every owner-facing string of the designs into named, grouped exports, verbatim and without paraphrase, citing in a doc comment the section each came from; add none the designs do not contain (anything missing goes to Open Gap 6, not into the file). Groups and sources: filters pane and threshold sentence (UX 1.1: *Find stocks*, *Find a stock*, *Look in*, *All followed stocks · {n}*, measure and direction labels, *Measure for {factor}*, *Direction for {factor}*, *Value threshold*, the percentile helper, *Hide stocks with an incomplete score* and its helper, *Clear filters*); cell and column states (*Incomplete* with the reason sentences of section 1.1, *{n} qualified, 30 needed* taking `minPeerSetSize`, *Not enough to rank*, *Not followed* and *Not followed since {date}. Earlier scores stand.*, *Possibly restated* and its explanation, *Outdated*, *Missing*, *Couldn't be computed*, the STD-UI-18 sentence); results, as-of line and banners (*Scores from ... · from the download started ... · sorted by ...*, *checked {time}*, *Updating*, *Not reflecting the latest download* with its body, *Score update failed {time}: {reason}...*, *Scores updated to ...* announcement, *Could not check for newer scores.*, *Open the download started {time}*, *Earlier sets…*, *Complete* / *Partial*); never-populated and nothing-found (*No stocks have been scored yet.*, the first-set *Updating* and *Score update failed* sentences, the three latest-download sentences, *Open Data health*, *No stocks match these filters.*); selection, inspector and compare (*{n} selected*, *Check 2 to 6 stocks to compare them.*, *Select a stock to see why it scores as it does.*, *In no universe*, the compare bound and field-error sentences); dialogs, toasts and refusals (classification-ui section 2.7 and UX 1.1, 1.3, 1.4: save, add, create, remove, retire, rename, add-stocks, as-of membership); universes list and detail; stock evidence and history (UX 1.6: the three-part statements, *No earlier scores for {symbol}.*). Interactive labels that read *Retire…* and *Retired* are the universe-lifecycle strings of Open Gap 1 and are collected under one clearly named `UNIVERSE_LIFECYCLE` group so the T004 allow-list names them. The three-part threshold description (*value percentile at least 80 · momentum standardised score at least 0.00 · search "AA" · stocks with an incomplete score hidden*) is built by one function over a `ResearchQuery`, importing the type only. Makes T004 and T007 (d) to (f) pass
+
+**Checkpoint**: Every test in the three files passes; `npx tsc --noEmit` is clean; `git diff --name-status` shows only new files.
+
+---
+
+## Phase 4: Integration
+
+**Purpose**: Show the three modules sit beside the delivered code without changing it.
+
+- [ ] T013 Confirm the delivered surface is unchanged (depends on T008 to T012): run the whole existing web suite (`client.*.test.ts`, `render.test.tsx`, the shell and routes tests, the screen tests) without editing any of them; `git diff --stat` shows only `format.ts`, `format.test.ts`, `research-query.ts`, `research-query.test.ts`, `copy.ts`, `copy.test.ts`, this story's `-tasks.md`, `-tdd-evidence.yaml`, the story's `status:` line and (only if a graph change is made, which none is) `dependencies.yaml`. Nothing imports the three modules yet (the first importers are CAP-002-E4-S3, the threshold sentence and Filters pane; CAP-002-E4-S4, the results table; CAP-002-E4-S5, the as-of line, banner and poll; CAP-002-E4-S8, the dialogs; and CAP-002-E1-S7, the create dialog). Confirm `web/src/api/render.test.tsx` still finds no `dangerouslySetInnerHTML` (copy strings are plain text, STD-UI-5 of the owner web app)
+
+**Checkpoint**: Only new files and the status line differ from `HEAD`; every delivered test is green.
+
+---
+
+## Phase 5: Polish
+
+**Purpose**: Final refinements and cross-cutting concerns.
+
+- [ ] T014 Run `npm run format` (a check; `biome format .` does not write), fix any report by running `npx biome format --write` on the six touched files only, then `npm run lint`, `npx tsc --noEmit`, `npm run test` and `npm run build`. Add short doc comments on each export in `format.ts` and `research-query.ts` naming the DAC it serves, in the style of `web/src/screens/coverage/copy.ts`. No behaviour change
+- [ ] T015 After each TDD cycle in T001-T014 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-002-E4-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC). The three cycles are listed in Other Notes
+
+**Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
+
+---
+
+## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-002-E4-S1 | hard | `research-query.ts` imports `Thresholds`, `ClassificationListParams`, `FactorName` from `classification-types.ts`, and `copy.ts` imports `ClassificationOperation` and `ClassificationResource` from it; existing graph edge `CAP-002-E4-S2: [CAP-002-E4-S1]` |
+| CAP-002-E4-S3 | reverse | The threshold sentence and Filters pane import `ResearchQuery`, `Measure`, `Direction` and the copy; graph edge S3 depends on S2 |
+| CAP-002-E4-S4 | reverse | The results table imports `format.ts` and the cell strings; graph edge S4 depends on S2 |
+| CAP-002-E4-S5 | reverse | The as-of line, banner and poll import `formatTimestamp`, the banner strings and `SHELL_ROUTES`; graph edge S5 depends on S2 |
+| CAP-002-E4-S8 | reverse | The save and add dialogs import `toThresholds`, the save payload and the dialog strings; graph edge S8 depends on S2 |
+| CAP-002-E1-S7 | reverse | The create dialog reads `ERROR_SENTENCES.instrument_not_acquired` and `SHELL_ROUTES.followedStocks`; graph edge CAP-002-E1-S7 depends on CAP-002-E4-S2 |
+| CAP-002-E4-S10 | context | Owns the shell composition and the four shell-test count edits (DEC-0084); this story edits none of them and only reads `routes.tsx` in T007 (f) |
+
+No new hard edge was found; `dependencies.yaml` already lists `CAP-002-E4-S2: [CAP-002-E4-S1]` and needs no change. The sibling E4 stories S6, S7 and S9 import these modules too (S6 and S7 depend on S2 in the graph).
+
+### Task Dependencies
+
+- T001, T002, T003, T004, T005, T006, T007: no dependencies (three files, written as one cycle each)
+- T008: depends on T001 and T005 existing (RED first); no code dependency
+- T009: depends on T002 and T006 existing (RED first) and on S1's `classification-types.ts`
+- T010: depends on T009; T003 exists first
+- T011: depends on T004 and T007 existing, on S1's `classification-types.ts`
+- T012: depends on T011
+- T013: depends on T008-T012
+- T014: depends on T013
+- T015: interleaved, runs after every TDD cycle and before the next begins
+
+### Parallel Opportunities
+
+- Phase 2: T001 to T007 write three files, so tasks on different files are parallel; assign `research-query.test.ts` (T002, T003, T006) to one agent
+- Phase 3: T008, T009 and T011 are independent and can run together; T010 follows T009 and T012 follows T011 (same files)
+
+---
+
+## Validation Plan
+
+### Constitution-Defined Commands
+- Build: `npm run build`
+- Test: `npm run test` (single file while iterating: `npx vitest run web/src/screens/research/format.test.ts`)
+- Lint: `npm run lint`
+- Format: `npm run format` (check only)
+- Type check: `npx tsc --noEmit` (named in the story's Technical Details; not in the tech-stack table)
+
+Working directory is the repository root `repos/factorflow-v2/FactorFlow-v2`. The tech-stack file's Validation Commands table lists `npm run build`, `npm run test`, `npm run test:e2e`; lint and format come from `package.json` (`biome lint .`, `biome format .`) and the story. `npm run test:e2e` is not run (no screen exists).
+
+### Story-Specific Validation
+- DAC-E4-S2-1: the T002 table round-trips every row and the T006 invalid-key cases are dropped; `toListParams` of a dropped sentence carries no bound
+- DAC-E4-S2-2: the T003 key-set assertion (fourteen allowed keys, none of scope, sort, order) and the equality with the list read's thresholds pass
+- DAC-E4-S2-3: the T001 assertions give the exact strings of the story (`+1.27`, `-0.45`, `0.00`, `84`, `+12.40%`) and the T005 rounding, zone and invalid-input cases pass under two machine time zones
+- DAC-E4-S2-4: the T004 scan passes over the whole catalogue and its self-checks fail the scanner on the known-bad strings; T007 (e) finds no implementation vocabulary
+- DAC-E4-1: the T007 anchor table finds *Incomplete*, *Not enough to rank* and *{n} qualified, 30 needed* with the design's text
+- Delivered surface: `git diff --stat` shows no modified delivered file
+
+---
+
+## Notes
+
+### Resolved Conflicts
+
+1. **The story's "section 2.8" catalogue does not exist.** The story description and the run's resolution register say `copy.ts` carries "the full message catalogue of `classification-ui` section 2.8". Section 2.8 of the component design reads "N/A, not applicable for this component" (it is the push-message section). The owner-facing wording is spread over classification-ui sections 2.2 (link targets), 2.4, 2.6, 2.7 and 10, and over UX design sections 0 and 1.1 to 1.6 and 4. Governing rule: the story's acceptance criteria (DAC-E4-1, DAC-E4-S2-4: "`copy.ts` ... keyed by error code and state") and the design prose that states `copy.ts` holds "every owner-facing string" (section 2.1 placement line, section 2.4) outrank the stale section number in the description. T012 harvests from those sections. No source edit is required; the description's section reference should be corrected at the story's next revision.
+2. **Minus sign: `-0.45` (story AC, TC-COMP-071) against `−0.45` U+2212 (classification-ui sections 2.4 and 7, UX design section 0 prose).** Governing rule: story acceptance criteria outrank design normative prose and a test specification outranks nothing above it (constraint 9 ladder); the AC and the mapped TC both print the ASCII hyphen-minus. T001 and T008 use U+002D. Machine-readable, copyable and sortable text is the tie-breaker the design never contradicted. Flag for the UI design's next revision.
+3. **`formatTimestamp` exists twice.** The delivered shell (`web/src/app/status-region.tsx`) prints `YYYY-MM-DD HH:mm:ss America/Chicago`; classification-ui section 2.4 and every UX example print the abbreviation (`2026-10-15 17:46 CDT`, *CDT or CST as the instant falls*). Not an authority conflict: the shell's function is CAP-001's and is untouched (AGT-SCOPE-002); `format.ts` is CAP-002's own and follows its design. The two do not import each other.
+4. **Rates are fractions, not percentages, on the wire.** The factor engine defines growth and total return as `x / y - 1` (factor-engine input table), so a stored `0.1240` renders `+12.40%` (DEC-0063 "signed percentages at two decimals"). Established by the engine design; no gap.
+
+### Open Gaps
+
+1. **`retire` in `copy.ts`. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0145.** DAC-E4-S2-4 and TC-COMP-072 forbid "retire" in any owner-facing string, yet the approved UX design (1.4) and classification-ui 2.7 print *Retire…*, *Retire universe*, *Retired* and *This universe is retired and can't be changed*, and capability AC-4 lets the owner retire a universe. Adopted: the AC's authority, STD-UI-1, forbids "retire (an instrument)" (display label *stop following*) and leaves *universe* as its own label, so the scan rejects "retire" everywhere except an explicit named allow-list of universe-lifecycle strings, each asserted to mention no stock or following. A literal ban would drop approved wording or split the catalogue. Follow-up: DAC-E4-S2-4 and TC-COMP-072 should say "retire a stock" at their next revision.
+2. **What counts as a "bare score". PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0146.** STD-UI-1 permits *score* for a whole classification and forbids shortening *standardised score* or *percentile* to it; no artifact says how a test tells them apart. Adopted: the scan rejects *score(s)* after a factor name or *percentile*, or before a threshold or number unless the preceding word is *standardised*, and the *standardized* spelling; all other uses (*Scores from*, *Score update failed*, *an incomplete score*) are the whole-classification label.
+3. **`format.ts` conventions DEC-0063 leaves open. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0147.** Half-away-from-zero rounding on the decimal string, rounded zero unsigned, comma separators with no currency symbol, `RangeError` on a non-decimal string (never `0.00`), timestamps to the minute with an optional seconds form, rates as engine fractions times 100. Derivation in the record.
+4. **URL codec conventions. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0148.** Identifiers `percentile`/`standardisedScore` and `atLeast`/`atMost`, a sentence kept only when all three parts are valid, invalid values dropped rather than repaired, defaults not written, `scope` absent for all followed stocks, `order` without `sort` dropped, unsorted as the absence of `sort`. On universe detail the route is the scope, so the screen there ignores a decoded `scope` (classification-ui section 2.4). `scope` is not shape-checked: the API answers an unknown id with `404 universe_not_found`.
+5. **Operation and resource labels. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0149.** No artifact lists the display label of each `ClassificationOperation` (S1 Open Gap 1 defines the identifiers) or resource; adopted the *Could not {verb phrase}* pattern of the design's own quoted sentences, in STD-UI-1 vocabulary. Follow-up: UX design section 4 should list them at its next revision.
+6. **Messages the designs may lack.** The catalogue is only as complete as the designs. Where a screen story later needs a message no design contains (for example the per-operation sentence for a failed history read), it records the gap in its own plan and adds the string to `copy.ts` with a doc comment saying so. The universe name maximum length (`[REQUIRES INPUT]`, classification-ui section 14 question 1) is not stated in any string here; no bound is invented, and the create, save and rename forms (E4-S8, E1-S7) must mark theirs provisional.
+
+### Other Notes
+
+- **Cycle plan for T015.** Three TDD cycles, each RED then GREEN, each reviewed before the next: (1) T001, T005 then T008 (`format.ts`); (2) T002, T003, T006 then T009, T010 (`research-query.ts`); (3) T004, T007 then T011, T012 (`copy.ts`). Cycle 3 is the largest diff; split it at T011 and T012 if the review needs a smaller change set.
+- **Dependency on S1 at coding time.** S1's task plan exists but its modules may not yet be on the branch. `research-query.ts` and `copy.ts` import types only, so vitest runs, but `npx tsc --noEmit` needs `classification-types.ts`. Code S2 after S1.
+- **Story status.** The story's `status` moves from `todo` to `planning` in this change, as the S1 plan did (commit `c450470`); no other story line is touched.
+- **`ResearchQuery` is defined once here.** classification-ui section 2.4 names the type and describes the codec but never writes the interface; the shape in T009 is the minimum that holds the URL keys the design lists. No other module defines a second filter model.
+- **Shell edits belong to CAP-002-E4-S10.** `SHELL_ROUTES` only names delivered CAP-001 routes; the `DESTINATIONS` entry, the five `/research` routes and the four shell-test count edits (DEC-0084) are CAP-002-E4-S10's, and this story reads `routes.tsx` without writing it.
+- **No screen, hook or request is built.** `use-score-set-poll.ts`, the patterns and the dialogs are later stories; this story ships strings and functions they call.
+- **Risk.** The largest risk is `copy.ts` omitting a message a later story needs. T007 (d) pins the design's anchor strings so the omission shows up as a failing test in the story that needs it, and Open Gap 6 says where the fix goes.
