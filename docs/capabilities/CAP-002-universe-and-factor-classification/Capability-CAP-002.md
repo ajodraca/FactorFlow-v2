@@ -11,10 +11,10 @@ description: >-
   sees each member classified by value, growth and momentum, and can inspect
   the dated inputs behind every result and where the evidence is insufficient.
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-17
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: capability-definition-agent
   agent_version: "1.0"
@@ -33,6 +33,12 @@ ai_provenance:
       version: "8, approved 2026-09-06"
   invoking_user: ajodraca
   correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-17T03:35:36Z
+  reviewed_revision: sha256:8a2706f314bf084b017d65d9a96a9ab3f9973106aa3e6fef3c34d7913741f629
+  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v3.md"
 ---
 
 # Universe & Factor Classification

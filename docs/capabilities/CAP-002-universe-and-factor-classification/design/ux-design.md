@@ -7,7 +7,7 @@ capability_id: CAP-002
 title: Universe & Factor Classification
 created: 2026-10-16
 updated: 2026-10-17
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 design_source: Generated from UX brief, starting from PRODUCT-UX-S03
@@ -49,6 +49,12 @@ ai_provenance:
       version: "as of 2026-10-15"
   invoking_user: ajodraca
   correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-17T03:35:37Z
+  reviewed_revision: sha256:cc3e23048fbd651f277d2d6eb01e9d6e5899a7857dcd85f5edc79146c116f03c
+  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v3.md"
 ---
 
 # UX Design: Universe & Factor Classification

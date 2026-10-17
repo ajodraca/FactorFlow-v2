@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-002-component-design-factor-engine
 artifact_type: component-design
 artifact_version: 2
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
@@ -32,6 +32,12 @@ ai_provenance:
       version: "15"
   invoking_user: ajodraca
   correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-17T03:35:38Z
+  reviewed_revision: sha256:76ade73b6e5df249f71523fce0056cad17d7a1000b7384e9066897d31a9d40c7
+  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v3.md"
 ---
 
 # Component: Factor Engine
