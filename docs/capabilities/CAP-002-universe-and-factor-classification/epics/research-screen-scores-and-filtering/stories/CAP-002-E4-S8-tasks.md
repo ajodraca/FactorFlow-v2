@@ -1,0 +1,202 @@
+---
+artifact_schema_version: 1
+artifact_id: CAP-002-E4-S8-tasks
+artifact_type: story-tasks
+artifact_version: 1
+status: draft
+owner: Alvaro de Jodra
+owner_github: ajodraca
+created: 2026-10-17
+updated: 2026-10-17
+ai_provenance:
+  agent_id: implementation-planning-agent
+  agent_version: "1.0"
+  model: claude-sonnet-5-5
+  tool: Claude Code
+  tool_version: "unknown"
+  timestamp: 2026-10-18T00:30:00Z
+  source_artifacts:
+    - id: CAP-002-E4-S8
+      version: "1"
+    - id: CAP-002-component-design-classification-ui
+      version: "3"
+    - id: CAP-002-component-design-classification-api
+      version: "3"
+  invoking_user: ajodraca
+  correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
+---
+
+# Tasks: CAP-002-E4-S8 — Save-as-Universe and Add-to-Universe Dialogs
+
+**Story**: `repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8.md`
+**Component**: `FactorFlow-v2` (web interface, `web/src/`)
+**Branch**: `usr/alvaro-de-jodra/CAP-002-E4-tasks`
+**Date**: 2026-10-17
+
+## Summary
+
+Delivers the two write dialogs the Research screen hosts, in `web/src/screens/research/`: `save-as-universe-dialog.tsx` (the **Save these {n} as a universe…** control and its `dialog` `standard`) and `add-to-universe-dialog.tsx` (the tray's **Add to universe…** dialog). Save is rendered only under *All followed stocks* (`query.scope === null`); at zero matches it is a focusable `blocked` button beside *No stocks match these filters, so there is nothing to save.*; otherwise it opens a dialog titled *Save these {n} stocks as a universe* whose description states the count, the incomplete clause when the host knows it, the thresholds, the search and the hide-incomplete state in words, with one **Name** field and **Save**. Confirming posts the same `toThresholds(query)` object the list read used (twelve bounds, `hide_incomplete`, the `symbol` prefix or `null`) and the on-screen `setId`. On `201` the dialog closes and a success notice *Saved {n} stocks as {name}* links to `/research/universes/:universeId`; `409 universe_name_in_use` attaches to the Name field; `409 classification_set_changed` keeps the dialog open with its sentence and replaces **Save** by **Review new result**. Add lists the active universes plus *New universe* (revealing a Name field), posts members or creates, and reports *Added {n} stocks to {name}* with *, and {m} were already members* when m > 0; `universe_retired` shows its wording. Because `web/src` has no toast, this story also ships the small shared `notices.tsx` (`useNotices`, `NoticeRegion`) the dialogs report through (DEC-0168); CAP-002-E4-S9 mounts it once. Two prerequisites (CAP-002-E4-S1 and CAP-002-E4-S2) must be on the branch and are read before coding.
+
+## Acceptance Criteria Traceability
+
+| AC | Description | Tasks |
+|----|-------------|-------|
+| AC-2 | Save a threshold filter as a named universe whose membership then never changes by itself: the dialog posts the displayed result's filter and set, confirms, and handles a changed set | T002, T003, T004, T006, T007, T010, T012, T013 |
+| AC-5 | No empty universe: Save is `blocked` at zero matches; `universe_retired` and refusals read as owner-facing sentences | T001, T005, T006, T008, T013, T014 |
+| DAC-E4-5 | Save blocked at zero matches; when confirmed it posts the same thresholds, `hide_incomplete`, search prefix and set id the header counted | T001, T002, T006, T013 |
+| DAC-E4-S8-1 | Zero matches: Save is `blocked` with its reason | T001, T013 |
+| DAC-E4-S8-2 | Active search: the request carries the prefix as `symbol` (`null` otherwise) and the description names the search | T002, T013 |
+| DAC-E4-S8-3 | `201`: dialog closes and a toast links to the universe | T003, T009, T010, T013 |
+| DAC-E4-S8-4 | `classification_set_changed`: Save is replaced by **Review new result** | T004, T013 |
+| DAC-E4-S8-5 | Add succeeds: *Added {n} stocks to {name}* with the already-member clause; `universe_retired` shows its wording | T005, T008, T009, T010, T014 |
+
+Mapped test cases (all from `tests/component/classification-ui-tests.md`, confirmed in `tests/coverage-matrix.md` lines 92 and 235-239): TC-COMP-008 (DAC-E4-S8-1, DAC-E4-5), TC-COMP-009 (DAC-E4-S8-2, DAC-E4-5), TC-COMP-010 (DAC-E4-S8-3), TC-COMP-011 (DAC-E4-S8-4), TC-COMP-033 (DAC-E4-S8-5). No other component TC traces to a DAC-E4-S8-* criterion; DAC-E4-5 maps to TC-COMP-008 and TC-COMP-009 only. Each spec body is a one-line generic ("Save is shown.", "Saved.", "Received.", "It succeeds.") with no steps; the plan sharpens each into concrete assertions from the AC and classification-ui sections 2.7 and 7 and UX design 1.1 (Phase 2). The e2e check that the created universe's member count equals the header's `match_count` (`tests/e2e/universe-from-result.spec.ts`) belongs to CAP-002-E4-S10 and is not planned here.
+
+## Phase 1: Setup
+
+Skipped. No dependency, configuration or existing-file change. vitest (`root: web`, `jsdom`, `globals`, jest-dom through `web/src/test-setup.ts`), `@testing-library/react`, `@testing-library/user-event`, `react-router-dom` v6 (`Link`, `MemoryRouter`), biome, `tsc` and Tailwind (`content` globs `web/src/**/*.{ts,tsx}`) already cover the new files. Neither S1 nor S2 is on the branch when this plan is written; read the shipped files before T011 and use their exact export names. This plan names only the symbols the designs and sibling plans fix: S1 `createUniverse` (two call shapes: by hand with `symbols`, from a result with thresholds and `setId`), `addUniverseMembers`, `listUniverses`, `ClassificationApiError` (`code`, `symbols`, `operation`, `resource`), `UniverseDetail`/`UniverseSummary` (`universeId`, `name`, `memberCount`), `AddMembersResult` (`added`, `alreadyMember`); S2 `ResearchQuery`, `toThresholds`, `failureSentence`, `ERROR_SENTENCES`, the threshold-description function over a `ResearchQuery`, and `copy.ts`.
+
+---
+
+## Phase 2: Tests (TDD)
+
+**Purpose**: Write failing tests that define each unit from the acceptance criteria. Three test files beside their units: `web/src/screens/research/save-as-universe-dialog.test.tsx` and `add-to-universe-dialog.test.tsx` (the paths the story names; neither exists) and `notices.test.tsx`. Follow `web/src/screens/instruments/retire-dialog.test.tsx` for dialog focus assertions and `web/src/screens/instruments/start-action.test.tsx` for a `blocked` control (`data-variant="blocked"`, `aria-disabled="true"`, not `disabled`). Each mandatory test carries a traceability comment (`// Implements TC-COMP-008`). Dialog tests render inside `MemoryRouter` with a small local `Host` that calls `useNotices()` and renders `NoticeRegion`, so a notice is asserted as the owner sees it. Unless a task says otherwise, the client is doubled with `vi.mock("../../api/classification-client", ...)` (keep the real `ClassificationApiError` through `vi.importActual`); fixtures are plain objects written from classification-api section 2.7 (`UniverseResponse`: `universe_id`, `name`, `member_count`; `AddMembersResponse`: `added[]`, `already_member[]`). No real network.
+
+### Mandatory Component Tests
+
+- [ ] T001 [P] Implement TC-COMP-008 (Save blocked at zero matches) in `web/src/screens/research/save-as-universe-dialog.test.tsx`, rendering `<SaveAsUniverse query={DEFAULT_RESEARCH_QUERY} matchCount={0} setId="s1" incompleteCount={null} onNotify={vi.fn()} />`: the control is a `button` named **Save these 0 as a universe…** with `data-variant="blocked"` and `aria-disabled="true"`, is not `disabled` and has `tabIndex` not `-1` (it takes focus when tabbed to), its `aria-describedby` points at an element whose text is exactly *No stocks match these filters, so there is nothing to save.* and that element is visible beside the button; activating it by click and by `Enter`/`Space` opens no dialog (`queryByRole("dialog")` is null) and issues no request (`createUniverse` not called). At `matchCount={12}` the control is named **Save these 12 as a universe…**, has no `aria-disabled`, shows no reason text and opens the dialog on click. With `query.scope = "u1"` (a universe scope) nothing is rendered at all (`container` is empty), at any `matchCount` (the save carries the filter, not the scope; UX 1.1). `matchCount` is the number printed, never a row count
+- [ ] T002 [P] Implement TC-COMP-009 (Save under a search carries the prefix) in `web/src/screens/research/save-as-universe-dialog.test.tsx`, stubbing `globalThis.fetch` (`vi.stubGlobal`) so the real `createUniverse` of E4-S1 and the real `toThresholds` of E4-S2 run end to end and the JSON body is captured: for a query with a value percentile at-least 80 sentence, a momentum standardised-score at-least 0.00 sentence, `hideIncomplete: true`, `symbol: "AA"` and `setId: "s-42"`, confirming **Save** with the name *Tech leaders* posts `POST /api/universes` with `{ name: "Tech leaders", filter: { value_percentile_min: "80", momentum_score_min: "0.00", hide_incomplete: true, symbol: "AA" }, set_id: "s-42" }` (key names and the omission of absent bounds exactly as S1's T006 pins them, read from the shipped client), no `symbols` key and no scope. With no search active the body carries `symbol: null` (present, not omitted, DEC-0085) and, with `hideIncomplete` false, the S1-pinned `hide_incomplete` encoding. The dialog description reads (in this order, each clause only when it applies) *{n} stocks, including {m} with an incomplete score* when `incompleteCount` is given and above 0, then *value percentile at least 80 · momentum standardised score at least 0.00 · search "AA" · stocks with an incomplete score hidden*, built by S2's description function so the text equals what that function returns for the same query; with no search the description contains no *search* clause; with `incompleteCount={null}` the sentence omits the *including* clause (STD-UI-15, never a guess). The title reads *Save these 12 stocks as a universe* for `matchCount` 12
+- [ ] T003 [P] Implement TC-COMP-010 (201 closes dialog and toasts a link) in `web/src/screens/research/save-as-universe-dialog.test.tsx`, with `createUniverse` resolving `{ universeId: "u-9", name: "Tech leaders", memberCount: 12, ... }`: after typing the name and activating **Save**, the dialog is gone (`queryByRole("dialog")` null), `NoticeRegion` shows *Saved 12 stocks as Tech leaders* with a link (`role="link"`) whose `href` is `/research/universes/u-9`, and focus returns to the **Save these 12 as a universe…** control. The number in the notice is the response's `memberCount` (set the header count to 12 and the response to 11 and assert *Saved 11 stocks*, so the notice reports what the server saved); a universe id containing `/` is `encodeURIComponent`-encoded in the `href`. On any failure (T004, T006) no notice is rendered
+- [ ] T004 [P] Implement TC-COMP-011 (classification_set_changed replaces Save with Review new result) in `web/src/screens/research/save-as-universe-dialog.test.tsx`, with `createUniverse` rejecting `new ClassificationApiError` for code `classification_set_changed`: the dialog stays open and shows exactly *Could not save these stocks as a universe: the scores changed while you were reviewing them. Review the new result, then save again.* in a `role="alert"` element; the **Save** button is absent from the DOM and a **Review new result** button takes its place in the same position; no notice is rendered; activating **Review new result** closes the dialog without any request (`createUniverse` called once in total) and returns focus to the control. After the host rerenders with a new `setId` and `matchCount`, opening Save again shows the new count and a confirm that posts the new `set_id` (the dialog reads its props at open time, never a stale copy). The sentence comes from `copy.ts` (assert equality with the export, not a literal copy)
+- [ ] T005 [P] Implement TC-COMP-033 (Add toast with already-member clause; universe_retired wording) in `web/src/screens/research/add-to-universe-dialog.test.tsx`: with `listUniverses` resolving two active universes (*Tech*, id `u1`; *Dividend growers*, id `u2`) and `addUniverseMembers` resolving `{ added: ["AAPL","MSFT","NVDA"], alreadyMember: [] }` for symbols `["AAPL","MSFT","NVDA"]` into *Tech*, activating **Add** closes the dialog and `NoticeRegion` shows *Added 3 stocks to Tech* with a link to `/research/universes/u1` and no already-member clause; with `{ added: ["AAPL","MSFT"], alreadyMember: ["NVDA"] }` it reads *Added 2 stocks to Tech, and 1 were already members* (the clause appended exactly as the design words it, *, and {m} were already members*, m counted from `alreadyMember.length`, n from `added.length`), and `already_member` is never rendered as an error (no `role="alert"`); with `addUniverseMembers` rejecting `ClassificationApiError` code `universe_retired` the dialog stays open and shows exactly *This universe is retired and can't be changed. Its members and history are still viewable.* in a `role="alert"` element, no notice is rendered and **Add** stays available
+
+### Additional Unit Tests
+
+- [ ] T006 Save dialog refusals, validation and request hygiene in `web/src/screens/research/save-as-universe-dialog.test.tsx` (AC-2, AC-5, DAC-E4-5; Open Gap 1): a `409 universe_name_in_use` keeps the dialog open, sets `aria-invalid="true"` on the Name field, and attaches the `copy.ts` sentence for that code to it through `aria-describedby` (not a banner), moves focus back to the field, and sends no second request; editing the name clears the error. A name empty after trimming (`"   "`) is a field error attached the same way, sends no request, and the dialog stays open. The sent name is trimmed (`"  Tech  "` posts `"Tech"`). No maximum length is enforced or stated: a 300-character name is sent unchanged and no `maxLength` attribute exists on the input (Open Gap 1). A `422 empty_universe` and any other `ClassificationApiError` (for example `validation_error` for an over-long name) show the `failureSentence` for the `create-universe` operation in a `role="alert"` element, never the raw `message`, code or stack, and keep the dialog open with the typed name intact; a plain network failure (`ApiUnreachableError`) shows the `FALLBACK_ERROR` sentence. While a request is pending, **Save** is not activatable a second time (`createUniverse` called once after a double click and after `Enter` twice) and the dialog has `aria-busy="true"`. After a failure the owner can fix the cause and save again (second request succeeds, one notice)
+- [ ] T007 Dialog frame behaviour for Save in `web/src/screens/research/save-as-universe-dialog.test.tsx` (AC-2): the open dialog is a native `dialog` element (implicit `dialog` role) with `aria-modal="true"`, `aria-labelledby` the title `h2`, `data-variant="standard"`; initial focus is the Name field; **Cancel** precedes **Save** in DOM order; `Escape` closes without a request and returns focus to the trigger; `Tab` from **Save** wraps to the first focusable control and `Shift+Tab` from the first wraps to the last (the manual trap `retire-dialog.tsx` uses, because jsdom has no `showModal`); the Name field has the accessible name *Name*. Cancel closes without a request. Reopening after Cancel shows an empty Name field and no stale error
+- [ ] T008 Add dialog states and routes in `web/src/screens/research/add-to-universe-dialog.test.tsx` (AC-5, DAC-E4-S8-5; Open Gap 3): the title reads *Add 3 stocks to a universe* for three symbols; `listUniverses` is called once on open with the active lifecycle and the largest page (500) and never again on a rerender; while it is pending the dialog shows a `role="status"` skeleton and **Add** is not activatable; the `select` (accessible name *Universe*, `data-variant="default"`) lists the universes in the API's order then *New universe* last; the initial choice is the first universe, and is *New universe* (with the Name field already shown) when the list is empty; choosing *New universe* reveals the **Name** field (accessible name *Name*) and focus stays on the select; choosing a universe hides it. Confirming with a universe chosen calls `addUniverseMembers(id, symbols)` once with the checked symbols and never `createUniverse`; confirming with *New universe* and the name *Quality* calls `createUniverse` by hand (`name` trimmed, `symbols`, no `filter`, no `setId`) once and never `addUniverseMembers`, and the notice reads *Added 3 stocks to Quality* with no already-member clause and a link to the new universe. An empty New-universe name is a field error (`aria-invalid`, described by the `copy.ts` sentence, no request); `universe_name_in_use` attaches to the same field; any other refusal shows the `failureSentence` in a `role="alert"` element; a rejected `listUniverses` replaces the select with that sentence and leaves **Cancel** working, **Add** unavailable. Initial focus is the select (or the Name field when the list is empty); `Escape` and **Cancel** call `onClose` without a request; a pending request cannot be submitted twice; a successful add calls `onNotify` once then `onClose` once
+- [ ] T009 [P] Notices in `web/src/screens/research/notices.test.tsx` (DAC-E4-S8-3, DAC-E4-S8-5; Open Gap 2): a component using `useNotices()` and `NoticeRegion` renders a `role="status"` region with `aria-live="polite"` that is present and empty before any notice (so the first announcement is read); `notify({ message, to })` adds one item showing the message and, when `to` is given, a router link with that `href`; items stack in arrival order; each has a **Dismiss** button that removes only that item and returns focus to a stable target (the region); nothing is removed by time (advance fake timers 5 minutes, the item remains); `notify` returns nothing the caller must clean up and a notice raised from an unmounted dialog's callback still shows (state lives in the host). The variant is `success` on the item (`data-variant="success"`); no `dangerouslySetInnerHTML`
+
+**Checkpoint**: All tests written and failing (`./save-as-universe-dialog`, `./add-to-universe-dialog` and `./notices` do not exist). No production code yet.
+
+---
+
+## Phase 3: Core Implementation
+
+**Purpose**: Make the tests pass with four new files and no edit to any delivered file; `copy.ts` is touched only if S2 shipped without a string the dialogs need (T011).
+
+- [ ] T010 Create `web/src/screens/research/notices.tsx` (DAC-E4-S8-3, DAC-E4-S8-5; DEC-0168; depends on T009 existing): export `Notice { message: string; to?: string }`, `useNotices(): { notices: Array<Notice & { id: number }>; notify(n: Notice): void; dismiss(id: number): void }` (state in the host, ids from a counter ref) and `NoticeRegion({ notices, onDismiss })`: a `div` with `role="status"` and `aria-live="polite"` always rendered, each item a `div` with `data-variant="success"` holding the message (a react-router `Link` when `to` is set) and a **Dismiss** `button`. No timer, no portal, no dependency. Doc comment states the contract E4-S9 and later screens rely on (the host calls `useNotices` once and renders `NoticeRegion` once; dialogs only call `notify`) and that no auto-dismiss duration is fixed by any artifact (Open Gap 2). Makes T009 pass
+- [ ] T011 Reconcile the dialogs' strings and calls with S1's and S2's shipped files (depends on CAP-002-E4-S1 and CAP-002-E4-S2 being on the branch): read `web/src/api/classification-client.ts`, `classification-types.ts`, `web/src/api/research-query.ts` and `web/src/screens/research/copy.ts` and use their exports for: *Save these {n} as a universe…*, *No stocks match these filters, so there is nothing to save.*, *Save these {n} stocks as a universe*, *{n} stocks, including {m} with an incomplete score*, the three-part threshold description function, **Save**, **Cancel**, **Review new result**, the `classification_set_changed` sentence, *Saved {n} stocks as {name}*, *Add {n} stocks to a universe*, *New universe*, **Add**, *Added {n} stocks to {name}*, *, and {m} were already members*, the `universe_retired` and `universe_name_in_use` sentences (from `ERROR_SENTENCES`), the `failureSentence` builder, `FALLBACK_ERROR`, and the labels *Name* and *Universe*. S2's T012 harvests the designs' strings verbatim, so most exist; where one is absent or takes other arguments, add it to `copy.ts` with a doc comment naming the design section it comes from (classification-ui 2.7, UX design 1.1) and DEC-0167 to DEC-0169, exactly as S2's Open Gap 6 directs, and extend `copy.test.ts` with an anchor for it; the empty-name sentence *Enter a name for the universe.* is expected to be such an addition (Open Gap 3). Do not write a second copy of any string in a component. Record the S1 and S2 export names actually used in the dialogs' doc comments, and the S1 call shape of `createUniverse` for the from-a-result case
+- [ ] T012 Create `web/src/screens/research/dialog-frame.tsx` (DAC-E4-S8-3, DAC-E4-S8-5; depends on T007 existing): export `DialogFrame({ title, children, initialFocusRef, onCancel, busy })`, the `dialog open` frame `retire-dialog.tsx` establishes: native `dialog` element, `aria-modal="true"`, `aria-labelledby` the `h2`, `data-variant="standard"`, the manual Tab-cycle over the focusable descendants it finds when Tab is pressed (first and last computed at keydown), `Escape` calls `onCancel`, initial focus on `initialFocusRef.current`, restore of the previously focused element on unmount, `aria-busy` from `busy`. Same Tailwind classes as the delivered dialog (`fixed inset-0 m-auto flex flex-col gap-3 rounded border border-border bg-background p-5`), written as full literal strings. No state of its own beyond refs. Doc comment cites the delivered precedent and why `showModal()` is not used (jsdom). Makes the frame half of T007 pass
+- [ ] T013 Create `web/src/screens/research/save-as-universe-dialog.tsx` (DAC-E4-5, DAC-E4-S8-1 to DAC-E4-S8-4; DEC-0076, DEC-0085, DEC-0167, DEC-0168; depends on T001 to T004, T006, T007, T010 to T012): export `SaveAsUniverse({ query, matchCount, setId, incompleteCount, onNotify }: { query: ResearchQuery; matchCount: number; setId: string | null; incompleteCount: number | null; onNotify: (n: Notice) => void })`. Returns `null` when `query.scope !== null`. Otherwise renders the trigger: at `matchCount === 0` (or `setId === null`) a `button type="button"` with `data-variant="blocked"`, `aria-disabled="true"`, `aria-describedby` set to the id of a sibling `span` holding the reason, an `onClick` that does nothing, never `disabled` (the `web/src/screens/instruments/start-action.tsx` pattern); otherwise a `button` `outline` that opens the dialog. The dialog is a `DialogFrame` holding a `form` with the description (S2's description function over `query`, preceded by the *including {m}* clause when `incompleteCount > 0`), one **Name** `input type="text"` (no `maxLength`, Open Gap 1; trimmed before use; empty is a field error with no request), **Cancel** then **Save**. Submit calls S1's `createUniverse` from-a-result shape with `toThresholds(query)` (the one object the list read used, never re-derived here) and `setId`, holds a pending flag, on success calls `onNotify({ message: <Saved {n} stocks as {name}> using the response's memberCount and name, to: /research/universes/${encodeURIComponent(universeId)} })` and closes; on `ClassificationApiError` code `universe_name_in_use` sets the field error; on `classification_set_changed` sets a `conflict` state that renders the `role="alert"` sentence and swaps **Save** for **Review new result**, which only closes; on any other error renders `failureSentence` in a `role="alert"`; never reads `message`. Props are read when the dialog opens. Doc comment states the contract E4-S9 relies on (it passes the header's `matchCount`, the on-screen `setId`, and `incompleteCount` only when every matching row is loaded, else `null`). Makes T001 to T004, T006 and T007 pass
+- [ ] T014 Create `web/src/screens/research/add-to-universe-dialog.tsx` (DAC-E4-S8-5; DEC-0076, DEC-0168, DEC-0169; depends on T005, T008, T010 to T012): export `AddToUniverseDialog({ symbols, onClose, onNotify }: { symbols: string[]; onClose: () => void; onNotify: (n: Notice) => void })`, rendered by the host while open (the tray's `onAddToUniverse` of CAP-002-E4-S7 is the opener, DEC-0163). On mount one S1 `listUniverses` read for active universes at page limit 500 (loading skeleton, then the `select`; failure renders the `failureSentence` and leaves Cancel; a `cancelled` flag drops a response after unmount). The `select` (label *Universe*) holds the universes in order then *New universe*; initial value the first universe or *New universe* when none; *New universe* reveals the **Name** field (trimmed, empty is the field error, no `maxLength`, Open Gap 1). **Add** calls `addUniverseMembers(id, symbols)` for a universe or S1's by-hand `createUniverse({ name, symbols })` for *New universe*, with a pending flag; success calls `onNotify` once with *Added {added.length} stocks to {name}* (plus *, and {alreadyMember.length} were already members* when above 0; for a created universe `n = symbols.length` from the response's `memberCount`, no clause) linking to the universe, then `onClose`; `universe_retired` and `universe_name_in_use` render their `copy.ts` sentences (retired in a `role="alert"` element, name-in-use on the field); any other error renders `failureSentence`; `onClose` also on Cancel and `Escape`. Makes T005 and T008 pass
+
+**Checkpoint**: Every test in the three files passes; `npx tsc --noEmit` is clean; `git diff --name-status` shows only the new files (plus `copy.ts` and `copy.test.ts` if T011 added strings).
+
+---
+
+## Phase 4: Integration
+
+**Purpose**: Show the dialogs and notices sit beside the delivered code without changing it.
+
+- [ ] T015 Confirm the delivered surface is unchanged (depends on T010 to T014): run the whole existing web suite (`client.*.test.ts`, `render.test.tsx`, the shell and routes tests, the screen tests, and S1 to S7's tests) without editing any of them; `git diff --stat` shows only `web/src/screens/research/notices.tsx`, `notices.test.tsx`, `dialog-frame.tsx`, `save-as-universe-dialog.tsx`, `save-as-universe-dialog.test.tsx`, `add-to-universe-dialog.tsx`, `add-to-universe-dialog.test.tsx`, `copy.ts` and `copy.test.ts` (only if T011 added strings), this story's `-tasks.md`, `-tdd-evidence.yaml` and the story's `status:` line; `classification-client.ts`, `research-query.ts` and every pattern file are not edited; `dependencies.yaml` does not change. Nothing imports the new files yet (first importer: CAP-002-E4-S9, the Research screen, which wires `SaveAsUniverse`, `AddToUniverseDialog` behind the tray's `onAddToUniverse`, `useNotices` and `NoticeRegion`). Confirm `web/src/api/render.test.tsx` still finds no `dangerouslySetInnerHTML`, and that neither dialog imports from `screens/research/results-table`, the patterns directory or any E4-S4 file
+
+**Checkpoint**: Only the new files, any `copy` additions and the status line differ from `HEAD`; every delivered test is green.
+
+---
+
+## Phase 5: Polish
+
+**Purpose**: Final refinements and cross-cutting concerns.
+
+- [ ] T016 Run `npm run format` (a check; `biome format .` does not write), fix any report by running `npx biome format --write` on the touched files only, then `npm run lint`, `npx tsc --noEmit`, `npm run test` and `npm run build`. Confirm the built CSS contains the classes the new files use (`border-border`, `bg-background`, `text-status-critical`, `text-sm`, `text-lg`, `bg-foreground`, `text-background`) by building and searching `dist` for one of each; write every class as a full literal string, never assembled, because Tailwind drops a class it cannot see. Add short doc comments on each export naming the DAC it serves. No behaviour change
+- [ ] T017 After each TDD cycle in T001-T016 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-002-E4-S8-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence and `diff_sha256` — the SHA-256 of the staged diff the reviews judged — before the next cycle begins. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. Each cycle's `commit_hash` names the commit carrying it: the cycle's own commit, or — when a driver commits once per stage, so the stage commit carries this file and cannot hold its own hash — `commit_hash: stage` (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles are listed in Other Notes
+
+**Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
+
+---
+
+## Dependencies & Execution Order
+
+### Story Dependency Classification
+
+| Story | Classification | Evidence |
+|---|---|---|
+| CAP-002-E4-S1 | hard | Both dialogs import `createUniverse`, `addUniverseMembers`, `listUniverses` and `ClassificationApiError` from `web/src/api/classification-client.ts`, created by S1; existing graph edge |
+| CAP-002-E4-S2 | hard | Both dialogs import `ResearchQuery`, `toThresholds` and the description function from `web/src/api/research-query.ts` and copy from `web/src/screens/research/copy.ts`, created by S2; existing graph edge |
+| CAP-002-E4-S7 | soft | The tray's optional `onAddToUniverse` is the seam to `AddToUniverseDialog`; S8 imports no S7 file and S7 none of S8's (DEC-0163). No graph edge |
+| CAP-002-E4-S9 | reverse | The Research screen hosts `SaveAsUniverse`, mounts `AddToUniverseDialog`, `useNotices` and `NoticeRegion`; graph edge `CAP-002-E4-S9` lists S8 |
+| CAP-002-E1-S6 | soft | The story says to develop in parallel against the `/api/universes` contract CAP-002-E1-S6 builds; the tests double or stub the wire, so no CAP-002-E1-S6 file is imported. No graph edge |
+| CAP-002-E1-S7 | context | The create dialog has the same Name-field rule (DEC-0104, no maximum enforced); S8 imports nothing from it and it imports nothing from S8 |
+| CAP-002-E4-S4 | context | The poll hook refreshes the table after a set changes (DEC-0062); the dialog reads its props afresh at open and imports no S4 file |
+| CAP-002-E1-S8 | context | The universe detail page the notices link to; S8 only builds the `/research/universes/:universeId` href and imports nothing from it |
+| CAP-002-E4-S10 | context | `tests/e2e/universe-from-result.spec.ts` drives the saved-result flow end to end; no implementation prerequisite either way |
+
+No hard edge was added: `CAP-002-E4-S8: [CAP-002-E4-S1, CAP-002-E4-S2]` in `dependencies.yaml` already lists every module this plan imports, and `dependencies.yaml` is unchanged. CAP-002-E4-S7 and CAP-002-E1-S6 are soft, CAP-002-E4-S9 is reverse, CAP-002-E1-S7, CAP-002-E4-S4, CAP-002-E1-S8 and CAP-002-E4-S10 are context.
+
+### Task Dependencies
+
+- T001 to T009: no dependencies (three test files, each written as RED cycles)
+- T010: depends on T009 existing
+- T011: depends on S1 and S2 existing on the branch; precedes T013 and T014
+- T012: depends on T007 existing
+- T013: depends on T001 to T004, T006, T007 existing and on T010 to T012
+- T014: depends on T005, T008 existing and on T010 to T012
+- T015: depends on T010-T014
+- T016: depends on T015
+- T017: interleaved, runs after every TDD cycle and before the next begins
+
+### Parallel Opportunities
+
+- Phase 2: `notices.test.tsx` (T009), `save-as-universe-dialog.test.tsx` (T001 to T004, T006, T007) and `add-to-universe-dialog.test.tsx` (T005, T008) are independent files and can be assigned to three agents
+- Phase 3: T010 (notices) is independent of T011 and T012; T013 and T014 are independent files once T010 to T012 exist
+
+---
+
+## Validation Plan
+
+### Constitution-Defined Commands
+- Build: `npm run build`
+- Test: `npm run test` (single file while iterating: `npx vitest run web/src/screens/research/save-as-universe-dialog.test.tsx`)
+- Lint: `npm run lint`
+- Format: `npm run format` (check only)
+- Type check: `npx tsc --noEmit` (named in the story's Technical Details; not in the tech-stack table)
+
+Working directory is the repository root `repos/factorflow-v2/FactorFlow-v2`. The tech-stack file's Validation Commands table lists `npm run build`, `npm run test`, `npm run test:e2e`; lint and format come from `package.json` (`biome lint .`, `biome format .`) and the story. `npm run test:e2e` is not run (no screen exists to drive; the end-to-end spec is CAP-002-E4-S10's).
+
+### Story-Specific Validation
+- DAC-E4-S8-1: the T001 assertions show the `blocked`, focusable control with its reason at zero matches and nothing under a universe scope
+- DAC-E4-S8-2: the T002 assertions show the captured body carrying the `symbol` prefix (or `null`), `hide_incomplete`, the bounds and `set_id`, and the description naming the search
+- DAC-E4-S8-3: the T003 assertions show the dialog closed and a notice linking to the new universe, reporting the server's count
+- DAC-E4-S8-4: the T004 assertions show **Save** replaced by **Review new result** and the sentence
+- DAC-E4-S8-5: the T005 and T008 assertions show the toast with and without the already-member clause and the `universe_retired` wording
+- AC-5: no request is sent at zero matches or for an empty name
+- Delivered surface: `git diff --stat` shows no modified delivered file
+
+---
+
+## Notes
+
+### Resolved Conflicts
+
+1. **Illustrative and generic test bodies.** TC-COMP-008 to 011 and 033 each read as one generic line with "no further cases are invented". The AC is the source of truth; the plan sharpens each into concrete assertions (Phase 2). Not a conflict.
+2. **Where the Save control lives.** The story names `save-as-universe-dialog.tsx` and its Description says Save is *offered only under All followed stocks* and *blocked at zero matches*, while CAP-002-E4-S9's Description lists "Save as universe" among `results-pane.tsx`'s elements. Governing rule: the S8 story's acceptance criteria and TC-COMP-008 ("Save is shown ... It is `blocked`") sit in S8's test file, and the design's test row *Save as universe* puts the blocked and scope behaviour in `save-as-universe-dialog.test.tsx`. Resolved: `SaveAsUniverse` owns the trigger and the dialog; E4-S9 places the component in its header and passes `matchCount`, `setId` and `incompleteCount`. Neither approved story is edited.
+3. **Dialog closes "onto the already-refreshed table" (UX 1.1) against what a dialog can guarantee.** On `classification_set_changed` the design says **Review new result** closes onto a table already refreshed (DEC-0062). The refresh is the poll hook's (CAP-002-E4-S4) and the host's, not the dialog's. Resolved: the dialog only closes and reads its props afresh at the next open (T004); if the host has not refreshed yet, the next Save returns the same truthful `409`. No state is guessed.
+4. **Add dialog opens from a tray callback, but the design says the toast confirms.** DEC-0163 made the tray's **Add to universe…** a callback, so the Add dialog is unmounted by its host on success; the design's toast must therefore outlive it. Resolved with the host-level notices of Open Gap 2 rather than a toast inside the dialog.
+5. **Register correction.** The run's resolution register (`resolution-register-E4.md`) is right on the design set, the closed questions and the name-length abstention, but it does not say that `web/src` has no toast component or notification host and that no E4 story is assigned to build one (E4-S9's Description and ACs do not mention a toast region either). It should record that E4-S8 ships `notices.tsx` (DEC-0168) and that E4-S9's plan must mount `NoticeRegion` once. It also names no E4-S8 open items; this plan adds Open Gaps 1 to 3.
+
+### Open Gaps
+
+1. **Maximum universe name length. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0167.** UI design section 14 question 1 and API `MAX_UNIVERSE_NAME_LENGTH` are `[REQUIRES INPUT]`; no artifact fixes a bound. Adopted: both name fields enforce and state no maximum; the name is trimmed, empty is a field error, and a server refusal renders through the failure sentence; this matches CAP-002-E4-S1 (the client applies no name bound) and DEC-0104 (CAP-002-E1-S7). Derivation: inventing a number is forbidden and the same rule on all three forms keeps them consistent. Follow-up: when the owner answers, UI design section 14 question 1, UX design 1.1, 1.3 and 1.4 state the bound and the dialogs gain one `maxLength` and one check each.
+2. **Toast host and the dialogs' seams. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0168.** No artifact fixes the props of the two dialogs, a toast component, its host or an auto-dismiss duration. Adopted: `SaveAsUniverse({ query, matchCount, setId, incompleteCount, onNotify })`, `AddToUniverseDialog({ symbols, onClose, onNotify })`, and `useNotices`/`NoticeRegion` in `notices.tsx`, a polite status region with no timer. Follow-up: classification-ui section 2.1 should name the notices module and its host (E4-S9), and the design-system toast spec should supply the duration. CAP-002-E4-S9's plan must mount the region once.
+3. **Add dialog defaults, list bound, create route and the empty-name sentence. PROVISIONAL — awaiting owner confirmation (2026-10-17). Recorded as DEC-0169.** Adopted: initial choice is the first active universe (else *New universe*); one `listUniverses` read at limit 500, no paging; *New universe* posts a by-hand create; an empty New-universe name reads *Enter a name for the universe.* (an addition to `copy.ts` if S2 shipped without it). Follow-up: UX design 1.1 should state these at its next revision.
+4. **Names of S1 and S2 exports.** Those stories are planned but not coded. Names relied on are those the designs and sibling plans fix; every `copy.ts` name and the exact `createUniverse` call shape are read from the shipped files at T011, and a missing string is added there under S2's Open Gap 6 rather than written into the component.
+
+### Other Notes
+
+- **Cycle plan for T017.** Three TDD cycles, each RED then GREEN, each reviewed before the next: (1) T009 then T010 (notices); (2) T001 to T004, T006, T007 then T012 and T013 (the frame and Save, with the T011 strings it needs); (3) T005, T008 then T014 (Add). T015 and T016 change no behaviour. If `copy.ts` needs several strings, T011 may be its own cycle with its `copy.test.ts` anchors.
+- **Code order.** S8 is coded after S1 and S2 (hard dependencies). The T001, T003 to T008 tests double the client, so vitest would run before S1 ships, but T002 (it runs the real client and `toThresholds`), `npx tsc --noEmit` and the string assertions need both.
+- **Server contract.** The `/api/universes` routers the dialogs call are built by CAP-002-E1-S6 (soft: contract only); the tests stub the wire, so S8 can be coded before that router exists.
+- **Story status.** The story's `status` moves from `todo` to `planning` in this change, as the earlier E4 plans did; no other story line is touched.
+- **No screen, table or route is built here.** The results pane that holds `query`, `matchCount`, `setId` and the dialog state is CAP-002-E4-S9; the universe detail page the notices link to is CAP-002-E1-S8.
+- **Risk.** The largest risk is `userEvent` with focus and `Escape` inside a hand-rolled modal: jsdom has no `showModal`, so the trap is the component's own and T007 is its only proof. The second is T002's fetch stub, which must be restored after each test (`vi.unstubAllGlobals`) so it does not leak into the doubled-client tests.
