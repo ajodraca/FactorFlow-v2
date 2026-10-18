@@ -7,7 +7,7 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
-updated: 2026-10-17
+updated: 2026-10-18
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -68,9 +68,13 @@ history or sets read is built here.
 
 Mapped component test cases (all mandatory): TC-COMP-170 (DAC-E3-S1-1), TC-COMP-171
 (DAC-E3-S1-2), TC-COMP-181 (DAC-E3-S1-3), TC-COMP-103 (DAC-E3-S1-4), TC-COMP-104
-(DAC-E3-S1-5), TC-COMP-178 (DAC-E3-S1-6). TC-COMP-173 and TC-INT-035 trace to
-DAC-E3-11 and DAC-E3-10 but are API-level tests owned by the API stories; they
-are not planned here (see Notes).
+(DAC-E3-S1-5), TC-COMP-178 (DAC-E3-S1-6). TC-COMP-173 traces to DAC-E3-11 and
+is an API-level component test owned by CAP-002-E3-S5 (its DAC-E3-S5-3).
+TC-INT-035 traces to DAC-E3-10 and is owned by no story: the coverage matrix
+maps it only to the epic-level DAC-E3-10, so it belongs to the Phase 6b
+automation stage for the capability's `integration-tests.md`. CAP-002-E3-S5
+cites it by comment only, without claiming it. Neither is planned here (see
+Notes and Open Gap 6).
 
 ## Phase 1: Setup
 
@@ -158,7 +162,7 @@ capability's `dependencies.yaml` or appear here as `reverse`, `soft`, or
 | CAP-002-E3-S2 | reverse | `list_classifications` imports `read_set_blocks` and the block types from `reader.py` for the `set` and `later` it carries (design 2.3, 2.7) |
 | CAP-002-E1-S1 | context | Creates `tests/unit/test_package_data_ships_sql.py` (T001, T017) and migration `0005`; reached through CAP-002-E2-S1's own hard edge, supplies no import to `reader.py` |
 | CAP-002-E3-S4 | context | Owns the 3000-stock volume test (TC-COMP-153); cited only to bound what the "indexed rows" proof here does not cover (Open Gap 4) |
-| CAP-002-E3-S5 | reverse | The summary and list routes call `summary` and the shared blocks; TC-COMP-173 and TC-INT-035 are tested there |
+| CAP-002-E3-S5 | reverse | The summary and list routes call `summary` and the shared blocks; TC-COMP-173 is tested there |
 
 ### Task Dependencies
 - T001: No dependencies
@@ -216,12 +220,13 @@ If no container runtime is available, run `uv run pytest -m 'not postgres'` and 
 3. **Name and shape of the shared block read.** Design 2.3 gives no function for "the `set` and `later` blocks" that `list_classifications` and `summary` both carry (2.4: "one definition of current"). The plan adds `read_set_blocks(conn) -> tuple[CurrentSet | None, LaterSet | None]` as a public module function, the minimal additive shape (precedence 9a) that avoids each caller re-running or re-parsing `current_set.sql` (SA-DUP-001). CAP-002-E3-S2 and CAP-002-E3-S5 must reuse it. Flag for the next revision of the reader design 2.3.
 4. **How "runs from indexed set rows" (DAC-E3-S1-5, TC-COMP-104) is proved.** The TC's steps are generic ("It is executed"); no artifact states a latency, a plan assertion or a row count, and design 5 states no latency target (open question 1). The plan asserts structurally with `enable_seqscan = off` and `EXPLAIN` (no `Seq Scan` on `factor_input`, `classification_set` or `classification_set_factor`), which proves an index path exists for the two statements without a timing number and is stable at small row counts. It does not prove the planner chooses the index at 3000 stocks; that is the volume test of CAP-002-E3-S4 (TC-COMP-153). Flag for the owner only if a stricter bound is wanted.
 5. **Seed helper location.** The design names `tests/integration/test_reader_*.py` and "fixtures insert sets and rows directly" but no helper module. The plan creates `tests/integration/reader_seed.py` (precedent: `tests/unit/design_sql.py`, `governor_fakes.py`). Later E3 stories extend it.
+6. **Owner-directed fix (cross-plan review 2026-10-18, E3-F09): TC-INT-035 is owned by the Phase 6b automation stage for the capability's `integration-tests.md`, not by CAP-002-E3-S5; TC-COMP-173 stays owned by CAP-002-E3-S5 (DAC-E3-S5-3).** — No approved artifact assigns TC-INT-035 to a story. The coverage matrix maps it only to the epic-level DAC-E3-10 (row DAC-E3-10) and to AC-13 (row AC-13), with no DAC-E3-Sn row. Its specification in `integration-tests.md` traces to AC-13 and DAC-E3-10 only. Integration test specifications are automated in Phase 6b (`automation-planning`), and CAP-002-E3-S5's plan leaves TC-INT-035 there, citing it by comment only in `tests/integration/test_api_classification_summary.py`. This plan's earlier statement that TC-INT-035 is tested in CAP-002-E3-S5 is withdrawn. The HTTP half of DAC-E3-10 is covered once the Phase 6b automation plan for `integration-tests.md` exists.
 
 ### Other Notes
 
 - **Dependency graph.** `dependencies.yaml` gains one edge: `CAP-002-E3-S1: [CAP-002-E2-S1, CAP-002-E2-S2]`. The story's own Dependencies section names only E2-S1; E2-S2 is discovered from the producer map (T015's imports of `constants.py` and the package `__init__.py` it creates). No cycle: E2-S2 depends only on E2-S1 and nothing in E2 depends on E3-S1. The approved story is not edited; the omission is for the next revision of the story's Dependencies section.
 - **Story status.** The skill's step of setting the story's frontmatter `status: planning` was not performed: the supervising instruction forbids editing the approved story. The story stays `todo`.
-- **Mapped TCs owned elsewhere.** TC-COMP-173 (list and summary share the shape, DAC-E3-S5-3) and TC-INT-035 (summary over HTTP, DAC-E3-10) need the routes; this story proves the reader half of DAC-E3-11 and DAC-E3-10 and the list half is proved when E3-S2 exists. The coverage matrix lists AC-20/AC-22 against many TCs; only the six above trace to a DAC-E3-S1 criterion.
+- **Mapped TCs owned elsewhere.** TC-COMP-173 (list and summary share the shape, DAC-E3-S5-3) is owned by CAP-002-E3-S5. TC-INT-035 (summary over HTTP, DAC-E3-10) is owned by the Phase 6b automation stage for the capability's `integration-tests.md`: the coverage matrix maps it to no story criterion, and CAP-002-E3-S5's `tests/integration/test_api_classification_summary.py` cites it by comment only (Open Gap 6). Both need the routes; this story proves the reader half of DAC-E3-11 and DAC-E3-10, and the list half is proved when E3-S2 exists. The coverage matrix lists AC-20/AC-22 against many TCs; only the six above trace to a DAC-E3-S1 criterion.
 - **No edit to CAP-001 modules or to `tests/conftest.py`.** The reader takes a connection, performs no commit and runs no write, so it is exercised with the existing `migrated_run_schema_connection` fixture.
 - **No SQL drift guard against the design.** The design's `current_set.sql` snippet elides its select list, so a verbatim comparison with `tests/unit/design_sql.py` (as for the coverage SQL) would be misleading; `summary.sql` is verbatim and a guard on it is possible but is not required by any AC.
 - **Risk.** Run T001 first. CAP-002-E2-S1, CAP-002-E2-S2 and their predecessors are `todo` at planning time; the reader tests cannot run against `0006` until they land.
