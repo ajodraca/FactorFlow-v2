@@ -5,7 +5,8 @@ An editable install finds SQL files in the source tree whether or not
 """
 
 import tomllib
-from pathlib import Path, PurePath
+from fnmatch import fnmatchcase
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT = REPO_ROOT / "src" / "factorflow"
@@ -25,7 +26,7 @@ def uncovered_sql_files(package_root: Path, globs: list[str]) -> list[str]:
             continue
         for path in sorted(directory.glob("*.sql")):
             relative = path.relative_to(package_root)
-            if not any(PurePath(relative).full_match(glob) for glob in globs):
+            if not any(fnmatchcase(relative.as_posix(), glob) for glob in globs):
                 uncovered.append(relative.as_posix())
     return uncovered
 

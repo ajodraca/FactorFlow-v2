@@ -10,14 +10,6 @@ from factorflow.db.migrator import apply_pending, discover
 
 pytestmark = pytest.mark.postgres
 
-CAP_001_TABLES = (
-    "instrument",
-    "daily_bar",
-    "fundamental_observation",
-    "acquisition_run",
-    "applied_migrations",
-)
-
 
 def seed_cap_001_rows(conn: psycopg.Connection) -> None:
     """Insert one row into each CAP-001 table a later migration could disturb."""
@@ -47,11 +39,20 @@ def seed_cap_001_rows(conn: psycopg.Connection) -> None:
     conn.commit()
 
 
-def snapshot_cap_001(conn: psycopg.Connection) -> dict[str, list[tuple[Any, ...]]]:
-    """Every row of every CAP-001 table, as text, in a stable order."""
+def cap_001_tables(conn: psycopg.Connection) -> list[str]:
+    """Every table in the catalogue; call it once migrations 0001 to 0004 are applied."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1")
+        return [row[0] for row in cur.fetchall()]
+
+
+def snapshot_cap_001(
+    conn: psycopg.Connection, tables: list[str]
+) -> dict[str, list[tuple[Any, ...]]]:
+    """Every row of the given tables, as text, in a stable order."""
     snapshot: dict[str, list[tuple[Any, ...]]] = {}
     with conn.cursor() as cur:
-        for table in CAP_001_TABLES:
+        for table in tables:
             cur.execute(f"SELECT t::text FROM {table} t ORDER BY 1")  # noqa: S608
             snapshot[table] = cur.fetchall()
     return snapshot
@@ -66,11 +67,13 @@ def test_migration_0005_applies_without_touching_cap_001_rows(
         files = discover(MIGRATIONS_DIR)
         assert apply_pending(conn, [f for f in files if f.version <= 4]) == [1, 2, 3, 4]
         seed_cap_001_rows(conn)
-        before = snapshot_cap_001(conn)
+        tables = cap_001_tables(conn)
+        assert len(tables) == 11
+        before = snapshot_cap_001(conn, tables)
 
         assert apply_pending(conn, [f for f in files if f.version <= 5]) == [5]
 
-        after = snapshot_cap_001(conn)
+        after = snapshot_cap_001(conn, tables)
         recorded_before = [
             row for row in after["applied_migrations"] if row not in before["applied_migrations"]
         ]

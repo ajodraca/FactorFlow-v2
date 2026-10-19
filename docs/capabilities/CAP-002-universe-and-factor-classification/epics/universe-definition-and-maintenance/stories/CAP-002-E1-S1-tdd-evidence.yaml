@@ -76,3 +76,30 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle adds only a test module and changes no production behaviour
+
+  - id: cycle-4
+    tasks: [T002, T005]
+    description: >
+      Review rework of implementation-review-v1: IR-001 (TC-COMP-018 guard used the Python 3.13-only
+      PurePath.full_match; now fnmatchcase on the posix path, valid on the project's 3.12) and IR-002
+      (TC-COMP-045 snapshots every table in the catalogue after 0004, 11 tables, instead of 5).
+      IR-003 and IR-004 are optional hardening and are not addressed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/red-cycle-4-python312.log
+    red_log_sha256: dd87bf75b73f77b04c0b9f8396512e530d1a305edc517dfc1814133f2b7b79db
+    red_evidence: >
+      The reviewed HEAD guard under Python 3.12.14 raised AttributeError ('full_match') in both
+      test_every_sql_directory_matches_a_package_data_glob and
+      test_guard_reports_a_sql_directory_no_glob_covers.
+    green_evidence: >
+      The three TC-COMP-018 test functions run directly under Python 3.12.14 passed (uv could not fetch
+      pytest for 3.12 offline); under the local 3.13.7 venv uv run pytest -m 'not postgres' 821 passed,
+      test_research_migrations_apply.py 2 passed against a container, ruff and mypy clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b6e7bae3feba47837b0f856c4b307954fb3c628ecc6a88b81c8bd50cc87ee159
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes only test code and no production behaviour

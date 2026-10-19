@@ -1,0 +1,82 @@
+diff --git a/tests/integration/test_research_migrations_apply.py b/tests/integration/test_research_migrations_apply.py
+index 201fc5b..1d31731 100644
+--- a/tests/integration/test_research_migrations_apply.py
++++ b/tests/integration/test_research_migrations_apply.py
+@@ -10,14 +10,6 @@ from factorflow.db.migrator import apply_pending, discover
+ 
+ pytestmark = pytest.mark.postgres
+ 
+-CAP_001_TABLES = (
+-    "instrument",
+-    "daily_bar",
+-    "fundamental_observation",
+-    "acquisition_run",
+-    "applied_migrations",
+-)
+-
+ 
+ def seed_cap_001_rows(conn: psycopg.Connection) -> None:
+     """Insert one row into each CAP-001 table a later migration could disturb."""
+@@ -47,11 +39,20 @@ def seed_cap_001_rows(conn: psycopg.Connection) -> None:
+     conn.commit()
+ 
+ 
+-def snapshot_cap_001(conn: psycopg.Connection) -> dict[str, list[tuple[Any, ...]]]:
+-    """Every row of every CAP-001 table, as text, in a stable order."""
++def cap_001_tables(conn: psycopg.Connection) -> list[str]:
++    """Every table in the catalogue; call it once migrations 0001 to 0004 are applied."""
++    with conn.cursor() as cur:
++        cur.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1")
++        return [row[0] for row in cur.fetchall()]
++
++
++def snapshot_cap_001(
++    conn: psycopg.Connection, tables: list[str]
++) -> dict[str, list[tuple[Any, ...]]]:
++    """Every row of the given tables, as text, in a stable order."""
+     snapshot: dict[str, list[tuple[Any, ...]]] = {}
+     with conn.cursor() as cur:
+-        for table in CAP_001_TABLES:
++        for table in tables:
+             cur.execute(f"SELECT t::text FROM {table} t ORDER BY 1")  # noqa: S608
+             snapshot[table] = cur.fetchall()
+     return snapshot
+@@ -66,11 +67,13 @@ def test_migration_0005_applies_without_touching_cap_001_rows(
+         files = discover(MIGRATIONS_DIR)
+         assert apply_pending(conn, [f for f in files if f.version <= 4]) == [1, 2, 3, 4]
+         seed_cap_001_rows(conn)
+-        before = snapshot_cap_001(conn)
++        tables = cap_001_tables(conn)
++        assert len(tables) == 11
++        before = snapshot_cap_001(conn, tables)
+ 
+         assert apply_pending(conn, [f for f in files if f.version <= 5]) == [5]
+ 
+-        after = snapshot_cap_001(conn)
++        after = snapshot_cap_001(conn, tables)
+         recorded_before = [
+             row for row in after["applied_migrations"] if row not in before["applied_migrations"]
+         ]
+diff --git a/tests/unit/test_package_data_ships_sql.py b/tests/unit/test_package_data_ships_sql.py
+index 168bf7d..46f325e 100644
+--- a/tests/unit/test_package_data_ships_sql.py
++++ b/tests/unit/test_package_data_ships_sql.py
+@@ -5,7 +5,8 @@ An editable install finds SQL files in the source tree whether or not
+ """
+ 
+ import tomllib
+-from pathlib import Path, PurePath
++from fnmatch import fnmatchcase
++from pathlib import Path
+ 
+ REPO_ROOT = Path(__file__).resolve().parents[2]
+ PACKAGE_ROOT = REPO_ROOT / "src" / "factorflow"
+@@ -25,7 +26,7 @@ def uncovered_sql_files(package_root: Path, globs: list[str]) -> list[str]:
+             continue
+         for path in sorted(directory.glob("*.sql")):
+             relative = path.relative_to(package_root)
+-            if not any(PurePath(relative).full_match(glob) for glob in globs):
++            if not any(fnmatchcase(relative.as_posix(), glob) for glob in globs):
+                 uncovered.append(relative.as_posix())
+     return uncovered
+ 
