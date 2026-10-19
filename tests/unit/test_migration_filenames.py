@@ -45,6 +45,7 @@ def test_e5_real_migration_inventory_is_contiguous_through_four() -> None:
         "0002_observations.sql",
         "0003_coverage.sql",
         "0004_runs.sql",
+        "0005_universes.sql",
     ]
 
 

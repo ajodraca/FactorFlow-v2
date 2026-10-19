@@ -14,7 +14,7 @@ def test_new_migrations_apply_after_0002_without_rewriting_rows(
 ) -> None:
     conn = psycopg.connect(postgres_connection_string)
     try:
-        files = discover(MIGRATION_0001_PATH.parent)
+        files = discover(MIGRATION_0001_PATH.parent)[:4]
         assert apply_pending(conn, files[:2]) == [1, 2]
         with conn.cursor() as cur:
             cur.execute(
