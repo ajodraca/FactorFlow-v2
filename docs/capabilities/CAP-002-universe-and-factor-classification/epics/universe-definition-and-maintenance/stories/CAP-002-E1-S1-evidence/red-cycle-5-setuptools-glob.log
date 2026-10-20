@@ -1,0 +1,200 @@
+$ uv run --offline --isolated --python 3.12.14 --with pytest pytest --noconftest -p no:cacheprovider -v tests/unit/test_package_data_ships_sql.py
+Installed 23 packages in 18ms
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/.cache/uv/builds-v0/.tmpaTQfWM/bin/python
+rootdir: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 9 items
+
+tests/unit/test_package_data_ships_sql.py::test_every_sql_directory_matches_a_package_data_glob PASSED [ 11%]
+tests/unit/test_package_data_ships_sql.py::test_universes_sql_glob_is_listed_before_its_directory_exists PASSED [ 22%]
+tests/unit/test_package_data_ships_sql.py::test_guard_reports_a_sql_directory_no_glob_covers PASSED [ 33%]
+tests/unit/test_package_data_ships_sql.py::test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[widgets/*.sql] FAILED [ 44%]
+tests/unit/test_package_data_ships_sql.py::test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[*.sql] FAILED [ 55%]
+tests/unit/test_package_data_ships_sql.py::test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[widgets/s*/x/*.sql] PASSED [ 66%]
+tests/unit/test_package_data_ships_sql.py::test_guard_accepts_a_glob_setuptools_expands_to_the_file[widgets/**/*.sql] PASSED [ 77%]
+tests/unit/test_package_data_ships_sql.py::test_guard_accepts_a_glob_setuptools_expands_to_the_file[**/*.sql] PASSED [ 88%]
+tests/unit/test_package_data_ships_sql.py::test_guard_accepts_a_glob_setuptools_expands_to_the_file[widgets/*/*.sql] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[widgets/*.sql] _
+
+tmp_path = PosixPath('/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/pytest-of-alvarodejodra/pytest-112/test_guard_reports_a_glob_that0')
+glob = 'widgets/*.sql'
+
+    @pytest.mark.parametrize("glob", ["widgets/*.sql", "*.sql", "widgets/s*/x/*.sql"])
+    def test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file(
+        tmp_path: Path, glob: str
+    ) -> None:
+        """setuptools expands package-data with `glob(..., recursive=True)`: `*` stops at `/`."""
+        sql_dir = tmp_path / "widgets" / "sql"
+        sql_dir.mkdir(parents=True)
+        (sql_dir / "read.sql").write_text("SELECT 1;\n", encoding="utf-8")
+    
+>       assert uncovered_sql_files(tmp_path, [glob]) == ["widgets/sql/read.sql"]
+E       AssertionError: assert [] == ['widgets/sql/read.sql']
+E         
+E         Right contains one more item: 'widgets/sql/read.sql'
+E         
+E         Full diff:
+E         + []
+E         - [
+E         -     'widgets/sql/read.sql',
+E         - ]
+
+tests/unit/test_package_data_ships_sql.py:67: AssertionError
+___ test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[*.sql] ___
+
+tmp_path = PosixPath('/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/pytest-of-alvarodejodra/pytest-112/test_guard_reports_a_glob_that1')
+glob = '*.sql'
+
+    @pytest.mark.parametrize("glob", ["widgets/*.sql", "*.sql", "widgets/s*/x/*.sql"])
+    def test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file(
+        tmp_path: Path, glob: str
+    ) -> None:
+        """setuptools expands package-data with `glob(..., recursive=True)`: `*` stops at `/`."""
+        sql_dir = tmp_path / "widgets" / "sql"
+        sql_dir.mkdir(parents=True)
+        (sql_dir / "read.sql").write_text("SELECT 1;\n", encoding="utf-8")
+    
+>       assert uncovered_sql_files(tmp_path, [glob]) == ["widgets/sql/read.sql"]
+E       AssertionError: assert [] == ['widgets/sql/read.sql']
+E         
+E         Right contains one more item: 'widgets/sql/read.sql'
+E         
+E         Full diff:
+E         + []
+E         - [
+E         -     'widgets/sql/read.sql',
+E         - ]
+
+tests/unit/test_package_data_ships_sql.py:67: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_package_data_ships_sql.py::test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[widgets/*.sql]
+FAILED tests/unit/test_package_data_ships_sql.py::test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file[*.sql]
+========================= 2 failed, 7 passed in 0.03s ==========================
+
+$ uv run --offline --isolated --python 3.12.14 --with pytest pytest --noconftest -p no:cacheprovider -v tests/unit/test_research_sql_is_append_only.py
+Installed 23 packages in 12ms
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/.cache/uv/builds-v0/.tmppmwAsk/bin/python
+rootdir: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 12 items
+
+tests/unit/test_research_sql_is_append_only.py::test_research_sql_is_append_only PASSED [  8%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[UPDATE universe_event SET name = 'x'-UPDATE universe_event] PASSED [ 16%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM universe_event WHERE universe_id = %s-DELETE FROM universe_event] PASSED [ 25%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM ONLY universe_event-DELETE FROM ONLY universe_event] PASSED [ 33%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM "public"."universe_event"-DELETE FROM "public"."universe_event"] PASSED [ 41%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE SET name = 'x'-INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE] PASSED [ 50%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[UPDATE universe SET created_at = now()-UPDATE universe] PASSED [ 58%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM universe-DELETE FROM universe] PASSED [ 66%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[UPDATE ONLY universe_event SET name = 'x'-UPDATE ONLY universe_event] PASSED [ 75%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE SET name = s.name-MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE] FAILED [ 83%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE-MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE] FAILED [ 91%]
+tests/unit/test_research_sql_is_append_only.py::test_guard_ignores_other_tables_and_lookalike_names PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_guard_detects_prohibited_research_mutation[MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE SET name = s.name-MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE] _
+
+sql = 'MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE SET name = s.name'
+expected = 'MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+            ("UPDATE ONLY universe_event SET name = 'x'", "UPDATE ONLY universe_event"),
+            (
+                "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
+                "WHEN MATCHED THEN UPDATE SET name = s.name",
+                "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
+                "WHEN MATCHED THEN UPDATE",
+            ),
+            (
+                "MERGE INTO universe u USING src s ON u.universe_id = s.universe_id "
+                "WHEN MATCHED THEN DELETE",
+                "MERGE INTO universe u USING src s ON u.universe_id = s.universe_id "
+                "WHEN MATCHED THEN DELETE",
+            ),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['MERGE INTO ... THEN UPDATE']
+E         
+E         Right contains one more item: 'MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE'
+E         
+E         Full diff:
+E         + []
+E         - [
+E         -     'MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN '
+E         -     'MATCHED THEN UPDATE',
+E         - ]
+
+tests/unit/test_research_sql_is_append_only.py:84: AssertionError
+_ test_guard_detects_prohibited_research_mutation[MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE-MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE] _
+
+sql = 'MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE'
+expected = 'MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+            ("UPDATE ONLY universe_event SET name = 'x'", "UPDATE ONLY universe_event"),
+            (
+                "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
+                "WHEN MATCHED THEN UPDATE SET name = s.name",
+                "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
+                "WHEN MATCHED THEN UPDATE",
+            ),
+            (
+                "MERGE INTO universe u USING src s ON u.universe_id = s.universe_id "
+                "WHEN MATCHED THEN DELETE",
+                "MERGE INTO universe u USING src s ON u.universe_id = s.universe_id "
+                "WHEN MATCHED THEN DELETE",
+            ),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['MERGE INTO ... THEN DELETE']
+E         
+E         Right contains one more item: 'MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE'
+E         
+E         Full diff:
+E         + []
+E         - [
+E         -     'MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN '
+E         -     'MATCHED THEN DELETE',
+E         - ]
+
+tests/unit/test_research_sql_is_append_only.py:84: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE SET name = s.name-MERGE INTO universe_event e USING src s ON e.event_id = s.event_id WHEN MATCHED THEN UPDATE]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE-MERGE INTO universe u USING src s ON u.universe_id = s.universe_id WHEN MATCHED THEN DELETE]
+========================= 2 failed, 10 passed in 0.04s =========================

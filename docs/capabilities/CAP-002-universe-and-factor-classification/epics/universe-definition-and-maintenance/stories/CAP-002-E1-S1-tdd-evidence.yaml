@@ -1,0 +1,154 @@
+# TDD evidence for CAP-002-E1-S1 - Migration 0005: universe and universe_event Tables.
+# Cycles share the one stage commit, so each cites its reviewed_patch (incremental, applied in order).
+# Decisions: DEC-0092 (T006, T007), DEC-0187 (test_migrator_discover.py and tests/integration/test_migrations_apply.py edits).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T004, T005, T006, T007, T008]
+    description: >
+      Migration 0005_universes.sql copied verbatim from research-store section 2.3, with its
+      design-drift guard (TC-COMP-017), constraint and unique-index tests (TC-COMP-046, TC-COMP-034),
+      apply and idempotence tests (TC-COMP-045, TC-COMP-048), and the minimal edits to four delivered
+      tests that a fifth migration breaks (DEC-0092, DEC-0187).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/red-cycle-1-migration.log
+    red_log_sha256: 9092cc497845f16f345560bbb8c18e082be84bd905958182e5695c6a6cbb78e0
+    red_evidence: >
+      26 failed, 8 passed, 15 errors before 0005_universes.sql existed (the migration file, the
+      0005 inventory entries and the postgres constraint fixtures all failed for the missing migration).
+    green_evidence: >
+      Full suite with -m "postgres or not postgres": 1110 passed, then the two further delivered tests
+      (DEC-0187) were edited and re-run: 9 passed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9fb55b89a3b1296ba36daea80e90246087fb5594490a872709f58817b967d895
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: efe0100598b829d7ffe304bab4c5f2f0c36b5a8b49d2aab9f4da46644543cbfd
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T009]
+    description: >
+      Package-data guard (TC-COMP-018) and the universes/sql/*.sql glob in pyproject.toml (DEC-0088).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/red-cycle-2-package-data.log
+    red_log_sha256: b777d3a59c8642bafd8162886aceae4b2a6521f4028b7673541ea31918a98a36
+    red_evidence: >
+      test_universes_sql_glob_is_listed_before_its_directory_exists failed before pyproject.toml named the glob.
+    green_evidence: tests/unit/test_package_data_ships_sql.py 3 passed after T009.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 186aafc03bba82e8bde27c53016dbb326e0783486762342ce54000f5fe3cb8c9
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the only non-test change is one package-data entry in pyproject.toml, configuration with no source line for the operators to mutate
+
+  - id: cycle-3
+    tasks: [T003]
+    description: >
+      Static append-only guard for universe_event and universe (TC-COMP-047, DAC-E1-10).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/red-cycle-3-append-only.log
+    red_log_sha256: 73838b642b497cfa898ee67446e7efb4859674e403270dac5eff9a8a8fec9c2c
+    red_evidence: >
+      The guard is a new test module, so no pre-existing failure was observable. The RED was produced by
+      stubbing prohibited_research_mutations to return [] and running the module: 7 failed, 2 passed. The
+      stub was then removed.
+    green_evidence: tests/unit/test_research_sql_is_append_only.py 9 passed on the unstubbed module.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3c085267d372c842e72ffc908177137f2b8a4561fcb6dff0a8dcc2a7c0100b38
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds only a test module and changes no production behaviour
+
+  - id: cycle-4
+    tasks: [T002, T005]
+    description: >
+      Review rework of implementation-review-v1: IR-001 (TC-COMP-018 guard used the Python 3.13-only
+      PurePath.full_match; now fnmatchcase on the posix path, valid on the project's 3.12) and IR-002
+      (TC-COMP-045 snapshots every table in the catalogue after 0004, 11 tables, instead of 5).
+      IR-003 and IR-004 are optional hardening and are not addressed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/red-cycle-4-python312.log
+    red_log_sha256: dd87bf75b73f77b04c0b9f8396512e530d1a305edc517dfc1814133f2b7b79db
+    red_evidence: >
+      The reviewed HEAD guard under Python 3.12.14 raised AttributeError ('full_match') in both
+      test_every_sql_directory_matches_a_package_data_glob and
+      test_guard_reports_a_sql_directory_no_glob_covers.
+    green_evidence: >
+      The three TC-COMP-018 test functions run directly under Python 3.12.14 passed (uv could not fetch
+      pytest for 3.12 offline); under the local 3.13.7 venv uv run pytest -m 'not postgres' 821 passed,
+      test_research_migrations_apply.py 2 passed against a container, ruff and mypy clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b6e7bae3feba47837b0f856c4b307954fb3c628ecc6a88b81c8bd50cc87ee159
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes only test code and no production behaviour
+
+  - id: cycle-5
+    tasks: [T002, T003, T004]
+    description: >
+      Review rework of implementation-review-v2. IR-001: the TC-COMP-018 guard now expands each
+      package-data glob the way setuptools' build_py does, glob(..., recursive=True) under the
+      package root, instead of fnmatchcase, whose * crossed /; synthetic cases pin that widgets/*.sql,
+      *.sql and widgets/s*/x/*.sql do not cover widgets/sql/read.sql and that widgets/**/*.sql,
+      **/*.sql and widgets/*/*.sql do. IR-002: RED and GREEN captured as pytest output on Python
+      3.12.14. reviewed_patch stays absolute: check-tdd-evidence.py hashes the path from the harness
+      root but runs git apply on it from inside the component repo, so a harness-relative path fails
+      TDD-LINT-DIFF (a harness gap, not fixable in this repository). IR-003: the append-only
+      guard detects MERGE INTO a research table with a THEN UPDATE or THEN DELETE action, and pins
+      UPDATE ONLY. IR-004: behavioural controls for two created universes, an unknown instrument
+      (ForeignKeyViolation), a NULL universe_id (NotNullViolation) and a reused event_id
+      (universe_event_pkey). recorded-on-utc stays pinned by the verbatim design guard only: the UTC and
+      America/Chicago dates differ only for part of each day, so no deterministic behavioural test exists.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/red-cycle-5-setuptools-glob.log
+    red_log_sha256: 1415fb6d214b9aca6132663f923b5419de86e34e38d33555977ab3b1c2b64586
+    red_evidence: >
+      Python 3.12.14, real pytest: test_package_data_ships_sql.py 2 failed, 7 passed (the fnmatchcase
+      matcher accepted widgets/*.sql and *.sql); test_research_sql_is_append_only.py 2 failed, 10 passed
+      (both MERGE cases returned no match).
+    green_evidence: >
+      Python 3.12.14, real pytest: test_package_data_ships_sql.py 9 passed, test_research_sql_is_append_only.py
+      12 passed, and the whole -m 'not postgres' suite 830 passed in an isolated 3.12 environment with the
+      dev extra. On the project venv (3.13.7): -m 'not postgres' 830 passed, -m postgres 295 passed
+      (test_research_constraints.py 19 passed), ruff check, ruff format --check and mypy src clean, uv build ok.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/green-cycle-5-python312.log
+        sha256: 2d26a9c08d6b194fc929da572b15163bb5bab12ba575383dfc662c2f5f686d5d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 421ea0138e5107aba8fd694e9e211e7599a793c0b47ed000abf0b568a5810c3b
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S1-evidence/mutation-cycle-5-results.json
+      results_sha256: 5eb1b98bb3f038289c5f7c3090e43c04ddf0ee2d6dc0ca1cf998b5d0a8227eb6
+      generated: 22
+      killed: 22
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

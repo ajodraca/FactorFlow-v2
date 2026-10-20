@@ -1,0 +1,14 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________ test_universes_sql_glob_is_listed_before_its_directory_exists _________
+
+    def test_universes_sql_glob_is_listed_before_its_directory_exists() -> None:
+        """`src/factorflow/universes/sql/` arrives with CAP-002-E1-S2 (DEC-0088)."""
+>       assert "universes/sql/*.sql" in package_data_globs()
+E       AssertionError: assert 'universes/sql/*.sql' in ['coverage/sql/*.sql', 'db/migrations/*.sql', 'api/static/**/*']
+E        +  where ['coverage/sql/*.sql', 'db/migrations/*.sql', 'api/static/**/*'] = package_data_globs()
+
+tests/unit/test_package_data_ships_sql.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_package_data_ships_sql.py::test_universes_sql_glob_is_listed_before_its_directory_exists
+1 failed, 2 passed in 0.07s

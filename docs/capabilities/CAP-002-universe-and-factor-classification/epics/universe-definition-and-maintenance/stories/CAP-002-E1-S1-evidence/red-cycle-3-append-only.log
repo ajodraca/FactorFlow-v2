@@ -1,0 +1,211 @@
+.FFFFFFF.                                                                [100%]
+=================================== FAILURES ===================================
+_ test_guard_detects_prohibited_research_mutation[UPDATE universe_event SET name = 'x'-UPDATE universe_event] _
+
+sql = "UPDATE universe_event SET name = 'x'", expected = 'UPDATE universe_event'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['UPDATE universe_event']
+E         
+E         Right contains one more item: 'UPDATE universe_event'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+_ test_guard_detects_prohibited_research_mutation[DELETE FROM universe_event WHERE universe_id = %s-DELETE FROM universe_event] _
+
+sql = 'DELETE FROM universe_event WHERE universe_id = %s'
+expected = 'DELETE FROM universe_event'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['DELETE FROM universe_event']
+E         
+E         Right contains one more item: 'DELETE FROM universe_event'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+_ test_guard_detects_prohibited_research_mutation[DELETE FROM ONLY universe_event-DELETE FROM ONLY universe_event] _
+
+sql = 'DELETE FROM ONLY universe_event'
+expected = 'DELETE FROM ONLY universe_event'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['DELETE FROM...iverse_event']
+E         
+E         Right contains one more item: 'DELETE FROM ONLY universe_event'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+_ test_guard_detects_prohibited_research_mutation[DELETE FROM "public"."universe_event"-DELETE FROM "public"."universe_event"] _
+
+sql = 'DELETE FROM "public"."universe_event"'
+expected = 'DELETE FROM "public"."universe_event"'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       assert [] == ['DELETE FROM...verse_event"']
+E         
+E         Right contains one more item: 'DELETE FROM "public"."universe_event"'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+_ test_guard_detects_prohibited_research_mutation[INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE SET name = 'x'-INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE] _
+
+sql = "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE SET name = 'x'"
+expected = 'INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['INSERT INTO...d) DO UPDATE']
+E         
+E         Right contains one more item: 'INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+_ test_guard_detects_prohibited_research_mutation[UPDATE universe SET created_at = now()-UPDATE universe] _
+
+sql = 'UPDATE universe SET created_at = now()', expected = 'UPDATE universe'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['UPDATE universe']
+E         
+E         Right contains one more item: 'UPDATE universe'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+_ test_guard_detects_prohibited_research_mutation[DELETE FROM universe-DELETE FROM universe] _
+
+sql = 'DELETE FROM universe', expected = 'DELETE FROM universe'
+
+    @pytest.mark.parametrize(
+        ("sql", "expected"),
+        (
+            ("UPDATE universe_event SET name = 'x'", "UPDATE universe_event"),
+            ("DELETE FROM universe_event WHERE universe_id = %s", "DELETE FROM universe_event"),
+            ("DELETE FROM ONLY universe_event", "DELETE FROM ONLY universe_event"),
+            ('DELETE FROM "public"."universe_event"', 'DELETE FROM "public"."universe_event"'),
+            (
+                "INSERT INTO universe_event (universe_id) VALUES (1) "
+                "ON CONFLICT (event_id) DO UPDATE SET name = 'x'",
+                "INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE",
+            ),
+            ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+            ("DELETE FROM universe", "DELETE FROM universe"),
+        ),
+    )
+    def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+>       assert prohibited_research_mutations(sql) == [expected]
+E       AssertionError: assert [] == ['DELETE FROM universe']
+E         
+E         Right contains one more item: 'DELETE FROM universe'
+E         Use -v to get more diff
+
+tests/unit/test_research_sql_is_append_only.py:70: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[UPDATE universe_event SET name = 'x'-UPDATE universe_event]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM universe_event WHERE universe_id = %s-DELETE FROM universe_event]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM ONLY universe_event-DELETE FROM ONLY universe_event]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM "public"."universe_event"-DELETE FROM "public"."universe_event"]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE SET name = 'x'-INSERT INTO universe_event (universe_id) VALUES (1) ON CONFLICT (event_id) DO UPDATE]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[UPDATE universe SET created_at = now()-UPDATE universe]
+FAILED tests/unit/test_research_sql_is_append_only.py::test_guard_detects_prohibited_research_mutation[DELETE FROM universe-DELETE FROM universe]
+7 failed, 2 passed in 0.09s

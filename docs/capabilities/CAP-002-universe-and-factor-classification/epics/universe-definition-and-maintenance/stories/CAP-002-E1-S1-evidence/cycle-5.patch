@@ -1,0 +1,202 @@
+diff --git a/tests/integration/test_research_constraints.py b/tests/integration/test_research_constraints.py
+index f25cf53..65da8b5 100644
+--- a/tests/integration/test_research_constraints.py
++++ b/tests/integration/test_research_constraints.py
+@@ -173,3 +173,58 @@ def test_one_instrument_may_belong_to_two_universes(
+         row = cur.fetchone()
+     assert row is not None
+     assert row[0] == 2
++
++
++# Implements AC-3
++def test_two_universes_may_each_be_created(universe_connection: psycopg.Connection) -> None:
++    first = _new_universe(universe_connection)
++    second = _new_universe(universe_connection)
++
++    _insert_event(universe_connection, first, "created", name="Growth")
++    _insert_event(universe_connection, second, "created", name="Value")
++
++    with universe_connection.cursor() as cur:
++        cur.execute("SELECT count(*) FROM universe_event WHERE event_type = 'created'")
++        row = cur.fetchone()
++    assert row is not None
++    assert row[0] == 2
++
++
++# Implements TC-COMP-046
++def test_a_member_event_for_an_unknown_instrument_is_refused(
++    universe_connection: psycopg.Connection,
++) -> None:
++    universe_id = _new_universe(universe_connection)
++    unknown = _instrument_id(universe_connection) + 1000
++
++    with pytest.raises(psycopg.errors.ForeignKeyViolation) as refused:
++        _insert_event(universe_connection, universe_id, "member_added", unknown)
++
++    assert refused.value.diag.constraint_name == "universe_event_instrument_id_fkey"
++
++
++# Implements TC-COMP-046
++def test_an_event_without_a_universe_is_refused(universe_connection: psycopg.Connection) -> None:
++    with pytest.raises(psycopg.errors.NotNullViolation) as refused:
++        with universe_connection.cursor() as cur:
++            cur.execute("INSERT INTO universe_event (event_type) VALUES ('retired')")
++
++    assert refused.value.diag.column_name == "universe_id"
++
++
++# Implements TC-COMP-046
++def test_an_event_id_is_never_reused(universe_connection: psycopg.Connection) -> None:
++    first = _new_universe(universe_connection)
++    second = _new_universe(universe_connection)
++    _insert_event(universe_connection, first, "retired")
++
++    with pytest.raises(psycopg.errors.UniqueViolation) as refused:
++        with universe_connection.cursor() as cur:
++            cur.execute(
++                "INSERT INTO universe_event (event_id, universe_id, event_type) "
++                "OVERRIDING SYSTEM VALUE "
++                "SELECT event_id, %s, 'retired' FROM universe_event WHERE universe_id = %s",
++                (second, first),
++            )
++
++    assert refused.value.diag.constraint_name == "universe_event_pkey"
+diff --git a/tests/unit/test_package_data_ships_sql.py b/tests/unit/test_package_data_ships_sql.py
+index 46f325e..6ca3ced 100644
+--- a/tests/unit/test_package_data_ships_sql.py
++++ b/tests/unit/test_package_data_ships_sql.py
+@@ -5,9 +5,11 @@ An editable install finds SQL files in the source tree whether or not
+ """
+ 
+ import tomllib
+-from fnmatch import fnmatchcase
++from glob import escape, glob
+ from pathlib import Path
+ 
++import pytest
++
+ REPO_ROOT = Path(__file__).resolve().parents[2]
+ PACKAGE_ROOT = REPO_ROOT / "src" / "factorflow"
+ 
+@@ -19,15 +21,23 @@ def package_data_globs() -> list[str]:
+ 
+ 
+ def uncovered_sql_files(package_root: Path, globs: list[str]) -> list[str]:
+-    """Return `.sql` files in a `sql/` directory that no glob matches."""
++    """Return `.sql` files in a `sql/` directory that no glob ships.
++
++    Each glob is expanded the way setuptools' `build_py` expands package-data,
++    `glob(..., recursive=True)`, so `*` never crosses a `/`.
++    """
++    shipped = {
++        Path(match)
++        for pattern in globs
++        for match in glob(f"{escape(str(package_root))}/{pattern}", recursive=True)
++    }
+     uncovered = []
+     for directory in sorted(package_root.rglob("sql")):
+         if not directory.is_dir():
+             continue
+         for path in sorted(directory.glob("*.sql")):
+-            relative = path.relative_to(package_root)
+-            if not any(fnmatchcase(relative.as_posix(), glob) for glob in globs):
+-                uncovered.append(relative.as_posix())
++            if path not in shipped:
++                uncovered.append(path.relative_to(package_root).as_posix())
+     return uncovered
+ 
+ 
+@@ -50,3 +60,26 @@ def test_guard_reports_a_sql_directory_no_glob_covers(tmp_path: Path) -> None:
+ 
+     assert uncovered_sql_files(tmp_path, ["db/migrations/*.sql"]) == ["widgets/sql/read.sql"]
+     assert uncovered_sql_files(tmp_path, ["widgets/sql/*.sql"]) == []
++
++
++# Implements TC-COMP-018
++@pytest.mark.parametrize("glob", ["widgets/*.sql", "*.sql", "widgets/s*/x/*.sql"])
++def test_guard_reports_a_glob_that_only_looks_like_it_covers_the_file(
++    tmp_path: Path, glob: str
++) -> None:
++    """setuptools expands package-data with `glob(..., recursive=True)`: `*` stops at `/`."""
++    sql_dir = tmp_path / "widgets" / "sql"
++    sql_dir.mkdir(parents=True)
++    (sql_dir / "read.sql").write_text("SELECT 1;\n", encoding="utf-8")
++
++    assert uncovered_sql_files(tmp_path, [glob]) == ["widgets/sql/read.sql"]
++
++
++# Implements TC-COMP-018
++@pytest.mark.parametrize("glob", ["widgets/**/*.sql", "**/*.sql", "widgets/*/*.sql"])
++def test_guard_accepts_a_glob_setuptools_expands_to_the_file(tmp_path: Path, glob: str) -> None:
++    sql_dir = tmp_path / "widgets" / "sql"
++    sql_dir.mkdir(parents=True)
++    (sql_dir / "read.sql").write_text("SELECT 1;\n", encoding="utf-8")
++
++    assert uncovered_sql_files(tmp_path, [glob]) == []
+diff --git a/tests/unit/test_research_sql_is_append_only.py b/tests/unit/test_research_sql_is_append_only.py
+index e91f4c4..4d3f573 100644
+--- a/tests/unit/test_research_sql_is_append_only.py
++++ b/tests/unit/test_research_sql_is_append_only.py
+@@ -3,7 +3,7 @@
+ `universe_event` is append-only (AC-6) and `universe` is insert-only in content
+ (DAC-E1-10 names both). The delivered guard in `test_sql_is_append_only.py`
+ fixes its table list in module constants, so this module builds the same three
+-patterns from its own table tuple. CAP-002-E2-S1 extends `RESEARCH_TABLES`.
++patterns, plus MERGE, from its own table tuple. CAP-002-E2-S1 extends `RESEARCH_TABLES`.
+ """
+ 
+ import re
+@@ -26,11 +26,20 @@ UPSERT_MUTATION_PATTERN = re.compile(
+     rf"[^;]*?\bon\s+conflict\b[^;]*?\bdo\s+update\b",
+     re.IGNORECASE | re.DOTALL,
+ )
++MERGE_MUTATION_PATTERN = re.compile(
++    rf"\bmerge\s+into\s+(?:only\s+)?{_QUALIFIED_TABLE_PATTERN}(?!\w)"
++    rf"[^;]*?\bthen\s+(?:update|delete)\b",
++    re.IGNORECASE | re.DOTALL,
++)
+ 
+ 
+ def prohibited_research_mutations(text: str) -> list[str]:
+-    """Return UPDATE, DELETE and upsert statements against the research tables."""
+-    matches = [*MUTATION_PATTERN.finditer(text), *UPSERT_MUTATION_PATTERN.finditer(text)]
++    """Return UPDATE, DELETE, upsert and MERGE statements against the research tables."""
++    matches = [
++        *MUTATION_PATTERN.finditer(text),
++        *UPSERT_MUTATION_PATTERN.finditer(text),
++        *MERGE_MUTATION_PATTERN.finditer(text),
++    ]
+     return [match.group(0) for match in sorted(matches, key=lambda match: match.start())]
+ 
+ 
+@@ -65,6 +74,19 @@ def test_research_sql_is_append_only() -> None:
+         ),
+         ("UPDATE universe SET created_at = now()", "UPDATE universe"),
+         ("DELETE FROM universe", "DELETE FROM universe"),
++        ("UPDATE ONLY universe_event SET name = 'x'", "UPDATE ONLY universe_event"),
++        (
++            "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
++            "WHEN MATCHED THEN UPDATE SET name = s.name",
++            "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
++            "WHEN MATCHED THEN UPDATE",
++        ),
++        (
++            "MERGE INTO universe u USING src s ON u.universe_id = s.universe_id "
++            "WHEN MATCHED THEN DELETE",
++            "MERGE INTO universe u USING src s ON u.universe_id = s.universe_id "
++            "WHEN MATCHED THEN DELETE",
++        ),
+     ),
+ )
+ def test_guard_detects_prohibited_research_mutation(sql: str, expected: str) -> None:
+@@ -76,7 +98,9 @@ def test_guard_ignores_other_tables_and_lookalike_names() -> None:
+     sql = (
+         "UPDATE instrument SET lifecycle = 'retired'; "
+         "DELETE FROM universe_event_foo; "
+-        "INSERT INTO universe_event (universe_id) VALUES (1);"
++        "INSERT INTO universe_event (universe_id) VALUES (1); "
++        "MERGE INTO universe_event e USING src s ON e.event_id = s.event_id "
++        "WHEN NOT MATCHED THEN INSERT (universe_id) VALUES (s.universe_id);"
+     )
+ 
+     assert prohibited_research_mutations(sql) == []

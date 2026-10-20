@@ -1,0 +1,498 @@
+diff --git a/src/factorflow/db/migrations/0005_universes.sql b/src/factorflow/db/migrations/0005_universes.sql
+new file mode 100644
+index 0000000..9830e0f
+--- /dev/null
++++ b/src/factorflow/db/migrations/0005_universes.sql
+@@ -0,0 +1,45 @@
++CREATE TABLE universe (
++    universe_id uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
++    created_at  timestamptz NOT NULL DEFAULT now()
++);
++
++CREATE TABLE universe_event (
++    event_id          bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
++    universe_id       uuid        NOT NULL REFERENCES universe (universe_id),
++    event_type        text        NOT NULL,
++    instrument_id     bigint      REFERENCES instrument (instrument_id),
++    name              text,
++    filter_provenance jsonb,
++    recorded_at       timestamptz NOT NULL DEFAULT now(),
++    recorded_on       date        NOT NULL
++                      DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date,
++    CONSTRAINT universe_event_type_known
++        CHECK (event_type IN ('created', 'renamed', 'member_added',
++                              'member_removed', 'retired')),
++    CONSTRAINT universe_event_member_has_instrument
++        CHECK ((event_type IN ('member_added', 'member_removed'))
++               = (instrument_id IS NOT NULL)),
++    CONSTRAINT universe_event_name_agrees
++        CHECK ((event_type IN ('created', 'renamed')) = (name IS NOT NULL)),
++    CONSTRAINT universe_event_name_trimmed
++        CHECK (name IS NULL OR (name = btrim(name) AND name <> '')),
++    CONSTRAINT universe_event_provenance_only_on_created
++        CHECK (filter_provenance IS NULL OR event_type = 'created')
++);
++
++CREATE INDEX idx_universe_event_universe
++    ON universe_event (universe_id, event_id);
++CREATE INDEX idx_universe_event_instrument
++    ON universe_event (instrument_id, event_id) WHERE instrument_id IS NOT NULL;
++CREATE UNIQUE INDEX idx_universe_event_single_created
++    ON universe_event (universe_id) WHERE event_type = 'created';
++CREATE UNIQUE INDEX idx_universe_event_single_retired
++    ON universe_event (universe_id) WHERE event_type = 'retired';
++
++COMMENT ON COLUMN universe_event.recorded_on IS
++    'The America/Chicago date the event was recorded; the as-of grain for AC-6 (DEC-0065).';
++COMMENT ON COLUMN universe_event.filter_provenance IS
++    'Only on a created event taken from a filter: the filter as evaluated and the set it was evaluated against, '
++    '{"set_id": uuid, "classification_date": date, "thresholds": {the twelve bounds that were set, '
++    '{factor}_score_min/_max and {factor}_percentile_min/_max, by query-parameter name}, '
++    '"hide_incomplete": bool, "symbol": text or null (the Find a stock prefix)} (AC-2, S03-7).';
+diff --git a/tests/integration/test_migrations_apply.py b/tests/integration/test_migrations_apply.py
+index 8375ede..7a337dd 100644
+--- a/tests/integration/test_migrations_apply.py
++++ b/tests/integration/test_migrations_apply.py
+@@ -14,7 +14,7 @@ def test_new_migrations_apply_after_0002_without_rewriting_rows(
+ ) -> None:
+     conn = psycopg.connect(postgres_connection_string)
+     try:
+-        files = discover(MIGRATION_0001_PATH.parent)
++        files = discover(MIGRATION_0001_PATH.parent)[:4]
+         assert apply_pending(conn, files[:2]) == [1, 2]
+         with conn.cursor() as cur:
+             cur.execute(
+diff --git a/tests/integration/test_research_constraints.py b/tests/integration/test_research_constraints.py
+new file mode 100644
+index 0000000..f25cf53
+--- /dev/null
++++ b/tests/integration/test_research_constraints.py
+@@ -0,0 +1,175 @@
++"""PostgreSQL constraints on the universe tables (migration 0005)."""
++
++from collections.abc import Iterator
++
++import psycopg
++import pytest
++
++from factorflow.db.migrate_main import MIGRATIONS_DIR
++from factorflow.db.migrator import apply_pending, discover
++
++pytestmark = pytest.mark.postgres
++
++
++@pytest.fixture
++def universe_connection(postgres_connection_string: str) -> Iterator[psycopg.Connection]:
++    """A connection to a store migrated through 0005, with one instrument."""
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        files = [f for f in discover(MIGRATIONS_DIR) if f.version <= 5]
++        assert apply_pending(conn, files) == [1, 2, 3, 4, 5]
++        with conn.cursor() as cur:
++            cur.execute("INSERT INTO instrument (symbol, lifecycle) VALUES ('ABC', 'active')")
++        conn.commit()
++        yield conn
++    finally:
++        conn.close()
++
++
++def _instrument_id(conn: psycopg.Connection) -> int:
++    with conn.cursor() as cur:
++        cur.execute("SELECT instrument_id FROM instrument WHERE symbol = 'ABC'")
++        row = cur.fetchone()
++    assert row is not None
++    return int(row[0])
++
++
++def _new_universe(conn: psycopg.Connection) -> str:
++    with conn.cursor() as cur:
++        cur.execute("INSERT INTO universe DEFAULT VALUES RETURNING universe_id")
++        row = cur.fetchone()
++    assert row is not None
++    return str(row[0])
++
++
++def _insert_event(
++    conn: psycopg.Connection,
++    universe_id: str,
++    event_type: str,
++    instrument_id: int | None = None,
++    name: str | None = None,
++    filter_provenance: str | None = None,
++) -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO universe_event "
++            "(universe_id, event_type, instrument_id, name, filter_provenance) "
++            "VALUES (%s, %s, %s, %s, %s::jsonb)",
++            (universe_id, event_type, instrument_id, name, filter_provenance),
++        )
++
++
++# Implements TC-COMP-046
++@pytest.mark.parametrize(
++    ("event_type", "with_instrument", "name", "provenance", "constraint"),
++    (
++        ("exploded", False, None, None, "universe_event_type_known"),
++        ("member_added", False, None, None, "universe_event_member_has_instrument"),
++        ("member_removed", False, None, None, "universe_event_member_has_instrument"),
++        ("renamed", True, "Name", None, "universe_event_member_has_instrument"),
++        ("created", False, None, None, "universe_event_name_agrees"),
++        ("renamed", False, None, None, "universe_event_name_agrees"),
++        ("retired", False, "Name", None, "universe_event_name_agrees"),
++        ("renamed", False, "Name", '{"set_id": "x"}', "universe_event_provenance_only_on_created"),
++        ("created", False, " x", None, "universe_event_name_trimmed"),
++        ("created", False, "x ", None, "universe_event_name_trimmed"),
++        ("created", False, "", None, "universe_event_name_trimmed"),
++    ),
++)
++def test_malformed_event_is_refused_by_its_named_constraint(
++    universe_connection: psycopg.Connection,
++    event_type: str,
++    with_instrument: bool,
++    name: str | None,
++    provenance: str | None,
++    constraint: str,
++) -> None:
++    universe_id = _new_universe(universe_connection)
++    instrument_id = _instrument_id(universe_connection) if with_instrument else None
++
++    with pytest.raises(psycopg.errors.CheckViolation) as refused:
++        _insert_event(universe_connection, universe_id, event_type, instrument_id, name, provenance)
++
++    assert refused.value.diag.constraint_name == constraint
++
++
++# Implements TC-COMP-034
++@pytest.mark.parametrize(
++    ("event_type", "name", "index"),
++    (
++        ("created", "Name", "idx_universe_event_single_created"),
++        ("retired", None, "idx_universe_event_single_retired"),
++    ),
++)
++def test_a_second_created_or_retired_event_is_refused(
++    universe_connection: psycopg.Connection,
++    event_type: str,
++    name: str | None,
++    index: str,
++) -> None:
++    universe_id = _new_universe(universe_connection)
++    _insert_event(universe_connection, universe_id, event_type, name=name)
++
++    with pytest.raises(psycopg.errors.UniqueViolation) as refused:
++        _insert_event(universe_connection, universe_id, event_type, name=name)
++
++    assert refused.value.diag.constraint_name == index
++
++
++# Implements TC-COMP-046, TC-COMP-034
++def test_a_valid_lifecycle_is_accepted_and_events_are_ordered(
++    universe_connection: psycopg.Connection,
++) -> None:
++    instrument_id = _instrument_id(universe_connection)
++    universe_id = _new_universe(universe_connection)
++
++    _insert_event(
++        universe_connection,
++        universe_id,
++        "created",
++        name="Growth",
++        filter_provenance='{"set_id": "s", "hide_incomplete": false}',
++    )
++    _insert_event(universe_connection, universe_id, "renamed", name="Growth 2")
++    _insert_event(universe_connection, universe_id, "member_added", instrument_id)
++    _insert_event(universe_connection, universe_id, "member_removed", instrument_id)
++    _insert_event(universe_connection, universe_id, "retired")
++
++    with universe_connection.cursor() as cur:
++        cur.execute(
++            "SELECT event_type, recorded_on IS NOT NULL, event_id FROM universe_event "
++            "WHERE universe_id = %s ORDER BY event_id",
++            (universe_id,),
++        )
++        rows = cur.fetchall()
++    assert [row[0] for row in rows] == [
++        "created",
++        "renamed",
++        "member_added",
++        "member_removed",
++        "retired",
++    ]
++    assert all(row[1] for row in rows)
++    event_ids = [row[2] for row in rows]
++    assert event_ids == sorted(set(event_ids))
++
++
++# Implements AC-3
++def test_one_instrument_may_belong_to_two_universes(
++    universe_connection: psycopg.Connection,
++) -> None:
++    instrument_id = _instrument_id(universe_connection)
++    first = _new_universe(universe_connection)
++    second = _new_universe(universe_connection)
++
++    _insert_event(universe_connection, first, "member_added", instrument_id)
++    _insert_event(universe_connection, second, "member_added", instrument_id)
++
++    with universe_connection.cursor() as cur:
++        cur.execute(
++            "SELECT count(DISTINCT universe_id) FROM universe_event WHERE instrument_id = %s",
++            (instrument_id,),
++        )
++        row = cur.fetchone()
++    assert row is not None
++    assert row[0] == 2
+diff --git a/tests/integration/test_research_migrations_apply.py b/tests/integration/test_research_migrations_apply.py
+new file mode 100644
+index 0000000..201fc5b
+--- /dev/null
++++ b/tests/integration/test_research_migrations_apply.py
+@@ -0,0 +1,112 @@
++"""Migration 0005 through the production migrator, and a second run after it."""
++
++from typing import Any
++
++import psycopg
++import pytest
++
++from factorflow.db.migrate_main import MIGRATIONS_DIR, run_migrations
++from factorflow.db.migrator import apply_pending, discover
++
++pytestmark = pytest.mark.postgres
++
++CAP_001_TABLES = (
++    "instrument",
++    "daily_bar",
++    "fundamental_observation",
++    "acquisition_run",
++    "applied_migrations",
++)
++
++
++def seed_cap_001_rows(conn: psycopg.Connection) -> None:
++    """Insert one row into each CAP-001 table a later migration could disturb."""
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO instrument (symbol, lifecycle) VALUES ('ABC', 'active') "
++            "RETURNING instrument_id"
++        )
++        row = cur.fetchone()
++        assert row is not None
++        instrument_id = row[0]
++        cur.execute(
++            "INSERT INTO daily_bar (instrument_id, session_date, value_hash, open_price, "
++            "high_price, low_price, close_price, volume) "
++            "VALUES (%s, '2020-01-02', decode(repeat('ab', 32), 'hex'), 1, 2, 1, 2, 100)",
++            (instrument_id,),
++        )
++        cur.execute(
++            "INSERT INTO fundamental_observation (instrument_id, fiscal_period_end, "
++            "fiscal_period, statement_type, value_hash, payload) "
++            "VALUES (%s, '2019-12-31', 'FY', 'ratios', decode(repeat('cd', 32), 'hex'), '{}')",
++            (instrument_id,),
++        )
++        cur.execute(
++            "INSERT INTO acquisition_run (state, history_depth_years) VALUES ('requested', 1)"
++        )
++    conn.commit()
++
++
++def snapshot_cap_001(conn: psycopg.Connection) -> dict[str, list[tuple[Any, ...]]]:
++    """Every row of every CAP-001 table, as text, in a stable order."""
++    snapshot: dict[str, list[tuple[Any, ...]]] = {}
++    with conn.cursor() as cur:
++        for table in CAP_001_TABLES:
++            cur.execute(f"SELECT t::text FROM {table} t ORDER BY 1")  # noqa: S608
++            snapshot[table] = cur.fetchall()
++    return snapshot
++
++
++# Implements TC-COMP-045
++def test_migration_0005_applies_without_touching_cap_001_rows(
++    postgres_connection_string: str,
++) -> None:
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        files = discover(MIGRATIONS_DIR)
++        assert apply_pending(conn, [f for f in files if f.version <= 4]) == [1, 2, 3, 4]
++        seed_cap_001_rows(conn)
++        before = snapshot_cap_001(conn)
++
++        assert apply_pending(conn, [f for f in files if f.version <= 5]) == [5]
++
++        after = snapshot_cap_001(conn)
++        recorded_before = [
++            row for row in after["applied_migrations"] if row not in before["applied_migrations"]
++        ]
++        assert len(recorded_before) == 1
++        assert {table: rows for table, rows in after.items() if table != "applied_migrations"} == {
++            table: rows for table, rows in before.items() if table != "applied_migrations"
++        }
++        assert set(before["applied_migrations"]) <= set(after["applied_migrations"])
++        with conn.cursor() as cur:
++            cur.execute("SELECT version, checksum FROM applied_migrations WHERE version = 5")
++            assert cur.fetchall() == [(5, files[4].checksum)]
++            cur.execute("SELECT count(*) FROM universe")
++            assert cur.fetchone() == (0,)
++            cur.execute("SELECT count(*) FROM universe_event")
++            assert cur.fetchone() == (0,)
++    finally:
++        conn.close()
++
++
++# Implements TC-COMP-048
++def test_second_migrator_run_after_0005_applies_nothing(
++    postgres_connection_string: str,
++) -> None:
++    highest = max(f.version for f in discover(MIGRATIONS_DIR))
++
++    first_code, _ = run_migrations(postgres_connection_string, MIGRATIONS_DIR)
++    assert first_code == 0
++    with psycopg.connect(postgres_connection_string) as conn:
++        with conn.cursor() as cur:
++            cur.execute("SELECT version, checksum FROM applied_migrations ORDER BY version")
++            recorded = cur.fetchall()
++
++    second = run_migrations(postgres_connection_string, MIGRATIONS_DIR)
++
++    assert second == (0, f"schema current at version {highest}")
++    with psycopg.connect(postgres_connection_string) as conn:
++        with conn.cursor() as cur:
++            cur.execute("SELECT version, checksum FROM applied_migrations ORDER BY version")
++            assert cur.fetchall() == recorded
+diff --git a/tests/unit/test_distribution_contents.py b/tests/unit/test_distribution_contents.py
+index 6444fb3..2840621 100644
+--- a/tests/unit/test_distribution_contents.py
++++ b/tests/unit/test_distribution_contents.py
+@@ -25,6 +25,7 @@ _MIGRATIONS = (
+     "0002_observations.sql",
+     "0003_coverage.sql",
+     "0004_runs.sql",
++    "0005_universes.sql",
+ )
+ 
+ _STUB_INDEX_HTML = "<!doctype html><html><body>stub</body></html>\n"
+@@ -76,7 +77,7 @@ def test_wheel_carries_the_migrations_and_nothing_under_tests(built_wheel: Path)
+ 
+ # Implements TC-COMP-392
+ def test_installed_layout_resolves_its_migrations(built_wheel: Path, tmp_path: Path) -> None:
+-    """The unpacked wheel's `migrate_main` finds versions 1 to 4 beside itself.
++    """The unpacked wheel's `migrate_main` finds versions 1 to 5 beside itself.
+     Its dependencies, such as `psycopg`, come from the project environment."""
+     site = tmp_path / "site"
+     zipfile.ZipFile(built_wheel).extractall(site)
+@@ -95,4 +96,4 @@ def test_installed_layout_resolves_its_migrations(built_wheel: Path, tmp_path: P
+     )
+     directory, versions = result.stdout.splitlines()
+     assert Path(directory) == site / "factorflow" / "db" / "migrations"
+-    assert versions == "[1, 2, 3, 4]"
++    assert versions == "[1, 2, 3, 4, 5]"
+diff --git a/tests/unit/test_migration_0005_matches_design.py b/tests/unit/test_migration_0005_matches_design.py
+new file mode 100644
+index 0000000..1342af3
+--- /dev/null
++++ b/tests/unit/test_migration_0005_matches_design.py
+@@ -0,0 +1,79 @@
++"""Guards against drift between migration 0005 and research-store design section 2.3.
++
++Like the 0001 guard, this reads the design's own SQL block rather than a copy
++of it, so a change on either side fails the test.
++"""
++
++from pathlib import Path
++
++import pytest
++
++from factorflow.db.migrate_main import MIGRATIONS_DIR
++from tests.unit.design_sql import sql_block_under_heading
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++RESEARCH_STORE_DESIGN_PATH = (
++    REPO_ROOT
++    / "docs"
++    / "capabilities"
++    / "CAP-002-universe-and-factor-classification"
++    / "design"
++    / "component-design-research-store.md"
++)
++MIGRATION_0005_PATH = MIGRATIONS_DIR / "0005_universes.sql"
++
++TABLES = ("universe", "universe_event")
++COLUMNS = (
++    "universe_id",
++    "created_at",
++    "event_id",
++    "event_type",
++    "instrument_id",
++    "name",
++    "filter_provenance",
++    "recorded_at",
++    "recorded_on",
++)
++CONSTRAINTS = (
++    "universe_event_type_known",
++    "universe_event_member_has_instrument",
++    "universe_event_name_agrees",
++    "universe_event_name_trimmed",
++    "universe_event_provenance_only_on_created",
++)
++INDEXES = (
++    "idx_universe_event_universe",
++    "idx_universe_event_instrument",
++    "idx_universe_event_single_created",
++    "idx_universe_event_single_retired",
++)
++
++
++def _design_block() -> str:
++    return sql_block_under_heading("### 2.3", path=RESEARCH_STORE_DESIGN_PATH)
++
++
++# Implements TC-COMP-017
++def test_migration_0005_matches_design_verbatim() -> None:
++    assert MIGRATION_0005_PATH.read_text(encoding="utf-8") == _design_block()
++
++
++# Implements TC-COMP-017
++def test_design_block_is_actually_read() -> None:
++    """The comparison above is only meaningful if the block was really found."""
++    block = _design_block()
++    assert "CREATE TABLE universe (" in block
++    assert "CREATE TABLE universe_event (" in block
++
++
++# Implements TC-COMP-017
++@pytest.mark.parametrize("name", [*TABLES, *COLUMNS, *CONSTRAINTS, *INDEXES])
++def test_migration_0005_names_every_element_of_section_2_3(name: str) -> None:
++    assert name in MIGRATION_0005_PATH.read_text(encoding="utf-8")
++
++
++# Implements TC-COMP-017
++def test_migration_0005_invents_no_name_length_bound() -> None:
++    text = MIGRATION_0005_PATH.read_text(encoding="utf-8").lower()
++    assert "octet_length" not in text
++    assert "length(" not in text
+diff --git a/tests/unit/test_migration_filenames.py b/tests/unit/test_migration_filenames.py
+index 6360b9c..991ce7d 100644
+--- a/tests/unit/test_migration_filenames.py
++++ b/tests/unit/test_migration_filenames.py
+@@ -45,6 +45,7 @@ def test_e5_real_migration_inventory_is_contiguous_through_four() -> None:
+         "0002_observations.sql",
+         "0003_coverage.sql",
+         "0004_runs.sql",
++        "0005_universes.sql",
+     ]
+ 
+ 
+diff --git a/tests/unit/test_migrator_discover.py b/tests/unit/test_migrator_discover.py
+index 287997a..73c8d0a 100644
+--- a/tests/unit/test_migrator_discover.py
++++ b/tests/unit/test_migrator_discover.py
+@@ -95,5 +95,5 @@ def test_migrations_dir_resolves_inside_the_package_with_unchanged_checksums() -
+         Path(migrate_main.__file__).resolve().parent / "migrations" == migrate_main.MIGRATIONS_DIR
+     )
+ 
+-    files = discover(migrate_main.MIGRATIONS_DIR)
++    files = [f for f in discover(migrate_main.MIGRATIONS_DIR) if f.version <= 4]
+     assert {f.version: f.checksum for f in files} == _CHECKSUMS_BEFORE_MOVE

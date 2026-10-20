@@ -95,5 +95,5 @@ def test_migrations_dir_resolves_inside_the_package_with_unchanged_checksums() -
         Path(migrate_main.__file__).resolve().parent / "migrations" == migrate_main.MIGRATIONS_DIR
     )
 
-    files = discover(migrate_main.MIGRATIONS_DIR)
+    files = [f for f in discover(migrate_main.MIGRATIONS_DIR) if f.version <= 4]
     assert {f.version: f.checksum for f in files} == _CHECKSUMS_BEFORE_MOVE

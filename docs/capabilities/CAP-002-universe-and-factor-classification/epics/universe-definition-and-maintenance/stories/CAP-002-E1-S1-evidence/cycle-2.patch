@@ -1,0 +1,70 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index df244a3..46e40a1 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -30,7 +30,7 @@ dev = [
+ where = ["src"]
+ 
+ [tool.setuptools.package-data]
+-factorflow = ["coverage/sql/*.sql", "db/migrations/*.sql", "api/static/**/*"]
++factorflow = ["coverage/sql/*.sql", "db/migrations/*.sql", "api/static/**/*", "universes/sql/*.sql"]
+ 
+ [tool.pytest.ini_options]
+ testpaths = ["tests"]
+diff --git a/tests/unit/test_package_data_ships_sql.py b/tests/unit/test_package_data_ships_sql.py
+new file mode 100644
+index 0000000..168bf7d
+--- /dev/null
++++ b/tests/unit/test_package_data_ships_sql.py
+@@ -0,0 +1,51 @@
++"""Every `sql/` directory under src/factorflow/ is shipped by a package-data glob.
++
++An editable install finds SQL files in the source tree whether or not
++`pyproject.toml` names them; a wheel does not. This guard keeps the two in step.
++"""
++
++import tomllib
++from pathlib import Path, PurePath
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++PACKAGE_ROOT = REPO_ROOT / "src" / "factorflow"
++
++
++def package_data_globs() -> list[str]:
++    pyproject = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
++    globs = pyproject["tool"]["setuptools"]["package-data"]["factorflow"]
++    return [str(glob) for glob in globs]
++
++
++def uncovered_sql_files(package_root: Path, globs: list[str]) -> list[str]:
++    """Return `.sql` files in a `sql/` directory that no glob matches."""
++    uncovered = []
++    for directory in sorted(package_root.rglob("sql")):
++        if not directory.is_dir():
++            continue
++        for path in sorted(directory.glob("*.sql")):
++            relative = path.relative_to(package_root)
++            if not any(PurePath(relative).full_match(glob) for glob in globs):
++                uncovered.append(relative.as_posix())
++    return uncovered
++
++
++# Implements TC-COMP-018
++def test_every_sql_directory_matches_a_package_data_glob() -> None:
++    assert uncovered_sql_files(PACKAGE_ROOT, package_data_globs()) == []
++
++
++# Implements TC-COMP-018
++def test_universes_sql_glob_is_listed_before_its_directory_exists() -> None:
++    """`src/factorflow/universes/sql/` arrives with CAP-002-E1-S2 (DEC-0088)."""
++    assert "universes/sql/*.sql" in package_data_globs()
++
++
++# Implements TC-COMP-018
++def test_guard_reports_a_sql_directory_no_glob_covers(tmp_path: Path) -> None:
++    sql_dir = tmp_path / "widgets" / "sql"
++    sql_dir.mkdir(parents=True)
++    (sql_dir / "read.sql").write_text("SELECT 1;\n", encoding="utf-8")
++
++    assert uncovered_sql_files(tmp_path, ["db/migrations/*.sql"]) == ["widgets/sql/read.sql"]
++    assert uncovered_sql_files(tmp_path, ["widgets/sql/*.sql"]) == []
