@@ -173,3 +173,58 @@ def test_one_instrument_may_belong_to_two_universes(
         row = cur.fetchone()
     assert row is not None
     assert row[0] == 2
+
+
+# Implements AC-3
+def test_two_universes_may_each_be_created(universe_connection: psycopg.Connection) -> None:
+    first = _new_universe(universe_connection)
+    second = _new_universe(universe_connection)
+
+    _insert_event(universe_connection, first, "created", name="Growth")
+    _insert_event(universe_connection, second, "created", name="Value")
+
+    with universe_connection.cursor() as cur:
+        cur.execute("SELECT count(*) FROM universe_event WHERE event_type = 'created'")
+        row = cur.fetchone()
+    assert row is not None
+    assert row[0] == 2
+
+
+# Implements TC-COMP-046
+def test_a_member_event_for_an_unknown_instrument_is_refused(
+    universe_connection: psycopg.Connection,
+) -> None:
+    universe_id = _new_universe(universe_connection)
+    unknown = _instrument_id(universe_connection) + 1000
+
+    with pytest.raises(psycopg.errors.ForeignKeyViolation) as refused:
+        _insert_event(universe_connection, universe_id, "member_added", unknown)
+
+    assert refused.value.diag.constraint_name == "universe_event_instrument_id_fkey"
+
+
+# Implements TC-COMP-046
+def test_an_event_without_a_universe_is_refused(universe_connection: psycopg.Connection) -> None:
+    with pytest.raises(psycopg.errors.NotNullViolation) as refused:
+        with universe_connection.cursor() as cur:
+            cur.execute("INSERT INTO universe_event (event_type) VALUES ('retired')")
+
+    assert refused.value.diag.column_name == "universe_id"
+
+
+# Implements TC-COMP-046
+def test_an_event_id_is_never_reused(universe_connection: psycopg.Connection) -> None:
+    first = _new_universe(universe_connection)
+    second = _new_universe(universe_connection)
+    _insert_event(universe_connection, first, "retired")
+
+    with pytest.raises(psycopg.errors.UniqueViolation) as refused:
+        with universe_connection.cursor() as cur:
+            cur.execute(
+                "INSERT INTO universe_event (event_id, universe_id, event_type) "
+                "OVERRIDING SYSTEM VALUE "
+                "SELECT event_id, %s, 'retired' FROM universe_event WHERE universe_id = %s",
+                (second, first),
+            )
+
+    assert refused.value.diag.constraint_name == "universe_event_pkey"
