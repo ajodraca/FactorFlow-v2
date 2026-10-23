@@ -1,0 +1,61 @@
+FF.....F..............                                                   [100%]
+=================================== FAILURES ===================================
+__________________ test_there_are_universe_sql_files_to_scan ___________________
+
+    def test_there_are_universe_sql_files_to_scan() -> None:
+>       assert _sql_files(), (
+            "no *.sql under src/factorflow/universes/sql/: the scan would pass vacuously"
+        )
+E       AssertionError: no *.sql under src/factorflow/universes/sql/: the scan would pass vacuously
+E       assert []
+E        +  where [] = _sql_files()
+
+tests/unit/test_universe_sql_safety.py:126: AssertionError
+_ test_every_sql_file_is_append_only_and_uses_named_placeholders_only[missing.sql] _
+
+path = PosixPath('/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/src/factorflow/universes/sql/missing.sql')
+
+    @pytest.mark.parametrize("path", _sql_files() or [SQL_DIR / "missing.sql"], ids=lambda p: p.name)
+    def test_every_sql_file_is_append_only_and_uses_named_placeholders_only(path: Path) -> None:
+>       assert statement_problems(path.read_text()) == []
+                                  ^^^^^^^^^^^^^^^^
+
+tests/unit/test_universe_sql_safety.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:546: in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py:632: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/src/factorflow/universes/sql/missing.sql')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/src/factorflow/universes/sql/missing.sql'
+
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_______ test_the_membership_statement_is_importable_and_equals_its_file ________
+
+    def test_the_membership_statement_is_importable_and_equals_its_file() -> None:
+>       assert isinstance(replay.MEMBERSHIP_AS_OF_SQL, str)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'MEMBERSHIP_AS_OF_SQL'
+
+tests/unit/test_universe_sql_safety.py:161: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_universe_sql_safety.py::test_there_are_universe_sql_files_to_scan
+FAILED tests/unit/test_universe_sql_safety.py::test_every_sql_file_is_append_only_and_uses_named_placeholders_only[missing.sql]
+FAILED tests/unit/test_universe_sql_safety.py::test_the_membership_statement_is_importable_and_equals_its_file
+3 failed, 19 passed in 0.13s

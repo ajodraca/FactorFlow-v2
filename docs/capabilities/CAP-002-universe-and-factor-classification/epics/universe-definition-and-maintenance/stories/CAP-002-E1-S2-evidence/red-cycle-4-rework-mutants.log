@@ -1,0 +1,117 @@
+=== reviewer mutant manual:1: new tests FAIL against production mutated this way ===
+E         
+E         Left contains 1 more item:
+E         {2: datetime.datetime(2026, 10, 1, 23, 0, tzinfo=datetime.timezone.utc)}
+E         Right contains 1 more item:
+E         {1: datetime.datetime(2026, 10, 2, 2, 0, tzinfo=datetime.timezone.utc)}
+E         Use -v to get more diff
+
+tests/unit/test_universe_replay.py:112: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_universe_replay.py::test_the_recorded_on_date_is_the_grain_not_the_utc_date_of_recorded_at
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 8 passed in 0.15s
+=== reviewer mutant manual:3: new tests FAIL against production mutated this way ===
+        assert past is not None and current is not None
+>       assert [m.symbol for m in past.members] == ["AA", "BB"]
+E       AssertionError: assert ['AA', 'CC'] == ['AA', 'BB']
+E         
+E         At index 1 diff: 'CC' != 'BB'
+E         Use -v to get more diff
+
+tests/integration/test_universe_as_of.py:239: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_current_state_for_a_past_date_returns_that_dates_members_not_todays
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 84 passed in 2.26s
+=== reviewer mutant manual:4: new tests FAIL against production mutated this way ===
+E       AssertionError: assert {'value_perce...04541015625')} == {'value_perce...ecimal('0.1')}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'growth_score_max': Decimal('0.1000000000000000055511151231257827021181583404541015625')} != {'growth_score_max': Decimal('0.1')}
+E         Use -v to get more diff
+
+tests/unit/test_universe_replay.py:293: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_universe_replay.py::test_full_provenance_maps_to_a_typed_origin_with_exact_decimals
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 47 passed in 0.17s
+=== reviewer mutant manual:5: new tests FAIL against production mutated this way ===
+E       AssertionError: assert {'CC': 'active'} == {'AA': 'activ...CC': 'active'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'AA': 'active'}
+E         Use -v to get more diff
+
+tests/integration/test_universe_as_of.py:261: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_the_recorded_on_date_and_event_id_decide_not_recorded_at
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 85 passed in 2.49s
+=== reviewer mutant manual:7: new tests FAIL against production mutated this way ===
+E         Omitting 1 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'BB': 'active'}
+E         Right contains 1 more item:
+E         {'CC': 'active'}
+E         Use -v to get more diff
+
+tests/integration/test_universe_as_of.py:261: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_the_recorded_on_date_and_event_id_decide_not_recorded_at
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 85 passed in 2.56s
+=== reviewer mutant manual:8: new tests FAIL against production mutated this way ===
+        before = replay.current_state(conn, universe_id, as_of=D1 - timedelta(days=1))
+    
+        assert on_creation is not None and before is not None
+>       assert on_creation.created_on == D1
+E       AssertionError: assert datetime.date(2026, 10, 2) == datetime.date(2026, 10, 1)
+E        +  where datetime.date(2026, 10, 2) = Universe(universe_id=UUID('bc02d7c2-a488-4975-bbed-68fe72d41ff1'), name='Late', lifecycle='active', created_at=datetim...one, symbol=None), as_of=datetime.date(2026, 10, 1), as_of_before_creation=True, created_on=datetime.date(2026, 10, 2)).created_on
+
+tests/integration/test_universe_as_of.py:284: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_the_creation_date_is_the_recorded_on_date_not_the_utc_date
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 86 passed in 2.76s
+=== reviewer mutant manual:9: new tests FAIL against production mutated this way ===
+        state = replay.current_state(conn, universe_id)
+    
+        assert state is not None
+>       assert state.as_of == today
+E       AssertionError: assert datetime.date(2026, 10, 23) == datetime.date(2026, 10, 22)
+E        +  where datetime.date(2026, 10, 23) = Universe(universe_id=UUID('2a8f525b-9888-447d-80b3-093e92331330'), name='Tech', lifecycle='active', created_at=datetim..., symbol=None), as_of=datetime.date(2026, 10, 23), as_of_before_creation=False, created_on=datetime.date(2026, 10, 19)).as_of
+
+tests/integration/test_universe_as_of.py:355: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_current_membership_uses_todays_america_chicago_date[UTC]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 90 passed in 2.90s
+=== reviewer mutant manual:17: new tests FAIL against production mutated this way ===
+    
+>       assert [e.event_id for e in page] == sorted([*ids, page[-1].event_id], reverse=True)
+E       assert [1, 2, 3, 4] == [4, 4, 3, 2]
+E         
+E         At index 0 diff: 1 != 4
+E         Use -v to get more diff
+
+tests/integration/test_universe_as_of.py:303: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_events_page_orders_by_event_id_whatever_recorded_at_says
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 87 passed in 2.70s
+=== reviewer mutant manual:18: new tests FAIL against production mutated this way ===
+E           assert {'AA': 'active'} == {'AA': 'activ...Z': 'retired'}
+E             
+E             Omitting 1 identical items, use -vv to show
+E             Right contains 1 more item:
+E             {'ZZ': 'retired'}
+E             Use -v to get more diff
+
+tests/integration/test_universe_as_of.py:215: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_as_of.py::test_a_member_whose_instrument_retires_later_stays_a_member_and_replays_as_retired
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 83 passed in 2.46s
