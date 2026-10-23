@@ -103,6 +103,20 @@ def test_event_id_decides_not_recorded_at_and_not_list_order() -> None:
 
 
 # Implements TC-COMP-049
+def test_the_recorded_on_date_is_the_grain_not_the_utc_date_of_recorded_at() -> None:
+    # Recorded 21:00 America/Chicago on D, which is 02:00 UTC on D + 1 (DEC-0065).
+    late = _at(D + timedelta(days=1), 2)
+    added = _event("member_added", 1, D, recorded_at=late)
+    next_day = _event("member_added", 2, D + timedelta(days=1), recorded_at=_at(D, 23))
+
+    assert fold_members([added, next_day], D) == {1: late}
+    assert fold_members([added, next_day], D + timedelta(days=1)) == {
+        1: late,
+        2: next_day.recorded_at,
+    }
+
+
+# Implements TC-COMP-049
 def test_events_recorded_after_as_of_are_ignored() -> None:
     added = _event("member_added", 1, D)
     events = [added, _event("member_removed", 1, D + timedelta(days=2))]
@@ -262,7 +276,11 @@ def test_full_provenance_maps_to_a_typed_origin_with_exact_decimals() -> None:
     provenance = {
         "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
         "classification_date": "2026-10-15",
-        "thresholds": {"value_percentile_min": 80, "momentum_score_min": 0.5},
+        "thresholds": {
+            "value_percentile_min": 80,
+            "momentum_score_min": 0.5,
+            "growth_score_max": 0.1,
+        },
         "hide_incomplete": True,
         "symbol": "AA",
     }
@@ -275,6 +293,7 @@ def test_full_provenance_maps_to_a_typed_origin_with_exact_decimals() -> None:
     assert origin.thresholds == {
         "value_percentile_min": Decimal("80"),
         "momentum_score_min": Decimal("0.5"),
+        "growth_score_max": Decimal("0.1"),
     }
     assert origin.thresholds is not None
     assert all(isinstance(v, Decimal) for v in origin.thresholds.values())

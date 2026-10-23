@@ -48,8 +48,14 @@ def _at(day: date, hour: int = 12) -> datetime:
     return datetime(day.year, day.month, day.day, hour, tzinfo=UTC)
 
 
-def _instrument(conn: psycopg.Connection, symbol: str, lifecycle: str = "active") -> int:
-    retired_at = _at(D1 - timedelta(days=30)) if lifecycle == "retired" else None
+def _instrument(
+    conn: psycopg.Connection,
+    symbol: str,
+    lifecycle: str = "active",
+    retired_at: datetime | None = None,
+) -> int:
+    if lifecycle == "retired" and retired_at is None:
+        retired_at = _at(D1 - timedelta(days=30))
     row = conn.execute(
         "INSERT INTO instrument (symbol, lifecycle, retired_at) VALUES (%s, %s, %s) "
         "RETURNING instrument_id",
@@ -194,6 +200,110 @@ def test_a_retired_instrument_stays_a_member_and_replays_as_retired(
     assert {m.symbol: m.lifecycle for m in current.members} == {"AA": "active", "ZZ": "retired"}
 
 
+# Implements TC-COMP-117
+def test_a_member_whose_instrument_retires_later_stays_a_member_and_replays_as_retired(
+    conn: psycopg.Connection,
+) -> None:
+    retired_at = _at(D3, 15)
+    live = _instrument(conn, "AA")
+    acquired = _instrument(conn, "ZZ", "retired", retired_at)
+    universe_id = _created(conn, D1)
+    _event(conn, universe_id, "member_added", D1, instrument_id=live)
+    _event(conn, universe_id, "member_added", D1, instrument_id=acquired)
+
+    for as_of in (D1, D2, D3, D4):  # before, on and after the instrument retired
+        assert _members(conn, universe_id, as_of) == {"AA": "active", "ZZ": "retired"}, as_of
+    current = replay.current_state(conn, universe_id)
+    assert current is not None
+    assert {m.symbol: m.lifecycle for m in current.members} == {"AA": "active", "ZZ": "retired"}
+    past = replay.current_state(conn, universe_id, as_of=D2)
+    assert past is not None
+    assert {m.symbol: m.lifecycle for m in past.members} == {"AA": "active", "ZZ": "retired"}
+
+
+# Implements TC-COMP-049
+def test_current_state_for_a_past_date_returns_that_dates_members_not_todays(
+    conn: psycopg.Connection,
+) -> None:
+    aa, bb, cc = _instrument(conn, "AA"), _instrument(conn, "BB"), _instrument(conn, "CC")
+    universe_id = _created(conn, D1)
+    _event(conn, universe_id, "member_added", D1, instrument_id=aa)
+    _event(conn, universe_id, "member_added", D1, instrument_id=bb)
+    _event(conn, universe_id, "member_removed", D3, instrument_id=bb)
+    _event(conn, universe_id, "member_added", D3, instrument_id=cc)
+
+    past = replay.current_state(conn, universe_id, as_of=D2)
+    current = replay.current_state(conn, universe_id)
+
+    assert past is not None and current is not None
+    assert [m.symbol for m in past.members] == ["AA", "BB"]
+    assert [m.symbol for m in current.members] == ["AA", "CC"]
+    assert past.members == replay.membership_as_of(conn, universe_id, D2)
+    assert past.as_of == D2
+
+
+# Implements TC-COMP-049
+def test_the_recorded_on_date_and_event_id_decide_not_recorded_at(
+    conn: psycopg.Connection,
+) -> None:
+    aa, bb, cc = _instrument(conn, "AA"), _instrument(conn, "BB"), _instrument(conn, "CC")
+    universe_id = _created(conn, D1)
+    # Recorded on D2 America/Chicago at 21:00, which is 02:00 UTC on D3.
+    late = _at(D3, 2)
+    _event(conn, universe_id, "member_added", D2, instrument_id=aa, at=late)
+    # The later event_id carries the earlier recorded_at: the add (20:00) then the removal (01:00).
+    _event(conn, universe_id, "member_added", D2, instrument_id=bb, at=_at(D2, 20))
+    _event(conn, universe_id, "member_removed", D2, instrument_id=bb, at=_at(D2, 1))
+    # The reverse: the removal (earlier id, later time) then the re-add (later id, earlier time).
+    _event(conn, universe_id, "member_removed", D2, instrument_id=cc, at=_at(D2, 20))
+    _event(conn, universe_id, "member_added", D2, instrument_id=cc, at=_at(D2, 1))
+
+    assert _members(conn, universe_id, D2) == {"AA": "active", "CC": "active"}
+    (aa_member,) = [m for m in replay.membership_as_of(conn, universe_id, D2) if m.symbol == "AA"]
+    assert aa_member.member_since == late
+    events = _replay_events(conn, universe_id)
+    for as_of in (D1, D2, D3):
+        sql = {
+            m.instrument_id: m.member_since
+            for m in replay.membership_as_of(conn, universe_id, as_of)
+        }
+        assert sql == fold_members(events, as_of), as_of
+
+
+# Implements TC-COMP-050
+def test_the_creation_date_is_the_recorded_on_date_not_the_utc_date(
+    conn: psycopg.Connection,
+) -> None:
+    universe_id = _universe(conn)
+    _event(conn, universe_id, "created", D1, name="Late", at=_at(D2, 2))  # 21:00 Chicago on D1
+
+    on_creation = replay.current_state(conn, universe_id, as_of=D1)
+    before = replay.current_state(conn, universe_id, as_of=D1 - timedelta(days=1))
+
+    assert on_creation is not None and before is not None
+    assert on_creation.created_on == D1
+    assert on_creation.as_of_before_creation is False
+    assert before.created_on == D1
+    assert before.as_of_before_creation is True
+
+
+# Implements TC-COMP-051
+def test_events_page_orders_by_event_id_whatever_recorded_at_says(
+    conn: psycopg.Connection,
+) -> None:
+    universe_id = _created(conn, D1, at=_at(D4))
+    ids = [
+        _event(conn, universe_id, "renamed", D2, name="One", at=_at(D3)),
+        _event(conn, universe_id, "renamed", D3, name="Two", at=_at(D2)),
+        _event(conn, universe_id, "renamed", D4, name="Three", at=_at(D1)),
+    ]
+
+    page, _ = replay.list_events(conn, universe_id, 10, None)
+
+    assert [e.event_id for e in page] == sorted([*ids, page[-1].event_id], reverse=True)
+    assert [e.name for e in page[:3]] == ["Three", "Two", "One"]
+
+
 # Implements TC-COMP-049
 def test_a_retired_universe_keeps_its_members_and_reports_when_it_retired(
     conn: psycopg.Connection,
@@ -224,7 +334,13 @@ def test_an_active_universe_has_no_retired_at(conn: psycopg.Connection) -> None:
 
 
 # Implements TC-COMP-049
-def test_current_membership_uses_todays_america_chicago_date(conn: psycopg.Connection) -> None:
+@pytest.mark.parametrize("session_zone", ["UTC", "Pacific/Kiritimati", "Pacific/Honolulu"])
+def test_current_membership_uses_todays_america_chicago_date(
+    conn: psycopg.Connection, session_zone: str
+) -> None:
+    # Kiritimati (UTC+14) and Honolulu (UTC-10) disagree with Chicago's date at
+    # complementary hours, so a session-date regression fails one of them at any time.
+    conn.execute(f"SET TIME ZONE '{session_zone}'")
     aa, bb = _instrument(conn, "AA"), _instrument(conn, "BB")
     row = conn.execute("SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date").fetchone()
     assert row is not None

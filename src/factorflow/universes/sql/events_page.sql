@@ -1,4 +1,4 @@
--- One page of a universe's event history, newest first (component design replay section; see replay.py).
+-- One page of a universe's event history, newest first (component-design-universe-service 2.5, DEC-0093, DEC-0094; see replay.py).
 -- before_event_id is the previous page's last event_id, or NULL for the first page.
 -- filter_provenance is non-null only on a created event saved from a filter.
 SELECT e.event_id,

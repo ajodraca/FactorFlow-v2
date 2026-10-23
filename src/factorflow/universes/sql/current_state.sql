@@ -1,4 +1,4 @@
--- One universe's current state by replay (component design replay section; see replay.py):
+-- One universe's current state by replay (component-design-universe-service 2.5, DEC-0065, DEC-0094; see replay.py):
 -- the created event (creation time and date, provenance, original name), the latest
 -- renamed event (current name) and the retired event (retired_at) in one query.
 -- Zero rows for an unknown universe. today is the America/Chicago date, computed in

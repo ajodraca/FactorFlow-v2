@@ -1,5 +1,5 @@
 -- One page of universes, newest first, keyset-paged by (created_at, universe_id)
--- (component design replay section; see replay.py). The name is the replayed current
+-- (component-design-universe-service 2.5, DEC-0094; see replay.py). The name is the replayed current
 -- name: the latest renamed event, else the created event. The prefix match uses starts_with, not LIKE, so a
 -- percent sign or underscore in the prefix is a literal. No member count.
 WITH replayed AS (

@@ -119,3 +119,53 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle adds only test code and changes no production behaviour
+
+  - id: cycle-4
+    tasks: [T003, T004, T006, T008]
+    description: >
+      Review rework for implementation-review-v1 (IR-001 to IR-006): tests for current_state composing
+      the requested as_of, fixtures that separate recorded_at from recorded_on and from event_id order
+      (membership, creation date, events page, pure fold), the planned retired-after-joining fixture, a
+      non-binary-exact threshold, the America/Chicago today under three session time zones, and the SQL
+      header citations. No production behaviour changes.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S2-evidence/red-cycle-4-rework-mutants.log
+    red_log_sha256: 7b3bb1e03735a332a9f48a364770bf3ee341afa8408ddc5d131a6aef45a815fb
+    red_evidence: >
+      The production code was already correct, so the new tests pass against it. Their RED is the nine
+      reviewer mutants (manual:1, 3, 4, 5, 7, 8, 9, 17, 18) that survived review v1: the new tests fail
+      against each, as the log shows.
+    green_evidence: >
+      Full suite: 909 passed non-postgres, 327 passed postgres; ruff, ruff format and mypy strict clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: debbba4425dcfc60aa45060641af6289d4f308826a7ea0bb2afecb2f66fe979e
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: 94b3a01fa9b446a7a538f70fcb43c2fd1462d5a7aa95e219aeabb8119b1cdde7
+      generated: 14
+      killed: 9
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.643
+      survivors:
+        - id: src/factorflow/universes/sql/current_state.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutant changes a number inside a SQL header comment; no statement changes.
+        - id: src/factorflow/universes/sql/current_state.sql:1:off-by-one:2
+          disposition: equivalent
+          reason: the mutant changes a number inside a SQL header comment; no statement changes.
+        - id: src/factorflow/universes/sql/events_page.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutant changes a number inside a SQL header comment; no statement changes.
+        - id: src/factorflow/universes/sql/events_page.sql:1:off-by-one:2
+          disposition: equivalent
+          reason: the mutant changes a number inside a SQL header comment; no statement changes.
+        - id: src/factorflow/universes/sql/list_universes.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutant changes a number inside a SQL header comment; no statement changes.
