@@ -67,7 +67,17 @@ expansion, and it never polls. Migration `0005_universes.sql` adds the
 research store's first tables, `universe` and the append-only
 `universe_event` log, and `src/factorflow/universes/replay.py` reads them:
 it replays current and as-of membership from the event log and pages events
-and universes; nothing writes them yet. What exists today is described
+and universes. `src/factorflow/universes/service.py` is their first writer:
+`create_by_hand` creates a named universe from covered instruments (an
+`instrument` row with at least one `coverage_segment`, whatever its
+lifecycle), and `add_members` adds covered instruments to an active universe,
+reporting current members as `already_member`. Either call refuses the whole
+request when any symbol is not covered, naming every such symbol, and a
+create is also refused when it has no members or when an active universe
+already holds its trimmed name. Every write takes one transaction advisory
+lock (`UNIVERSE_WRITE_LOCK_KEY`) before its checks, so two concurrent creates
+of one name cannot both succeed, and issues `INSERT` only; no API route or
+screen calls the service yet. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
@@ -2155,7 +2165,9 @@ included in `uv run pytest -m postgres` and in the full suite.
 `test_coverage_volume.py` (CAP-001-E6-S1), which pages coverage across 3000
 instruments, is also marked `slow`, as is
 `test_api_coverage.py::test_volume_read_of_3000_instruments` (CAP-001-E6-S3),
-which does the same through `GET /api/coverage`.
+which does the same through `GET /api/coverage`. `test_universe_volume.py`
+(CAP-002-E1-S3), which builds a 3000-member universe in three calls and
+replays it, is marked `slow` as well.
 
 The interface suite is Vitest with React Testing Library, run from the
 repository root:
