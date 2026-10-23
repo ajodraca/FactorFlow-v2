@@ -65,7 +65,9 @@ each instrument's per-data-type presence, covered range, gap count and
 depth shortfall from `GET /api/coverage`, with gap dates behind row
 expansion, and it never polls. Migration `0005_universes.sql` adds the
 research store's first tables, `universe` and the append-only
-`universe_event` log; no service reads or writes them yet. What exists today is described
+`universe_event` log, and `src/factorflow/universes/replay.py` reads them:
+it replays current and as-of membership from the event log and pages events
+and universes; nothing writes them yet. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
