@@ -1,0 +1,511 @@
+diff --git a/src/factorflow/universes/__init__.py b/src/factorflow/universes/__init__.py
+new file mode 100644
+index 0000000..e0375c5
+--- /dev/null
++++ b/src/factorflow/universes/__init__.py
+@@ -0,0 +1,6 @@
++"""The universe service: named, dated sets of acquired instruments (CAP-002).
++
++This package holds the read half (``replay``): membership is replayed from the
++append-only ``universe_event`` log, never read from a maintained row. The
++public service names live in ``service.py``, which is CAP-002-E1-S3's.
++"""
+diff --git a/src/factorflow/universes/replay.py b/src/factorflow/universes/replay.py
+new file mode 100644
+index 0000000..75a02d1
+--- /dev/null
++++ b/src/factorflow/universes/replay.py
+@@ -0,0 +1,179 @@
++"""Universe replay: membership, current state and the event history.
++
++Implements ``component-design-universe-service.md`` sections 2.1, 2.3 and 2.5.
++A universe's state is never stored: it is replayed from the append-only
++``universe_event`` log by ``event_id``, at the ``recorded_on`` (America/Chicago)
++grain (DEC-0065). The types and the paged reads live here, and
++``service.py`` (CAP-002-E1-S3) re-exports and delegates to them (DEC-0093); the
++universe page and the creation date follow DEC-0094.
++
++This module issues no ``INSERT``, ``UPDATE`` or ``DELETE``. Satisfies AC-6,
++AC-15, DAC-E1-8, DAC-E1-9 and DAC-E1-S2-1 through DAC-E1-S2-5
++(CAP-002-E1-S2).
++"""
++
++import base64
++import json
++from collections.abc import Iterable
++from dataclasses import dataclass
++from datetime import date, datetime
++from decimal import Decimal
++from typing import Any, Final
++from uuid import UUID
++
++from factorflow.runs.queries import CursorError
++
++_CURSOR_VERSION: Final = 1
++_MEMBER_EVENTS: Final = frozenset({"member_added", "member_removed"})
++
++
++@dataclass(frozen=True)
++class Member:
++    instrument_id: int
++    symbol: str
++    lifecycle: str
++    member_since: datetime
++
++
++@dataclass(frozen=True)
++class Origin:
++    kind: str
++    set_id: UUID | None
++    classification_date: date | None
++    thresholds: dict[str, Decimal] | None
++    hide_incomplete: bool | None
++    symbol: str | None
++
++
++@dataclass(frozen=True)
++class Universe:
++    universe_id: UUID
++    name: str
++    lifecycle: str
++    created_at: datetime
++    retired_at: datetime | None
++    members: list[Member]
++    origin: Origin
++    as_of: date
++    as_of_before_creation: bool
++    created_on: date | None = None
++
++
++@dataclass(frozen=True)
++class UniverseEvent:
++    event_id: int
++    event_type: str
++    name: str | None
++    symbol: str | None
++    recorded_at: datetime
++    recorded_on: date
++    filter_provenance: dict[str, Any] | None = None
++
++
++@dataclass(frozen=True)
++class ReplayEvent:
++    """One ``universe_event`` row as ``fold_members`` reads it."""
++
++    event_id: int
++    event_type: str
++    instrument_id: int | None
++    recorded_at: datetime
++    recorded_on: date
++
++
++@dataclass(frozen=True)
++class UniverseRow:
++    universe_id: UUID
++    name: str
++    lifecycle: str
++    created_at: datetime
++    retired_at: datetime | None
++
++
++def fold_members(events: Iterable[ReplayEvent], as_of: date) -> dict[int, datetime]:
++    """Members as of ``as_of``: ``instrument_id`` to the selected add's ``recorded_at``.
++
++    Per instrument the highest ``event_id`` among the member events recorded on
++    or before ``as_of`` decides; the instrument is a member iff it is a
++    ``member_added``. This is the pure statement of ``membership_as_of.sql``.
++    """
++    latest: dict[int, ReplayEvent] = {}
++    for event in events:
++        if event.event_type not in _MEMBER_EVENTS or event.recorded_on > as_of:
++            continue
++        if event.instrument_id is None:
++            continue
++        seen = latest.get(event.instrument_id)
++        if seen is None or event.event_id > seen.event_id:
++            latest[event.instrument_id] = event
++    return {
++        instrument_id: event.recorded_at
++        for instrument_id, event in latest.items()
++        if event.event_type == "member_added"
++    }
++
++
++def origin_from_provenance(provenance: dict[str, Any] | None) -> Origin:
++    """The typed ``Origin`` of a ``created`` event's ``filter_provenance``."""
++    if provenance is None:
++        return Origin("by_hand", None, None, None, None, None)
++    raw_thresholds = provenance.get("thresholds")
++    return Origin(
++        kind="from_filter",
++        set_id=UUID(provenance["set_id"]),
++        classification_date=date.fromisoformat(provenance["classification_date"]),
++        thresholds=(
++            None
++            if raw_thresholds is None
++            else {name: Decimal(str(value)) for name, value in raw_thresholds.items()}
++        ),
++        hide_incomplete=provenance.get("hide_incomplete"),
++        symbol=provenance.get("symbol"),
++    )
++
++
++def _encode(payload: dict[str, Any]) -> str:
++    raw = json.dumps({"v": _CURSOR_VERSION, **payload}, separators=(",", ":"))
++    return base64.urlsafe_b64encode(raw.encode()).decode().rstrip("=")
++
++
++def _decode(cursor: str) -> dict[str, Any]:
++    if not cursor:
++        raise CursorError("empty cursor")
++    try:
++        data = json.loads(base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4)))
++    except Exception as exc:
++        raise CursorError(f"malformed cursor: {exc}") from exc
++    if not isinstance(data, dict):
++        raise CursorError("cursor payload is not a JSON object")
++    if data.get("v") != _CURSOR_VERSION:
++        raise CursorError(
++            f"unsupported cursor version {data.get('v')!r}; expected {_CURSOR_VERSION}"
++        )
++    return data
++
++
++def encode_event_cursor(event_id: int) -> str:
++    """Encode the last ``event_id`` of a page as a versioned URL-safe cursor."""
++    return _encode({"id": event_id})
++
++
++def decode_event_cursor(cursor: str) -> int:
++    data = _decode(cursor)
++    event_id = data.get("id")
++    if isinstance(event_id, bool) or not isinstance(event_id, int):
++        raise CursorError("cursor field error: id must be an integer")
++    return event_id
++
++
++def encode_universe_cursor(created_at: datetime, universe_id: UUID) -> str:
++    """Encode a ``(created_at, universe_id)`` keyset cursor."""
++    return _encode({"ts": created_at.isoformat(), "id": str(universe_id)})
++
++
++def decode_universe_cursor(cursor: str) -> tuple[datetime, UUID]:
++    data = _decode(cursor)
++    try:
++        return datetime.fromisoformat(data["ts"]), UUID(data["id"])
++    except (KeyError, TypeError, ValueError) as exc:
++        raise CursorError(f"cursor field error: {exc}") from exc
+diff --git a/tests/unit/test_universe_replay.py b/tests/unit/test_universe_replay.py
+new file mode 100644
+index 0000000..fb174a8
+--- /dev/null
++++ b/tests/unit/test_universe_replay.py
+@@ -0,0 +1,308 @@
++"""Replay semantics on in-memory event sequences, cursors and provenance.
++
++``fold_members`` is the pure statement of the rule the SQL implements
++(``membership_as_of.sql``); ``tests/integration/test_universe_as_of.py`` proves
++the two agree. Satisfies AC-6, DAC-E1-8, DAC-E1-S2-1.
++"""
++
++import base64
++import copy
++import json
++import random
++from datetime import UTC, date, datetime, timedelta
++from decimal import Decimal
++from uuid import UUID
++
++import pytest
++
++from factorflow.runs.queries import CursorError
++from factorflow.universes import replay
++from factorflow.universes.replay import ReplayEvent, fold_members
++
++D = date(2026, 10, 1)
++_NEXT_ID = iter(range(1, 10_000))
++
++
++def _at(day: date, hour: int = 12) -> datetime:
++    return datetime(day.year, day.month, day.day, hour, tzinfo=UTC)
++
++
++def _event(
++    event_type: str, instrument_id: int | None, day: date, *, recorded_at: datetime | None = None
++) -> ReplayEvent:
++    return ReplayEvent(
++        event_id=next(_NEXT_ID),
++        event_type=event_type,
++        instrument_id=instrument_id,
++        recorded_at=recorded_at or _at(day),
++        recorded_on=day,
++    )
++
++
++# Implements TC-COMP-049
++def test_add_and_remove_on_the_same_date_is_not_membership() -> None:
++    events = [_event("member_added", 1, D), _event("member_removed", 1, D)]
++
++    assert fold_members(events, D) == {}
++    assert fold_members(events, D + timedelta(days=1)) == {}
++
++
++# Implements TC-COMP-049
++@pytest.mark.parametrize("offset", [0, 1, 30])
++def test_a_member_added_on_d_is_a_member_from_d_onward(offset: int) -> None:
++    added = _event("member_added", 1, D)
++
++    assert fold_members([added], D + timedelta(days=offset)) == {1: added.recorded_at}
++
++
++# Implements TC-COMP-049
++def test_a_member_is_not_one_before_the_day_it_was_added() -> None:
++    assert fold_members([_event("member_added", 1, D)], D - timedelta(days=1)) == {}
++
++
++# Implements TC-COMP-049
++def test_removal_ends_membership_on_its_own_date_but_not_the_day_before() -> None:
++    removal_day = D + timedelta(days=5)
++    added = _event("member_added", 1, D)
++    events = [added, _event("member_removed", 1, removal_day)]
++
++    assert fold_members(events, removal_day) == {}
++    assert fold_members(events, removal_day - timedelta(days=1)) == {1: added.recorded_at}
++
++
++# Implements TC-COMP-049
++def test_a_re_add_makes_a_member_again_since_the_second_add() -> None:
++    events = [
++        _event("member_added", 1, D),
++        _event("member_removed", 1, D + timedelta(days=3)),
++        _event("member_added", 1, D + timedelta(days=9)),
++    ]
++    second = events[-1]
++
++    assert fold_members(events, D + timedelta(days=9)) == {1: second.recorded_at}
++
++
++# Implements TC-COMP-049
++def test_event_id_decides_not_recorded_at_and_not_list_order() -> None:
++    # The later event carries the earlier recorded_at, and the list is shuffled.
++    added = _event("member_added", 1, D, recorded_at=_at(D, 20))
++    removed = _event("member_removed", 1, D, recorded_at=_at(D, 1))
++    assert added.event_id < removed.event_id
++    ordered = [added, removed]
++
++    for seed in range(5):
++        shuffled = ordered[:]
++        random.Random(seed).shuffle(shuffled)
++        assert fold_members(shuffled, D) == {}
++
++    # And the opposite order of ids is a member.
++    removed_first = _event("member_removed", 2, D, recorded_at=_at(D, 20))
++    added_second = _event("member_added", 2, D, recorded_at=_at(D, 1))
++    assert fold_members([added_second, removed_first], D) == {2: added_second.recorded_at}
++
++
++# Implements TC-COMP-049
++def test_events_recorded_after_as_of_are_ignored() -> None:
++    added = _event("member_added", 1, D)
++    events = [added, _event("member_removed", 1, D + timedelta(days=2))]
++
++    assert fold_members(events, D + timedelta(days=1)) == {1: added.recorded_at}
++
++
++# Implements TC-COMP-049
++def test_created_renamed_and_retired_never_add_or_remove_a_member() -> None:
++    added = _event("member_added", 1, D)
++    events = [
++        _event("created", None, D),
++        added,
++        _event("renamed", None, D + timedelta(days=1)),
++        _event("retired", None, D + timedelta(days=2)),
++    ]
++
++    assert fold_members(events, D + timedelta(days=3)) == {1: added.recorded_at}
++
++
++# Implements TC-COMP-049
++def test_an_empty_sequence_has_no_members() -> None:
++    assert fold_members([], D) == {}
++
++
++# Implements TC-COMP-049
++def test_several_instruments_fold_independently() -> None:
++    a = _event("member_added", 1, D)
++    b = _event("member_added", 2, D)
++    removed_a = _event("member_removed", 1, D + timedelta(days=1))
++
++    assert fold_members([a, b, removed_a], D + timedelta(days=1)) == {2: b.recorded_at}
++
++
++def test_fold_members_is_pure() -> None:
++    events = [_event("member_added", 1, D), _event("member_removed", 1, D + timedelta(days=1))]
++    snapshot = copy.deepcopy(events)
++
++    first = fold_members(events, D)
++    assert events == snapshot
++    assert fold_members(events, D) == first
++
++
++# Implements TC-COMP-051
++def test_event_cursor_round_trips_as_a_versioned_url_safe_string() -> None:
++    cursor = replay.encode_event_cursor(12345)
++
++    assert replay.decode_event_cursor(cursor) == 12345
++    payload = json.loads(base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4)))
++    assert payload["v"] == 1
++    assert set(cursor) <= set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
++
++
++# Implements TC-COMP-051
++@pytest.mark.parametrize("event_id", [1, 12, 123, 1234, 12345, 123456, 10**12])
++def test_event_cursor_round_trips_whatever_its_padding(event_id: int) -> None:
++    assert replay.decode_event_cursor(replay.encode_event_cursor(event_id)) == event_id
++
++
++@pytest.mark.parametrize(
++    "value",
++    (
++        replay.Member(1, "AA", "active", _at(D)),
++        replay.Origin("by_hand", None, None, None, None, None),
++        replay.Universe(
++            UUID(int=1),
++            "u",
++            "active",
++            _at(D),
++            None,
++            [],
++            replay.Origin("by_hand", None, None, None, None, None),
++            D,
++            False,
++        ),
++        replay.UniverseEvent(1, "created", "u", None, _at(D), D),
++        ReplayEvent(1, "created", None, _at(D), D),
++        replay.UniverseRow(UUID(int=1), "u", "active", _at(D), None),
++    ),
++)
++def test_the_replayed_types_are_immutable(value: object) -> None:
++    with pytest.raises(AttributeError):
++        value.__setattr__(next(iter(vars(value))), None)
++
++
++# Implements TC-COMP-051
++def test_universe_cursor_round_trips() -> None:
++    created_at = datetime(2026, 10, 1, 12, 30, 45, 123456, tzinfo=UTC)
++    universe_id = UUID("6f1c2a54-0000-4000-8000-00000000abcd")
++
++    cursor = replay.encode_universe_cursor(created_at, universe_id)
++
++    assert replay.decode_universe_cursor(cursor) == (created_at, universe_id)
++    payload = json.loads(base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4)))
++    assert payload["v"] == 1
++
++
++def _raw(payload: object) -> str:
++    return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
++
++
++@pytest.mark.parametrize(
++    "cursor",
++    (
++        "",
++        "!!! not base64 !!!",
++        _raw([1, 2]),
++        _raw({"v": 2, "id": 5}),
++        _raw({"v": 1}),
++        _raw({"v": 1, "id": "five"}),
++        _raw({"v": 1, "id": True}),
++    ),
++)
++def test_a_bad_event_cursor_raises_cursor_error(cursor: str) -> None:
++    with pytest.raises(CursorError):
++        replay.decode_event_cursor(cursor)
++
++
++@pytest.mark.parametrize(
++    "cursor",
++    (
++        "",
++        "!!! not base64 !!!",
++        _raw([1, 2]),
++        _raw(
++            {
++                "v": 2,
++                "ts": "2026-10-01T00:00:00+00:00",
++                "id": "6f1c2a54-0000-4000-8000-00000000abcd",
++            }
++        ),
++        _raw({"v": 1, "ts": "2026-10-01T00:00:00+00:00"}),
++        _raw({"v": 1, "id": "6f1c2a54-0000-4000-8000-00000000abcd"}),
++        _raw({"v": 1, "ts": "not a date", "id": "6f1c2a54-0000-4000-8000-00000000abcd"}),
++        _raw({"v": 1, "ts": "2026-10-01T00:00:00+00:00", "id": "not a uuid"}),
++    ),
++)
++def test_a_bad_universe_cursor_raises_cursor_error(cursor: str) -> None:
++    with pytest.raises(CursorError):
++        replay.decode_universe_cursor(cursor)
++
++
++def test_no_provenance_is_by_hand_with_every_other_field_none() -> None:
++    assert replay.origin_from_provenance(None) == replay.Origin(
++        kind="by_hand",
++        set_id=None,
++        classification_date=None,
++        thresholds=None,
++        hide_incomplete=None,
++        symbol=None,
++    )
++
++
++def test_full_provenance_maps_to_a_typed_origin_with_exact_decimals() -> None:
++    provenance = {
++        "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
++        "classification_date": "2026-10-15",
++        "thresholds": {"value_percentile_min": 80, "momentum_score_min": 0.5},
++        "hide_incomplete": True,
++        "symbol": "AA",
++    }
++
++    origin = replay.origin_from_provenance(provenance)
++
++    assert origin.kind == "from_filter"
++    assert origin.set_id == UUID("6f1c2a54-0000-4000-8000-00000000abcd")
++    assert origin.classification_date == date(2026, 10, 15)
++    assert origin.thresholds == {
++        "value_percentile_min": Decimal("80"),
++        "momentum_score_min": Decimal("0.5"),
++    }
++    assert origin.thresholds is not None
++    assert all(isinstance(v, Decimal) for v in origin.thresholds.values())
++    assert origin.hide_incomplete is True
++    assert origin.symbol == "AA"
++
++
++def test_provenance_with_no_search_prefix_has_symbol_none() -> None:
++    origin = replay.origin_from_provenance(
++        {
++            "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
++            "classification_date": "2026-10-15",
++            "thresholds": {},
++            "hide_incomplete": False,
++            "symbol": None,
++        }
++    )
++
++    assert origin.symbol is None
++    assert origin.hide_incomplete is False
++
++
++def test_empty_thresholds_object_is_empty_not_none() -> None:
++    origin = replay.origin_from_provenance(
++        {
++            "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
++            "classification_date": "2026-10-15",
++            "thresholds": {},
++            "hide_incomplete": False,
++            "symbol": None,
++        }
++    )
++
++    assert origin.thresholds == {}

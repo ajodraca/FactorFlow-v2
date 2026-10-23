@@ -1,0 +1,519 @@
+...........................................F.....FFFFFFFFFFFFFFFFFFFFFFF [100%]
+=================================== FAILURES ===================================
+_ test_a_bad_universe_cursor_raises_cursor_error[eyJ2IjogMSwgInRzIjogIjIwMjYtMTAtMDFUMDA6MDA6MDArMDA6MDAiLCAiaWQiOiA1fQ] _
+
+cursor = 'eyJ2IjogMSwgInRzIjogIjIwMjYtMTAtMDFUMDA6MDA6MDArMDA6MDAiLCAiaWQiOiA1fQ'
+
+    @pytest.mark.parametrize(
+        "cursor",
+        (
+            "",
+            "!!! not base64 !!!",
+            _raw([1, 2]),
+            _raw(
+                {
+                    "v": 2,
+                    "ts": "2026-10-01T00:00:00+00:00",
+                    "id": "6f1c2a54-0000-4000-8000-00000000abcd",
+                }
+            ),
+            _raw({"v": 1, "ts": "2026-10-01T00:00:00+00:00"}),
+            _raw({"v": 1, "id": "6f1c2a54-0000-4000-8000-00000000abcd"}),
+            _raw({"v": 1, "ts": "not a date", "id": "6f1c2a54-0000-4000-8000-00000000abcd"}),
+            _raw({"v": 1, "ts": "2026-10-01T00:00:00+00:00", "id": "not a uuid"}),
+            _raw({"v": 1, "ts": "2026-10-01T00:00:00+00:00", "id": 5}),
+            _raw({"v": 1, "ts": 5, "id": "6f1c2a54-0000-4000-8000-00000000abcd"}),
+        ),
+    )
+    def test_a_bad_universe_cursor_raises_cursor_error(cursor: str) -> None:
+        with pytest.raises(CursorError):
+>           replay.decode_universe_cursor(cursor)
+
+tests/unit/test_universe_replay.py:247: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/universes/replay.py:177: in decode_universe_cursor
+    return datetime.fromisoformat(data["ts"]), UUID(data["id"])
+                                               ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x10b7f4210>
+hex = 5, bytes = None, bytes_le = None, fields = None, int = None
+version = None, is_safe = <SafeUUID.unknown: None>
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a string of 16 bytes as the 'bytes' argument, a string of 16 bytes
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes='\x12\x34\x56\x78'*4)
+        UUID(bytes_le='\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      '\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+            raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+        if hex is not None:
+>           hex = hex.replace('urn:', '').replace('uuid:', '')
+                  ^^^^^^^^^^^
+E           AttributeError: 'int' object has no attribute 'replace'
+
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/uuid.py:178: AttributeError
+____ test_an_out_of_range_limit_is_refused_before_the_connection_is_touched ____
+
+    def test_an_out_of_range_limit_is_refused_before_the_connection_is_touched() -> None:
+        for limit in (0, -1, MAX_PAGE_SIZE + 1):
+            with pytest.raises(ValueError):
+>               replay.list_events(None, UUID(int=1), limit, None)  # type: ignore[arg-type]
+                ^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'factorflow.universes.replay' has no attribute 'list_events'
+
+tests/unit/test_universe_replay.py:317: AttributeError
+____ test_an_unknown_lifecycle_is_refused_before_the_connection_is_touched _____
+
+    def test_an_unknown_lifecycle_is_refused_before_the_connection_is_touched() -> None:
+        with pytest.raises(ValueError):
+>           replay.list_universe_rows(None, "everything", None, 5, None)  # type: ignore[arg-type]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.replay' has no attribute 'list_universe_rows'
+
+tests/unit/test_universe_replay.py:324: AttributeError
+_____ test_sql_and_the_pure_fold_agree_on_every_date_of_a_scripted_history _____
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_913959897b734c25b02e45aceb04e62e) at 0x10b4707d0>
+
+    def test_sql_and_the_pure_fold_agree_on_every_date_of_a_scripted_history(
+        conn: psycopg.Connection,
+    ) -> None:
+        aa, bb, cc = _instrument(conn, "AA"), _instrument(conn, "BB"), _instrument(conn, "CC")
+        universe_id = _created(conn, D1)
+        _event(conn, universe_id, "member_added", D1, instrument_id=aa)
+        _event(conn, universe_id, "member_added", D1, instrument_id=bb)
+        _event(conn, universe_id, "member_removed", D2, instrument_id=bb)
+        _event(conn, universe_id, "member_added", D2, instrument_id=cc)
+        _event(conn, universe_id, "member_removed", D3, instrument_id=cc)
+        _event(conn, universe_id, "member_added", D3, instrument_id=cc)
+        _event(conn, universe_id, "member_added", D4, instrument_id=bb)
+        _event(conn, universe_id, "member_removed", D4, instrument_id=bb)
+        events = _replay_events(conn, universe_id)
+    
+        for offset in range(-1, 6):
+            as_of = D1 + timedelta(days=offset)
+            sql = {
+                m.instrument_id: m.member_since
+>               for m in replay.membership_as_of(conn, universe_id, as_of)
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+            }
+E           AttributeError: module 'factorflow.universes.replay' has no attribute 'membership_as_of'
+
+tests/integration/test_universe_as_of.py:138: AttributeError
+_____ test_a_stock_added_and_removed_on_one_date_is_not_a_member_that_day ______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_c872ef47606a418bb322781dc2e4df82) at 0x10b478e90>
+
+    def test_a_stock_added_and_removed_on_one_date_is_not_a_member_that_day(
+        conn: psycopg.Connection,
+    ) -> None:
+        aa, bb = _instrument(conn, "AA"), _instrument(conn, "BB")
+        universe_id = _created(conn, D1)
+        _event(conn, universe_id, "member_added", D2, instrument_id=aa)
+        _event(conn, universe_id, "member_removed", D2, instrument_id=aa)
+        _event(conn, universe_id, "member_added", D2, instrument_id=bb)
+    
+>       assert _members(conn, universe_id, D2) == {"BB": "active"}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_universe_as_of.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_c872ef47606a418bb322781dc2e4df82) at 0x10b478e90>
+universe_id = UUID('068ac0f8-a2a3-49e5-97ea-3d2dbe40a43f')
+as_of = datetime.date(2026, 10, 2)
+
+    def _members(conn: psycopg.Connection, universe_id: UUID, as_of: date) -> dict[str, str]:
+>       return {m.symbol: m.lifecycle for m in replay.membership_as_of(conn, universe_id, as_of)}
+                                               ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'membership_as_of'
+
+tests/integration/test_universe_as_of.py:115: AttributeError
+____ test_a_date_before_creation_has_no_members_and_names_the_creation_date ____
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_ac8dbfd7fdac46b3b405b0081564b7a0) at 0x10b4b6210>
+
+    def test_a_date_before_creation_has_no_members_and_names_the_creation_date(
+        conn: psycopg.Connection,
+    ) -> None:
+        aa = _instrument(conn, "AA")
+        universe_id = _created(conn, D1)
+        _event(conn, universe_id, "member_added", D1, instrument_id=aa)
+    
+>       before = replay.current_state(conn, universe_id, as_of=D1 - timedelta(days=1))
+                 ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:168: AttributeError
+_______ test_a_retired_instrument_stays_a_member_and_replays_as_retired ________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_3ccbd954f46f42349dbba101566c9afa) at 0x10b464380>
+
+    def test_a_retired_instrument_stays_a_member_and_replays_as_retired(
+        conn: psycopg.Connection,
+    ) -> None:
+        live, retired = _instrument(conn, "AA"), _instrument(conn, "ZZ", "retired")
+        universe_id = _created(conn, D1)
+        _event(conn, universe_id, "member_added", D1, instrument_id=live)
+        _event(conn, universe_id, "member_added", D2, instrument_id=retired)
+    
+>       assert _members(conn, universe_id, D2) == {"AA": "active", "ZZ": "retired"}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_universe_as_of.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_3ccbd954f46f42349dbba101566c9afa) at 0x10b464380>
+universe_id = UUID('e487bfd4-fba7-4582-a8f8-83312f357520')
+as_of = datetime.date(2026, 10, 2)
+
+    def _members(conn: psycopg.Connection, universe_id: UUID, as_of: date) -> dict[str, str]:
+>       return {m.symbol: m.lifecycle for m in replay.membership_as_of(conn, universe_id, as_of)}
+                                               ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'membership_as_of'
+
+tests/integration/test_universe_as_of.py:115: AttributeError
+____ test_a_retired_universe_keeps_its_members_and_reports_when_it_retired _____
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_3d79fa0d9d5c4724a48b82e6806b50eb) at 0x10b5d4c50>
+
+    def test_a_retired_universe_keeps_its_members_and_reports_when_it_retired(
+        conn: psycopg.Connection,
+    ) -> None:
+        aa = _instrument(conn, "AA")
+        universe_id = _created(conn, D1)
+        _event(conn, universe_id, "member_added", D1, instrument_id=aa)
+        _event(conn, universe_id, "retired", D3, at=_at(D3, 8))
+    
+>       past = replay.current_state(conn, universe_id, as_of=D2)
+               ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:206: AttributeError
+__________________ test_an_active_universe_has_no_retired_at ___________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_6db99932f99446c6b4d8a5158c43d6e7) at 0x10b436300>
+
+    def test_an_active_universe_has_no_retired_at(conn: psycopg.Connection) -> None:
+        universe_id = _created(conn, D1)
+    
+>       state = replay.current_state(conn, universe_id, as_of=D1)
+                ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:219: AttributeError
+___________ test_current_membership_uses_todays_america_chicago_date ___________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_7b46a1e5fd0f4c19ba665cdae43a4bb2) at 0x10b436210>
+
+    def test_current_membership_uses_todays_america_chicago_date(conn: psycopg.Connection) -> None:
+        aa, bb = _instrument(conn, "AA"), _instrument(conn, "BB")
+        row = conn.execute("SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date").fetchone()
+        assert row is not None
+        today = row[0]
+        universe_id = _created(conn, today - timedelta(days=3))
+        _event(conn, universe_id, "member_added", today, instrument_id=aa)
+        _event(conn, universe_id, "member_added", today + timedelta(days=1), instrument_id=bb)
+    
+>       state = replay.current_state(conn, universe_id)
+                ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:236: AttributeError
+____________________ test_an_unknown_universe_has_no_state _____________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=51956 user=test database=test_b24d04d409ca4799b6006cc982481e8e) at 0x10b436d50>
+
+    def test_an_unknown_universe_has_no_state(conn: psycopg.Connection) -> None:
+>       assert replay.current_state(conn, UUID(int=7)) is None
+               ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:245: AttributeError
+____________ test_the_name_is_the_latest_rename_whatever_the_as_of _____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_17b454a4b2f549eaaab6d42dc1a75324) at 0x10b4375c0>
+
+    def test_the_name_is_the_latest_rename_whatever_the_as_of(conn: psycopg.Connection) -> None:
+        universe_id = _created(conn, D1, name="Tech")
+        _event(conn, universe_id, "renamed", D2, name="Technology")
+        _event(conn, universe_id, "renamed", D3, name="Tech 100")
+    
+        for as_of in (D1, D2, D4):
+>           state = replay.current_state(conn, universe_id, as_of=as_of)
+                    ^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:255: AttributeError
+____________ test_a_filter_provenance_reads_back_as_a_typed_origin _____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_56da8070acf24f6caadeb5c1359d1962) at 0x10b437e30>
+
+    def test_a_filter_provenance_reads_back_as_a_typed_origin(conn: psycopg.Connection) -> None:
+        provenance = {
+            "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
+            "classification_date": "2026-10-15",
+            "thresholds": {"value_percentile_min": 80, "momentum_score_min": 0.5},
+            "hide_incomplete": True,
+            "symbol": None,
+        }
+        saved = _created(conn, D1, provenance=provenance)
+        by_hand = _created(conn, D1, name="Hand")
+    
+>       from_filter = replay.current_state(conn, saved, as_of=D1)
+                      ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'current_state'
+
+tests/integration/test_universe_as_of.py:273: AttributeError
+______________ test_member_since_is_the_selected_adds_recorded_at ______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_2c0393a643854e93857eeba21e9b79be) at 0x10b760500>
+
+    def test_member_since_is_the_selected_adds_recorded_at(conn: psycopg.Connection) -> None:
+        aa = _instrument(conn, "AA")
+        universe_id = _created(conn, D1)
+        _event(conn, universe_id, "member_added", D1, instrument_id=aa, at=_at(D1, 9))
+        _event(conn, universe_id, "member_removed", D2, instrument_id=aa)
+        _event(conn, universe_id, "member_added", D3, instrument_id=aa, at=_at(D3, 17))
+    
+>       (member,) = replay.membership_as_of(conn, universe_id, D4)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'membership_as_of'
+
+tests/integration/test_universe_as_of.py:299: AttributeError
+______________________ test_members_are_ordered_by_symbol ______________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_d322442ae7b243efae22ce79b69840e9) at 0x10b760b90>
+
+    def test_members_are_ordered_by_symbol(conn: psycopg.Connection) -> None:
+        ids = {s: _instrument(conn, s) for s in ("MM", "AA", "ZZ")}
+        universe_id = _created(conn, D1)
+        for symbol in ("MM", "ZZ", "AA"):
+            _event(conn, universe_id, "member_added", D1, instrument_id=ids[symbol])
+    
+>       assert [m.symbol for m in replay.membership_as_of(conn, universe_id, D1)] == ["AA", "MM", "ZZ"]
+                                  ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'membership_as_of'
+
+tests/integration/test_universe_as_of.py:311: AttributeError
+________________ test_universes_do_not_see_each_others_members _________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_1cf18c8a26f64ca88e1d400b817aeb28) at 0x10b4374d0>
+
+    def test_universes_do_not_see_each_others_members(conn: psycopg.Connection) -> None:
+        aa, bb = _instrument(conn, "AA"), _instrument(conn, "BB")
+        one, two = _created(conn, D1, name="One"), _created(conn, D1, name="Two")
+        _event(conn, one, "member_added", D1, instrument_id=aa)
+        _event(conn, two, "member_added", D1, instrument_id=bb)
+    
+>       assert _members(conn, one, D1) == {"AA": "active"}
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_universe_as_of.py:320: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_1cf18c8a26f64ca88e1d400b817aeb28) at 0x10b4374d0>
+universe_id = UUID('bf6aed89-76db-4713-aba1-9b96622092a1')
+as_of = datetime.date(2026, 10, 1)
+
+    def _members(conn: psycopg.Connection, universe_id: UUID, as_of: date) -> dict[str, str]:
+>       return {m.symbol: m.lifecycle for m in replay.membership_as_of(conn, universe_id, as_of)}
+                                               ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'membership_as_of'
+
+tests/integration/test_universe_as_of.py:115: AttributeError
+______________ test_events_page_newest_first_with_a_stable_cursor ______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_b5ca0f4e09f3492ea413e195fd29b704) at 0x10b436c60>
+
+    def test_events_page_newest_first_with_a_stable_cursor(conn: psycopg.Connection) -> None:
+        aa = _instrument(conn, "AA")
+        provenance = {
+            "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
+            "classification_date": "2026-10-15",
+            "thresholds": {"value_percentile_min": 80, "growth_score_max": 1.5},
+            "hide_incomplete": True,
+            "symbol": "AA",
+        }
+        universe_id = _created(conn, D1, provenance=provenance)
+        other = _created(conn, D1, name="Other")
+        _event(conn, other, "member_added", D1, instrument_id=aa)
+        ids = [
+            _event(conn, universe_id, "member_added", D1, instrument_id=aa),
+            _event(conn, universe_id, "renamed", D2, name="Tech 2"),
+            _event(conn, universe_id, "member_removed", D2, instrument_id=aa),
+            _event(conn, universe_id, "member_added", D3, instrument_id=aa),
+            _event(conn, universe_id, "retired", D4),
+        ]
+        all_ids = [*ids]
+        created_id = conn.execute(
+            "SELECT event_id FROM universe_event WHERE universe_id = %s AND event_type = 'created'",
+            (universe_id,),
+        ).fetchone()
+        assert created_id is not None
+        all_ids.append(int(created_id[0]))
+        expected = sorted(all_ids, reverse=True)
+        assert len(expected) == 6
+    
+        # One more so the page sizes are 3, 3, 1 over seven events.
+        expected.insert(0, _event(conn, universe_id, "renamed", D4, name="Tech 3"))
+    
+>       page1, cursor1 = replay.list_events(conn, universe_id, 3, None)
+                         ^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'list_events'
+
+tests/integration/test_universe_as_of.py:357: AttributeError
+___ test_the_created_event_passes_the_stored_provenance_through_unconverted ____
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_86623e8b4b644e58b25fef01d1f04db8) at 0x10b436120>
+
+    def test_the_created_event_passes_the_stored_provenance_through_unconverted(
+        conn: psycopg.Connection,
+    ) -> None:
+        provenance = {
+            "set_id": "6f1c2a54-0000-4000-8000-00000000abcd",
+            "classification_date": "2026-10-15",
+            "thresholds": {"value_percentile_min": 80, "growth_score_max": 1.5},
+            "hide_incomplete": True,
+            "symbol": "AA",
+        }
+        universe_id = _created(conn, D1, provenance=provenance)
+        _event(conn, universe_id, "renamed", D2, name="Tech 2")
+    
+>       events, _ = replay.list_events(conn, universe_id, 10, None)
+                    ^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'list_events'
+
+tests/integration/test_universe_as_of.py:393: AttributeError
+_______ test_events_of_a_universe_without_provenance_and_of_an_empty_one _______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_134a671945dd45468fad9a6b7a8aeee1) at 0x10b436030>
+
+    def test_events_of_a_universe_without_provenance_and_of_an_empty_one(
+        conn: psycopg.Connection,
+    ) -> None:
+        universe_id = _created(conn, D1)
+    
+>       (event,), cursor = replay.list_events(conn, universe_id, 5, None)
+                           ^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'list_events'
+
+tests/integration/test_universe_as_of.py:410: AttributeError
+________________ test_events_page_rejects_a_bad_limit_or_cursor ________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_905601991525419d8af9f0ae2d4a98fc) at 0x10b4364e0>
+
+    def test_events_page_rejects_a_bad_limit_or_cursor(conn: psycopg.Connection) -> None:
+        universe_id = _created(conn, D1)
+    
+        for limit in (0, -1, MAX_PAGE_SIZE + 1):
+            with pytest.raises(ValueError):
+>               replay.list_events(conn, universe_id, limit, None)
+                ^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'factorflow.universes.replay' has no attribute 'list_events'
+
+tests/integration/test_universe_as_of.py:423: AttributeError
+_____________ test_universe_rows_select_by_lifecycle_newest_first ______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_646940e620eb493486b0afc5bfe5b9dd) at 0x10b434d70>
+
+    def test_universe_rows_select_by_lifecycle_newest_first(conn: psycopg.Connection) -> None:
+        older, renamed, retired = _three_universes(conn)
+    
+>       everything, _ = replay.list_universe_rows(conn, "all", None, 10, None)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'list_universe_rows'
+
+tests/integration/test_universe_as_of.py:445: AttributeError
+________ test_universe_rows_filter_on_the_replayed_name_prefix_as_given ________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_132a5c1e3e90464ebacc8d8b73a26c2c) at 0x10b434410>
+
+    def test_universe_rows_filter_on_the_replayed_name_prefix_as_given(
+        conn: psycopg.Connection,
+    ) -> None:
+        _, renamed, _ = _three_universes(conn)
+    
+>       renamed_rows, _ = replay.list_universe_rows(conn, "all", "Ren", 10, None)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'list_universe_rows'
+
+tests/integration/test_universe_as_of.py:462: AttributeError
+_________________ test_universe_rows_page_with_a_stable_cursor _________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=51956 user=test database=test_c6251875507044d6b4c8c2ac862cdd6d) at 0x10b434230>
+
+    def test_universe_rows_page_with_a_stable_cursor(conn: psycopg.Connection) -> None:
+        older, renamed, retired = _three_universes(conn)
+    
+>       first, cursor = replay.list_universe_rows(conn, "all", None, 2, None)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.replay' has no attribute 'list_universe_rows'
+
+tests/integration/test_universe_as_of.py:474: AttributeError
+__________ test_universe_rows_reject_a_bad_lifecycle_limit_or_cursor ___________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=51956 user=test database=test_ee09f1dfdc2745db9f78bd811f837ec7) at 0x10b463c50>
+
+    def test_universe_rows_reject_a_bad_lifecycle_limit_or_cursor(conn: psycopg.Connection) -> None:
+        with pytest.raises(ValueError):
+>           replay.list_universe_rows(conn, "bogus", None, 5, None)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.replay' has no attribute 'list_universe_rows'
+
+tests/integration/test_universe_as_of.py:487: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_universe_replay.py::test_a_bad_universe_cursor_raises_cursor_error[eyJ2IjogMSwgInRzIjogIjIwMjYtMTAtMDFUMDA6MDA6MDArMDA6MDAiLCAiaWQiOiA1fQ]
+FAILED tests/unit/test_universe_replay.py::test_an_out_of_range_limit_is_refused_before_the_connection_is_touched
+FAILED tests/unit/test_universe_replay.py::test_an_unknown_lifecycle_is_refused_before_the_connection_is_touched
+FAILED tests/integration/test_universe_as_of.py::test_sql_and_the_pure_fold_agree_on_every_date_of_a_scripted_history
+FAILED tests/integration/test_universe_as_of.py::test_a_stock_added_and_removed_on_one_date_is_not_a_member_that_day
+FAILED tests/integration/test_universe_as_of.py::test_a_date_before_creation_has_no_members_and_names_the_creation_date
+FAILED tests/integration/test_universe_as_of.py::test_a_retired_instrument_stays_a_member_and_replays_as_retired
+FAILED tests/integration/test_universe_as_of.py::test_a_retired_universe_keeps_its_members_and_reports_when_it_retired
+FAILED tests/integration/test_universe_as_of.py::test_an_active_universe_has_no_retired_at
+FAILED tests/integration/test_universe_as_of.py::test_current_membership_uses_todays_america_chicago_date
+FAILED tests/integration/test_universe_as_of.py::test_an_unknown_universe_has_no_state
+FAILED tests/integration/test_universe_as_of.py::test_the_name_is_the_latest_rename_whatever_the_as_of
+FAILED tests/integration/test_universe_as_of.py::test_a_filter_provenance_reads_back_as_a_typed_origin
+FAILED tests/integration/test_universe_as_of.py::test_member_since_is_the_selected_adds_recorded_at
+FAILED tests/integration/test_universe_as_of.py::test_members_are_ordered_by_symbol
+FAILED tests/integration/test_universe_as_of.py::test_universes_do_not_see_each_others_members
+FAILED tests/integration/test_universe_as_of.py::test_events_page_newest_first_with_a_stable_cursor
+FAILED tests/integration/test_universe_as_of.py::test_the_created_event_passes_the_stored_provenance_through_unconverted
+FAILED tests/integration/test_universe_as_of.py::test_events_of_a_universe_without_provenance_and_of_an_empty_one
+FAILED tests/integration/test_universe_as_of.py::test_events_page_rejects_a_bad_limit_or_cursor
+FAILED tests/integration/test_universe_as_of.py::test_universe_rows_select_by_lifecycle_newest_first
+FAILED tests/integration/test_universe_as_of.py::test_universe_rows_filter_on_the_replayed_name_prefix_as_given
+FAILED tests/integration/test_universe_as_of.py::test_universe_rows_page_with_a_stable_cursor
+FAILED tests/integration/test_universe_as_of.py::test_universe_rows_reject_a_bad_lifecycle_limit_or_cursor
+24 failed, 48 passed in 3.90s
