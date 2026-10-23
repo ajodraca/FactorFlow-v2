@@ -1,0 +1,133 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+__ test_create_appends_one_created_then_one_member_added_per_distinct_symbol ___
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_3448e8735ffa402eb3d502099343837e) at 0x1096d7110>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1097683e0>
+
+    def test_create_appends_one_created_then_one_member_added_per_distinct_symbol(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Implements TC-COMP-002."""
+        seed(conn, "AAPL", "MSFT", "NVDA", "TSLA", "AMZN")
+        spy = ExecutemanySpy(monkeypatch)
+    
+>       universe = service.create_by_hand(conn, "  Tech  ", ["msft", "aapl", "AAPL", "nvda"])
+                   ^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'create_by_hand'
+
+tests/integration/test_universe_create.py:148: AttributeError
+_________________ test_a_stock_may_belong_to_several_universes _________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_0810002839ae430ca02baf2b4e926dce) at 0x10974bce0>
+
+    def test_a_stock_may_belong_to_several_universes(conn: psycopg.Connection) -> None:
+        """AC-3: more than one universe at a time; a stock may belong to several."""
+        seed(conn, "AAPL", "MSFT", "NVDA")
+>       first = service.create_by_hand(conn, "First", ["AAPL", "MSFT"])
+                ^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'create_by_hand'
+
+tests/integration/test_universe_create.py:187: AttributeError
+_____ test_create_refuses_the_whole_request_naming_every_uncovered_symbol ______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=57743 user=test database=test_800c09bba27c4a849aaf90cb93105f21) at 0x1098d31d0>
+
+    def test_create_refuses_the_whole_request_naming_every_uncovered_symbol(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-001 (create)."""
+        _seed_coverage_mix(conn)
+        events_before, universes_before = count_events(conn), count_universes(conn)
+    
+        with pytest.raises(InstrumentNotAcquired) as excinfo:
+>           service.create_by_hand(conn, "U", ["AAA", "CCC", "BBB"])
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'create_by_hand'
+
+tests/integration/test_universe_create.py:215: AttributeError
+________ test_lower_case_input_is_normalised_before_the_coverage_check _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_c6cca1b30bfe44fe90651dd44780b7fe) at 0x1091d7350>
+
+    def test_lower_case_input_is_normalised_before_the_coverage_check(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-001 (normalisation)."""
+        _seed_coverage_mix(conn)
+        with pytest.raises(InstrumentNotAcquired) as excinfo:
+>           service.create_by_hand(conn, "U", ["aaa", "ccc"])
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'create_by_hand'
+
+tests/integration/test_universe_create.py:230: AttributeError
+_____ test_create_with_no_symbols_raises_empty_universe_and_writes_nothing _____
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_06aae973f07f41399528cc49822659ef) at 0x1098df750>
+
+    def test_create_with_no_symbols_raises_empty_universe_and_writes_nothing(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-035."""
+        seed(conn, "AAA")
+        with pytest.raises(service.EmptyUniverse):
+>           service.create_by_hand(conn, "U", [])
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'create_by_hand'
+
+tests/integration/test_universe_create.py:243: AttributeError
+_________ test_blank_symbols_are_a_shape_failure_not_an_empty_universe _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_9c49190da7e241e299faa2be87b2fff7) at 0x10974f3e0>
+
+    def test_blank_symbols_are_a_shape_failure_not_an_empty_universe(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-035 (design 2.4 step 2 precedes step 7)."""
+        with pytest.raises(ValueError) as excinfo:
+>           service.create_by_hand(conn, "U", ["  ", ""])
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'create_by_hand'
+
+tests/integration/test_universe_create.py:258: AttributeError
+______ test_the_coverage_statement_returns_exactly_the_uncovered_symbols _______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_82db26c353a2420795eb46ba55b8865d) at 0x10974ed50>
+
+    def test_the_coverage_statement_returns_exactly_the_uncovered_symbols(
+        conn: psycopg.Connection,
+    ) -> None:
+        """The SQL half of TC-COMP-001."""
+        _seed_coverage_mix(conn)
+        both = seed_instrument(conn, "BOTH")
+        conn.execute(
+            "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
+            "VALUES (%s, 'reference', '2024-01-01', '2024-12-31')",
+            (both,),
+        )
+        conn.commit()
+    
+>       assert _uncovered(conn, ["AAA", "BBB", "CCC", "BOTH"]) == ["BBB", "CCC"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_universe_create.py:285: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=57743 user=test database=test_82db26c353a2420795eb46ba55b8865d) at 0x10974ed50>
+symbols = ['AAA', 'BBB', 'CCC', 'BOTH']
+
+    def _uncovered(conn: psycopg.Connection, symbols: list[str]) -> list[str]:
+>       rows = conn.execute(service.COVERAGE_CHECK_SQL, {"symbols": symbols}).fetchall()
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'COVERAGE_CHECK_SQL'
+
+tests/integration/test_universe_create.py:268: AttributeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_create.py::test_create_appends_one_created_then_one_member_added_per_distinct_symbol
+FAILED tests/integration/test_universe_create.py::test_a_stock_may_belong_to_several_universes
+FAILED tests/integration/test_universe_create.py::test_create_refuses_the_whole_request_naming_every_uncovered_symbol
+FAILED tests/integration/test_universe_create.py::test_lower_case_input_is_normalised_before_the_coverage_check
+FAILED tests/integration/test_universe_create.py::test_create_with_no_symbols_raises_empty_universe_and_writes_nothing
+FAILED tests/integration/test_universe_create.py::test_blank_symbols_are_a_shape_failure_not_an_empty_universe
+FAILED tests/integration/test_universe_create.py::test_the_coverage_statement_returns_exactly_the_uncovered_symbols
+7 failed in 2.41s

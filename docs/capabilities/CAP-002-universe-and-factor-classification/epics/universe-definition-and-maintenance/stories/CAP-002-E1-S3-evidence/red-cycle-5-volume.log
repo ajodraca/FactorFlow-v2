@@ -1,0 +1,46 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_a_3000_member_universe_is_created_in_three_calls_and_replayed ______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=62986 user=test database=test_de9d5a8f8db84de9a7404f9dc2a0b07b) at 0x10a98bb10>
+
+    def test_a_3000_member_universe_is_created_in_three_calls_and_replayed(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-003."""
+        symbols = _seed(conn)
+        chunk = MAX_SYMBOLS_PER_REQUEST
+        first, second, third = (symbols[i : i + chunk] for i in range(0, SCALE, chunk))
+    
+        created = service.create_by_hand(conn, "Everything", first)
+        conn.commit()
+        assert len(created.members) == chunk
+        for batch in (second, third):
+            added, already = service.add_members(conn, created.universe_id, batch)
+            conn.commit()
+            assert len(added) == chunk
+            assert already == []
+    
+        universe = service.get_universe(conn, created.universe_id)
+        assert [m.symbol for m in universe.members] == symbols
+        assert universe.members[0].symbol == "S0001"
+        assert universe.members[-1].symbol == "S3000"
+        assert count_events(conn) == 1 + SCALE
+        created_events = conn.execute(
+            "SELECT count(*) FROM universe_event WHERE event_type = 'created'"
+        ).fetchone()
+        assert created_events == (1,)
+    
+        before = count_events(conn)
+        for i in range(0, SCALE, chunk):
+            added, already = service.add_members(conn, created.universe_id, symbols[i : i + chunk])
+            conn.commit()
+            assert added == []
+>           assert len(already) == chunk
+E           assert 0 == 1000
+E            +  where 0 = len([])
+
+tests/integration/test_universe_volume.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_volume.py::test_a_3000_member_universe_is_created_in_three_calls_and_replayed
+1 failed in 1.90s
