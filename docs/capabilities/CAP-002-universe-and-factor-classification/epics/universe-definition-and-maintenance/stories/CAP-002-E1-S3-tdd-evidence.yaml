@@ -1,0 +1,164 @@
+# TDD evidence for CAP-002-E1-S3 - Universe Creation by Hand and Adding Members with Coverage Check and Write Lock.
+# Cycles share the one stage commit, so each cites its reviewed_patch (incremental, applied in order).
+# Decisions: DEC-0095 (recorded at planning; no new decision at coding unless listed in the run report).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T010, T013]
+    description: >
+      The pure part of service.py: the eight exceptions of design 2.3, UNIVERSE_WRITE_LOCK_KEY, _normalise_name, _normalise_symbols (with the request cap re-check) and the DEC-0093 re-exports, with their unit tests. Verification of the S1 and S2 producers (T001).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/red-cycle-1-pure-service.log
+    red_log_sha256: 056d7e0aaf46a8c4ed3d2ee627301b191446604f1587e946977fd28162423858
+    red_evidence: >
+      tests/unit/test_universe_service_validation.py failed at collection: factorflow.universes.service did not exist (ImportError: cannot import name 'service').
+    green_evidence: >
+      tests/unit/test_universe_service_validation.py 36 passed; tests/unit/test_universe_sql_safety.py still passes; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 451806deec1acdc4b6ce7b1126c230bd43334732b44e6d8032926f1937ce9e4d
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 1406a829cbc611c0f8fa6a61defdab7987430c98544941b0c0b0d45e244fdf52
+      generated: 18
+      killed: 18
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T003, T004, T008, T012, T013]
+    description: >
+      coverage_check.sql (verbatim from design 2.5) and the create path of service.py: COVERAGE_CHECK_SQL, the INSERT constants, _uncovered, create_by_hand (coverage then empty check, one created and n member_added events in one executemany, replayed result) and get_universe, with the integration tests for TC-COMP-002 and AC-3, TC-COMP-001 (create half and the SQL half), TC-COMP-035 and get_universe. The write lock and the name check are cycle 3's.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/red-cycle-2-create.log
+    red_log_sha256: 934f3c5897366d4c7ed5ce642e6752d73c8e10d83ec75f62c4da68053be27a1c
+    red_evidence: >
+      7 failed before coverage_check.sql and the create path existed: every create_by_hand / get_universe call failed with AttributeError on factorflow.universes.service, and the SQL half failed on the missing COVERAGE_CHECK_SQL. The get_universe unknown-id and before-creation test was added to the cycle after this run and fails the same way (no get_universe).
+    green_evidence: >
+      tests/integration/test_universe_create.py, tests/unit/test_universe_service_validation.py and tests/unit/test_universe_sql_safety.py with -m 'postgres or not postgres': all passed (the S2 glob scan now sees coverage_check.sql and service.py); ruff, ruff format and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b69c566644caa0ad45f3558213320b20add59aee5a4bbeb01a6e911526344898
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: a31944d7250321eb9bbb14624405589e34123027f85a35ec5df684822a7e3630
+      generated: 23
+      killed: 18
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.783
+      survivors:  # strengthen the tests and rerun; or dispose of each one
+        - id: src/factorflow/universes/sql/coverage_check.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutant changes a number inside a SQL header comment; no statement changes.
+        - id: src/factorflow/universes/sql/coverage_check.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutant changes a number inside a SQL header comment; no statement changes.
+        - id: src/factorflow/universes/sql/coverage_check.sql:6:off-by-one:1
+          disposition: equivalent
+          reason: >
+            SELECT 1 becoming SELECT 2 inside the EXISTS subquery changes only a select list that EXISTS ignores.
+        - id: manual:uncovered-unsorted
+          disposition: equivalent
+          reason: >
+            InstrumentNotAcquired sorts its symbols itself (its unit test pins that), so the order _uncovered returns never reaches an observable output; the sort in _uncovered is for determinism only.
+        - id: manual:skip-empty-query
+          disposition: equivalent
+          reason: >
+            the early return for an empty list only skips a query that returns no rows for an empty array, which TC-COMP-001's SQL half asserts; the result is the same empty list.
+
+  - id: cycle-3
+    tasks: [T005, T006, T013]
+    description: >
+      The write lock and the name rule: _take_lock as the first statement of create_by_hand and _name_in_use (a replayed-name check over list_universe_rows, paged, with an excluding argument S4 reuses), with TC-COMP-023 (create half: trimming, retired name reuse, renamed name decides) and TC-COMP-019 (the deterministic pg_locks form and the 20-round barrier form), plus tests of the excluding argument and of paging.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/red-cycle-3-name-and-lock.log
+    red_log_sha256: 341ca4381520771b0e9da617891e2c8b5720cef71b09f7301bb80fd435905fb9
+    red_evidence: >
+      4 failed, 9 passed before the lock and the name check existed: the active-name and renamed-name tests did not raise UniverseNameInUse, the pg_locks test never saw the second create waiting, and the barrier test produced two successes in a round. The retired-name test passes without the check by design (a name nobody holds is accepted). The excluding and paging tests were added after this run and are killed by the manual mutants instead.
+    green_evidence: >
+      tests/integration/test_universe_create.py, tests/unit/test_universe_service_validation.py and tests/unit/test_universe_sql_safety.py with -m 'postgres or not postgres': 79 passed; ruff, ruff format and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7c1cda7f70f29862ff3032657d34ed2b98f69e3496a1390abae0f7bd30fbad2e
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 7996dc58afde6155b37d9a95a2706a299297aa5caced0472c020905a30dacc59
+      generated: 14
+      killed: 13
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.929
+      survivors:  # strengthen the tests and rerun; or dispose of each one
+        - id: manual:case-insensitive
+          disposition: equivalent
+          reason: >
+            list_universe_rows only returns names that start with the candidate exactly (case-sensitive), so a returned name of the candidate's own length differs from it only if it equals it; lower-casing both sides changes no outcome.
+
+  - id: cycle-4
+    tasks: [T006, T007, T011, T013]
+    description: >
+      add_members (lock, normalise, coverage before target, active-target guard, added and already_member partition, one executemany only when something is added), _require_active and the read delegates list_universes and list_events, with TC-COMP-024, TC-COMP-118 (retired-lifecycle covered symbols and AC-15/DAC-E1-9), the guards of T011 (coverage before target, UniverseRetired, mid-write rollback, list pages, shared instrument), an add_members write-lock wait test and an events paging test added to kill surviving mutants. The first review of the cycle required changes (a misplaced type-ignore, failure-path hardening of the lock-wait tests, a replayed-name prefix check); they were made and an independent re-review approved.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/red-cycle-4-add-members-and-reads.log
+    red_log_sha256: 5fdf0678bcb9957d7518ae9d24fccfb7e98d5819322128b60e2082e0c1894d8b
+    red_evidence: >
+      11 failed, 18 passed before add_members, list_universes and list_events existed: every add_members and list_* call failed with AttributeError on factorflow.universes.service. The lock-wait and events-paging tests were added after this run to kill two surviving mutants (the missing add_members lock and an ignored events cursor).
+    green_evidence: >
+      tests/integration/test_universe_create.py 31 passed with the unit tests; ruff, ruff format and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: fa8890186b926c9d29ff36a9b717b0ad241cc7735392503f4af1966aff274d6d
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: bbf8175880fd43ca7986489e20815f42847bc40df1fe67fe1685ab8798b94c90
+      generated: 16
+      killed: 16
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T009]
+    description: >
+      The 3000-member volume test (TC-COMP-003, DAC-E1-S3-8): a universe created with 1000 symbols and grown by two add_members calls, replayed in symbol order with the right first and last symbol, a second pass returning every symbol as already_member with no event appended, and the as_of reads. Correctness only; no elapsed-time bound.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/red-cycle-5-volume.log
+    red_log_sha256: 1b0e8d16d430640c993a0417ad9908ea05aa1e74c7370b95b9b2b5bb37a8a77b
+    red_evidence: >
+      The behaviour already existed, so the test was run against a deliberately injected fault (add_members returning an empty already_member list), which is reverted and not in the commit: the volume test failed with 'assert 0 == 1000' on the second pass. An earlier attempt failed on the test's own seed (instrument.lifecycle is NOT NULL), which was corrected.
+    green_evidence: >
+      pytest -m 'postgres and slow' tests/integration/test_universe_volume.py: 1 passed against the unmodified service.py; ruff, ruff format and mypy clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 1fc14b131ef4d5f8d27fcc0f8cc8a73bdb418070fdd1a405a8763c6fe61e3cb8
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds only test code and changes no production behaviour

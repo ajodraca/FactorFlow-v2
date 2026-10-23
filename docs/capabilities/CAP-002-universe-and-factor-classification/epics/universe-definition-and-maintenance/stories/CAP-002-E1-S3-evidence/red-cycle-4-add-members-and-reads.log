@@ -1,0 +1,218 @@
+............FFFF..FF..FF.FF.F                                            [100%]
+=================================== FAILURES ===================================
+________ test_adding_a_current_member_is_reported_and_appends_no_event _________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_6d286beeaeb440a9ba57d656d8218e7a) at 0x10c9b36b0>
+
+    def test_adding_a_current_member_is_reported_and_appends_no_event(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-024."""
+        seed(conn, "AAA", "BBB", "CCC")
+        universe = service.create_by_hand(conn, "U", ["AAA", "BBB"])
+        conn.commit()
+        before = count_events(conn)
+    
+>       added, already = service.add_members(conn, universe.universe_id, ["BBB", "CCC", "ccc", "AAA"])
+                         ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:369: AttributeError
+_______________ test_adding_only_current_members_appends_nothing _______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_b8a879609ecb4eb894c05ad6c7a6fa33) at 0x10c9b32f0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cdf7530>
+
+    def test_adding_only_current_members_appends_nothing(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Implements TC-COMP-024 (no empty executemany)."""
+        seed(conn, "AAA", "BBB")
+        universe = service.create_by_hand(conn, "U", ["AAA", "BBB"])
+        conn.commit()
+        before = count_events(conn)
+        spy = ExecutemanySpy(monkeypatch)
+    
+>       result = service.add_members(conn, universe.universe_id, ["BBB", "AAA"])
+                 ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:397: AttributeError
+_____________ test_a_removed_symbol_is_added_again_as_a_new_member _____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_769ed64f103b49ae83d8b2147a233ebd) at 0x10c9b35c0>
+
+    def test_a_removed_symbol_is_added_again_as_a_new_member(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-024 (a removed member is not a current member)."""
+        seed(conn, "AAA", "BBB")
+        universe = service.create_by_hand(conn, "U", ["AAA", "BBB"])
+        conn.commit()
+        insert_event(conn, universe.universe_id, "member_removed", symbol="BBB")
+        before = count_events(conn)
+    
+>       added, already = service.add_members(conn, universe.universe_id, ["BBB"])
+                         ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:413: AttributeError
+______________________ test_adding_no_symbols_is_a_no_op _______________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_84cae434d3ef4117b1a9af5ad34b9710) at 0x10cd785f0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c3fef10>
+
+    def test_adding_no_symbols_is_a_no_op(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0095 (provisional): an empty add returns two empty lists and writes nothing."""
+        seed(conn, "AAA")
+        universe = service.create_by_hand(conn, "U", ["AAA"])
+        conn.commit()
+        before = count_events(conn)
+        spy = ExecutemanySpy(monkeypatch)
+    
+>       assert service.add_members(conn, universe.universe_id, []) == ([], [])
+               ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:430: AttributeError
+________ test_a_covered_retired_symbol_is_accepted_and_replays_retired _________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_31715db53c2d499aa05cf3fbd456786b) at 0x10cd788c0>
+
+    def test_a_covered_retired_symbol_is_accepted_and_replays_retired(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-118 (a, b)."""
+        seed_instrument(conn, "RRR", lifecycle="retired")
+        seed_instrument(conn, "SSS", lifecycle="retired")
+        seed_instrument(conn, "AAA")
+        conn.commit()
+    
+        universe = service.create_by_hand(conn, "U", ["RRR", "AAA"])
+        conn.commit()
+        lifecycles = {m.symbol: m.lifecycle for m in universe.members}
+        assert lifecycles == {"AAA": "active", "RRR": "retired"}
+        replayed = service.get_universe(conn, universe.universe_id)
+        assert {m.symbol: m.lifecycle for m in replayed.members} == lifecycles
+    
+>       added, already = service.add_members(conn, universe.universe_id, ["SSS"])
+                         ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:552: AttributeError
+___________ test_a_member_stays_a_member_when_its_instrument_retires ___________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_4691ab6c0390444ba7cb13e072bcfd3c) at 0x10cd79d60>
+
+    def test_a_member_stays_a_member_when_its_instrument_retires(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-118 (c): DAC-E1-9."""
+        seed(conn, "AAA", "BBB")
+        universe = service.create_by_hand(conn, "U", ["AAA", "BBB"])
+        conn.commit()
+        conn.execute(
+            "UPDATE instrument SET lifecycle = 'retired', retired_at = now() WHERE symbol='BBB'"
+        )
+        conn.commit()
+    
+        replayed = service.get_universe(conn, universe.universe_id)
+        assert {m.symbol: m.lifecycle for m in replayed.members} == {"AAA": "active", "BBB": "retired"}
+>       assert service.add_members(conn, universe.universe_id, ["BBB"]) == ([], ["BBB"])
+               ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:569: AttributeError
+______________ test_add_members_checks_coverage_before_the_target ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59116 user=test database=test_48c54dfaaa264afbb1925cc63163b219) at 0x10c3be4e0>
+
+    def test_add_members_checks_coverage_before_the_target(conn: psycopg.Connection) -> None:
+        """Design 2.4: steps 4 and 5."""
+        with pytest.raises(UniverseNotFound):
+>           service.add_members(conn, UUID(int=1), [])
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:615: AttributeError
+______________ test_add_members_to_a_retired_universe_is_refused _______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_80cc461b540c4693aea059dbf76d2ea6) at 0x10c9b2e40>
+
+    def test_add_members_to_a_retired_universe_is_refused(conn: psycopg.Connection) -> None:
+        seed(conn, "AAA", "BBB")
+        universe = service.create_by_hand(conn, "U", ["AAA"])
+        conn.commit()
+        insert_event(conn, universe.universe_id, "retired")
+        before = count_events(conn)
+    
+        with pytest.raises(UniverseRetired):
+>           service.add_members(conn, universe.universe_id, ["BBB"])
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:632: AttributeError
+_________ test_list_universes_pages_newest_first_with_replayed_members _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59116 user=test database=test_f1ef1dc33e7e4575a6084ee91538415d) at 0x10cd794f0>
+
+    def test_list_universes_pages_newest_first_with_replayed_members(
+        conn: psycopg.Connection,
+    ) -> None:
+        seed(conn, "AAA", "BBB")
+        first = service.create_by_hand(conn, "Alpha", ["AAA"])
+        conn.commit()
+        second = service.create_by_hand(conn, "Beta", ["AAA", "BBB"])
+        conn.commit()
+        third = service.create_by_hand(conn, "Gamma", ["BBB"])
+        conn.commit()
+        insert_event(conn, third.universe_id, "retired")
+    
+>       universes, cursor = service.list_universes(conn, "active", None, 10, None)
+                            ^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'list_universes'. Did you mean: 'get_universe'?
+
+tests/integration/test_universe_create.py:665: AttributeError
+__________________ test_list_events_newest_first_with_symbols __________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59116 user=test database=test_7ade776885ee4925af2fe4e827c9cda6) at 0x10cd788c0>
+
+    def test_list_events_newest_first_with_symbols(conn: psycopg.Connection) -> None:
+        seed(conn, "AAA", "BBB")
+        universe = service.create_by_hand(conn, "U", ["AAA", "BBB"])
+        conn.commit()
+    
+>       events, cursor = service.list_events(conn, universe.universe_id, 10, None)
+                         ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'list_events'
+
+tests/integration/test_universe_create.py:691: AttributeError
+____________ test_add_refuses_the_whole_request_and_changes_nothing ____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=59116 user=test database=test_f3d4df9ca08b49669fa637ec4d2b4f41) at 0x10cd79a90>
+
+    def test_add_refuses_the_whole_request_and_changes_nothing(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-001 (add)."""
+        _seed_coverage_mix(conn)
+        seed(conn, "KEEP")
+        universe = service.create_by_hand(conn, "U", ["KEEP"])
+        conn.commit()
+        events_before = event_rows(conn, universe.universe_id)
+    
+        with pytest.raises(InstrumentNotAcquired) as excinfo:
+>           service.add_members(conn, universe.universe_id, ["AAA", "ZZZ", "BBB"])
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'add_members'
+
+tests/integration/test_universe_create.py:726: AttributeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_create.py::test_adding_a_current_member_is_reported_and_appends_no_event
+FAILED tests/integration/test_universe_create.py::test_adding_only_current_members_appends_nothing
+FAILED tests/integration/test_universe_create.py::test_a_removed_symbol_is_added_again_as_a_new_member
+FAILED tests/integration/test_universe_create.py::test_adding_no_symbols_is_a_no_op
+FAILED tests/integration/test_universe_create.py::test_a_covered_retired_symbol_is_accepted_and_replays_retired
+FAILED tests/integration/test_universe_create.py::test_a_member_stays_a_member_when_its_instrument_retires
+FAILED tests/integration/test_universe_create.py::test_add_members_checks_coverage_before_the_target
+FAILED tests/integration/test_universe_create.py::test_add_members_to_a_retired_universe_is_refused
+FAILED tests/integration/test_universe_create.py::test_list_universes_pages_newest_first_with_replayed_members
+FAILED tests/integration/test_universe_create.py::test_list_events_newest_first_with_symbols
+FAILED tests/integration/test_universe_create.py::test_add_refuses_the_whole_request_and_changes_nothing
+11 failed, 18 passed in 3.89s

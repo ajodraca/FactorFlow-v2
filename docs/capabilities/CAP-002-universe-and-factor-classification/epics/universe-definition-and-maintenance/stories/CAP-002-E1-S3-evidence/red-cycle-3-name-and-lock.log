@@ -1,0 +1,123 @@
+.......F.FFF.                                                            [100%]
+=================================== FAILURES ===================================
+_____________ test_an_active_name_cannot_be_reused_after_trimming ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58372 user=test database=test_90e6b6e668e9400aac26878a79ae574e) at 0x108c28d70>
+
+    def test_an_active_name_cannot_be_reused_after_trimming(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-023 (create half)."""
+        seed(conn, "AAA")
+        first = service.create_by_hand(conn, "Growth", ["AAA"])
+        conn.commit()
+    
+>       with pytest.raises(UniverseNameInUse):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UniverseNameInUse
+
+tests/integration/test_universe_create.py:287: Failed
+_________ test_the_replayed_current_name_decides_not_the_created_name __________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58372 user=test database=test_6da1b276a8c64d28813616b4283c80f4) at 0x108bf73e0>
+
+    def test_the_replayed_current_name_decides_not_the_created_name(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-023 (DEC-0065: replay decides)."""
+        seed(conn, "AAA")
+        first = service.create_by_hand(conn, "Growth", ["AAA"])
+        conn.commit()
+        insert_event(conn, first.universe_id, "renamed", name="Value")
+    
+>       with pytest.raises(UniverseNameInUse):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UniverseNameInUse
+
+tests/integration/test_universe_create.py:323: Failed
+_______ test_a_second_create_waits_on_the_advisory_lock_then_is_refused ________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58372 user=test database=test_227e74ffbdd64bb8aed48b63d9dbfaa3) at 0x108bf7200>
+postgres_connection_string = 'postgresql://test:test@localhost:58372/test_227e74ffbdd64bb8aed48b63d9dbfaa3'
+
+    def test_a_second_create_waits_on_the_advisory_lock_then_is_refused(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        """Implements TC-COMP-019 (deterministic form)."""
+        seed(conn, "AAA")
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[BaseException | str] = []
+    
+        def second() -> None:
+            try:
+                service.create_by_hand(conn_b, "Race", ["AAA"])
+                conn_b.commit()
+                outcome.append("created")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=second)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            deadline = time.monotonic() + 5
+            while _lock_waiters(watcher) == 0 and time.monotonic() < deadline:
+                time.sleep(0.02)
+>           assert _lock_waiters(watcher) == 1, "the second create never reached the lock"
+E           AssertionError: the second create never reached the lock
+E           assert 0 == 1
+E            +  where 0 = _lock_waiters(<psycopg.Connection [IDLE] (host=localhost port=58372 user=test database=test_227e74ffbdd64bb8aed48b63d9dbfaa3) at 0x108bf6a80>)
+
+tests/integration/test_universe_create.py:367: AssertionError
+____________________ test_racing_creates_never_both_succeed ____________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58372 user=test database=test_7814736f3da14e8bb0501e4e5f5f8008) at 0x108c286e0>
+postgres_connection_string = 'postgresql://test:test@localhost:58372/test_7814736f3da14e8bb0501e4e5f5f8008'
+
+    def test_racing_creates_never_both_succeed(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        """Implements TC-COMP-019 (barrier form)."""
+        seed(conn, "AAA")
+        rounds = 20
+        barrier = threading.Barrier(2)
+        results: dict[tuple[int, int], BaseException | str] = {}
+    
+        def worker(who: int) -> None:
+            worker_conn = psycopg.connect(postgres_connection_string)
+            try:
+                for round_no in range(rounds):
+                    barrier.wait(timeout=30)
+                    try:
+                        service.create_by_hand(worker_conn, f"Round {round_no}", ["AAA"])
+                        worker_conn.commit()
+                        results[(who, round_no)] = "created"
+                    except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                        worker_conn.rollback()
+                        results[(who, round_no)] = exc
+            finally:
+                worker_conn.close()
+    
+        threads = [threading.Thread(target=worker, args=(who,)) for who in (0, 1)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(timeout=120)
+            assert not thread.is_alive()
+    
+        assert len(results) == 2 * rounds
+        for round_no in range(rounds):
+            pair = [results[(0, round_no)], results[(1, round_no)]]
+            successes = [r for r in pair if r == "created"]
+            refusals = [r for r in pair if isinstance(r, UniverseNameInUse)]
+>           assert len(successes) == 1 and len(refusals) == 1, pair
+E           AssertionError: ['created', 'created']
+E           assert (2 == 1)
+E            +  where 2 = len(['created', 'created'])
+
+tests/integration/test_universe_create.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_create.py::test_an_active_name_cannot_be_reused_after_trimming
+FAILED tests/integration/test_universe_create.py::test_the_replayed_current_name_decides_not_the_created_name
+FAILED tests/integration/test_universe_create.py::test_a_second_create_waits_on_the_advisory_lock_then_is_refused
+FAILED tests/integration/test_universe_create.py::test_racing_creates_never_both_succeed
+4 failed, 9 passed in 8.05s
