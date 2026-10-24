@@ -1,0 +1,78 @@
+# TDD evidence for CAP-002-E2-S1 - Migration 0006: classification tables.
+# Cycles share the one stage commit, so each cites its reviewed_patch (applied independently; files do not overlap).
+# Decisions: DEC-0110 and DEC-0092 (T017 inventory-test edits).
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged all three patches; cycle-1 was fixed and re-reviewed.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T011, T013, T014, T015, T017, T018]
+    description: >
+      Migration 0006_classifications.sql copied verbatim from research-store section 2.4 with its design-drift
+      guard (TC-COMP-017 style), constraint tests (TC-COMP-075, 163, 164, 165, 157), apply, idempotence and
+      pg_dump round-trip tests (TC-COMP-156, 158), the README row, and the inventory edits to
+      test_migration_filenames.py and test_distribution_contents.py (DEC-0110, DEC-0092). The edits T017 (c) and (d)
+      to test_migrations_apply.py and test_migrator_discover.py were already in place from CAP-002-E1-S1.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/red-cycle-1-migration.log
+    red_log_sha256: 107c9f857cbb9cdf1c4a70991fde8bd29c9e54f5acfbf4fdccd658cac3a8e29f
+    red_evidence: >
+      5 failed, 22 passed, 30 errors before 0006_classifications.sql existed (the drift guard, the apply tests
+      and every classification constraint fixture failed for the missing migration).
+    green_evidence: >
+      Full suite with -m "postgres or not postgres": 1358 passed; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 138f2d34b64b1156a9f0fb067f7ddb509323a6fbe676a8aba609d951cfc8dfb5
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: 6e40a71fd05b45dc0ae211c534297ffd22c5e79b4339f08dc12877e70bf0647e
+      generated: 19
+      killed: 19
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T010, T016]
+    description: >
+      Package-data glob classification/sql/*.sql in pyproject.toml (DEC-0088) and its guard (TC-COMP-076).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/red-cycle-2-package-data.log
+    red_log_sha256: d1d4fd561a93f57524720d1b5200caee2e46fc74d9e334c564d4618a803a8c3b
+    red_evidence: >
+      test_classification_sql_is_covered_by_a_package_data_glob failed before pyproject.toml named the glob.
+    green_evidence: tests/unit/test_package_data_ships_sql.py 10 passed after T016.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e0187176f3e38fc0e046a0ce9a98912b898c117cdd4959b9b80b1ca345f67c95
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the only non-test change is one package-data entry in pyproject.toml, configuration with no source line for the operators to mutate
+
+  - id: cycle-3
+    tasks: [T012]
+    description: >
+      Append-only guard extended to the three classification tables, plus the rule that every
+      UPDATE classification_set carries a state = 'building' guard and no DELETE names it (TC-COMP-047).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/red-cycle-3-append-only.log
+    red_log_sha256: 4888b8bcea45c30bfad91f2eecd760a4f27120613162aa3cdcfd77aace21445f
+    red_evidence: >
+      With RESEARCH_TABLES restored to its two pre-cycle entries the three classification-table cases failed (3 failed, 22 passed).
+    green_evidence: tests/unit/test_research_sql_is_append_only.py 25 passed with the five-table tuple.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d8240b90a020b44f5e0e929de976038601b8c6cca85065e7ff633f2d900a1b28
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds only test code and changes no production behaviour

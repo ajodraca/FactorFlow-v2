@@ -6,7 +6,7 @@ An editable install finds SQL files in the source tree whether or not
 
 import tomllib
 from glob import escape, glob
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import pytest
 
@@ -50,6 +50,18 @@ def test_every_sql_directory_matches_a_package_data_glob() -> None:
 def test_universes_sql_glob_is_listed_before_its_directory_exists() -> None:
     """`src/factorflow/universes/sql/` arrives with CAP-002-E1-S2 (DEC-0088)."""
     assert "universes/sql/*.sql" in package_data_globs()
+
+
+# Implements TC-COMP-076
+def test_classification_sql_is_covered_by_a_package_data_glob() -> None:
+    """`src/factorflow/classification/sql/` arrives with CAP-002-E2-S2 (DEC-0088).
+
+    The directory does not exist yet, so the glob is matched against a synthetic
+    path: a check that enumerates directories cannot fail for one that is absent.
+    """
+    synthetic = PurePath("classification/sql/anything.sql")
+
+    assert any(synthetic.match(pattern) for pattern in package_data_globs())
 
 
 # Implements TC-COMP-018

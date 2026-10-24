@@ -1,0 +1,21 @@
+F
+=================================== FAILURES ===================================
+_________________ test_migration_0006_matches_design_verbatim __________________
+
+    def test_migration_0006_matches_design_verbatim() -> None:
+>       assert MIGRATION_0006_PATH.read_text() == _design_block()
+E       assert "CREATE TABLE...EC-0066).';\n" == "CREATE TABLE...EC-0066).';\n"
+E         
+E         Skipping 3558 identical leading characters in diff, use -v to show
+E         Skipping 2151 identical trailing characters in diff, use -v to show
+E         - meric(18, 6),
+E         ?           ^
+E         + meric(18, 7),
+E         ?           ^
+E               pe
+
+tests/unit/test_migration_0006_matches_design.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_migration_0006_matches_design.py::test_migration_0006_matches_design_verbatim
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.11s
