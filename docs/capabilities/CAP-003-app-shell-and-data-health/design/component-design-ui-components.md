@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T02:25:00Z
+  timestamp: 2026-10-25T19:44:57Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -49,7 +49,9 @@ DEC-0205 and DEC-0210 without re-deciding them, and records DEC-0211 (it owns
 vendored `data-table` and `form` need), DEC-0216 (the first-download item
 before the score read exists) and DEC-0217 (`worstDataTier` over every tier),
 all under `projects/factorflow-v2/decisions/`
-in the harness repository and all **PROVISIONAL**.
+in the harness repository and all **PROVISIONAL**. DEC-0210 and DEC-0217 are
+applied as the owner amended them on 2026-10-25 (specification review v1
+FINDING-8, FINDING-9).
 
 ## 1. Overview
 
@@ -77,11 +79,12 @@ design width 1280 px and above (blueprint §3.1).
 
 Dependencies: React 18, Tailwind bound to `design-system/theme.css`, the
 Radix primitive packages `@radix-ui/react-dialog`, `-alert-dialog`,
-`-radio-group`, `-progress`, `-select`, `-checkbox`, `-slot`, and,
-**PROVISIONALLY pending the owner's `$tech-stack` confirmation**, `cmdk`,
+`-radio-group`, `-progress`, `-select`, `-checkbox`, `-slot`, and `cmdk`,
 `sonner`, `clsx`, `tailwind-merge`, `class-variance-authority`,
 `lucide-react` (DEC-0205), `@tanstack/react-table`, `react-hook-form`, `zod`,
-`@hookform/resolvers` and `@radix-ui/react-label` (DEC-0215).
+`@hookform/resolvers` and `@radix-ui/react-label` (DEC-0215); the owner
+confirmed all ten non-Radix packages in tech stack v6 on 2026-10-25
+(OQ-TS-10).
 
 ## 2. Design Details
 
@@ -109,7 +112,7 @@ web/src/components/patterns/tiers.ts                  Tier, tierOf(), labelOf():
 web/src/components/patterns/status-badge.tsx          StatusBadge: label + tier shape, never colour alone
 web/src/components/patterns/presence.tsx              Absent (em dash), NotDeterminable (coverage-unknown + reason)
 web/src/components/patterns/format.ts                 formatInstant, formatClock, formatSessionDate, formatCount, formatDownloadName
-web/src/components/patterns/as-of-line.tsx            AsOfLine: parts joined by " · " at --text-xs
+web/src/components/patterns/as-of-line.tsx            AsOfLine: parts joined by " · " at --text-xs; taken over from CAP-002, generalised
 web/src/components/patterns/worst-data-tier.ts        worstDataTier (DEC-0210)
 web/src/components/patterns/needs-you.ts              NeedsYouItem, deriveNeedsYou(), sortAttention() (DEC-0203, DEC-0216)
 web/src/components/patterns/needs-you-item.tsx        the blueprint §4.1 row
@@ -126,12 +129,22 @@ imports rewritten to relative paths, so neither `tsconfig.json` nor
 moment they are copied: reviewed, linted by Biome and scanned with the rest of
 the bundle (SEC-DEP-001).
 
-**Packages are added only after the owner's confirmation.** No story adds a
-non-Radix package to `package.json` before the owner confirms it through
-`$tech-stack` (DEC-0205, DEC-0215; capability OQ-4), and each package's
-licence is recorded when it is added (SEC-DEP-003). The Radix packages are
-within the approved `shadcn/ui on Radix primitives` entry and may be added
-with the first story that vendors a component needing them.
+**Packages are added with their licence.** The owner confirmed all ten
+non-Radix packages in tech stack v6 on 2026-10-25 (OQ-TS-10; capability OQ-4;
+DEC-0205, DEC-0215). Each is added by the first story that vendors a
+component needing it, and its licence is checked against the package when it
+is added (SEC-DEP-003). The Radix packages are within the approved `shadcn/ui
+on Radix primitives` entry and are added the same way.
+
+**`as-of-line.tsx` is taken over from CAP-002** (owner decision 2026-10-25;
+review v1 FINDING-14). CAP-002 lands first (capability OQ-2, answered
+2026-10-25) and delivers `web/src/components/patterns/as-of-line.tsx`
+specialised to the Research as-of line (DEC-0073). This component takes that
+file over and generalises it to `AsOfLine`, and CAP-002's Research line
+composes `AsOfLine`, rendering what it rendered before, so the blueprint
+builds the as-of line once (§0, §4.8) and CAP-002's `as-of-line.test.tsx`
+cases for the Research line keep passing. It is the one delivered pattern
+file this component edits rather than creates.
 
 ### 2.2 Layers
 
@@ -206,39 +219,72 @@ text and the tier shape as an `aria-hidden` icon: neutral hollow circle,
 active ringed dot, good filled circle, warning triangle, serious diamond,
 critical square (blueprint §8; STD-UI-8).
 
-### 2.4 `worstDataTier` (DEC-0210, PROVISIONAL)
+### 2.4 `worstDataTier` (DEC-0210, DEC-0217 as amended, PROVISIONAL)
 
 ```typescript
 // web/src/components/patterns/worst-data-tier.ts
-export type DataAnswer =
-  | { tier: "good" | "warning" | "critical"; word: "Yes" | "Mostly yes" | "No" }
-  | { tier: "not_determinable"; word: "Can't tell yet"; reasons: string[] };
+export type DataAnswer = {
+  tier: "good" | "warning" | "serious" | "critical";
+  word: "Yes" | "Mostly yes" | "No";
+  downloadClause: "failed" | "interrupted" | null;   // from the latest terminal download
+};
 
 export function worstDataTier(inputs: {
-  dailyPrices: Tier | "not_determinable";
-  companyFinancials: Tier | "not_determinable";
-  factorScores: Tier | "not_determinable";
-  affectedCount: number;            // warning when > 0, good otherwise
-  reasons: Partial<Record<"dailyPrices" | "companyFinancials" | "factorScores", string>>;
+  affectedCount: number;                    // the problem set: affected_count or problems.stock_count (DEC-0201)
+  followedCount: number;                    // followed_count from the same response
+  latestTerminalDownload: RunState | null;  // attention's latest_terminal_download?.state
 }): DataAnswer;
+
+export function dataTileBadge(
+  verdict: DataAnswer,
+  scores: Extract<Status, { of: "scores" }> | null,   // null while the summary is not served
+): { tier: Tier; label: string; from: "verdict" | "scores" };
 ```
 
-It returns the worst tier by the order critical, serious, warning, good over
-the inputs that are tiers; a not-determinable input contributes no tier and
-its reason is returned for the sentence; when every check is not
-determinable the answer is *Can't tell yet* with the reasons. Neutral and
-active inputs (the Factor scores card's *No scores yet* and *Updating*) rank
-as good, and a serious input ranks above warning and answers *No*, so the
-function is total over every tier (DEC-0217, PROVISIONAL). `home-ui`'s data tile and
-`data-health-ui`'s verdict both call it with the same inputs, so the two
-screens never disagree.
+The inputs are the problem set and the latest terminal download; the checks'
+tiers do not feed the answer, and each check card shows its own (DEC-0210 as
+the owner amended it on 2026-10-25):
+
+| Input | Tier | Answer word | Clause after the count clause |
+|-------|------|-------------|-------------------------------|
+| `affectedCount` 0 | good | *Yes* | none |
+| `affectedCount` above 0, below `followedCount` | warning | *Mostly yes* | none |
+| every followed stock affected (`affectedCount` ≥ `followedCount` > 0) | critical | *No* | none |
+| `latestTerminalDownload` `failed` | critical | *No* | *, and the last download failed.* |
+| `latestTerminalDownload` `abandoned` (*Interrupted*) | serious, rendered `status-serious` | *Mostly yes* | *, and the last download was interrupted.* |
+| any other `latestTerminalDownload` state, or none | no tier | n/a | none |
+
+The answer is the worst of the problem-set tier and the download tier by one
+full tier order for all six tiers, critical, serious, warning, good, neutral,
+with active ranked alongside good, the order `sortAttention` uses (2.6;
+DEC-0217 as amended). The word follows the winning tier: good *Yes*, warning
+and serious *Mostly yes*, critical *No*. The download clause is returned
+whenever the latest terminal download failed or was interrupted, whichever
+input wins, and replaces the closing full stop of the count clause the
+caller composes. Not determinable is not an answer of this function: a
+caller whose read of these inputs has not answered renders its skeleton, and
+one whose read has failed renders its region's Error state (UX design 1.3
+and 1.4 States); `NotDeterminable` is for a value no artifact can determine
+(STD-UI-14), such as the score state while the summary answers `404`.
+
+`dataTileBadge` is Home's data tile badge: the worse of the verdict tier and
+the blueprint §8 score-state tier (`tierOf` over the summary's score state),
+by the same order, with the label of whichever wins, the answer word for the
+verdict or `labelOf` for the scores (*Score update failed*, *Not reflecting
+the latest download*). A tie goes to the verdict and a null score state
+contributes no tier, so neutral (*No scores yet*) and active (*Updating*)
+never worsen or displace the answer. Before any download Home renders its
+empty state and neither function is called. `data-health-ui`'s verdict and
+`home-ui`'s tile pass the same problem set and the same latest download, so
+the tile's verdict tier never disagrees with the verdict; the tile adds only
+the score state, which Data health shows on its Factor scores card.
 
 ### 2.5 Presence and formatting (STD-UI-3, STD-UI-4, STD-UI-5, STD-UI-14)
 
 - `Absent` renders an em dash in `--value-missing` with visually hidden text
   naming what is absent; never `0`, never blank.
 - `NotDeterminable` renders `badge` `coverage-unknown` with *Not determinable*
-  (or a caller's label such as *Can't tell yet*) carrying
+  (or a caller's label) carrying
   `--pattern-indeterminate`, and its reason beside it or in its accessible
   description; never a dimmed absent, never a passed check.
 - `formatInstant(date, { seconds })` renders `YYYY-MM-DD HH:MM zone`, or
@@ -334,12 +380,15 @@ here is pure or presentational.
 
 ## 3. Constraints and Assumptions
 
-- **Tokens only** (AC-26; STD-UI-29). No spacing, size or colour literal
-  outside `theme.css`. The pixel widths the blueprint and screen
-  specifications quote (208, 1180, 260 to 300, 28 px) bind the screens'
-  layout, not this layer; the one width inside a vendored component, the
-  `command` dialog's 560 px, is shadcn/ui's own and is not a call-site
-  literal (UX design 1.1).
+- **Tokens only** (AC-26 as the owner narrowed it; STD-UI-29). No spacing,
+  size or colour literal outside `theme.css`. The widths the blueprint and
+  screen specifications quote (208, 1180, 260 to 300, 28 px, 16 px and 70ch)
+  are approved-specification values, not theme literals and not new tokens
+  (STD-UI-10): they are held in one layout-constants module,
+  `web/src/app/layout.ts`, which `owner-shell` owns, and no component or
+  pattern in this layer carries one. The one width inside a vendored
+  component, the `command` dialog's 560 px, is shadcn/ui's own and is not a
+  call-site literal (UX design 1.1).
 - **Components as they exist.** Every variant used is one its spec defines
   (UX design §3, no COMPONENT-SPEC-GAP). Six specs are `status: beta` and this
   capability is their first consumer: `command`, `stepper`, `progress`,
@@ -362,8 +411,8 @@ here is pure or presentational.
 - **No `dangerouslySetInnerHTML`** in any vendored component or pattern; the
   delivered `web/src/api/render.test.tsx` assertion covers the new
   directories. Provider reasons render as text (AGT-PROHIB-003).
-- **Supply chain.** The non-Radix packages are not added before the owner's
-  confirmation; each is recorded with its licence when added (SEC-DEP-003)
+- **Supply chain.** The non-Radix packages are the ten tech stack v6
+  confirms (OQ-TS-10); each is recorded with its licence when added (SEC-DEP-003)
   and is scanned with `package.json` (SEC-DEP-001). Vendored sources are
   reviewed as first-party code.
 - **No storage.** Nothing here reads or writes browser storage (system design
@@ -393,7 +442,7 @@ Vitest with React Testing Library, as the tech stack approves.
 |------|------|----------------|
 | Tier table | `web/src/components/patterns/tiers.test.ts` | Every row of UX brief §12.2 maps to its label and tier; `partial` is never good, `cancelled` never critical (AC-20; STD-UI-12) |
 | Shape and words | `web/src/components/patterns/status-badge.test.tsx` | Every tier renders its label as text and its shape `aria-hidden`; no information is carried by colour alone (STD-UI-8) |
-| Worst tier | `web/src/components/patterns/worst-data-tier.test.ts` | Worst of the tiers wins; a not-determinable input contributes no tier and its reason is returned; all not determinable gives *Can't tell yet*; neutral and active rank as good, serious answers *No* (DEC-0210, DEC-0217) |
+| Worst tier | `web/src/components/patterns/worst-data-tier.test.ts` | None affected gives good *Yes*; some affected gives warning *Mostly yes*; every followed stock affected (`affectedCount` ≥ `followedCount` > 0) gives critical *No*; a failed latest terminal download gives critical *No* with *, and the last download failed.*; an interrupted one gives serious *Mostly yes* with *, and the last download was interrupted.*; in `dataTileBadge` a worse score state wins with its own label, neutral and active do not worsen or displace the answer, and a null score state contributes no tier (DEC-0210, DEC-0217 as amended) |
 | Derivation | `web/src/components/patterns/needs-you.test.ts` | Each kind present exactly while its cause holds; the first-download variant under a `404` summary only when no download has ended (DEC-0216); the scores variant and kind 5 absent under `404` |
 | Sort | `web/src/components/patterns/needs-you.test.ts` | Tier order then newest first; active sorts with good; stable on ties (AC-9) |
 | One count | `web/src/components/patterns/needs-you.test.ts` | The length of `deriveNeedsYou` is what both callers use (AC-16) |
@@ -408,7 +457,9 @@ Vitest with React Testing Library, as the tech stack approves.
 
 1. Every status any CAP-003 surface renders goes through `tierOf` and
    `StatusBadge`, with a text label and a shape, never colour alone.
-2. The verdict and the data tile render the same answer for the same inputs.
+2. The verdict and the data tile take their answer from the same problem
+   set and latest download; the tile differs only when the score state is
+   worse.
 3. Home's list and the Home chip are the same derivation; the chip equals the
    list's length.
 4. Absent and not determinable never render as `0`, blank or passed.
@@ -492,7 +543,7 @@ N/A, not applicable for this component. It makes no request; the
 | Standard | STD-UI v6 | STD-UI-3, 4, 5, 8, 12, 14, 23, 24, 29, 30 | `docs/constitution/standards/ui-conventions.md` |
 | Design system | Component specifications and theme | 18 specs, `theme.css` | `design-system/` |
 | Decisions | DEC-0203, DEC-0205, DEC-0210, DEC-0211, DEC-0215, DEC-0216, DEC-0217 | Item kinds, packages, worst tier, ownership, more packages, first-download item, worst tier over every tier | `projects/factorflow-v2/decisions/` (harness repository) |
-| Constitution | Tech stack v5 | `shadcn/ui` on Radix (OQ-TS-6), Vitest, Biome | `docs/constitution/tech-stack.md` |
+| Constitution | Tech stack v6 | `shadcn/ui` on Radix (OQ-TS-6), the ten packages it imports (OQ-TS-10), Vitest, Biome | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
 
@@ -511,17 +562,12 @@ N/A, not applicable for this component. It makes no request; the
 
 ## 14. Open Questions
 
-1. **The non-Radix packages await the owner's `$tech-stack` confirmation**
-   (capability OQ-4; DEC-0205, DEC-0215). Every component mapping assumes the
-   vendored components exist. *Owner: capability owner via `$tech-stack`.
-   Blocks: the stories that add the packages.*
-2. **`web/src/components/patterns/as-of-line.tsx` is also placed by CAP-002.**
-   The approved `component-design-classification-ui.md` §2.1 creates a file at
-   the same path, specialised to the Research as-of line (DEC-0073). The
-   blueprint builds the as-of line once (§0, §4.8). Recommendation: CAP-002's
-   Research line composes this generic `AsOfLine`; whichever lands second
-   reuses the file rather than replacing it. *Owner: capability owner, with
-   CAP-002's owner (in flight). Blocks: whichever story lands second.*
-3. **DEC-0217 awaits the owner's verdict.** No M1 check yields serious, and
-   neutral or active scores answering *Yes* is the reading a reviewer should
-   check first. *Owner: capability owner. Blocks: nothing.*
+1. ~~**The non-Radix packages await the owner's `$tech-stack` confirmation**~~
+   **Answered 2026-10-25:** all ten packages are confirmed in tech stack v6
+   (OQ-TS-10; capability OQ-4; DEC-0205, DEC-0215); each licence is checked
+   when the package is added (2.1).
+2. ~~**`web/src/components/patterns/as-of-line.tsx` is also placed by CAP-002.**~~
+   **Resolved 2026-10-25 by the owner:** CAP-002 lands first (capability
+   OQ-2) with its Research-specialised file (DEC-0073); this component takes
+   the file over and generalises it to `AsOfLine`, and CAP-002's Research line
+   composes it (2.1).

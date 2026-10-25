@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T02:05:00Z
+  timestamp: 2026-10-25T19:45:46Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -68,8 +68,11 @@ Use cases addressed:
 - Data health's verdict counts, check cards and *Needs fixing* rows, read on
   demand (AC-11, AC-13, AC-14; capability flow 2).
 - Setup's and Home's download progress (AC-7).
-- The honest empty state before any download (AC-21), through
-  `coverage-service`'s `never_acquired`.
+- The honest empty state before any download (AC-21): Data health's
+  never-downloaded empty state is triggered by the attention read's
+  `latest_terminal_download` being absent (no download has ever ended), and
+  `coverage-service`'s `never_acquired` gives the check cards their null
+  state (review v1 FINDING-10).
 
 Support matrix: the application container, Python 3.12, PostgreSQL 16, one
 owner, at most 3000 active instruments (STD-UI-30; CAP-001 AC-4).
@@ -130,7 +133,7 @@ class LatestDownload:
 @dataclass(frozen=True)
 class LatestTerminalDownload:
     run_id: UUID
-    state: str
+    state: str                   # succeeded | partial | failed | cancelled | abandoned, as recorded (2.6)
     ended_at: datetime
     failure_reason: str | None
 
@@ -308,7 +311,7 @@ else is wrong (system design constraint 5).
 ```mermaid
 flowchart TD
     S["[1] read_coverage page 1, lifecycle=active, limit=500"] --> N{"[2] never_acquired?"}
-    N -- yes --> E["[3] DataHealth never_acquired=true, both checks None; the interface renders AC-21's empty state"]
+    N -- yes --> E["[3] DataHealth never_acquired=true, both checks None; the interface renders the check cards' null state"]
     N -- no --> L["[4] iterate pages to next_cursor = null"]
     L --> P["[5] per stock: prices presence, covered_to, gaps.missing_days; fundamentals presence"]
     P --> LS["[6] latest_session = max prices covered_to"]
@@ -329,8 +332,13 @@ flowchart TD
 
 **Never acquired.** When `read_coverage` reports `never_acquired`, it returns
 no instruments, so there is nothing to count: both checks are `None` and the
-interface renders AC-21's empty state in their place. A check is never
+interface renders the check cards' null state in their place. A check is never
 returned with zero counts that could read as passed (AC-21; STD-UI-4).
+`never_acquired` is not the screen's empty-state trigger: Data health shows
+its never-downloaded empty state when the attention read's
+`latest_terminal_download` is absent, because no download has ever ended
+(2.6). A download that ended having stored nothing therefore still shows its
+*Needs fixing* rows and Recent downloads (review v1 FINDING-10).
 
 **Daily prices.** `absent_count` counts active stocks with no prices stored,
 whether coverage reports the presence as `absent` (attempted, nothing stored)
@@ -367,7 +375,14 @@ that run (`GROUP BY instrument_id HAVING count(*) = 4`), and `total` is
 claimed the download, so the interface shows indeterminate progress rather
 than *0 of 0* (DEC-0213 f; system design assumption 3).
 `LATEST_TERMINAL_SQL` selects the run with the greatest `ended_at` among the
-five terminal states, with its `failure_reason`.
+five terminal states, with its `failure_reason`. Its `state` is the recorded
+terminal state, returned as stored: `succeeded` (displayed *Complete*),
+`partial`, `failed`, `cancelled` or `abandoned` (displayed *Interrupted*).
+The interface reads it, with the problem set, as the data verdict's download
+input (DEC-0210, DEC-0217 as the owner amended them: `failed` is critical,
+`abandoned` serious), and reads its absence as "no download has ever ended",
+Data health's never-downloaded empty state (AC-21). This module returns the
+state and no tier (DEC-0200).
 
 ### 2.7 Attention items (DEC-0203, PROVISIONAL)
 
@@ -431,12 +446,16 @@ callers poll.
   boolean; the key's value never enters this module (AC-4; AGT-PROHIB-001).
 - **Provider text is data.** `reason` and `failure_reason` are returned as
   stored; the interface renders them as text (AGT-PROHIB-003).
-- **Data classification:** Internal, as all CAP-001 data. No PII.
+- **Data classification:** Internal (SEC-DAT-001), as all CAP-001 data. No
+  PII. System design §4.2 now carries the same classification for the new
+  response elements it introduces.
 - **No new dependency.** `psycopg` 3 and the delivered pool only, so no OSS
   inventory change.
-- **Loopback reliance.** The module's queries travel the application to
-  PostgreSQL channel at `127.0.0.1:5432` under DEC-0050 as extended by
-  DEC-0208.
+- **Loopback reliance.** This design relies on the `SEC-ENC-001 host-local
+  loopback exception` for one channel: the application process to
+  PostgreSQL at `127.0.0.1:5432`, which every query of this module travels.
+  The owner's loopback decision DEC-0050, as extended by DEC-0208, covers it,
+  and DEC-0208's `artifacts` name this design.
 
 ## 5. Scalability and Performance
 
@@ -444,9 +463,10 @@ callers poll.
   instruments and their 12,000 `acquisition_state` rows, plus one progress
   aggregate over the latest run's results; safe at the 10 second cadence.
 - **Data health read:** six `read_coverage` pages at 3000 stocks plus the
-  problem page; read on demand only, never polled (system design §3.4 note
-  1). No latency target exists (system design open question 7), so none is
-  asserted; the volume test records the measured duration.
+  problem page; read on demand only, by Data health alone, never polled
+  (system design §3.4 note 1). With 3,000 followed stocks,
+  `GET /api/data-health` answers within 2 seconds at the 95th percentile
+  (AC-28), and the volume test asserts it.
 - **Memory:** `read_data_health` folds each coverage page into running counts
   and keeps at most five exception symbols per check, so memory does not grow
   with the roster.
@@ -478,9 +498,9 @@ tech stack.
 | Keyset paging | `tests/integration/test_data_health_problems.py` | Pages of 2 over 5 problem stocks return 2, 2, 1 with cursors, and a full final page has no cursor |
 | Progress | `tests/integration/test_data_health_attention.py` | `done` counts instruments with all four results; `total` is `None` while `instruments_named` is 0 (DEC-0213 f; AC-7) |
 | Latest terminal | `tests/integration/test_data_health_attention.py` | A running download does not displace the latest terminal one; an `abandoned` latest terminal yields the item with its `run_id` |
-| Never acquired | `tests/integration/test_data_health_checks.py` | An empty store returns `never_acquired` true and both checks `None`, so no check reports `ok` (AC-21) |
+| Never acquired | `tests/integration/test_data_health_checks.py` | An empty store returns `never_acquired` true and both checks `None`, so no check reports `ok` (AC-21); a store where a download ended and every request failed returns `never_acquired` true with `affected_count` and the problem rows populated, and a non-null `latest_terminal_download` (FINDING-10) |
 | Retired stocks excluded | `tests/integration/test_data_health_checks.py` | A retired stock with a failure is in no count and no row |
-| Volume | `tests/integration/test_data_health_volume.py` | 3000 active instruments with failures on 300: correct counts, keyset pages, memory bounded; measured duration recorded, not asserted (open question 7) |
+| Volume | `tests/integration/test_data_health_volume.py` | 3000 active instruments with failures on 300: correct counts, keyset pages, memory bounded; after one warm-up request, 20 timed `GET /api/data-health` requests through the in-process application against that store have a 95th percentile of at most 2 seconds (AC-28) |
 
 ## 8. Acceptance Criteria
 
@@ -500,6 +520,8 @@ tech stack.
 7. No statement writes to the store.
 8. Failure scenario: a database error propagates to `data-health-api`, which
    answers the error envelope; no partial aggregate is returned as complete.
+9. With 3,000 followed stocks, `GET /api/data-health` answers within 2
+   seconds at the 95th percentile in the volume test (AC-28).
 
 ## 9. Workflows
 
@@ -531,11 +553,11 @@ This component exposes no HTTP endpoint. Its Python interface is consumed by
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| Capability | CAP-003 v1 | AC-7, AC-9, AC-11, AC-13, AC-14, AC-16, AC-21 | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` |
+| Capability | CAP-003 v1 | AC-7, AC-9, AC-11, AC-13, AC-14, AC-16, AC-21, AC-28 | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` |
 | System design | CAP-003 v1 | §3.3, §3.4, §4.1, §4.2, constraints 1, 3, 5, 7 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
 | Component design | CAP-001 coverage service | `read_coverage` contract, presence and gap semantics | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-coverage-service.md` |
 | Schema | Migrations 0001, 0003, 0004 | The tables read | `src/factorflow/db/migrations/` |
-| Decisions | DEC-0200, DEC-0201, DEC-0203, DEC-0208, DEC-0213, DEC-0220 | Server-side aggregates, problem and check definitions, item kinds, loopback, count rules, exception count | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decisions | DEC-0200, DEC-0201, DEC-0203, DEC-0208, DEC-0210, DEC-0213, DEC-0217, DEC-0220 | Server-side aggregates, problem and check definitions, item kinds, loopback, the verdict's inputs (as amended), count rules, exception count | `projects/factorflow-v2/decisions/` (harness repository) |
 | Constitution | Tech stack v5 | Python 3.12, `psycopg` 3, pytest, testcontainers | `docs/constitution/tech-stack.md` |
 
 ## 13. Traceability
@@ -549,14 +571,16 @@ This component exposes no HTTP endpoint. Its Python interface is consumed by
 | AC-13 | One problem set with reasons | Problem rows from `acquisition_state` and `run_instrument_result` | 2.4 |
 | AC-14 | `retryable` false for `not_found` | `retryable` rule | 2.4 |
 | AC-16 | `problems.stock_count` | Same set as the rows | 2.4 |
-| AC-21 | `never_acquired` | Passed through from `coverage-service` | 2.5 |
+| AC-21 | `never_acquired`; `latest_terminal_download` | `never_acquired` passed through from `coverage-service` for the check cards' null state; an absent `latest_terminal_download` is the screen's empty-state trigger | 2.5, 2.6 |
 | AC-24 | Not determinable is a value | `null` counts and `not_determinable` status | 2.5 |
+| AC-28 | `GET /api/data-health` at 3,000 stocks | Volume test asserts p95 ≤ 2 s | 5, 7 |
 
 ## 14. Open Questions
 
-1. **No latency target for the on-demand aggregate at 3000 stocks** (system
-   design open question 7). The volume test records the duration so the owner
-   can set one. *Owner: capability owner. Blocks: a performance criterion.*
+1. **Latency target for the on-demand aggregate at 3000 stocks: answered.**
+   The owner set AC-28 on 2026-10-25 (review v1 FINDING-4): p95 within 2
+   seconds at 3,000 followed stocks, which the volume test asserts (section
+   7). *Owner: capability owner. Blocks: nothing.*
 2. **DEC-0213 awaits the owner's verdict.** If the owner wants a never
    attempted stock shown apart from one the provider returned nothing for,
    the Daily prices card gains a fourth count and the response a field.

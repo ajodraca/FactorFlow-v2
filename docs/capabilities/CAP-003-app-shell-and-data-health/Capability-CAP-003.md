@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: unknown
-  timestamp: 2026-10-24T23:26:09Z
+  timestamp: 2026-10-25T19:41:02Z
   source_artifacts:
     - id: PRODUCT-UX
       version: "6"
@@ -284,7 +284,9 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
     `/data/downloads/:id` and `/settings`.
 18. **AC-18 — Old paths still arrive:** Each path CAP-001 shipped MUST take the
     owner to the same screen at its new path for one release after this
-    capability ships, and MUST then be removed.
+    capability ships. (Their removal in the following release is the
+    out-of-scope item in §2; the clause requiring it was dropped on 2026-10-25,
+    review v1 FINDING-5, because it cannot be exercised at this delivery.)
 19. **AC-19 — Product vocabulary:** Every user-visible label on the screens
     this capability delivers or takes over MUST use the display label STD-UI-1
     defines and MUST NOT show the domain term beside it.
@@ -311,10 +313,18 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
 26. **AC-26 — Built from the design system:** Every surface this capability
     delivers or takes over MUST be built from the product's design-system
     components and consume its theme tokens, with no spacing, size or colour
-    literal outside the theme.
+    literal outside the theme. The layout dimensions the approved blueprint
+    and screen specifications fix (the 208 px rail, the 1180 px measure, the
+    260 to 300 px side column, 28 px, 16 px and 70ch) are approved-specification
+    values held in one layout-constants module, not theme literals and not new
+    tokens (owner decision 2026-10-25, review v1 FINDING-6).
 27. **AC-27 — CAP-002 keeps its routes:** Replacing the interim Research entry
     CAP-002 appended to CAP-001's rail MUST leave every CAP-002 route
     unchanged and reachable from the new rail.
+28. **AC-28 — Data health answers in bounded time:** With 3,000 followed
+    stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th
+    percentile, measured by the volume test (owner decision 2026-10-25, review
+    v1 FINDING-4).
 
 ## 5. Dependencies and Constraints
 
@@ -388,11 +398,11 @@ mirror of it, and the two must agree.
 | STD-UI-22 | no | No capital-at-risk or destructive control on these screens |
 | STD-UI-23 | yes | AC-24; the UX brief enumerates all eight states per region, starting from the screen specs' states tables |
 | STD-UI-24 | yes | AC-25; the screen specs' accessibility sections are the starting point |
-| STD-UI-25 | yes | AC-25; cadences recorded in the design, starting from the screen specs |
+| STD-UI-25 | yes | AC-25; cadences recorded in the design, starting from the screen specs. **Specialization (permitted):** the rail chips are polled but carry no time of their own; the *checked {time}* lines on Home and Data health, read on the same cadence, stand for them (owner decision 2026-10-25, review v1 FINDING-11) |
 | STD-UI-26 | yes | AC-3: setup shows steps, position and what remains, and going back keeps entered data |
 | STD-UI-27 | no | No chart in M1 |
 | STD-UI-28 | no | No chart in M1 |
-| STD-UI-29 | yes | AC-26; density inherits the theme's tier (STD-UI OQ-UI-4 still open) |
+| STD-UI-29 | yes | AC-26; density inherits the theme's tier (STD-UI OQ-UI-4 still open). The approved-specification layout dimensions AC-26 names are held in one layout-constants module and are not theme literals (owner decision 2026-10-25, review v1 FINDING-6) |
 | STD-UI-30 | yes | The followed-stock and coverage lists CAP-001 committed to 3000 stocks (CAP-001 AC-4) keep CAP-001's volume handling when taken over; no new list reaches that volume |
 
 ## 6. Assumptions
@@ -456,7 +466,7 @@ mirror of it, and the two must agree.
 
 **Readiness Score: 85/100**
 
-Problem, users, outcome, scope, flows and 27 acceptance criteria are defined
+Problem, users, outcome, scope, flows and 28 acceptance criteria are defined
 against an approved blueprint and three approved screen specifications, and
 every dependency is typed and cited. The four product questions raised at
 definition — the visible download number (OQ-1), delivery order relative to

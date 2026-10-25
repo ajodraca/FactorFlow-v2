@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T02:10:00Z
+  timestamp: 2026-10-25T19:45:46Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -191,7 +191,7 @@ Timestamps serialise as ISO-8601 with offset; session dates as `YYYY-MM-DD`.
 
 | Model | Fields |
 |-------|--------|
-| `AttentionResponse` | `checked_at`; `followed_count`; `prices_as_of` (date or null); `credential_present` (bool); `problems {stock_count, symbols[≤3], newest_completed_at}`; `latest_download {run_id, state, requested_at, started_at, ended_at, progress {done, total or null}}` or null; `latest_terminal_download {run_id, state, ended_at, failure_reason}` or null; `items[] {kind, recorded_at, run_id or null}` |
+| `AttentionResponse` | `checked_at`; `followed_count`; `prices_as_of` (date or null); `credential_present` (bool); `problems {stock_count, symbols[≤3], newest_completed_at}`; `latest_download {run_id, state, requested_at, started_at, ended_at, progress {done, total or null}}` or null; `latest_terminal_download {run_id, state (the recorded terminal state: succeeded, partial, failed, cancelled or abandoned), ended_at, failure_reason}` or null; `items[] {kind, recorded_at, run_id or null}` |
 | `DataHealthResponse` | `checked_at`; `never_acquired`; `followed_count`; `affected_count`; `checks {daily_prices, company_financials}`, each null exactly when `never_acquired` is true; `problems {rows, next_cursor}` |
 | `DailyPricesCheckResponse` | `status` (`ok`, `exceptions`, `not_determinable`); `absent_count`; `gap_stock_count` (int or null); `behind_count`; `latest_session` (date or null); `gap_detection {available, reason}`; `exception_count`; `exception_symbols[≤5]` |
 | `CompanyFinancialsCheckResponse` | `status` (`ok`, `exceptions`); `absent_count`; `problem_count`; `as_of` (timestamp or null); `exception_count`; `exception_symbols[≤5]` |
@@ -201,7 +201,14 @@ Timestamps serialise as ISO-8601 with offset; session dates as `YYYY-MM-DD`.
 `gap_stock_count` and the nullable dates are serialised as `null`, never
 omitted and never `0`, so the interface can render not determinable and
 absent apart from zero (STD-UI-4, STD-UI-14; DEC-0213). The checks are null
-before anything was acquired so no check can read as passed (AC-21).
+before anything was acquired so no check can read as passed (AC-21):
+`never_acquired` gives the check cards their null state and is not the
+screen's empty-state trigger. Data health's never-downloaded empty state is
+triggered by `AttentionResponse.latest_terminal_download` being null, because
+no download has ever ended (review v1 FINDING-10). That field's `state` is
+also the data verdict's download input, read with the problem set by the
+interface (DEC-0210, DEC-0217 as the owner amended them); the API passes it
+through as recorded.
 
 ### 2.5 Messages
 
@@ -229,9 +236,13 @@ polls `GET /api/attention` at the cadences `owner-shell` owns.
 - **Loopback, no authentication.** The routes inherit the delivered bind and
   the Host and Origin middleware, and rely on the `SEC-ENC-001 host-local
   loopback exception` for the browser-to-API channel under DEC-0050 as
-  extended to this design by DEC-0208 (constraint 9). SEC-AUTH-001's
-  authentication requirement is met by that exception's conditions H1 to H9,
-  which CAP-001 delivered.
+  extended to this design by DEC-0208 (constraint 9); that exception's
+  conditions H1 to H9, which CAP-001 delivered, govern the channel's
+  transport. The basis for serving the routes without authentication
+  (SEC-AUTH-001) is separate: they are not externally reachable, because the
+  application binds to loopback only, and the owner's loopback decision
+  (DEC-0050, DEC-0208) covers them. The exception does not by itself meet
+  SEC-AUTH-001.
 - **Input validation** (SEC-INP-001): `limit` is bounded, `cursor` is
   normalised and validated as a symbol before it reaches SQL, where it is a
   bound parameter (SEC-INP-002).
@@ -250,8 +261,12 @@ polls `GET /api/attention` at the cadences `owner-shell` owns.
 - `GET /api/attention` is safe to poll at 10 seconds: a handful of indexed
   aggregates (`data-health-reader` §5).
 - `GET /api/data-health` runs the coverage derivation over the active roster
-  and is called only on demand, by `data-health-ui` and by `home-ui` for its
-  tile badge, never on an interval (system design §3.4 note 1; DEC-0219). No latency target exists (system design open question 7).
+  and is called only on demand, by `data-health-ui` alone, never on an
+  interval (system design §3.4 note 1); Home does not read it (DEC-0219,
+  withdrawn by the owner on 2026-10-25). With 3,000 followed stocks it
+  answers within 2 seconds at the 95th percentile (AC-28), asserted by the
+  volume test `tests/integration/test_data_health_volume.py`
+  (`data-health-reader` §7), which times this route.
 - Each request holds one pooled connection for the duration of its read and
   releases it; no request opens a second.
 
@@ -274,6 +289,7 @@ polls `GET /api/attention` at the cadences `owner-shell` owns.
 | End to end | `tests/integration/test_api_data_health.py` | Against a seeded PostgreSQL: attention and data-health bodies match the reader's values; `affected_count` equals the row count; keyset pages concatenate to the full problem set (AC-13, AC-16) |
 | Empty store | `tests/integration/test_api_data_health.py` | `200` with `never_acquired` true and both checks `null` (AC-21) |
 | Host and Origin | `tests/integration/test_api_data_health_host_origin.py` | A foreign `Host` gets `400 host_not_allowed` on all three routes; a foreign `Origin` on a `GET` is not refused (GET changes no state) |
+| Latency | `tests/integration/test_data_health_volume.py` (`data-health-reader` §7) | With 3,000 followed stocks, `GET /api/data-health` has a 95th percentile of at most 2 seconds (AC-28) |
 
 The no-credential assertion over these routes lives in the delivered
 `tests/unit/test_api_no_secrets.py`, extended by `ingestion-api`.
@@ -288,6 +304,8 @@ The no-credential assertion over these routes lives in the delivered
 4. No response carries the credential's value or any sentence or tier.
 5. A request whose `Host` is not a loopback address is refused by the
    delivered middleware before reaching a handler.
+6. With 3,000 followed stocks, `GET /api/data-health` answers within 2
+   seconds at the 95th percentile, measured by the volume test (AC-28).
 
 ## 9. Workflows
 
@@ -295,10 +313,9 @@ The no-credential assertion over these routes lives in the delivered
 - **Home:** the data tile and the server items come from the same read.
 - **Data health:** `GET /api/data-health` on load, on **Try again**, once when
   a download ends and after **Stop following**; **Show more** calls
-  `GET /api/data-health/problems`.
-- **Home:** `GET /api/data-health` under the same rule, for the data tile's
-  badge, so the tile and the verdict are one function over one read (DEC-0219,
-  PROVISIONAL).
+  `GET /api/data-health/problems`. Data health is the only reader of
+  `GET /api/data-health`; Home does not read it on mount (DEC-0219,
+  withdrawn by the owner on 2026-10-25).
 - **Setup step 4:** progress from the shell's attention read.
 
 ## 10. UX / GUI
@@ -312,7 +329,7 @@ see `component-design-home-ui.md`, `component-design-data-health-ui.md` and
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
 | `/api/attention` | GET | none, loopback (DEC-0208) | none | `200 AttentionResponse`; `500` envelope | Polled by `owner-shell` every 60 s, every 10 s while a download is non-terminal (DEC-0200, PROVISIONAL) |
-| `/api/data-health` | GET | none, loopback | none | `200 DataHealthResponse` with the first 50 problem rows; `500` envelope | On demand only (system design §3.4 note 1); consumers `data-health-ui` and `home-ui` (DEC-0219) |
+| `/api/data-health` | GET | none, loopback | none | `200 DataHealthResponse` with the first 50 problem rows; `500` envelope | On demand only (system design §3.4 note 1); sole consumer `data-health-ui` (DEC-0219 withdrawn); p95 ≤ 2 s at 3,000 stocks (AC-28) |
 | `/api/data-health/problems` | GET | none, loopback | `limit` (default 50, max 500), `cursor` (last symbol) | `200 ProblemPageResponse`; `422 validation_error`; `500` envelope | Keyset by symbol (STD-UI-30) |
 
 Interfaces consumed: `data-health-reader`'s `read_attention`,
@@ -327,7 +344,7 @@ envelope and pool.
 | Component design | CAP-001 ingestion API v8 | Middleware, error envelope, bounds, `app.state.db_pool` | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-ingestion-api.md` |
 | Component design | CAP-003 data health reader | The functions and dataclasses this router serves | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-data-health-reader.md` |
 | Component design | CAP-003 ingestion API changes | The `include_router` line and the no-secrets test | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-ingestion-api.md` |
-| Decisions | DEC-0200, DEC-0201, DEC-0203, DEC-0208, DEC-0211, DEC-0213, DEC-0219, DEC-0220 | Reads, definitions, items, loopback, ownership, count rules, Home's on-demand read, exception count | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decisions | DEC-0050, DEC-0200, DEC-0201, DEC-0203, DEC-0208, DEC-0210, DEC-0211, DEC-0213, DEC-0217, DEC-0219 (withdrawn), DEC-0220 | Owner's loopback decision, reads, definitions, items, loopback extension, the verdict's inputs (as amended), ownership, count rules, Home's on-demand read (withdrawn), exception count | `projects/factorflow-v2/decisions/` (harness repository) |
 | Constitution | Harness security constitution | SEC-ENC-001 host-local loopback exception, SEC-INP-001, SEC-INP-002, SEC-ERR-001 | `docs/constitutions/security.constitution.md` (harness repository) |
 
 ## 13. Traceability
@@ -341,11 +358,13 @@ envelope and pool.
 | AC-13 | Problem rows | `ProblemRowResponse` | 2.4 |
 | AC-14 | `retryable` | `ProblemRowResponse.retryable` | 2.4 |
 | AC-16 | `problems.stock_count` | `AttentionResponse.problems` | 2.4 |
-| AC-21 | `never_acquired` | Checks null, `never_acquired` true | 2.4 |
+| AC-21 | `never_acquired`; `latest_terminal_download` | Checks null, `never_acquired` true (check cards' null state); `latest_terminal_download` null is the screen's empty-state trigger | 2.4 |
 | AC-23 | Health answers independently | These routes play no part in liveness; health stays the delivered route | 3 |
+| AC-28 | `GET /api/data-health` at 3,000 stocks | p95 ≤ 2 s, asserted by the volume test | 5, 7 |
 
 ## 14. Open Questions
 
-1. **No latency target for `GET /api/data-health`** (system design open
-   question 7). *Owner: capability owner. Blocks: a performance criterion
-   only.*
+1. **Latency target for `GET /api/data-health`: answered.** The owner set
+   AC-28 on 2026-10-25 (review v1 FINDING-4): p95 within 2 seconds at 3,000
+   followed stocks, asserted by the volume test (section 5). *Owner:
+   capability owner. Blocks: nothing.*

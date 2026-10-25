@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T03:15:00Z
+  timestamp: 2026-10-25T19:44:57Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -42,11 +42,13 @@ ai_provenance:
 **Last Updated:** 2026-10-25
 
 This design was produced in an unattended `$design-run`. It applies DEC-0202,
-DEC-0203, DEC-0206, DEC-0209 and DEC-0210 without re-deciding them, and
-records DEC-0216 (the first-download item before the score read exists) and
-DEC-0219 (Home reads the data-health aggregate on demand for its tile badge),
-under `projects/factorflow-v2/decisions/` in the harness repository.
-Positions resting on a decision are marked **PROVISIONAL**.
+DEC-0203, DEC-0206, DEC-0209, DEC-0210 and DEC-0217 without re-deciding them,
+DEC-0210 and DEC-0217 as the owner amended them on 2026-10-25, and records
+DEC-0216 (the first-download item before the score read exists), under
+`projects/factorflow-v2/decisions/` in the harness repository. DEC-0219, which
+had Home read the data-health aggregate for its tile badge, was withdrawn by
+the owner on 2026-10-25 (specification review v1 FINDING-4). Positions
+resting on a decision are marked **PROVISIONAL**.
 
 ## 1. Overview
 
@@ -57,17 +59,19 @@ and *Needs you* beside it (system design §3.3; UX design 1.3). It answers
 exactly one navigating action per item. It renders no strategy, paper or live
 region and no placeholder for one (AC-10; S01-7).
 
-Nothing on Home mutates state (S01 §6). It reads the shell's attention and
-summary reads through `useShell()`, and `GET /api/data-health` on demand only
-for the tile's badge, so the tile and Data health's verdict are one function
-over one read (DEC-0210, DEC-0219, PROVISIONAL).
+Nothing on Home mutates state (S01 §6). It reads only the shell's attention
+and summary reads through `useShell()` and never `GET /api/data-health`. The
+tile's badge is the worse of the verdict tier, which `worstDataTier` computes
+from attention's problem set and latest terminal download exactly as Data
+health's verdict does, and the summary's score-state tier (DEC-0210, DEC-0217
+as amended, PROVISIONAL).
 
 Use cases addressed: capability flow 3 and its alternates; AC-7 (the first
 download's progress), AC-8, AC-9, AC-10, AC-12, AC-21, AC-24, AC-25.
 
-Support matrix: as the shell. Dependencies: `owner-shell` (`useShell`,
-`useDataHealth`), `ui-components` (`deriveNeedsYou`, `sortAttention`,
-`worstDataTier`, `StatusBadge`, `NotDeterminable`, `Absent`, `AsOfLine`,
+Support matrix: as the shell. Dependencies: `owner-shell` (`useShell`),
+`ui-components` (`deriveNeedsYou`, `sortAttention`, `worstDataTier`,
+`dataTileBadge`, `StatusBadge`, `NotDeterminable`, `Absent`, `AsOfLine`,
 formatters, `StateRegion`).
 
 ## 2. Design Details
@@ -90,11 +94,11 @@ All new; no delivered file is edited.
 ### 2.2 From reads to regions
 
 The flowchart is system design §3.3 at the component level. Its actors are the
-shell's attention and summary reads, this screen's on-demand aggregate read,
-and the three regions. The decision points are whether any download was ever
-requested, whether the summary is served and current, and whether any item
-applies. The outcome is a Home that names what needs the owner with one
-action each, a tile whose badge matches Data health's verdict, and counts and
+shell's attention and summary reads and the three regions. The decision
+points are whether any download was ever requested, whether the summary is
+served and current, and whether any item applies. The outcome is a Home that
+names what needs the owner with one action each, a tile whose badge carries
+Data health's verdict tier unless the score state is worse, and counts and
 as-of lines that never present an absent or undetermined figure as a value.
 
 ```mermaid
@@ -103,8 +107,10 @@ flowchart TD
     E -- yes --> EMPTY["[3] header + 'No data has been downloaded yet.' + Start setup (AC-21)"]
     E -- no --> T["[4] data tile"]
     S["[5] useShell().scores"] --> T
-    DH["[6] useDataHealth(): GET /api/data-health on demand (DEC-0219)"] --> B["[7] worstDataTier(checks, score tier, affected_count)"]
-    B --> T
+    A --> B["[6] worstDataTier(problems.stock_count, followed_count, latest_terminal_download)"]
+    B --> DB["[7] dataTileBadge: worse of the verdict tier and the score-state tier"]
+    S --> DB
+    DB --> T
     T --> T1{"[8] summary state"}
     T1 -- "not served / error" --> T2["[9] current count and scores as-of: em dash 'not determinable', or error + Try again"]
     T1 -- "set.not_current or later building/failed" --> T3["[10] 'Not reflecting the latest download' badge"]
@@ -142,17 +148,19 @@ A `card` `metric` whose whole surface is one link to `/data`, titled *Data*.
 
 | Part | Source | Rendering |
 |------|--------|-----------|
-| Badge | `worstDataTier` over the aggregate's two checks, the summary's Factor scores tier and `affected_count` (DEC-0210, DEC-0219) | `status-good` *Yes*, `status-warning` *Mostly yes*, `status-critical` *No*, or `coverage-unknown` *Can't tell yet*; skeleton while the aggregate loads; `coverage-unknown` with the reason if it fails |
-| Hero line | `stocks_current.current_count` (summary) of `followed_count` (attention) | *{current} of {followed} stocks current* at `--text-2xl` `--font-numeric`; the current count an em dash with hidden *not determinable* while the summary is not served |
+| Badge | `dataTileBadge` over the verdict tier, `worstDataTier` from attention's `problems.stock_count`, `followed_count` and `latest_terminal_download`, and the summary's score-state tier (DEC-0210, DEC-0217 as amended) | the verdict's `status-good` *Yes*, `status-warning` *Mostly yes*, `status-serious` *Mostly yes* or `status-critical` *No*, or, when the score state is worse, its own badge and label (`status-critical` *Score update failed*, `status-warning` *Not reflecting the latest download*); skeleton while attention loads; while attention fails the tile renders 1.3's Error state (*Couldn't read the data summary: {reason}.* with **Try again**) and no badge |
+| Hero line | both figures from the summary's `stocks_current`: `current_count` of `followed_count` (the set's `active_instruments`) | *{current} of {followed} stocks current* at `--text-2xl` `--font-numeric`; only while the summary is not served or carries no `stocks_current` (never classified), `followed` is attention's `followed_count` and the current count an em dash with hidden *not determinable* |
 | *Scores {YYYY-MM-DD HH:MM zone}* | summary `set.ended_at` | em dash with *not determinable* while not served; *No scores yet* when `never_classified` |
 | *Prices {YYYY-MM-DD}* | attention `prices_as_of` | em dash with *not determinable* while attention fails |
 | Scope sentence | static | *Every other number on this page is as of those times.* |
 | Lag badge | summary `set.not_current` true, or `later` building or failed | `badge` `status-warning` *Not reflecting the latest download* under the as-of lines (AC-8) |
 
-The Factor scores tier given to `worstDataTier` is `tierOf({ of: "scores",
-... })` over the summary's state, and not determinable while the summary is
-not served, exactly as `data-health-ui` derives it, so the two screens pass
-identical inputs.
+The score-state tier given to `dataTileBadge` is `tierOf({ of: "scores",
+... })` over the summary's state, the tier Data health's Factor scores card
+shows, and contributes no tier while the summary is not served. The verdict
+tier comes from the same problem set (DEC-0201) and latest download Data
+health's verdict uses, so the tile never reads better than the verdict and
+reads worse only when the score state is.
 
 ### 2.5 *Needs you* (DEC-0203, DEC-0216, PROVISIONAL)
 
@@ -192,8 +200,9 @@ N/A, not applicable for this component.
 - **Not determinable is a value** (constraint 5): the current count, the
   scores as-of, the market state inside session hours and any figure whose
   read fails render through `NotDeterminable` or `Absent`, never as `0`.
-- **The aggregate is not polled** (DEC-0219): read on mount, on **Try again**,
-  once when a download ends.
+- **No aggregate read** (review v1 FINDING-4): Home never reads
+  `GET /api/data-health`; the badge comes from the shell's polled attention
+  and summary reads, so the first screen waits on no coverage derivation.
 - **Assumption:** the summary's `set.ended_at` is the time scores were
   produced, as `classification-api` publishes it.
 - **The weekday is English** (DEC-0209); there is one locale.
@@ -204,14 +213,13 @@ N/A, not applicable for this component.
   never the key's value.
 - `failure_reason` and score `reason` are provider or engine text, rendered as
   text (AGT-PROHIB-003).
-- No storage, no new request beyond the shell's reads and the aggregate.
+- No storage, no request beyond the shell's reads.
 
 ## 5. Scalability and Performance
 
 - The list holds at most six items; the data item names at most three symbols
   and a count.
-- One aggregate read per visit; the shell's polling drives every other
-  update.
+- No read of its own; the shell's polling drives every update.
 
 ## 6. Upgrade
 
@@ -226,9 +234,9 @@ N/A, not applicable for this component.
 | Test | File | What it proves |
 |------|------|----------------|
 | Empty state | `web/src/screens/home/home.test.tsx` | `latest_download` null renders *No data has been downloaded yet.* with **Start setup**; no tile, no list (AC-21) |
-| Tile figures | `web/src/screens/home/data-tile.test.tsx` | Current of followed, both as-of lines; em dash with *not determinable* for each figure whose source is not served; never `0` (AC-8; STD-UI-4) |
+| Tile figures | `web/src/screens/home/data-tile.test.tsx` | Current of followed, both from `stocks_current` when served and never more current than followed; attention's `followed_count` only while the summary is not served; both as-of lines; em dash with *not determinable* for each figure whose source is not served; never `0` (AC-8; STD-UI-4) |
 | Lag | `web/src/screens/home/data-tile.test.tsx` | `set.not_current` or `later` building or failed shows *Not reflecting the latest download* (AC-8) |
-| Tile matches verdict | `web/src/screens/home/data-tile.test.tsx` | For the same aggregate and summary fixtures, the badge equals `data-health-ui`'s verdict badge (DEC-0210, DEC-0219) |
+| Tile matches verdict | `web/src/screens/home/data-tile.test.tsx` | For the same problem set and latest download, the tile's verdict tier equals `data-health-ui`'s verdict badge; a worse score state wins with its own label; *No scores yet* and *Updating* never displace the answer; no request to `/api/data-health` is made (DEC-0210, DEC-0217) |
 | Item catalogue | `web/src/screens/home/needs-you-card.test.tsx` | Each kind's tag, tier, title, body and single action; plural forms; `score_failed` without a set drops the second sentence (AC-9) |
 | Order and resolution | `web/src/screens/home/needs-you-card.test.tsx` | Critical before serious before warning, newest first within a tier; an item leaves only when the next read lacks its cause (AC-9; S01-4) |
 | First download before scores | `web/src/screens/home/needs-you-card.test.tsx` | With the summary at `404` and no terminal download, the first-download item shows its progress (AC-7; DEC-0216) |
@@ -276,7 +284,7 @@ the right; rows separated by `--border`.
 | UI Element | Component | Variant | Design Spec Reference |
 |------------|----------|---------|-----------------------|
 | Data tile | `card` | `metric`, the whole card one link | `design-system/components/card/design-spec.md` |
-| Tile badge; lag badge | `badge` | `status-good` / `status-warning` / `status-critical`; `status-warning` | `design-system/components/badge/design-spec.md` |
+| Tile badge; lag badge | `badge` | `status-good` / `status-warning` / `status-serious` / `status-critical`; `status-warning` | `design-system/components/badge/design-spec.md` |
 | Undetermined figures; market state inside hours | `badge` and em dash | `coverage-unknown`; `--value-missing` em dash | `design-system/components/badge/design-spec.md` |
 | Needs you card | `card` | `default` | `design-system/components/card/design-spec.md` |
 | Needs-you item | `ui-components` `NeedsYouItem` pattern | `badge` + `button` | `design-system/components/badge/design-spec.md`, `design-system/components/button/design-spec.md` |
@@ -329,7 +337,6 @@ Consumed; none exposed.
 |----------|-----------------|----------------|---------|----------|-------|
 | `/api/attention` (via `useShell`) | GET | none, loopback | none | `AttentionResponse` | Shell cadence |
 | `/api/classifications/summary` (via `useShell`) | GET | none, loopback | none | `ClassificationSummaryResponse` or `404` | Shell cadence |
-| `/api/data-health` (via `useDataHealth`) | GET | none, loopback | none | `DataHealthResponse` | On mount, **Try again**, once when a download ends (DEC-0219) |
 
 ## 12. References
 
@@ -338,7 +345,7 @@ Consumed; none exposed.
 | UX design | CAP-003 v1 | §1.3 Home, §0.8 date departure | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
 | Screen spec | PRODUCT-UX-S01 v4 | M1 regions, item, states, S01-3 to S01-7 | `docs/ux/screens/S01-home.md` |
 | System design | CAP-003 v1 | §3.3 and notes | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
-| Decisions | DEC-0202, DEC-0203, DEC-0206, DEC-0209, DEC-0210, DEC-0216, DEC-0219 | Completion, items, market state, date, worst tier, first download, on-demand aggregate | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decisions | DEC-0202, DEC-0203, DEC-0206, DEC-0209, DEC-0210, DEC-0216, DEC-0217 | Completion, items, market state, date, worst tier (as amended 2026-10-25), first download, the full tier order (as amended 2026-10-25) | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
@@ -362,6 +369,3 @@ Consumed; none exposed.
    Blocks: one row of copy.*
 2. **DEC-0203's five item kinds have not been seen rendered by the owner.**
    *Owner: capability owner. Blocks: nothing.*
-3. **The extra on-demand read on Home** (DEC-0219) adds one coverage
-   derivation per visit; system design open question 7 has no latency target
-   for it. *Owner: capability owner. Blocks: nothing.*

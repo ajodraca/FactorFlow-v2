@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T03:30:00Z
+  timestamp: 2026-10-25T19:44:57Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -42,8 +42,8 @@ ai_provenance:
 **Last Updated:** 2026-10-25
 
 This design was produced in an unattended `$design-run`. It applies DEC-0200,
-DEC-0201, DEC-0210, DEC-0213, DEC-0217, DEC-0219 and DEC-0220 without
-re-deciding them;
+DEC-0201, DEC-0210, DEC-0213, DEC-0217 and DEC-0220 without re-deciding them,
+DEC-0210 and DEC-0217 as the owner amended them on 2026-10-25;
 decisions live under `projects/factorflow-v2/decisions/` in the harness
 repository. Positions resting on a decision are marked **PROVISIONAL**. It
 records no decision of its own.
@@ -103,7 +103,7 @@ All new; no delivered file is edited.
 
 The sequence is system design §3.4 at the component level. Its actors are
 the owner, this screen, the shell and the delivered API. The decision points
-are whether anything was ever acquired, whether a failure is retryable,
+are whether any download has ever ended, whether a failure is retryable,
 whether a download is already running, and whether stopping following
 succeeds. The outcome is that every counted stock has a row with its fix,
 that a running download heads Recent downloads with its progress, and that
@@ -122,10 +122,11 @@ sequenceDiagram
     DH->>API: GET /api/acquisition-runs?limit=5
     DH->>API: GET /api/acquisition-runs?state=succeeded&limit=1 (only when Needs fixing is empty)
     DH->>API: GET /api/instruments?limit=1, GET /api/settings/history-depth
-    alt never_acquired
-        DH-->>O: one card: No data has been downloaded yet + Start the first download or Open setup
+    alt attention latest_terminal_download null (no download has ever ended)
+        DH-->>O: empty card: No data has been downloaded yet + Start the first download or Open setup
+        DH-->>O: Needs fixing when affected_count is above 0, Recent downloads when any download exists
     else
-        DH-->>O: verdict, three cards (scores from useShell), Needs fixing, Recent downloads, What you follow
+        DH-->>O: verdict, three cards (scores from useShell, check cards null while never_acquired), Needs fixing, Recent downloads, What you follow
     end
     O->>DH: Download now
     DH->>API: POST /api/acquisition-runs
@@ -153,21 +154,28 @@ sequenceDiagram
 
 ### 2.3 Verdict (DEC-0210, DEC-0217, PROVISIONAL)
 
-The badge is `worstDataTier` over `checks.daily_prices.status`,
-`checks.company_financials.status`, the Factor scores tier and
-`affected_count`, the same call Home's tile makes with the same inputs
-(DEC-0219). The sentence is composed here from `affected_count` (*n*) and
-`followed_count` (*m*), with the badge as its first clause:
+The badge is `worstDataTier` over the problem set, `affected_count` (*n*)
+against `followed_count` (*m*) from the aggregate, and attention's
+`latest_terminal_download` state from `useShell()`. The checks' tiers do not
+feed it; each card shows its own (DEC-0210, DEC-0217 as amended). Home's tile
+passes the same problem set (attention's `problems.stock_count`, one set by
+DEC-0201) and the same download, so its verdict tier is this one. The
+sentence is composed here, with the badge as its first clause:
 
 | Answer | Badge | Sentence after the badge |
 |--------|-------|--------------------------|
-| good | `status-good` *Yes* | *None of your {m} followed stocks needs attention.* |
+| good | `status-good` *Yes* | *None of the {m} followed stocks needs attention.* |
 | warning | `status-warning` *Mostly yes* | *{n} of {m} followed stocks need attention; their scores show as Incomplete until they're fixed.* (one: *1 of {m} followed stocks needs attention; its scores show as Incomplete until it's fixed.*) |
-| critical | `status-critical` *No* | the count clause, then *, and the latest score update failed.* when the Factor scores input is the critical one |
-| not determinable | `coverage-unknown` *Can't tell yet* | the reasons each check gives, joined with semicolons |
+| serious (latest download interrupted) | `status-serious` *Mostly yes* | the count clause, then *, and the last download was interrupted.* |
+| critical (every followed stock affected, or the latest download failed) | `status-critical` *No* | the count clause, then *, and the last download failed.* when the latest download failed |
+| attention loading | skeleton verdict line and badge (UX design 1.4 States) | none |
+| attention failed | the verdict region's header kept, body *Couldn't read what needs attention: {reason}.* with **Try again** (UX design 1.4 States, Error); no tier is computed without the download input | none |
 
-A check that is not determinable contributes no tier and is named after the
-count clause, *Daily prices can't be checked for gaps: {reason}.*, the reason
+The download clause replaces the count clause's closing full stop and
+follows the latest terminal download whichever input wins. S09 §3's
+strategies clause returns in M2. A check that is not determinable sets no
+tier but is still named after the sentence, *Daily prices can't be checked
+for gaps: {reason}.*, the reason
 being `checks.daily_prices.gap_detection.reason`. The as-of line under the sentence
 is *checked {time}* from `checked_at`. Right of the `h1`: **Full coverage
 table** (a link to `/data/coverage`, `button` `outline`) and **Download now**.
@@ -178,7 +186,7 @@ table** (a link to `/data/coverage`, `button` `outline`) and **Download now**.
 |------|----------------|-------------|---------------------------|
 | *Daily prices* | `ok` *No missing prices or gaps* (good); `exceptions` *Needs attention* (warning); `not_determinable` *Not determinable* (`coverage-unknown`) | *All {m} stocks have prices to {latest_session}*, or the non-zero parts of *{absent_count} without prices, {gap_stock_count} with gaps, {behind_count} behind {latest_session}*; a null `gap_stock_count` renders *Gaps not determinable: {reason}* as `coverage-unknown` while the other parts still render | *Prices to {latest_session}* then up to five `exception_symbols` and *and {k} more*; the scope note *Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.* with **Full coverage table** (STD-UI-18; DEC-0201, DEC-0206) |
 | *Company financials* | `ok` *All financials present*; `exceptions` *Needs attention* | *All {m} stocks have financials*, or *{absent_count} without financials, {problem_count} with failed downloads* (zero parts omitted) | *Financials to {as_of}* as a timestamp with the zone, then exceptions; *Checks that financials are present and downloaded, not that they are correct.* (STD-UI-18) |
-| *Factor scores* (`useShell().scores`) | not served: `coverage-unknown` *Not determinable*; `never_classified`: *No scores yet* (neutral); `later` building: *Updating* (active); `later` failed: *Score update failed* (critical); `set.not_current`: *Not reflecting the latest download* (warning); else *Current* (good) | *{current} of {followed} stocks current*, and when some are not, *{k} stocks show as Incomplete until their data is complete*, *k* being `followed_count` minus `current_count` | *Scores {YYYY-MM-DD HH:MM zone} · from the download started {start time}* with the start time a link to `/data/downloads/{run_id}`; while not served, *FactorFlow can't read scores yet.* |
+| *Factor scores* (`useShell().scores`) | not served: `coverage-unknown` *Not determinable*; `never_classified`: *No scores yet* (neutral); `later` building: *Updating* (active); `later` failed: *Score update failed* (critical); `set.not_current`: *Not reflecting the latest download* (warning); else *Current* (good) | *{current} of {followed} stocks current*, both from the summary's `stocks_current`, and when some are not, *{k} stocks show as Incomplete until their data is complete*, *k* being `stocks_current.followed_count` (the set's `active_instruments`) minus `stocks_current.current_count`, never the aggregate's or attention's `followed_count`, so it cannot go negative | *Scores {YYYY-MM-DD HH:MM zone} · from the download started {start time}* with the start time a link to `/data/downloads/{run_id}`; while not served, *FactorFlow can't read scores yet.* |
 
 *and {k} more* takes *k* as the check's `exception_count` minus the symbols
 shown, and is omitted when *k* is 0 (DEC-0220, PROVISIONAL). A `0` part of a result
@@ -232,7 +240,9 @@ with a different filter.
   `determinate` and *{done} of {total} stocks* from attention's
   `latest_download.progress`. The list is re-read on each attention answer
   while `latest_download` is non-terminal, which is the shell's 10 second
-  tick, and otherwise only on load.
+  tick, and otherwise only on load. The card's header carries *checked
+  {time}*, the time the list last answered, both while a download runs and
+  otherwise (AC-25; STD-UI-25).
 - **What you follow** (`card` `summary`): *Followed stocks* *{active_count}*,
   *Stopped following* *{retired_count} (history kept)*, *History depth* *{y}
   years* or *not set* as a link to `/settings`, *Market data key* `badge`
@@ -286,10 +296,13 @@ N/A, not applicable for this component.
   and the scope note states that currency is judged against that session,
   not a trading calendar (STD-UI-18; UX design §0.8). The state returns when a
   calendar exists (system design open question 9).
-- **The verdict's download clause.** UX design 1.4 offers *, and the last
-  download failed.* as a critical cause, but DEC-0210's inputs are the three
-  checks and the problem set, none of which is a download, so that clause has
-  no input that reaches it in M1 (open question 1).
+- **The verdict's download clause has an input** (resolved 2026-10-25):
+  attention's `latest_terminal_download` feeds `worstDataTier`, a failed one
+  critical with *, and the last download failed.* and an interrupted one
+  serious with *, and the last download was interrupted.*, so a failed
+  download that recorded no per-stock failure no longer leaves the verdict at
+  *Yes* while Home shows a critical item for the same cause (DEC-0210,
+  DEC-0217 as amended).
 - **Assumption:** `run_started_at` on the summary's `set` names the download
   the scores came from, as `classification-api` publishes it.
 
@@ -318,14 +331,15 @@ N/A, not applicable for this component.
 
 | Test | File | What it proves |
 |------|------|----------------|
-| Verdict | `web/src/screens/data-health/verdict.test.tsx` | Each answer's badge and sentence; singular forms; not-determinable checks named after the count clause (AC-11; DEC-0210) |
+| Verdict | `web/src/screens/data-health/verdict.test.tsx` | Each answer's badge and sentence; singular forms; every followed stock affected answers critical *No*; a failed latest download answers critical with *, and the last download failed.*; an interrupted one `status-serious` *Mostly yes* with *, and the last download was interrupted.*; check tiers do not change the answer; not-determinable checks named after the sentence; attention failing gives *Can't tell yet* (AC-11; DEC-0210, DEC-0217) |
 | Cards | `web/src/screens/data-health/check-cards.test.tsx` | Each status's label and tier; a null gap count renders *Gaps not determinable* and never `0`; zero parts omitted; Factor scores *Not determinable* while the summary answers `404` (AC-11, AC-24; DEC-0213) |
 | Partial is never complete | `web/src/screens/data-health/recent-downloads.test.tsx` | *Partial* is warning and *Interrupted* serious with their result sentences (AC-12; S09-1) |
+| Recent downloads time | `web/src/screens/data-health/recent-downloads.test.tsx` | *checked {time}* shows while a download runs and otherwise, and advances on each 10 s re-read (AC-25) |
 | Rows | `web/src/screens/data-health/problem-row.test.tsx` | Symbol, what failed, reason, attempts and consequence; *Not found* rows offer **Stop following** and **Follow a different symbol** and no download (AC-13, AC-14; S09-2, S09-3) |
 | Header action | `web/src/screens/data-health/needs-fixing.test.tsx` | **Download now** appears in *Needs fixing* only with a retryable row; **Show more** appends and keeps focus |
 | Download now | `web/src/screens/data-health/download-now.test.tsx` | `202` refreshes attention; `queued_behind` shows the queued line; each `409` names its fix (AC-15) |
 | Stop following | `web/src/screens/data-health/stop-following-dialog.test.tsx` | `confirm`, cancel first and focused, blueprint wording; success re-reads and announces; refusal stays in the dialog (STD-UI-2) |
-| Empty states | `web/src/screens/data-health/data-health.test.tsx` | `never_acquired` with and without followed stocks; *Nothing needs fixing.* with the last complete download or *No complete download yet* (AC-21; S09-5) |
+| Empty states | `web/src/screens/data-health/data-health.test.tsx` | `latest_terminal_download` null with and without followed stocks renders the empty card, with Recent downloads beneath it while a first download runs; a download that ended with nothing stored (`never_acquired` true, `affected_count` above 0) renders the verdict, *Needs fixing* with its rows and the check cards' null state, not the empty card; *Nothing needs fixing.* with the last complete download or *No complete download yet* (AC-13, AC-21; S09-5) |
 | Refresh rule | `web/src/screens/data-health/data-health.test.tsx` | No aggregate read on a timer; one when the latest download turns terminal |
 | Trust journey | `tests/e2e/data-health-trust.spec.ts` | A partial download: verdict *Mostly yes*, rows named, **Download now** starts a full download that heads Recent downloads and the checks refresh at its end (capability flow 2) |
 | Not found journey | `tests/e2e/data-health-not-found.spec.ts` | An unrecognised symbol's row: stop following confirmed and the row leaves with history kept on Coverage; follow a different symbol lands on Followed stocks with the add field focused (AC-14) |
@@ -341,8 +355,8 @@ N/A, not applicable for this component.
 4. **Download now** starts a full download, or says it starts when the
    current one finishes.
 5. Nothing partial or interrupted renders as complete.
-6. Before any download, the screen says no data has been downloaded and
-   offers the first download or setup.
+6. Before any download has ended, the screen says no data has been
+   downloaded and offers the first download or setup.
 7. Failure scenario: a failed read keeps each card's header and replaces its
    body with *Couldn't read {the data health checks / recent downloads / what
    you follow}: {reason}.* and **Try again**; no `request_id` is shown.
@@ -373,7 +387,7 @@ apart, Recent downloads and What you follow.
 | UI Element | Component | Variant | Design Spec Reference |
 |------------|----------|---------|-----------------------|
 | Check cards | `card` | `metric` | `design-system/components/card/design-spec.md` |
-| Verdict tier; check tiers; score states; row outcomes; download outcomes; key presence | `badge` | `status-neutral` / `status-active` / `status-good` / `status-warning` / `status-critical` per brief §12.2 | `design-system/components/badge/design-spec.md` |
+| Verdict tier; check tiers; score states; row outcomes; download outcomes; key presence | `badge` | `status-neutral` / `status-active` / `status-good` / `status-warning` / `status-serious` / `status-critical` per brief §12.2 | `design-system/components/badge/design-spec.md` |
 | Not determinable | `badge` | `coverage-unknown` | `design-system/components/badge/design-spec.md` |
 | Download now; Start the first download | `button` | `default`, one per region | `design-system/components/button/design-spec.md` |
 | Full coverage table; Follow a different symbol; Manage followed stocks; Show more; Try again | `button` | `outline` (links where they navigate) | `design-system/components/button/design-spec.md` |
@@ -387,16 +401,25 @@ apart, Recent downloads and What you follow.
 
 **States** (UX design 1.4). Loading: skeleton verdict line and badge, three
 skeleton cards, skeleton rows in the lower cards. Empty, never populated:
-`never_acquired`, the whole main region under the `h1` is one `card`
-`default`, `h2` *No data has been downloaded yet.*, with *Download data for
+attention's `latest_terminal_download` null (no download has ever ended),
+one `card` `default` in place of the verdict, the check cards and What you
+follow, `h2` *No data has been downloaded yet.*, with *Download data for
 your {n} followed stocks to see whether it can be trusted.* and **Start the
 first download** when stocks are followed, or *Follow some stocks first.* and
-**Open setup** when none are; no check renders as passed. Empty, nothing
+**Open setup** when none are; no check renders as passed. *Needs fixing*
+still renders when `affected_count` is above 0, and Recent downloads when any
+download exists, so a running first download shows its progress. A download
+that ended with nothing stored (`never_acquired` true) is not this state:
+the verdict, *Needs fixing* and Recent downloads render, and the Daily prices
+and Company financials cards render their null state, an `Absent` em dash
+for the tier and the result line with hidden *no data stored yet*, never a
+passed check. Empty, nothing
 found: *Nothing needs fixing.* with the last complete download. Partial: the
 cards name their exceptions with counts; *Partial* and *Interrupted* rows as
 such. Stale: Factor scores *Not reflecting the latest download*. Unavailable:
 the gap part `coverage-unknown` with its reason; Factor scores before the
-summary is served; key presence while health is unreachable. Error: per card,
+summary is served; key presence while health is unreachable; the verdict
+while attention fails. Error: per card,
 header kept, body replaced with the three-part error and **Try again**.
 Unreachable: the shell state.
 
@@ -435,6 +458,7 @@ Consumed; none exposed.
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
 | `/api/data-health` (via `useDataHealth`) | GET | none, loopback | none | `DataHealthResponse` | On demand (DEC-0200) |
+| `/api/attention` (via `useShell`) | GET | none, loopback | none | `AttentionResponse` | Shell cadence; `latest_terminal_download` for the verdict and the empty state |
 | `/api/data-health/problems` (via `fetchProblems`) | GET | none, loopback | `cursor`, `limit=50` | `ProblemPageResponse` | **Show more** |
 | `/api/acquisition-runs` | GET | none, loopback | `limit=5`; `state=succeeded&limit=1` | runs | Recent downloads; last complete download |
 | `/api/acquisition-runs` | POST | none, loopback | none | `202`; `409` | **Download now** (AC-15) |
@@ -450,7 +474,7 @@ Consumed; none exposed.
 | Screen spec | PRODUCT-UX-S09 v4 | Regions, copy, states, S09-1 to S09-5 | `docs/ux/screens/S09-data-health.md` |
 | System design | CAP-003 v1 | §3.4 and notes | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
 | Blueprint | PRODUCT-UX v6 | §9 confirm wording; D-9 | `docs/ux/product-ux-blueprint.md` |
-| Decisions | DEC-0200, DEC-0201, DEC-0210, DEC-0213, DEC-0217, DEC-0219, DEC-0220 | Reads, definitions, verdict, counts, worst tier, shared aggregate, exception count | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decisions | DEC-0200, DEC-0201, DEC-0210, DEC-0213, DEC-0217, DEC-0220 | Reads, definitions, verdict (as amended 2026-10-25), counts, the full tier order (as amended 2026-10-25), exception count | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
@@ -461,22 +485,21 @@ Consumed; none exposed.
 | AC-13 | Problem rows | Problem row composition | 2.5 |
 | AC-14 | `retryable` false for `not_found` | *Not found* fixes, no download | 2.5, 2.7 |
 | AC-15 | `POST /api/acquisition-runs`, `queued_behind` | **Download now** | 2.7 |
-| AC-21 | `never_acquired` | Empty state | 10 |
+| AC-21 | No download ever ended | Empty state on `latest_terminal_download` null; `never_acquired` drives the check cards' null state | 2.2, 10 |
 | AC-24 | States per region | States paragraph | 10 |
-| AC-25 | Keyboard; *checked {time}* | As-of lines; dialog focus | 2.3, 10 |
+| AC-25 | Keyboard; *checked {time}* | As-of lines; Recent downloads' *checked {time}*; dialog focus | 2.3, 2.6, 10 |
 | AC-26 | `ui-components` | Component mapping | 10 |
 | AC-16 | `problems.stock_count` | Same set as the header count | 2.5 |
 
 ## 14. Open Questions
 
-1. **The verdict's download clause has no input** (3). UX design 1.4 lists
-   *, and the last download failed.* as a critical cause; DEC-0210's inputs
-   do not include the latest download. Recommendation: either add attention's
-   `latest_terminal_download` failed state as a critical input to
-   `worstDataTier` (DEC-0210 revised, so Home's tile changes too), or drop
-   the clause from UX design 1.4. *Owner: capability owner. Blocks: one
-   clause of copy.*
+1. ~~**The verdict's download clause has no input** (3).~~ **Answered
+   2026-10-25 by the owner:** attention's `latest_terminal_download` is an
+   input to `worstDataTier`; failed is critical with *, and the last download
+   failed.*, interrupted serious with *, and the last download was
+   interrupted.* (DEC-0210, DEC-0217 as amended; 2.3, 3).
 2. **The download's name** (capability OQ-1). *Owner: capability owner.
    Blocks: copy only.*
-3. **No latency target for the aggregate** (system design open question 7).
-   *Owner: capability owner. Blocks: nothing.*
+3. **Latency target for the aggregate: answered.** The owner set AC-28 on
+   2026-10-25 (p95 ≤ 2 s at 3,000 followed stocks; system design open
+   question 7).

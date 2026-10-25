@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T01:40:00Z
+  timestamp: 2026-10-25T19:46:08Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -202,10 +202,10 @@ document is hidden and resumes with an immediate read when it is shown.
 | Read | Cadence | Consumers | Shown as |
 |------|---------|-----------|----------|
 | `GET /api/health` (the delivered `HealthProvider`, kept) | every 30 s | the `/` redirect, the unreachable state, setup step 1 and Settings (credential presence), What you follow | the unreachable state's *Last answered {time}* |
-| `GET /api/attention` | every 60 s; every 10 s while `latest_download.state` is non-terminal | the two count chips, Home, setup step 4, Data health's Recent downloads tick | *checked {time}* on Home's header and *Needs you* card and on *Needs fixing* |
+| `GET /api/attention` | every 60 s; every 10 s while `latest_download.state` is non-terminal | the two count chips, Home, setup step 4, Data health's verdict and empty state (`latest_terminal_download`) and its Recent downloads tick | *checked {time}* on Home's header and *Needs you* card, on setup step 4's progress line and on *Needs fixing* |
 | `GET /api/classifications/summary` | every 60 s; every 10 s while `later` reports a set building; a `404` is the state *not served*, not an error | Home's data tile and score-derived items, Data health's Factor scores card | the data tile's *Scores {as-of}* line |
 | `GET /api/data-health` | on load of `/data`, on **Try again**, once when the attention read shows the latest download turned terminal, and after **Stop following** succeeds; never on an interval | Data health | *checked {time}* in the verdict's as-of line and the *Needs fixing* sub-line |
-| `GET /api/acquisition-runs?limit=5` | on load of `/data` and on each 10 s attention tick while a download is non-terminal | Recent downloads | the running row's progress; *checked {time}* otherwise |
+| `GET /api/acquisition-runs?limit=5` | on load of `/data` and on each 10 s attention tick while a download is non-terminal | Recent downloads | the running row's progress, and *checked {time}* in the card's sub-line, the time of the last successful read, while it polls and otherwise |
 
 Times in *checked {time}* render as `HH:MM:SS` with the zone (*checked
 18:52:14 CDT*), as blueprint §4.8 draws them.
@@ -241,8 +241,8 @@ at `--text-xs`, checked against the rail ground at 4.5:1 and recorded in
 not-found cards `--card` and `--card-foreground`; toast accents
 `--status-good`, `--status-warning`, `--status-critical`. Type:
 `--text-base` default, `--text-xs` for the shortcut hint and *checked {time}*.
-Spacing only from `--space-*`. No literal outside the theme (AC-26;
-STD-UI-29).
+Spacing only from `--space-*`. No literal outside the theme, except the
+layout widths 0.7 places in `web/src/app/layout.ts` (AC-26; STD-UI-29).
 
 **Accessibility** (STD-UI-24; brief §6). The rail is a `nav` labelled *Main*;
 the current item carries `aria-current="page"`. The top bar is a `banner`
@@ -271,8 +271,11 @@ function in `ui-components` as `badge` `status-<tier>` with its label and the
 tier shape (neutral hollow circle, active ringed dot, good filled circle,
 warning triangle, serious diamond, critical square), never colour alone
 (AC-20; STD-UI-8, STD-UI-12; blueprint §8); the full table is brief §12.2.
-The verdict and the data tile share one `worstDataTier` function (DEC-0210,
-PROVISIONAL).
+The verdict's tier comes from one function in `ui-components`,
+`worstDataTier`, over the problem set and the latest terminal download; Home's
+data tile calls the same function and shows the worse of its tier and the
+score-state tier (DEC-0210 and DEC-0217 as the owner amended them on
+2026-10-25, PROVISIONAL).
 
 **Three presence renderings are never confused** (STD-UI-4, STD-UI-14; system
 design constraint 5). Present: the value. Absent: an em dash in
@@ -293,14 +296,17 @@ and the setup step question, `--text-2xl` the data tile's hero count. Every
 table consumes `--row-height`, which resolves to `--row-height-comfortable`;
 this design selects no density tier and inherits, as CAP-001 and CAP-002 did,
 pending STD-UI OQ-UI-4. The pixel widths quoted from the blueprint and the
-screen specifications (208, 1180, 260 to 300, 28 px) are the approved
-specifications' and bind the layout, not the theme. The light theme is assumed
+screen specifications (208, 1180, 260 to 300, 28 px, 16 px, 70ch) are
+approved-specification values, not theme literals and not new tokens: they are
+held in one layout-constants module in `owner-shell`, `web/src/app/layout.ts`,
+and read from there, never written at a call site. AC-26, as the owner
+narrowed it on 2026-10-25, permits them there (review v1 FINDING-6). The light theme is assumed
 (STD-UI OQ-UI-2; brief §9).
 
 ### 0.8 Departures from approved sources
 
 Blueprint §0 requires every departure from a screen specification to be
-listed with its reason. This design departs in five places, four of them
+listed with its reason. This design departs in seven places, six of them
 inherited from the brief and one of its own against the brief, and in none of
 them redesigns what the source settles.
 
@@ -310,6 +316,8 @@ them redesigns what the source settles.
 | The M1 verdict sentence | S09 §3: *strategies skip them until they're fixed* | *their scores show as Incomplete until they're fixed* | No strategy exists in M1 and STD-UI-2 forbids words describing behaviour the product does not have; the wording returns with M2 (DEC-0210, PROVISIONAL; DEC-0201) |
 | Setup step 3's source choice | S02 §3: *Paste a list* / *Upload a CSV* / *Add later* | two `radio-group` `cards` options, *Paste a list* and *Add later* | The capability scopes step 3 to a pasted list (capability §2, AC-5); CSV upload was capability OQ-3, answered no by the owner on 2026-10-25, and would have been a `file-input` gap through `design-system/intake.md` (S02 §11) |
 | The check cards' Stale state | S09 §7: a check whose as-of is before the latest trading day reads *Not current* | Not rendered in M1; the Daily prices card states that currency is judged against the newest session any followed stock holds | No trading calendar exists (DEC-0206), so currency is judged against the newest session any followed stock holds (DEC-0201), which no stock can predate for every stock; a label would assert what cannot be detected (STD-UI-18; review v1 FINDING-2). The state returns when a calendar exists (system design open question 9) |
+| *Needs fixing*'s sub-line | S09 §3: the *Needs fixing* header names each problem *with the download it came from* | *From your most recent downloads · checked {time}* (1.4) | Problems are each stock's latest recorded outcome per data type, which may come from different downloads, so no single download can be named (DEC-0201, PROVISIONAL) |
+| Home's market state | S01 §3, §5 and §8: the market state from a trading calendar (*Market closed at 15:00 CDT*) | *Market closed* on Saturdays, Sundays and weekdays outside 08:30 to 15:00 America/Chicago; inside those hours `coverage-unknown` *Market state not determinable* (1.3) | No trading calendar exists, so a session cannot be told from a holiday and no close time can be asserted (DEC-0206, PROVISIONAL; STD-UI-15) |
 | The palette dialog's accessible label | UX brief §6: *Command palette* | *Search FactorFlow* | The `command` design spec §5 fixes the dialog's label, and the component contract is what this design must use as it exists (skill constraint 2). The brief's `h1`-style title is not rendered; the input's placeholder is the visible text |
 
 Three further points are specializations of a source rather than departures,
@@ -453,7 +461,7 @@ has no Continue and no Next hint.
 | 1 | *Connect market data* | Read-only. A line *Market data key:* with `badge` `status-good` *Found* or `status-critical` *Missing* from `health.credential_present`. When missing, two lines: *Set the environment variable `FACTORFLOW_MASSIVE_API_KEY` to your Massive API key.* and *Restart FactorFlow after setting it.* Never the value (AC-4; S02-4). While health is unreachable the badge is `coverage-unknown` *Not determinable* with *FactorFlow isn't answering, so the key can't be checked.*, never *Missing* (S02 §7). **Continue** is available in every case: a missing key is fixed outside the product, and a download without one fails and surfaces on Home (DEC-0203) |
 | 2 | *How far back should history go?* | `form` `stacked` with one field: label *History depth*, `input` `numeric` with the non-editable suffix *years* (part of the accessible name), description *Whole years, 1 to 50.* Plan-limit note (S02 §3; CAP-001 §6): *Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.* **Continue** saves with `PUT /api/settings/history-depth` and moves on. `422`: a field error *History depth must be a whole number of years from 1 to 50.* with the value kept (S02 §7) |
 | 3 | *Which stocks do you want to follow?* | Explanation (S02 §8): *FactorFlow downloads data and scores value, growth and momentum for these stocks. Scores rank stocks against each other, so a factor needs at least 30 stocks with complete data before it can rank anything. Start with 100 or more if you can.* Then `radio-group` `cards` labelled *How do you want to name them?* with two options (0.8): **Paste a list**, *Paste symbols separated by commas or one per line.*; **Add later**, *Finish setup now and follow stocks from Data health later.* Choosing *Paste a list* reveals `form` `stacked` with `textarea` `list`, label *Stock symbols*, placeholder *AAPL, MSFT, NVDA or one symbol per line*, description *Whether the provider knows each one is checked during the download.* (S02 §8). Parse on paste and blur with the delivered `parse-bulk-symbols`: the counter sentence *{a} symbols recognised, {d} duplicates, {r} not recognised* with `badge` `status-good` on the accepted count and one `badge` `status-warning` per duplicate or unreadable entry, each named with its reason (*ZZZZ, not a valid symbol format*), and a near-miss as a `button` `outline` *Did you mean BRK.B?* that applies it (S02 §6). Below 30 accepted, the warning *Factor scores need at least 30 stocks with complete data. With {a}, no factor can be ranked yet.* with **Continue** available (AC-6; S02-5). Info note (S02 §8): *This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.* |
-| 4 | *Download data for {n} stocks* | A `card` `summary` description list of the three choices: *Market data key* with step 1's badge repeated, *History depth* *{y} years*, *Followed stocks* *{n}*. Then **Start download** (`button` `default`). After `202`: `progress` `determinate` with the text *{done} of {total} stocks* from attention `latest_download.progress` on the 10 s cadence, the line *Started {start time}*, and *You can leave; this keeps running.* (S02 §3). Nothing else to do on this step |
+| 4 | *Download data for {n} stocks* | A `card` `summary` description list of the three choices: *Market data key* with step 1's badge repeated, *History depth* *{y} years*, *Followed stocks* *{n}*. Then **Start download** (`button` `default`). After `202`: `progress` `determinate` with the text *{done} of {total} stocks* from attention `latest_download.progress` on the 10 s cadence, the line *Started {start time} · checked {time}*, the time being the attention read's `checked_at` (STD-UI-25; AC-25), and *You can leave; this keeps running.* (S02 §3). Nothing else to do on this step |
 
 #### Component Mapping
 
@@ -527,7 +535,7 @@ routine, no confirmation (blueprint §9).
 | Empty, never populated | Step 1 current with nothing done |
 | Empty, nothing found | Step 3 with zero accepted symbols: **Continue** `blocked` with its reason (S02 §7) |
 | Partial | Step 3 with rejected or duplicate entries: both counts, the accepted kept (S02-3); some steps done, the rest to do |
-| Stale | Not applicable: setup re-derives every step from the server on load (S02 §7) |
+| Stale | Not applicable to the steps: setup re-derives every step from the server on load (S02 §7); step 4's progress line, the one polled region, carries *checked {time}* (0.4) |
 | Unavailable | Step 1 and step 4's key line `coverage-unknown` while health is unreachable, never *Missing*; step 4's progress while the attention read fails: *Progress can't be read right now* beside the running state, never a frozen bar presented as current |
 | Error | A failed read of the depth or the followed count: that step's summary reads *Couldn't read {history depth / the followed list}: {reason}* with **Try again**; other steps unaffected. A failed save: the field-level error naming the step and the reason, values kept (S02 §7). A `409` on step 4: the refusal above, with the step that fixes it |
 | Unreachable | Shell state (0.5) |
@@ -590,15 +598,27 @@ Main region capped at 1180 px, regions stacked `--space-5` apart (S01 §3).
 2. **Summary row.** A three-column grid holding the data tile in the first
    column; the other two columns are empty, not placeholders (S01 §2).
    **Data tile**: a `card` `metric` whose whole surface is one link to
-   `/data`, titled *Data* at `--text-lg`. Under the title the tier `badge`
-   from `worstDataTier` (DEC-0210, PROVISIONAL) with the label of the answer
-   it gives on Data health: `status-good` *Yes*, `status-warning` *Mostly
-   yes*, `status-critical` *No*, or `coverage-unknown` *Can't tell yet*. The
-   hero line *{current} of {followed} stocks current* at `--text-2xl`
-   `--font-numeric`, where `followed` is attention `followed_count` and
-   `current` is the summary's `stocks_current.current_count`, rendered as an
-   em dash in `--value-missing` with the visually hidden text *not
-   determinable* while the summary is not served (AC-8; STD-UI-4). Then two
+   `/data`, titled *Data* at `--text-lg`. Under the title the tier `badge`:
+   the worse of two tiers by blueprint §4.1's order (critical, serious,
+   warning, good, neutral; active beside good), with the label of whichever
+   wins (DEC-0210 as the owner amended it on 2026-10-25, PROVISIONAL). One is
+   the verdict tier, from the same `worstDataTier` call Data health's verdict
+   makes, over attention's `problems.stock_count`, `followed_count` and
+   `latest_terminal_download`, labelled with its answer word (`status-good`
+   *Yes*, `status-warning` or `status-serious` *Mostly yes*, `status-critical`
+   *No*; 1.4). The other is the blueprint §8 score-state tier from the
+   summary, labelled as the Factor scores card labels it (*Score update
+   failed*, *Not reflecting the latest download*; 1.4). Neutral and active
+   score states (*No scores yet*, *Updating*) never worsen the badge, and a
+   score state that is not determinable contributes no tier. The tile reads
+   nothing from `GET /api/data-health` (review v1 FINDING-4). The hero line
+   *{current} of {followed} stocks current* at `--text-2xl` `--font-numeric`
+   takes both figures from the summary's `stocks_current`, `current_count`
+   and `followed_count`, counted over the score set's active instruments,
+   when the summary is served, so one population is counted (review v1
+   FINDING-7); while it is not served, `followed` is attention's
+   `followed_count` and `current` an em dash in `--value-missing` with the
+   visually hidden text *not determinable* (AC-8; STD-UI-4). Then two
    as-of lines, *Scores {YYYY-MM-DD HH:MM zone}* from the summary's current
    set and *Prices {YYYY-MM-DD}* from `prices_as_of` (S01-6), each an em dash
    with *not determinable* when its source is not served; then the sentence
@@ -641,7 +661,7 @@ resolved and never because it was viewed (AC-9; S01-4).
 | UI Element | Component | Variant | Design Spec Reference |
 |------------|----------|---------|-----------------------|
 | Data tile | `card` | `metric`, the whole card one link | `design-system/components/card/design-spec.md` |
-| Data tier label; *Not reflecting the latest download* | `badge` | `status-good` / `status-warning` / `status-critical`; `status-warning` | `design-system/components/badge/design-spec.md` |
+| Data tier label; *Not reflecting the latest download* | `badge` | `status-<tier>` of the winning tier; `status-warning` | `design-system/components/badge/design-spec.md` |
 | Figures that cannot be determined; the market state inside session hours | `badge` and em dash | `coverage-unknown`; `--value-missing` em dash | `design-system/components/badge/design-spec.md` |
 | Needs you card | `card` | `default` | `design-system/components/card/design-spec.md` |
 | Needs-you item | composition, blueprint §4.1 (`web/src/components/patterns/`) | `card` row, `badge`, `button` | `design-system/components/badge/design-spec.md`, `design-system/components/button/design-spec.md` |
@@ -706,33 +726,39 @@ S09 §3 to §9 delivered for M1: the verdict, three check cards (Live prices is
 M3), *Needs fixing* with its recoveries, Recent downloads without the schedule
 line (M2, D-2), and What you follow without the broker row (M2). Owned by
 `data-health-ui`, reading `GET /api/data-health` on demand (DEC-0200,
-PROVISIONAL) and the shell's summary read.
+PROVISIONAL) and the shell's attention and summary reads.
 
 #### Page Layout
 
 Reading width, 1180 px cap, regions stacked `--space-5` apart (S09 §3).
 
 1. **Header row.** `h1` *Is the data good enough to trust?* at `--text-xl`.
-   Under it the verdict: a `badge` with the tier from `worstDataTier` over the
-   three check tiers and the problem set, and the one-sentence verdict
-   composed in the interface from `affected_count` and `followed_count`
-   (DEC-0210, PROVISIONAL; DEC-0200). The badge is the sentence's opening
-   clause, so the line reads as one sentence with the badge as its first
-   word:
+   Under it the verdict: a `badge` with the tier from `worstDataTier` and the
+   one-sentence verdict composed in the interface (DEC-0210 and DEC-0217 as
+   the owner amended them on 2026-10-25, PROVISIONAL; DEC-0200). The tier and
+   the opening word come from two inputs only: the problem set
+   (`affected_count`, *n*, against `followed_count`, *m*) and attention's
+   `latest_terminal_download`. The worst applicable row wins by the order
+   critical, serious, warning, good; the check cards and the score state
+   contribute no tier (review v1 FINDING-8, FINDING-9). The badge is the
+   sentence's opening clause, so the line reads as one sentence with the
+   badge as its first word:
 
-   | Tier | Badge | Sentence after the badge |
-   |------|-------|--------------------------|
-   | good | `status-good` *Yes* | *None of your {m} followed stocks needs attention.* |
-   | warning | `status-warning` *Mostly yes* | *{n} of {m} followed stocks need attention; their scores show as Incomplete until they're fixed.* (singular: *1 of {m} followed stocks needs attention; its scores show as Incomplete until it's fixed.*) |
-   | critical | `status-critical` *No* | the count clause above, then the critical cause in one clause: *, and the latest score update failed.* or *, and the last download failed.* |
-   | every input not determinable | `coverage-unknown` *Can't tell yet* | *{the reason each check gives, joined with semicolons}.* |
+   | Tier | When | Badge | Sentence after the badge |
+   |------|------|-------|--------------------------|
+   | good | no followed stock is affected, and the latest terminal download neither failed nor was interrupted | `status-good` *Yes* | *None of the {m} followed stocks needs attention.* |
+   | warning | some, not every, followed stock is affected | `status-warning` *Mostly yes* | *{n} of {m} followed stocks need attention; their scores show as Incomplete until they're fixed.* (singular: *1 of {m} followed stocks needs attention; its scores show as Incomplete until it's fixed.*) |
+   | serious | the latest terminal download is *Interrupted* | `status-serious` *Mostly yes* | the count clause above, then *, and the last download was interrupted.* |
+   | critical | every followed stock is affected, or the latest terminal download *Failed* | `status-critical` *No* | the count clause above, then *, and the last download failed.* when the download failed |
 
-   Under the sentence, the as-of line at `--text-xs`: *checked {time}* from
+   The download clause follows the count clause whenever the latest terminal
+   download failed or was interrupted, whichever row wins. In M1 the sentence
+   names no strategy; S09 §3's strategies clause returns with M2 (0.8). Under
+   the sentence, the as-of line at `--text-xs`: *checked {time}* from
    `checked_at`. Right of the `h1`: **Full coverage table** (a link to
    `/data/coverage` styled `button` `outline`) and **Download now** (`button`
-   `default`). A check that is not determinable contributes no tier and is
-   named in the sentence instead: *Daily prices can't be checked for gaps:
-   {reason}.* appended after the count clause.
+   `default`). A check that is not determinable changes no tier and is named
+   after the sentence: *Daily prices can't be checked for gaps: {reason}.*
 2. **Check cards.** Three `card` `metric` in a four-column grid, the fourth
    column empty with no placeholder (S09 §2). Each: the tier `badge` with the
    check's name as its label is not used; instead the card title is the
@@ -744,7 +770,7 @@ Reading width, 1180 px cap, regions stacked `--space-5` apart (S09 §3).
    |------|----------------|-------------|---------------------------|
    | *Daily prices* (`checks.daily_prices`) | `status-good` *No missing prices or gaps* when `status` is `ok`; `status-warning` *Needs attention* when `exceptions`; `coverage-unknown` *Not determinable* when `not_determinable` (S09 §7's Stale state is not rendered: §0.8) | *All {m} stocks have prices to {latest_session}* or *{absent_count} without prices, {gap_stock_count} with gaps, {behind_count} behind {latest_session}* (a zero part is omitted) | *Prices to {latest_session}* then up to five `exception_symbols` *and {k} more*. When `gap_detection.available` is false the gap part reads *Gaps not determinable: {gap_detection.reason}* as `coverage-unknown` while absence and currency still render (capability flow 2 step 7; DEC-0201). A scope note under the line, *Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.* with **Full coverage table** as its link (STD-UI-18; S09 §8; DEC-0201, DEC-0206) |
    | *Company financials* (`checks.company_financials`) | `status-good` *All financials present* when `status` is `ok`; otherwise as above | *All {m} stocks have financials* or *{absent_count} without financials, {problem_count} with failed downloads* | *Financials to {as_of}* (a timestamp with the zone) then exceptions as above; a scope line *Checks that financials are present and downloaded, not that they are correct.* (STD-UI-18) |
-   | *Factor scores* (the shell's summary) | `coverage-unknown` *Not determinable* while the summary answers `404`; `status-neutral` *No scores yet* while `never_classified`; `status-active` *Updating* while `later` reports a set building; `status-critical` *Score update failed* when `later` failed; `status-warning` *Not reflecting the latest download* when `set.not_current`; else `status-good` *Current* | *{current} of {followed} stocks current*, and when any are not, *{k} stocks show as Incomplete until their data is complete* (S09 §11) | *Scores {YYYY-MM-DD HH:MM zone} · from the download started {start time}* (the time a link to `/data/downloads/{run_id}`); *FactorFlow can't read scores yet.* while not served |
+   | *Factor scores* (the shell's summary) | `coverage-unknown` *Not determinable* while the summary answers `404`; `status-neutral` *No scores yet* while `never_classified`; `status-active` *Updating* while `later` reports a set building; `status-critical` *Score update failed* when `later` failed; `status-warning` *Not reflecting the latest download* when `set.not_current`; else `status-good` *Current* | *{current} of {followed} stocks current*, both from the summary's `stocks_current` as on Home's tile (1.3), and when any are not, *{k} stocks show as Incomplete until their data is complete*, *k* being that `followed_count` minus `current_count` (S09 §11) | *Scores {YYYY-MM-DD HH:MM zone} · from the download started {start time}* (the time a link to `/data/downloads/{run_id}`); *FactorFlow can't read scores yet.* while not served |
 
 3. **Needs fixing · {n}** (`card` `default`). Header `h2` with the count, the
    sub-line *From your most recent downloads · checked {time}* (problems are
@@ -772,7 +798,10 @@ Reading width, 1180 px cap, regions stacked `--space-5` apart (S09 §3).
    (STD-UI-30).
 4. **Two columns**, `--space-5` apart.
    - **Recent downloads** (`card` `default`, `h2` *Recent downloads*,
-     sub-line *Starts when you press Download now* (S09 §11, before M2)):
+     sub-line *Starts when you press Download now · checked {time}*: the
+     first part S09 §11's wording before M2, the time that of the last
+     successful read of the list, shown while it polls and otherwise,
+     STD-UI-25, AC-25):
      a `data-table` `compact` with `history` semantics, the five most recent
      from `GET /api/acquisition-runs?limit=5`, columns *Started* (the start
      time with the zone, the row header, a link to `/data/downloads/{id}`),
@@ -796,8 +825,8 @@ Reading width, 1180 px cap, regions stacked `--space-5` apart (S09 §3).
 | UI Element | Component | Variant | Design Spec Reference |
 |------------|----------|---------|-----------------------|
 | Check cards | `card` | `metric` | `design-system/components/card/design-spec.md` |
-| Verdict tier; check tiers; score states; *Failed* / *Not found* on rows; download outcomes; key presence | `badge` | `status-neutral` / `status-active` / `status-good` / `status-warning` / `status-critical` per brief §12.2 | `design-system/components/badge/design-spec.md` |
-| Not determinable (verdict, gap part, Factor scores before served, key while unreachable) | `badge` | `coverage-unknown` | `design-system/components/badge/design-spec.md` |
+| Verdict tier; check tiers; score states; *Failed* / *Not found* on rows; download outcomes; key presence | `badge` | `status-neutral` / `status-active` / `status-good` / `status-warning` / `status-serious` / `status-critical` per brief §12.2 | `design-system/components/badge/design-spec.md` |
+| Not determinable (gap part, null checks, Factor scores before served, key while unreachable) | `badge` | `coverage-unknown` | `design-system/components/badge/design-spec.md` |
 | Download now (header and *Needs fixing*); Start the first download | `button` | `default`, one per region | `design-system/components/button/design-spec.md` |
 | Full coverage table; Follow a different symbol; Manage followed stocks; Show more; Try again | `button` | `outline` (links where they navigate) | `design-system/components/button/design-spec.md` |
 | Stop following (in row) | `button` | `ghost` | `design-system/components/button/design-spec.md` |
@@ -862,12 +891,12 @@ S09 §7, specialized by brief §2.5.
 | State | Rendering |
 |-------|-----------|
 | Loading | Skeleton verdict line and badge, three skeleton cards, skeleton rows in the three lower cards (S09 §7) |
-| Empty, never populated | `never_acquired` true: the whole main region under the `h1` is one `card` `default`: `h2` *No data has been downloaded yet.*; when at least one stock is followed, *Download data for your {n} followed stocks to see whether it can be trusted.* and **Start the first download** (`button` `default`, the same post as Download now); when none is followed, *Follow some stocks first.* and **Open setup** (a link to `/setup`). No check renders as passed (AC-21; S09-5) |
+| Empty, never populated | No download has ever ended (attention's `latest_terminal_download` absent), not coverage's `never_acquired`: the verdict, the check cards and What you follow give way to one `card` `default` under the `h1`: `h2` *No data has been downloaded yet.*; when at least one stock is followed, *Download data for your {n} followed stocks to see whether it can be trusted.* and **Start the first download** (`button` `default`, the same post as Download now); when none is followed, *Follow some stocks first.* and **Open setup** (a link to `/setup`). *Needs fixing* and Recent downloads still render below it whenever problems or downloads exist, so a running first download shows its progress. No check renders as passed (AC-21; S09-5). Once a download has ended the screen renders in full even if nothing was stored: `never_acquired` then drives only the check cards, whose null checks render `coverage-unknown` *Not determinable* with *Nothing has been stored yet.*, while the problem rows say why (review v1 FINDING-10) |
 | Empty, nothing found | *Needs fixing · 0* reads *Nothing needs fixing.* with *Last complete download {start time}* from the most recent *Complete* row of Recent downloads, or *No complete download yet* (S09 §7) |
 | Partial | The check cards name their exceptions with counts; the *Partial* or *Interrupted* row in Recent downloads is shown as such, never as complete (AC-12; S09-1) |
 | Stale | Not detectable on the check cards in M1: the Daily prices scope note states that currency is judged against the newest session any followed stock holds (§0.8; DEC-0201, DEC-0206); Factor scores carries *Not reflecting the latest download* when `set.not_current` |
 | Unavailable | The gap part of Daily prices as `coverage-unknown` with `coverage-service`'s reason; Factor scores `coverage-unknown` before the summary is served; the key presence `coverage-unknown` while health is unreachable (S09 §7) |
-| Error | Per card, header kept, body replaced by *Couldn't read {the data health checks / recent downloads / what you follow}: {reason}.* and **Try again** (S09 §7). A `500` envelope's `request_id` is never shown |
+| Error | Per card, header kept, body replaced by *Couldn't read {what needs attention / the data health checks / recent downloads / what you follow}: {reason}.* and **Try again** (S09 §7); the verdict's read is attention, so its failure renders there. A `500` envelope's `request_id` is never shown |
 | Unreachable | Shell state (0.5) |
 
 #### Token Usage
@@ -1341,7 +1370,10 @@ only while the total is unknown.
 **Compositions, not components**, built once in `web/src/components/patterns/`
 and `web/src/app/` and named so the component designs use one name each
 (blueprint §4; brief §4): the shell (0.1 to 0.5), the count chip (0.2), the
-Needs-you item and `sortAttention` (1.3), the as-of line (0.4, blueprint §4.8),
+Needs-you item and `sortAttention` (1.3), the as-of line (0.4, blueprint §4.8; `AsOfLine` in
+`web/src/components/patterns/as-of-line.tsx`, which CAP-002 lands first
+specialised to Research and `ui-components` takes over and generalises, the
+Research line composing it, by the owner's decision of 2026-10-25),
 the status badge with the one tier function (0.7), `worstDataTier` (1.3, 1.4),
 the state-coverage region that renders STD-UI-23's eight states around a body
 (blueprint §4.10), the check card (1.4), the problem row (1.4), the setup step
@@ -1373,7 +1405,7 @@ table so a reviewer does not raise them.
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Consistency with product patterns | pass | The shell, the patterns and the three M1 screens are the blueprint's, built from the approved S01, S02 and S09 and the §7 labels, §8 status map and §9 action tiers; the five CAP-001 screens are restyled into them with their behaviour intact (AC-17). No destination, pattern or label is invented: Section 0.8 lists the four departures, each with its source and reason. Compositions have one name each (Section 3) so later capabilities reuse rather than restyle them (capability §5.3) |
+| Consistency with product patterns | pass | The shell, the patterns and the three M1 screens are the blueprint's, built from the approved S01, S02 and S09 and the §7 labels, §8 status map and §9 action tiers; the five CAP-001 screens are restyled into them with their behaviour intact (AC-17). No destination, pattern or label is invented: Section 0.8 lists the seven departures, each with its source and reason. Compositions have one name each (Section 3) so later capabilities reuse rather than restyle them (capability §5.3) |
 | Progressive disclosure | pass | Blueprint principle 4 throughout: Home shows the topmost item and one tile; Data health shows the verdict, then three cards, then only the rows that need fixing, with the full coverage table, the followed list and the download detail one link away; setup shows one step at a time with the whole path visible; the palette reaches any page without adding navigation. Expandable rows keep 3000-stock tables readable (STD-UI-30) |
 | Error clarity | pass | Every refusal and failure names the operation, the stock or download and the reason, and offers the recovery (STD-UI-19): the step to fix in setup, Settings or Followed stocks for a refused download, **Try again** for a failed read, *Download again* or **Stop following** / **Follow a different symbol** per problem row, *Downloading again won't help* for a not-found symbol. No code, `request_id`, payload key or implementation word reaches the owner (STD-UI-1); the unreachable state names the likely cause and where to look |
 | Accessibility | pass | WCAG 2.1 AA per STD-UI-24, specified per surface in Sections 0 and 1: landmarks and names, keyboard completion of every operation, focus management on route changes, dialogs, the palette and the stepper, polite announcement of every polled change, `blocked` instead of `disabled` wherever a precondition gates an action, 4.5:1 text and 3:1 boundaries with the chip and as-of pairs checked against `theme-validation.md`. Radix, cmdk and native-list contracts carry the dialog, radio, command, stepper and table semantics. Enforcement is human review, which the standard acknowledges |
@@ -1417,7 +1449,7 @@ delivers is the blueprint's approved navigation, not a new item.
 | AC-23 | Unreachable is a designed state | 0.5 unreachable state with *Last answered {time}*; rail and top bar remain; remount at the same URL | `card` `default` |
 | AC-24 | Every region defines its states | States tables in 1.1 to 1.9 and 0.5, each inapplicable state recorded with its reason | state-coverage region |
 | AC-25 | Keyboard and freshness | 0.4 cadences and *checked {time}* on every polled region; Accessibility subsections of every surface | all |
-| AC-26 | Built from the design system | Component Mapping and Token Usage of every surface; no literal outside `theme.css`; 0.7 | all, vendored per DEC-0205 |
+| AC-26 | Built from the design system | Component Mapping and Token Usage of every surface; no literal outside `theme.css` except the approved-specification layout widths in `web/src/app/layout.ts` (0.7) | all, vendored per DEC-0205 |
 | AC-27 | CAP-002 keeps its routes | 0.2 Research in the static list when its routes are registered; 0.3 the five `/research` routes unchanged | shell composition |
 
 **Screen acceptance checks.** S01-3 and S01-4 (1.3 catalogue and
@@ -1434,7 +1466,7 @@ outcomes), S09-2 and S09-3 (1.4 problem rows), S09-4 (1.4 What you follow,
 | Source | Reference | Verification Method | Date |
 |--------|-----------|---------------------|------|
 | UX brief v1 (draft, 41ff183) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-brief.md` | Text reference. Eight screens and two shell surfaces, information architecture, interactions, component proposals, constraints, accessibility, the STD-UI conformance record and the eight-state enumeration read in full; its suggested copy finalised here in the shapes it fixed | 2026-10-25 |
-| Capability CAP-003 v1 (draft) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Text reference. All 27 acceptance criteria traced in Section 5; five user flows drawn in Section 2; §5.3 constraints and OQ-1 to OQ-4 carried | 2026-10-25 |
+| Capability CAP-003 v1 (draft) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Text reference. All 28 acceptance criteria (AC-28 added 2026-10-25), the 27 interface-facing ones traced in Section 5; five user flows drawn in Section 2; §5.3 constraints and OQ-1 to OQ-4 carried | 2026-10-25 |
 | System design CAP-003 v1 (draft, 4c663e2) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` | Text reference. The eight components, the three new reads and their fields, the shell context, screen registration, control flows §3.1 to §3.5 with every state source and cadence, constraints 1 to 15 | 2026-10-25 |
 | Product UX blueprint `PRODUCT-UX` v6 (approved 2026-10-16) | `docs/ux/product-ux-blueprint.md` | Text reference. §0 how a design uses it; §2.1, §2.2 rail, routes and redirects; §3.1, §3.4, §3.5 shell; §4.1, §4.8, §4.10 patterns; §6 flows; §7 vocabulary; §8 status map; §9 action tiers; §10 M1 row; D-2, D-7, D-8, D-9 | 2026-10-25 |
 | Home `PRODUCT-UX-S01` v4 (approved) | `docs/ux/screens/S01-home.md` | Text reference. Starting layout for 1.3; M1 regions, mapping, interactions, states, copy, accessibility, S01-3 to S01-7; departed from on the `h1` date (DEC-0209) | 2026-10-25 |
@@ -1479,25 +1511,27 @@ owner, and what the next stages need to know is still open.
   `tech-stack.md`. Every Component Mapping here assumes the vendored
   components exist. *Owner: capability owner via `$tech-stack`. Blocks: the
   implementing stories, not this design.*
-- **DEC-0209 and DEC-0210 await the owner's verdict.** If the owner prefers
+- **DEC-0209 awaits the owner's verdict; DEC-0210 was reviewed and upheld as
+  amended on 2026-10-25, and 1.4 carries the amended rule.** If the owner prefers
   S01's long date, the fix is an amendment to STD-UI-5 (one-way, the owner's)
   and 1.3's `h1` changes; if the owner wants the verdict worded or tiered
   differently, 1.4's verdict table and `worstDataTier` change, and the data
   tile's badge label in 1.3 with them. DEC-0203's five item kinds have not
   been seen rendered by the owner; a kind the owner does not want is one row
   of the 1.3 catalogue.
-- **The data tile's badge carries the verdict's answer word** (*Yes*, *Mostly
-  yes*, *No*, *Can't tell yet*) because brief §12.2 assigns the verdict and
-  the data tile one label set and DEC-0210 makes them one function. On Home
-  the question is not on screen, so the tile's title *Data* and its
-  accessible name carry the context. If the owner finds the answer word
-  unclear on Home, a tier label (*No missing prices or gaps*, *Needs attention*) is a
-  one-row change to brief §12.2 and 1.3; recorded here rather than decided
-  silently.
+- **The data tile's badge carries the label of whichever tier wins**: the
+  verdict's answer word (*Yes*, *Mostly yes*, *No*) or the score state's
+  label (*Score update failed*, *Not reflecting the latest download*), as
+  DEC-0210, amended by the owner on 2026-10-25, directs (1.3). On Home the
+  question is not on screen, so the tile's title *Data* and its accessible
+  name carry the context. When the two tiers are equal the amended decision
+  does not say whose label shows; this design shows the verdict's answer
+  word, the label the tile carried before the amendment, and records that
+  here rather than deciding it silently.
 - **Carried from the system design §8, not re-decided here:** the other
   design's consumer name (question 5), the research screens' `/runs/:runId`
-  links, which the redirect carries for one release (6), no latency target
-  for `GET /api/data-health` (7), the delivered file and test edit list that
+  links, which the redirect carries for one release (6), the latency target
+  for `GET /api/data-health` (7, answered 2026-10-25: AC-28), the delivered file and test edit list that
   design decomposition enumerates (8), a trading calendar (9), and the
   promotion of DEC-0203 and DEC-0204 to a `decision-record` constitution
   artifact (10).

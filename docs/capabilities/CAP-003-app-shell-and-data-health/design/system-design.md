@@ -17,7 +17,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T00:58:00Z
+  timestamp: 2026-10-25T19:43:20Z
   source_artifacts:
     - id: CAP-003
       version: "1, draft 2026-10-24"
@@ -102,8 +102,8 @@ Aggregation happens on the server because the volume demands it: the rail
 shows a count on every screen, and the followed list is committed to 3000
 stocks (STD-UI-30). `GET /api/attention` is cheap and polled shell-wide;
 `GET /api/data-health` runs the coverage derivation over the whole roster and
-is read on demand, never on an interval (DEC-0200). Score currency is not
-re-derived here: `owner-shell` reads the classification summary
+is read on demand by Data health alone, never on an interval (DEC-0200). Score
+currency is not re-derived here: `owner-shell` reads the classification summary
 `classification-api` publishes and shares it with Home and Data health through
 the shell context (capability §5.1).
 
@@ -235,7 +235,8 @@ sequenceDiagram
    nothing reloads the page.
 4. The redirects of step 9 are client-side `Navigate replace` routes in one
    module, `web/src/app/legacy-redirects.tsx`, so their removal one release
-   later deletes one file and its tests (AC-18; capability assumption 3).
+   later, which is out of this capability's scope, deletes one file and its
+   tests (AC-18 keeps them for that release; capability assumption 3).
 5. A `404` on the summary is how the interface learns the score read is not yet
    deployed; any other error renders the score regions' error state with
    **Try again**. Neither renders a value (capability §5.1).
@@ -306,7 +307,9 @@ sequenceDiagram
    the delivered endpoint reports them as already followed (`409` when all
    are), which setup treats as success rather than an error.
 4. Step 18's progress comes from the shell's attention read, so setup, Home and
-   Data health show the same numbers at the same 10 s cadence.
+   Data health show the same numbers at the same 10 s cadence. While it polls,
+   the progress shows *checked {time}* from the attention read's `checked_at`
+   (AC-25, STD-UI-25).
 5. The *Upload a CSV* source S02 §3 draws is not built: the capability scopes
    step 3 to a pasted list (capability §2, AC-5; open question 3).
 
@@ -318,9 +321,12 @@ and summary reads; `home-ui` merges the three server-derived item kinds with
 the two score-derived kinds into one list sorted by tier and recency, and the
 shell computes the Home count with the same function (DEC-0203). The decision
 points are whether any download has ever run (honest empty state), whether
-scores exist and reflect the latest download, and which items apply. The
-expected outcome is a Home that names what needs the owner, with exactly one
-navigating action per item, and counts that leave the rail when they reach zero.
+scores exist and reflect the latest download, and which items apply. Home
+never reads `GET /api/data-health`: the tile's badge comes from the two
+shell-wide reads (DEC-0210 as amended by the owner on 2026-10-25; DEC-0219's
+on-demand read is withdrawn). The expected outcome is a Home that names what
+needs the owner, with exactly one navigating action per item, and counts that
+leave the rail when they reach zero.
 
 ```mermaid
 flowchart TD
@@ -328,7 +334,7 @@ flowchart TD
     A2["[2] owner-shell summary read<br/>GET /api/classifications/summary"] --> A3
     A3["[3] home-ui reads shell context"] --> D1{"[4] latest_download is null?"}
     D1 -- yes --> E1["[5] Empty, never populated:<br/>No data has been downloaded yet + Start setup"]
-    D1 -- no --> T1["[6] Data tile: current_count of followed_count (summary),<br/>scores as-of (summary), prices as-of (attention)"]
+    D1 -- no --> T1["[6] Data tile: current_count of followed_count (both summary stocks_current),<br/>scores as-of (summary), prices as-of (attention)"]
     T1 --> D2{"[7] summary state"}
     D2 -- "404 / error" --> T2["[8] score figures not determinable / error + Try again"]
     D2 -- "set not current" --> T3["[9] Not reflecting the latest download (warning)"]
@@ -342,11 +348,16 @@ flowchart TD
     D3 -- yes --> L1["[16] Needs you list; one action each, navigation only"]
     S1 --> R1["[17] owner-shell: Home count = list length; absent at 0"]
     A1 --> R2["[18] owner-shell: Data health count = problems.stock_count; absent at 0"]
+    T1 --> B1["[19] tile badge: worstDataTier, the worse of the verdict tier (attention)<br/>and the score-state tier (summary)"]
 ```
 
-1. Box 6 states `{current} of {followed} stocks current`; when the summary is
-   not served the followed count still comes from attention, and the current
-   count renders not determinable (AC-8, capability §5.1).
+1. Box 6 states `{current} of {followed} stocks current`. When the summary is
+   served, both figures come from its `stocks_current`: `current_count`
+   counted over the set's `active_instruments`, and that same set's
+   `followed_count`, so the two always count one population and the tile can
+   never read more current than followed. Attention's `followed_count` is used
+   only while the summary is not served, and the current count then renders
+   not determinable (AC-8, capability §5.1).
 2. Box 9 renders when the summary's `set.not_current` is true or its `later`
    block reports a newer set building or failed; Home never presents the older
    set as current (AC-8; blueprint §8 score states).
@@ -357,7 +368,16 @@ flowchart TD
 4. The header's market state follows DEC-0206: *Market closed* when the clock
    alone settles it, not determinable inside weekday session hours.
 5. The *Needs you* card shows *checked {time}* from the attention read's
-   `checked_at` (STD-UI-25) and announces a changed count politely.
+   `checked_at` (STD-UI-25) and announces a changed count politely. The rail
+   count chips of boxes 17 and 18 carry no time of their own: the Home and
+   Data health *checked* lines stand for them (constraint 8).
+6. Box 19's badge is `worstDataTier` (constraint 4) over two tiers: the
+   verdict tier, computed from attention's `problems.stock_count`,
+   `followed_count` and `latest_terminal_download` exactly as Data health's
+   verdict is, and the blueprint §8 score-state tier from the summary. The
+   badge shows the worse of the two, with the label from whichever wins; the
+   empty state of box 5 replaces both (DEC-0210 as amended by the owner on
+   2026-10-25, DEC-0217).
 
 ### 3.4 Data health: reading, and fixing a problem
 
@@ -391,11 +411,11 @@ sequenceDiagram
         DHR->>COV: read_coverage(conn, lifecycle="active", cursor, limit=500)
         COV->>MDS: coverage segments, observations
     end
-    DHR-->>DHA: verdict counts, checks, first problem page, next_cursor
+    DHR-->>DHA: verdict counts, checks (each with exception_count; null when never acquired), first problem page, next_cursor
     alt database error
         DHA-->>DHU: 500 internal_error with request_id
         DHU-->>O: per-card error: operation, reason, Try again
-    else never acquired
+    else attention's latest_terminal_download is null (no download has ever ended)
         DHU-->>O: No data has been downloaded yet + Start the first download or setup link (AC-21)
     else
         DHA-->>DHU: 200
@@ -435,6 +455,9 @@ sequenceDiagram
 2. Step 4's problem set and step 8's checks are DEC-0201's definitions. A
    not-found row never offers **Download now** (AC-14); the *Needs fixing*
    header shows **Download now** only when at least one row is retryable.
+   Each check carries `exception_count`, the number of distinct stocks in its
+   exceptions (DEC-0220), and both checks are null when `never_acquired`
+   (DEC-0213), which drives the check cards' null state.
 3. When gap detection cannot run, the Daily prices card renders its gap result
    as not determinable with `coverage-service`'s reason, never as passed
    (capability flow 2 step 7).
@@ -442,10 +465,22 @@ sequenceDiagram
    until the summary is served (capability §5.1).
 5. Recent downloads re-reads on every attention tick while a download is
    non-terminal (10 s), so the running download heads the list with its
-   progress (S09 §6).
+   progress (S09 §6), and shows *checked {time}* while it polls (AC-25,
+   STD-UI-25).
 6. Step 31's dialog is the delivered `dialog` `confirm` wording of blueprint
    §9; stopping following goes through the delivered retire endpoint, so it
    keeps the stock's history (STD-UI-2).
+7. The never-downloaded empty state is triggered by the shell's attention read
+   reporting no `latest_terminal_download` (no download has ever ended), not by
+   `never_acquired`; `never_acquired` drives only the check cards' null state.
+   *Needs fixing* and Recent downloads are not part of the empty state: each
+   renders whenever a problem or a download exists, so a download that ended
+   having stored nothing still shows every failed row and its fix (AC-13,
+   AC-16, AC-21).
+8. The verdict is `worstDataTier` (constraint 4) over the problem set and the
+   latest terminal download, with the sentence composed from `affected_count`
+   and `followed_count`; the check cards do not feed it (DEC-0210 as amended
+   by the owner on 2026-10-25).
 
 ### 3.5 Reaching the delivered screens and the palette
 
@@ -493,9 +528,9 @@ flowchart TD
 
 | Component ID | Name | Responsibility | Owned by |
 |--------------|------|----------------|----------|
-| `owner-shell` | Owner interface shell | React composition root of the owner interface: the rail in two groups listing only shipped destinations with their attention counts, the sticky top bar with the route-derived title and the palette button, the route map with the `/` redirect and the four legacy redirects, the unreachable state, and the shell-wide polled reads (health 30 s; attention and classification summary 60 s, 10 s while a download is non-terminal or scores are building) shared through the shell context. Replaces the delivered shell and route composition in `web/src/app/` (DEC-0204) | this design |
+| `owner-shell` | Owner interface shell | React composition root of the owner interface: the rail in two groups listing only shipped destinations with their attention counts, the sticky top bar with the route-derived title and the palette button, the route map with the `/` redirect and the four legacy redirects, the unreachable state, and the shell-wide polled reads (health 30 s; attention and classification summary 60 s, 10 s while a download is non-terminal or scores are building; all paused while the document is hidden, DEC-0212) shared through the shell context. Replaces the delivered shell and route composition in `web/src/app/` (DEC-0204) | this design |
 | `command-palette` | Command palette | The `command` `dialog` opened by the shell: Stocks from the followed list (server prefix search), Universes and Pages filtered locally, targets per DEC-0207; never a trading action. `web/src/app/command-palette/` | this design |
-| `ui-components` | Design-system components and shared patterns | The design-system components vendored as shadcn/ui ships them in `web/src/components/ui/` (badge, button, card, data-table, dialog, input, textarea, select, checkbox, radio-group, progress, stepper, command, toast) and the blueprint §4 patterns in `web/src/components/patterns/` (Needs-you item and `sortAttention`, as-of line, status badge with tier shape, state-coverage region), consuming only `theme.css` tokens (DEC-0205) | this design |
+| `ui-components` | Design-system components and shared patterns | The design-system components vendored as shadcn/ui ships them in `web/src/components/ui/` (badge, button, card, data-table, dialog, form, input, textarea, select, checkbox, radio-group, progress, stepper, command, toast; `form` per DEC-0215) and the blueprint §4 patterns in `web/src/components/patterns/` (Needs-you item and `sortAttention`, `worstDataTier`, as-of line, status badge with tier shape, state-coverage region), consuming only `theme.css` tokens (DEC-0205). The as-of line is taken over, not created: CAP-002 lands first with its Research-specialised `web/src/components/patterns/as-of-line.tsx`, and `ui-components` generalises that file to `AsOfLine`, with the Research line composing it (owner decision 2026-10-25) | this design |
 | `setup-ui` | Setup screen | S02 steps 1 to 4 at `/setup`: stepper, per-step drafts held for the visit, each step committed through the delivered endpoints, the first download started and its progress shown (DEC-0202) | this design |
 | `home-ui` | Home screen | S01 M1 regions at `/home`: date and market state (DEC-0206), the data tile, and the *Needs you* list merged from the attention items and the score-derived items (DEC-0203) | this design |
 | `data-health-ui` | Data health screen | S09 M1 regions at `/data`: verdict, Daily prices, Company financials and Factor scores cards, *Needs fixing* with its recoveries, Recent downloads, What you follow | this design |
@@ -509,19 +544,24 @@ their behaviour; this design moves them to `/data/coverage`, `/data/followed`,
 user-visible string to the display vocabulary (blueprint §7), renders every
 status as its blueprint §8 tier, rebuilds them from `ui-components`, updates
 their internal links to the new paths, and adds two entry hints (Section 3.5
-note 3) and the *Open setup* link S02 §6 puts in Settings. Its shell and route
-composition pass to `owner-shell`, and its `HealthProvider` is reused there
-unchanged except that it exposes the time of the last successful answer to the
-unreachable state. `ingestion-api` gains one `include_router` call in
-`src/factorflow/api/app.py` for `data-health-api`. No other delivered
-component changes.
+note 3) and the *Open setup* link S02 §6 puts in Settings. It also makes the
+one edit CAP-002's approved design allocates to this capability: in
+`web/src/screens/research/copy.ts` `SHELL_ROUTES`, it migrates all three
+targets, `/runs/:runId`, `/runs` and `/instruments`, to
+`/data/downloads/:runId`, `/data/downloads` and `/data/followed` (open
+question 6). Its shell and route composition pass to `owner-shell`, and its
+`HealthProvider` is reused there unchanged except that it exposes the time of
+the last successful answer to the unreachable state and pauses polling while
+the document is hidden, with an immediate read when it is shown (DEC-0212).
+`ingestion-api` gains one `include_router` call in `src/factorflow/api/app.py`
+for `data-health-api`. No other delivered component changes.
 
 ### 4.2 Interfaces
 
 | Interface | Provider component | Consumer component | Shape | Stability |
 |-----------|--------------------|--------------------|-------|-----------|
-| `GET /api/attention` | `data-health-api` | `owner-shell` | Request: none. Response: `checked_at`; `followed_count` (active instruments); `prices_as_of` (latest `prices` `covered_to` over active instruments, a session date, or null); `credential_present`; `problems` `{stock_count, symbols (first three by symbol), newest_completed_at}`; `latest_download` `{run_id, state, requested_at, started_at, ended_at, progress {done, total}}` or null, where `done` counts instruments with a result for all four data types in that run and `total` is `instruments_named`; `latest_terminal_download` `{run_id, state, ended_at, failure_reason}` or null; `items` — the server-derived attention items, each `{kind, recorded_at}` plus `run_id` for `download_not_complete`, kinds `data_problems`, `download_not_complete`, `credential_missing` (DEC-0203). Domain vocabulary; no tier, no sentence. `200` always when the database answers; `500` envelope otherwise | new, provisional (DEC-0200) |
-| `GET /api/data-health` | `data-health-api` | `data-health-ui` | Request: none. Response: `checked_at`; `never_acquired` (from `coverage-service`); `followed_count`; `affected_count` (= `problems.stock_count`); `checks.daily_prices` `{status: ok, exceptions or not_determinable, absent_count, gap_stock_count, behind_count, latest_session, gap_detection {available, reason}, exception_symbols (first five)}`; `checks.company_financials` `{status, absent_count, problem_count, as_of, exception_symbols}`; `problems` `{rows, next_cursor}` — first page of 50, one row per stock `{symbol, failures: [{data_type, outcome (failed or not_found), reason, attempts, completed_at, run_id}], retryable}` ordered by symbol (DEC-0201) | new, provisional (DEC-0200) |
+| `GET /api/attention` | `data-health-api` | `owner-shell` | Request: none. Response: `checked_at`; `followed_count` (active instruments; the verdict tier's denominator, and Home's tile denominator only while the summary is not served); `prices_as_of` (latest `prices` `covered_to` over active instruments, a session date, or null); `credential_present`; `problems` `{stock_count, symbols (first three by symbol), newest_completed_at}`; `latest_download` `{run_id, state, requested_at, started_at, ended_at, progress {done, total}}` or null, where `done` counts instruments with a result for all four data types in that run and `total` is `instruments_named`; `latest_terminal_download` `{run_id, state, ended_at, failure_reason}` or null; `items` — the server-derived attention items, each `{kind, recorded_at}` plus `run_id` for `download_not_complete`, kinds `data_problems`, `download_not_complete`, `credential_missing` (DEC-0203). Domain vocabulary; no tier, no sentence. `200` always when the database answers; `500` envelope otherwise | new, provisional (DEC-0200) |
+| `GET /api/data-health` | `data-health-api` | `data-health-ui` | Request: none. Response: `checked_at`; `never_acquired` (from `coverage-service`); `followed_count`; `affected_count` (= `problems.stock_count`); `checks.daily_prices` `{status: ok, exceptions or not_determinable, absent_count, gap_stock_count, behind_count, exception_count, latest_session, gap_detection {available, reason}, exception_symbols (first five)}`; `checks.company_financials` `{status, absent_count, problem_count, exception_count, as_of, exception_symbols}`, where `exception_count` is the number of distinct stocks in the check's exceptions (DEC-0220) and both checks are null when `never_acquired` (DEC-0213); `problems` `{rows, next_cursor}` — first page of 50, one row per stock `{symbol, failures: [{data_type, outcome (failed or not_found), reason, attempts, completed_at, run_id}], retryable}` ordered by symbol (DEC-0201) | new, provisional (DEC-0200) |
 | `GET /api/data-health/problems` | `data-health-api` | `data-health-ui` | Request: `limit` (default 50, max 500 — the canonical bounds in `api/bounds.py`), `cursor` (the last symbol, validated as a symbol). Response: `{rows, next_cursor}` as above. `422 validation_error` on a bad bound or cursor | new, provisional (DEC-0200) |
 | `Data health queries` | `data-health-reader` | `data-health-api` | Python calls on a pooled connection: `read_attention(conn)`, `read_data_health(conn)`, `read_problems(conn, cursor, limit)`, returning frozen dataclasses mirroring the three responses; read-only, no transaction left open | new |
 | `Problem and download read` | `market-data-store` | `data-health-reader` | SQL reads only: `instrument` (active), `acquisition_state` (latest outcome per instrument and data type), `run_instrument_result` (reason, attempts, completed_at for that outcome's `last_run_id`), `acquisition_run` (latest by `requested_at`, latest terminal by `ended_at`), `coverage_segment` (`prices` `covered_to`). Parameterised `psycopg` 3 queries; no INSERT, UPDATE or DELETE | new consumer of an existing component |
@@ -554,8 +594,13 @@ component changes.
 | `GET /api/settings/history-depth` | `ingestion-api` | `data-health-ui` | Reused unchanged for What you follow | existing |
 | `DELETE /api/instruments/{symbol}` | `ingestion-api` | `data-health-ui` | Reused unchanged as **Stop following**: `200` retired; `404`, `409` refusals | existing |
 | `GET /api/instruments` | `ingestion-api` | `command-palette` | Reused unchanged: `symbol` prefix, `lifecycle=active`, `limit=8` | existing |
-| `GET /api/classifications/summary` | `classification-api` | `owner-shell` | Consumed as published, not redefined: `never_classified`, `set`, `later`, `stocks_current {current_count, followed_count}`; `404 not_found` before the route is deployed renders not determinable | existing, other design |
+| `GET /api/classifications/summary` | `classification-api` | `owner-shell` | Consumed as published, not redefined: `never_classified`, `set`, `later`, `stocks_current {current_count, followed_count}`; Home's *{current} of {followed}* takes both figures from `stocks_current` whenever the summary is served; `404 not_found` before the route is deployed renders not determinable | existing, other design |
 | `GET /api/universes` | `classification-api` | `command-palette` | Consumed as published: `lifecycle=active`, names and ids | existing, other design |
+
+**Data classification.** Every element the three new responses introduce —
+counts, run states and outcomes, failure reasons, symbols, session dates and
+timestamps — is Internal under SEC-DAT-001, as all CAP-001 data is; none is
+personal data or a secret (component design `data-health-reader` §4).
 
 ### 4.3 Technology Selections
 
@@ -593,7 +638,23 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 4. **One tier per status.** Every download state, result outcome, check result
    and score state maps to the single tier of blueprint §8 in one function in
    `ui-components`, rendered as label plus tier shape, never colour alone
-   (AC-20, STD-UI-8, STD-UI-12).
+   (AC-20, STD-UI-8, STD-UI-12). One shared function there, `worstDataTier`,
+   composes both the Data health verdict and Home's data tile badge over the
+   full tier order critical, serious, warning, good, neutral, with active
+   ranked alongside good; neutral and active inputs never worsen the answer.
+   The verdict's tier and opening word come from the problem set and the
+   latest terminal download: none affected, good, *Yes.*; some affected,
+   warning, *Mostly yes.*; every followed stock affected, critical, *No.*;
+   latest terminal download `failed`, critical, with the clause *, and the
+   last download failed.*; latest terminal download interrupted (`abandoned`),
+   serious, rendered `status-serious` with the answer word *Mostly yes*
+   followed by the count clause and *, and the last download was
+   interrupted.* The M1 sentences are *Mostly yes. {n} of {m} followed stocks
+   need attention; their scores show as Incomplete until they're fixed.* and
+   *Yes. None of the {m} followed stocks needs attention.* Home's tile badge is
+   the worse of that verdict tier and the blueprint §8 score-state tier, with
+   the label from whichever wins; the never-acquired empty state replaces both
+   (DEC-0210 and DEC-0217 as amended by the owner on 2026-10-25).
 5. **Not determinable is a value of its own.** A check that could not run, a
    score figure before the summary is served, and the market state inside
    session hours render as not determinable with a reason; none renders as
@@ -604,15 +665,20 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 7. **Volume.** `GET /api/attention` is bounded by a few indexed aggregates over
    at most 3000 active instruments times four data types and is safe to poll;
    `GET /api/data-health` runs the coverage derivation over the whole active
-   roster (six `read_coverage` pages at 3000) and is read only on demand
-   (Section 3.4 note 1). *Needs fixing* pages by keyset under the canonical
-   bounds (STD-UI-30).
+   roster (six `read_coverage` pages at 3000), is read only on demand and only
+   by Data health (Section 3.4 note 1), and MUST answer within 2 s at the 95th
+   percentile with 3,000 followed stocks (AC-28). Home never reads it: its
+   tile badge comes from the attention and summary reads (Section 3.3 note 6).
+   *Needs fixing* pages by keyset under the canonical bounds (STD-UI-30).
 8. **Polling cadences are part of the design** (STD-UI-25): health 30 s
    (delivered); attention and summary 60 s, 10 s while a download is
    non-terminal or a score set is building; Recent downloads on each 10 s tick
    while a download runs; data-health aggregate on demand and once when a
    download ends; all paused while the document is hidden. Each polled region
-   shows *checked {time}*.
+   shows *checked {time}*, setup step 4's progress and Recent downloads
+   included while they poll. The rail count chips carry no time of their own;
+   the Home and Data health *checked* lines stand for them, a permitted
+   specialization of STD-UI-25 recorded here (owner decision 2026-10-25).
 9. **Loopback, no authentication.** The new routes inherit the delivered bind,
    Host and Origin checks and error envelope, and rely on the `SEC-ENC-001
    host-local loopback exception` for the browser-to-API channel at
@@ -629,7 +695,13 @@ Rollback is therefore a redeploy of the previous image, with no data step.
     renders no strategy, paper or live region and no placeholder (S01-7).
 12. **Built from the design system.** Every surface delivered or taken over is
     built from `ui-components` and consumes `theme.css` tokens only; no spacing,
-    size or colour literal outside the theme (AC-26, STD-UI-29). The non-Radix
+    size or colour literal outside the theme (AC-26, STD-UI-29). The layout
+    dimensions the approved blueprint and screen specifications fix (the 208 px
+    rail, the 1180 px measure, the 260 to 300 px side column, 28 px, 16 px and
+    70ch) are approved-specification values, not theme literals and not new
+    tokens: they are held in one layout-constants module in `owner-shell`,
+    `web/src/app/layout.ts` (AC-26 as narrowed by the owner on 2026-10-25). The
+    non-Radix
     packages those components import are added only after the owner's
     `$tech-stack` confirmation (DEC-0205), and each package's licence is
     recorded when it is (SEC-DEP-003).
@@ -660,8 +732,9 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 3. **A download's progress can be read from its results.** `done` counts
    instruments with a result for all four data types in the run; the delivered
    journal writes results per instrument as the run proceeds.
-4. **The coverage derivation is fast enough on demand at 3000 stocks.** No
-   latency target exists (open question 7); the aggregate is not polled, so a
+4. **The coverage derivation is fast enough on demand at 3000 stocks.** AC-28
+   bounds it at 2 s at the 95th percentile, measured by the volume test (open
+   question 7); the aggregate is not polled and Home does not read it, so a
    slow read delays only Data health's first render.
 5. **A download is named by its start time** in America/Chicago until the owner
    decides whether downloads get a short number (capability OQ-1; DEC-0083's
@@ -682,10 +755,10 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 | AC-5 | Pasted list parsed honestly | Reused `parse-bulk-symbols`; `POST /api/instruments` per-symbol dispositions | 3.2 notes 2, 3 |
 | AC-6 | Fewer than 30 is a warning | `setup-ui` warning below 30 accepted; Continue available | 3.2 |
 | AC-7 | First download from setup; Home shows progress | `POST /api/acquisition-runs` from `setup-ui`; `latest_download.progress`; Needs-you kind 4 | 3.2, 3.3; DEC-0203 |
-| AC-8 | Home data tile, scores lag stated | `home-ui` tile from summary and `prices_as_of`; not-current rendering | 3.3 boxes 6 to 10 |
+| AC-8 | Home data tile, scores lag stated | `home-ui` tile: both counts from the summary's `stocks_current` when served, `prices_as_of`; not-current rendering; badge from `worstDataTier` | 3.3 boxes 6 to 10, 19; 5.4 |
 | AC-9 | Needs you: one action, ordered, leaves on resolution | `sortAttention` in `ui-components`; items derived from current state only | 3.3 note 3; DEC-0203 |
 | AC-10 | Nothing unshipped on Home | `home-ui` M1 regions only | 5.11 |
-| AC-11 | Data health verdict and check cards | `GET /api/data-health` `affected_count`, `checks`; Factor scores from summary | 3.4; DEC-0201 |
+| AC-11 | Data health verdict and check cards | `GET /api/data-health` `affected_count`, `checks`; verdict from `worstDataTier` over the problem set and latest terminal download; Factor scores from summary | 3.4 note 8, 5.4; DEC-0201, DEC-0210 |
 | AC-12 | A partial download is never complete | Recorded run states only; checks carry exceptions | 5.6 |
 | AC-13 | Every problem names its fix | Problem rows with data type, outcome, reason, attempts; consequence text; one set with the count | 3.4; DEC-0201 |
 | AC-14 | Not found is not retried | `retryable` false for `not_found`; Stop following and Follow a different symbol | 3.4 note 2 |
@@ -695,13 +768,14 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 | AC-18 | Old paths arrive for one release | `legacy-redirects.tsx` `Navigate replace` | 3.1 note 4 |
 | AC-19 | Product vocabulary | Display labels composed in the interface; domain terms in the API | 5.3 |
 | AC-20 | One tier per status | Blueprint §8 mapping in one `ui-components` function | 5.4 |
-| AC-21 | Honest empty state | `latest_download` null on Home; `never_acquired` on Data health | 3.3 box 5, 3.4 |
+| AC-21 | Honest empty state | `latest_download` null on Home; `latest_terminal_download` null on Data health, with `never_acquired` nulling the check cards | 3.3 box 5, 3.4 note 7 |
 | AC-22 | Command palette | `command-palette`; shell keydown listener; no trading action | 3.5; DEC-0207 |
 | AC-23 | Unreachable is a designed state | `owner-shell` main-region swap; last answered time; remount at same URL | 3.1 note 3; DEC-0204 |
 | AC-24 | Every region defines its states | State sources named per region here; the UX brief enumerates the eight per region | 3.3, 3.4, 5.5 |
-| AC-25 | Keyboard and freshness | Radix and native semantics; cadences and *checked {time}* | 5.8, 5.13 |
-| AC-26 | Built from the design system | `ui-components`; tokens only | 4.1, 5.12; DEC-0205 |
+| AC-25 | Keyboard and freshness | Radix and native semantics; cadences and *checked {time}*, including setup step 4 and Recent downloads; rail chips covered by the Home and Data health lines | 3.2 note 4, 3.4 note 5, 5.8, 5.13 |
+| AC-26 | Built from the design system | `ui-components`; tokens only; approved-specification layout dimensions in `owner-shell`'s `web/src/app/layout.ts` | 4.1, 5.12; DEC-0205 |
 | AC-27 | CAP-002 keeps its routes | `classification-ui` `Screen registration` into `owner-shell`, routes unchanged | 4.2; DEC-0204 |
+| AC-28 | With 3,000 followed stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th percentile, measured by the volume test | `data-health-reader` coverage derivation over the active roster; `data-health-api` `GET /api/data-health`; read on demand by Data health only | 3.4 note 1, 5.7, 6.4 |
 
 Screen acceptance checks: S01-3, S01-4 (DEC-0203), S01-6 (box 6) and S01-7
 (5.11); S02-1 to S02-6 (Section 3.2, DEC-0202); S09-1 to S09-5 (Sections 3.4,
@@ -743,15 +817,19 @@ not in M1.
    design publishes it as `owner-shell`, which shares the read with `home-ui`
    and `data-health-ui`. *Owner: that design's owner, to replace the
    placeholder. Blocks: the architecture inventory's orphan finding only.*
-6. **Links to `/runs/:runId` in the research screens.** The other design links
-   a score set's download to `/runs/:runId`; the redirect carries it for one
-   release, after which the link must read `/data/downloads/:runId`. *Owner:
-   that design's owner, before the redirects are removed. Blocks: the
-   redirect-removal change.*
+6. **Links to the old paths in the research screens.** CAP-002's approved
+   design allocates to this capability one edit: migrating the three link
+   targets in `web/src/screens/research/copy.ts` `SHELL_ROUTES`, `/runs/:runId`,
+   `/runs` and `/instruments`, to the new paths. *Owner: capability owner.
+   Blocks: the redirect-removal change.* **Answered 2026-10-25 by the owner:**
+   CAP-003's `owner-web-app` owns the edit and migrates all three targets to
+   `/data/downloads/:runId`, `/data/downloads` and `/data/followed`
+   (Section 4.1).
 7. **No latency target for `GET /api/data-health` at 3000 stocks**, mirroring
    the store's unresolved read-latency question. The design reads it on demand
    and never polls it. *Owner: capability owner. Blocks: a performance
-   criterion, not the implementation.*
+   criterion, not the implementation.* **Answered 2026-10-25 by the owner:
+   AC-28, p95 ≤ 2 s at 3,000 followed stocks.**
 8. **Every delivered file and test this design edits.** The five screens, the
    shell, the route map, the status region's removal (DEC-0204), `app.py`'s
    router line and the delivered tests asserting old destinations, labels and
@@ -779,7 +857,7 @@ not in M1.
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-003 v1 (draft) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | 27 acceptance criteria; scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
+| Capability CAP-003 v1 (draft) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
 | Product UX blueprint `PRODUCT-UX` v6 (approved) | `docs/ux/product-ux-blueprint.md` | §0 patterns in `web/src/components/patterns/`; principles 4, 5, 7, 8; §2.1 rail groups and count chips; §2.2 routes, `/` redirect and the four legacy redirects; §3.1 layout; §3.4 palette and the single keydown listener; §3.5 shell states; §4.1 Needs-you item and sort; §4.8 as-of line; §4.10 states; §6 first-run and data-problem flows; §7 vocabulary; §8 tiers; §9 action tiers and confirm wording; §10 M1 row (three palette groups, CAP-001 API as it is); §12 D-2, D-7, D-8, D-9 |
 | Home `PRODUCT-UX-S01` v4 (approved) | `docs/ux/screens/S01-home.md` | M1 regions; view model with an attention service and server sort; 60 s polling with *checked*; data item copy; states; S01-3, S01-4, S01-6, S01-7 |
 | Setup `PRODUCT-UX-S02` v4 (approved) | `docs/ux/screens/S02-setup.md` | Four M1 steps on CAP-001's API; credential variable name; parse rules and the 30-stock warning; complete when the first download is started; progress polled 10 s; reopen from Settings; S02-1 to S02-6 |
@@ -809,9 +887,9 @@ criterion traces to a design element, and so do the M1 acceptance checks of
 the three approved screen specifications.
 
 What keeps it at 80 is that nine positions rest on recorded agent decisions
-rather than approved artifacts, two of them carrying real uncertainty: the
-npm packages the vendored components import await the owner's tech-stack
-confirmation (DEC-0205, open question 4), and the Needs-you catalogue extends
-S01's one data item to five kinds (DEC-0203). Two product questions stay open
-for the owner — the download number and CSV upload — and change copy and one
-control rather than the architecture.
+rather than approved artifacts. Of the two that carried real uncertainty at
+v1, the owner settled one on 2026-10-25: the npm packages the vendored
+components import are confirmed in tech-stack v6 (DEC-0205, DEC-0215, open
+question 4), and the four product questions (download number, delivery
+order, CSV upload, tech stack) are answered. The Needs-you catalogue still
+extends S01's one data item to five kinds on a recorded decision (DEC-0203).

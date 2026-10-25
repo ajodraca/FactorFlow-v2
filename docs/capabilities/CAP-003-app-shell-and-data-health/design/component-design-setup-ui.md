@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T03:00:00Z
+  timestamp: 2026-10-25T19:45:46Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -275,7 +275,7 @@ N/A, not applicable for this component.
 | Paste summary | `web/src/screens/setup/summarise-paste.test.ts` | Duplicates within the paste named once; `BRK/B`, `BRK B` and `BRK_B` suggest `BRK.B`; `ZZZZ!` suggests nothing; accepted kept whatever else is rejected (AC-5; DEC-0218) |
 | Ranking warning | `web/src/screens/setup/step-stocks.test.tsx` | Below 30 accepted the warning shows and **Continue** stays available; at zero it is `blocked` with its reason (AC-6; S02-5) |
 | Batches | `web/src/screens/setup/post-in-batches.test.ts` | 2500 symbols post as 1000, 1000, 500; a `409` batch counts as success; a failed batch keeps its and later entries |
-| Start | `web/src/screens/setup/step-download.test.tsx` | `202` shows progress from attention; `queued_behind` shows the queued line; each `409` names its step to fix |
+| Start | `web/src/screens/setup/step-download.test.tsx` | `202` shows progress from attention with *checked {time}* that advances on each attention answer (AC-25); `queued_behind` shows the queued line; each `409` names its step to fix |
 | First run | `tests/e2e/setup-first-run.spec.ts` | Empty install opens setup; all four steps by keyboard; after **Start download** `/` opens Home with the first-download item (AC-2, AC-7, AC-25) |
 | Add later | `tests/e2e/setup-first-run.spec.ts` | *Add later* lands on Home's empty state; `/` still opens setup (AC-21; DEC-0202) |
 
@@ -314,7 +314,10 @@ a `card` `default` with *Step {n} of 4* at `--text-xs`, the question as `h2`
 at `--text-xl`, an explanation capped at 70ch, the controls, an info note at
 `--text-xs` on `--muted`, and a footer with **← Back: {previous step title}**
 (`button` `ghost`) left and *Next: {next step title}* and **Continue**
-(`button` `default`) right; step 1 has no Back, step 4 no Continue.
+(`button` `default`) right; step 1 has no Back, step 4 no Continue. The
+1180 px, 260 to 300 px, 28 px and 70ch are approved-specification layout
+dimensions read from `owner-shell`'s `web/src/app/layout.ts`, not theme
+literals (AC-26 as narrowed by the owner; review v1 FINDING-6).
 
 **Steps.**
 
@@ -323,7 +326,7 @@ at `--text-xl`, an explanation capped at 70ch, the controls, an info note at
 | 1 | *Connect market data* | *Market data key:* `badge` `status-good` *Found* or `status-critical` *Missing*; when missing, *Set the environment variable `FACTORFLOW_MASSIVE_API_KEY` to your Massive API key.* and *Restart FactorFlow after setting it.*; while health is unreachable `coverage-unknown` *Not determinable* with *FactorFlow isn't answering, so the key can't be checked.*; **Continue** always available |
 | 2 | *How far back should history go?* | `form` `stacked`, *History depth*, `input` `numeric` with the suffix *years*, *Whole years, 1 to 50.*; note *Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.*; `422` *History depth must be a whole number of years from 1 to 50.* |
 | 3 | *Which stocks do you want to follow?* | The explanation of S02 §8; `radio-group` `cards` *How do you want to name them?*: **Paste a list** (*Paste symbols separated by commas or one per line.*), **Add later** (*Finish setup now and follow stocks from Data health later.*); *Paste a list* reveals `form` `stacked` with `textarea` `list` *Stock symbols*, placeholder *AAPL, MSFT, NVDA or one symbol per line*, description *Whether the provider knows each one is checked during the download.*; counter *{a} symbols recognised, {d} duplicates, {r} not recognised* with `badge` `status-good` on the accepted count and one `badge` `status-warning` per duplicate or unreadable entry with its reason; *Did you mean {fix}?* as `button` `outline`; below 30, *Factor scores need at least 30 stocks with complete data. With {a}, no factor can be ranked yet.*; at zero, **Continue** `blocked` with *Paste at least one symbol, or choose Add later.*; info note *This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.* |
-| 4 | *Download data for {n} stocks* | `card` `summary`: *Market data key* (step 1's badge), *History depth* *{y} years*, *Followed stocks* *{n}*; **Start download** (`button` `default`); after `202`, `progress` `determinate` *{done} of {total} stocks* (`indeterminate` while the total is unknown), *Started {start time}*, *You can leave; this keeps running.*; queued: *A download is running. This starts when it finishes.*; `409`: *Couldn't start the download: history depth isn't set.* with **Go to step 2**, or *Couldn't start the download: no stocks are followed.* with **Go to step 3** |
+| 4 | *Download data for {n} stocks* | `card` `summary`: *Market data key* (step 1's badge), *History depth* *{y} years*, *Followed stocks* *{n}*; **Start download** (`button` `default`); after `202`, `progress` `determinate` *{done} of {total} stocks* (`indeterminate` while the total is unknown), *Started {start time}*, *checked {time}* at `--text-xs` `--muted-foreground` from the attention read's `checkedAt`, updated on its 10 s poll (AC-25; STD-UI-25; review v1 FINDING-11), *You can leave; this keeps running.*; queued: *A download is running. This starts when it finishes.*; `409`: *Couldn't start the download: history depth isn't set.* with **Go to step 2**, or *Couldn't start the download: no stocks are followed.* with **Go to step 3** |
 
 **Component mapping.**
 
@@ -414,8 +417,8 @@ Consumed only; all delivered and unchanged.
 | AC-7 | First download from setup | Step 4 start and progress | 2.3 |
 | AC-21 | Honest empty state | *Add later* to Home's empty state | 2.3 |
 | AC-24 | Every region's states | States paragraph | 10 |
-| AC-25 | Keyboard; polled freshness | Native and Radix keyboard; progress at 10 s | 10 |
-| AC-26 | `ui-components` | Component mapping | 10 |
+| AC-25 | Keyboard; polled freshness | Native and Radix keyboard; progress at 10 s with its *checked {time}* | 10 |
+| AC-26 | `ui-components`; layout dimensions in one module | Component mapping; layout dimensions from `layout.ts` | 10 |
 
 ## 14. Open Questions
 

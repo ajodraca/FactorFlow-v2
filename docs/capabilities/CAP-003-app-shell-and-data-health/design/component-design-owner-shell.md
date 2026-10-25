@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T02:40:00Z
+  timestamp: 2026-10-25T19:45:46Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -48,8 +48,9 @@ DEC-0203, DEC-0204, DEC-0207 and DEC-0208 without re-deciding them, and
 records DEC-0211 (the delivered `web/src/app/` files it owns, and the move of
 `HealthProvider` to `health.tsx`), DEC-0212 (the health poll pauses while the
 page is hidden), DEC-0214 (a top-bar crumb the route cannot name comes from
-the routed screen) and DEC-0219 (the on-demand aggregate hook Home shares
-with Data health), all under `projects/factorflow-v2/decisions/` in the
+the routed screen) and DEC-0219 (the on-demand aggregate hook Home shared
+with Data health, withdrawn by the owner on 2026-10-25, so only Data health
+uses the hook), all under `projects/factorflow-v2/decisions/` in the
 harness repository and all **PROVISIONAL**.
 
 ## 1. Overview
@@ -109,7 +110,8 @@ web/src/app/use-polled-read.ts           new: interval read paused while the doc
 web/src/app/shell-client.ts              new: fetchAttention(), fetchScoreSummary() (404 -> not_served),
                                          fetchDataHealth(), fetchProblems(cursor, limit)
 web/src/app/shell-types.ts               new: Attention, DataHealth, ProblemPage, ScoreSummary, ScoreState, ReadState
-web/src/app/use-data-health.ts           new: the on-demand aggregate hook home-ui and data-health-ui share (DEC-0219)
+web/src/app/use-data-health.ts           new: the on-demand aggregate hook data-health-ui uses (Home does not; DEC-0219 withdrawn)
+web/src/app/layout.ts                    new: the approved-specification layout dimensions (AC-26; review v1 FINDING-6)
 web/src/app/count-chip.tsx               new: the rail count chip
 web/src/app/unreachable-state.tsx        new: the designed unreachable state (moved and extended)
 web/src/app/not-found.tsx                new: the not-found state
@@ -140,6 +142,26 @@ tests/e2e/unreachable-recovery.spec.ts   new
 
 `web/src/main.tsx` is unchanged: it still renders `<Shell />` inside
 `BrowserRouter`.
+
+`layout.ts` is the one layout-constants module. It holds the layout
+dimensions the approved blueprint and screen specifications fix, which are
+approved-specification values, not theme literals and not new tokens (AC-26
+as narrowed by the owner on 2026-10-25, review v1 FINDING-6; capability 5.4
+STD-UI-29). The shell and the screens consume it; no other file writes these
+values.
+
+```typescript
+// web/src/app/layout.ts
+export const LAYOUT = {
+  railWidth: "208px",          // the rail (UX design 0.1)
+  contentMaxWidth: "1180px",   // Home, Setup and Data health content cap
+  sideColumnMin: "260px",      // setup's step list, 260 to 300 px
+  sideColumnMax: "300px",
+  markerSize: "28px",          // setup's step dot; Home's severity tile
+  railIconSize: "16px",        // the rail item icon
+  explanationMeasure: "70ch",  // setup's step explanation
+} as const;
+```
 
 ### 2.2 Composition
 
@@ -196,7 +218,13 @@ export interface ShellContextValue {
 export function useShell(): ShellContextValue;
 ```
 
-`Attention` mirrors `data-health-api`'s `AttentionResponse` field for field;
+`Attention` mirrors `data-health-api`'s `AttentionResponse` field for field,
+so it already carries `latest_terminal_download` with its recorded terminal
+`state` (`succeeded`, displayed *Complete*; `partial`; `failed`;
+`cancelled`; `abandoned`, displayed *Interrupted*). The screens take the data
+verdict's download input from that state (DEC-0210, DEC-0217 as the owner
+amended them), and Data health takes its never-downloaded empty state from
+the field's absence (review v1 FINDING-10); no field is added.
 `ScoreSummary` mirrors `classification-api`'s `ClassificationSummaryResponse`
 as published (`never_classified`, `set`, `later`, `factors`,
 `stocks_current`) and is not redefined here (capability §5.1). `refresh`
@@ -210,8 +238,9 @@ and the summary, so the screens share one mapping from the wire shapes.
 on-demand read of `GET /api/data-health`, which reads once on mount, on its
 `retry()`, and once when the context's attention read shows
 `latest_download` turning terminal, and never on an interval (system design
-§3.4 note 1). `data-health-ui` and `home-ui` both use it (DEC-0219,
-PROVISIONAL).
+§3.4 note 1). Only `data-health-ui` uses it; Home does not read
+`GET /api/data-health` on mount (DEC-0219, withdrawn by the owner on
+2026-10-25, review v1 FINDING-4).
 
 ### 2.4 Reads and cadences (STD-UI-25; system design constraint 8)
 
@@ -350,11 +379,11 @@ export const legacyRoutes = [
 
 ### 2.7 Rail, chips and top bar
 
-- **Rail** (UX design 0.1): 208 px, `--border` right edge; the brand mark
-  *FactorFlow* as text; the primary group; a flexible gap; the data-and-system
-  group pinned to the bottom. Each item is a `NavLink` with a 16 px
-  `lucide-react` stroke icon and its label, `aria-current="page"` on the
-  current one. The `nav` is labelled *Main*.
+- **Rail** (UX design 0.1): 208 px (`LAYOUT.railWidth`), `--border` right
+  edge; the brand mark *FactorFlow* as text; the primary group; a flexible
+  gap; the data-and-system group pinned to the bottom. Each item is a
+  `NavLink` with a 16 px (`LAYOUT.railIconSize`) `lucide-react` stroke icon
+  and its label, `aria-current="page"` on the current one. The `nav` is labelled *Main*.
 - **Count chip** (UX design 0.2; AC-16): `badge` `status-warning` at
   `--text-xs`. Home's count is `deriveNeedsYou(attention, scores).length`
   from `ui-components`, the same call `home-ui` makes (DEC-0203); Data
@@ -363,6 +392,10 @@ export const legacyRoutes = [
   you*; *Data health, 3 stocks with problems*); while the attention read
   fails the chip keeps its last value and its name gains *, as of {time}*. A
   changed count is announced through one polite live region in the rail.
+  The chips are polled but carry no time of their own: the *checked {time}*
+  lines on Home and Data health, read on the same attention cadence, stand
+  for them. This is a permitted STD-UI-25 specialization recorded in
+  capability 5.4 (owner decision 2026-10-25, review v1 FINDING-11).
 - **Top bar** (UX design 0.1): sticky, `--background`, bottom `--border`;
   left the title or breadcrumb at `--text-base` weight 600; right the opener,
   `button` `outline` *Search* with the shortcut as trailing `--text-xs` text,
@@ -427,7 +460,9 @@ interface learns by polling at the cadences in 2.4.
 - **No browser storage** (system design §4.4): nothing is kept between
   visits; setup's progress is re-derived from the server (DEC-0202).
 - **Every cadence is recorded** (2.4) and every polled region shows its
-  *checked {time}* (constraint 8; AC-25).
+  *checked {time}* (constraint 8; AC-25), except the rail chips, for which
+  the Home and Data health *checked {time}* lines stand (2.7; capability 5.4
+  STD-UI-25 specialization).
 - **Static titles** (system design §3.5 note 4), with the screen-supplied
   detail of DEC-0214 as the one exception.
 - **Assumption:** the classification summary keeps the published shape and
@@ -524,8 +559,9 @@ From UX design §0 (Application Shell), which this component builds.
 ground `hsl(var(--muted) / 0.5)` over `--background`; content on `card`s on
 `--background`. Main region `--space-5` padding, regions `--space-5` apart;
 Home, Setup and Data health cap content at 1180 px; the four table screens
-use the full width and Settings `--measure-prose`. Below 768 px the rail is a
-horizontal list above the content and the opener wraps under the title.
+use the full width and Settings `--measure-prose`. The 208 px and 1180 px
+come from `layout.ts` (2.1). Below 768 px the rail is a horizontal list above
+the content and the opener wraps under the title.
 
 **Destinations and chips** (0.2). Drawn for both landing orders: three items
 (Home; Data health, Settings) or four (Home, Research; Data health,
@@ -559,7 +595,8 @@ focus `--ring` at `--focus-ring-width`; chip `--status-warning` on
 `design-system/theme-validation.md`, not assumed; state cards `--card` and
 `--card-foreground`; toast accents `--status-good`, `--status-warning`,
 `--status-critical`; type `--text-base`, with `--text-xs` for the shortcut
-hint and *checked {time}*; spacing from `--space-*` only (AC-26).
+hint and *checked {time}*; spacing from `--space-*` only, and the
+approved-specification layout dimensions from `layout.ts` only (AC-26).
 
 **Accessibility** (0.6; STD-UI-24). `nav` labelled *Main* with
 `aria-current="page"`; the top bar is a `banner` whose first text is the
@@ -580,7 +617,7 @@ This component exposes none. It consumes:
 | `/api/health` | GET | none, loopback | none | `status`, `database`, `credential_present`, `schema_version`, `most_recent_run` | `ingestion-api`, unchanged; every 30 s, paused while hidden |
 | `/api/attention` | GET | none, loopback | none | `AttentionResponse` | `data-health-api`; 60 s, 10 s while a download runs or scores build |
 | `/api/classifications/summary` | GET | none, loopback | none | `ClassificationSummaryResponse`; `404 not_found` before deployment | `classification-api`, as published; same cadence |
-| `/api/data-health`, `/api/data-health/problems` | GET | none, loopback | none; `cursor`, `limit` | `DataHealthResponse`; `ProblemPageResponse` | `data-health-api`; fetched here for `home-ui` and `data-health-ui`, on demand only |
+| `/api/data-health`, `/api/data-health/problems` | GET | none, loopback | none; `cursor`, `limit` | `DataHealthResponse`; `ProblemPageResponse` | `data-health-api`; fetched here for `data-health-ui` only, on demand only (DEC-0219 withdrawn) |
 
 ## 12. References
 
@@ -591,7 +628,7 @@ This component exposes none. It consumes:
 | Blueprint | PRODUCT-UX v6 | §2.1, §2.2, §3.1, §3.4, §3.5 | `docs/ux/product-ux-blueprint.md` |
 | Component design | CAP-001 owner web app v4 (approved, not edited) | The delivered shell, status region and HealthProvider | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-owner-web-app.md` |
 | Component design | CAP-002 classification UI v3 (approved) | §2.2 composition into the shell, research titles | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-classification-ui.md` |
-| Decisions | DEC-0202, DEC-0203, DEC-0204, DEC-0207, DEC-0208, DEC-0211, DEC-0212, DEC-0214, DEC-0219 | Setup completion, items, shell and destinations, palette, loopback, ownership, health pause, crumbs, the shared on-demand aggregate | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decisions | DEC-0202, DEC-0203, DEC-0204, DEC-0207, DEC-0208, DEC-0211, DEC-0212, DEC-0214, DEC-0219 | Setup completion, items, shell and destinations, palette, loopback, ownership, health pause, crumbs, the on-demand aggregate hook (Home's use withdrawn) | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
@@ -604,20 +641,20 @@ This component exposes none. It consumes:
 | AC-22 | Shell keydown listener, top-bar opener | Listener and opener | 2.7 |
 | AC-23 | Main-region swap, last answered time | `UnreachableState`, `lastAnsweredAt` | 2.8 |
 | AC-24 | Shell states | Loading, unreachable, not-found states | 2.8 |
-| AC-25 | Cadences and *checked {time}*; keyboard | 2.4 cadences; listener, focus management | 2.4, 2.7 |
-| AC-26 | Built from `ui-components` | Component mapping and tokens | 10 |
+| AC-25 | Cadences and *checked {time}*; keyboard | 2.4 cadences; chips stood for by the Home and Data health *checked {time}* lines (STD-UI-25 specialization); listener, focus management | 2.4, 2.7 |
+| AC-26 | Built from `ui-components`; layout dimensions in one module | Component mapping and tokens; `layout.ts` | 2.1, 10 |
 | AC-27 | `classification-ui` screen registration | Research entry and five routes kept | 2.6 |
 | AC-10 | Only shipped destinations | No Strategies or Portfolio item | 2.6 |
 
 ## 14. Open Questions
 
-1. **Research screens' links to `/runs/:runId` and `/instruments`.** System
-   design open question 6 assigns migrating them to CAP-002's owner, while
-   CAP-002's approved `component-design-classification-ui.md` §2.2 assigns it
-   to the shell capability as one edit to `SHELL_ROUTES` in
-   `web/src/screens/research/copy.ts`. The redirects carry those links for one
-   release, so nothing breaks now. *Owner: capability owner, with CAP-002's
-   owner. Blocks: the redirect-removal change.*
+1. **Research screens' links to `/runs/:runId`, `/runs` and `/instruments`:
+   answered.** CAP-002's approved `component-design-classification-ui.md`
+   §2.2 assigns migrating them to the shell capability as one edit to
+   `SHELL_ROUTES` in `web/src/screens/research/copy.ts`, and DEC-0211 gives
+   every file under `web/src/screens/` to `owner-web-app`, so the edit is
+   `owner-web-app`'s (its 2.1), not CAP-002's (review v1 FINDING-13).
+   *Owner: capability owner. Blocks: nothing.*
 2. **Icons per destination.** UX design 0.1 specifies a 16 px `lucide-react`
    stroke icon per rail item and names none. *Owner: capability owner, or the
    implementing story's review. Blocks: nothing structural.*

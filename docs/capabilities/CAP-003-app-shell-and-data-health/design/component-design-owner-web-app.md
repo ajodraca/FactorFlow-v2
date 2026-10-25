@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T03:45:00Z
+  timestamp: 2026-10-25T19:45:46Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -79,6 +79,10 @@ design 1.5 to 1.9; AC-17). Concretely:
    relabelled *Market data key*.
 7. **Download detail** supplies its top-bar crumb, *Download {start time}*,
    through `useShell().setTitleDetail` (DEC-0214).
+8. **Research links**: the one `SHELL_ROUTES` edit in
+   `web/src/screens/research/copy.ts` that CAP-002's approved design assigns
+   to the shell capability, migrating its three targets to the new paths
+   (2.1; DEC-0211; review v1 FINDING-13).
 
 Every action, confirmation and refusal CAP-001 accepted is kept with the same
 outcome: following and stopping following stocks, starting, queueing and
@@ -101,6 +105,7 @@ web/src/screens/runs/*                labels; Started column; StatusBadge in pla
                                       detail/result-outcome-badge.tsx; links and navigate() to /data/downloads/*
 web/src/screens/runs/detail/*         labels; progress determinate; confirm wording; Not found sentence; setTitleDetail
 web/src/screens/settings/*            labels; Open setup link; Market data key region; coverage-unknown while unreachable
+web/src/screens/research/copy.ts      SHELL_ROUTES only: /runs/:runId, /runs, /instruments to the new paths (CAP-002 §2.2)
 web/src/screens/**/*.test.ts(x)       the delivered screen tests: label, path and component assertions follow (2.6)
 web/src/api/client.ts                 + export on requestJson, unless CAP-002 has already added it (DEC-0064)
 tests/e2e/first-run.spec.ts, diagnose-failure.spec.ts, cancel-run.spec.ts, cancel-in-progress.spec.ts,
@@ -120,6 +125,24 @@ code and paths may keep the domain terms; only user-visible text changes
 `detail/result-outcome-badge.tsx` are deleted with their tests once every
 caller uses `StatusBadge`, whose tests carry the same tier assertions
 (`ui-components` §7).
+
+**`SHELL_ROUTES` in `web/src/screens/research/copy.ts`.** CAP-002's approved
+`component-design-classification-ui.md` (v3) §2.2 keeps the three CAP-001
+link targets its Research screens use in one map, `SHELL_ROUTES`, and
+assigns migrating them to the shell capability as one edit. DEC-0211 gives
+every file under `web/src/screens/` to this component, so the edit is this
+component's, not CAP-002's (review v1 FINDING-13). It changes the three
+targets and nothing else in the file:
+
+| Link | Today | After |
+|------|-------|-------|
+| The download's start time in the as-of line (DEC-0083) | `/runs/:runId` | `/data/downloads/:id` |
+| *Open Data health* | `/runs` | `/data` |
+| The followed-stocks link in refusals | `/instruments` | `/data/followed` |
+
+Every Research link then points at the new paths directly, so none depends on
+the legacy redirects and none breaks when they are removed (AC-17, AC-18).
+CAP-002's routes and screens are otherwise untouched (AC-27).
 
 ### 2.2 Before and after
 
@@ -436,7 +459,7 @@ with the screen that now calls each.
 | AC-14 | Not found distinguished | Detail's *Not found* sentence and **Open Data health** | 2.3 |
 | AC-15 | `queued_behind` | Queued sentence on Coverage and Downloads | 2.3 |
 | AC-17 | Screens at `/data/*`, `/settings`; endpoints unchanged | Paths, links, preserved behaviour, relabelled tests | 2.1, 2.3, 2.6 |
-| AC-18 | Legacy redirects | Internal links all point at the new paths | 2.3 |
+| AC-18 | Legacy redirects | Internal links all point at the new paths, including the three Research targets in `SHELL_ROUTES` | 2.1, 2.3 |
 | AC-19 | Display vocabulary | Label deltas; vocabulary sweep test | 2.3, 7 |
 | AC-20 | One tier function | `StatusBadge` everywhere | 2.3 |
 | AC-24 | Every region's states | v5 tables through `StateRegion` | 2.5 |
