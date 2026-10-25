@@ -1,0 +1,40 @@
+# TDD evidence for CAP-002-E2-S2 - Factor engine build transaction: constants, set context, completion, failure and timeout.
+# One cycle: the package is a single spine (transaction, three statements, constants, line items) whose tests share fixtures.
+# Decisions applied: DEC-0111 (REPEATABLE READ), DEC-0112 (_STAGES seam), DEC-0113 (strict xfail), DEC-0114 (no price data), DEC-0121 (registration order).
+# Reviews: independent code-review and spec-drift subagents judged the staged diff three times. The first found BuildResult.set_id missing,
+# the second found line_items.py not verbatim from design 2.4 (labels, sentinel); both were fixed with tests and re-reviewed. The third approved.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019]
+    description: >
+      factorflow.classification package: constants.py, line_items.py (seven items, every key REQUIRES_INPUT),
+      engine.build with the _STAGES seam inside one REPEATABLE READ transaction, and set_context.sql,
+      complete_set.sql, fail_set.sql. Tests: TC-COMP-159, 166, 167, 090 (integration), TC-COMP-160 (isolation and
+      append-only over classification/), TC-COMP-059 (strict xfail), constants, line items and statement loading.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-1-engine.log
+    red_log_sha256: 07a455db55b84295b573a8fe4f1e58ff807692ae6435141e5a059190616a37d1
+    red_evidence: >
+      6 collection errors before factorflow.classification.engine, line_items and constants existed
+      (ImportError: cannot import name 'engine'); every new test module failed to import.
+    green_evidence: >
+      Full suite with -m "postgres or not postgres": 1412 passed, 1 xfailed (TC-COMP-059, strict);
+      ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c2b459cbf3bf67c258ca06f22ca124576cac70c7c0cec498140cd32b122f84c
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: f010922b0d39835c5e6e0d86b4bde62bc9d2c9b536514c32751e9bf03ae7d263
+      generated: 35
+      killed: 35
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

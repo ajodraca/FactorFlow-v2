@@ -1,0 +1,118 @@
+.................................x.........F
+=================================== FAILURES ===================================
+_____ test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set ______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=52245 user=test database=test_322a2d9989ad4cfe8fe46588bd096975) at 0x10b323560>
+context = BuildContext(set_id=UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), run_id=UUID('171686ea-90b7-4eab-9d4b-ac6e1c7e141b'),...cation_date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1,), retired_ids=())
+
+    def stage(conn: psycopg.Connection, context: engine.BuildContext) -> None:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
+                "VALUES (%s, 'value', 1, false)",
+                (set_id,),
+            )
+            cur.execute(
+                "INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, "
+                "value, as_of, known_on, detail) VALUES (%s, %s, 'value', 'book_to_price', "
+                "'present', 1, %s, %s, '{}')",
+                (set_id, instrument_id, date(2026, 9, 30), date(2026, 10, 1)),
+            )
+            cur.execute(
+                "INSERT INTO factor_classification (set_id, instrument_id, factor, status, "
+                "score, percentile) VALUES (%s, %s, 'value', 'classified', 1, 50)",
+                (set_id, instrument_id),
+            )
+>       raise error
+E       RuntimeError: injected failure
+
+tests/integration/test_engine_transaction.py:77: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=52245 user=test database=test_322a2d9989ad4cfe8fe46588bd096975) at 0x10b323560>
+building_set = (UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b323920>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10b323500>
+
+    def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        set_id, instrument_id = building_set
+        stage = write_rows_then_raise(set_id, instrument_id, RuntimeError("injected failure"))
+        monkeypatch.setattr(engine, "_STAGES", [stage])
+    
+        with caplog.at_level(logging.ERROR):
+>           result = engine.build(conn, set_id, 30)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_transaction.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=52245 user=test database=test_322a2d9989ad4cfe8fe46588bd096975) at 0x10b323560>
+set_id = UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), timeout_seconds = 30
+
+    def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> BuildResult:
+        """Build the set in one transaction; return its terminal state, never raising for a failure.
+    
+        A failure while recording the failure itself (the connection is lost) is not caught: the
+        scheduler's start-up reclaim records it (DEC-0067).
+        """
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        if conn.autocommit:
+            raise ValueError("build needs a connection with autocommit off")
+        if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+            raise ValueError("build needs a connection that is not inside a transaction")
+    
+        # statement_timeout = 0 disables the timeout, so round up to at least one millisecond.
+        timeout_ms = str(max(1, math.ceil(timeout_seconds * 1000)))
+        try:
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")  # DEC-0111
+            conn.execute("SELECT set_config('statement_timeout', %(ms)s, true)", {"ms": timeout_ms})
+            with conn.cursor() as cur:
+                context = _read_context(cur, set_id)
+            if context.latest_trading_day is None:
+                raise ValueError("no price data held for any active instrument")  # DEC-0114
+            for stage in _STAGES:
+                stage(conn, context)
+            with conn.cursor() as cur:
+                cur.execute(
+                    _COMPLETE_SET_SQL,
+                    {
+                        "set_id": set_id,
+                        "latest_trading_day": context.latest_trading_day,
+                        "active_instruments": len(context.active_ids),
+                    },
+                )
+                if cur.rowcount != 1:
+                    raise RuntimeError("classification set is no longer building")
+                cur.execute(_QUALIFIED_COUNTS_SQL, {"set_id": set_id})
+                qualified_counts = {factor: int(count) for factor, count in cur.fetchall()}
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            reason = _reason(exc)
+            log.error("classification build failed: %s", reason, extra={"set_id": str(set_id)})
+            with conn.cursor() as cur:
+                cur.execute(_FAIL_SET_SQL, {"set_id": set_id, "reason": reason})
+            conn.commit()
+>           return BuildResult(
+                set_id=set_id,
+                state="failed",
+                failure_reason=reason,
+    
+                qualified_counts={},
+            )
+E           TypeError: BuildResult.__init__() missing 1 required positional argument: 'active_instruments'
+
+src/factorflow/classification/engine.py:133: TypeError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: injected failure
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 42 passed, 1 xfailed in 2.08s

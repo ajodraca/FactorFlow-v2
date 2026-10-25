@@ -1,0 +1,34 @@
+.................................x.......F
+=================================== FAILURES ===================================
+_________ test_set_context_resolves_date_latest_trading_day_and_roster _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=52217 user=test database=test_dcfbcae170e6408ab07defdda15048f0) at 0x10b1a62a0>
+postgres_connection_string = 'postgresql://test:test@localhost:52217/test_dcfbcae170e6408ab07defdda15048f0'
+
+    def test_set_context_resolves_date_latest_trading_day_and_roster(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        a = add_instrument(conn, "AAA")
+        b = add_instrument(conn, "BBB")
+        c = add_instrument(conn, "CCC")
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, a, date(2026, 10, 1))
+        add_bar(conn, b, date(2026, 10, 2))
+        add_bar(conn, c, date(2026, 9, 1))
+        add_bar(conn, retired, date(2026, 10, 9))
+        run_id = add_run(conn)
+        set_id = add_building_set(conn, run_id, date(2026, 10, 3))
+    
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+            with other.cursor() as cur:
+                first = engine._read_context(cur, set_id)
+>               assert first.set_id == set_id
+E               AssertionError: assert UUID('b18002b6-9de5-436e-b7a3-2832f84268fd') == UUID('94a019b2-05a1-4025-af16-b75247920026')
+E                +  where UUID('b18002b6-9de5-436e-b7a3-2832f84268fd') = BuildContext(set_id=UUID('b18002b6-9de5-436e-b7a3-2832f84268fd'), run_id=UUID('b18002b6-9de5-436e-b7a3-2832f84268fd'),...date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1, 2, 3), retired_ids=(4,)).set_id
+
+tests/integration/test_engine_context.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 40 passed, 1 xfailed in 1.81s
