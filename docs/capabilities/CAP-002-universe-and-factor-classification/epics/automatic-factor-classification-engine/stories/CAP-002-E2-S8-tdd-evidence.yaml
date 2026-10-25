@@ -87,3 +87,36 @@ cycles:
         - id: src/factorflow/classification/sql/reclaim_interrupted.sql:1:off-by-one:1
           disposition: equivalent
           reason: the mutated digit sits inside the -- header comment, which Postgres discards
+
+  - id: cycle-3
+    tasks: [T007]
+    description: >
+      Review rework of IR-001. The TC-COMP-080 control (claim with at omitted) now asserts classification_date equals the
+      Chicago date of the set's own started_at, which defaults to the claim transaction's now(), instead of accepting a stamp
+      one day behind. It runs under three session time zones (UTC, Etc/GMT+4, Etc/GMT-14) so a CURRENT_DATE fallback is
+      killed whatever the hour. Production code is unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/red-cycle-3-default-yesterday.log
+    red_log_sha256: 6b4ec54f9830b603003904b7d905d3737a6ffd479d5a338fec57a3f45cb1c937
+    red_evidence: >
+      With the fallback in claim_set.sql mutated to CURRENT_TIMESTAMP - interval '1 day' (manual:r-c-default-yesterday),
+      the strengthened control fails in all three zones (3 failed); the log was taken with the mutation applied and
+      reverted afterwards.
+    green_evidence: tests/integration/test_scheduler_claim.py 12 passed against a real PostgreSQL 16 container after the change.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b6fe5031c1c8da07e206e956c63ed1091660eb2bf67419a90a50f66d0c927ee4
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/mutation-cycle-3-results.json
+      results_sha256: 8ac9c4e9e6047627adb6641978526900a5b70251ee7a4a84d1558d4c92a6e9cf
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
