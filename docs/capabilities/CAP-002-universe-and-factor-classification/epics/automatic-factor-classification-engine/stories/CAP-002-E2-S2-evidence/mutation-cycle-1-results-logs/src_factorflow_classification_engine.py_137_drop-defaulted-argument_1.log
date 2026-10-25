@@ -1,9 +1,9 @@
-.................................x.........F
+.....................................x.........F
 =================================== FAILURES ===================================
 _____ test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set ______
 
-conn = <psycopg.Connection [IDLE] (host=localhost port=52245 user=test database=test_322a2d9989ad4cfe8fe46588bd096975) at 0x10b323560>
-context = BuildContext(set_id=UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), run_id=UUID('171686ea-90b7-4eab-9d4b-ac6e1c7e141b'),...cation_date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1,), retired_ids=())
+conn = <psycopg.Connection [IDLE] (host=localhost port=61171 user=test database=test_4e6f1f0831f648ecb3219d46d9f33c92) at 0x10acab680>
+context = BuildContext(set_id=UUID('c47c1a53-3756-4ad0-8fa6-0ac0a035b1c9'), run_id=UUID('b701e040-0587-430c-abea-6b9f27e0f905'),...cation_date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1,), retired_ids=())
 
     def stage(conn: psycopg.Connection, context: engine.BuildContext) -> None:
         with conn.cursor() as cur:
@@ -26,34 +26,38 @@ context = BuildContext(set_id=UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), run_
 >       raise error
 E       RuntimeError: injected failure
 
-tests/integration/test_engine_transaction.py:77: RuntimeError
+tests/integration/test_engine_transaction.py:108: RuntimeError
 
 During handling of the above exception, another exception occurred:
 
-conn = <psycopg.Connection [IDLE] (host=localhost port=52245 user=test database=test_322a2d9989ad4cfe8fe46588bd096975) at 0x10b323560>
-building_set = (UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), 1)
-monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b323920>
-caplog = <_pytest.logging.LogCaptureFixture object at 0x10b323500>
+conn = <psycopg.Connection [IDLE] (host=localhost port=61171 user=test database=test_4e6f1f0831f648ecb3219d46d9f33c92) at 0x10acab680>
+building_set = (UUID('c47c1a53-3756-4ad0-8fa6-0ac0a035b1c9'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10acaa9c0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10acaac60>
+postgres_connection_string = 'postgresql://test:test@localhost:61171/test_4e6f1f0831f648ecb3219d46d9f33c92'
 
     def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
         conn: psycopg.Connection,
         building_set: tuple[UUID, int],
         monkeypatch: pytest.MonkeyPatch,
         caplog: pytest.LogCaptureFixture,
+        postgres_connection_string: str,
     ) -> None:
         set_id, instrument_id = building_set
-        stage = write_rows_then_raise(set_id, instrument_id, RuntimeError("injected failure"))
+        dsn = postgres_connection_string
+        injected = RuntimeError("injected failure")
+        stage = write_rows_then_raise(set_id, instrument_id, injected)
         monkeypatch.setattr(engine, "_STAGES", [stage])
     
         with caplog.at_level(logging.ERROR):
 >           result = engine.build(conn, set_id, 30)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/integration/test_engine_transaction.py:94: 
+tests/integration/test_engine_transaction.py:128: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-conn = <psycopg.Connection [IDLE] (host=localhost port=52245 user=test database=test_322a2d9989ad4cfe8fe46588bd096975) at 0x10b323560>
-set_id = UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), timeout_seconds = 30
+conn = <psycopg.Connection [IDLE] (host=localhost port=61171 user=test database=test_4e6f1f0831f648ecb3219d46d9f33c92) at 0x10acab680>
+set_id = UUID('c47c1a53-3756-4ad0-8fa6-0ac0a035b1c9'), timeout_seconds = 30
 
     def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> BuildResult:
         """Build the set in one transaction; return its terminal state, never raising for a failure.
@@ -96,7 +100,12 @@ set_id = UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), timeout_seconds = 30
         except Exception as exc:
             conn.rollback()
             reason = _reason(exc)
-            log.error("classification build failed: %s", reason, extra={"set_id": str(set_id)})
+            log.error(
+                "classification build failed: %s",
+                reason,
+                exc_info=True,  # the stack trace goes to the structured log only (SEC-ERR-001)
+                extra={"set_id": str(set_id)},
+            )
             with conn.cursor() as cur:
                 cur.execute(_FAIL_SET_SQL, {"set_id": set_id, "reason": reason})
             conn.commit()
@@ -109,10 +118,16 @@ set_id = UUID('7bf93048-878f-4052-b5d7-eacf575dc924'), timeout_seconds = 30
             )
 E           TypeError: BuildResult.__init__() missing 1 required positional argument: 'active_instruments'
 
-src/factorflow/classification/engine.py:133: TypeError
+src/factorflow/classification/engine.py:138: TypeError
 ------------------------------ Captured log call -------------------------------
 ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: injected failure
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-q3e05vbt/w1/src/factorflow/classification/engine.py", line 111, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-q3e05vbt/w1/tests/integration/test_engine_transaction.py", line 108, in stage
+    raise error
+RuntimeError: injected failure
 =========================== short test summary info ============================
 FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
 !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 failed, 42 passed, 1 xfailed in 2.08s
+1 failed, 46 passed, 1 xfailed in 2.29s

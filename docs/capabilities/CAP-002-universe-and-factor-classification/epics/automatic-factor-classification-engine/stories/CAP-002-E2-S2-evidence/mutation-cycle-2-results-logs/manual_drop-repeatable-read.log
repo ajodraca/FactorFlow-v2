@@ -1,0 +1,44 @@
+.....................................x..................F
+=================================== FAILURES ===================================
+____________________ test_inputs_are_read_from_one_snapshot ____________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63266 user=test database=test_c71beaabf2e54a2da993016dc4b87134) at 0x10884f800>
+building_set = (UUID('98321d18-e039-4c8a-8ba5-1086a3db5abc'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108859340>
+postgres_connection_string = 'postgresql://test:test@localhost:63266/test_c71beaabf2e54a2da993016dc4b87134'
+
+    def test_inputs_are_read_from_one_snapshot(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """DAC-E2-9, AC-19, DEC-0111: a bar committed mid-build is invisible to later stages."""
+        set_id, instrument_id = building_set
+        dsn = postgres_connection_string
+        seen: list[date] = []
+    
+        def read_latest(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            row = stage_conn.execute("SELECT max(session_date) FROM daily_bar").fetchone()
+            assert row is not None
+            seen.append(row[0])
+    
+        def commit_newer_bar(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            with psycopg.connect(dsn) as other:
+                add_bar(other, instrument_id, date(2026, 10, 3), close=11)
+    
+        monkeypatch.setattr(engine, "_STAGES", [read_latest, commit_newer_bar, read_latest])
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "complete"
+>       assert seen == [date(2026, 10, 2), date(2026, 10, 2)]
+E       assert [datetime.dat...(2026, 10, 3)] == [datetime.dat...(2026, 10, 2)]
+E         
+E         At index 1 diff: datetime.date(2026, 10, 3) != datetime.date(2026, 10, 2)
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:393: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_inputs_are_read_from_one_snapshot
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 55 passed, 1 xfailed in 3.01s

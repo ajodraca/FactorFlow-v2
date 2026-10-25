@@ -1,0 +1,43 @@
+.....................................x........F
+=================================== FAILURES ===================================
+________ test_set_context_without_price_data_has_no_latest_trading_day _________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=63439 user=test database=test_ce71a8b793b145c58af655c3fe08b6ec) at 0x108a3eb10>
+
+    def test_set_context_without_price_data_has_no_latest_trading_day(
+        conn: psycopg.Connection,
+    ) -> None:
+        """DAC-E2-S2-4: an active roster with no bar at all reads a NULL latest trading day."""
+        add_instrument(conn, "AAA")
+        set_id = add_building_set(conn, add_run(conn), date(2026, 10, 3))
+        with conn.cursor() as cur:
+>           context = engine._read_context(cur, set_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_context.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cur = <psycopg.Cursor [closed] [INTRANS] (host=localhost port=63439 user=test database=test_ce71a8b793b145c58af655c3fe08b6ec) at 0x1090bb7d0>
+set_id = UUID('3a48aba0-6d83-473b-93a7-81d593e9b7a0')
+
+    def _read_context(cur: psycopg.Cursor, set_id: UUID) -> BuildContext:
+        cur.execute(_SET_CONTEXT_SQL, {"set_id": set_id})
+        row = cur.fetchone()
+        if row is None:
+            raise LookupError(f"classification set {set_id} does not exist")
+        return BuildContext(
+            set_id=row[0],
+            run_id=row[1],
+            classification_date=row[2],
+            latest_trading_day=row[3],
+            active_ids=tuple(row[4]),
+>           retired_ids=tuple(row[5]),
+                        ^^^^^^^^^^^^^
+        )
+E       TypeError: 'NoneType' object is not iterable
+
+src/factorflow/classification/engine.py:79: TypeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_context.py::test_set_context_without_price_data_has_no_latest_trading_day
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 45 passed, 1 xfailed in 2.16s

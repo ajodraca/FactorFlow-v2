@@ -1,19 +1,37 @@
-.................................xF
+.....................................x.......................F
 =================================== FAILURES ===================================
-_____________________________ test_constant_values _____________________________
+_ test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0004-1] _
 
-    def test_constant_values() -> None:
-        assert constants.MIN_PEER_SET_SIZE == 30
-        assert constants.FUNDAMENTALS_STALE_AFTER_MONTHS == 6
-        assert constants.MOMENTUM_LAG_MONTHS == 1
->       assert constants.MOMENTUM_WINDOWS_MONTHS == (3, 6, 12)
-E       assert (3, 7, 12) == (3, 6, 12)
+building_set = (UUID('ae9ad2e6-5b2f-4ad6-b271-acf553169390'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108b60bf0>
+postgres_connection_string = 'postgresql://test:test@localhost:61016/test_41a7a87893fc41cdbe48b78bf86e64a2'
+seconds = 0.0004, sent = '1'
+
+    @pytest.mark.parametrize(("seconds", "sent"), [(0.0004, "1"), (0.0015, "2"), (30, "30000")])
+    def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        seconds: float,
+        sent: str,
+    ) -> None:
+        """AC-11 (IR-006): zero would disable statement_timeout, so 0.0004 s must send one ms.
+    
+        The parameter is recorded as sent: a 1 ms timeout can cancel any statement that observes
+        it, so reading the setting back would depend on the host's speed.
+        """
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+        with RecordingConnection.connect(postgres_connection_string) as recording:
+            engine.build(recording, set_id, seconds)
+>       assert recording.timeouts == [{"ms": sent}]
+E       AssertionError: assert [{'ms': '2'}] == [{'ms': '1'}]
 E         
-E         At index 1 diff: 7 != 6
+E         At index 0 diff: {'ms': '2'} != {'ms': '1'}
 E         Use -v to get more diff
 
-tests/unit/test_classification_constants.py:13: AssertionError
+tests/integration/test_engine_transaction.py:436: AssertionError
 =========================== short test summary info ============================
-FAILED tests/unit/test_classification_constants.py::test_constant_values - as...
+FAILED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0004-1]
 !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 failed, 33 passed, 1 xfailed in 0.14s
+1 failed, 60 passed, 1 xfailed in 3.55s

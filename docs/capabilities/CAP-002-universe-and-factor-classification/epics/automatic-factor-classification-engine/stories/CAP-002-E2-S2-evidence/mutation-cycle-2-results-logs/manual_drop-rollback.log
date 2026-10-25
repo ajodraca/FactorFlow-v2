@@ -1,0 +1,53 @@
+.....................................x.........F
+=================================== FAILURES ===================================
+_____ test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set ______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=63226 user=test database=test_3330e58694434d748a1848c100f50efd) at 0x108c1ab10>
+building_set = (UUID('9394e2ac-4c0e-4877-ae17-ce74a69b9ca4'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108c23020>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x108c23590>
+postgres_connection_string = 'postgresql://test:test@localhost:63226/test_3330e58694434d748a1848c100f50efd'
+
+    def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        postgres_connection_string: str,
+    ) -> None:
+        set_id, instrument_id = building_set
+        dsn = postgres_connection_string
+        injected = RuntimeError("injected failure")
+        stage = write_rows_then_raise(set_id, instrument_id, injected)
+        monkeypatch.setattr(engine, "_STAGES", [stage])
+    
+        with caplog.at_level(logging.ERROR):
+            result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "failed"
+>       assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+E       AssertionError: assert {'classificat...ification': 1} == {'classificat...ification': 0}
+E         
+E         Differing items:
+E         {'factor_classification': 1} != {'factor_classification': 0}
+E         {'factor_input': 1} != {'factor_input': 0}
+E         {'classification_set_factor': 1} != {'classification_set_factor': 0}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:131: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: injected failure
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w1/src/factorflow/classification/engine.py", line 111, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w1/tests/integration/test_engine_transaction.py", line 108, in stage
+    raise error
+RuntimeError: injected failure
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 46 passed, 1 xfailed in 2.16s

@@ -1,11 +1,11 @@
-.................................x..........F
+.....................................x..........F
 =================================== FAILURES ===================================
 _____ test_completing_an_already_failed_set_updates_no_row_and_rolls_back ______
 
-conn = <psycopg.Connection [IDLE] (host=localhost port=52242 user=test database=test_e75ac96919864da98d727e5cdf78374c) at 0x1095d9250>
-building_set = (UUID('a9e15003-6823-4498-80ca-93590f019cab'), 1)
-monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1095d9280>
-postgres_connection_string = 'postgresql://test:test@localhost:52242/test_e75ac96919864da98d727e5cdf78374c'
+conn = <psycopg.Connection [IDLE] (host=localhost port=61123 user=test database=test_716ecae568434709a06ea1820e410c3d) at 0x108cfb5f0>
+building_set = (UUID('24c24d4b-b690-47f8-9973-06986ba415d0'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108daf320>
+postgres_connection_string = 'postgresql://test:test@localhost:61123/test_716ecae568434709a06ea1820e410c3d'
 
     def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
         conn: psycopg.Connection,
@@ -22,6 +22,8 @@ postgres_connection_string = 'postgresql://test:test@localhost:52242/test_e75ac9
                 "failure_reason = 'other writer' WHERE set_id = %s",
                 (set_id,),
             )
+        other_ended_at = committed(postgres_connection_string, set_id)[0]["ended_at"]
+        assert other_ended_at is not None
         result = engine.build(conn, set_id, 30)
     
 >       assert result.state == "failed"
@@ -30,8 +32,8 @@ E
 E         - failed
 E         + complete
 
-tests/integration/test_engine_transaction.py:135: AssertionError
+tests/integration/test_engine_transaction.py:181: AssertionError
 =========================== short test summary info ============================
 FAILED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back
 !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 failed, 43 passed, 1 xfailed in 2.13s
+1 failed, 47 passed, 1 xfailed in 2.52s

@@ -1,19 +1,99 @@
-.................................xF
+.....................................x.............F
 =================================== FAILURES ===================================
-_____________________________ test_constant_values _____________________________
+________________ test_success_with_no_stages_completes_the_set _________________
 
-    def test_constant_values() -> None:
-        assert constants.MIN_PEER_SET_SIZE == 30
-        assert constants.FUNDAMENTALS_STALE_AFTER_MONTHS == 6
-        assert constants.MOMENTUM_LAG_MONTHS == 1
->       assert constants.MOMENTUM_WINDOWS_MONTHS == (3, 6, 12)
-E       assert (3, 7, 12) == (3, 6, 12)
-E         
-E         At index 1 diff: 7 != 6
-E         Use -v to get more diff
+conn = <psycopg.Connection [IDLE] (host=localhost port=61217 user=test database=test_34053f57077e4e20836591046d42771a) at 0x10aae3620>
+building_set = (UUID('68d4a52a-8294-4e91-ab0b-5cb8a4c334b8'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10aae3740>
+postgres_connection_string = 'postgresql://test:test@localhost:61217/test_34053f57077e4e20836591046d42771a'
 
-tests/unit/test_classification_constants.py:13: AssertionError
+    def test_success_with_no_stages_completes_the_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """AC-20: a build that raises nothing leaves a complete, sized set."""
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+>       result = engine.build(conn, set_id, 30)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_transaction.py:263: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61217 user=test database=test_34053f57077e4e20836591046d42771a) at 0x10aae3620>
+set_id = UUID('68d4a52a-8294-4e91-ab0b-5cb8a4c334b8'), timeout_seconds = 30
+
+    def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> BuildResult:
+        """Build the set in one transaction; return its terminal state, never raising for a failure.
+    
+        A failure while recording the failure itself (the connection is lost) is not caught: the
+        scheduler's start-up reclaim records it (DEC-0067).
+        """
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        if conn.autocommit:
+            raise ValueError("build needs a connection with autocommit off")
+        if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+            raise ValueError("build needs a connection that is not inside a transaction")
+    
+        # statement_timeout = 0 disables the timeout, so round up to at least one millisecond.
+        timeout_ms = str(max(1, math.ceil(timeout_seconds * 1000)))
+        try:
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")  # DEC-0111
+            conn.execute("SELECT set_config('statement_timeout', %(ms)s, true)", {"ms": timeout_ms})
+            with conn.cursor() as cur:
+                context = _read_context(cur, set_id)
+            if context.latest_trading_day is None:
+                raise ValueError("no price data held for any active instrument")  # DEC-0114
+            for stage in _STAGES:
+                stage(conn, context)
+            with conn.cursor() as cur:
+                cur.execute(
+                    _COMPLETE_SET_SQL,
+                    {
+                        "set_id": set_id,
+                        "latest_trading_day": context.latest_trading_day,
+                        "active_instruments": len(context.active_ids),
+                    },
+                )
+                if cur.rowcount != 1:
+                    raise RuntimeError("classification set is no longer building")
+                cur.execute(_QUALIFIED_COUNTS_SQL, {"set_id": set_id})
+                qualified_counts = {factor: int(count) for factor, count in cur.fetchall()}
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            reason = _reason(exc)
+            log.error(
+                "classification build failed: %s",
+                reason,
+                exc_info=True,  # the stack trace goes to the structured log only (SEC-ERR-001)
+                extra={"set_id": str(set_id)},
+            )
+            with conn.cursor() as cur:
+                cur.execute(_FAIL_SET_SQL, {"set_id": set_id, "reason": reason})
+            conn.commit()
+            return BuildResult(
+                set_id=set_id,
+                state="failed",
+                failure_reason=reason,
+                active_instruments=0,
+                qualified_counts={},
+            )
+>       return BuildResult(
+            set_id=set_id,
+            state="complete",
+    
+            active_instruments=len(context.active_ids),
+            qualified_counts=qualified_counts,
+        )
+E       TypeError: BuildResult.__init__() missing 1 required positional argument: 'failure_reason'
+
+src/factorflow/classification/engine.py:145: TypeError
 =========================== short test summary info ============================
-FAILED tests/unit/test_classification_constants.py::test_constant_values - as...
+FAILED tests/integration/test_engine_transaction.py::test_success_with_no_stages_completes_the_set
 !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 failed, 33 passed, 1 xfailed in 0.13s
+1 failed, 50 passed, 1 xfailed in 2.46s

@@ -1,0 +1,69 @@
+.....................................x.........F
+=================================== FAILURES ===================================
+_____ test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set ______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=63062 user=test database=test_5611dd1403944f5c80770922e83c015e) at 0x108e33440>
+building_set = (UUID('83ee7dde-ee85-4818-acf9-ae1864949015'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e3b830>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x108e3b7d0>
+postgres_connection_string = 'postgresql://test:test@localhost:63062/test_5611dd1403944f5c80770922e83c015e'
+
+    def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        postgres_connection_string: str,
+    ) -> None:
+        set_id, instrument_id = building_set
+        dsn = postgres_connection_string
+        injected = RuntimeError("injected failure")
+        stage = write_rows_then_raise(set_id, instrument_id, injected)
+        monkeypatch.setattr(engine, "_STAGES", [stage])
+    
+        with caplog.at_level(logging.ERROR):
+            result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "failed"
+        assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+        assert committed(dsn, set_id)[1] == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+        row, _ = committed(dsn, set_id)  # IR-001: the failed set is durable, not session-local
+        assert row["state"] == "failed"
+        assert row["ended_at"] is not None
+        reason = str(row["failure_reason"])
+        assert reason.startswith("RuntimeError")
+        assert "injected failure" in reason
+        assert "Traceback" not in reason  # SEC-ERR-001
+        assert result.failure_reason == reason
+        assert result.set_id == set_id
+        records = [
+            r
+            for r in caplog.records
+            if r.levelno == logging.ERROR and getattr(r, "set_id", None) == str(set_id)
+        ]
+        assert records
+        # IR-008: the stack trace goes to the structured log only (SEC-ERR-001, OPS-ERR-001)
+        # RedactingFilter, once installed by another test, moves exc_info into exc_text
+        record = records[0]
+        if record.exc_info is not None:
+            assert record.exc_info[1] is injected
+        else:
+>           assert record.exc_text is not None
+E           assert None is not None
+E            +  where None = <LogRecord: factorflow.classification.engine, 40, /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w0/src/factorflow/classification/engine.py, 129, "classification build failed: %s">.exc_text
+
+tests/integration/test_engine_transaction.py:162: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: injected failure
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 46 passed, 1 xfailed in 2.39s

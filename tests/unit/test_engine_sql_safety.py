@@ -12,6 +12,10 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.test_research_sql_is_append_only import (
+    prohibited_research_mutations,
+    unguarded_classification_set_updates,
+)
 from tests.unit.test_sql_is_append_only import prohibited_observation_mutations
 
 PACKAGE = Path(__file__).resolve().parents[2] / "src" / "factorflow" / "classification"
@@ -30,13 +34,6 @@ _ENGINE_SQL_FILES = (
     "fail_set.sql",
 )
 _GUARDED_FILES = ("complete_set.sql", "fail_set.sql")
-
-_CLASSIFICATION_MUTATION = re.compile(
-    r"\b(?:UPDATE|DELETE\s+FROM)\s+(?:classification_set_factor|factor_input|"
-    r"factor_classification|universe_event)\b",
-    re.IGNORECASE,
-)
-_UPDATE_SET = re.compile(r"UPDATE\s+classification_set\b(?!_)[^;]*", re.IGNORECASE)
 
 
 def ingestion_imports(source: str) -> list[str]:
@@ -99,16 +96,13 @@ def format_executes(source: str) -> list[str]:
 
 
 def history_mutations(text: str) -> list[str]:
-    return [
-        *prohibited_observation_mutations(text),
-        *(m.group(0) for m in _CLASSIFICATION_MUTATION.finditer(text)),
-    ]
+    """Observation- and research-table mutations, by the same patterns CAP-002-E2-S1's
+    append-only guard uses, so qualified names, ONLY and upserts are caught here too."""
+    return [*prohibited_observation_mutations(text), *prohibited_research_mutations(text)]
 
 
 def unguarded_set_updates(text: str) -> list[str]:
-    return [
-        m.group(0) for m in _UPDATE_SET.finditer(text) if "state = 'building'" not in m.group(0)
-    ]
+    return unguarded_classification_set_updates(text)
 
 
 def engine_sql_violations(text: str) -> list[str]:
@@ -169,6 +163,10 @@ def test_format_execute_is_detected() -> None:
         "UPDATE factor_classification SET score = 1",
         "UPDATE universe_event SET kind = 'x'",
         "DELETE FROM daily_bar",
+        "UPDATE public.factor_input SET value = 1",
+        'UPDATE "factor_input" SET value = 1',
+        "UPDATE ONLY factor_input SET value = 1",
+        "INSERT INTO factor_input (set_id) VALUES (1) ON CONFLICT (set_id) DO UPDATE SET value = 1",
     ],
 )
 def test_history_mutation_is_detected(text: str) -> None:
@@ -177,6 +175,13 @@ def test_history_mutation_is_detected(text: str) -> None:
 
 def test_unguarded_set_update_is_detected_and_guarded_ones_allowed() -> None:
     assert unguarded_set_updates("UPDATE classification_set SET state = 'complete'")
+    followed_by_a_guarded_one = (
+        "UPDATE classification_set SET state = 'complete';\n"
+        "UPDATE classification_set SET state = 'failed' WHERE state = 'building'"
+    )
+    assert unguarded_set_updates(followed_by_a_guarded_one) == [
+        "UPDATE classification_set SET state = 'complete'"
+    ]
     guarded = (
         "UPDATE classification_set SET state = 'complete', ended_at = now() "
         "WHERE set_id = %(set_id)s AND state = 'building'"

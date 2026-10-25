@@ -1,0 +1,39 @@
+.....................................x................F
+=================================== FAILURES ===================================
+_________ test_unknown_set_is_reported_as_missing_not_as_a_type_error __________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63270 user=test database=test_8abb7e6efc8143c0a31e1900ea90f39b) at 0x1086e3e90>
+building_set = (UUID('cfcef7df-8269-4c51-aab4-c7f4fd016002'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108bcc740>
+
+    def test_unknown_set_is_reported_as_missing_not_as_a_type_error(
+        conn: psycopg.Connection, building_set: tuple[UUID, int], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S2-4 (IR-005): a set id that does not exist fails with a stated cause."""
+        missing = uuid4()
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, missing, 30)
+    
+        assert result.state == "failed"
+>       assert result.failure_reason == f"LookupError: classification set {missing} does not exist"
+E       assert "TypeError: '...subscriptable" == 'LookupError:...oes not exist'
+E         
+E         - LookupError: classification set f1e83def-4462-4280-915f-adef212b590f does not exist
+E         + TypeError: 'NoneType' object is not subscriptable
+
+tests/integration/test_engine_transaction.py:350: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: TypeError: 'NoneType' object is not subscriptable
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w1/src/factorflow/classification/engine.py", line 107, in build
+    context = _read_context(cur, set_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w1/src/factorflow/classification/engine.py", line 74, in _read_context
+    set_id=row[0],
+           ~~~^^^
+TypeError: 'NoneType' object is not subscriptable
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_unknown_set_is_reported_as_missing_not_as_a_type_error
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 53 passed, 1 xfailed in 2.78s

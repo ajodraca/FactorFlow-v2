@@ -1,0 +1,11 @@
+# cycle-2 RED, observed 2026-10-25. Command (engine.py with the exc_info=True line removed, tests as committed in the cycle):
+#   uv run --all-extras --offline python -B -m pytest -p no:cacheprovider -q -m "postgres or not postgres" tests/integration/test_engine_transaction.py
+F....................                                                    [100%]
+FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+>       assert records[0].exc_info is not None
+E       assert None is not None
+E        +  where None = <LogRecord: factorflow.classification.engine, 40, .../src/factorflow/classification/engine.py, 129, "classification build failed: %s">.exc_info
+1 failed, 20 passed in 3.59s
+# IR-008 is the one finding that needed a production change. The other findings (IR-001 to IR-006, IR-009) are test
+# strength: their RED is the survival of the reviewer's 8 mutants against the cycle-1 tests (implementation review v1,
+# "Independent Validation"), and mutation-cycle-2-results.json shows each killed by the cycle-2 tests.

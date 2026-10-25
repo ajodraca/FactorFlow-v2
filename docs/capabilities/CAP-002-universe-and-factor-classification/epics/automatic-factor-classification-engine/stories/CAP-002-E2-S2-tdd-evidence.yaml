@@ -1,6 +1,7 @@
 # TDD evidence for CAP-002-E2-S2 - Factor engine build transaction: constants, set context, completion, failure and timeout.
 # One cycle: the package is a single spine (transaction, three statements, constants, line items) whose tests share fixtures.
 # Decisions applied: DEC-0111 (REPEATABLE READ), DEC-0112 (_STAGES seam), DEC-0113 (strict xfail), DEC-0114 (no price data), DEC-0121 (registration order).
+# Rework: cycle-2 answers implementation review v1 (IR-001 to IR-006, IR-008, IR-009, IR-010); IR-007 is the mutation evidence regenerated with python -B (no stale bytecode) and only referenced logs kept.
 # Reviews: independent code-review and spec-drift subagents judged the staged diff three times. The first found BuildResult.set_id missing,
 # the second found line_items.py not verbatim from design 2.4 (labels, sentinel); both were fixed with tests and re-reviewed. The third approved.
 
@@ -16,7 +17,10 @@ cycles:
     red_log_sha256: 07a455db55b84295b573a8fe4f1e58ff807692ae6435141e5a059190616a37d1
     red_evidence: >
       6 collection errors before factorflow.classification.engine, line_items and constants existed
-      (ImportError: cannot import name 'engine'); every new test module failed to import.
+      (ImportError: cannot import name 'engine'); the five new test modules that import factorflow.classification
+      failed to import. tests/unit/test_engine_sql_safety.py imports nothing from the package and is not in the RED
+      log: it passed from the start, and its ability to fail is shown by its own self-tests (TC-COMP-160). Review
+      IR-007 corrected an earlier claim that every new module failed to import.
     green_evidence: >
       Full suite with -m "postgres or not postgres": 1412 passed, 1 xfailed (TC-COMP-059, strict);
       ruff check, ruff format --check and mypy src clean.
@@ -30,9 +34,52 @@ cycles:
     mutation:
       runner: scripts/mutation-run.py
       results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-1-results.json
-      results_sha256: f010922b0d39835c5e6e0d86b4bde62bc9d2c9b536514c32751e9bf03ae7d263
+      results_sha256: a705a0bf0b9803d32a195ec464609af05ee07559327e63f3dafc238cd610a6ef
       generated: 35
       killed: 35
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T006, T007, T008, T009, T010, T017]
+    description: >
+      Review rework for implementation review v1. Tests: the transaction tests read the terminal set state and row
+      counts from a second connection (IR-001); the timeout is local to the build transaction (IR-002); qualified_counts
+      come from this set's classification_set_factor rows only (IR-003); stages run in list order (IR-004); an unknown
+      set id and an empty active roster fail with their stated reasons (IR-005); the millisecond rounding is observed
+      from the set_config parameter sent, not by reading the setting back under a 1 ms timeout (IR-006); the other
+      writer's ended_at, the elapsed-time bound and the per-test AC traces T007 to T009 and T019 ask for (IR-009); the
+      engine SQL guard reuses CAP-002-E2-S1's patterns for qualified names, ONLY, upserts and statement bounds (IR-010).
+      Production: the failure log carries the exception (exc_info=True) so the stack trace reaches the structured log
+      while failure_reason stays one line (IR-008). IR-007: cycle-1's mutation evidence is regenerated with python -B and
+      the 16 unreferenced logs are removed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-2-rework.log
+    red_log_sha256: 50b708fa2c325ac359c46bd27294871cd86d5a1cbae54dcd6e2e97d5dad9cfec
+    red_evidence: >
+      With the exc_info line removed from engine.py, test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+      failed on the exc_info assertion (1 failed, 20 passed). The other findings are test strength: their RED is the
+      survival of the reviewer's 8 mutants against the cycle-1 tests (review v1), and each of those mutants is killed by
+      the cycle-2 tests (mutation-cycle-2-results.json).
+    green_evidence: >
+      tests/integration/test_engine_transaction.py, tests/unit/test_engine_sql_safety.py and
+      tests/unit/test_research_sql_is_append_only.py 74 passed; the full suite is run before hand-off (see the
+      completion summary); ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c71bb43fc36cc5a6d2120afa25cfea7903b34908354a289fe88980aebfb0db05
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 453df6249f5dfa746d6d06186cf717fbb019ae338a3f8109c8eea90dd4888eb0
+      generated: 23
+      killed: 23
       survived: 0
       stillborn: 0
       timeout: 0

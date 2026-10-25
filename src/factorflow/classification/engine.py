@@ -126,7 +126,12 @@ def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> Bui
     except Exception as exc:
         conn.rollback()
         reason = _reason(exc)
-        log.error("classification build failed: %s", reason, extra={"set_id": str(set_id)})
+        log.error(
+            "classification build failed: %s",
+            reason,
+            exc_info=True,  # the stack trace goes to the structured log only (SEC-ERR-001)
+            extra={"set_id": str(set_id)},
+        )
         with conn.cursor() as cur:
             cur.execute(_FAIL_SET_SQL, {"set_id": set_id, "reason": reason})
         conn.commit()

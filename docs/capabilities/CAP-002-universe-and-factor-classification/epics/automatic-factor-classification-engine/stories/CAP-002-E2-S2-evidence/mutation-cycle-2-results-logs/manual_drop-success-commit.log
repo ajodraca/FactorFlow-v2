@@ -1,0 +1,38 @@
+.....................................x.............F
+=================================== FAILURES ===================================
+________________ test_success_with_no_stages_completes_the_set _________________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=63093 user=test database=test_f32d85b11fd3470393ca5b902c6b70c7) at 0x10a672ed0>
+building_set = (UUID('e210557a-b4bb-4edd-9d86-c83225c9c9d6'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a672570>
+postgres_connection_string = 'postgresql://test:test@localhost:63093/test_f32d85b11fd3470393ca5b902c6b70c7'
+
+    def test_success_with_no_stages_completes_the_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """AC-20: a build that raises nothing leaves a complete, sized set."""
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.set_id == set_id
+        assert result.state == "complete"
+        assert result.failure_reason is None
+        assert result.active_instruments == 1
+        assert result.qualified_counts == {}
+        row, _ = committed(postgres_connection_string, set_id)  # IR-001: durable for other readers
+>       assert row["state"] == "complete"
+E       AssertionError: assert 'building' == 'complete'
+E         
+E         - complete
+E         + building
+
+tests/integration/test_engine_transaction.py:277: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_success_with_no_stages_completes_the_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 50 passed, 1 xfailed in 2.77s

@@ -1,9 +1,9 @@
-.................................x.......F
+.....................................x.......F
 =================================== FAILURES ===================================
 _________ test_set_context_resolves_date_latest_trading_day_and_roster _________
 
-conn = <psycopg.Connection [IDLE] (host=localhost port=52217 user=test database=test_dcfbcae170e6408ab07defdda15048f0) at 0x10b1a62a0>
-postgres_connection_string = 'postgresql://test:test@localhost:52217/test_dcfbcae170e6408ab07defdda15048f0'
+conn = <psycopg.Connection [IDLE] (host=localhost port=60877 user=test database=test_a4abe90d33114214a230f08709fe8b06) at 0x10acb0920>
+postgres_connection_string = 'postgresql://test:test@localhost:60877/test_a4abe90d33114214a230f08709fe8b06'
 
     def test_set_context_resolves_date_latest_trading_day_and_roster(
         conn: psycopg.Connection, postgres_connection_string: str
@@ -24,11 +24,11 @@ postgres_connection_string = 'postgresql://test:test@localhost:52217/test_dcfbca
             with other.cursor() as cur:
                 first = engine._read_context(cur, set_id)
 >               assert first.set_id == set_id
-E               AssertionError: assert UUID('b18002b6-9de5-436e-b7a3-2832f84268fd') == UUID('94a019b2-05a1-4025-af16-b75247920026')
-E                +  where UUID('b18002b6-9de5-436e-b7a3-2832f84268fd') = BuildContext(set_id=UUID('b18002b6-9de5-436e-b7a3-2832f84268fd'), run_id=UUID('b18002b6-9de5-436e-b7a3-2832f84268fd'),...date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1, 2, 3), retired_ids=(4,)).set_id
+E               AssertionError: assert UUID('9c4d8e48-cbfa-45a0-9925-03fcce137f6d') == UUID('037954a7-da82-4902-813e-37184629c7fa')
+E                +  where UUID('9c4d8e48-cbfa-45a0-9925-03fcce137f6d') = BuildContext(set_id=UUID('9c4d8e48-cbfa-45a0-9925-03fcce137f6d'), run_id=UUID('9c4d8e48-cbfa-45a0-9925-03fcce137f6d'),...date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1, 2, 3), retired_ids=(4,)).set_id
 
 tests/integration/test_engine_context.py:52: AssertionError
 =========================== short test summary info ============================
 FAILED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
 !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 failed, 40 passed, 1 xfailed in 1.81s
+1 failed, 44 passed, 1 xfailed in 2.25s
