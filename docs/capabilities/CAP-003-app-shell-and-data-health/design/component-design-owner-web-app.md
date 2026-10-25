@@ -31,7 +31,7 @@ ai_provenance:
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "5"
+      version: "6"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---

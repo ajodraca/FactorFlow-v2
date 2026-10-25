@@ -24,7 +24,7 @@ ai_provenance:
     - id: product-charter
       version: "2, approved"
     - id: tech-stack
-      version: "5, approved 2026-10-13"
+      version: "6, draft 2026-10-25"
     - id: STD-UI
       version: "6, approved"
     - id: PRODUCT-UX
@@ -561,7 +561,7 @@ component changes.
 
 | Component repo | Language | Framework | Store | Key libraries | Source |
 |----------------|----------|-----------|-------|---------------|--------|
-| FactorFlow-v2 (`owner-shell`, `command-palette`, `ui-components`, `setup-ui`, `home-ui`, `data-health-ui`, and the changes to `owner-web-app`) | TypeScript 5.x | React 18 with Vite; `react-router-dom` 6 (routes, `NavLink` `aria-current`, `Navigate replace`) | none (no browser storage; DEC-0202) | `tailwindcss` with `autoprefixer` bound to `design-system/theme.css`; **`shadcn/ui` on Radix primitives** vendored into `web/src/components/ui/`, importing `@radix-ui/react-*` and, PROVISIONALLY pending the owner's `$tech-stack` confirmation, `cmdk`, `sonner`, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` (DEC-0205); tests with `vitest`, `@testing-library/react`, `@playwright/test`; `biome` | tech-stack |
+| FactorFlow-v2 (`owner-shell`, `command-palette`, `ui-components`, `setup-ui`, `home-ui`, `data-health-ui`, and the changes to `owner-web-app`) | TypeScript 5.x | React 18 with Vite; `react-router-dom` 6 (routes, `NavLink` `aria-current`, `Navigate replace`) | none (no browser storage; DEC-0202) | `tailwindcss` with `autoprefixer` bound to `design-system/theme.css`; **`shadcn/ui` on Radix primitives** vendored into `web/src/components/ui/`, importing `@radix-ui/react-*` and, confirmed by the owner on 2026-10-25 in `tech-stack.md` v6 (OQ-TS-10; capability OQ-4), `cmdk`, `sonner`, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` (DEC-0205) and `@tanstack/react-table`, `react-hook-form`, `zod`, `@hookform/resolvers`, `@radix-ui/react-label` (DEC-0215); tests with `vitest`, `@testing-library/react`, `@playwright/test`; `biome` | tech-stack |
 | FactorFlow-v2 (`data-health-reader`, `data-health-api`, and the one line in `ingestion-api`) | Python 3.12+ | FastAPI on uvicorn, Pydantic response models | PostgreSQL 16, read only; no ORM, no migration | `psycopg` 3 through the delivered `psycopg_pool`; `pytest`, `testcontainers[postgres]`; `ruff`, `mypy` | tech-stack |
 
 No third-party repository is involved, and no provider is read (capability
@@ -713,24 +713,31 @@ not in M1.
 1. **Do downloads get a short visible number?** Capability OQ-1, carried from
    the other design's DEC-0083. This design names a download by its start time
    in America/Chicago in setup's progress line, Recent downloads and the
-   download detail title. `[REQUIRES INPUT: whether downloads gain a short
-   number, and its format]`. *Owner: capability owner. Blocks: copy in the UX
+   download detail title. *Owner: capability owner. Blocks: copy in the UX
    design; no interface shape here changes unless a stored number is added.*
+   **Answered 2026-10-25 by the owner: no.** The start time in America/Chicago
+   is the permanent naming; no interface shape changes.
 2. **Which lands first, this shell or the research screens?** Capability OQ-2.
    DEC-0204 makes either order work: the research screens register into
    `owner-shell`'s destination list if this lands first, and this design
    replaces their interim rail entry if it lands second. *Owner: capability
-   owner (sequencing). Blocks: nothing in this design.*
+   owner (sequencing). Blocks: nothing in this design.* **Answered 2026-10-25
+   by the owner: CAP-002 lands first**, so this design replaces its interim
+   rail entry (AC-27).
 3. **Is uploading a CSV an M1 way to name stocks?** Capability OQ-3. This
    design builds *Paste a list* and *Add later* only, because the capability
    scopes step 3 to a pasted list; S02 §3's *Upload a CSV* is a departure the UX
-   design records. `[REQUIRES INPUT: whether CSV upload is in M1]`. *Owner:
+   design records. *Owner:
    capability owner. Blocks: one radio option and a file control; a yes adds a
-   criterion and a design-system intake.*
+   criterion and a design-system intake.* **Answered 2026-10-25 by the owner:
+   no.** Setup builds *Paste a list* and *Add later* only.
 4. **The npm packages the vendored components import.** Capability OQ-4.
    DEC-0205 specifies them provisionally; only the owner amends
    `tech-stack.md`. *Owner: capability owner, via `$tech-stack`. Blocks: the
    implementing stories that add the packages, not this design.*
+   **Answered 2026-10-25 by the owner: all ten packages confirmed** in
+   `tech-stack.md` v6 (OQ-TS-10); Section 4.3 lists them, including the four
+   DEC-0215 added. The implementing stories are no longer gated.
 5. **The other design's consumer name.** Its Section 4.2 names the consumer of
    `GET /api/classifications/summary` as an unpublished shell component. This
    design publishes it as `owner-shell`, which shares the read with `home-ui`
@@ -753,7 +760,9 @@ not in M1.
    read as this capability's own work, not an amendment to the delivered
    capability. *Owner: capability owner, to confirm that reading over the
    list design decomposition enumerates. Blocks: design decomposition's
-   ownership of the edits.*
+   ownership of the edits.* **Confirmed 2026-10-25 by the owner** over the
+   DEC-0211 list: the takeover is this capability's own work and CAP-001's
+   designs are not reopened.
 9. **A trading calendar.** Home's market state is only partly determinable
    without one (DEC-0206), and scheduled downloads each trading day (M2,
    blueprint D-2) will need one. *Owner: capability owner, at the M2 design.

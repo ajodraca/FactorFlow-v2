@@ -300,7 +300,7 @@ specifications' and bind the layout, not the theme. The light theme is assumed
 ### 0.8 Departures from approved sources
 
 Blueprint §0 requires every departure from a screen specification to be
-listed with its reason. This design departs in four places, three of them
+listed with its reason. This design departs in five places, four of them
 inherited from the brief and one of its own against the brief, and in none of
 them redesigns what the source settles.
 
@@ -308,7 +308,8 @@ them redesigns what the source settles.
 |-----------|---------------------|-----------------------|--------|
 | Home's `h1` date | S01 §3 and §8: *Thursday, 15 October* | *Thursday, 2026-10-15* | STD-UI-5 requires ISO-8601 and never a locale format, and STD-UI §1.1 makes the standard win; the weekday word is kept (DEC-0209, `contradiction`, decided on the standard's own precedence) |
 | The M1 verdict sentence | S09 §3: *strategies skip them until they're fixed* | *their scores show as Incomplete until they're fixed* | No strategy exists in M1 and STD-UI-2 forbids words describing behaviour the product does not have; the wording returns with M2 (DEC-0210, PROVISIONAL; DEC-0201) |
-| Setup step 3's source choice | S02 §3: *Paste a list* / *Upload a CSV* / *Add later* | two `radio-group` `cards` options, *Paste a list* and *Add later* | The capability scopes step 3 to a pasted list (capability §2, AC-5); CSV upload is capability OQ-3 and would be a `file-input` gap through `design-system/intake.md` (S02 §11) |
+| Setup step 3's source choice | S02 §3: *Paste a list* / *Upload a CSV* / *Add later* | two `radio-group` `cards` options, *Paste a list* and *Add later* | The capability scopes step 3 to a pasted list (capability §2, AC-5); CSV upload was capability OQ-3, answered no by the owner on 2026-10-25, and would have been a `file-input` gap through `design-system/intake.md` (S02 §11) |
+| The check cards' Stale state | S09 §7: a check whose as-of is before the latest trading day reads *Not current* | Not rendered in M1; the Daily prices card states that currency is judged against the newest session any followed stock holds | No trading calendar exists (DEC-0206), so currency is judged against the newest session any followed stock holds (DEC-0201), which no stock can predate for every stock; a label would assert what cannot be detected (STD-UI-18; review v1 FINDING-2). The state returns when a calendar exists (system design open question 9) |
 | The palette dialog's accessible label | UX brief §6: *Command palette* | *Search FactorFlow* | The `command` design spec §5 fixes the dialog's label, and the component contract is what this design must use as it exists (skill constraint 2). The brief's `h1`-style title is not rendered; the input's placeholder is the visible text |
 
 Three further points are specializations of a source rather than departures,
@@ -316,7 +317,8 @@ and are recorded where they occur: S01 §8's *Needs you* data item becomes five
 item kinds in the §4.1 shape (DEC-0203, PROVISIONAL; 1.3); S09 §5's
 server-written verdict sentence is composed in the interface from the counts
 the new read returns (DEC-0200, PROVISIONAL; 1.4); and S09 §3's *Recent
-downloads* row number is the download's start time (OQ-1; 1.4).
+downloads* row number is the download's start time (capability OQ-1, answered
+no by the owner on 2026-10-25; 1.4).
 
 ## 1. Screens
 
@@ -740,8 +742,8 @@ Reading width, 1180 px cap, regions stacked `--space-5` apart (S09 §3).
 
    | Card | Tier and label | Result line | As-of line and exceptions |
    |------|----------------|-------------|---------------------------|
-   | *Daily prices* (`checks.daily_prices`) | `status-good` *All current* when `status` is `ok`; `status-warning` *Needs attention* when `exceptions`; `status-warning` *Not current* when the as-of predates `latest_session` for every stock (S09 §7 Stale); `coverage-unknown` *Not determinable* when `not_determinable` | *All {m} stocks have prices to {latest_session}* or *{absent_count} without prices, {gap_stock_count} with gaps, {behind_count} behind {latest_session}* (a zero part is omitted) | *Prices to {latest_session}* then up to five `exception_symbols` *and {k} more*. When `gap_detection.available` is false the gap part reads *Gaps not determinable: {gap_detection.reason}* as `coverage-unknown` while absence and currency still render (capability flow 2 step 7; DEC-0201). A scope note under the line, *Gaps are judged against the days other followed stocks hold. A market-wide outage leaves no gap to detect.* with **Full coverage table** as its link (STD-UI-18; S09 §8) |
-   | *Company financials* (`checks.company_financials`) | as above over `status` | *All {m} stocks have financials* or *{absent_count} without financials, {problem_count} with failed downloads* | *Financials to {as_of}* (a timestamp with the zone) then exceptions as above; a scope line *Checks that financials are present and downloaded, not that they are correct.* (STD-UI-18) |
+   | *Daily prices* (`checks.daily_prices`) | `status-good` *No missing prices or gaps* when `status` is `ok`; `status-warning` *Needs attention* when `exceptions`; `coverage-unknown` *Not determinable* when `not_determinable` (S09 §7's Stale state is not rendered: §0.8) | *All {m} stocks have prices to {latest_session}* or *{absent_count} without prices, {gap_stock_count} with gaps, {behind_count} behind {latest_session}* (a zero part is omitted) | *Prices to {latest_session}* then up to five `exception_symbols` *and {k} more*. When `gap_detection.available` is false the gap part reads *Gaps not determinable: {gap_detection.reason}* as `coverage-unknown` while absence and currency still render (capability flow 2 step 7; DEC-0201). A scope note under the line, *Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.* with **Full coverage table** as its link (STD-UI-18; S09 §8; DEC-0201, DEC-0206) |
+   | *Company financials* (`checks.company_financials`) | `status-good` *All financials present* when `status` is `ok`; otherwise as above | *All {m} stocks have financials* or *{absent_count} without financials, {problem_count} with failed downloads* | *Financials to {as_of}* (a timestamp with the zone) then exceptions as above; a scope line *Checks that financials are present and downloaded, not that they are correct.* (STD-UI-18) |
    | *Factor scores* (the shell's summary) | `coverage-unknown` *Not determinable* while the summary answers `404`; `status-neutral` *No scores yet* while `never_classified`; `status-active` *Updating* while `later` reports a set building; `status-critical` *Score update failed* when `later` failed; `status-warning` *Not reflecting the latest download* when `set.not_current`; else `status-good` *Current* | *{current} of {followed} stocks current*, and when any are not, *{k} stocks show as Incomplete until their data is complete* (S09 §11) | *Scores {YYYY-MM-DD HH:MM zone} · from the download started {start time}* (the time a link to `/data/downloads/{run_id}`); *FactorFlow can't read scores yet.* while not served |
 
 3. **Needs fixing · {n}** (`card` `default`). Header `h2` with the count, the
@@ -863,7 +865,7 @@ S09 §7, specialized by brief §2.5.
 | Empty, never populated | `never_acquired` true: the whole main region under the `h1` is one `card` `default`: `h2` *No data has been downloaded yet.*; when at least one stock is followed, *Download data for your {n} followed stocks to see whether it can be trusted.* and **Start the first download** (`button` `default`, the same post as Download now); when none is followed, *Follow some stocks first.* and **Open setup** (a link to `/setup`). No check renders as passed (AC-21; S09-5) |
 | Empty, nothing found | *Needs fixing · 0* reads *Nothing needs fixing.* with *Last complete download {start time}* from the most recent *Complete* row of Recent downloads, or *No complete download yet* (S09 §7) |
 | Partial | The check cards name their exceptions with counts; the *Partial* or *Interrupted* row in Recent downloads is shown as such, never as complete (AC-12; S09-1) |
-| Stale | A check whose as-of predates `latest_session` carries `status-warning` *Not current* (S09 §7); Factor scores carries *Not reflecting the latest download* when `set.not_current` |
+| Stale | Not detectable on the check cards in M1: the Daily prices scope note states that currency is judged against the newest session any followed stock holds (§0.8; DEC-0201, DEC-0206); Factor scores carries *Not reflecting the latest download* when `set.not_current` |
 | Unavailable | The gap part of Daily prices as `coverage-unknown` with `coverage-service`'s reason; Factor scores `coverage-unknown` before the summary is served; the key presence `coverage-unknown` while health is unreachable (S09 §7) |
 | Error | Per card, header kept, body replaced by *Couldn't read {the data health checks / recent downloads / what you follow}: {reason}.* and **Try again** (S09 §7). A `500` envelope's `request_id` is never shown |
 | Unreachable | Shell state (0.5) |
@@ -1375,7 +1377,7 @@ table so a reviewer does not raise them.
 | Progressive disclosure | pass | Blueprint principle 4 throughout: Home shows the topmost item and one tile; Data health shows the verdict, then three cards, then only the rows that need fixing, with the full coverage table, the followed list and the download detail one link away; setup shows one step at a time with the whole path visible; the palette reaches any page without adding navigation. Expandable rows keep 3000-stock tables readable (STD-UI-30) |
 | Error clarity | pass | Every refusal and failure names the operation, the stock or download and the reason, and offers the recovery (STD-UI-19): the step to fix in setup, Settings or Followed stocks for a refused download, **Try again** for a failed read, *Download again* or **Stop following** / **Follow a different symbol** per problem row, *Downloading again won't help* for a not-found symbol. No code, `request_id`, payload key or implementation word reaches the owner (STD-UI-1); the unreachable state names the likely cause and where to look |
 | Accessibility | pass | WCAG 2.1 AA per STD-UI-24, specified per surface in Sections 0 and 1: landmarks and names, keyboard completion of every operation, focus management on route changes, dialogs, the palette and the stepper, polite announcement of every polled change, `blocked` instead of `disabled` wherever a precondition gates an action, 4.5:1 text and 3:1 boundaries with the chip and as-of pairs checked against `theme-validation.md`. Radix, cmdk and native-list contracts carry the dialog, radio, command, stepper and table semantics. Enforcement is human review, which the standard acknowledges |
-| States and feedback (empty, loading, error, success, partial) | pass | All five, plus the three more STD-UI-23 requires, enumerated per surface in a States table (AC-24), starting from S01 §7, S02 §7, S09 §7 and CAP-001 v5 §1.1 to §1.5. Never-populated (*No data has been downloaded yet.*) and nothing-found (*Nothing needs you right now.*, *Nothing needs fixing.*) are distinct everywhere both can occur (AC-21); stale is a marked state (*Not reflecting the latest download*, *Not current*); unavailable is `coverage-unknown` with a reason; progress shows *{done} of {total}*; a download that completes while the owner is elsewhere raises a `toast`, and a change the owner can see (a row leaving) is announced politely rather than toasted |
+| States and feedback (empty, loading, error, success, partial) | pass | All five, plus the three more STD-UI-23 requires, enumerated per surface in a States table (AC-24), starting from S01 §7, S02 §7, S09 §7 and CAP-001 v5 §1.1 to §1.5. Never-populated (*No data has been downloaded yet.*) and nothing-found (*Nothing needs you right now.*, *Nothing needs fixing.*) are distinct everywhere both can occur (AC-21); stale is a marked state where it can be detected (*Not reflecting the latest download*), and the check cards state the currency they cannot judge; unavailable is `coverage-unknown` with a reason; progress shows *{done} of {total}*; a download that completes while the owner is elsewhere raises a `toast`, and a change the owner can see (a row leaving) is announced politely rather than toasted |
 
 **Intentional departures from `edg-compliance`, declared by STD-UI.** Six
 severity tiers reconciled to EDG's three levels (STD-UI-12); the kill switch
@@ -1489,7 +1491,7 @@ owner, and what the next stages need to know is still open.
   the data tile one label set and DEC-0210 makes them one function. On Home
   the question is not on screen, so the tile's title *Data* and its
   accessible name carry the context. If the owner finds the answer word
-  unclear on Home, a tier label (*All current*, *Needs attention*) is a
+  unclear on Home, a tier label (*No missing prices or gaps*, *Needs attention*) is a
   one-row change to brief §12.2 and 1.3; recorded here rather than decided
   silently.
 - **Carried from the system design §8, not re-decided here:** the other

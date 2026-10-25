@@ -29,7 +29,7 @@ ai_provenance:
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "5"
+      version: "6"
     - id: CAP-001-component-design-owner-web-app
       version: "4"
   invoking_user: ajodraca

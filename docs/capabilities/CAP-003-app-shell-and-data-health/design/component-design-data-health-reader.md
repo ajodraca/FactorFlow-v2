@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-003-ux-design
       version: "1"
     - id: tech-stack
-      version: "5"
+      version: "6"
     - id: CAP-001-component-design-coverage-service
       version: "6"
   invoking_user: ajodraca

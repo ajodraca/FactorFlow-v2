@@ -29,7 +29,7 @@ ai_provenance:
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "5"
+      version: "6"
     - id: factorflow-design-system
       version: "18 components as of 2026-10-15"
   invoking_user: ajodraca
@@ -192,7 +192,7 @@ The table the function implements is UX brief §12.2, verbatim:
 | result `not_found` / `failed` | *Not found* / *Failed* | warning / critical |
 | scores `building` / `not_current` / `failed` | *Updating* / *Not reflecting the latest download* / *Score update failed* | active / warning / critical |
 | scores `never_classified` / `current` | *No scores yet* / *Current* | neutral / good |
-| check `ok` / `exceptions` / `not_current` | *All current* / *Needs attention* / *Not current* | good / warning / warning |
+| check `ok` / `exceptions` | *No missing prices or gaps* or *All financials present* / *Needs attention* | good / warning |
 | credential present / missing | *Found* / *Missing* | good / critical |
 
 Not determinable is not a tier: it renders through `NotDeterminable` (2.5),

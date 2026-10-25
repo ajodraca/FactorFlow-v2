@@ -29,7 +29,7 @@ ai_provenance:
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "5"
+      version: "6"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
@@ -176,8 +176,8 @@ table** (a link to `/data/coverage`, `button` `outline`) and **Download now**.
 
 | Card | Tier and label | Result line | As-of line and exceptions |
 |------|----------------|-------------|---------------------------|
-| *Daily prices* | `ok` *All current* (good); `exceptions` *Needs attention* (warning); `not_determinable` *Not determinable* (`coverage-unknown`) | *All {m} stocks have prices to {latest_session}*, or the non-zero parts of *{absent_count} without prices, {gap_stock_count} with gaps, {behind_count} behind {latest_session}*; a null `gap_stock_count` renders *Gaps not determinable: {reason}* as `coverage-unknown` while the other parts still render | *Prices to {latest_session}* then up to five `exception_symbols` and *and {k} more*; the scope note *Gaps are judged against the days other followed stocks hold. A market-wide outage leaves no gap to detect.* with **Full coverage table** (STD-UI-18) |
-| *Company financials* | `ok` *All current*; `exceptions` *Needs attention* | *All {m} stocks have financials*, or *{absent_count} without financials, {problem_count} with failed downloads* (zero parts omitted) | *Financials to {as_of}* as a timestamp with the zone, then exceptions; *Checks that financials are present and downloaded, not that they are correct.* (STD-UI-18) |
+| *Daily prices* | `ok` *No missing prices or gaps* (good); `exceptions` *Needs attention* (warning); `not_determinable` *Not determinable* (`coverage-unknown`) | *All {m} stocks have prices to {latest_session}*, or the non-zero parts of *{absent_count} without prices, {gap_stock_count} with gaps, {behind_count} behind {latest_session}*; a null `gap_stock_count` renders *Gaps not determinable: {reason}* as `coverage-unknown` while the other parts still render | *Prices to {latest_session}* then up to five `exception_symbols` and *and {k} more*; the scope note *Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.* with **Full coverage table** (STD-UI-18; DEC-0201, DEC-0206) |
+| *Company financials* | `ok` *All financials present*; `exceptions` *Needs attention* | *All {m} stocks have financials*, or *{absent_count} without financials, {problem_count} with failed downloads* (zero parts omitted) | *Financials to {as_of}* as a timestamp with the zone, then exceptions; *Checks that financials are present and downloaded, not that they are correct.* (STD-UI-18) |
 | *Factor scores* (`useShell().scores`) | not served: `coverage-unknown` *Not determinable*; `never_classified`: *No scores yet* (neutral); `later` building: *Updating* (active); `later` failed: *Score update failed* (critical); `set.not_current`: *Not reflecting the latest download* (warning); else *Current* (good) | *{current} of {followed} stocks current*, and when some are not, *{k} stocks show as Incomplete until their data is complete*, *k* being `followed_count` minus `current_count` | *Scores {YYYY-MM-DD HH:MM zone} · from the download started {start time}* with the start time a link to `/data/downloads/{run_id}`; while not served, *FactorFlow can't read scores yet.* |
 
 *and {k} more* takes *k* as the check's `exception_count` minus the symbols
@@ -279,11 +279,13 @@ N/A, not applicable for this component.
   fixing* appears only when a row is retryable.
 - **No strategy wording in M1** (UX design 0.8; DEC-0210): the consequence
   speaks of scores and universes.
-- **The *Not current* label on Daily prices** is S09 §7's Stale state. Under
+- **S09 §7's Stale state is not rendered on the check cards.** Under
   DEC-0201, `latest_session` is the latest session any followed stock holds,
-  so no as-of can predate it for every stock and M1 never renders the label;
-  it stays in the tier table for when a trading calendar exists (system design
-  open question 9).
+  so no as-of can predate it for every stock. The owner resolved review v1
+  FINDING-2 on 2026-10-25: the `ok` label asserts only that nothing is missing
+  and the scope note states that currency is judged against that session,
+  not a trading calendar (STD-UI-18; UX design §0.8). The state returns when a
+  calendar exists (system design open question 9).
 - **The verdict's download clause.** UX design 1.4 offers *, and the last
   download failed.* as a critical cause, but DEC-0210's inputs are the three
   checks and the problem set, none of which is a download, so that clause has

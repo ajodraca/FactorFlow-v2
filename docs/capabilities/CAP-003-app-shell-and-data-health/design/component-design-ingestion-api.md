@@ -21,7 +21,7 @@ ai_provenance:
     - id: CAP-003-system-design
       version: "1"
     - id: tech-stack
-      version: "5"
+      version: "6"
     - id: CAP-001-component-design-ingestion-api
       version: "8"
   invoking_user: ajodraca
