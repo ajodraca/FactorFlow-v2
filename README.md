@@ -77,7 +77,13 @@ create is also refused when it has no members or when an active universe
 already holds its trimmed name. Every write takes one transaction advisory
 lock (`UNIVERSE_WRITE_LOCK_KEY`) before its checks, so two concurrent creates
 of one name cannot both succeed, and issues `INSERT` only; no API route or
-screen calls the service yet. What exists today is described
+screen calls the service yet. Migration `0006_classifications.sql` adds the
+classification tables: `classification_set` (one row per set, keyed to the
+acquisition run it reflects, in state `building`, `complete` or `failed`, with
+at most one `building` at a time), `classification_set_factor`, `factor_input`
+and `factor_classification`. Nothing writes or reads them yet, and
+`classification/sql/*.sql` is added to the package data ahead of the
+statements that will live there. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
