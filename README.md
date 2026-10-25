@@ -77,7 +77,19 @@ create is also refused when it has no members or when an active universe
 already holds its trimmed name. Every write takes one transaction advisory
 lock (`UNIVERSE_WRITE_LOCK_KEY`) before its checks, so two concurrent creates
 of one name cannot both succeed, and issues `INSERT` only; no API route or
-screen calls the service yet. What exists today is described
+screen calls the service yet. Migration `0006_classifications.sql` adds the
+classification tables: `classification_set` (one row per set, keyed to the
+acquisition run it reflects, in state `building`, `complete` or `failed`, with
+at most one `building` at a time), `classification_set_factor`, `factor_input`
+and `factor_classification`. The data side of the classification scheduler
+is `src/factorflow/classification/scheduler.py`: `claim_next_set` takes the
+oldest ended acquisition run in `succeeded` or `partial` with no set and
+inserts a `building` set stamped with the America/Chicago date (a concurrent
+claim loses to the one-`building` index and returns `None`), and
+`reclaim_interrupted_sets` records every set left `building` as `failed`
+with the reason `interrupted: the application restarted during the build`.
+Their statements live in `classification/sql/`. No loop calls either yet, and
+nothing writes the factor tables. What exists today is described
 below — everything else in `docs/` is specification for work not yet
 implemented.
 
@@ -180,6 +192,8 @@ variable** — never its value.
 | `FACTORFLOW_RUN_HEARTBEAT_SECONDS` | no | `60` | Minimum 1 second |
 | `FACTORFLOW_RUN_STALE_AFTER_SECONDS` | no | `900` | See the timing rules below |
 | `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` | no | `5` | Minimum 1 second |
+| `FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS` | no | `5` | Minimum 1 second. Read by `ClassificationSettings`, which no running process uses yet. Must be less than the build timeout, or the settings are refused |
+| `FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS` | no | `300` | Minimum 1 second. Read by `ClassificationSettings`, which no running process uses yet |
 | `FACTORFLOW_LOG_LEVEL` | no | `INFO` | Applied to the root logger by `configure_logging()` |
 
 ### Timing rules

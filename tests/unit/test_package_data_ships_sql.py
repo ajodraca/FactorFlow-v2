@@ -52,6 +52,21 @@ def test_universes_sql_glob_is_listed_before_its_directory_exists() -> None:
     assert "universes/sql/*.sql" in package_data_globs()
 
 
+# Implements TC-COMP-076
+def test_classification_sql_is_covered_by_a_package_data_glob(tmp_path: Path) -> None:
+    """`src/factorflow/classification/sql/` arrives with CAP-002-E2-S2 (DEC-0088).
+
+    The directory does not exist yet, so the globs are expanded against a synthetic
+    tree: a check that enumerates the real directories cannot fail for one that is
+    absent. Expansion is setuptools', not `PurePath.match`, which anchors on the right.
+    """
+    sql_dir = tmp_path / "classification" / "sql"
+    sql_dir.mkdir(parents=True)
+    (sql_dir / "anything.sql").write_text("SELECT 1;\n", encoding="utf-8")
+
+    assert uncovered_sql_files(tmp_path, package_data_globs()) == []
+
+
 # Implements TC-COMP-018
 def test_guard_reports_a_sql_directory_no_glob_covers(tmp_path: Path) -> None:
     sql_dir = tmp_path / "widgets" / "sql"

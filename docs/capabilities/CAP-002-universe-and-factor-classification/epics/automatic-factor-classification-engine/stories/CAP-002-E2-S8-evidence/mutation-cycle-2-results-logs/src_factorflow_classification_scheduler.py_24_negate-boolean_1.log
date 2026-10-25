@@ -1,0 +1,19 @@
+......F................                                                  [100%]
+=================================== FAILURES ===================================
+__ test_result_types_are_frozen_dataclasses_of_set_id_and_run_id[ClaimedSet] ___
+
+cls = <class 'factorflow.classification.scheduler.ClaimedSet'>
+
+    @pytest.mark.parametrize("cls", [ClaimedSet, ReclaimedSet])
+    def test_result_types_are_frozen_dataclasses_of_set_id_and_run_id(cls: type) -> None:
+        assert dataclasses.is_dataclass(cls)
+>       assert cls.__dataclass_params__.frozen  # type: ignore[attr-defined]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert False
+E        +  where False = _DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False,match_args=True,kw_only=False,slots=False,weakref_slot=False).frozen
+E        +    where _DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False,match_args=True,kw_only=False,slots=False,weakref_slot=False) = <class 'factorflow.classification.scheduler.ClaimedSet'>.__dataclass_params__
+
+tests/unit/test_classification_scheduler_shapes.py:21: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_shapes.py::test_result_types_are_frozen_dataclasses_of_set_id_and_run_id[ClaimedSet]
+1 failed, 22 passed in 3.49s

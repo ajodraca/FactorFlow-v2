@@ -1,0 +1,63 @@
+diff --git a/tests/integration/test_scheduler_claim.py b/tests/integration/test_scheduler_claim.py
+index 67fd5bc..abe9897 100644
+--- a/tests/integration/test_scheduler_claim.py
++++ b/tests/integration/test_scheduler_claim.py
+@@ -140,27 +140,43 @@ def test_claim_stamps_the_chicago_date(
+ 
+ 
+ # Implements TC-COMP-080
++# The fallback must not depend on the session's zone: a CURRENT_DATE fallback stamps the wrong
++# Chicago date during a part of the day that moves with the zone, so the control runs under several.
++@pytest.mark.parametrize("session_zone", ["UTC", "Etc/GMT+4", "Etc/GMT-14"])
+ def test_claim_without_at_stamps_the_database_clock_chicago_date(
+-    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++    postgres_connection_string: str, session_zone: str
+ ) -> None:
+-    pool, conn = store
+-    add_run(conn, "succeeded")
++    migrate_all(postgres_connection_string)
++    pool: ConnectionPool[Any] = ConnectionPool(
++        postgres_connection_string,
++        min_size=1,
++        max_size=2,
++        kwargs={"options": f"-c TimeZone={session_zone}"},
++        open=True,
++    )
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        add_run(conn, "succeeded")
+ 
+-    claimed = claim_next_set(pool)
++        claimed = claim_next_set(pool)
+ 
+-    assert claimed is not None
+-    with conn.cursor() as cur:
+-        cur.execute(
+-            "SELECT classification_date, (now() AT TIME ZONE 'America/Chicago')::date "
+-            "FROM classification_set WHERE set_id = %s",
+-            (claimed.set_id,),
+-        )
+-        row = cur.fetchone()
+-    conn.rollback()
++        assert claimed is not None
++        with conn.cursor() as cur:
++            cur.execute(
++                "SELECT classification_date, (started_at AT TIME ZONE 'America/Chicago')::date "
++                "FROM classification_set WHERE set_id = %s",
++                (claimed.set_id,),
++            )
++            row = cur.fetchone()
++        conn.rollback()
++    finally:
++        conn.close()
++        pool.close()
+     assert row is not None
+     stamped, expected = row
+-    # The two reads straddle at most one Chicago midnight.
+-    assert stamped in (expected, expected - timedelta(days=1))
++    # started_at defaults to now(), the claim transaction's own timestamp, so no Chicago midnight
++    # can fall between the two reads.
++    assert stamped == expected
+ 
+ 
+ # Implements TC-COMP-081

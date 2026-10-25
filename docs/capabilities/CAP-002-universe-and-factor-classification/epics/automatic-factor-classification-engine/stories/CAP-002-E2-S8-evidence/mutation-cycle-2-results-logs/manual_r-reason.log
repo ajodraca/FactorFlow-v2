@@ -1,0 +1,65 @@
+.....F..............F..                                                  [100%]
+=================================== FAILURES ===================================
+___ test_interruption_reason_is_fixed_and_avoids_relabelled_interface_terms ____
+
+    def test_interruption_reason_is_fixed_and_avoids_relabelled_interface_terms() -> None:
+        """AC-20, DAC-E2-12: the shipped reason, and none of the terms STD-UI v5/v6 relabelled."""
+        text = _sql("reclaim_interrupted.sql")
+        match = re.search(r"failure_reason\s*=\s*'([^']*)'", text)
+        assert match is not None
+        reason = match.group(1)
+>       assert reason == "interrupted: the application restarted during the build"
+E       AssertionError: assert 'interrupted:...ing the build' == 'interrupted:...ing the build'
+E         
+E         - interrupted: the application restarted during the build
+E         ?              ^
+E         + interrupted: The application restarted during the build
+E         ?              ^
+
+tests/unit/test_classification_scheduler_sql.py:68: AssertionError
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x10b0c0190>, <psycopg.Connection [IDLE] (host=localhost port=60250 user=test database=test_bd2de317b975439f98146843116a1509) at 0x10aa2cd10>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+        reclaim_interrupted_sets(pool)
+    
+        assert _full_rows(conn, [complete, failed]) == untouched_before
+        rows = {r[0]: r for r in set_rows(conn)}
+        assert rows[stale][2] == "failed"
+>       assert rows[stale][3] == INTERRUPTED_REASON
+E       AssertionError: assert 'interrupted:...ing the build' == 'interrupted:...ing the build'
+E         
+E         - interrupted: the application restarted during the build
+E         ?              ^
+E         + interrupted: The application restarted during the build
+E         ?              ^
+
+tests/integration/test_scheduler_restart.py:84: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set b8edb8eb-b88f-4156-afc3-3739849dd3a6 for run 0d447af4-b7fe-4d57-97a7-fb915802105c was interrupted; recorded failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_interruption_reason_is_fixed_and_avoids_relabelled_interface_terms
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+2 failed, 21 passed in 3.09s

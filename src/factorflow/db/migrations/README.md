@@ -34,3 +34,4 @@ definition is exported as `APPLIED_MIGRATIONS_DDL` in
 | `0003_coverage.sql` | CAP-001-E5-S1 | Coverage tables |
 | `0004_runs.sql` | CAP-001-E5-S1 | Run journal tables |
 | `0005_universes.sql` | CAP-002-E1-S1 | `universe`, `universe_event` |
+| `0006_classifications.sql` | CAP-002-E2-S1 | `classification_set`, `classification_set_factor`, `factor_input`, `factor_classification` |

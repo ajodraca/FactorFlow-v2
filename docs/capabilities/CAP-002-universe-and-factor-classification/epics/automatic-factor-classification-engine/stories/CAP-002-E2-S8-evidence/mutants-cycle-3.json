@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "repo_head": "3f897a7d6cc821e1d802613b260fde1d1bf570cd",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "manual:r-c-default-yesterday",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/claim_set.sql",
+      "line": 4,
+      "original": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "old": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "mutated": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP - interval '1 day')",
+      "new": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP - interval '1 day')"
+    },
+    {
+      "id": "manual:r-c-default-current-date",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/claim_set.sql",
+      "line": 4,
+      "original": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "old": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "mutated": "COALESCE(%(at)s::timestamptz, CURRENT_DATE)",
+      "new": "COALESCE(%(at)s::timestamptz, CURRENT_DATE)"
+    },
+    {
+      "id": "manual:r-c-default-tomorrow",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/claim_set.sql",
+      "line": 4,
+      "original": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "old": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "mutated": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP + interval '1 day')",
+      "new": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP + interval '1 day')"
+    },
+    {
+      "id": "manual:c-coalesce",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/claim_set.sql",
+      "line": 4,
+      "original": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "old": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+      "mutated": "CURRENT_TIMESTAMP",
+      "new": "CURRENT_TIMESTAMP"
+    }
+  ]
+}

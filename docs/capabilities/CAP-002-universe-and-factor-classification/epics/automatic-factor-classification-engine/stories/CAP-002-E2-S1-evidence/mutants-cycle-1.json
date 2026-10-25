@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "repo_head": "f7af5c746b6d73b25f7209fbbf48210111177d23",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:23:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 23,
+      "original": "    ON classification_set ((true)) WHERE state = 'building';",
+      "mutated": "    ON classification_set ((false)) WHERE state = 'building';"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:38:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 38,
+      "original": "        CHECK (qualified_count >= 0)",
+      "mutated": "        CHECK (qualified_count > 0)"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:38:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 38,
+      "original": "        CHECK (qualified_count >= 0)",
+      "mutated": "        CHECK (qualified_count >= 1)"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:47:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 47,
+      "original": "    value             numeric(30, 10),",
+      "mutated": "    value             numeric(31, 10),"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:47:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 47,
+      "original": "    value             numeric(30, 10),",
+      "mutated": "    value             numeric(30, 11),"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:50:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 50,
+      "original": "    restated_possible boolean         NOT NULL DEFAULT false,",
+      "mutated": "    restated_possible boolean         NOT NULL DEFAULT true,"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:73:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 73,
+      "original": "    score             numeric(18, 6),",
+      "mutated": "    score             numeric(19, 6),"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:73:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 73,
+      "original": "    score             numeric(18, 6),",
+      "mutated": "    score             numeric(18, 7),"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:74:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 74,
+      "original": "    percentile        numeric(9, 6),",
+      "mutated": "    percentile        numeric(10, 6),"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:74:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 74,
+      "original": "    percentile        numeric(9, 6),",
+      "mutated": "    percentile        numeric(9, 7),"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:78:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 78,
+      "original": "    restated_possible boolean        NOT NULL DEFAULT false,",
+      "mutated": "    restated_possible boolean        NOT NULL DEFAULT true,"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:97:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 97,
+      "original": "        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile <= 100))",
+      "mutated": "        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile < 100))"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:97:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 97,
+      "original": "        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile <= 100))",
+      "mutated": "        CHECK (percentile IS NULL OR (percentile > 0 AND percentile <= 100))"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:97:off-by-one:3",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 97,
+      "original": "        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile <= 100))",
+      "mutated": "        CHECK (percentile IS NULL OR (percentile >= 1 AND percentile <= 100))"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:97:off-by-one:4",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 97,
+      "original": "        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile <= 100))",
+      "mutated": "        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile <= 101))"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:108:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 108,
+      "original": "    'The America/Chicago date at set creation; what dates the classification (AC-18, AC-19).';",
+      "mutated": "    'The America/Chicago date at set creation; what dates the classification (AC-19, AC-19).';"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:108:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 108,
+      "original": "    'The America/Chicago date at set creation; what dates the classification (AC-18, AC-19).';",
+      "mutated": "    'The America/Chicago date at set creation; what dates the classification (AC-18, AC-20).';"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:110:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 110,
+      "original": "    'The latest observed_on among the rows the input was computed from (AC-17).';",
+      "mutated": "    'The latest observed_on among the rows the input was computed from (AC-18).';"
+    },
+    {
+      "id": "src/factorflow/db/migrations/0006_classifications.sql:112:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/db/migrations/0006_classifications.sql",
+      "line": 112,
+      "original": "    'The line items, statements, sessions and corporate actions used, or the acquisition outcome when missing (DEC-0066).';",
+      "mutated": "    'The line items, statements, sessions and corporate actions used, or the acquisition outcome when missing (DEC-67).';"
+    }
+  ]
+}

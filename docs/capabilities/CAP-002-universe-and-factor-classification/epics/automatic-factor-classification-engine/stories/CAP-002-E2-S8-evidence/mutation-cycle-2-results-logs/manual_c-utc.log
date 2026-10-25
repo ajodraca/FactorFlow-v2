@@ -1,0 +1,119 @@
+.F............FFF......                                                  [100%]
+=================================== FAILURES ===================================
+________ test_claim_set_is_a_single_building_insert_stamped_in_chicago _________
+
+    def test_claim_set_is_a_single_building_insert_stamped_in_chicago() -> None:
+        text = _sql("claim_set.sql")
+        assert text.count("INSERT INTO classification_set") == 1
+        assert "'building'" in text
+        assert re.search(r"RETURNING\s+set_id", text)
+>       assert "America/Chicago" in text
+E       assert 'America/Chicago' in "-- Claim a run: one building set, stamped with the Chicago date (STD-UI-5; DEC-0125 adds the at parameter).\nINSERT I...'building',\n        (COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP) AT TIME ZONE 'UTC')::date)\nRETURNING set_id;\n"
+
+tests/unit/test_classification_scheduler_sql.py:39: AssertionError
+__________ test_claim_stamps_the_chicago_date[instant0-chicago_date0] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10d310b90>, <psycopg.Connection [IDLE] (host=localhost port=60024 user=test database=test_7cfbc1af049b47f28f70f0172797de21) at 0x10ce109e0>)
+instant = datetime.datetime(2026, 10, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 10, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool, at=instant)
+    
+        assert claimed is not None
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT classification_date FROM classification_set WHERE set_id = %s",
+                (claimed.set_id,),
+            )
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+>       assert row[0] == chicago_date
+E       assert datetime.date(2026, 10, 16) == datetime.date(2026, 10, 15)
+
+tests/integration/test_scheduler_claim.py:139: AssertionError
+__________ test_claim_stamps_the_chicago_date[instant1-chicago_date1] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-6' at 0x10d498550>, <psycopg.Connection [IDLE] (host=localhost port=60024 user=test database=test_fdfeb4fa2471454997009ca931e2ec65) at 0x10d4ac380>)
+instant = datetime.datetime(2026, 12, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 12, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool, at=instant)
+    
+        assert claimed is not None
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT classification_date FROM classification_set WHERE set_id = %s",
+                (claimed.set_id,),
+            )
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+>       assert row[0] == chicago_date
+E       assert datetime.date(2026, 12, 16) == datetime.date(2026, 12, 15)
+
+tests/integration/test_scheduler_claim.py:139: AssertionError
+_________ test_claim_without_at_stamps_the_database_clock_chicago_date _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-7' at 0x10d4996d0>, <psycopg.Connection [IDLE] (host=localhost port=60024 user=test database=test_71f9de39cc22447abbe8d6c92280855c) at 0x10d4acd10>)
+
+    def test_claim_without_at_stamps_the_database_clock_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool)
+    
+        assert claimed is not None
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT classification_date, (now() AT TIME ZONE 'America/Chicago')::date "
+                "FROM classification_set WHERE set_id = %s",
+                (claimed.set_id,),
+            )
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        stamped, expected = row
+        # The two reads straddle at most one Chicago midnight.
+>       assert stamped in (expected, expected - timedelta(days=1))
+E       assert datetime.date(2026, 10, 25) in (datetime.date(2026, 10, 24), datetime.date(2026, 10, 23))
+
+tests/integration/test_scheduler_claim.py:163: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_claim_set_is_a_single_building_insert_stamped_in_chicago
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant0-chicago_date0]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant1-chicago_date1]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_without_at_stamps_the_database_clock_chicago_date
+4 failed, 19 passed in 3.32s

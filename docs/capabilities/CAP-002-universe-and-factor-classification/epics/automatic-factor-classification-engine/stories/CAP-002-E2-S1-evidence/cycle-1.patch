@@ -1,0 +1,1037 @@
+diff --git a/src/factorflow/db/migrations/0006_classifications.sql b/src/factorflow/db/migrations/0006_classifications.sql
+new file mode 100644
+index 0000000..1ee9d70
+--- /dev/null
++++ b/src/factorflow/db/migrations/0006_classifications.sql
+@@ -0,0 +1,112 @@
++CREATE TABLE classification_set (
++    set_id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
++    run_id              uuid        NOT NULL UNIQUE REFERENCES acquisition_run (run_id),
++    state               text        NOT NULL,
++    classification_date date        NOT NULL,
++    latest_trading_day  date,
++    active_instruments  integer,
++    started_at          timestamptz NOT NULL DEFAULT now(),
++    ended_at            timestamptz,
++    failure_reason      text,
++    CONSTRAINT classification_set_state_known
++        CHECK (state IN ('building', 'complete', 'failed')),
++    CONSTRAINT classification_set_terminal_has_end
++        CHECK ((state IN ('complete', 'failed')) = (ended_at IS NOT NULL)),
++    CONSTRAINT classification_set_failed_has_reason
++        CHECK ((state = 'failed') = (failure_reason IS NOT NULL)),
++    CONSTRAINT classification_set_complete_is_sized
++        CHECK (state <> 'complete'
++               OR (latest_trading_day IS NOT NULL AND active_instruments IS NOT NULL))
++);
++
++CREATE UNIQUE INDEX idx_classification_set_single_building
++    ON classification_set ((true)) WHERE state = 'building';
++CREATE INDEX idx_classification_set_complete_recent
++    ON classification_set (ended_at DESC) WHERE state = 'complete';
++CREATE INDEX idx_classification_set_started
++    ON classification_set (started_at DESC);
++
++CREATE TABLE classification_set_factor (
++    set_id          uuid    NOT NULL REFERENCES classification_set (set_id),
++    factor          text    NOT NULL,
++    qualified_count integer NOT NULL,
++    ranked          boolean NOT NULL,
++    PRIMARY KEY (set_id, factor),
++    CONSTRAINT classification_set_factor_known
++        CHECK (factor IN ('value', 'growth', 'momentum')),
++    CONSTRAINT classification_set_factor_count_nonnegative
++        CHECK (qualified_count >= 0)
++);
++
++CREATE TABLE factor_input (
++    set_id            uuid            NOT NULL REFERENCES classification_set (set_id),
++    instrument_id     bigint          NOT NULL REFERENCES instrument (instrument_id),
++    factor            text            NOT NULL,
++    input_name        text            NOT NULL,
++    status            text            NOT NULL,
++    value             numeric(30, 10),
++    as_of             date,
++    known_on          date,
++    restated_possible boolean         NOT NULL DEFAULT false,
++    detail            jsonb           NOT NULL,
++    PRIMARY KEY (set_id, instrument_id, factor, input_name),
++    CONSTRAINT factor_input_factor_known
++        CHECK (factor IN ('value', 'growth', 'momentum')),
++    CONSTRAINT factor_input_name_matches_factor CHECK (
++           (factor = 'value'    AND input_name IN ('book_to_price', 'earnings_yield', 'fcf_yield'))
++        OR (factor = 'growth'   AND input_name IN ('revenue_growth', 'eps_growth'))
++        OR (factor = 'momentum' AND input_name IN ('return_3m', 'return_6m', 'return_12m'))),
++    CONSTRAINT factor_input_status_known
++        CHECK (status IN ('present', 'missing', 'outdated', 'not_computable')),
++    CONSTRAINT factor_input_present_is_dated
++        CHECK (status <> 'present'
++               OR (value IS NOT NULL AND as_of IS NOT NULL AND known_on IS NOT NULL))
++);
++
++CREATE INDEX idx_factor_input_instrument ON factor_input (instrument_id, set_id);
++
++CREATE TABLE factor_classification (
++    set_id            uuid           NOT NULL REFERENCES classification_set (set_id),
++    instrument_id     bigint         NOT NULL REFERENCES instrument (instrument_id),
++    factor            text           NOT NULL,
++    status            text           NOT NULL,
++    score             numeric(18, 6),
++    percentile        numeric(9, 6),
++    reason_code       text,
++    reason_input      text,
++    reason_detail     text,
++    restated_possible boolean        NOT NULL DEFAULT false,
++    PRIMARY KEY (set_id, instrument_id, factor),
++    CONSTRAINT factor_classification_factor_known
++        CHECK (factor IN ('value', 'growth', 'momentum')),
++    CONSTRAINT factor_classification_status_known
++        CHECK (status IN ('classified', 'not_classified')),
++    CONSTRAINT factor_classification_reason_known
++        CHECK (reason_code IS NULL OR reason_code IN (
++            'input_missing', 'input_outdated', 'input_not_computable',
++            'not_enough_stocks', 'retired')),
++    CONSTRAINT factor_classification_shape CHECK (
++           (status = 'classified'     AND score IS NOT NULL AND percentile IS NOT NULL
++                                      AND reason_code IS NULL AND reason_input IS NULL)
++        OR (status = 'not_classified' AND score IS NULL AND percentile IS NULL
++                                      AND reason_code IS NOT NULL)),
++    CONSTRAINT factor_classification_reason_input_agrees
++        CHECK ((reason_code IN ('input_missing', 'input_outdated', 'input_not_computable'))
++               = (reason_input IS NOT NULL)),
++    CONSTRAINT factor_classification_percentile_range
++        CHECK (percentile IS NULL OR (percentile >= 0 AND percentile <= 100))
++);
++
++CREATE INDEX idx_factor_classification_instrument
++    ON factor_classification (instrument_id, set_id);
++CREATE INDEX idx_factor_classification_set_factor_score
++    ON factor_classification (set_id, factor, score);
++CREATE INDEX idx_factor_classification_set_factor_percentile
++    ON factor_classification (set_id, factor, percentile);
++
++COMMENT ON COLUMN classification_set.classification_date IS
++    'The America/Chicago date at set creation; what dates the classification (AC-18, AC-19).';
++COMMENT ON COLUMN factor_input.known_on IS
++    'The latest observed_on among the rows the input was computed from (AC-17).';
++COMMENT ON COLUMN factor_input.detail IS
++    'The line items, statements, sessions and corporate actions used, or the acquisition outcome when missing (DEC-0066).';
+diff --git a/src/factorflow/db/migrations/README.md b/src/factorflow/db/migrations/README.md
+index bf549f0..96736da 100644
+--- a/src/factorflow/db/migrations/README.md
++++ b/src/factorflow/db/migrations/README.md
+@@ -34,3 +34,4 @@ definition is exported as `APPLIED_MIGRATIONS_DDL` in
+ | `0003_coverage.sql` | CAP-001-E5-S1 | Coverage tables |
+ | `0004_runs.sql` | CAP-001-E5-S1 | Run journal tables |
+ | `0005_universes.sql` | CAP-002-E1-S1 | `universe`, `universe_event` |
++| `0006_classifications.sql` | CAP-002-E2-S1 | `classification_set`, `classification_set_factor`, `factor_input`, `factor_classification` |
+diff --git a/tests/integration/test_research_constraints.py b/tests/integration/test_research_constraints.py
+index 65da8b5..74ec544 100644
+--- a/tests/integration/test_research_constraints.py
++++ b/tests/integration/test_research_constraints.py
+@@ -1,6 +1,10 @@
+-"""PostgreSQL constraints on the universe tables (migration 0005)."""
++"""PostgreSQL constraints on the universe tables (migration 0005) and the
++classification tables (migration 0006)."""
+ 
+-from collections.abc import Iterator
++import uuid
++from collections.abc import Callable, Iterator
++from datetime import UTC, date, datetime
++from typing import Any
+ 
+ import psycopg
+ import pytest
+@@ -228,3 +232,584 @@ def test_an_event_id_is_never_reused(universe_connection: psycopg.Connection) ->
+             )
+ 
+     assert refused.value.diag.constraint_name == "universe_event_pkey"
++
++
++# --- Migration 0006: classification tables (CAP-002-E2-S1) -------------------
++
++
++@pytest.fixture
++def classification_connection(postgres_connection_string: str) -> Iterator[psycopg.Connection]:
++    """A connection to a store migrated through 0006, with one instrument."""
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        assert apply_pending(conn, discover(MIGRATIONS_DIR)) == [1, 2, 3, 4, 5, 6]
++        with conn.cursor() as cur:
++            cur.execute("INSERT INTO instrument (symbol, lifecycle) VALUES ('ABC', 'active')")
++        conn.commit()
++        yield conn
++    finally:
++        conn.close()
++
++
++def insert_terminal_run(conn: psycopg.Connection) -> str:
++    """Insert a run that is not active, so any number can coexist, and commit it."""
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO acquisition_run (state, history_depth_years, ended_at) "
++            "VALUES ('succeeded', 1, now()) RETURNING run_id"
++        )
++        row = cur.fetchone()
++    assert row is not None
++    conn.commit()
++    return str(row[0])
++
++
++def insert_classification_set(
++    conn: psycopg.Connection,
++    state: str = "building",
++    run_id: str | None = None,
++    **columns: Any,
++) -> str:
++    """Insert a set that satisfies every constraint for `state`, minus `columns` overrides.
++
++    An override of None writes NULL, which is how a test removes a required column.
++    The caller owns the transaction.
++    """
++    values: dict[str, Any] = {
++        "run_id": run_id or insert_terminal_run(conn),
++        "state": state,
++        "classification_date": date(2026, 10, 24),
++    }
++    if state in ("complete", "failed"):
++        values["ended_at"] = datetime(2026, 10, 24, 12, 0, tzinfo=UTC)
++    if state == "complete":
++        values["latest_trading_day"] = date(2026, 10, 23)
++        values["active_instruments"] = 3
++    if state == "failed":
++        values["failure_reason"] = "RuntimeError: boom"
++    values.update(columns)
++    names = ", ".join(values)
++    marks = ", ".join(["%s"] * len(values))
++    with conn.cursor() as cur:
++        cur.execute(
++            f"INSERT INTO classification_set ({names}) VALUES ({marks}) RETURNING set_id",  # noqa: S608
++            tuple(values.values()),
++        )
++        row = cur.fetchone()
++    assert row is not None
++    return str(row[0])
++
++
++def _insert_factor_input(
++    conn: psycopg.Connection, set_id: str, instrument_id: int, **columns: Any
++) -> None:
++    values: dict[str, Any] = {
++        "set_id": set_id,
++        "instrument_id": instrument_id,
++        "factor": "momentum",
++        "input_name": "return_3m",
++        "status": "missing",
++        "detail": "{}",
++    }
++    values.update(columns)
++    names = ", ".join(values)
++    marks = ", ".join("%s::jsonb" if name == "detail" else "%s" for name in values)
++    with conn.cursor() as cur:
++        cur.execute(
++            f"INSERT INTO factor_input ({names}) VALUES ({marks})",  # noqa: S608
++            tuple(values.values()),
++        )
++
++
++def _insert_classification(
++    conn: psycopg.Connection, set_id: str, instrument_id: int, **columns: Any
++) -> None:
++    values: dict[str, Any] = {
++        "set_id": set_id,
++        "instrument_id": instrument_id,
++        "factor": "momentum",
++        "status": "classified",
++        "score": 1.5,
++        "percentile": 50,
++    }
++    values.update(columns)
++    names = ", ".join(values)
++    marks = ", ".join(["%s"] * len(values))
++    with conn.cursor() as cur:
++        cur.execute(
++            f"INSERT INTO factor_classification ({names}) VALUES ({marks})",  # noqa: S608
++            tuple(values.values()),
++        )
++
++
++def _refusal(
++    conn: psycopg.Connection, error: type[psycopg.Error], statement: Callable[[], None]
++) -> str | None:
++    """Run `statement`, expect `error`, roll back, and return the constraint it names."""
++    with pytest.raises(error) as refused:
++        statement()
++    conn.rollback()
++    return refused.value.diag.constraint_name
++
++
++def _scalar(conn: psycopg.Connection, query: str) -> Any:
++    with conn.cursor() as cur:
++        cur.execute(query)  # type: ignore[call-overload]
++        row = cur.fetchone()
++    assert row is not None
++    return row[0]
++
++
++# Implements TC-COMP-075
++def test_a_second_set_for_the_same_run_is_refused(
++    classification_connection: psycopg.Connection,
++) -> None:
++    conn = classification_connection
++    run_id = insert_terminal_run(conn)
++    insert_classification_set(conn, "complete", run_id)
++    conn.commit()
++
++    name = _refusal(
++        conn,
++        psycopg.errors.UniqueViolation,
++        lambda: insert_classification_set(conn, "failed", run_id),
++    )
++
++    assert name == "classification_set_run_id_key"
++    assert _scalar(conn, "SELECT count(*) FROM classification_set") == 1
++
++
++# Implements TC-COMP-075
++def test_a_set_naming_no_run_is_refused(classification_connection: psycopg.Connection) -> None:
++    conn = classification_connection
++
++    name = _refusal(
++        conn,
++        psycopg.errors.ForeignKeyViolation,
++        lambda: insert_classification_set(conn, "building", str(uuid.uuid4())),
++    )
++
++    assert name == "classification_set_run_id_fkey"
++
++
++# Implements TC-COMP-163
++def test_only_one_building_set_is_allowed_but_terminal_sets_may_sit_beside_it(
++    classification_connection: psycopg.Connection,
++) -> None:
++    conn = classification_connection
++    first_run, second_run, third_run = (insert_terminal_run(conn) for _ in range(3))
++    insert_classification_set(conn, "building", first_run)
++    conn.commit()
++
++    name = _refusal(
++        conn,
++        psycopg.errors.UniqueViolation,
++        lambda: insert_classification_set(conn, "building", second_run),
++    )
++    assert name == "idx_classification_set_single_building"
++
++    insert_classification_set(conn, "complete", second_run)
++    insert_classification_set(conn, "failed", third_run)
++    conn.commit()
++    assert _scalar(conn, "SELECT count(*) FROM classification_set") == 3
++
++
++# Implements TC-COMP-164
++@pytest.mark.parametrize(
++    ("state", "overrides", "constraint"),
++    (
++        ("complete", {"ended_at": None}, "classification_set_terminal_has_end"),
++        ("complete", {"latest_trading_day": None}, "classification_set_complete_is_sized"),
++        ("complete", {"active_instruments": None}, "classification_set_complete_is_sized"),
++        ("failed", {"failure_reason": None}, "classification_set_failed_has_reason"),
++    ),
++)
++def test_a_terminal_set_missing_a_required_column_is_refused(
++    classification_connection: psycopg.Connection,
++    state: str,
++    overrides: dict[str, None],
++    constraint: str,
++) -> None:
++    conn = classification_connection
++    run_id = insert_terminal_run(conn)
++
++    name = _refusal(
++        conn,
++        psycopg.errors.CheckViolation,
++        lambda: insert_classification_set(conn, state, run_id, **overrides),
++    )
++
++    assert name == constraint
++
++
++@pytest.fixture
++def building_set(classification_connection: psycopg.Connection) -> tuple[str, int]:
++    """A committed `building` set and the id of the instrument ABC."""
++    conn = classification_connection
++    set_id = insert_classification_set(conn, "building")
++    conn.commit()
++    return set_id, _instrument_id(conn)
++
++
++# Implements TC-COMP-165
++@pytest.mark.parametrize(
++    ("columns", "constraint"),
++    (
++        (
++            {"status": "classified", "reason_code": "retired"},
++            "factor_classification_shape",
++        ),
++        (
++            {
++                "status": "not_classified",
++                "score": 1.5,
++                "percentile": None,
++                "reason_code": "retired",
++            },
++            "factor_classification_shape",
++        ),
++        (
++            {
++                "status": "not_classified",
++                "score": None,
++                "percentile": None,
++                "reason_code": "input_missing",
++            },
++            "factor_classification_reason_input_agrees",
++        ),
++        (
++            {
++                "status": "not_classified",
++                "score": None,
++                "percentile": None,
++                "reason_code": "retired",
++                "reason_input": "return_3m",
++            },
++            "factor_classification_reason_input_agrees",
++        ),
++        ({"percentile": 100.5}, "factor_classification_percentile_range"),
++        ({"percentile": -1}, "factor_classification_percentile_range"),
++    ),
++)
++def test_a_malformed_classification_row_is_refused_by_its_named_constraint(
++    classification_connection: psycopg.Connection,
++    building_set: tuple[str, int],
++    columns: dict[str, Any],
++    constraint: str,
++) -> None:
++    set_id, instrument_id = building_set
++    conn = classification_connection
++
++    name = _refusal(
++        conn,
++        psycopg.errors.CheckViolation,
++        lambda: _insert_classification(conn, set_id, instrument_id, **columns),
++    )
++
++    assert name == constraint
++
++
++# Implements TC-COMP-165
++@pytest.mark.parametrize(
++    "columns",
++    (
++        {"percentile": 0},
++        {"percentile": 100},
++        {
++            "status": "not_classified",
++            "score": None,
++            "percentile": None,
++            "reason_code": "input_missing",
++            "reason_input": "return_3m",
++        },
++        {
++            "status": "not_classified",
++            "score": None,
++            "percentile": None,
++            "reason_code": "not_enough_stocks",
++            "reason_detail": "18 of 30 stocks qualified",
++        },
++        {"status": "not_classified", "score": None, "percentile": None, "reason_code": "retired"},
++    ),
++)
++def test_a_well_formed_classification_row_is_accepted(
++    classification_connection: psycopg.Connection,
++    building_set: tuple[str, int],
++    columns: dict[str, Any],
++) -> None:
++    set_id, instrument_id = building_set
++    conn = classification_connection
++
++    _insert_classification(conn, set_id, instrument_id, **columns)
++    conn.commit()
++
++    assert _scalar(conn, "SELECT count(*) FROM factor_classification") == 1
++
++
++# Implements TC-COMP-157
++@pytest.mark.parametrize(
++    ("columns", "constraint"),
++    (
++        ({"factor": "value", "input_name": "return_3m"}, "factor_input_name_matches_factor"),
++        (
++            {
++                "status": "present",
++                "value": None,
++                "as_of": date(2026, 9, 30),
++                "known_on": date(2026, 10, 1),
++            },
++            "factor_input_present_is_dated",
++        ),
++        (
++            {"status": "present", "value": 1, "as_of": None, "known_on": date(2026, 10, 1)},
++            "factor_input_present_is_dated",
++        ),
++        (
++            {"status": "present", "value": 1, "as_of": date(2026, 9, 30), "known_on": None},
++            "factor_input_present_is_dated",
++        ),
++    ),
++)
++def test_a_malformed_factor_input_is_refused_by_its_named_constraint(
++    classification_connection: psycopg.Connection,
++    building_set: tuple[str, int],
++    columns: dict[str, Any],
++    constraint: str,
++) -> None:
++    set_id, instrument_id = building_set
++    conn = classification_connection
++
++    name = _refusal(
++        conn,
++        psycopg.errors.CheckViolation,
++        lambda: _insert_factor_input(conn, set_id, instrument_id, **columns),
++    )
++
++    assert name == constraint
++
++
++# Implements TC-COMP-157
++def test_a_present_dated_input_and_a_bare_missing_input_are_accepted(
++    classification_connection: psycopg.Connection, building_set: tuple[str, int]
++) -> None:
++    set_id, instrument_id = building_set
++    conn = classification_connection
++
++    _insert_factor_input(
++        conn,
++        set_id,
++        instrument_id,
++        status="present",
++        value=1,
++        as_of=date(2026, 9, 30),
++        known_on=date(2026, 10, 1),
++    )
++    _insert_factor_input(conn, set_id, instrument_id, input_name="return_6m", status="missing")
++    conn.commit()
++
++    assert _scalar(conn, "SELECT count(*) FROM factor_input") == 2
++
++
++# Implements AC-20
++@pytest.mark.parametrize(
++    ("state", "overrides", "constraint"),
++    (
++        ("unknown", {}, "classification_set_state_known"),
++        (
++            "building",
++            {"ended_at": datetime(2026, 10, 24, tzinfo=UTC)},
++            "classification_set_terminal_has_end",
++        ),
++        ("building", {"failure_reason": "x"}, "classification_set_failed_has_reason"),
++    ),
++)
++def test_set_level_edge_constraints_are_named(
++    classification_connection: psycopg.Connection,
++    state: str,
++    overrides: dict[str, Any],
++    constraint: str,
++) -> None:
++    conn = classification_connection
++    run_id = insert_terminal_run(conn)
++
++    name = _refusal(
++        conn,
++        psycopg.errors.CheckViolation,
++        lambda: insert_classification_set(conn, state, run_id, **overrides),
++    )
++
++    assert name == constraint
++
++
++# Implements AC-20
++def test_set_factor_edge_constraints_are_named(
++    classification_connection: psycopg.Connection, building_set: tuple[str, int]
++) -> None:
++    set_id, _ = building_set
++    conn = classification_connection
++
++    def insert(factor: str, count: int) -> None:
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
++                "VALUES (%s, %s, %s, false)",
++                (set_id, factor, count),
++            )
++
++    assert (
++        _refusal(conn, psycopg.errors.CheckViolation, lambda: insert("quality", 0))
++        == "classification_set_factor_known"
++    )
++    assert (
++        _refusal(conn, psycopg.errors.CheckViolation, lambda: insert("value", -1))
++        == "classification_set_factor_count_nonnegative"
++    )
++    insert("value", 0)
++    conn.commit()
++    assert (
++        _refusal(conn, psycopg.errors.UniqueViolation, lambda: insert("value", 1))
++        == "classification_set_factor_pkey"
++    )
++
++
++# Implements AC-20
++def test_input_and_classification_edge_constraints_are_named(
++    classification_connection: psycopg.Connection, building_set: tuple[str, int]
++) -> None:
++    set_id, instrument_id = building_set
++    conn = classification_connection
++
++    assert (
++        _refusal(
++            conn,
++            psycopg.errors.CheckViolation,
++            lambda: _insert_factor_input(conn, set_id, instrument_id, status="stale"),
++        )
++        == "factor_input_status_known"
++    )
++    assert (
++        _refusal(
++            conn,
++            psycopg.errors.CheckViolation,
++            lambda: _insert_classification(
++                conn,
++                set_id,
++                instrument_id,
++                status="not_classified",
++                score=None,
++                percentile=None,
++                reason_code="unknown",
++            ),
++        )
++        == "factor_classification_reason_known"
++    )
++    # PostgreSQL tests CHECK constraints in name order, and a status outside the
++    # set also breaks the shape CHECK, which sorts first, so it is the one reported.
++    assert (
++        _refusal(
++            conn,
++            psycopg.errors.CheckViolation,
++            lambda: _insert_classification(conn, set_id, instrument_id, status="maybe"),
++        )
++        == "factor_classification_shape"
++    )
++    assert (
++        _refusal(
++            conn,
++            psycopg.errors.CheckViolation,
++            lambda: _insert_classification(conn, set_id, instrument_id, factor="quality"),
++        )
++        == "factor_classification_factor_known"
++    )
++
++
++# Implements AC-20
++def test_every_classification_table_refuses_a_set_that_does_not_exist(
++    classification_connection: psycopg.Connection,
++) -> None:
++    conn = classification_connection
++    instrument_id = _instrument_id(conn)
++    missing = str(uuid.uuid4())
++
++    def insert_set_factor() -> None:
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
++                "VALUES (%s, 'value', 0, false)",
++                (missing,),
++            )
++
++    assert (
++        _refusal(conn, psycopg.errors.ForeignKeyViolation, insert_set_factor)
++        == "classification_set_factor_set_id_fkey"
++    )
++    assert (
++        _refusal(
++            conn,
++            psycopg.errors.ForeignKeyViolation,
++            lambda: _insert_factor_input(conn, missing, instrument_id),
++        )
++        == "factor_input_set_id_fkey"
++    )
++    assert (
++        _refusal(
++            conn,
++            psycopg.errors.ForeignKeyViolation,
++            lambda: _insert_classification(conn, missing, instrument_id),
++        )
++        == "factor_classification_set_id_fkey"
++    )
++
++
++# Implements AC-20
++def test_indexes_and_column_types_match_the_design(
++    classification_connection: psycopg.Connection,
++) -> None:
++    conn = classification_connection
++    with conn.cursor() as cur:
++        cur.execute(
++            "SELECT indexname, indexdef FROM pg_indexes "
++            "WHERE schemaname = 'public' AND (indexname LIKE 'idx\\_classification%' "
++            "OR indexname LIKE 'idx\\_factor%')"
++        )
++        indexes = dict(cur.fetchall())
++        cur.execute(
++            "SELECT table_name, column_name, data_type, numeric_precision, numeric_scale, "
++            "is_nullable FROM information_schema.columns "
++            "WHERE table_schema = 'public' AND (table_name, column_name) IN "
++            "(('factor_input', 'value'), ('factor_input', 'detail'), "
++            "('factor_classification', 'score'), ('factor_classification', 'percentile'))"
++        )
++        columns = {(row[0], row[1]): row[2:] for row in cur.fetchall()}
++
++    assert set(indexes) == {
++        "idx_classification_set_single_building",
++        "idx_classification_set_complete_recent",
++        "idx_classification_set_started",
++        "idx_factor_input_instrument",
++        "idx_factor_classification_instrument",
++        "idx_factor_classification_set_factor_score",
++        "idx_factor_classification_set_factor_percentile",
++    }
++    single = indexes["idx_classification_set_single_building"]
++    assert "UNIQUE" in single
++    assert "WHERE (state = 'building'::text)" in single
++    assert columns[("factor_input", "value")] == ("numeric", 30, 10, "YES")
++    assert columns[("factor_classification", "score")] == ("numeric", 18, 6, "YES")
++    assert columns[("factor_classification", "percentile")] == ("numeric", 9, 6, "YES")
++    assert columns[("factor_input", "detail")] == ("jsonb", None, None, "NO")
++
++
++# Implements AC-19
++def test_restated_possible_defaults_to_false_on_inputs_and_classifications(
++    classification_connection: psycopg.Connection, building_set: tuple[str, int]
++) -> None:
++    set_id, instrument_id = building_set
++    conn = classification_connection
++
++    _insert_factor_input(conn, set_id, instrument_id)
++    _insert_classification(conn, set_id, instrument_id)
++    conn.commit()
++
++    assert _scalar(conn, "SELECT restated_possible FROM factor_input") is False
++    assert _scalar(conn, "SELECT restated_possible FROM factor_classification") is False
+diff --git a/tests/integration/test_research_migrations_apply.py b/tests/integration/test_research_migrations_apply.py
+index 1d31731..7dd4549 100644
+--- a/tests/integration/test_research_migrations_apply.py
++++ b/tests/integration/test_research_migrations_apply.py
+@@ -1,12 +1,19 @@
+-"""Migration 0005 through the production migrator, and a second run after it."""
++"""Migrations 0005 and 0006 through the production migrator, and a second run after them."""
+ 
++import uuid
+ from typing import Any
+ 
+ import psycopg
+ import pytest
++from psycopg import sql
++from testcontainers.community.postgres import PostgresContainer
+ 
+ from factorflow.db.migrate_main import MIGRATIONS_DIR, run_migrations
+ from factorflow.db.migrator import apply_pending, discover
++from tests.integration.test_research_constraints import (
++    insert_classification_set,
++    insert_terminal_run,
++)
+ 
+ pytestmark = pytest.mark.postgres
+ 
+@@ -113,3 +120,170 @@ def test_second_migrator_run_after_0005_applies_nothing(
+         with conn.cursor() as cur:
+             cur.execute("SELECT version, checksum FROM applied_migrations ORDER BY version")
+             assert cur.fetchall() == recorded
++
++
++def seed_universe(conn: psycopg.Connection, instrument_id: int) -> None:
++    """One universe with a `created` and a `member_added` event."""
++    with conn.cursor() as cur:
++        cur.execute("INSERT INTO universe DEFAULT VALUES RETURNING universe_id")
++        row = cur.fetchone()
++        assert row is not None
++        cur.execute(
++            "INSERT INTO universe_event (universe_id, event_type, name) "
++            "VALUES (%s, 'created', 'Growth')",
++            (row[0],),
++        )
++        cur.execute(
++            "INSERT INTO universe_event (universe_id, event_type, instrument_id) "
++            "VALUES (%s, 'member_added', %s)",
++            (row[0], instrument_id),
++        )
++    conn.commit()
++
++
++CLASSIFICATION_TABLES = [
++    "classification_set",
++    "classification_set_factor",
++    "factor_input",
++    "factor_classification",
++]
++
++
++# Implements TC-COMP-156
++def test_migration_0006_applies_without_touching_earlier_rows(
++    postgres_connection_string: str,
++) -> None:
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        files = discover(MIGRATIONS_DIR)
++        assert apply_pending(conn, [f for f in files if f.version <= 5]) == [1, 2, 3, 4, 5]
++        seed_cap_001_rows(conn)
++        with conn.cursor() as cur:
++            cur.execute("SELECT instrument_id FROM instrument WHERE symbol = 'ABC'")
++            row = cur.fetchone()
++        assert row is not None
++        seed_universe(conn, row[0])
++        tables = cap_001_tables(conn)
++        before = snapshot_cap_001(conn, tables)
++
++        assert apply_pending(conn, files) == [6]
++
++        after = snapshot_cap_001(conn, tables)
++        assert {table: rows for table, rows in after.items() if table != "applied_migrations"} == {
++            table: rows for table, rows in before.items() if table != "applied_migrations"
++        }
++        assert set(before["applied_migrations"]) <= set(after["applied_migrations"])
++        with conn.cursor() as cur:
++            cur.execute("SELECT version, checksum FROM applied_migrations WHERE version = 6")
++            assert cur.fetchall() == [(6, files[5].checksum)]
++            for table in CLASSIFICATION_TABLES:
++                cur.execute(f"SELECT count(*) FROM {table}")  # noqa: S608
++                assert cur.fetchone() == (0,), table
++    finally:
++        conn.close()
++
++
++# Implements DAC-E2-S1-1
++def test_a_second_apply_after_0006_changes_nothing(postgres_connection_string: str) -> None:
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        files = discover(MIGRATIONS_DIR)
++        assert apply_pending(conn, files) == [1, 2, 3, 4, 5, 6]
++        insert_classification_set(conn, "complete")
++        conn.commit()
++        before = snapshot_cap_001(conn, CLASSIFICATION_TABLES)
++
++        assert apply_pending(conn, files) == []
++
++        with conn.cursor() as cur:
++            cur.execute("SELECT count(*) FROM applied_migrations")
++            assert cur.fetchone() == (6,)
++        assert snapshot_cap_001(conn, CLASSIFICATION_TABLES) == before
++        assert len(before["classification_set"]) == 1
++    finally:
++        conn.close()
++
++
++# Implements TC-COMP-158
++def test_pg_dump_restore_returns_the_current_set_and_membership_unchanged(
++    postgres_connection_string: str, postgres_container: PostgresContainer
++) -> None:
++    source_db = postgres_connection_string.rsplit("/", 1)[1]
++    restored_db = f"restore_{uuid.uuid4().hex}"
++    admin_url = postgres_container.get_connection_url(driver=None)
++    restored_url = f"{admin_url.rsplit('/', 1)[0]}/{restored_db}"
++    container = postgres_container.get_wrapped_container()
++    assert container is not None
++    compared = [
++        "classification_set",
++        "classification_set_factor",
++        "factor_classification",
++        "universe",
++        "universe_event",
++    ]
++
++    conn = psycopg.connect(postgres_connection_string)
++    admin = psycopg.connect(admin_url, autocommit=True)
++    try:
++        assert apply_pending(conn, discover(MIGRATIONS_DIR)) == [1, 2, 3, 4, 5, 6]
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO instrument (symbol, lifecycle) VALUES ('ABC', 'active') "
++                "RETURNING instrument_id"
++            )
++            row = cur.fetchone()
++        assert row is not None
++        instrument_id = row[0]
++        conn.commit()
++        seed_universe(conn, instrument_id)
++        set_id = insert_classification_set(conn, "complete", insert_terminal_run(conn))
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
++                "VALUES (%s, 'momentum', 1, false)",
++                (set_id,),
++            )
++            cur.execute(
++                "INSERT INTO factor_classification "
++                "(set_id, instrument_id, factor, status, score, percentile) "
++                "VALUES (%s, %s, 'momentum', 'classified', 1.5, 50)",
++                (set_id, instrument_id),
++            )
++        conn.commit()
++        before = snapshot_cap_001(conn, compared)
++        assert all(before[table] for table in compared)
++
++        dump = container.exec_run(
++            [
++                "pg_dump",
++                "-Fc",
++                "-U",
++                postgres_container.username,
++                "-d",
++                source_db,
++                "-f",
++                "/tmp/factorflow.dump",
++            ]
++        )
++        assert dump.exit_code == 0, dump.output
++        with admin.cursor() as cur:
++            cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(restored_db)))
++        restore = container.exec_run(
++            [
++                "pg_restore",
++                "-U",
++                postgres_container.username,
++                "-d",
++                restored_db,
++                "/tmp/factorflow.dump",
++            ]
++        )
++        assert restore.exit_code == 0, restore.output
++
++        with psycopg.connect(restored_url) as restored:
++            assert snapshot_cap_001(restored, compared) == before
++    finally:
++        conn.close()
++        with admin.cursor() as cur:
++            cur.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(restored_db)))
++        admin.close()
+diff --git a/tests/unit/test_distribution_contents.py b/tests/unit/test_distribution_contents.py
+index 2840621..eea8708 100644
+--- a/tests/unit/test_distribution_contents.py
++++ b/tests/unit/test_distribution_contents.py
+@@ -26,6 +26,7 @@ _MIGRATIONS = (
+     "0003_coverage.sql",
+     "0004_runs.sql",
+     "0005_universes.sql",
++    "0006_classifications.sql",
+ )
+ 
+ _STUB_INDEX_HTML = "<!doctype html><html><body>stub</body></html>\n"
+@@ -77,7 +78,7 @@ def test_wheel_carries_the_migrations_and_nothing_under_tests(built_wheel: Path)
+ 
+ # Implements TC-COMP-392
+ def test_installed_layout_resolves_its_migrations(built_wheel: Path, tmp_path: Path) -> None:
+-    """The unpacked wheel's `migrate_main` finds versions 1 to 5 beside itself.
++    """The unpacked wheel's `migrate_main` finds versions 1 to 6 beside itself.
+     Its dependencies, such as `psycopg`, come from the project environment."""
+     site = tmp_path / "site"
+     zipfile.ZipFile(built_wheel).extractall(site)
+@@ -96,4 +97,4 @@ def test_installed_layout_resolves_its_migrations(built_wheel: Path, tmp_path: P
+     )
+     directory, versions = result.stdout.splitlines()
+     assert Path(directory) == site / "factorflow" / "db" / "migrations"
+-    assert versions == "[1, 2, 3, 4, 5]"
++    assert versions == "[1, 2, 3, 4, 5, 6]"
+diff --git a/tests/unit/test_migration_0006_matches_design.py b/tests/unit/test_migration_0006_matches_design.py
+new file mode 100644
+index 0000000..9e97c35
+--- /dev/null
++++ b/tests/unit/test_migration_0006_matches_design.py
+@@ -0,0 +1,59 @@
++"""Guards against drift between migration 0006 and research-store section 2.4.
++
++Reads the design's own SQL block rather than a copy of it, so editing either
++side fails the test. Traces to AC-20 and AC-19 (CAP-002-E2-S1).
++"""
++
++import re
++from pathlib import Path
++
++from factorflow.db.migrate_main import MIGRATIONS_DIR
++from tests.unit.design_sql import REPO_ROOT, sql_block_under_heading
++
++RESEARCH_STORE_DESIGN_PATH = (
++    REPO_ROOT
++    / "docs"
++    / "capabilities"
++    / "CAP-002-universe-and-factor-classification"
++    / "design"
++    / "component-design-research-store.md"
++)
++MIGRATION_0006_PATH: Path = MIGRATIONS_DIR / "0006_classifications.sql"
++
++
++def _design_block() -> str:
++    return sql_block_under_heading("### 2.4", RESEARCH_STORE_DESIGN_PATH)
++
++
++def _names(pattern: str, text: str) -> list[str]:
++    return re.findall(pattern, text)
++
++
++def test_migration_0006_matches_design_verbatim() -> None:
++    assert MIGRATION_0006_PATH.read_text() == _design_block()
++
++
++def test_design_block_is_actually_read() -> None:
++    """The comparison above is only meaningful if the block was really found."""
++    block = _design_block()
++    assert "CREATE TABLE classification_set" in block
++    assert "CREATE TABLE factor_classification" in block
++
++
++def test_migration_0006_names_every_table_index_and_constraint_in_the_design() -> None:
++    block = _design_block()
++    committed = MIGRATION_0006_PATH.read_text()
++
++    tables = _names(r"CREATE TABLE (\w+)", block)
++    indexes = _names(r"CREATE (?:UNIQUE )?INDEX (\w+)", block)
++    constraints = _names(r"CONSTRAINT (\w+)", block)
++
++    assert len(tables) == 4
++    assert len(indexes) == 7
++    assert len(constraints) == 16
++    for name in tables:
++        assert f"CREATE TABLE {name}" in committed
++    for name in indexes:
++        assert re.search(rf"CREATE (?:UNIQUE )?INDEX {name}\b", committed)
++    for name in constraints:
++        assert f"CONSTRAINT {name}" in committed
+diff --git a/tests/unit/test_migration_filenames.py b/tests/unit/test_migration_filenames.py
+index 991ce7d..223518f 100644
+--- a/tests/unit/test_migration_filenames.py
++++ b/tests/unit/test_migration_filenames.py
+@@ -39,13 +39,14 @@ def test_real_migration_versions_are_contiguous_from_one() -> None:
+     assert versions == list(range(1, len(versions) + 1))
+ 
+ 
+-def test_e5_real_migration_inventory_is_contiguous_through_four() -> None:
++def test_e5_real_migration_inventory_is_contiguous_through_six() -> None:
+     assert [path.name for path in _real_migration_files()] == [
+         "0001_extensions_owner_state.sql",
+         "0002_observations.sql",
+         "0003_coverage.sql",
+         "0004_runs.sql",
+         "0005_universes.sql",
++        "0006_classifications.sql",
+     ]
+ 
+ 

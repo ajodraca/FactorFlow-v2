@@ -1,0 +1,45 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index 46e40a1..d686e54 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -30,7 +30,7 @@ dev = [
+ where = ["src"]
+ 
+ [tool.setuptools.package-data]
+-factorflow = ["coverage/sql/*.sql", "db/migrations/*.sql", "api/static/**/*", "universes/sql/*.sql"]
++factorflow = ["coverage/sql/*.sql", "db/migrations/*.sql", "api/static/**/*", "universes/sql/*.sql", "classification/sql/*.sql"]
+ 
+ [tool.pytest.ini_options]
+ testpaths = ["tests"]
+diff --git a/tests/unit/test_package_data_ships_sql.py b/tests/unit/test_package_data_ships_sql.py
+index 6ca3ced..1612dd8 100644
+--- a/tests/unit/test_package_data_ships_sql.py
++++ b/tests/unit/test_package_data_ships_sql.py
+@@ -6,7 +6,7 @@ An editable install finds SQL files in the source tree whether or not
+ 
+ import tomllib
+ from glob import escape, glob
+-from pathlib import Path
++from pathlib import Path, PurePath
+ 
+ import pytest
+ 
+@@ -52,6 +52,18 @@ def test_universes_sql_glob_is_listed_before_its_directory_exists() -> None:
+     assert "universes/sql/*.sql" in package_data_globs()
+ 
+ 
++# Implements TC-COMP-076
++def test_classification_sql_is_covered_by_a_package_data_glob() -> None:
++    """`src/factorflow/classification/sql/` arrives with CAP-002-E2-S2 (DEC-0088).
++
++    The directory does not exist yet, so the glob is matched against a synthetic
++    path: a check that enumerates directories cannot fail for one that is absent.
++    """
++    synthetic = PurePath("classification/sql/anything.sql")
++
++    assert any(synthetic.match(pattern) for pattern in package_data_globs())
++
++
+ # Implements TC-COMP-018
+ def test_guard_reports_a_sql_directory_no_glob_covers(tmp_path: Path) -> None:
+     sql_dir = tmp_path / "widgets" / "sql"

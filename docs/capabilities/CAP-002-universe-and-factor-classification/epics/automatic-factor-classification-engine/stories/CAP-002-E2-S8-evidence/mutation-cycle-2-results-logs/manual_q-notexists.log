@@ -1,0 +1,252 @@
+F.........FFF.FFFFF.F..                                                  [100%]
+=================================== FAILURES ===================================
+__ test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set ___
+
+    def test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set() -> None:
+        text = _sql("qualifying_run.sql")
+        assert "FROM acquisition_run" in text
+        assert re.search(r"state\s+IN\s*\(\s*'succeeded'\s*,\s*'partial'\s*\)", text)
+>       assert re.search(r"NOT\s+EXISTS\s*\(.*classification_set.*run_id\s*=\s*r\.run_id", text, re.S)
+E       assert None
+E        +  where None = <function search at 0x105173f60>('NOT\\s+EXISTS\\s*\\(.*classification_set.*run_id\\s*=\\s*r\\.run_id', "-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-4).\nSELECT r.run_id\n  ...)\n   AND EXISTS (SELECT 1 FROM classification_set s WHERE s.run_id = r.run_id)\n ORDER BY r.ended_at ASC\n LIMIT 1;\n", re.DOTALL)
+E        +    where <function search at 0x105173f60> = re.search
+E        +    and   re.DOTALL = re.S
+
+tests/unit/test_classification_scheduler_sql.py:29: AssertionError
+_________ test_only_succeeded_and_partial_runs_are_claimed[succeeded] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-1' at 0x1087e3e00>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_06a971c9cac748f3b97071b337973a12) at 0x108974cd0>)
+qualifying = 'succeeded'
+
+    @pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
+    def test_only_succeeded_and_partial_runs_are_claimed(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
+    ) -> None:
+        pool, conn = store
+        for state in ("failed", "cancelled", "abandoned", "requested", "running"):
+            add_run(conn, state)
+    
+        assert claim_next_set(pool) is None
+        assert set_rows(conn) == []
+    
+        run_id = add_run(conn, qualifying)
+        claimed = claim_next_set(pool)
+    
+>       assert isinstance(claimed, ClaimedSet)
+E       assert False
+E        +  where False = isinstance(None, ClaimedSet)
+
+tests/integration/test_scheduler_claim.py:69: AssertionError
+__________ test_only_succeeded_and_partial_runs_are_claimed[partial] ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-2' at 0x108974410>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_7ac2a51cfa0f44448f55f6c1ae66abbf) at 0x1089847c0>)
+qualifying = 'partial'
+
+    @pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
+    def test_only_succeeded_and_partial_runs_are_claimed(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
+    ) -> None:
+        pool, conn = store
+        for state in ("failed", "cancelled", "abandoned", "requested", "running"):
+            add_run(conn, state)
+    
+        assert claim_next_set(pool) is None
+        assert set_rows(conn) == []
+    
+        run_id = add_run(conn, qualifying)
+        claimed = claim_next_set(pool)
+    
+>       assert isinstance(claimed, ClaimedSet)
+E       assert False
+E        +  where False = isinstance(None, ClaimedSet)
+
+tests/integration/test_scheduler_claim.py:69: AssertionError
+___________ test_qualifying_runs_are_claimed_oldest_first_once_each ____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-3' at 0x108974050>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_6b38d6f8a27448a19a9a61361e24c6fc) at 0x108984380>)
+
+    def test_qualifying_runs_are_claimed_oldest_first_once_each(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        second = add_run(conn, "succeeded", T0 + timedelta(hours=1))
+        third = add_run(conn, "partial", T0 + timedelta(hours=2))
+        first = add_run(conn, "succeeded", T0)
+    
+        order = []
+        for _ in range(3):
+            claimed = claim_next_set(pool)
+>           assert claimed is not None
+E           assert None is not None
+
+tests/integration/test_scheduler_claim.py:87: AssertionError
+__________ test_claim_stamps_the_chicago_date[instant0-chicago_date0] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x108975f90>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_638538fd59f443c6a3d668a795169487) at 0x108984f30>)
+instant = datetime.datetime(2026, 10, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 10, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool, at=instant)
+    
+>       assert claimed is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_claim.py:130: AssertionError
+__________ test_claim_stamps_the_chicago_date[instant1-chicago_date1] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-6' at 0x108974190>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_5f0c0ce9850f4d8da0189863fca5c0f5) at 0x108985370>)
+instant = datetime.datetime(2026, 12, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 12, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool, at=instant)
+    
+>       assert claimed is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_claim.py:130: AssertionError
+_________ test_claim_without_at_stamps_the_database_clock_chicago_date _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-7' at 0x108976350>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_1acd9f227cf84a2eb9c46ac8894ebd56) at 0x108985bf0>)
+
+    def test_claim_without_at_stamps_the_database_clock_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool)
+    
+>       assert claimed is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_claim.py:151: AssertionError
+_____________ test_failed_set_for_run_a_does_not_block_later_run_b _____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-8' at 0x1089765d0>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_6790596b875843f9ad960565285721ab) at 0x108986ad0>)
+
+    def test_failed_set_for_run_a_does_not_block_later_run_b(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        failed = add_set(conn, run_a, "failed", failure_reason="own reason")
+        run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
+    
+        claimed = claim_next_set(pool)
+>       assert claimed is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_claim.py:176: AssertionError
+____ test_claim_returns_none_when_the_run_acquired_a_set_between_statements ____
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-9' at 0x108974190>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_16e2f04c8b7d44cf826bcbbdbe30b0cc) at 0x1089867a0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1088df360>
+
+    def test_claim_returns_none_when_the_run_acquired_a_set_between_statements(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-4, AC-10 (design 2.4): a run_id UniqueViolation yields None and rolls back."""
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        add_set(conn, run_a, "failed")
+        monkeypatch.setattr(scheduler, "_QUALIFYING_RUN_SQL", f"SELECT '{run_a}'::uuid")
+    
+        assert claim_next_set(pool) is None
+    
+        assert len(set_rows(conn)) == 1
+        monkeypatch.undo()
+        run_b = add_run(conn, "succeeded", T0 + timedelta(hours=1))
+        follow_up = claim_next_set(pool)
+>       assert follow_up is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_claim.py:202: AssertionError
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x108976350>, <psycopg.Connection [IDLE] (host=localhost port=60019 user=test database=test_7897ea9364fe4b80ad20fc49e1c4f122) at 0x1089869c0>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+        reclaim_interrupted_sets(pool)
+    
+        assert _full_rows(conn, [complete, failed]) == untouched_before
+        rows = {r[0]: r for r in set_rows(conn)}
+        assert rows[stale][2] == "failed"
+        assert rows[stale][3] == INTERRUPTED_REASON
+        with conn.cursor() as cur:
+            cur.execute("SELECT ended_at FROM classification_set WHERE set_id = %s", (stale,))
+            ended = cur.fetchone()
+        conn.rollback()
+        assert ended is not None
+        assert ended[0] >= before_reclaim
+    
+        claimed = claim_next_set(pool)
+>       assert claimed is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_restart.py:93: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set e2be1100-90a2-44e3-83b4-cbc423b29dd5 for run d5663511-7b49-417d-bc68-be8efe4bc257 was interrupted; recorded failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set
+FAILED tests/integration/test_scheduler_claim.py::test_only_succeeded_and_partial_runs_are_claimed[succeeded]
+FAILED tests/integration/test_scheduler_claim.py::test_only_succeeded_and_partial_runs_are_claimed[partial]
+FAILED tests/integration/test_scheduler_claim.py::test_qualifying_runs_are_claimed_oldest_first_once_each
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant0-chicago_date0]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant1-chicago_date1]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_without_at_stamps_the_database_clock_chicago_date
+FAILED tests/integration/test_scheduler_claim.py::test_failed_set_for_run_a_does_not_block_later_run_b
+FAILED tests/integration/test_scheduler_claim.py::test_claim_returns_none_when_the_run_acquired_a_set_between_statements
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+10 failed, 13 passed in 3.07s

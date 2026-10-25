@@ -1,0 +1,122 @@
+# TDD evidence for CAP-002-E2-S8 - Classification settings, qualifying-run claim and interrupted-build reclaim.
+# Cycles share the one stage commit, so each cites its reviewed_patch (the files do not overlap).
+# Decisions: DEC-0125 (the at keyword on claim_next_set and the COALESCE in claim_set.sql).
+# Reviews: one independent code-review subagent and one independent spec-drift subagent per cycle; each cycle was rejected or flagged once, reworked and re-reviewed APPROVED.
+
+cycles:
+  - id: cycle-1
+    tasks: [T003, T014, T015]
+    description: >
+      ClassificationSettings (FACTORFLOW_CLASSIFICATION_*, poll 5 s, timeout 300 s, poll strictly below timeout) and the
+      package marker, with TC-COMP-082 and its additional cases. Review rework: a fractional poll in the accepted case
+      (kills a float-to-int mutant), the timeout-below-bound test also asserts the poll variable is not named, and the
+      TC tag was removed from two additional-case tests.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/red-cycle-1-settings.log
+    red_log_sha256: 5246aeb741a1ca65e2809b333998d839cf597e1a3de96b2df1bfbcf785166c17
+    red_evidence: >
+      Collection error before the change: ModuleNotFoundError, no module named factorflow.classification.settings.
+    green_evidence: tests/unit/test_classification_settings.py 9 passed after T014 and T015.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 521dd18a44e53f8136fd78f537927e60ec22e07d5952ecfa70ea9cb3eddbc5ca
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/mutation-cycle-1-results.json
+      results_sha256: 2e0620f216920a974b899c528ae900e343cd82da87225f9161ec93837db8304a
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T016, T017]
+    description: >
+      scheduler.py (claim_next_set with the DEC-0125 at keyword, reclaim_interrupted_sets, ClaimedSet, ReclaimedSet), the
+      three SQL files, the database helper module and TC-COMP-077 to 081 and 168 with the race, error-propagation and
+      reclaim edge tests, plus the SQL/source and shape unit tests. Review rework: an error other than UniqueViolation must
+      propagate (kills a widened except), the reclaim asserts ended_at is not earlier than the reclaim began, universe_event
+      joined the append-only list, the reason-terms test reads the shipped SQL, and AC docstrings were added.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/red-cycle-2-scheduler.log
+    red_log_sha256: 98e8ff25ce1551eae8f59029bd728f6160f6beef1cc7b7df466febeb2a89b168
+    red_evidence: >
+      Collection errors before the change: ModuleNotFoundError, no module named factorflow.classification.scheduler,
+      for the shape, claim and restart modules.
+    green_evidence: >
+      The four scheduler modules plus the settings module: 32 passed against a real PostgreSQL 16 container; the full suite
+      is recorded in the stage report.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8da73609220190f061978b0166fbb9b08bf81a09ec6e19d7a0f1e3cc14181137
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/mutation-cycle-2-results.json
+      results_sha256: c2ca7a4cbf005bd179014710cd95bde7ff0aacb1052dd211ae8d8678259eb9ef
+      generated: 25
+      killed: 19
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 0.76
+      survivors:
+        - id: src/factorflow/classification/sql/claim_set.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/claim_set.sql:1:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/qualifying_run.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/qualifying_run.sql:1:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/qualifying_run.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: SELECT 1 became SELECT 2 inside NOT EXISTS, whose select list is never read
+        - id: src/factorflow/classification/sql/reclaim_interrupted.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+
+  - id: cycle-3
+    tasks: [T007]
+    description: >
+      Review rework of IR-001. The TC-COMP-080 control (claim with at omitted) now asserts classification_date equals the
+      Chicago date of the set's own started_at, which defaults to the claim transaction's now(), instead of accepting a stamp
+      one day behind. It runs under three session time zones (UTC, Etc/GMT+4, Etc/GMT-14) so a CURRENT_DATE fallback is
+      killed whatever the hour. Production code is unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/red-cycle-3-default-yesterday.log
+    red_log_sha256: 6b4ec54f9830b603003904b7d905d3737a6ffd479d5a338fec57a3f45cb1c937
+    red_evidence: >
+      With the fallback in claim_set.sql mutated to CURRENT_TIMESTAMP - interval '1 day' (manual:r-c-default-yesterday),
+      the strengthened control fails in all three zones (3 failed); the log was taken with the mutation applied and
+      reverted afterwards.
+    green_evidence: tests/integration/test_scheduler_claim.py 12 passed against a real PostgreSQL 16 container after the change.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b6fe5031c1c8da07e206e956c63ed1091660eb2bf67419a90a50f66d0c927ee4
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S8-evidence/mutation-cycle-3-results.json
+      results_sha256: 8ac9c4e9e6047627adb6641978526900a5b70251ee7a4a84d1558d4c92a6e9cf
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

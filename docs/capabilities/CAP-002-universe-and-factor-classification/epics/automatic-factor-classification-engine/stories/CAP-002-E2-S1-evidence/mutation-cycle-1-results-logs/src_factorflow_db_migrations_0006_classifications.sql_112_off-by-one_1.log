@@ -1,0 +1,19 @@
+F
+=================================== FAILURES ===================================
+_________________ test_migration_0006_matches_design_verbatim __________________
+
+    def test_migration_0006_matches_design_verbatim() -> None:
+>       assert MIGRATION_0006_PATH.read_text() == _design_block()
+E       assert "CREATE TABLE...(DEC-67).';\n" == "CREATE TABLE...EC-0066).';\n"
+E         
+E         Skipping 5710 identical leading characters in diff, use -v to show
+E         - sing (DEC-0066).';
+E         ?           -- ^
+E         + sing (DEC-67).';
+E         ?            ^
+
+tests/unit/test_migration_0006_matches_design.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_migration_0006_matches_design.py::test_migration_0006_matches_design_verbatim
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.08s

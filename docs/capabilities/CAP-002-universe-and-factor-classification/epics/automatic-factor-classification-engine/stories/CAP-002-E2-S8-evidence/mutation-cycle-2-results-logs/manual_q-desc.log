@@ -1,0 +1,45 @@
+F...........F..........                                                  [100%]
+=================================== FAILURES ===================================
+__ test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set ___
+
+    def test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set() -> None:
+        text = _sql("qualifying_run.sql")
+        assert "FROM acquisition_run" in text
+        assert re.search(r"state\s+IN\s*\(\s*'succeeded'\s*,\s*'partial'\s*\)", text)
+        assert re.search(r"NOT\s+EXISTS\s*\(.*classification_set.*run_id\s*=\s*r\.run_id", text, re.S)
+>       assert re.search(r"ORDER\s+BY\s+r\.ended_at\s+ASC", text)
+E       AssertionError: assert None
+E        +  where None = <function search at 0x1080bff60>('ORDER\\s+BY\\s+r\\.ended_at\\s+ASC', '-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-4).\nSELECT r.run_id\n  ... AND NOT EXISTS (SELECT 1 FROM classification_set s WHERE s.run_id = r.run_id)\n ORDER BY r.ended_at DESC\n LIMIT 1;\n')
+E        +    where <function search at 0x1080bff60> = re.search
+
+tests/unit/test_classification_scheduler_sql.py:30: AssertionError
+___________ test_qualifying_runs_are_claimed_oldest_first_once_each ____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-3' at 0x10b868190>, <psycopg.Connection [IDLE] (host=localhost port=60023 user=test database=test_04299059b1e04ef38e8309a28820d62a) at 0x10b1d09e0>)
+
+    def test_qualifying_runs_are_claimed_oldest_first_once_each(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        second = add_run(conn, "succeeded", T0 + timedelta(hours=1))
+        third = add_run(conn, "partial", T0 + timedelta(hours=2))
+        first = add_run(conn, "succeeded", T0)
+    
+        order = []
+        for _ in range(3):
+            claimed = claim_next_set(pool)
+            assert claimed is not None
+            order.append(claimed.run_id)
+            _complete(conn, claimed.set_id)
+    
+>       assert order == [first, second, third]
+E       AssertionError: assert [UUID('89b6f0...91e2338dad6')] == [UUID('569828...67546a02f9a')]
+E         
+E         At index 0 diff: UUID('89b6f098-d031-45c8-ba31-667546a02f9a') != UUID('56982820-02eb-42b3-9609-091e2338dad6')
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_claim.py:91: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set
+FAILED tests/integration/test_scheduler_claim.py::test_qualifying_runs_are_claimed_oldest_first_once_each
+2 failed, 21 passed in 3.21s

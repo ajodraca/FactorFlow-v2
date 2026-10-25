@@ -1,0 +1,24 @@
+...................F...                                                  [100%]
+=================================== FAILURES ===================================
+______________ test_claim_does_not_swallow_other_database_errors _______________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-10' at 0x1089a8190>, <psycopg.Connection [IDLE] (host=localhost port=59795 user=test database=test_bb44a81face84c339f734d71218dde56) at 0x108347df0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1089476f0>
+
+    def test_claim_does_not_swallow_other_database_errors(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Only a UniqueViolation means "not now" (design 2.4, OPS-ERR-001); anything else raises."""
+        pool, conn = store
+        add_run(conn, "succeeded")
+        monkeypatch.setattr(scheduler, "_QUALIFYING_RUN_SQL", "SELECT gen_random_uuid()")
+    
+>       with pytest.raises(psycopg.errors.ForeignKeyViolation):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ForeignKeyViolation
+
+tests/integration/test_scheduler_claim.py:215: Failed
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_claim.py::test_claim_does_not_swallow_other_database_errors
+1 failed, 22 passed in 3.14s

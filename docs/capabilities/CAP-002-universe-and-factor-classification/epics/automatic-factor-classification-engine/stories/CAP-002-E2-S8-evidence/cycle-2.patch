@@ -1,0 +1,695 @@
+diff --git a/src/factorflow/classification/scheduler.py b/src/factorflow/classification/scheduler.py
+new file mode 100644
+index 0000000..01eb6bf
+--- /dev/null
++++ b/src/factorflow/classification/scheduler.py
+@@ -0,0 +1,71 @@
++"""Classification scheduler, data side: claim a qualifying run and reclaim interrupted builds.
++
++The asyncio loop and the build handoff are CAP-002-E2-S9.
++"""
++
++import logging
++from dataclasses import dataclass
++from datetime import datetime
++from pathlib import Path
++from typing import Any, Final
++from uuid import UUID
++
++import psycopg.errors
++from psycopg_pool import ConnectionPool
++
++_SQL_DIR = Path(__file__).parent / "sql"
++_QUALIFYING_RUN_SQL: Final = (_SQL_DIR / "qualifying_run.sql").read_text()
++_CLAIM_SET_SQL: Final = (_SQL_DIR / "claim_set.sql").read_text()
++_RECLAIM_INTERRUPTED_SQL: Final = (_SQL_DIR / "reclaim_interrupted.sql").read_text()
++
++_log = logging.getLogger(__name__)
++
++
++@dataclass(frozen=True)
++class ClaimedSet:
++    set_id: UUID
++    run_id: UUID
++
++
++@dataclass(frozen=True)
++class ReclaimedSet:
++    set_id: UUID
++    run_id: UUID
++
++
++def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
++    """Create a building set for the oldest qualifying run, or return None.
++
++    `at` fixes the instant the classification date is taken from (DEC-0125); production
++    passes nothing and the database clock is used. A UniqueViolation means a set is
++    already building or the run acquired one between the two statements: both mean
++    "not now", so the transaction is rolled back and None is returned.
++    """
++    try:
++        with pool.connection() as conn, conn.cursor() as cur:
++            cur.execute(_QUALIFYING_RUN_SQL)
++            run = cur.fetchone()
++            if run is None:
++                return None
++            run_id = run[0]
++            cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
++            created = cur.fetchone()
++            if created is None:
++                raise RuntimeError("claim_set.sql returned no set_id")
++            return ClaimedSet(set_id=created[0], run_id=run_id)
++    except psycopg.errors.UniqueViolation:
++        return None
++
++
++def reclaim_interrupted_sets(pool: "ConnectionPool[Any]") -> list[ReclaimedSet]:
++    """Record every set left building as failed; run once at start, before any claim."""
++    with pool.connection() as conn, conn.cursor() as cur:
++        cur.execute(_RECLAIM_INTERRUPTED_SQL)
++        reclaimed = [ReclaimedSet(set_id=row[0], run_id=row[1]) for row in cur.fetchall()]
++    for item in reclaimed:
++        _log.warning(
++            "classification set %s for run %s was interrupted; recorded failed",
++            item.set_id,
++            item.run_id,
++        )
++    return reclaimed
+diff --git a/src/factorflow/classification/sql/claim_set.sql b/src/factorflow/classification/sql/claim_set.sql
+new file mode 100644
+index 0000000..e12b8d8
+--- /dev/null
++++ b/src/factorflow/classification/sql/claim_set.sql
+@@ -0,0 +1,5 @@
++-- Claim a run: one building set, stamped with the Chicago date (STD-UI-5; DEC-0125 adds the at parameter).
++INSERT INTO classification_set (run_id, state, classification_date)
++VALUES (%(run_id)s, 'building',
++        (COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP) AT TIME ZONE 'America/Chicago')::date)
++RETURNING set_id;
+diff --git a/src/factorflow/classification/sql/qualifying_run.sql b/src/factorflow/classification/sql/qualifying_run.sql
+new file mode 100644
+index 0000000..4489722
+--- /dev/null
++++ b/src/factorflow/classification/sql/qualifying_run.sql
+@@ -0,0 +1,7 @@
++-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-4).
++SELECT r.run_id
++  FROM acquisition_run r
++ WHERE r.state IN ('succeeded', 'partial')
++   AND NOT EXISTS (SELECT 1 FROM classification_set s WHERE s.run_id = r.run_id)
++ ORDER BY r.ended_at ASC
++ LIMIT 1;
+diff --git a/src/factorflow/classification/sql/reclaim_interrupted.sql b/src/factorflow/classification/sql/reclaim_interrupted.sql
+new file mode 100644
+index 0000000..15001ee
+--- /dev/null
++++ b/src/factorflow/classification/sql/reclaim_interrupted.sql
+@@ -0,0 +1,7 @@
++-- Start-up reclaim: a set left building by an interrupted process is recorded failed (DAC-E2-12).
++UPDATE classification_set
++   SET state = 'failed',
++       ended_at = now(),
++       failure_reason = 'interrupted: the application restarted during the build'
++ WHERE state = 'building'
++RETURNING set_id, run_id;
+diff --git a/tests/integration/scheduler_support.py b/tests/integration/scheduler_support.py
+new file mode 100644
+index 0000000..e05d149
+--- /dev/null
++++ b/tests/integration/scheduler_support.py
+@@ -0,0 +1,103 @@
++"""Helpers for the classification scheduler's database tests (CAP-002-E2-S8).
++
++A plain module, not a conftest: it has no fixtures. Every helper that writes commits.
++"""
++
++from datetime import UTC, date, datetime
++from typing import Any
++from uuid import UUID
++
++import psycopg
++from psycopg_pool import ConnectionPool
++
++from factorflow.db.migrate_main import MIGRATIONS_DIR
++from factorflow.db.migrator import apply_pending, discover
++
++TERMINAL_RUN_STATES = ("succeeded", "partial", "failed", "cancelled", "abandoned")
++INTERRUPTED_REASON = "interrupted: the application restarted during the build"
++
++
++def migrate_all(connection_string: str) -> None:
++    """Apply every migration and assert the classification tables (version 6) are present."""
++    with psycopg.connect(connection_string) as conn:
++        apply_pending(conn, discover(MIGRATIONS_DIR))
++        with conn.cursor() as cur:
++            cur.execute("SELECT version FROM applied_migrations")
++            versions = {row[0] for row in cur.fetchall()}
++    assert 6 in versions
++
++
++def open_pool(connection_string: str) -> "ConnectionPool[Any]":
++    return ConnectionPool(connection_string, min_size=1, max_size=2, open=True)
++
++
++def add_run(conn: psycopg.Connection, state: str, ended_at: datetime | None = None) -> UUID:
++    """Insert an acquisition_run in `state` that satisfies the table's CHECK constraints."""
++    with conn.cursor() as cur:
++        if state in TERMINAL_RUN_STATES:
++            cur.execute(
++                "INSERT INTO acquisition_run (state, history_depth_years, ended_at) "
++                "VALUES (%s, 1, COALESCE(%s, now())) RETURNING run_id",
++                (state, ended_at),
++            )
++        elif state == "running":
++            cur.execute(
++                "INSERT INTO acquisition_run (state, history_depth_years, started_at, "
++                "claimed_by, heartbeat_at) VALUES ('running', 1, now(), 'runner', now()) "
++                "RETURNING run_id"
++            )
++        else:
++            cur.execute(
++                "INSERT INTO acquisition_run (state, history_depth_years) VALUES (%s, 1) "
++                "RETURNING run_id",
++                (state,),
++            )
++        row = cur.fetchone()
++    conn.commit()
++    assert row is not None
++    return UUID(str(row[0]))
++
++
++def add_set(
++    conn: psycopg.Connection,
++    run_id: UUID,
++    state: str,
++    classification_date: date = date(2026, 10, 1),
++    failure_reason: str = "RuntimeError: boom",
++) -> UUID:
++    """Insert a classification_set in `state` that satisfies the terminal-shape CHECKs."""
++    columns: dict[str, Any] = {
++        "run_id": run_id,
++        "state": state,
++        "classification_date": classification_date,
++    }
++    if state in ("complete", "failed"):
++        columns["ended_at"] = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
++    if state == "complete":
++        columns["latest_trading_day"] = date(2026, 9, 30)
++        columns["active_instruments"] = 0
++    if state == "failed":
++        columns["failure_reason"] = failure_reason
++    names = ", ".join(columns)
++    marks = ", ".join(["%s"] * len(columns))
++    with conn.cursor() as cur:
++        cur.execute(
++            f"INSERT INTO classification_set ({names}) VALUES ({marks}) RETURNING set_id",  # noqa: S608
++            tuple(columns.values()),
++        )
++        row = cur.fetchone()
++    conn.commit()
++    assert row is not None
++    return UUID(str(row[0]))
++
++
++def set_rows(conn: psycopg.Connection) -> list[tuple[Any, ...]]:
++    """Every set as (set_id, run_id, state, failure_reason), oldest first."""
++    with conn.cursor() as cur:
++        cur.execute(
++            "SELECT set_id, run_id, state, failure_reason FROM classification_set "
++            "ORDER BY started_at, set_id"
++        )
++        rows = cur.fetchall()
++    conn.rollback()
++    return rows
+diff --git a/tests/integration/test_scheduler_claim.py b/tests/integration/test_scheduler_claim.py
+new file mode 100644
+index 0000000..67fd5bc
+--- /dev/null
++++ b/tests/integration/test_scheduler_claim.py
+@@ -0,0 +1,218 @@
++"""Implements TC-COMP-077 to TC-COMP-081: the scheduler's qualifying-run claim (CAP-002-E2-S8)."""
++
++from collections.abc import Iterator
++from datetime import UTC, date, datetime, timedelta
++from typing import Any
++from zoneinfo import ZoneInfo
++
++import psycopg
++import psycopg.errors
++import pytest
++from psycopg_pool import ConnectionPool
++
++from factorflow.classification import scheduler
++from factorflow.classification.scheduler import ClaimedSet, claim_next_set
++from tests.integration.scheduler_support import (
++    add_run,
++    add_set,
++    migrate_all,
++    open_pool,
++    set_rows,
++)
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
++
++
++@pytest.fixture
++def store(
++    postgres_connection_string: str,
++) -> Iterator[tuple["ConnectionPool[Any]", psycopg.Connection]]:
++    migrate_all(postgres_connection_string)
++    pool = open_pool(postgres_connection_string)
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        yield pool, conn
++    finally:
++        conn.close()
++        pool.close()
++
++
++def _complete(conn: psycopg.Connection, set_id: Any) -> None:
++    """Finish a building set so the single-building index admits the next claim."""
++    with conn.cursor() as cur:
++        cur.execute(
++            "UPDATE classification_set SET state = 'complete', ended_at = now(), "
++            "latest_trading_day = '2026-09-30', active_instruments = 0 "
++            "WHERE set_id = %s AND state = 'building'",
++            (set_id,),
++        )
++    conn.commit()
++
++
++# Implements TC-COMP-077
++@pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
++def test_only_succeeded_and_partial_runs_are_claimed(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
++) -> None:
++    pool, conn = store
++    for state in ("failed", "cancelled", "abandoned", "requested", "running"):
++        add_run(conn, state)
++
++    assert claim_next_set(pool) is None
++    assert set_rows(conn) == []
++
++    run_id = add_run(conn, qualifying)
++    claimed = claim_next_set(pool)
++
++    assert isinstance(claimed, ClaimedSet)
++    assert claimed.run_id == run_id
++    rows = set_rows(conn)
++    assert [(r[0], r[1], r[2]) for r in rows] == [(claimed.set_id, run_id, "building")]
++
++
++# Implements TC-COMP-078
++def test_qualifying_runs_are_claimed_oldest_first_once_each(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++) -> None:
++    pool, conn = store
++    second = add_run(conn, "succeeded", T0 + timedelta(hours=1))
++    third = add_run(conn, "partial", T0 + timedelta(hours=2))
++    first = add_run(conn, "succeeded", T0)
++
++    order = []
++    for _ in range(3):
++        claimed = claim_next_set(pool)
++        assert claimed is not None
++        order.append(claimed.run_id)
++        _complete(conn, claimed.set_id)
++
++    assert order == [first, second, third]
++    assert claim_next_set(pool) is None
++    assert sorted(str(r[1]) for r in set_rows(conn)) == sorted(str(r) for r in order)
++
++
++# Implements TC-COMP-079
++def test_claim_beside_a_building_set_returns_none_and_inserts_nothing(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++) -> None:
++    pool, conn = store
++    run_a = add_run(conn, "succeeded", T0)
++    building = add_set(conn, run_a, "building")
++    run_b = add_run(conn, "succeeded", T0 + timedelta(hours=1))
++
++    assert claim_next_set(pool) is None
++
++    rows = set_rows(conn)
++    assert [(r[0], r[1], r[2]) for r in rows] == [(building, run_a, "building")]
++    assert all(r[1] != run_b for r in rows)
++
++
++# Implements TC-COMP-080
++@pytest.mark.parametrize(
++    ("instant", "chicago_date"),
++    [
++        (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
++        (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
++    ],
++)
++def test_claim_stamps_the_chicago_date(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++    instant: datetime,
++    chicago_date: date,
++) -> None:
++    pool, conn = store
++    add_run(conn, "succeeded")
++
++    claimed = claim_next_set(pool, at=instant)
++
++    assert claimed is not None
++    with conn.cursor() as cur:
++        cur.execute(
++            "SELECT classification_date FROM classification_set WHERE set_id = %s",
++            (claimed.set_id,),
++        )
++        row = cur.fetchone()
++    conn.rollback()
++    assert row is not None
++    assert row[0] == chicago_date
++
++
++# Implements TC-COMP-080
++def test_claim_without_at_stamps_the_database_clock_chicago_date(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++) -> None:
++    pool, conn = store
++    add_run(conn, "succeeded")
++
++    claimed = claim_next_set(pool)
++
++    assert claimed is not None
++    with conn.cursor() as cur:
++        cur.execute(
++            "SELECT classification_date, (now() AT TIME ZONE 'America/Chicago')::date "
++            "FROM classification_set WHERE set_id = %s",
++            (claimed.set_id,),
++        )
++        row = cur.fetchone()
++    conn.rollback()
++    assert row is not None
++    stamped, expected = row
++    # The two reads straddle at most one Chicago midnight.
++    assert stamped in (expected, expected - timedelta(days=1))
++
++
++# Implements TC-COMP-081
++def test_failed_set_for_run_a_does_not_block_later_run_b(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++) -> None:
++    pool, conn = store
++    run_a = add_run(conn, "succeeded", T0)
++    failed = add_set(conn, run_a, "failed", failure_reason="own reason")
++    run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
++
++    claimed = claim_next_set(pool)
++    assert claimed is not None
++    assert claimed.run_id == run_b
++    assert claim_next_set(pool) is None
++
++    rows = set_rows(conn)
++    assert len(rows) == 2
++    assert (failed, run_a, "failed", "own reason") in rows
++    assert [(r[1], r[2]) for r in rows if r[1] == run_b] == [(run_b, "building")]
++
++
++def test_claim_returns_none_when_the_run_acquired_a_set_between_statements(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """DAC-E2-4, AC-10 (design 2.4): a run_id UniqueViolation yields None and rolls back."""
++    pool, conn = store
++    run_a = add_run(conn, "succeeded", T0)
++    add_set(conn, run_a, "failed")
++    monkeypatch.setattr(scheduler, "_QUALIFYING_RUN_SQL", f"SELECT '{run_a}'::uuid")
++
++    assert claim_next_set(pool) is None
++
++    assert len(set_rows(conn)) == 1
++    monkeypatch.undo()
++    run_b = add_run(conn, "succeeded", T0 + timedelta(hours=1))
++    follow_up = claim_next_set(pool)
++    assert follow_up is not None
++    assert follow_up.run_id == run_b
++
++
++def test_claim_does_not_swallow_other_database_errors(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Only a UniqueViolation means "not now" (design 2.4, OPS-ERR-001); anything else raises."""
++    pool, conn = store
++    add_run(conn, "succeeded")
++    monkeypatch.setattr(scheduler, "_QUALIFYING_RUN_SQL", "SELECT gen_random_uuid()")
++
++    with pytest.raises(psycopg.errors.ForeignKeyViolation):
++        claim_next_set(pool)
++
++    assert set_rows(conn) == []
+diff --git a/tests/integration/test_scheduler_restart.py b/tests/integration/test_scheduler_restart.py
+new file mode 100644
+index 0000000..bca6d9d
+--- /dev/null
++++ b/tests/integration/test_scheduler_restart.py
+@@ -0,0 +1,125 @@
++"""Implements TC-COMP-168: reclaiming an interrupted build (CAP-002-E2-S8; DAC-E2-12)."""
++
++import logging
++from collections.abc import Iterator
++from datetime import UTC, datetime, timedelta
++from typing import Any
++
++import psycopg
++import pytest
++from psycopg_pool import ConnectionPool
++
++from factorflow.classification.scheduler import (
++    ReclaimedSet,
++    claim_next_set,
++    reclaim_interrupted_sets,
++)
++from tests.integration.scheduler_support import (
++    INTERRUPTED_REASON,
++    add_run,
++    add_set,
++    migrate_all,
++    open_pool,
++    set_rows,
++)
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
++
++
++@pytest.fixture
++def store(
++    postgres_connection_string: str,
++) -> Iterator[tuple["ConnectionPool[Any]", psycopg.Connection]]:
++    migrate_all(postgres_connection_string)
++    pool = open_pool(postgres_connection_string)
++    conn = psycopg.connect(postgres_connection_string)
++    try:
++        yield pool, conn
++    finally:
++        conn.close()
++        pool.close()
++
++
++def _full_rows(conn: psycopg.Connection, set_ids: list[Any]) -> list[tuple[Any, ...]]:
++    with conn.cursor() as cur:
++        cur.execute(
++            "SELECT t::text FROM classification_set t WHERE set_id = ANY(%s) ORDER BY 1",
++            (set_ids,),
++        )
++        rows = cur.fetchall()
++    conn.rollback()
++    return rows
++
++
++# Implements TC-COMP-168
++def test_reclaim_fails_stale_building_sets_only(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++) -> None:
++    pool, conn = store
++    run_a = add_run(conn, "succeeded", T0)
++    stale = add_set(conn, run_a, "building")
++    complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
++    failed = add_set(
++        conn,
++        add_run(conn, "partial", T0 + timedelta(hours=2)),
++        "failed",
++        failure_reason="own reason",
++    )
++    run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
++    untouched_before = _full_rows(conn, [complete, failed])
++    with conn.cursor() as cur:
++        cur.execute("SELECT clock_timestamp()")
++        row = cur.fetchone()
++    conn.rollback()
++    assert row is not None
++    before_reclaim = row[0]
++
++    reclaim_interrupted_sets(pool)
++
++    assert _full_rows(conn, [complete, failed]) == untouched_before
++    rows = {r[0]: r for r in set_rows(conn)}
++    assert rows[stale][2] == "failed"
++    assert rows[stale][3] == INTERRUPTED_REASON
++    with conn.cursor() as cur:
++        cur.execute("SELECT ended_at FROM classification_set WHERE set_id = %s", (stale,))
++        ended = cur.fetchone()
++    conn.rollback()
++    assert ended is not None
++    assert ended[0] >= before_reclaim
++
++    claimed = claim_next_set(pool)
++    assert claimed is not None
++    assert claimed.run_id == run_d
++
++
++def test_reclaim_with_nothing_building_returns_empty_and_changes_nothing(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++) -> None:
++    """AC-20, DAC-E2-12, DAC-E2-S8-6: nothing building means nothing is touched."""
++    pool, conn = store
++    complete = add_set(conn, add_run(conn, "succeeded"), "complete")
++    before = _full_rows(conn, [complete])
++
++    assert reclaim_interrupted_sets(pool) == []
++    assert _full_rows(conn, [complete]) == before
++
++
++def test_reclaim_reports_and_logs_each_set_and_is_idempotent(
++    store: tuple["ConnectionPool[Any]", psycopg.Connection],
++    caplog: pytest.LogCaptureFixture,
++) -> None:
++    """AC-20, DAC-E2-12, DAC-E2-S8-6: each reclaimed set is returned and logged once."""
++    pool, conn = store
++    run_a = add_run(conn, "succeeded")
++    stale = add_set(conn, run_a, "building")
++
++    with caplog.at_level(logging.WARNING):
++        reclaimed = reclaim_interrupted_sets(pool)
++
++    assert reclaimed == [ReclaimedSet(set_id=stale, run_id=run_a)]
++    warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
++    assert len(warnings) == 1
++    assert str(stale) in warnings[0].getMessage()
++    assert reclaim_interrupted_sets(pool) == []
+diff --git a/tests/unit/test_classification_scheduler_shapes.py b/tests/unit/test_classification_scheduler_shapes.py
+new file mode 100644
+index 0000000..56da648
+--- /dev/null
++++ b/tests/unit/test_classification_scheduler_shapes.py
+@@ -0,0 +1,35 @@
++"""The scheduler's public shapes (CAP-002-E2-S8; AC-10, DEC-0125); no mapped TC."""
++
++import dataclasses
++import inspect
++from typing import get_type_hints
++from uuid import UUID
++
++import pytest
++
++from factorflow.classification.scheduler import (
++    ClaimedSet,
++    ReclaimedSet,
++    claim_next_set,
++    reclaim_interrupted_sets,
++)
++
++
++@pytest.mark.parametrize("cls", [ClaimedSet, ReclaimedSet])
++def test_result_types_are_frozen_dataclasses_of_set_id_and_run_id(cls: type) -> None:
++    assert dataclasses.is_dataclass(cls)
++    assert cls.__dataclass_params__.frozen  # type: ignore[attr-defined]
++    assert [f.name for f in dataclasses.fields(cls)] == ["set_id", "run_id"]
++    hints = get_type_hints(cls)
++    assert hints == {"set_id": UUID, "run_id": UUID}
++
++
++def test_claim_next_set_takes_a_keyword_only_at_defaulting_to_none() -> None:
++    params = inspect.signature(claim_next_set).parameters
++    assert list(params) == ["pool", "at"]
++    assert params["at"].kind is inspect.Parameter.KEYWORD_ONLY
++    assert params["at"].default is None
++
++
++def test_reclaim_interrupted_sets_takes_only_the_pool() -> None:
++    assert list(inspect.signature(reclaim_interrupted_sets).parameters) == ["pool"]
+diff --git a/tests/unit/test_classification_scheduler_sql.py b/tests/unit/test_classification_scheduler_sql.py
+new file mode 100644
+index 0000000..0586aca
+--- /dev/null
++++ b/tests/unit/test_classification_scheduler_sql.py
+@@ -0,0 +1,70 @@
++"""The scheduler's SQL and source stay inside their contract (CAP-002-E2-S8).
++
++Traces to AC-10, AC-20, DAC-E2-4 and DAC-E2-12; no mapped TC.
++"""
++
++import re
++from pathlib import Path
++
++import factorflow.classification
++
++PACKAGE = Path(factorflow.classification.__file__).parent
++SQL_DIR = PACKAGE / "sql"
++APPEND_ONLY_TABLES = (
++    "universe_event",
++    "classification_set_factor",
++    "factor_input",
++    "factor_classification",
++)
++
++
++def _sql(name: str) -> str:
++    return (SQL_DIR / name).read_text()
++
++
++def test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set() -> None:
++    text = _sql("qualifying_run.sql")
++    assert "FROM acquisition_run" in text
++    assert re.search(r"state\s+IN\s*\(\s*'succeeded'\s*,\s*'partial'\s*\)", text)
++    assert re.search(r"NOT\s+EXISTS\s*\(.*classification_set.*run_id\s*=\s*r\.run_id", text, re.S)
++    assert re.search(r"ORDER\s+BY\s+r\.ended_at\s+ASC", text)
++    assert re.search(r"LIMIT\s+1\b", text)
++
++
++def test_claim_set_is_a_single_building_insert_stamped_in_chicago() -> None:
++    text = _sql("claim_set.sql")
++    assert text.count("INSERT INTO classification_set") == 1
++    assert "'building'" in text
++    assert re.search(r"RETURNING\s+set_id", text)
++    assert "America/Chicago" in text
++
++
++def test_reclaim_updates_only_building_rows_to_failed() -> None:
++    text = _sql("reclaim_interrupted.sql")
++    assert re.search(r"WHERE\s+state\s*=\s*'building'", text)
++    assert re.search(r"SET\s+state\s*=\s*'failed'", text)
++
++
++def test_nothing_deletes_and_scheduler_source_leaves_the_append_only_tables_alone() -> None:
++    for path in SQL_DIR.glob("*.sql"):
++        assert "DELETE" not in path.read_text().upper(), path.name
++    source = (PACKAGE / "scheduler.py").read_text()
++    assert "DELETE FROM" not in source.upper()
++    for table in APPEND_ONLY_TABLES:
++        assert not re.search(rf"UPDATE\s+(ONLY\s+)?{table}\b", source, re.I), table
++
++
++def test_scheduler_module_does_not_import_asyncio() -> None:
++    source = (PACKAGE / "scheduler.py").read_text()
++    assert not re.search(r"^\s*(import asyncio|from asyncio)", source, re.M)
++
++
++def test_interruption_reason_is_fixed_and_avoids_relabelled_interface_terms() -> None:
++    """AC-20, DAC-E2-12: the shipped reason, and none of the terms STD-UI v5/v6 relabelled."""
++    text = _sql("reclaim_interrupted.sql")
++    match = re.search(r"failure_reason\s*=\s*'([^']*)'", text)
++    assert match is not None
++    reason = match.group(1)
++    assert reason == "interrupted: the application restarted during the build"
++    for term in ("stock", "download", "incomplete", "score"):
++        assert term not in reason.lower()

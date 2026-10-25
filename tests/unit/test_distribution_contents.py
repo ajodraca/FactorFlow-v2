@@ -26,6 +26,7 @@ _MIGRATIONS = (
     "0003_coverage.sql",
     "0004_runs.sql",
     "0005_universes.sql",
+    "0006_classifications.sql",
 )
 
 _STUB_INDEX_HTML = "<!doctype html><html><body>stub</body></html>\n"
@@ -77,7 +78,7 @@ def test_wheel_carries_the_migrations_and_nothing_under_tests(built_wheel: Path)
 
 # Implements TC-COMP-392
 def test_installed_layout_resolves_its_migrations(built_wheel: Path, tmp_path: Path) -> None:
-    """The unpacked wheel's `migrate_main` finds versions 1 to 5 beside itself.
+    """The unpacked wheel's `migrate_main` finds versions 1 to 6 beside itself.
     Its dependencies, such as `psycopg`, come from the project environment."""
     site = tmp_path / "site"
     zipfile.ZipFile(built_wheel).extractall(site)
@@ -96,4 +97,4 @@ def test_installed_layout_resolves_its_migrations(built_wheel: Path, tmp_path: P
     )
     directory, versions = result.stdout.splitlines()
     assert Path(directory) == site / "factorflow" / "db" / "migrations"
-    assert versions == "[1, 2, 3, 4, 5]"
+    assert versions == "[1, 2, 3, 4, 5, 6]"

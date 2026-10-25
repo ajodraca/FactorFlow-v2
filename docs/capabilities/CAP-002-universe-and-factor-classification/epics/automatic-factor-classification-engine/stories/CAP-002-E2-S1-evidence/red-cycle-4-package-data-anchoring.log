@@ -1,0 +1,9 @@
+# cycle-4 RED: test_classification_sql_is_covered_by_a_package_data_glob (setuptools-faithful) against mis-anchored globs.
+# Each run replaced the "classification/sql/*.sql" entry of pyproject.toml, then restored it.
+# Command: uv run --directory repos/factorflow-v2/FactorFlow-v2 --offline pytest tests/unit/test_package_data_ships_sql.py -q -p no:cacheprovider
+glob "*.sql":      FAILED test_classification_sql_is_covered_by_a_package_data_glob
+  AssertionError: assert ['classificat...anything.sql'] == []   (1 failed, 9 passed)
+glob "sql/*.sql":  FAILED test_classification_sql_is_covered_by_a_package_data_glob
+  AssertionError: assert ['classificat...anything.sql'] == []   (1 failed, 9 passed)
+glob "*/*.sql":    FAILED test_classification_sql_is_covered_by_a_package_data_glob
+  AssertionError: assert ['classificat...anything.sql'] == []   (1 failed, 9 passed)
