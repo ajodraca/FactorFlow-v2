@@ -76,3 +76,27 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle adds only test code and changes no production behaviour
+
+  - id: cycle-4
+    tasks: [T010]
+    description: >
+      Review rework for implementation review v1 / IR-001. TC-COMP-076 decided coverage with PurePath.match, which anchors
+      on the right, so the globs "*.sql", "sql/*.sql" and "*/*.sql" passed although setuptools ships nothing under
+      classification/sql/ for them. It now calls the module's setuptools-faithful uncovered_sql_files on a synthetic tree
+      holding classification/sql/anything.sql, as T010's "use the existing helper" clause directs. This replaces T010's
+      fnmatch/PurePath.match suggestion; the TC-COMP-018 tests are untouched. IR-002 (optional, LOW) is not addressed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/red-cycle-4-package-data-anchoring.log
+    red_log_sha256: 55b7af3612a535e07e66e7b77df380c1aecdb72ba5760e14e78f3c2926f88d6a
+    red_evidence: >
+      With pyproject.toml's classification entry replaced by "*.sql", "sql/*.sql" and "*/*.sql" in turn, the rewritten test
+      failed each time (1 failed, 9 passed); the entry was restored afterwards.
+    green_evidence: tests/unit/test_package_data_ships_sql.py 10 passed with the committed glob.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 0d9c844ba3bf3a834a631cd9a83e95d5cd982bbfac2198c073fd21edf40b7260
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes only test code and no production behaviour; the three mis-anchored pyproject.toml globs were run by hand as the RED evidence

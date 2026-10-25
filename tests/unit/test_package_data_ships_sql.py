@@ -6,7 +6,7 @@ An editable install finds SQL files in the source tree whether or not
 
 import tomllib
 from glob import escape, glob
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import pytest
 
@@ -53,15 +53,18 @@ def test_universes_sql_glob_is_listed_before_its_directory_exists() -> None:
 
 
 # Implements TC-COMP-076
-def test_classification_sql_is_covered_by_a_package_data_glob() -> None:
+def test_classification_sql_is_covered_by_a_package_data_glob(tmp_path: Path) -> None:
     """`src/factorflow/classification/sql/` arrives with CAP-002-E2-S2 (DEC-0088).
 
-    The directory does not exist yet, so the glob is matched against a synthetic
-    path: a check that enumerates directories cannot fail for one that is absent.
+    The directory does not exist yet, so the globs are expanded against a synthetic
+    tree: a check that enumerates the real directories cannot fail for one that is
+    absent. Expansion is setuptools', not `PurePath.match`, which anchors on the right.
     """
-    synthetic = PurePath("classification/sql/anything.sql")
+    sql_dir = tmp_path / "classification" / "sql"
+    sql_dir.mkdir(parents=True)
+    (sql_dir / "anything.sql").write_text("SELECT 1;\n", encoding="utf-8")
 
-    assert any(synthetic.match(pattern) for pattern in package_data_globs())
+    assert uncovered_sql_files(tmp_path, package_data_globs()) == []
 
 
 # Implements TC-COMP-018
