@@ -1,0 +1,79 @@
+F..........FF....F.....                                                  [100%]
+=================================== FAILURES ===================================
+__ test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set ___
+
+    def test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set() -> None:
+        text = _sql("qualifying_run.sql")
+        assert "FROM acquisition_run" in text
+>       assert re.search(r"state\s+IN\s*\(\s*'succeeded'\s*,\s*'partial'\s*\)", text)
+E       assert None
+E        +  where None = <function search at 0x109377f60>("state\\s+IN\\s*\\(\\s*'succeeded'\\s*,\\s*'partial'\\s*\\)", "-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-4).\nSELECT r.run_id\n  ...  AND NOT EXISTS (SELECT 1 FROM classification_set s WHERE s.run_id = r.run_id)\n ORDER BY r.ended_at ASC\n LIMIT 1;\n")
+E        +    where <function search at 0x109377f60> = re.search
+
+tests/unit/test_classification_scheduler_sql.py:28: AssertionError
+__________ test_only_succeeded_and_partial_runs_are_claimed[partial] ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-2' at 0x10cbb82d0>, <psycopg.Connection [IDLE] (host=localhost port=59796 user=test database=test_a2f6d567f3624e878e4097d4f3d47a8b) at 0x10cbb4270>)
+qualifying = 'partial'
+
+    @pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
+    def test_only_succeeded_and_partial_runs_are_claimed(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
+    ) -> None:
+        pool, conn = store
+        for state in ("failed", "cancelled", "abandoned", "requested", "running"):
+            add_run(conn, state)
+    
+        assert claim_next_set(pool) is None
+        assert set_rows(conn) == []
+    
+        run_id = add_run(conn, qualifying)
+        claimed = claim_next_set(pool)
+    
+>       assert isinstance(claimed, ClaimedSet)
+E       assert False
+E        +  where False = isinstance(None, ClaimedSet)
+
+tests/integration/test_scheduler_claim.py:69: AssertionError
+___________ test_qualifying_runs_are_claimed_oldest_first_once_each ____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-3' at 0x10cbb8050>, <psycopg.Connection [IDLE] (host=localhost port=59796 user=test database=test_ef864fa6c85f46b898a78f822cdd713e) at 0x10cbb47c0>)
+
+    def test_qualifying_runs_are_claimed_oldest_first_once_each(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        second = add_run(conn, "succeeded", T0 + timedelta(hours=1))
+        third = add_run(conn, "partial", T0 + timedelta(hours=2))
+        first = add_run(conn, "succeeded", T0)
+    
+        order = []
+        for _ in range(3):
+            claimed = claim_next_set(pool)
+>           assert claimed is not None
+E           assert None is not None
+
+tests/integration/test_scheduler_claim.py:87: AssertionError
+_____________ test_failed_set_for_run_a_does_not_block_later_run_b _____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-8' at 0x10cbb9590>, <psycopg.Connection [IDLE] (host=localhost port=59796 user=test database=test_04531cad410649318eca9afd7f6c0d6d) at 0x10cbb4d10>)
+
+    def test_failed_set_for_run_a_does_not_block_later_run_b(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        failed = add_set(conn, run_a, "failed", failure_reason="own reason")
+        run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
+    
+        claimed = claim_next_set(pool)
+>       assert claimed is not None
+E       assert None is not None
+
+tests/integration/test_scheduler_claim.py:176: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_qualifying_run_selects_oldest_succeeded_or_partial_run_without_a_set
+FAILED tests/integration/test_scheduler_claim.py::test_only_succeeded_and_partial_runs_are_claimed[partial]
+FAILED tests/integration/test_scheduler_claim.py::test_qualifying_runs_are_claimed_oldest_first_once_each
+FAILED tests/integration/test_scheduler_claim.py::test_failed_set_for_run_a_does_not_block_later_run_b
+4 failed, 19 passed in 3.19s

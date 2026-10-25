@@ -1,0 +1,80 @@
+....................F.F                                                  [100%]
+=================================== FAILURES ===================================
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x108ad4050>, <psycopg.Connection [IDLE] (host=localhost port=59337 user=test database=test_5c57ebf12cd44a03876f75eb18fd4756) at 0x10846fce0>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+>       reclaim_interrupted_sets(pool)
+
+tests/integration/test_scheduler_restart.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-11' at 0x108ad4050>
+
+    def reclaim_interrupted_sets(pool: "ConnectionPool[Any]") -> list[ReclaimedSet]:
+        """Record every set left building as failed; run once at start, before any claim."""
+        with pool.connection() as conn, conn.cursor() as cur:
+            cur.execute(_RECLAIM_INTERRUPTED_SQL)
+>           reclaimed = [ReclaimedSet(set_id=row[0], run_id=row[2]) for row in cur.fetchall()]
+                                                            ^^^^^^
+E           IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:64: IndexError
+___________ test_reclaim_reports_and_logs_each_set_and_is_idempotent ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-13' at 0x108ad4b90>, <psycopg.Connection [IDLE] (host=localhost port=59337 user=test database=test_1b2d5bf7ea7d42938c3f6f9dcf79fb89) at 0x108af4490>)
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10896bcb0>
+
+    def test_reclaim_reports_and_logs_each_set_and_is_idempotent(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """AC-20, DAC-E2-12, DAC-E2-S8-6: each reclaimed set is returned and logged once."""
+        pool, conn = store
+        run_a = add_run(conn, "succeeded")
+        stale = add_set(conn, run_a, "building")
+    
+        with caplog.at_level(logging.WARNING):
+>           reclaimed = reclaim_interrupted_sets(pool)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_restart.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-13' at 0x108ad4b90>
+
+    def reclaim_interrupted_sets(pool: "ConnectionPool[Any]") -> list[ReclaimedSet]:
+        """Record every set left building as failed; run once at start, before any claim."""
+        with pool.connection() as conn, conn.cursor() as cur:
+            cur.execute(_RECLAIM_INTERRUPTED_SQL)
+>           reclaimed = [ReclaimedSet(set_id=row[0], run_id=row[2]) for row in cur.fetchall()]
+                                                            ^^^^^^
+E           IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:64: IndexError
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_reports_and_logs_each_set_and_is_idempotent
+2 failed, 21 passed in 3.22s

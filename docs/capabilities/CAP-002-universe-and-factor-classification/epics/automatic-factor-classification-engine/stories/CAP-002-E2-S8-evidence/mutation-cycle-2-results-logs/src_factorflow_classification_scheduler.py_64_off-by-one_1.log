@@ -1,0 +1,31 @@
+......................F                                                  [100%]
+=================================== FAILURES ===================================
+___________ test_reclaim_reports_and_logs_each_set_and_is_idempotent ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-13' at 0x10930c550>, <psycopg.Connection [IDLE] (host=localhost port=59336 user=test database=test_8f6c52292b6c42f7b90d3df0241b02d9) at 0x109334380>)
+caplog = <_pytest.logging.LogCaptureFixture object at 0x1091a7cb0>
+
+    def test_reclaim_reports_and_logs_each_set_and_is_idempotent(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """AC-20, DAC-E2-12, DAC-E2-S8-6: each reclaimed set is returned and logged once."""
+        pool, conn = store
+        run_a = add_run(conn, "succeeded")
+        stale = add_set(conn, run_a, "building")
+    
+        with caplog.at_level(logging.WARNING):
+            reclaimed = reclaim_interrupted_sets(pool)
+    
+>       assert reclaimed == [ReclaimedSet(set_id=stale, run_id=run_a)]
+E       AssertionError: assert [ReclaimedSet...f2d6acd90b'))] == [ReclaimedSet...f2d6acd90b'))]
+E         
+E         At index 0 diff: ReclaimedSet(set_id=UUID('d5860456-eb0e-47fa-afce-f3f2d6acd90b'), run_id=UUID('d5860456-eb0e-47fa-afce-f3f2d6acd90b')) != ReclaimedSet(set_id=UUID('3be8d546-dd96-4468-85e2-7ab9a423d720'), run_id=UUID('d5860456-eb0e-47fa-afce-f3f2d6acd90b'))
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:121: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set d5860456-eb0e-47fa-afce-f3f2d6acd90b for run d5860456-eb0e-47fa-afce-f3f2d6acd90b was interrupted; recorded failed
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_reports_and_logs_each_set_and_is_idempotent
+1 failed, 22 passed in 3.19s

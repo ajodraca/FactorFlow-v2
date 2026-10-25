@@ -1,0 +1,116 @@
+....................F.F                                                  [100%]
+=================================== FAILURES ===================================
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x10d198050>, <psycopg.Connection [IDLE] (host=localhost port=60252 user=test database=test_785357a70e1b4966bf0b5030810a69d6) at 0x10cb33f00>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+>       reclaim_interrupted_sets(pool)
+
+tests/integration/test_scheduler_restart.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/classification/scheduler.py:63: in reclaim_interrupted_sets
+    cur.execute(_RECLAIM_INTERRUPTED_SQL)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [IDLE] (host=localhost port=60252 user=test database=test_785357a70e1b4966bf0b5030810a69d6) at 0x10d150290>
+query = "-- Start-up reclaim: a set left building by an interrupted process is recorded failed (DAC-E2-12).\nUPDATE classifica...on = 'interrupted: the application restarted during the build'\n WHERE state = 'building'\nRETURNING set_id, run_id;\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_terminal_has_end"
+E           DETAIL:  Failing row contains (beea922b-73cd-479c-9822-ffd72d4ca11d, 284c2ad5-ec19-4ffc-b3b9-316407e8bc67, failed, 2026-10-01, null, null, 2026-10-25 02:12:37.22542+00, null, interrupted: the application restarted during the build).
+
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/psycopg/cursor.py:117: CheckViolation
+___________ test_reclaim_reports_and_logs_each_set_and_is_idempotent ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-13' at 0x10d198cd0>, <psycopg.Connection [IDLE] (host=localhost port=60252 user=test database=test_c40503855a2a4b2e83f5d3462a341f68) at 0x10d1bc5a0>)
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10d02fcb0>
+
+    def test_reclaim_reports_and_logs_each_set_and_is_idempotent(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """AC-20, DAC-E2-12, DAC-E2-S8-6: each reclaimed set is returned and logged once."""
+        pool, conn = store
+        run_a = add_run(conn, "succeeded")
+        stale = add_set(conn, run_a, "building")
+    
+        with caplog.at_level(logging.WARNING):
+>           reclaimed = reclaim_interrupted_sets(pool)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_restart.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/classification/scheduler.py:63: in reclaim_interrupted_sets
+    cur.execute(_RECLAIM_INTERRUPTED_SQL)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [IDLE] (host=localhost port=60252 user=test database=test_c40503855a2a4b2e83f5d3462a341f68) at 0x10d150950>
+query = "-- Start-up reclaim: a set left building by an interrupted process is recorded failed (DAC-E2-12).\nUPDATE classifica...on = 'interrupted: the application restarted during the build'\n WHERE state = 'building'\nRETURNING set_id, run_id;\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_terminal_has_end"
+E           DETAIL:  Failing row contains (b6062e80-f038-443f-9b3e-4c08dca59fea, 9f70ddc7-ec43-4493-88f4-971ef24b024a, failed, 2026-10-01, null, null, 2026-10-25 02:12:37.55302+00, null, interrupted: the application restarted during the build).
+
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/psycopg/cursor.py:117: CheckViolation
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_reports_and_logs_each_set_and_is_idempotent
+2 failed, 21 passed in 3.29s

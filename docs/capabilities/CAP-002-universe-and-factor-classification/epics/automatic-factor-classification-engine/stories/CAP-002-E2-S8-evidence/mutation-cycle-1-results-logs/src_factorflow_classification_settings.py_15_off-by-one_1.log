@@ -1,0 +1,51 @@
+..F
+=================================== FAILURES ===================================
+__________________ test_one_second_lower_bounds_are_accepted ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108b804d0>
+
+    def test_one_second_lower_bounds_are_accepted(monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv(POLL, "1")
+        monkeypatch.setenv(TIMEOUT, "1.5")
+>       settings = _load()
+                   ^^^^^^^
+
+tests/unit/test_classification_settings.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classification_settings.py:23: in _load
+    return ClassificationSettings(_env_file=None)  # type: ignore[call-arg]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ClassificationSettings(), data = {'_env_file': None}
+
+    def __init__(self, **data: Any) -> None:
+        try:
+            super().__init__(**data)
+        except ValidationError as exc:
+            prefix = self.model_config.get("env_prefix", "")
+            lines = []
+            for error in exc.errors(include_url=False, include_input=False):
+                message = error["msg"]
+                # `msg` does not reliably contain the field name (Pydantic's
+                # "Field required" names nothing at all), so the variable
+                # name is prefixed onto the message rather than substituted
+                # into it -- substitution can silently produce a message
+                # naming no variable, which is the one outcome DAC-E1-7
+                # forbids.
+                var_names = [
+                    f"{prefix}{field_name}".upper()
+                    for field_name in error["loc"]
+                    if isinstance(field_name, str)
+                ]
+                if var_names:
+                    message = f"{'.'.join(var_names)}: {message}"
+                lines.append(message)
+>           raise ConfigurationError("; ".join(lines)) from None
+E           factorflow.config.settings.ConfigurationError: FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS: Input should be greater than or equal to 2
+
+src/factorflow/config/settings.py:83: ConfigurationError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_settings.py::test_one_second_lower_bounds_are_accepted
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 0.10s

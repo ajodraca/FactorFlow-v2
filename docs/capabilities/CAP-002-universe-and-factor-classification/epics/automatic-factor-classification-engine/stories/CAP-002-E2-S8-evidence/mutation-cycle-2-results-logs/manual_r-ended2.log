@@ -1,0 +1,48 @@
+....................F..                                                  [100%]
+=================================== FAILURES ===================================
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x10d7b0050>, <psycopg.Connection [IDLE] (host=localhost port=60472 user=test database=test_dd2350d74f7c45fda9a6909ff8a56a4f) at 0x10d14fce0>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+        reclaim_interrupted_sets(pool)
+    
+        assert _full_rows(conn, [complete, failed]) == untouched_before
+        rows = {r[0]: r for r in set_rows(conn)}
+        assert rows[stale][2] == "failed"
+        assert rows[stale][3] == INTERRUPTED_REASON
+        with conn.cursor() as cur:
+            cur.execute("SELECT ended_at FROM classification_set WHERE set_id = %s", (stale,))
+            ended = cur.fetchone()
+        conn.rollback()
+        assert ended is not None
+>       assert ended[0] >= before_reclaim
+E       AssertionError: assert datetime.datetime(2026, 10, 25, 2, 12, 40, 107389, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) >= datetime.datetime(2026, 10, 25, 2, 12, 40, 111813, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))
+
+tests/integration/test_scheduler_restart.py:90: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set f59b6a7d-a54c-423d-bf2b-01dacccff7f5 for run 238a5861-fa09-406a-b92b-c68b93155a03 was interrupted; recorded failed
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+1 failed, 22 passed in 2.82s
