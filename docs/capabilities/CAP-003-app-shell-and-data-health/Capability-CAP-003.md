@@ -11,10 +11,10 @@ description: >-
   whether the data can be trusted, with CAP-001's market data surfaces reached
   through it in the product's own words.
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-26
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: capability-definition-agent
   agent_version: "1.0"
@@ -39,6 +39,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-26T02:36:24Z
+  reviewed_revision: sha256:52cd12cd9b606e6691d9ba1617949d778a1e7431d646c157c0b393a016d8a3f8
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # App Shell & Data Health

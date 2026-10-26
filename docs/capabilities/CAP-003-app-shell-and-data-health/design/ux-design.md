@@ -6,8 +6,8 @@ artifact_version: 1
 capability_id: CAP-003
 title: App Shell & Data Health
 created: 2026-10-25
-updated: 2026-10-25
-status: draft
+updated: 2026-10-26
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 design_source: Generated from UX brief, starting from PRODUCT-UX-S01, PRODUCT-UX-S02 and PRODUCT-UX-S09
@@ -45,6 +45,12 @@ ai_provenance:
       version: "18 components as of 2026-10-15"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-26T02:36:25Z
+  reviewed_revision: sha256:4d7a816572b09884ffa98872f0a7b5e75a850281a01492378ad46b792b38f7bc
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # UX Design: App Shell & Data Health

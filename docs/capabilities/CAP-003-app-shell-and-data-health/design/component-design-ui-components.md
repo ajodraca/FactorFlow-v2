@@ -3,11 +3,11 @@ artifact_schema_version: 1
 artifact_id: CAP-003-component-design-ui-components
 artifact_type: component-design
 artifact_version: 1
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-26
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
@@ -34,6 +34,12 @@ ai_provenance:
       version: "18 components as of 2026-10-15"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-26T02:36:28Z
+  reviewed_revision: sha256:f192035972886f4d75abf789fba598cf064f5f7aa69ee7f6d72bb2f5d288a558
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # Component: UI Components (design-system components and shared patterns)

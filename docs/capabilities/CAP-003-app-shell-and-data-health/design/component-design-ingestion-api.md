@@ -3,11 +3,11 @@ artifact_schema_version: 1
 artifact_id: CAP-003-component-design-ingestion-api
 artifact_type: component-design
 artifact_version: 1
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-26
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
@@ -26,6 +26,12 @@ ai_provenance:
       version: "8"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-26T02:36:26Z
+  reviewed_revision: sha256:c6800ef2637c3e6010eae5b02d41d00e8bccefa9bbefb0cfe414ebd14632ebce
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # Component: Ingestion API (CAP-003 changes)
