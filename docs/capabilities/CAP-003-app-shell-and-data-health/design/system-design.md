@@ -17,7 +17,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T19:43:20Z
+  timestamp: 2026-10-26T02:17:21Z
   source_artifacts:
     - id: CAP-003
       version: "1, draft 2026-10-24"
@@ -188,7 +188,7 @@ including the redirects that keep old bookmarks working. `owner-shell` starts
 its three shell-wide reads, waits for the first health answer before deciding
 where `/` goes, and keeps the rail and top bar on screen throughout. The
 decision points are whether any download has ever been requested (setup or
-Home, DEC-0202), whether the path is one of the four the delivered interface
+Home, DEC-0202 as the owner amended it on 2026-10-25), whether the path is one of the four the delivered interface
 shipped (redirect, AC-18), and whether the API answers at all. The expected
 outcome is that the owner lands on setup on an empty install, on Home
 otherwise, and on the same screen as before when following an old bookmark.
@@ -244,13 +244,20 @@ sequenceDiagram
 ### 3.2 First-run setup
 
 The sequence shows the four M1 setup steps against the delivered API, from an
-empty install to a started download. `setup-ui` keeps every step's draft value
-in memory for the visit, commits each step through the existing endpoint when
-the owner continues, and re-derives each step's state from the server when the
-owner returns later (DEC-0202). The decision points are whether the credential
-was found, whether the depth and the pasted list are accepted, and whether the
-download is accepted, queued or refused. The expected outcome is a requested
-download, after which `/` opens Home and Home shows its progress.
+empty install to a started download. `setup-ui` saves each step's values
+through CAP-001's endpoints when the owner continues (`PUT
+/api/settings/history-depth`, `POST /api/instruments`), holds unsaved input in
+app memory above the `/setup` route for the session, and re-derives the step
+list and the current step from settings, the followed list and downloads on
+every visit (DEC-0202; S02 §5). Setup counts as complete once CAP-001's run
+journal holds at least one download in any state, read from `GET /api/health`
+`most_recent_run`; no setup flag is stored. The decision points are whether
+the credential was found, whether the depth and the pasted list are accepted,
+whether the owner chose *Add later*, and whether the download is accepted,
+queued, refused or blocked because no stock is followed. The expected outcome
+is a requested download, after which `/` opens Home and Home shows its
+progress; after *Add later* setup stays incomplete, and `/` keeps opening
+`/setup` until a download is started from setup or Data health.
 
 ```mermaid
 sequenceDiagram
@@ -275,7 +282,7 @@ sequenceDiagram
     SU->>SU: parse on paste and blur: accepted, duplicates, unreadable (AC-5)
     alt fewer than 30 accepted
         SU-->>O: ranking warning; Continue stays available (AC-6)
-    else zero accepted
+    else zero accepted and Paste a list chosen
         SU-->>O: Continue blocked with its reason; Add later offered
     end
     O->>SU: Continue
@@ -294,13 +301,18 @@ sequenceDiagram
     else 409 history_depth_not_set or no_active_instruments
         SU-->>O: refusal names the operation, the step to fix and the reason
     end
-    opt Add later at step 3
-        SU-->>O: navigate to /home (honest empty state); "/" still opens setup
+    opt Add later at step 3, no stock followed
+        SU-->>O: Continue passes step 3, nothing posted; step 4 shows Start download blocked with the no_active_instruments reason, and Go to Home or Manage followed stocks; "/" still opens setup
     end
 ```
 
-1. Going back a step (step 6 onward) never discards a later step's draft; the
-   drafts live in `setup-ui`'s state above the step views (AC-3, S02-2).
+1. Going back a step (step 6 onward), or leaving `/setup` and returning in the
+   same session, never discards unsaved input: it is held in app memory, a
+   React state holder in `owner-shell`'s route tree above the `/setup` route,
+   for the session, and only a page reload loses it. Nothing is written to
+   browser storage (Section 4.4). Saved values are re-read from the server on
+   every visit, and a field shows its unsaved input when some is held
+   (DEC-0202; AC-3, S02-2).
 2. Step 10's parse is the delivered `parse-bulk-symbols` function, reused, so
    setup and the followed-stocks screen accept the same input (AC-5).
 3. A repeated Continue on step 3 after going back re-posts the same symbols;
@@ -312,6 +324,13 @@ sequenceDiagram
    (AC-25, STD-UI-25).
 5. The *Upload a CSV* source S02 §3 draws is not built: the capability scopes
    step 3 to a pasted list (capability §2, AC-5; open question 3).
+6. *Add later* (step 22) lets **Continue** pass step 3 with no symbols and
+   posts nothing. Step 4 then shows **Start download** `blocked` with CAP-001's
+   `no_active_instruments` reason, derived from `active_count` 0 without a
+   request, and two exits: **Go to Home** (`/home`, which shows its honest
+   empty state) and **Manage followed stocks** (`/data/followed`). Setup stays
+   incomplete, so `/` keeps opening `/setup` until a download is started from
+   setup or Data health (DEC-0202).
 
 ### 3.3 Home and the rail counts
 
@@ -320,8 +339,8 @@ The flow shows how one set of shell-wide reads becomes Home's data tile, its
 and summary reads; `home-ui` merges the three server-derived item kinds with
 the two score-derived kinds into one list sorted by tier and recency, and the
 shell computes the Home count with the same function (DEC-0203). The decision
-points are whether any download has ever run (honest empty state), whether
-scores exist and reflect the latest download, and which items apply. Home
+points are whether any download has ever been requested (honest empty state)
+or ended (first-download-running state, no verdict tier), whether scores exist and reflect the latest download, and which items apply. Home
 never reads `GET /api/data-health`: the tile's badge comes from the two
 shell-wide reads (DEC-0210 as amended by the owner on 2026-10-25; DEC-0219's
 on-demand read is withdrawn). The expected outcome is a Home that names what
@@ -334,7 +353,9 @@ flowchart TD
     A2["[2] owner-shell summary read<br/>GET /api/classifications/summary"] --> A3
     A3["[3] home-ui reads shell context"] --> D1{"[4] latest_download is null?"}
     D1 -- yes --> E1["[5] Empty, never populated:<br/>No data has been downloaded yet + Start setup"]
-    D1 -- no --> T1["[6] Data tile: current_count of followed_count (both summary stocks_current),<br/>scores as-of (summary), prices as-of (attention)"]
+    D1 -- no --> D4{"[20] latest_terminal_download is null?<br/>(no download has ever ended)"}
+    D4 -- yes --> F1["[21] First download running: no verdict tier, no Yes;<br/>The first download, started {time}, is running + Downloading (status-active) at most"]
+    D4 -- no --> T1["[6] Data tile: current_count of followed_count (both summary stocks_current),<br/>scores as-of (summary), prices as-of (attention)"]
     T1 --> D2{"[7] summary state"}
     D2 -- "404 / error" --> T2["[8] score figures not determinable / error + Try again"]
     D2 -- "set not current" --> T3["[9] Not reflecting the latest download (warning)"]
@@ -375,9 +396,18 @@ flowchart TD
    verdict tier, computed from attention's `problems.stock_count`,
    `followed_count` and `latest_terminal_download` exactly as Data health's
    verdict is, and the blueprint §8 score-state tier from the summary. The
-   badge shows the worse of the two, with the label from whichever wins; the
-   empty state of box 5 replaces both (DEC-0210 as amended by the owner on
-   2026-10-25, DEC-0217).
+   badge shows the worse of the two, with the label from whichever wins.
+   Never-acquired replaces both (boxes 20 and 21): while attention's
+   `latest_terminal_download` is null (no download has ever ended, the signal
+   Data health already uses) the tile shows no verdict tier and no *Yes*.
+   Before any download is requested the empty state of box 5 replaces the
+   tile, as AC-21 requires; from the first request until a download ends the
+   tile shows the first-download-running state of box 21: its body says the
+   first download, started {start time}, is running, and its badge is at most
+   `status-active` *Downloading* (shown while `latest_download.state` is
+   `running`), never a verdict word. The tile renders no progress; the *Your
+   first download is running* item carries it (DEC-0210 as amended by the
+   owner on 2026-10-25, DEC-0217).
 
 ### 3.4 Data health: reading, and fixing a problem
 
@@ -531,7 +561,7 @@ flowchart TD
 | `owner-shell` | Owner interface shell | React composition root of the owner interface: the rail in two groups listing only shipped destinations with their attention counts, the sticky top bar with the route-derived title and the palette button, the route map with the `/` redirect and the four legacy redirects, the unreachable state, and the shell-wide polled reads (health 30 s; attention and classification summary 60 s, 10 s while a download is non-terminal or scores are building; all paused while the document is hidden, DEC-0212) shared through the shell context. Replaces the delivered shell and route composition in `web/src/app/` (DEC-0204) | this design |
 | `command-palette` | Command palette | The `command` `dialog` opened by the shell: Stocks from the followed list (server prefix search), Universes and Pages filtered locally, targets per DEC-0207; never a trading action. `web/src/app/command-palette/` | this design |
 | `ui-components` | Design-system components and shared patterns | The design-system components vendored as shadcn/ui ships them in `web/src/components/ui/` (badge, button, card, data-table, dialog, form, input, textarea, select, checkbox, radio-group, progress, stepper, command, toast; `form` per DEC-0215) and the blueprint §4 patterns in `web/src/components/patterns/` (Needs-you item and `sortAttention`, `worstDataTier`, as-of line, status badge with tier shape, state-coverage region), consuming only `theme.css` tokens (DEC-0205). The as-of line is taken over, not created: CAP-002 lands first with its Research-specialised `web/src/components/patterns/as-of-line.tsx`, and `ui-components` generalises that file to `AsOfLine`, with the Research line composing it (owner decision 2026-10-25) | this design |
-| `setup-ui` | Setup screen | S02 steps 1 to 4 at `/setup`: stepper, per-step drafts held for the visit, each step committed through the delivered endpoints, the first download started and its progress shown (DEC-0202) | this design |
+| `setup-ui` | Setup screen | S02 steps 1 to 4 at `/setup`: stepper, each step's values saved on Continue through the delivered endpoints, unsaved input held in app memory above the `/setup` route for the session (never browser storage), *Add later* leading to step 4's blocked **Start download** with its two exits, the first download started and its progress shown (DEC-0202) | this design |
 | `home-ui` | Home screen | S01 M1 regions at `/home`: date and market state (DEC-0206), the data tile, and the *Needs you* list merged from the attention items and the score-derived items (DEC-0203) | this design |
 | `data-health-ui` | Data health screen | S09 M1 regions at `/data`: verdict, Daily prices, Company financials and Factor scores cards, *Needs fixing* with its recoveries, Recent downloads, What you follow | this design |
 | `data-health-reader` | Data health reader | Read-only Python module computing the problem-stock set, the latest and latest-terminal downloads with progress, the followed count, the prices as-of, the server-derived attention items, the verdict counts and the Daily prices and Company financials checks (DEC-0200, DEC-0201). `src/factorflow/data_health/` | this design |
@@ -616,8 +646,10 @@ No third-party repository is involved, and no provider is read (capability
 
 None. This design adds no table, column, index, setting or migration, and no
 component it introduces writes to the store. Setup's completion is the
-existence of a download (DEC-0202); a problem is the latest outcome already in
-`acquisition_state` (DEC-0201). The browser keeps no state across visits.
+existence of a download in any state (DEC-0202); a problem is the latest
+outcome already in `acquisition_state` (DEC-0201). The browser stores nothing:
+setup's unsaved input lives in app memory for the session and is lost on a
+page reload.
 Rollback is therefore a redeploy of the previous image, with no data step.
 
 ## 5. Architectural Constraints
@@ -653,8 +685,11 @@ Rollback is therefore a redeploy of the previous image, with no data step.
    need attention; their scores show as Incomplete until they're fixed.* and
    *Yes. None of the {m} followed stocks needs attention.* Home's tile badge is
    the worse of that verdict tier and the blueprint §8 score-state tier, with
-   the label from whichever wins; the never-acquired empty state replaces both
-   (DEC-0210 and DEC-0217 as amended by the owner on 2026-10-25).
+   the label from whichever wins; never-acquired replaces both: while no
+   download has ever ended (attention's `latest_terminal_download` null) the
+   tile shows AC-21's empty state or the first-download-running state, never
+   a verdict tier and never *Yes* (Section 3.3 note 6; DEC-0210 and DEC-0217
+   as amended by the owner on 2026-10-25).
 5. **Not determinable is a value of its own.** A check that could not run, a
    score figure before the summary is served, and the market state inside
    session hours render as not determinable with a reason; none renders as
@@ -750,12 +785,12 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 |------|---------------------|--------------------|---------|
 | AC-1 | One shell; groups in order; unshipped absent | `owner-shell` static destination list in two groups; `Screen registration` rows; DEC-0204 | 2, 3.1, 4.1, 5.11 |
 | AC-2 | Setup first, Home after | `owner-shell` `/` redirect on `most_recent_run`; DEC-0202 | 3.1 |
-| AC-3 | Setup steps, position, back keeps values | `setup-ui` stepper and in-memory drafts above the step views | 3.2 note 1 |
+| AC-3 | Setup steps, position, back keeps values | `setup-ui` stepper; unsaved input held in app memory above the `/setup` route for the session; *Add later* to step 4's blocked start; DEC-0202 | 3.2 notes 1, 6 |
 | AC-4 | Credential presence, never value | `credential_present` via `Shell context`; Settings unchanged; no-secrets test extended | 3.2, 5.10 |
 | AC-5 | Pasted list parsed honestly | Reused `parse-bulk-symbols`; `POST /api/instruments` per-symbol dispositions | 3.2 notes 2, 3 |
 | AC-6 | Fewer than 30 is a warning | `setup-ui` warning below 30 accepted; Continue available | 3.2 |
 | AC-7 | First download from setup; Home shows progress | `POST /api/acquisition-runs` from `setup-ui`; `latest_download.progress`; Needs-you kind 4 | 3.2, 3.3; DEC-0203 |
-| AC-8 | Home data tile, scores lag stated | `home-ui` tile: both counts from the summary's `stocks_current` when served, `prices_as_of`; not-current rendering; badge from `worstDataTier` | 3.3 boxes 6 to 10, 19; 5.4 |
+| AC-8 | Home data tile, scores lag stated | `home-ui` tile: both counts from the summary's `stocks_current` when served, `prices_as_of`; not-current rendering; badge from `worstDataTier`, no tier while no download has ended | 3.3 boxes 6 to 10, 19 to 21; 5.4 |
 | AC-9 | Needs you: one action, ordered, leaves on resolution | `sortAttention` in `ui-components`; items derived from current state only | 3.3 note 3; DEC-0203 |
 | AC-10 | Nothing unshipped on Home | `home-ui` M1 regions only | 5.11 |
 | AC-11 | Data health verdict and check cards | `GET /api/data-health` `affected_count`, `checks`; verdict from `worstDataTier` over the problem set and latest terminal download; Factor scores from summary | 3.4 note 8, 5.4; DEC-0201, DEC-0210 |
@@ -768,7 +803,7 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 | AC-18 | Old paths arrive for one release | `legacy-redirects.tsx` `Navigate replace` | 3.1 note 4 |
 | AC-19 | Product vocabulary | Display labels composed in the interface; domain terms in the API | 5.3 |
 | AC-20 | One tier per status | Blueprint §8 mapping in one `ui-components` function | 5.4 |
-| AC-21 | Honest empty state | `latest_download` null on Home; `latest_terminal_download` null on Data health, with `never_acquired` nulling the check cards | 3.3 box 5, 3.4 note 7 |
+| AC-21 | Honest empty state | `latest_download` null on Home, and no verdict tier on Home's tile while `latest_terminal_download` is null; `latest_terminal_download` null on Data health, with `never_acquired` nulling the check cards | 3.3 boxes 5, 20, 21, 3.4 note 7 |
 | AC-22 | Command palette | `command-palette`; shell keydown listener; no trading action | 3.5; DEC-0207 |
 | AC-23 | Unreachable is a designed state | `owner-shell` main-region swap; last answered time; remount at same URL | 3.1 note 3; DEC-0204 |
 | AC-24 | Every region defines its states | State sources named per region here; the UX brief enumerates the eight per region | 3.3, 3.4, 5.5 |

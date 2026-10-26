@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T19:45:46Z
+  timestamp: 2026-10-26T02:20:00Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -106,6 +106,9 @@ web/src/app/titles.ts                    new: the route-to-title table (DEC-0214
 web/src/app/health.tsx                   new: HealthProvider, useHealth, formatTimestamp, UNREACHABLE_MESSAGE moved from
                                          status-region.tsx; + lastAnsweredAt (AC-23); + pause while hidden (DEC-0212)
 web/src/app/shell-context.tsx            new: ShellProvider and useShell()
+                                         shell.tsx mounts setup-ui's SetupDraftProvider (web/src/screens/setup/draft.tsx)
+                                         inside ShellProvider and outside the main region's route map, so neither a
+                                         route change nor the unreachable state unmounts it (DEC-0202 as amended)
 web/src/app/use-polled-read.ts           new: interval read paused while the document is hidden
 web/src/app/shell-client.ts              new: fetchAttention(), fetchScoreSummary() (404 -> not_served),
                                          fetchDataHealth(), fetchProblems(cursor, limit)
@@ -178,6 +181,7 @@ flowchart TB
     subgraph PROV["Providers (outermost first)"]
         HP["HealthProvider (health.tsx)<br/>GET /api/health every 30 s"]
         SP["ShellProvider (shell-context.tsx)<br/>attention + summary, 60 s / 10 s"]
+        SDP["SetupDraftProvider (screens/setup/draft.tsx, setup-ui's)<br/>session drafts above /setup (DEC-0202)"]
     end
     subgraph FRAME["Frame (shell.tsx)"]
         RAIL["Rail: brand mark, primary group, gap,<br/>data-and-system group, count chips"]

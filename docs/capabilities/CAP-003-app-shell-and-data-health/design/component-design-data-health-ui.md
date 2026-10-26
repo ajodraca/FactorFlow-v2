@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T19:44:57Z
+  timestamp: 2026-10-26T02:20:00Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -156,7 +156,10 @@ sequenceDiagram
 
 The badge is `worstDataTier` over the problem set, `affected_count` (*n*)
 against `followed_count` (*m*) from the aggregate, and attention's
-`latest_terminal_download` state from `useShell()`. The checks' tiers do not
+`latest_terminal_download` state from `useShell()`. `worstDataTier` returns
+null while `latest_terminal_download` is null; this screen never receives
+that case, because 2.2 renders the empty card on the same condition before
+the verdict is composed (DEC-0210 as amended; review v2 FINDING-2). The checks' tiers do not
 feed it; each card shows its own (DEC-0210, DEC-0217 as amended). Home's tile
 passes the same problem set (attention's `problems.stock_count`, one set by
 DEC-0201) and the same download, so its verdict tier is this one. The

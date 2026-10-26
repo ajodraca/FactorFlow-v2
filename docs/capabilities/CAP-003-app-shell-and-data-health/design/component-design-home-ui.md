@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T19:44:57Z
+  timestamp: 2026-10-26T02:13:49Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -64,7 +64,12 @@ and summary reads through `useShell()` and never `GET /api/data-health`. The
 tile's badge is the worse of the verdict tier, which `worstDataTier` computes
 from attention's problem set and latest terminal download exactly as Data
 health's verdict does, and the summary's score-state tier (DEC-0210, DEC-0217
-as amended, PROVISIONAL).
+as amended, PROVISIONAL). While attention's `latest_terminal_download` is null
+(no download has ever ended) the tile shows no verdict tier and never *Yes*:
+AC-21's empty state before any download is requested, then the
+first-download-running state until one ends (DEC-0210 as the owner amended it
+on 2026-10-25: never-acquired replaces both with the empty state;
+specification review v2 FINDING-2).
 
 Use cases addressed: capability flow 3 and its alternates; AC-7 (the first
 download's progress), AC-8, AC-9, AC-10, AC-12, AC-21, AC-24, AC-25.
@@ -95,16 +100,20 @@ All new; no delivered file is edited.
 
 The flowchart is system design §3.3 at the component level. Its actors are the
 shell's attention and summary reads and the three regions. The decision
-points are whether any download was ever requested, whether the summary is
-served and current, and whether any item applies. The outcome is a Home that
-names what needs the owner with one action each, a tile whose badge carries
-Data health's verdict tier unless the score state is worse, and counts and
-as-of lines that never present an absent or undetermined figure as a value.
+points are whether any download has ever ended, whether any was ever
+requested, whether the summary is served and current, and whether any item
+applies. The outcome is a Home that names what needs the owner with one
+action each, a tile that gives no verdict until a download has ended and then
+carries Data health's verdict tier unless the score state is worse, and
+counts and as-of lines that never present an absent or undetermined figure as
+a value.
 
 ```mermaid
 flowchart TD
-    A["[1] useShell().attention"] --> E{"[2] latest_download null?"}
-    E -- yes --> EMPTY["[3] header + 'No data has been downloaded yet.' + Start setup (AC-21)"]
+    A["[1] useShell().attention"] --> E{"[2] latest_terminal_download null? (no download has ever ended)"}
+    E -- yes --> E2{"[2a] latest_download null?"}
+    E2 -- yes --> EMPTY["[3] header + 'No data has been downloaded yet.' + Start setup (AC-21)"]
+    E2 -- no --> RUN["[3a] first-download-running tile: no verdict tier, never Yes; at most status-active Downloading (DEC-0210 as amended)"]
     E -- no --> T["[4] data tile"]
     S["[5] useShell().scores"] --> T
     A --> B["[6] worstDataTier(problems.stock_count, followed_count, latest_terminal_download)"]
@@ -148,7 +157,7 @@ A `card` `metric` whose whole surface is one link to `/data`, titled *Data*.
 
 | Part | Source | Rendering |
 |------|--------|-----------|
-| Badge | `dataTileBadge` over the verdict tier, `worstDataTier` from attention's `problems.stock_count`, `followed_count` and `latest_terminal_download`, and the summary's score-state tier (DEC-0210, DEC-0217 as amended) | the verdict's `status-good` *Yes*, `status-warning` *Mostly yes*, `status-serious` *Mostly yes* or `status-critical` *No*, or, when the score state is worse, its own badge and label (`status-critical` *Score update failed*, `status-warning` *Not reflecting the latest download*); skeleton while attention loads; while attention fails the tile renders 1.3's Error state (*Couldn't read the data summary: {reason}.* with **Try again**) and no badge |
+| Badge | `dataTileBadge` over the verdict tier, `worstDataTier` from attention's `problems.stock_count`, `followed_count` and `latest_terminal_download`, and the summary's score-state tier (DEC-0210, DEC-0217 as amended); none of it while `latest_terminal_download` is null (below) | the verdict's `status-good` *Yes*, `status-warning` *Mostly yes*, `status-serious` *Mostly yes* or `status-critical` *No*, or, when the score state is worse, its own badge and label (`status-critical` *Score update failed*, `status-warning` *Not reflecting the latest download*); skeleton while attention loads; while attention fails the tile renders 1.3's Error state (*Couldn't read the data summary: {reason}.* with **Try again**) and no badge |
 | Hero line | both figures from the summary's `stocks_current`: `current_count` of `followed_count` (the set's `active_instruments`) | *{current} of {followed} stocks current* at `--text-2xl` `--font-numeric`; only while the summary is not served or carries no `stocks_current` (never classified), `followed` is attention's `followed_count` and the current count an em dash with hidden *not determinable* |
 | *Scores {YYYY-MM-DD HH:MM zone}* | summary `set.ended_at` | em dash with *not determinable* while not served; *No scores yet* when `never_classified` |
 | *Prices {YYYY-MM-DD}* | attention `prices_as_of` | em dash with *not determinable* while attention fails |
@@ -161,6 +170,24 @@ shows, and contributes no tier while the summary is not served. The verdict
 tier comes from the same problem set (DEC-0201) and latest download Data
 health's verdict uses, so the tile never reads better than the verdict and
 reads worse only when the score state is.
+
+**No download has ended yet** (DEC-0210 as the owner amended it on
+2026-10-25: never-acquired replaces both with the empty state). The tile's
+states are keyed on attention's `latest_terminal_download`. While it is null
+no download has ever ended, so the tile shows no verdict tier and never
+*Yes*: `worstDataTier` and `dataTileBadge` return no answer (`ui-components`
+2.4), and neither the verdict nor the score-state badge renders. Before any
+download is requested (`latest_download` null too) Home renders AC-21's empty
+state (2.2), as before. From the first request until a download ends, the
+tile renders the first-download-running state: the title *Data*, the body
+*Your first download, started {YYYY-MM-DD HH:MM zone}, is running.* from
+`latest_download`'s `started_at`, or its `requested_at` while it is queued,
+and at most a `StatusBadge` `status-active` *Downloading*, shown only while
+`latest_download.state` is `running`; never a verdict word, no hero count, no
+as-of lines and no lag badge. The tile does not render the download's
+progress, so none is added; the *Needs you* `first_download` item carries it
+(2.5). The tile stays one link to `/data`. Once `latest_terminal_download` is
+set, the table above applies.
 
 ### 2.5 *Needs you* (DEC-0203, DEC-0216, PROVISIONAL)
 
@@ -234,6 +261,7 @@ N/A, not applicable for this component.
 | Test | File | What it proves |
 |------|------|----------------|
 | Empty state | `web/src/screens/home/home.test.tsx` | `latest_download` null renders *No data has been downloaded yet.* with **Start setup**; no tile, no list (AC-21) |
+| First download running | `web/src/screens/home/data-tile.test.tsx` | With `latest_download` `requested` or `running` and `latest_terminal_download` null, `problems.stock_count` 0 and the summary at `404` or `never_classified`, the tile shows *Your first download, started {time}, is running.* and no *Yes*, *Mostly yes*, *No* or score-state badge; `status-active` *Downloading* only while `running`, none while `requested`; once `latest_terminal_download` is set the verdict badge renders (DEC-0210 as amended; STD-UI-18) |
 | Tile figures | `web/src/screens/home/data-tile.test.tsx` | Current of followed, both from `stocks_current` when served and never more current than followed; attention's `followed_count` only while the summary is not served; both as-of lines; em dash with *not determinable* for each figure whose source is not served; never `0` (AC-8; STD-UI-4) |
 | Lag | `web/src/screens/home/data-tile.test.tsx` | `set.not_current` or `later` building or failed shows *Not reflecting the latest download* (AC-8) |
 | Tile matches verdict | `web/src/screens/home/data-tile.test.tsx` | For the same problem set and latest download, the tile's verdict tier equals `data-health-ui`'s verdict badge; a worse score state wins with its own label; *No scores yet* and *Updating* never displace the answer; no request to `/api/data-health` is made (DEC-0210, DEC-0217) |
@@ -253,7 +281,8 @@ N/A, not applicable for this component.
 3. Every item has exactly one navigating action; items sort by tier then
    recency and leave only on resolution.
 4. Before any download, Home states that no data has been downloaded and
-   offers setup.
+   offers setup; until a download has ended, the data tile gives no verdict
+   and never *Yes*.
 5. No strategy, paper or live region or placeholder renders.
 6. Failure scenario: a failed attention read keeps the header, replaces the
    card bodies with *Couldn't read {what needs you / the data summary}:
@@ -297,7 +326,9 @@ the right; rows separated by `--border`.
 item rows. Empty, never populated: `latest_download` null, one `card`
 `default` with `h2` *No data has been downloaded yet.*, *Set up FactorFlow to
 name the stocks to follow and start the first download.* and **Start setup**;
-the header still renders. Empty, nothing found: *Nothing needs you right
+the header still renders. From the first request until a download ends
+(`latest_terminal_download` null), the tile is in its first-download-running
+state (2.4) with no verdict tier, and *Needs you* renders. Empty, nothing found: *Nothing needs you right
 now.* with *checked {time}*. Partial: the tile at its warning tier with
 counts; the affected stocks named in an item. Stale: the lag badge; *checked
 {time}* ages while attention fails. Unavailable: score figures and the
@@ -321,7 +352,9 @@ in `--status-foreground`; not determinable `--value-indeterminate` on
 **Accessibility.** `main` with the date `h1`; each card a `section` labelled
 by its `h2`. The tile is one link named by its title, tier and figures (*Data:
 mostly yes. 1,233 of 1,236 stocks current. Scores 2026-10-15 17:46 CDT,
-prices 2026-10-15.*). The list is a `ul` of `li`s; the severity tile is
+prices 2026-10-15.*); in the first-download-running state, by its title and
+sentence (*Data: your first download, started 2026-10-15 16:02 CDT, is
+running.*). The list is a `ul` of `li`s; the severity tile is
 `aria-hidden` and the tag carries the tier in words. A changed count is
 announced politely through the card's live region and focus never moves. The
 em dash carries hidden *not determinable* so a screen reader never hears a
@@ -356,7 +389,7 @@ Consumed; none exposed.
 | AC-9 | `sortAttention`; items from current state | The list | 2.5 |
 | AC-10 | M1 regions only | Empty grid columns, no strategy region | 3 |
 | AC-12 | Recorded states only | *Interrupted* serious; never shown complete | 2.5 |
-| AC-21 | `latest_download` null | Empty state with **Start setup** | 2.2 |
+| AC-21 | `latest_download` null; `latest_terminal_download` null | Empty state with **Start setup**; first-download-running tile with no verdict | 2.2, 2.4 |
 | AC-24 | States per region | States paragraph | 10 |
 | AC-25 | *checked {time}*; keyboard | As-of line; links and buttons only | 2.3, 10 |
 | AC-26 | `ui-components` | Component mapping | 10 |

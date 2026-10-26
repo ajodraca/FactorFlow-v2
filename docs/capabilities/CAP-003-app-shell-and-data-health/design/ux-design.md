@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T19:46:08Z
+  timestamp: 2026-10-26T02:17:21Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -173,7 +173,7 @@ screen's name.
 
 | Route | Screen | Top-bar title |
 |-------|--------|---------------|
-| `/` | redirect: `/setup` while `GET /api/health` `most_recent_run` is null, else `/home` (DEC-0202, PROVISIONAL) | none; a skeleton main region until the first health answer |
+| `/` | redirect: `/setup` while `GET /api/health` `most_recent_run` is null, else `/home` (DEC-0202 as the owner amended it on 2026-10-25, PROVISIONAL) | none; a skeleton main region until the first health answer |
 | `/setup` | 1.2 First-run setup | *Setup* |
 | `/home` | 1.3 Home | *Home* |
 | `/data` | 1.4 Data health | *Data health* |
@@ -216,7 +216,7 @@ Blueprint §3.5, specialized for M1 (brief §2.1).
 
 | State | Rendering |
 |-------|-----------|
-| Setup incomplete | `/` opens setup. The rail is present and every destination stays reachable, each showing its honest empty state (DEC-0202; AC-21). No banner, no lock |
+| Setup incomplete | `/` opens setup until a download is started from setup or Data health. The rail is present and every destination stays reachable, each showing its honest empty state (DEC-0202; AC-21). No banner, no lock |
 | Unreachable | The main region alone is replaced by a `card` `default` holding a `section` with `role="status"`: `h2` *FactorFlow is not answering.* and the delivered paragraph kept word for word, *The application container may have stopped, or a database migration may have failed and prevented it from starting. Check the container logs.* (`CAP-001-ux-design` v5 §2), then one line this capability adds, *Last answered {YYYY-MM-DD HH:MM:SS zone}* from `HealthProvider`'s last successful answer, or *Not yet answered since this page opened* when there is none (DEC-0204; AC-23). The rail, its chips as last read, and the top bar remain. When a later health poll answers, the routed screen mounts again at the same URL and refetches; nothing reloads the page. The state is announced once on entry and once on recovery |
 | Not found | A path matching no registered route renders, inside the shell with the top-bar title *Page not found*, a `card` `default` holding a `section` with `role="status"`: `h1` *There's no page at this address.* and one line, *Check the address, or go to* **Home** (a link to `/home`). The main region is never blank. Copy is this design's (brief §2.1) |
 | Trading stopped, classifications updating | Not shell states in M1: no order path exists (D-7), and score state is shown where scores are shown (blueprint §3.5) |
@@ -422,10 +422,13 @@ closing returns it to the opener. The hint and *Showing the first 8* rows are
 ### 1.2 First-run setup (S02, `/setup`)
 
 S02 §3 to §9 delivered for steps 1 to 4 (step 5 is M2, S02 §2), on CAP-001's
-API as it is. Owned by `setup-ui`. Setup is complete exactly when a download
-has been requested (DEC-0202, PROVISIONAL): `/` then opens Home (AC-2, S02-6),
-and `/setup` stays reachable from Settings' **Open setup** link (S02 §6) with
-every step shown as done.
+API as it is. Owned by `setup-ui`. Setup is complete exactly when CAP-001's
+run journal holds a download in any state (DEC-0202, PROVISIONAL); no setup
+flag is stored. `/` then opens Home (AC-2, S02-6), and `/setup` stays
+reachable from Settings' **Open setup** link (S02 §6) with every step shown as
+done. Each step's values are saved on **Continue** through CAP-001's
+endpoints, and unsaved input is held in app memory above the `/setup` route
+for the session (Interaction Flows).
 
 #### Page Layout
 
@@ -445,8 +448,10 @@ what was chosen once the step is done:
 | 3 | *Stocks to follow* | *{n} followed stocks* | `GET /api/instruments?lifecycle=active&limit=1` `active_count` > 0 |
 | 4 | *Download data* | *Download started {start time}* | the shell's attention `latest_download` is non-null |
 
-On load the current step is the first step not done; nothing is kept in the
-browser between visits (system design §4.4).
+On every visit the step list and the current step are re-derived from
+settings, the followed list and downloads, the current step being the first
+step not done (S02 §5); unsaved input held for the session fills its fields,
+and nothing is written to browser storage (system design §4.4).
 
 **Step card** (fluid, a `card` `default`): *Step {n} of 4* at `--text-xs`
 `--muted-foreground`; the step question as `h2` at `--text-xl`; an explanation
@@ -460,8 +465,8 @@ has no Continue and no Next hint.
 |------|-----------------|-------------------|
 | 1 | *Connect market data* | Read-only. A line *Market data key:* with `badge` `status-good` *Found* or `status-critical` *Missing* from `health.credential_present`. When missing, two lines: *Set the environment variable `FACTORFLOW_MASSIVE_API_KEY` to your Massive API key.* and *Restart FactorFlow after setting it.* Never the value (AC-4; S02-4). While health is unreachable the badge is `coverage-unknown` *Not determinable* with *FactorFlow isn't answering, so the key can't be checked.*, never *Missing* (S02 §7). **Continue** is available in every case: a missing key is fixed outside the product, and a download without one fails and surfaces on Home (DEC-0203) |
 | 2 | *How far back should history go?* | `form` `stacked` with one field: label *History depth*, `input` `numeric` with the non-editable suffix *years* (part of the accessible name), description *Whole years, 1 to 50.* Plan-limit note (S02 §3; CAP-001 §6): *Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.* **Continue** saves with `PUT /api/settings/history-depth` and moves on. `422`: a field error *History depth must be a whole number of years from 1 to 50.* with the value kept (S02 §7) |
-| 3 | *Which stocks do you want to follow?* | Explanation (S02 §8): *FactorFlow downloads data and scores value, growth and momentum for these stocks. Scores rank stocks against each other, so a factor needs at least 30 stocks with complete data before it can rank anything. Start with 100 or more if you can.* Then `radio-group` `cards` labelled *How do you want to name them?* with two options (0.8): **Paste a list**, *Paste symbols separated by commas or one per line.*; **Add later**, *Finish setup now and follow stocks from Data health later.* Choosing *Paste a list* reveals `form` `stacked` with `textarea` `list`, label *Stock symbols*, placeholder *AAPL, MSFT, NVDA or one symbol per line*, description *Whether the provider knows each one is checked during the download.* (S02 §8). Parse on paste and blur with the delivered `parse-bulk-symbols`: the counter sentence *{a} symbols recognised, {d} duplicates, {r} not recognised* with `badge` `status-good` on the accepted count and one `badge` `status-warning` per duplicate or unreadable entry, each named with its reason (*ZZZZ, not a valid symbol format*), and a near-miss as a `button` `outline` *Did you mean BRK.B?* that applies it (S02 §6). Below 30 accepted, the warning *Factor scores need at least 30 stocks with complete data. With {a}, no factor can be ranked yet.* with **Continue** available (AC-6; S02-5). Info note (S02 §8): *This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.* |
-| 4 | *Download data for {n} stocks* | A `card` `summary` description list of the three choices: *Market data key* with step 1's badge repeated, *History depth* *{y} years*, *Followed stocks* *{n}*. Then **Start download** (`button` `default`). After `202`: `progress` `determinate` with the text *{done} of {total} stocks* from attention `latest_download.progress` on the 10 s cadence, the line *Started {start time} · checked {time}*, the time being the attention read's `checked_at` (STD-UI-25; AC-25), and *You can leave; this keeps running.* (S02 §3). Nothing else to do on this step |
+| 3 | *Which stocks do you want to follow?* | Explanation (S02 §8): *FactorFlow downloads data and scores value, growth and momentum for these stocks. Scores rank stocks against each other, so a factor needs at least 30 stocks with complete data before it can rank anything. Start with 100 or more if you can.* Then `radio-group` `cards` labelled *How do you want to name them?* with two options (0.8): **Paste a list**, *Paste symbols separated by commas or one per line.*; **Add later**, *Continue without stocks for now; you can follow them later from Data health.*, with which **Continue** is available and posts nothing Choosing *Paste a list* reveals `form` `stacked` with `textarea` `list`, label *Stock symbols*, placeholder *AAPL, MSFT, NVDA or one symbol per line*, description *Whether the provider knows each one is checked during the download.* (S02 §8). Parse on paste and blur with the delivered `parse-bulk-symbols`: the counter sentence *{a} symbols recognised, {d} duplicates, {r} not recognised* with `badge` `status-good` on the accepted count and one `badge` `status-warning` per duplicate or unreadable entry, each named with its reason (*ZZZZ, not a valid symbol format*), and a near-miss as a `button` `outline` *Did you mean BRK.B?* that applies it (S02 §6). Below 30 accepted, the warning *Factor scores need at least 30 stocks with complete data. With {a}, no factor can be ranked yet.* with **Continue** available (AC-6; S02-5). Info note (S02 §8): *This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.* |
+| 4 | *Download data for {n} stocks* | A `card` `summary` description list of the three choices: *Market data key* with step 1's badge repeated, *History depth* *{y} years*, *Followed stocks* *{n}*. Then **Start download** (`button` `default`). After `202`: `progress` `determinate` with the text *{done} of {total} stocks* from attention `latest_download.progress` on the 10 s cadence, the line *Started {start time} · checked {time}*, the time being the attention read's `checked_at` (STD-UI-25; AC-25), and *You can leave; this keeps running.* (S02 §3). With no stock followed (`active_count` 0, as after *Add later*), **Start download** is `button` `blocked` with CAP-001's `no_active_instruments` reason beside it, *No stocks are followed. Follow stocks before downloading.*, and the step offers two exits, **Go to Home** (a link to `/home`) and **Manage followed stocks** (a link to `/data/followed`), both styled `button` `outline`. Nothing else to do on this step |
 
 #### Component Mapping
 
@@ -478,15 +483,20 @@ has no Continue and no Next hint.
 | Step 4 summary | `card` | `summary` | `design-system/components/card/design-spec.md` |
 | Start download, Continue | `button` | `default`, one per step card | `design-system/components/button/design-spec.md` |
 | Continue with zero accepted symbols | `button` | `blocked`, reason through `aria-describedby` | `design-system/components/button/design-spec.md` |
+| Start download with no stock followed (step 4) | `button` | `blocked`, the `no_active_instruments` reason through `aria-describedby` | `design-system/components/button/design-spec.md` |
+| Go to Home, Manage followed stocks (step 4 exits) | link styled as `button` | `outline` | `design-system/components/button/design-spec.md` |
 | Back | `button` | `ghost` | `design-system/components/button/design-spec.md` |
 | Download progress | `progress` | `determinate`; `indeterminate` only while `total` is unknown | `design-system/components/progress/design-spec.md` |
 
 #### Interaction Flows
 
 **Continue** saves the step through the delivered endpoint and makes the next
-step current; **← Back** makes the previous step current and discards nothing:
-every value entered in a later step is kept in `setup-ui`'s state for the
-visit (AC-3; S02-2; STD-UI-26). A done step in the stepper is a link to that
+step current; **← Back** makes the previous step current and discards nothing.
+Unsaved input in every step is held in app memory above the `/setup` route, a
+React state holder in the shell's route tree, for the session: going back a
+step, or leaving `/setup` and returning, keeps it, and only a page reload
+loses it; nothing is written to browser storage (DEC-0202; AC-3; S02-2;
+STD-UI-26). A done step in the stepper is a link to that
 step. Focus moves to the step card's `h2` whenever the current step changes
 (S02 §9).
 
@@ -496,8 +506,8 @@ of history*.
 
 **Step 3, pasting.** Parsing runs on paste and blur, never per keystroke;
 symbols normalise to upper case on blur (`textarea` contract). Rejected and
-duplicate entries never discard accepted ones (AC-5). At zero accepted,
-**Continue** is `button` `blocked` with *Paste at least one symbol, or choose
+duplicate entries never discard accepted ones (AC-5). At zero accepted with
+*Paste a list* chosen, **Continue** is `button` `blocked` with *Paste at least one symbol, or choose
 Add later.* beside it (S02 §7).
 
 **Step 3, Continue.** The accepted symbols go to `POST /api/instruments` in
@@ -510,9 +520,15 @@ batch fails part-way, the entries not yet posted are named and kept in the
 textarea for a retry, and the posted ones are counted as followed. The stepper
 summary becomes *{n} followed stocks*; step 4 becomes current.
 
-**Step 3, Add later.** Setup ends by navigating to `/home`, which shows its
-honest empty state (AC-21). Nothing is stored, so `/` opens setup again until
-a download is requested (DEC-0202; capability flow 1 step 7).
+**Step 3, Add later.** **Continue** passes step 3 with no symbols and posts
+nothing; step 4 becomes current. With no stock followed, step 4 shows **Start
+download** `blocked` with CAP-001's `no_active_instruments` reason, *No stocks
+are followed. Follow stocks before downloading.*, derived from `active_count`
+0 without a request, and two exits: **Go to Home**, where Home shows its
+honest empty state with **Start setup** (AC-21), and **Manage followed
+stocks**, which opens `/data/followed`. Setup stays incomplete, so `/` keeps
+opening `/setup` until a download is started from setup or Data health; no
+setup flag is stored (DEC-0202; capability flow 1 step 7).
 
 **Step 4, Start download.** `POST /api/acquisition-runs`. `202` with
 `queued_behind` null: the progress bar and text appear; `/` now opens Home
@@ -533,7 +549,7 @@ routine, no confirmation (blueprint §9).
 |-------|-----------|
 | Loading | Skeleton step list and a card skeleton at the step card's shape (S02 §7) |
 | Empty, never populated | Step 1 current with nothing done |
-| Empty, nothing found | Step 3 with zero accepted symbols: **Continue** `blocked` with its reason (S02 §7) |
+| Empty, nothing found | Step 3 with zero accepted symbols: **Continue** `blocked` with its reason (S02 §7); step 4 with no stock followed (after *Add later*): **Start download** `blocked` with the `no_active_instruments` reason, with **Go to Home** and **Manage followed stocks** |
 | Partial | Step 3 with rejected or duplicate entries: both counts, the accepted kept (S02-3); some steps done, the rest to do |
 | Stale | Not applicable to the steps: setup re-derives every step from the server on load (S02 §7); step 4's progress line, the one polled region, carries *checked {time}* (0.4) |
 | Unavailable | Step 1 and step 4's key line `coverage-unknown` while health is unreachable, never *Missing*; step 4's progress while the attention read fails: *Progress can't be read right now* beside the running state, never a frozen bar presented as current |
@@ -611,7 +627,20 @@ Main region capped at 1180 px, regions stacked `--space-5` apart (S01 §3).
    failed*, *Not reflecting the latest download*; 1.4). Neutral and active
    score states (*No scores yet*, *Updating*) never worsen the badge, and a
    score state that is not determinable contributes no tier. The tile reads
-   nothing from `GET /api/data-health` (review v1 FINDING-4). The hero line
+   nothing from `GET /api/data-health` (review v1 FINDING-4). Never-acquired
+   replaces both tiers (DEC-0210 as amended): while attention's
+   `latest_terminal_download` is null no download has ever ended (the signal
+   Data health already uses), and the tile shows no verdict tier and no
+   *Yes*. Before any download is requested Home shows its empty state
+   (States); from the first request until a download ends the tile is in the
+   first-download-running state: under the title, `badge` `status-active`
+   *Downloading* while `latest_download.state` is `running` and no badge
+   otherwise, and in place of the hero line and the as-of lines the one
+   sentence *The first download, started {start time}, is running.*, the time
+   being `latest_download.started_at`, or `requested_at` while it waits to
+   start. The tile renders no progress; the *Your first download is running*
+   item carries it. Once a download has ended the tile renders in full. The
+   hero line
    *{current} of {followed} stocks current* at `--text-2xl` `--font-numeric`
    takes both figures from the summary's `stocks_current`, `current_count`
    and `followed_count`, counted over the score set's active instruments,
@@ -661,7 +690,7 @@ resolved and never because it was viewed (AC-9; S01-4).
 | UI Element | Component | Variant | Design Spec Reference |
 |------------|----------|---------|-----------------------|
 | Data tile | `card` | `metric`, the whole card one link | `design-system/components/card/design-spec.md` |
-| Data tier label; *Not reflecting the latest download* | `badge` | `status-<tier>` of the winning tier; `status-warning` | `design-system/components/badge/design-spec.md` |
+| Data tier label; *Not reflecting the latest download* | `badge` | `status-<tier>` of the winning tier, or at most `status-active` *Downloading* while no download has ended; `status-warning` | `design-system/components/badge/design-spec.md` |
 | Figures that cannot be determined; the market state inside session hours | `badge` and em dash | `coverage-unknown`; `--value-missing` em dash | `design-system/components/badge/design-spec.md` |
 | Needs you card | `card` | `default` | `design-system/components/card/design-spec.md` |
 | Needs-you item | composition, blueprint §4.1 (`web/src/components/patterns/`) | `card` row, `badge`, `button` | `design-system/components/badge/design-spec.md`, `design-system/components/button/design-spec.md` |
@@ -687,6 +716,7 @@ S01 §7, specialized by brief §2.4.
 |-------|-----------|
 | Loading | Skeleton header line, a skeleton tile and three skeleton item rows (S01 §7) |
 | Empty, never populated | `latest_download` null: not a redirect. The summary row and the list give way to one `card` `default`: `h2` *No data has been downloaded yet.*, the line *Set up FactorFlow to name the stocks to follow and start the first download.*, and **Start setup** (a link to `/setup`) (AC-21; DEC-0202; system design §3.3 box 5). The header still renders |
+| Empty, first download running | `latest_download` set and `latest_terminal_download` null: the data tile shows the first-download-running state (Page Layout 2), with no verdict tier and no *Yes*, `status-active` *Downloading* at most and the sentence *The first download, started {start time}, is running.*; the score-state tier is not shown either (DEC-0210 as amended; system design §3.3 box 21). *Needs you* renders as usual, with the *Your first download is running* item |
 | Empty, nothing found | *Needs you* with zero items: the body reads *Nothing needs you right now.* with *checked {time}* (S01 §7) |
 | Partial | The data tile at its warning tier with its counts; the affected stocks named in a *Needs you* item (S01 §7) |
 | Stale | `badge` `status-warning` *Not reflecting the latest download* on the tile when scores lag the latest download (AC-8); *checked {time}* ages while the attention read fails |
@@ -712,7 +742,9 @@ no signed figure exists on Home in M1.
 `main` with the date `h1`; each card is a `section` labelled by its `h2` (S01
 §9). The data tile is a single link whose accessible name combines its title,
 tier and figures: *Data: mostly yes. 1,233 of 1,236 stocks current. Scores
-2026-10-15 17:46 CDT, prices 2026-10-15.* The item's severity tile is
+2026-10-15 17:46 CDT, prices 2026-10-15.* In the first-download-running
+state it is *Data: downloading. The first download, started 2026-10-15 17:31
+CDT, is running.* The item's severity tile is
 `aria-hidden` and the tag badge carries the tier in words (S01 §9); the list
 is a `ul` of `li`s and each action's accessible name names the item (*Fix data
 for KO, TSLA and FBXX*, *See the download that failed*, *Open Settings to set
@@ -1294,12 +1326,18 @@ below are the capability's five user flows drawn across them.
 
 **First run** (capability flow 1; blueprint §6). `/` on an empty install
 redirects to `/setup` after the first health answer (DEC-0202). Setup's four
-steps run against CAP-001's API; **Start download** requests the download and
-from then on `/` opens `/home`, where the *Your first download is running*
-item (kind 4) shows its progress with **See download** to the detail, until a
-score set exists (AC-7). *Add later* ends setup on Home's honest empty state,
-whose **Start setup** returns to `/setup`. Settings' **Open setup** reopens
-setup at any time with its steps shown as done.
+steps run against CAP-001's API, each saved on **Continue**, with unsaved
+input held in app memory above `/setup` for the session; **Start download**
+requests the download and from then on `/` opens `/home`, where the *Your
+first download is running* item (kind 4) shows its progress with **See
+download** to the detail, until a score set exists (AC-7), and the data tile
+shows the first-download-running state, with no verdict, until a download
+ends. *Add later* passes step 3 with no symbols to step 4, whose **Start
+download** is `blocked` with the `no_active_instruments` reason and whose two
+exits lead to Home's honest empty state (its **Start setup** returns to
+`/setup`) and to Followed stocks; setup stays incomplete, so `/` keeps opening
+`/setup` until a download is started from setup or Data health. Settings'
+**Open setup** reopens setup at any time with its steps shown as done.
 
 **Deciding whether the data can be trusted** (flow 2). Rail: Data health. The
 verdict and the three cards answer first; *Needs fixing* lists only the
@@ -1426,12 +1464,12 @@ delivers is the blueprint's approved navigation, not a new item.
 |-------|---------------|-------------------|-------------------------|
 | AC-1 | One shell; groups in order; unshipped absent | 0.1 layout; 0.2 static destination list drawn for both landing orders; Strategies and Portfolio absent | shell composition; `badge` `status-warning` chips |
 | AC-2 | Setup first, Home after | 0.3 `/` redirect on `most_recent_run` (DEC-0202); 1.2 step 4 | `Navigate replace`; `button` `default` |
-| AC-3 | Setup steps, position, back keeps values | 1.2 stepper with *Step n of 4*, drafts kept for the visit, **← Back** | `stepper` `vertical`; `card` `default`; `button` `ghost` |
+| AC-3 | Setup steps, position, back keeps values | 1.2 stepper with *Step n of 4*, unsaved input held in app memory above `/setup` for the session, **← Back**; step 4 blocked after *Add later* with its two exits (DEC-0202) | `stepper` `vertical`; `card` `default`; `button` `ghost` |
 | AC-4 | Credential presence, never value | 1.2 step 1 and step 4 summary; 1.9 Market data key region; 1.4 What you follow | `badge` `status-good` / `status-critical` / `coverage-unknown` |
 | AC-5 | Pasted list parsed honestly | 1.2 step 3 parse result and the per-entry server dispositions; 1.6 Follow many | `textarea` `list`; `badge` `status-good` / `status-warning` |
 | AC-6 | Fewer than 30 is a warning | 1.2 step 3 ranking warning with **Continue** available | `button` `default` |
 | AC-7 | First download from setup; Home shows progress | 1.2 step 4 progress; 1.3 item kind 4 *Your first download is running* | `progress` `determinate`; Needs-you item |
-| AC-8 | Home data tile, scores lag stated | 1.3 data tile: counts, two as-of lines, *Not reflecting the latest download*, not determinable while the summary is not served | `card` `metric`; `badge` `status-warning`; `--value-missing` em dash |
+| AC-8 | Home data tile, scores lag stated | 1.3 data tile: counts, two as-of lines, *Not reflecting the latest download*, not determinable while the summary is not served; no verdict tier while no download has ended | `card` `metric`; `badge` `status-warning`; `--value-missing` em dash |
 | AC-9 | Needs you: one action, ordered, leaves on resolution | 1.3 catalogue, `sortAttention`, items present only while their cause holds | Needs-you item; `button` `outline` |
 | AC-10 | Nothing unshipped on Home | 1.3 page layout: one tile, no strategy, paper or live region, empty grid columns not placeholders | `card` `metric` |
 | AC-11 | Data health verdict and check cards | 1.4 verdict composed from `affected_count` and `followed_count` with its tier; three cards each with tier, result and as-of | `badge` `status-*` / `coverage-unknown`; `card` `metric` |
@@ -1444,7 +1482,7 @@ delivers is the blueprint's approved navigation, not a new item.
 | AC-18 | Old paths arrive for one release | 0.3 four legacy redirects with the query kept | `Navigate replace` |
 | AC-19 | Product vocabulary | 0.7 conventions; every string in Sections 0 and 1, including the five relabelled screens | all |
 | AC-20 | One tier per status | 0.7 one tier function with label plus shape; brief §12.2 table rendered in 1.3, 1.4, 1.7, 1.8 | `badge` `status-*` |
-| AC-21 | Honest empty state | 1.3 and 1.4 never-populated states with **Start setup**, **Start the first download** or **Open setup**; no check renders as passed | `card` `default`; `button` `default` |
+| AC-21 | Honest empty state | 1.3 and 1.4 never-populated states with **Start setup**, **Start the first download** or **Open setup**; 1.3's first-download-running tile with no verdict; no check renders as passed | `card` `default`; `button` `default` |
 | AC-22 | Command palette | 1.1 opened by `⌘K` / `Ctrl+K` and the top-bar opener on every route; Stocks, Universes, Pages; no trading action | `command` `dialog`; `button` `outline` |
 | AC-23 | Unreachable is a designed state | 0.5 unreachable state with *Last answered {time}*; rail and top bar remain; remount at the same URL | `card` `default` |
 | AC-24 | Every region defines its states | States tables in 1.1 to 1.9 and 0.5, each inapplicable state recorded with its reason | state-coverage region |

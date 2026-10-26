@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-25T19:44:57Z
+  timestamp: 2026-10-26T02:13:49Z
   source_artifacts:
     - id: CAP-003
       version: "1"
@@ -51,7 +51,8 @@ before the score read exists) and DEC-0217 (`worstDataTier` over every tier),
 all under `projects/factorflow-v2/decisions/`
 in the harness repository and all **PROVISIONAL**. DEC-0210 and DEC-0217 are
 applied as the owner amended them on 2026-10-25 (specification review v1
-FINDING-8, FINDING-9).
+FINDING-8, FINDING-9), including DEC-0210's clause that never-acquired
+replaces both with the empty state (specification review v2 FINDING-2).
 
 ## 1. Overview
 
@@ -233,12 +234,12 @@ export function worstDataTier(inputs: {
   affectedCount: number;                    // the problem set: affected_count or problems.stock_count (DEC-0201)
   followedCount: number;                    // followed_count from the same response
   latestTerminalDownload: RunState | null;  // attention's latest_terminal_download?.state
-}): DataAnswer;
+}): DataAnswer | null;                      // null while latestTerminalDownload is null: no verdict
 
 export function dataTileBadge(
-  verdict: DataAnswer,
+  verdict: DataAnswer | null,                         // null: no download has ever ended
   scores: Extract<Status, { of: "scores" }> | null,   // null while the summary is not served
-): { tier: Tier; label: string; from: "verdict" | "scores" };
+): { tier: Tier; label: string; from: "verdict" | "scores" } | null;   // null whenever verdict is null
 ```
 
 The inputs are the problem set and the latest terminal download; the checks'
@@ -247,14 +248,20 @@ the owner amended it on 2026-10-25):
 
 | Input | Tier | Answer word | Clause after the count clause |
 |-------|------|-------------|-------------------------------|
+| `latestTerminalDownload` null (no download has ever ended), whatever `affectedCount` | no answer: the function returns `null` | none, never *Yes* | none |
 | `affectedCount` 0 | good | *Yes* | none |
 | `affectedCount` above 0, below `followedCount` | warning | *Mostly yes* | none |
 | every followed stock affected (`affectedCount` ≥ `followedCount` > 0) | critical | *No* | none |
 | `latestTerminalDownload` `failed` | critical | *No* | *, and the last download failed.* |
 | `latestTerminalDownload` `abandoned` (*Interrupted*) | serious, rendered `status-serious` | *Mostly yes* | *, and the last download was interrupted.* |
-| any other `latestTerminalDownload` state, or none | no tier | n/a | none |
+| any other `latestTerminalDownload` state | no tier | n/a | none |
 
-The answer is the worst of the problem-set tier and the download tier by one
+While `latestTerminalDownload` is null no download has ever ended, so nothing
+has been acquired to judge and `worstDataTier` returns `null` instead of an
+answer: an empty problem set over data never downloaded is not evidence that
+the data can be trusted, so it never yields *Yes* (DEC-0210 as the owner
+amended it on 2026-10-25: never-acquired replaces both with the empty state;
+STD-UI-18). Otherwise the answer is the worst of the problem-set tier and the download tier by one
 full tier order for all six tiers, critical, serious, warning, good, neutral,
 with active ranked alongside good, the order `sortAttention` uses (2.6;
 DEC-0217 as amended). The word follows the winning tier: good *Yes*, warning
@@ -273,8 +280,14 @@ by the same order, with the label of whichever wins, the answer word for the
 verdict or `labelOf` for the scores (*Score update failed*, *Not reflecting
 the latest download*). A tie goes to the verdict and a null score state
 contributes no tier, so neutral (*No scores yet*) and active (*Updating*)
-never worsen or displace the answer. Before any download Home renders its
-empty state and neither function is called. `data-health-ui`'s verdict and
+never worsen or displace the answer. `dataTileBadge` returns `null` whenever
+the verdict is `null`, whatever the score state, so neither the verdict tier
+nor the score-state tier reaches the tile while no download has ended; Home
+then renders AC-21's empty state before any download is requested and its
+first-download-running state, with at most a `status-active` *Downloading*
+badge and never a verdict word, until one ends (`home-ui` 2.4). Data health
+renders its empty card on the same condition and never renders a `null`
+answer. `data-health-ui`'s verdict and
 `home-ui`'s tile pass the same problem set and the same latest download, so
 the tile's verdict tier never disagrees with the verdict; the tile adds only
 the score state, which Data health shows on its Factor scores card.
@@ -442,7 +455,7 @@ Vitest with React Testing Library, as the tech stack approves.
 |------|------|----------------|
 | Tier table | `web/src/components/patterns/tiers.test.ts` | Every row of UX brief §12.2 maps to its label and tier; `partial` is never good, `cancelled` never critical (AC-20; STD-UI-12) |
 | Shape and words | `web/src/components/patterns/status-badge.test.tsx` | Every tier renders its label as text and its shape `aria-hidden`; no information is carried by colour alone (STD-UI-8) |
-| Worst tier | `web/src/components/patterns/worst-data-tier.test.ts` | None affected gives good *Yes*; some affected gives warning *Mostly yes*; every followed stock affected (`affectedCount` ≥ `followedCount` > 0) gives critical *No*; a failed latest terminal download gives critical *No* with *, and the last download failed.*; an interrupted one gives serious *Mostly yes* with *, and the last download was interrupted.*; in `dataTileBadge` a worse score state wins with its own label, neutral and active do not worsen or displace the answer, and a null score state contributes no tier (DEC-0210, DEC-0217 as amended) |
+| Worst tier | `web/src/components/patterns/worst-data-tier.test.ts` | None affected gives good *Yes*; some affected gives warning *Mostly yes*; every followed stock affected (`affectedCount` ≥ `followedCount` > 0) gives critical *No*; a failed latest terminal download gives critical *No* with *, and the last download failed.*; an interrupted one gives serious *Mostly yes* with *, and the last download was interrupted.*; in `dataTileBadge` a worse score state wins with its own label, neutral and active do not worsen or displace the answer, and a null score state contributes no tier; `latestTerminalDownload` null returns `null` for `affectedCount` 0 and above 0, never *Yes*, and `dataTileBadge` over a `null` verdict returns `null` for every score state, including `failed` and `not_current` (DEC-0210, DEC-0217 as amended) |
 | Derivation | `web/src/components/patterns/needs-you.test.ts` | Each kind present exactly while its cause holds; the first-download variant under a `404` summary only when no download has ended (DEC-0216); the scores variant and kind 5 absent under `404` |
 | Sort | `web/src/components/patterns/needs-you.test.ts` | Tier order then newest first; active sorts with good; stable on ties (AC-9) |
 | One count | `web/src/components/patterns/needs-you.test.ts` | The length of `deriveNeedsYou` is what both callers use (AC-16) |
