@@ -9,7 +9,7 @@ updated: 2026-10-27
 last_updated: 2026-10-27
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: tech-stack-agent
   agent_version: "1.0"
@@ -29,8 +29,8 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:12:08Z
-  reviewed_revision: sha256:2288cb2558800b084a811c561f87008e09d79a352281b146ddbbdf058b5a37d6
+  approved_at: 2026-10-27T23:03:56Z
+  reviewed_revision: sha256:ec6ef4ec99385bce5bb714f191d913ae6bf356d715ea1acd0b03c562670626fc
 ---
 
 # Tech Stack: FactorFlow
