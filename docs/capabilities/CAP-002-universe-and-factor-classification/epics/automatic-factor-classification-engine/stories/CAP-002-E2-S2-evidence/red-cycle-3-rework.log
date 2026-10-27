@@ -1,0 +1,167 @@
+# RED, cycle-3 (review v2 rework): the four new tests, as committed in this cycle, run against
+# production carrying the seven cycle-3 mutants (mutants-cycle-3.json), all applied at once:
+# complete-no-active-count, stored-count-includes-retired, result-count-includes-retired,
+# reason-no-empty-guard, txn-status-intrans-only, ctx-active-unordered, ctx-retired-unordered.
+# Tree: 70d3728f4d2ebec1a8f3408ec00c0c7a69391768 plus the cycle-3 working tree, then the mutants. Unmutated, the same four pass.
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <four new tests>
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c3/red
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c3/red
+Installed 43 packages in 49ms
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+____________ test_completed_set_is_sized_by_the_active_roster_only _____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63970 user=test database=test_4597e2fa55dd42cdaf789e87245ad7a7) at 0x10b29bdd0>
+building_set = (UUID('e67757d4-b6c2-4d9c-a8b7-e7264c0b05da'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b29dd00>
+postgres_connection_string = 'postgresql://test:test@localhost:63970/test_4597e2fa55dd42cdaf789e87245ad7a7'
+
+    def test_completed_set_is_sized_by_the_active_roster_only(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """DAC-E2-10, AC-15 (IR-001): two active instruments and one retired, all holding bars,
+        size the set at two, on the committed row and in the result."""
+        set_id, _ = building_set
+        second = add_instrument(conn, "BBB")
+        add_bar(conn, second, date(2026, 10, 1))
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, retired, date(2026, 10, 2))
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "complete"
+>       assert result.active_instruments == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = BuildResult(set_id=UUID('e67757d4-b6c2-4d9c-a8b7-e7264c0b05da'), state='complete', failure_reason=None, active_instruments=3, qualified_counts={}).active_instruments
+
+tests/integration/test_engine_transaction.py:301: AssertionError
+____________ test_connection_with_an_aborted_transaction_is_refused ____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63970 user=test database=test_b198f743f5244b0d9f88218dc728ffc4) at 0x10b29d5b0>
+building_set = (UUID('ddeb8572-5206-4bd1-831c-97c59c3aba7f'), 1)
+
+    def test_connection_with_an_aborted_transaction_is_refused(
+        conn: psycopg.Connection, building_set: tuple[UUID, int]
+    ) -> None:
+        """DEC-0111, T009 (e), T017 step 1 (IR-003): a transaction already in error is refused
+        before any statement, not recorded as a failed build."""
+        set_id, _ = building_set
+        with pytest.raises(psycopg.errors.DivisionByZero):
+            conn.execute("SELECT 1/0")
+        assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INERROR
+>       with pytest.raises(ValueError, match="transaction"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/integration/test_engine_transaction.py:532: Failed
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c3/red/src/factorflow/classification/engine.py", line 104, in build
+    conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")  # DEC-0111
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c3/red/.venv/lib/python3.12/site-packages/psycopg/connection.py", line 300, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+________ test_failure_with_an_empty_message_is_recorded_with_its_class _________
+
+_conn = <psycopg.Connection [IDLE] (host=localhost port=63970 user=test database=test_1dd2f13bd78c42ee892969590232fde2) at 0x10b211c10>
+_context = BuildContext(set_id=UUID('31ca7e2e-8799-40d1-94be-7fbaa624b9b3'), run_id=UUID('a0e2012c-96a8-4218-8ee0-35b4a150bbc4'),...cation_date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1,), retired_ids=())
+
+    def bare(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+>       raise RuntimeError
+E       RuntimeError
+
+tests/integration/test_engine_transaction.py:566: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63970 user=test database=test_1dd2f13bd78c42ee892969590232fde2) at 0x10b211c10>
+building_set = (UUID('31ca7e2e-8799-40d1-94be-7fbaa624b9b3'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b210c50>
+postgres_connection_string = 'postgresql://test:test@localhost:63970/test_1dd2f13bd78c42ee892969590232fde2'
+
+    def test_failure_with_an_empty_message_is_recorded_with_its_class(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """AC-20, DAC-E2-10 (IR-002): an exception with no message still fails the set durably,
+        with its class as the reason, and build does not raise."""
+        set_id, _ = building_set
+    
+        def bare(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            raise RuntimeError
+    
+        monkeypatch.setattr(engine, "_STAGES", [bare])
+>       result = engine.build(conn, set_id, 30)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_transaction.py:569: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/classification/engine.py:128: in build
+    reason = _reason(exc)
+             ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exc = RuntimeError()
+
+    def _reason(exc: Exception) -> str:
+>       message = str(exc).splitlines()[0]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+src/factorflow/classification/engine.py:84: IndexError
+_____________ test_set_context_rosters_are_in_instrument_id_order ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63970 user=test database=test_c098a4bedad44c6eaa87cb5f939e9166) at 0x10b211d00>
+
+    def test_set_context_rosters_are_in_instrument_id_order(conn: psycopg.Connection) -> None:
+        """DAC-E2-S2-4, T013 (IR-004): both rosters come back in instrument_id order even when
+        the heap holds them in another order and no index supplies that order."""
+        a = add_instrument(conn, "AAA")
+        b = add_instrument(conn, "BBB")
+        old = add_instrument(conn, "OLD", lifecycle="retired")
+        older = add_instrument(conn, "OLDER", lifecycle="retired")
+        # A new row version is written after the others, so a heap scan reads a and old last.
+        conn.execute(
+            "UPDATE instrument SET added_at = added_at WHERE instrument_id IN (%s, %s)", (a, old)
+        )
+        conn.commit()
+        set_id = add_building_set(conn, add_run(conn), date(2026, 10, 3))
+    
+        with conn.cursor() as cur:
+            # A sequential scan only: idx_instrument_active would otherwise return id order.
+            cur.execute("SET LOCAL enable_indexscan = off")
+            cur.execute("SET LOCAL enable_indexonlyscan = off")
+            cur.execute("SET LOCAL enable_bitmapscan = off")
+            cur.execute(
+                "SELECT array_agg(instrument_id) FILTER (WHERE lifecycle = 'active'), "
+                "array_agg(instrument_id) FILTER (WHERE lifecycle = 'retired') FROM instrument"
+            )
+            heap_order = cur.fetchone()
+            context = engine._read_context(cur, set_id)
+        conn.rollback()
+    
+        assert heap_order == ([b, a], [older, old])  # the precondition: heap order is not id order
+>       assert context.active_ids == (a, b)
+E       assert (2, 1) == (1, 2)
+E         
+E         At index 0 diff: 2 != 1
+E         Use -v to get more diff
+
+tests/integration/test_engine_context.py:110: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_completed_set_is_sized_by_the_active_roster_only
+FAILED tests/integration/test_engine_transaction.py::test_connection_with_an_aborted_transaction_is_refused
+FAILED tests/integration/test_engine_transaction.py::test_failure_with_an_empty_message_is_recorded_with_its_class
+FAILED tests/integration/test_engine_context.py::test_set_context_rosters_are_in_instrument_id_order
+4 failed in 2.53s
+exit=1

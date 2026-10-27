@@ -1,0 +1,56 @@
+.....................................x.................................F
+=================================== FAILURES ===================================
+________ test_failure_with_an_empty_message_is_recorded_with_its_class _________
+
+_conn = <psycopg.Connection [IDLE] (host=localhost port=64308 user=test database=test_009e29e67cd44578a9081e7868ac36a2) at 0x10d603080>
+_context = BuildContext(set_id=UUID('66f09321-9453-41a2-965a-bba5d80c5b3f'), run_id=UUID('12a51b13-9aaa-4dc0-8726-9fd6b7124df4'),...cation_date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1,), retired_ids=())
+
+    def bare(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+>       raise RuntimeError
+E       RuntimeError
+
+tests/integration/test_engine_transaction.py:566: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=64308 user=test database=test_009e29e67cd44578a9081e7868ac36a2) at 0x10d603080>
+building_set = (UUID('66f09321-9453-41a2-965a-bba5d80c5b3f'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d601a00>
+postgres_connection_string = 'postgresql://test:test@localhost:64308/test_009e29e67cd44578a9081e7868ac36a2'
+
+    def test_failure_with_an_empty_message_is_recorded_with_its_class(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """AC-20, DAC-E2-10 (IR-002): an exception with no message still fails the set durably,
+        with its class as the reason, and build does not raise."""
+        set_id, _ = building_set
+    
+        def bare(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            raise RuntimeError
+    
+        monkeypatch.setattr(engine, "_STAGES", [bare])
+>       result = engine.build(conn, set_id, 30)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_transaction.py:569: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/classification/engine.py:128: in build
+    reason = _reason(exc)
+             ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exc = RuntimeError()
+
+    def _reason(exc: Exception) -> str:
+>       message = str(exc).splitlines()[0]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+src/factorflow/classification/engine.py:84: IndexError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_failure_with_an_empty_message_is_recorded_with_its_class
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 70 passed, 1 xfailed in 6.43s

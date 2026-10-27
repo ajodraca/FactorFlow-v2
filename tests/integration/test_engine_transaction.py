@@ -280,6 +280,30 @@ def test_success_with_no_stages_completes_the_set(
     assert row["active_instruments"] == 1
 
 
+def test_completed_set_is_sized_by_the_active_roster_only(
+    conn: psycopg.Connection,
+    building_set: tuple[UUID, int],
+    monkeypatch: pytest.MonkeyPatch,
+    postgres_connection_string: str,
+) -> None:
+    """DAC-E2-10, AC-15 (IR-001): two active instruments and one retired, all holding bars,
+    size the set at two, on the committed row and in the result."""
+    set_id, _ = building_set
+    second = add_instrument(conn, "BBB")
+    add_bar(conn, second, date(2026, 10, 1))
+    retired = add_instrument(conn, "OLD", lifecycle="retired")
+    add_bar(conn, retired, date(2026, 10, 2))
+    monkeypatch.setattr(engine, "_STAGES", [])
+
+    result = engine.build(conn, set_id, 30)
+
+    assert result.state == "complete"
+    assert result.active_instruments == 2
+    row, _ = committed(postgres_connection_string, set_id)
+    assert row["state"] == "complete"
+    assert row["active_instruments"] == 2
+
+
 def test_qualified_counts_are_this_sets_classification_set_factor_rows(
     conn: psycopg.Connection,
     building_set: tuple[UUID, int],
@@ -496,6 +520,21 @@ def test_autocommit_or_open_transaction_connection_is_refused(
         engine.build(conn, set_id, 30)
 
 
+def test_connection_with_an_aborted_transaction_is_refused(
+    conn: psycopg.Connection, building_set: tuple[UUID, int]
+) -> None:
+    """DEC-0111, T009 (e), T017 step 1 (IR-003): a transaction already in error is refused
+    before any statement, not recorded as a failed build."""
+    set_id, _ = building_set
+    with pytest.raises(psycopg.errors.DivisionByZero):
+        conn.execute("SELECT 1/0")
+    assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INERROR
+    with pytest.raises(ValueError, match="transaction"):
+        engine.build(conn, set_id, 30)
+    conn.rollback()
+    assert set_row(conn, set_id)["state"] == "building"
+
+
 def test_failure_reason_is_one_line(
     conn: psycopg.Connection,
     building_set: tuple[UUID, int],
@@ -511,3 +550,27 @@ def test_failure_reason_is_one_line(
     engine.build(conn, set_id, 30)
 
     assert set_row(conn, set_id)["failure_reason"] == "RuntimeError: first"
+
+
+def test_failure_with_an_empty_message_is_recorded_with_its_class(
+    conn: psycopg.Connection,
+    building_set: tuple[UUID, int],
+    monkeypatch: pytest.MonkeyPatch,
+    postgres_connection_string: str,
+) -> None:
+    """AC-20, DAC-E2-10 (IR-002): an exception with no message still fails the set durably,
+    with its class as the reason, and build does not raise."""
+    set_id, _ = building_set
+
+    def bare(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+        raise RuntimeError
+
+    monkeypatch.setattr(engine, "_STAGES", [bare])
+    result = engine.build(conn, set_id, 30)
+
+    assert result.state == "failed"
+    assert result.failure_reason == "RuntimeError: "
+    row, _ = committed(postgres_connection_string, set_id)
+    assert row["state"] == "failed"
+    assert row["ended_at"] is not None
+    assert row["failure_reason"] == "RuntimeError: "

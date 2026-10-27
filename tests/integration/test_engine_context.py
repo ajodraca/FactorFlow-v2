@@ -77,3 +77,35 @@ def test_set_context_without_price_data_has_no_latest_trading_day(
     with conn.cursor() as cur:
         context = engine._read_context(cur, set_id)
     assert context.latest_trading_day is None
+
+
+def test_set_context_rosters_are_in_instrument_id_order(conn: psycopg.Connection) -> None:
+    """DAC-E2-S2-4, T013 (IR-004): both rosters come back in instrument_id order even when
+    the heap holds them in another order and no index supplies that order."""
+    a = add_instrument(conn, "AAA")
+    b = add_instrument(conn, "BBB")
+    old = add_instrument(conn, "OLD", lifecycle="retired")
+    older = add_instrument(conn, "OLDER", lifecycle="retired")
+    # A new row version is written after the others, so a heap scan reads a and old last.
+    conn.execute(
+        "UPDATE instrument SET added_at = added_at WHERE instrument_id IN (%s, %s)", (a, old)
+    )
+    conn.commit()
+    set_id = add_building_set(conn, add_run(conn), date(2026, 10, 3))
+
+    with conn.cursor() as cur:
+        # A sequential scan only: idx_instrument_active would otherwise return id order.
+        cur.execute("SET LOCAL enable_indexscan = off")
+        cur.execute("SET LOCAL enable_indexonlyscan = off")
+        cur.execute("SET LOCAL enable_bitmapscan = off")
+        cur.execute(
+            "SELECT array_agg(instrument_id) FILTER (WHERE lifecycle = 'active'), "
+            "array_agg(instrument_id) FILTER (WHERE lifecycle = 'retired') FROM instrument"
+        )
+        heap_order = cur.fetchone()
+        context = engine._read_context(cur, set_id)
+    conn.rollback()
+
+    assert heap_order == ([b, a], [older, old])  # the precondition: heap order is not id order
+    assert context.active_ids == (a, b)
+    assert context.retired_ids == (old, older)

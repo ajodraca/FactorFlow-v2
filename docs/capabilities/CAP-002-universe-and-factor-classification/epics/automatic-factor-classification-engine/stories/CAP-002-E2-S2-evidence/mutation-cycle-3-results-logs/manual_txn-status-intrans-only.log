@@ -1,0 +1,34 @@
+.....................................x...............................F
+=================================== FAILURES ===================================
+____________ test_connection_with_an_aborted_transaction_is_refused ____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=64463 user=test database=test_7518c7a9eac84b69828caa3df0e49eee) at 0x10aa02de0>
+building_set = (UUID('8f6c459a-15da-468a-a7f4-6afc4005881d'), 1)
+
+    def test_connection_with_an_aborted_transaction_is_refused(
+        conn: psycopg.Connection, building_set: tuple[UUID, int]
+    ) -> None:
+        """DEC-0111, T009 (e), T017 step 1 (IR-003): a transaction already in error is refused
+        before any statement, not recorded as a failed build."""
+        set_id, _ = building_set
+        with pytest.raises(psycopg.errors.DivisionByZero):
+            conn.execute("SELECT 1/0")
+        assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INERROR
+>       with pytest.raises(ValueError, match="transaction"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/integration/test_engine_transaction.py:532: Failed
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c3/work/mutation-run-lhp6fx9w/w2/src/factorflow/classification/engine.py", line 104, in build
+    conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")  # DEC-0111
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c3/work/mutation-run-lhp6fx9w/w2/.venv/lib/python3.12/site-packages/psycopg/connection.py", line 300, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_connection_with_an_aborted_transaction_is_refused
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 68 passed, 1 xfailed in 5.06s
