@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "repo_head": "3f897a7d6cc821e1d802613b260fde1d1bf570cd",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/classification/constants.py:8:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/constants.py",
+      "line": 8,
+      "original": "MIN_PEER_SET_SIZE: Final = 30  # AC-14, owner decision 2026-10-12",
+      "mutated": "MIN_PEER_SET_SIZE: Final = 31  # AC-14, owner decision 2026-10-12"
+    },
+    {
+      "id": "src/factorflow/classification/constants.py:9:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/constants.py",
+      "line": 9,
+      "original": "FUNDAMENTALS_STALE_AFTER_MONTHS: Final = 6  # AC-13",
+      "mutated": "FUNDAMENTALS_STALE_AFTER_MONTHS: Final = 7  # AC-13"
+    },
+    {
+      "id": "src/factorflow/classification/constants.py:10:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/constants.py",
+      "line": 10,
+      "original": "MOMENTUM_LAG_MONTHS: Final = 1  # capability section 2: skip the most recent month",
+      "mutated": "MOMENTUM_LAG_MONTHS: Final = 2  # capability section 2: skip the most recent month"
+    },
+    {
+      "id": "src/factorflow/classification/constants.py:11:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/constants.py",
+      "line": 11,
+      "original": "MOMENTUM_WINDOWS_MONTHS: Final = (3, 6, 12)  # capability section 2",
+      "mutated": "MOMENTUM_WINDOWS_MONTHS: Final = (4, 6, 12)  # capability section 2"
+    },
+    {
+      "id": "src/factorflow/classification/constants.py:11:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/constants.py",
+      "line": 11,
+      "original": "MOMENTUM_WINDOWS_MONTHS: Final = (3, 6, 12)  # capability section 2",
+      "mutated": "MOMENTUM_WINDOWS_MONTHS: Final = (3, 7, 12)  # capability section 2"
+    },
+    {
+      "id": "src/factorflow/classification/constants.py:11:off-by-one:3",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/constants.py",
+      "line": 11,
+      "original": "MOMENTUM_WINDOWS_MONTHS: Final = (3, 6, 12)  # capability section 2",
+      "mutated": "MOMENTUM_WINDOWS_MONTHS: Final = (3, 6, 13)  # capability section 2"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:35:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 35,
+      "original": "@dataclass(frozen=True)",
+      "mutated": "@dataclass(frozen=False)"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:45:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 45,
+      "original": "@dataclass(frozen=True)",
+      "mutated": "@dataclass(frozen=False)"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:74:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 74,
+      "original": "        set_id=row[0],",
+      "mutated": "        set_id=row[1],"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:75:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 75,
+      "original": "        run_id=row[1],",
+      "mutated": "        run_id=row[2],"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:76:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 76,
+      "original": "        classification_date=row[2],",
+      "mutated": "        classification_date=row[3],"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:77:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 77,
+      "original": "        latest_trading_day=row[3],",
+      "mutated": "        latest_trading_day=row[4],"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:78:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 78,
+      "original": "        active_ids=tuple(row[4]),",
+      "mutated": "        active_ids=tuple(row[5]),"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:79:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 79,
+      "original": "        retired_ids=tuple(row[5]),",
+      "mutated": "        retired_ids=tuple(row[6]),"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:84:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 84,
+      "original": "    message = str(exc).splitlines()[0] if str(exc) else \"\"",
+      "mutated": "    message = str(exc).splitlines()[1] if str(exc) else \"\""
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:94:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 94,
+      "original": "    if timeout_seconds <= 0:",
+      "mutated": "    if timeout_seconds < 0:"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:94:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 94,
+      "original": "    if timeout_seconds <= 0:",
+      "mutated": "    if timeout_seconds <= 1:"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:98:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 98,
+      "original": "    if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:",
+      "mutated": "    if conn.info.transaction_status == psycopg.pq.TransactionStatus.IDLE:"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:102:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 102,
+      "original": "    timeout_ms = str(max(1, math.ceil(timeout_seconds * 1000)))",
+      "mutated": "    timeout_ms = str(max(2, math.ceil(timeout_seconds * 1000)))"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:102:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 102,
+      "original": "    timeout_ms = str(max(1, math.ceil(timeout_seconds * 1000)))",
+      "mutated": "    timeout_ms = str(max(1, math.ceil(timeout_seconds * 1001)))"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:121:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 121,
+      "original": "            if cur.rowcount != 1:",
+      "mutated": "            if cur.rowcount == 1:"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:121:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 121,
+      "original": "            if cur.rowcount != 1:",
+      "mutated": "            if cur.rowcount != 2:"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:137:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 137,
+      "original": "            active_instruments=0,",
+      "mutated": "            "
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:137:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 137,
+      "original": "            active_instruments=0,",
+      "mutated": "            active_instruments=1,"
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:138:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 138,
+      "original": "            qualified_counts={},",
+      "mutated": "            "
+    },
+    {
+      "id": "src/factorflow/classification/engine.py:143:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 143,
+      "original": "        failure_reason=None,",
+      "mutated": "        "
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:17:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 17,
+      "original": "@dataclass(frozen=True)",
+      "mutated": "@dataclass(frozen=False)"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:26:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 26,
+      "original": "    \"book_equity\": LineItem(\"book equity\", \"balance_sheet\", REQUIRES_INPUT, 1),",
+      "mutated": "    \"book_equity\": LineItem(\"book equity\", \"balance_sheet\", REQUIRES_INPUT, 2),"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:27:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 27,
+      "original": "    \"shares_outstanding\": LineItem(\"shares outstanding\", \"balance_sheet\", REQUIRES_INPUT, 1),",
+      "mutated": "    \"shares_outstanding\": LineItem(\"shares outstanding\", \"balance_sheet\", REQUIRES_INPUT, 2),"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:28:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 28,
+      "original": "    \"net_income\": LineItem(\"net income\", \"income_statement\", REQUIRES_INPUT, 1),",
+      "mutated": "    \"net_income\": LineItem(\"net income\", \"income_statement\", REQUIRES_INPUT, 2),"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:29:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 29,
+      "original": "    \"diluted_eps\": LineItem(\"diluted earnings per share\", \"income_statement\", REQUIRES_INPUT, 1),",
+      "mutated": "    \"diluted_eps\": LineItem(\"diluted earnings per share\", \"income_statement\", REQUIRES_INPUT, 2),"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:30:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 30,
+      "original": "    \"revenue\": LineItem(\"revenue\", \"income_statement\", REQUIRES_INPUT, 1),",
+      "mutated": "    \"revenue\": LineItem(\"revenue\", \"income_statement\", REQUIRES_INPUT, 2),"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:32:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 32,
+      "original": "        \"operating cash flow\", \"cash_flow_statement\", REQUIRES_INPUT, 1",
+      "mutated": "        \"operating cash flow\", \"cash_flow_statement\", REQUIRES_INPUT, 2"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:35:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 35,
+      "original": "        \"capital expenditure\", \"cash_flow_statement\", REQUIRES_INPUT, 1",
+      "mutated": "        \"capital expenditure\", \"cash_flow_statement\", REQUIRES_INPUT, 2"
+    },
+    {
+      "id": "src/factorflow/classification/line_items.py:41:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/line_items.py",
+      "line": 41,
+      "original": "    return [name for name, item in LINE_ITEMS.items() if item.payload_key == REQUIRES_INPUT]",
+      "mutated": "    return [name for name, item in LINE_ITEMS.items() if item.payload_key != REQUIRES_INPUT]"
+    }
+  ]
+}

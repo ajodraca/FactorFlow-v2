@@ -1,0 +1,39 @@
+.....................................x.............F
+=================================== FAILURES ===================================
+________________ test_success_with_no_stages_completes_the_set _________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61130 user=test database=test_dbd9b06e77b24e8698f2d5c8b1339e9a) at 0x10c843bc0>
+building_set = (UUID('6b092e7f-94aa-46c3-8747-d18408d8da1c'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c840470>
+postgres_connection_string = 'postgresql://test:test@localhost:61130/test_dbd9b06e77b24e8698f2d5c8b1339e9a'
+
+    def test_success_with_no_stages_completes_the_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """AC-20: a build that raises nothing leaves a complete, sized set."""
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.set_id == set_id
+>       assert result.state == "complete"
+E       AssertionError: assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_transaction.py:266: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-q3e05vbt/w0/src/factorflow/classification/engine.py", line 122, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_success_with_no_stages_completes_the_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 50 passed, 1 xfailed in 2.58s

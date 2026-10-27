@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "command": "uv run --all-extras --offline python -B -m pytest -m \"postgres or not postgres\" -x -q -p no:cacheprovider tests/unit/test_engine_sql_safety.py tests/unit/test_line_items.py tests/unit/test_line_items_resolved.py tests/unit/test_classification_constants.py tests/unit/test_classification_sql_ships.py tests/integration/test_engine_context.py tests/integration/test_engine_transaction.py",
+  "repo_head": "ed27721780bacce15e3301d2cbc28be517186991",
+  "tree_patch_sha256": "821fb72d8df95e49d6b05aa287799e5aef0d2ee8ac830a109bed04cfc7723469",
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutants-cycle-5.json",
+  "mutants_sha256": "57d83fbd6fe5749796019471f08a5bb36c5bd74194c7beb163a8de8e1c402ae2",
+  "jobs": 2,
+  "started": "2026-10-27T21:41:11Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 8.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-5-results-logs/baseline-w0.log",
+      "log_sha256": "69bfa0eab0e3eaf471fa7054cd93e845d5e379756be2e61ec1cca8a8acac030e"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 8.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-5-results-logs/baseline-w1.log",
+      "log_sha256": "aaf1f8140a34549e965290eb042798e10633676dade3b4a9a3f4728a2ef0da52"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:ctx-ltd-observed-on",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/set_context.sql",
+      "line": 1,
+      "old": "(SELECT max(b.session_date)",
+      "new": "(SELECT max(b.observed_on)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.1,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-5-results-logs/manual_ctx-ltd-observed-on.log",
+      "log_sha256": "c51bea71d6a8838a5f61d0881233dfe67d1a06e6dfe931ad1ca8d6eff528e9fa"
+    },
+    {
+      "id": "manual:commit-before-complete",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "        for stage in _STAGES:\n            stage(conn, context)\n",
+      "new": "        for stage in _STAGES:\n            stage(conn, context)\n        conn.commit()\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.7,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-5-results-logs/manual_commit-before-complete.log",
+      "log_sha256": "4bfd63f8cdf6694120a449e176879c701bda76b85638230734a95f8a9283a843"
+    }
+  ],
+  "finished": "2026-10-27T21:41:24Z"
+}

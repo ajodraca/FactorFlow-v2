@@ -1,0 +1,42 @@
+.....................................x.............F
+=================================== FAILURES ===================================
+________________ test_success_with_no_stages_completes_the_set _________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63491 user=test database=test_3802209e3bd24722bb043476d0f8ba43) at 0x108d16cf0>
+building_set = (UUID('18f9b664-3344-4640-b608-7d2a72246dab'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d16ea0>
+postgres_connection_string = 'postgresql://test:test@localhost:63491/test_3802209e3bd24722bb043476d0f8ba43'
+
+    def test_success_with_no_stages_completes_the_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """AC-20: a build that raises nothing leaves a complete, sized set."""
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.set_id == set_id
+>       assert result.state == "complete"
+E       AssertionError: assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_transaction.py:272: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_complete_is_sized"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w0/src/factorflow/classification/engine.py", line 113, in build
+    cur.execute(
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w0/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_complete_is_sized"
+DETAIL:  Failing row contains (18f9b664-3344-4640-b608-7d2a72246dab, 3c16e6e5-3fac-4414-844f-39b6b239431a, complete, 2026-10-03, null, 1, 2026-10-25 01:20:47.193818+00, 2026-10-25 01:20:47.194729+00, null).
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_success_with_no_stages_completes_the_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 50 passed, 1 xfailed in 2.51s

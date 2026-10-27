@@ -1,0 +1,29 @@
+.....................................x...........................F
+=================================== FAILURES ===================================
+________________ test_timeout_is_local_to_the_build_transaction ________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63132 user=test database=test_df39dc1b5ecf41cb930d0bd031f738a5) at 0x10afeddc0>
+building_set = (UUID('a493860a-aaf3-4464-a58b-9c7d59a5757b'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10afeef30>
+
+    def test_timeout_is_local_to_the_build_transaction(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DEC-0067, factor-engine 2.6 (IR-002): a pooled connection keeps its own timeout."""
+        set_id, _ = building_set
+        before = statement_timeout(conn)
+        monkeypatch.setattr(engine, "_STAGES", [])
+        assert engine.build(conn, set_id, 30).state == "complete"
+>       assert statement_timeout(conn) == before
+E       AssertionError: assert '30s' == '0'
+E         
+E         - 0
+E         + 30s
+
+tests/integration/test_engine_transaction.py:475: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_timeout_is_local_to_the_build_transaction
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 64 passed, 1 xfailed in 3.80s

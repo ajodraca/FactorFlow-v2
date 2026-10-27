@@ -1,0 +1,70 @@
+{
+ "schema": 1,
+ "repo_head": "70d3728f4d2ebec1a8f3408ec00c0c7a69391768",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:complete-no-active-count",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/complete_set.sql",
+   "line": 1,
+   "old": "active_instruments = %(active_instruments)s",
+   "new": "active_instruments = 1"
+  },
+  {
+   "id": "manual:stored-count-includes-retired",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "\"active_instruments\": len(context.active_ids),",
+   "new": "\"active_instruments\": len(context.active_ids) + len(context.retired_ids),"
+  },
+  {
+   "id": "manual:result-count-includes-retired",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "active_instruments=len(context.active_ids),",
+   "new": "active_instruments=len(context.active_ids) + len(context.retired_ids),"
+  },
+  {
+   "id": "manual:reason-no-empty-guard",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "message = str(exc).splitlines()[0] if str(exc) else \"\"",
+   "new": "message = str(exc).splitlines()[0]"
+  },
+  {
+   "id": "manual:txn-status-intrans-only",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:",
+   "new": "if conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS:"
+  },
+  {
+   "id": "manual:ctx-active-unordered",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "coalesce((SELECT array_agg(i.instrument_id ORDER BY i.instrument_id)\n                FROM instrument i\n               WHERE i.lifecycle = 'active')",
+   "new": "coalesce((SELECT array_agg(i.instrument_id)\n                FROM instrument i\n               WHERE i.lifecycle = 'active')"
+  },
+  {
+   "id": "manual:ctx-retired-unordered",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "coalesce((SELECT array_agg(i.instrument_id ORDER BY i.instrument_id)\n                FROM instrument i\n               WHERE i.lifecycle = 'retired')",
+   "new": "coalesce((SELECT array_agg(i.instrument_id)\n                FROM instrument i\n               WHERE i.lifecycle = 'retired')"
+  }
+ ]
+}

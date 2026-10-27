@@ -1,0 +1,37 @@
+.....................................x.......F
+=================================== FAILURES ===================================
+_________ test_set_context_resolves_date_latest_trading_day_and_roster _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60894 user=test database=test_8880908aa11e49bca590ddda61c2bc9d) at 0x10c5c29f0>
+postgres_connection_string = 'postgresql://test:test@localhost:60894/test_8880908aa11e49bca590ddda61c2bc9d'
+
+    def test_set_context_resolves_date_latest_trading_day_and_roster(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        a = add_instrument(conn, "AAA")
+        b = add_instrument(conn, "BBB")
+        c = add_instrument(conn, "CCC")
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, a, date(2026, 10, 1))
+        add_bar(conn, b, date(2026, 10, 2))
+        add_bar(conn, c, date(2026, 9, 1))
+        add_bar(conn, retired, date(2026, 10, 9))
+        run_id = add_run(conn)
+        set_id = add_building_set(conn, run_id, date(2026, 10, 3))
+    
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+            with other.cursor() as cur:
+                first = engine._read_context(cur, set_id)
+                assert first.set_id == set_id
+                assert first.run_id == run_id
+>               assert first.classification_date == date(2026, 10, 3)
+E               AssertionError: assert datetime.date(2026, 10, 2) == datetime.date(2026, 10, 3)
+E                +  where datetime.date(2026, 10, 2) = BuildContext(set_id=UUID('7d915781-19a3-4268-80db-6543ee5cfff7'), run_id=UUID('57776015-7f3d-4704-a0a9-beeef42afaf3'),...date=datetime.date(2026, 10, 2), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1, 2, 3), retired_ids=(4,)).classification_date
+E                +  and   datetime.date(2026, 10, 3) = date(2026, 10, 3)
+
+tests/integration/test_engine_context.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 44 passed, 1 xfailed in 2.24s

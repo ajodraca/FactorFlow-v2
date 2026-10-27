@@ -1,0 +1,38 @@
+.....................................x...............F
+=================================== FAILURES ===================================
+____________ test_completed_set_is_sized_by_the_active_roster_only _____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=64310 user=test database=test_da22a3801578403a8a473a059250219c) at 0x10d653950>
+building_set = (UUID('a1d8abee-2bc9-4409-9478-fa5c9680af6f'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d652e40>
+postgres_connection_string = 'postgresql://test:test@localhost:64310/test_da22a3801578403a8a473a059250219c'
+
+    def test_completed_set_is_sized_by_the_active_roster_only(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """DAC-E2-10, AC-15 (IR-001): two active instruments and one retired, all holding bars,
+        size the set at two, on the committed row and in the result."""
+        set_id, _ = building_set
+        second = add_instrument(conn, "BBB")
+        add_bar(conn, second, date(2026, 10, 1))
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, retired, date(2026, 10, 2))
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "complete"
+        assert result.active_instruments == 2
+        row, _ = committed(postgres_connection_string, set_id)
+        assert row["state"] == "complete"
+>       assert row["active_instruments"] == 2
+E       assert 3 == 2
+
+tests/integration/test_engine_transaction.py:304: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_completed_set_is_sized_by_the_active_roster_only
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 52 passed, 1 xfailed in 3.80s

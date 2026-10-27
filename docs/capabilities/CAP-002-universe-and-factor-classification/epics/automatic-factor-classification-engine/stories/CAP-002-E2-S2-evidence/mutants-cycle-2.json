@@ -1,0 +1,214 @@
+{
+ "schema": 1,
+ "repo_head": "5368ae966ad9fa1a0b0ac36e94dd89d032483850",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/engine.py:132:drop-defaulted-argument:1",
+   "cycle": "cycle-2",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 132,
+   "original": "            exc_info=True,  # the stack trace goes to the structured log only (SEC-ERR-001)",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/engine.py:132:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 132,
+   "original": "            exc_info=True,  # the stack trace goes to the structured log only (SEC-ERR-001)",
+   "mutated": "            exc_info=False,  # the stack trace goes to the structured log only (SEC-ERR-001)"
+  },
+  {
+   "id": "manual:drop-success-commit",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "        conn.commit()\n    except Exception as exc:",
+   "new": "        pass\n    except Exception as exc:"
+  },
+  {
+   "id": "manual:drop-failure-commit",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "        conn.commit()\n        return BuildResult(",
+   "new": "        pass\n        return BuildResult("
+  },
+  {
+   "id": "manual:timeout-not-local",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "set_config('statement_timeout', %(ms)s, true)",
+   "new": "set_config('statement_timeout', %(ms)s, false)"
+  },
+  {
+   "id": "manual:qualified-counts-not-read",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "qualified_counts = {factor: int(count) for factor, count in cur.fetchall()}",
+   "new": "qualified_counts = {}"
+  },
+  {
+   "id": "manual:qualified-counts-other-sets",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "FROM classification_set_factor WHERE set_id = %(set_id)s\"",
+   "new": "FROM classification_set_factor WHERE %(set_id)s IS NOT NULL\""
+  },
+  {
+   "id": "manual:drop-rollback",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "        conn.rollback()",
+   "new": "        pass"
+  },
+  {
+   "id": "manual:drop-repeatable-read",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "conn.execute(\"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ\")",
+   "new": "conn.execute(\"SELECT 1\")"
+  },
+  {
+   "id": "manual:drop-lookup-error",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "    if row is None:\n        raise LookupError",
+   "new": "    if False:\n        raise LookupError"
+  },
+  {
+   "id": "manual:drop-no-price-check",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "if context.latest_trading_day is None:",
+   "new": "if False:"
+  },
+  {
+   "id": "manual:stages-reversed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "for stage in _STAGES:",
+   "new": "for stage in reversed(_STAGES):"
+  },
+  {
+   "id": "manual:log-warning",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "log.error(",
+   "new": "log.warning("
+  },
+  {
+   "id": "manual:ctx-ltd-any-lifecycle",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "      WHERE i.lifecycle = 'active') AS latest_trading_day,",
+   "new": "      ) AS latest_trading_day,"
+  },
+  {
+   "id": "manual:ctx-active-null-when-empty",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "WHERE i.lifecycle = 'active'), ARRAY[]::bigint[]) AS active_ids",
+   "new": "WHERE i.lifecycle = 'active'), NULL::bigint[]) AS active_ids"
+  },
+  {
+   "id": "manual:ctx-retired-null-when-empty",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "WHERE i.lifecycle = 'retired'), ARRAY[]::bigint[]) AS retired_ids",
+   "new": "WHERE i.lifecycle = 'retired'), NULL::bigint[]) AS retired_ids"
+  },
+  {
+   "id": "manual:ctx-active-includes-retired",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "               WHERE i.lifecycle = 'active'), ARRAY",
+   "new": "               WHERE true), ARRAY"
+  },
+  {
+   "id": "manual:complete-unguarded",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/complete_set.sql",
+   "line": 1,
+   "old": "   AND state = 'building'",
+   "new": "   AND true"
+  },
+  {
+   "id": "manual:complete-no-ltd",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/complete_set.sql",
+   "line": 1,
+   "old": "latest_trading_day = %(latest_trading_day)s,",
+   "new": "latest_trading_day = latest_trading_day,"
+  },
+  {
+   "id": "manual:fail-unguarded",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/fail_set.sql",
+   "line": 1,
+   "old": "   AND state = 'building'",
+   "new": "   AND true"
+  },
+  {
+   "id": "manual:fail-fixed-reason",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/fail_set.sql",
+   "line": 1,
+   "old": "failure_reason = %(reason)s",
+   "new": "failure_reason = 'failed'"
+  },
+  {
+   "id": "manual:drop-exc-info",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "            exc_info=True,  # the stack trace goes to the structured log only (SEC-ERR-001)\n",
+   "new": ""
+  },
+  {
+   "id": "manual:ms-floor",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "math.ceil(timeout_seconds * 1000)",
+   "new": "int(timeout_seconds * 1000)"
+  }
+ ]
+}

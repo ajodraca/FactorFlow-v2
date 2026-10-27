@@ -1,0 +1,199 @@
+# Classification engine
+
+`src/factorflow/classification/engine.py` is the factor engine's build
+transaction (CAP-002-E2-S2; `component-design-factor-engine.md` sections 2.1
+to 2.4). With it come `constants.py`, `line_items.py` and three statements in
+`classification/sql/`: `set_context.sql`, `complete_set.sql` and
+`fail_set.sql`. `build` either commits a whole classification set or records
+the set `failed` with its reason, so no reader ever sees half a set.
+
+No factor is computed yet. The stage list is empty, so a successful build
+completes a set with no factor rows. No production code calls `build` yet.
+
+## `build`
+
+`build(conn, set_id, timeout_seconds) -> BuildResult` takes a
+`psycopg.Connection`, the id of a `classification_set` row, and the build
+timeout in seconds.
+
+It raises `ValueError` before running any statement, leaving the set as it
+was, when:
+
+- `timeout_seconds` is zero or negative, because a `statement_timeout` of 0
+  would disable the timeout;
+- the connection has `autocommit` on;
+- the connection is already inside a transaction, open or aborted.
+
+Otherwise it runs one transaction, in this order:
+
+1. `SET TRANSACTION ISOLATION LEVEL REPEATABLE READ` (DEC-0111). Every stage
+   reads the same snapshot, so a row another connection commits during the
+   build is not seen (DAC-E2-9).
+2. `statement_timeout` is set local to this transaction through
+   `set_config('statement_timeout', ..., true)`. The value is whole
+   milliseconds, rounded up and never 0: 0.0004 s is sent as `1` and
+   300.0004 s as `300001`. The session's own `statement_timeout` is the same
+   after the build as before, whether the build succeeded or failed.
+3. `set_context.sql` reads the set's [`BuildContext`](#buildcontext). An
+   unknown `set_id` raises `LookupError`. When no active instrument holds a
+   daily bar, the latest trading day is `NULL` and the build raises
+   `ValueError("no price data held for any active instrument")` (DEC-0114).
+4. Each stage in `_STAGES` runs in list order (see [Stages](#stages)).
+5. `complete_set.sql` moves the set from `building` to `complete`. It sets
+   `ended_at`, `latest_trading_day` and `active_instruments`, the size of the
+   active roster. When the guard `state = 'building'` matches no row because
+   another writer already ended the set, `build` raises
+   `RuntimeError("classification set is no longer building")` inside the
+   transaction.
+6. This set's `classification_set_factor` rows are read into
+   `qualified_counts`. The query is the inline constant
+   `_QUALIFIED_COUNTS_SQL`, not a file.
+7. One commit. The stages' rows and the completion are committed together or
+   not at all.
+
+On success `build` returns a `BuildResult` with `state="complete"`,
+`failure_reason=None`, `active_instruments` equal to the active roster's size
+and `qualified_counts` mapping each factor to its count. The counts are `{}`
+while no stage writes `classification_set_factor`.
+
+### Failure
+
+Any `Exception` raised from step 1 through the commit takes the same path.
+That covers a stage's own exception, `QueryCanceled` from the timeout, and the
+`LookupError`, `ValueError` and `RuntimeError` above.
+
+1. The transaction is rolled back, taking every row the attempt wrote with it
+   (DAC-E2-10).
+2. The reason is the exception's class name, a colon and a space, then the
+   first line of its message, such as `RuntimeError: first`. An empty message
+   still gives the class (`RuntimeError: `). No traceback is ever part of the
+   reason.
+3. The failure is logged at `ERROR` on the `factorflow.classification.engine`
+   logger as `classification build failed: <reason>`. The record carries the
+   exception and its traceback (`exc_info`) and `set_id` as an `extra` field.
+   The traceback goes to the log only.
+4. In a new transaction, at the connection's default isolation level and
+   without the build's timeout, `fail_set.sql` moves the set from `building`
+   to `failed`, sets `ended_at` and stores the reason, then commits. A set
+   another writer already ended keeps that writer's reason and `ended_at`, and
+   an unknown `set_id` updates no row.
+5. `build` returns a `BuildResult` with `state="failed"`, the reason,
+   `active_instruments=0` and `qualified_counts={}`. It does not raise.
+
+A build that exceeds its timeout fails the set with a reason beginning
+`QueryCanceled:`, followed by PostgreSQL's message naming the statement
+timeout.
+
+A failure while recording the failure, for example a lost connection, is not
+caught. It propagates out of `build`, and the set stays `building` until
+`reclaim_interrupted_sets` in `scheduler.py` records it `failed` (DEC-0067).
+
+## `BuildContext`
+
+A frozen dataclass read once by `set_context.sql` and passed to every stage.
+No stage can rebind its fields.
+
+| Field | Value |
+|---|---|
+| `set_id` | The set being built |
+| `run_id` | The acquisition run the set reflects |
+| `classification_date` | The set's `classification_date` |
+| `latest_trading_day` | The latest `session_date` of any `daily_bar` held for an active instrument, or `None` when there is none. Retired instruments' bars are ignored, and `observed_on` plays no part |
+| `active_ids` | The `instrument_id` of every active instrument, ascending; `()` when there is none |
+| `retired_ids` | The `instrument_id` of every retired instrument, ascending; `()` when there is none |
+
+`set_context.sql` takes no row lock. It reads inside the build's snapshot like
+every later statement.
+
+## Stages
+
+A stage is `Callable[[psycopg.Connection, BuildContext], None]`. It runs
+inside the build transaction and writes through the connection it is given.
+`_STAGES` is empty: this story registers no stage. The docstring under
+`_STAGES` records the order later stages must be registered in (DEC-0121,
+amending DEC-0112). Tests replace the list with `monkeypatch`.
+
+## Statements
+
+All three are loaded once, at import, from `classification/sql/`. They ship as
+package data (`classification/sql/*.sql` under
+`[tool.setuptools.package-data]` in `pyproject.toml`). Every value is bound as
+a `%(name)s` parameter.
+
+| Statement | Effect |
+|---|---|
+| `set_context.sql` | One row: the set's id, run and classification date, the latest trading day, and the active and retired rosters. No row for an unknown set |
+| `complete_set.sql` | `building` to `complete`, with `ended_at = now()`, `latest_trading_day` and `active_instruments`. Guarded by `set_id` and `state = 'building'` |
+| `fail_set.sql` | `building` to `failed`, with `ended_at = now()` and `failure_reason`. Guarded by `set_id` and `state = 'building'` |
+
+## Constants
+
+`constants.py` holds the numbers and names classification is built on. Each
+value cites its source in the code. `engine.py` reads none of them yet.
+
+| Name | Value | Source |
+|---|---|---|
+| `MIN_PEER_SET_SIZE` | `30` | AC-14, owner decision 2026-10-12 |
+| `FUNDAMENTALS_STALE_AFTER_MONTHS` | `6` | AC-13 |
+| `MOMENTUM_LAG_MONTHS` | `1` | Capability section 2: skip the most recent month |
+| `MOMENTUM_WINDOWS_MONTHS` | `(3, 6, 12)` | Capability section 2 |
+| `FACTORS` | `("value", "growth", "momentum")` | Capability section 2 |
+| `INPUT_NAMES` | `value`: `book_to_price`, `earnings_yield`, `fcf_yield`; `growth`: `revenue_growth`, `eps_growth`; `momentum`: `return_3m`, `return_6m`, `return_12m` | Mirrors the `factor_input_name_matches_factor` check in migration `0006_classifications.sql` (DEC-0112) |
+
+## Line items
+
+`line_items.py` names the seven fundamentals line items that the value and
+growth inputs are derived from (`component-design-factor-engine.md` section
+2.4). `LINE_ITEMS` maps each key to a frozen `LineItem(label, statement_type,
+payload_key, sign)`. The `label` is the product's word for the item.
+
+| Key | Label | Statement type |
+|---|---|---|
+| `book_equity` | book equity | `balance_sheet` |
+| `shares_outstanding` | shares outstanding | `balance_sheet` |
+| `net_income` | net income | `income_statement` |
+| `diluted_eps` | diluted earnings per share | `income_statement` |
+| `revenue` | revenue | `income_statement` |
+| `operating_cash_flow` | operating cash flow | `cash_flow_statement` |
+| `capital_expenditure` | capital expenditure | `cash_flow_statement` |
+
+The Massive payload key, sign and quarterly availability of each item are an
+open owner question (system design section 8, question 1). Until it is
+answered, every `payload_key` is `REQUIRES_INPUT`
+(`"[REQUIRES INPUT: Massive payload key]"`) and every `sign` is `1`. A sign of
+`-1` would mark an item the provider reports as a negative outflow. Nothing is
+guessed.
+
+- `unresolved()` lists the keys whose payload key is still `REQUIRES_INPUT`.
+  Today that is all seven.
+- `UNRESOLVED_CAUSE` (`"line_item_mapping_unresolved"`) is defined beside
+  them as the cause of an input left missing by an unresolved line item
+  (DAC-E2-S2-5). No code writes it yet.
+- `tests/unit/test_line_items_resolved.py` (TC-COMP-059) asserts
+  `unresolved() == []` under a strict `xfail` (DEC-0113). While any key is
+  unresolved, the suite reports it as an expected failure (`xfailed`). Once
+  every key is resolved, the strict XPASS fails the suite until the marker is
+  removed.
+
+## Safety rules
+
+`tests/unit/test_engine_sql_safety.py` (TC-COMP-160) holds every file under
+`src/factorflow/classification/` to these rules, the scheduler's files
+included:
+
+- No module imports `factorflow.ingestion.massive`.
+- No `.execute` call builds its statement with an f-string, `%` or `+`.
+- No statement updates, deletes from or upserts into an observation table
+  (`instrument_reference`, `daily_bar`, `fundamental_observation`,
+  `corporate_action`) or an append-only research table (`universe`,
+  `universe_event`, `classification_set_factor`, `factor_input`,
+  `factor_classification`), and none merges into a research table.
+- Every `UPDATE` of `classification_set` is guarded by `state = 'building'`,
+  and none deletes from it.
+
+The engine's own files are held to more. `complete_set.sql` and
+`fail_set.sql` must also be guarded by `set_id = %(set_id)s`. No engine module
+builds a statement with `.format(`. The engine's statements use only
+`%(name)s` parameters, never braces or `||` concatenation. Each engine file is
+checked once it exists, so a later story's files are covered without editing
+the test.

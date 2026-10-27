@@ -1,0 +1,39 @@
+.....................................x.................F
+=================================== FAILURES ===================================
+_________ test_empty_active_roster_fails_with_the_no_price_data_reason _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63343 user=test database=test_4dcdc21c6c8448e195b43227fb016d70) at 0x10a768260>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ac54c80>
+
+    def test_empty_active_roster_fails_with_the_no_price_data_reason(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S2-4, DEC-0114, T013 (IR-005): no active instrument is an empty array, not NULL."""
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, retired, date(2026, 10, 2))
+        set_id = add_building_set(conn, add_run(conn), CLASSIFICATION_DATE)
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "failed"
+>       assert result.failure_reason == "ValueError: no price data held for any active instrument"
+E       assert 'CheckViolati...ete_is_sized"' == 'ValueError: ...ve instrument'
+E         
+E         - ValueError: no price data held for any active instrument
+E         + CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_complete_is_sized"
+
+tests/integration/test_engine_transaction.py:366: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_complete_is_sized"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w0/src/factorflow/classification/engine.py", line 113, in build
+    cur.execute(
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w0/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.CheckViolation: new row for relation "classification_set" violates check constraint "classification_set_complete_is_sized"
+DETAIL:  Failing row contains (c4073c33-aaa7-494e-b9ec-b7bf324f2995, 354c1758-a3ec-4f33-a13e-c3e5e5918f8f, complete, 2026-10-03, null, 0, 2026-10-25 01:20:36.0477+00, 2026-10-25 01:20:36.048421+00, null).
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_empty_active_roster_fails_with_the_no_price_data_reason
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 54 passed, 1 xfailed in 3.00s

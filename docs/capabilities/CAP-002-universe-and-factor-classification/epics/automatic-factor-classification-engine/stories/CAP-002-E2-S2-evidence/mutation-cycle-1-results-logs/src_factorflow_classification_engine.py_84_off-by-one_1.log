@@ -1,0 +1,74 @@
+.....................................x.........F
+=================================== FAILURES ===================================
+_____ test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set ______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60927 user=test database=test_ba901b9cccaa48aeb81fca85f291b4d4) at 0x1086a7cb0>
+context = BuildContext(set_id=UUID('bf645999-86d7-4e2f-835b-f32a0f9aa59d'), run_id=UUID('911d9cfb-4823-4493-960d-1215fef69a81'),...cation_date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 2), active_ids=(1,), retired_ids=())
+
+    def stage(conn: psycopg.Connection, context: engine.BuildContext) -> None:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
+                "VALUES (%s, 'value', 1, false)",
+                (set_id,),
+            )
+            cur.execute(
+                "INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, "
+                "value, as_of, known_on, detail) VALUES (%s, %s, 'value', 'book_to_price', "
+                "'present', 1, %s, %s, '{}')",
+                (set_id, instrument_id, date(2026, 9, 30), date(2026, 10, 1)),
+            )
+            cur.execute(
+                "INSERT INTO factor_classification (set_id, instrument_id, factor, status, "
+                "score, percentile) VALUES (%s, %s, 'value', 'classified', 1, 50)",
+                (set_id, instrument_id),
+            )
+>       raise error
+E       RuntimeError: injected failure
+
+tests/integration/test_engine_transaction.py:108: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60927 user=test database=test_ba901b9cccaa48aeb81fca85f291b4d4) at 0x1086a7cb0>
+building_set = (UUID('bf645999-86d7-4e2f-835b-f32a0f9aa59d'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086a6960>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x1086a6450>
+postgres_connection_string = 'postgresql://test:test@localhost:60927/test_ba901b9cccaa48aeb81fca85f291b4d4'
+
+    def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        postgres_connection_string: str,
+    ) -> None:
+        set_id, instrument_id = building_set
+        dsn = postgres_connection_string
+        injected = RuntimeError("injected failure")
+        stage = write_rows_then_raise(set_id, instrument_id, injected)
+        monkeypatch.setattr(engine, "_STAGES", [stage])
+    
+        with caplog.at_level(logging.ERROR):
+>           result = engine.build(conn, set_id, 30)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_transaction.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/classification/engine.py:128: in build
+    reason = _reason(exc)
+             ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exc = RuntimeError('injected failure')
+
+    def _reason(exc: Exception) -> str:
+>       message = str(exc).splitlines()[1] if str(exc) else ""
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+src/factorflow/classification/engine.py:84: IndexError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 46 passed, 1 xfailed in 2.39s

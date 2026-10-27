@@ -1,0 +1,18 @@
+..........................F
+=================================== FAILURES ===================================
+_________ test_every_classification_set_update_is_guarded_by_building __________
+
+    def test_every_classification_set_update_is_guarded_by_building() -> None:
+        for path in package_files(".py", ".sql"):
+>           assert unguarded_set_updates(path.read_text()) == [], path.name
+E           AssertionError: fail_set.sql
+E           assert ['UPDATE clas...  AND true\n'] == []
+E             
+E             Left contains one more item: "UPDATE classification_set\n   SET state = 'failed',\n       ended_at = now(),\n       failure_reason = %(reason)s\n WHERE set_id = %(set_id)s\n   AND true\n"
+E             Use -v to get more diff
+
+tests/unit/test_engine_sql_safety.py:236: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_engine_sql_safety.py::test_every_classification_set_update_is_guarded_by_building
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 26 passed in 0.35s

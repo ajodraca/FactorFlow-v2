@@ -1,0 +1,37 @@
+.....................................x........................F
+=================================== FAILURES ===================================
+_ test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0015-2] _
+
+building_set = (UUID('d21da611-f459-4392-b15e-f9f76b2b76f0'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ab0ad80>
+postgres_connection_string = 'postgresql://test:test@localhost:63548/test_36aea025f993488d976ff02b27e641d4'
+seconds = 0.0015, sent = '2'
+
+    @pytest.mark.parametrize(("seconds", "sent"), [(0.0004, "1"), (0.0015, "2"), (30, "30000")])
+    def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        seconds: float,
+        sent: str,
+    ) -> None:
+        """AC-11 (IR-006): zero would disable statement_timeout, so 0.0004 s must send one ms.
+    
+        The parameter is recorded as sent: a 1 ms timeout can cancel any statement that observes
+        it, so reading the setting back would depend on the host's speed.
+        """
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+        with RecordingConnection.connect(postgres_connection_string) as recording:
+            engine.build(recording, set_id, seconds)
+>       assert recording.timeouts == [{"ms": sent}]
+E       AssertionError: assert [{'ms': '1'}] == [{'ms': '2'}]
+E         
+E         At index 0 diff: {'ms': '1'} != {'ms': '2'}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:442: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0015-2]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 61 passed, 1 xfailed in 3.44s

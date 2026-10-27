@@ -1,0 +1,22 @@
+# Validation at 70d3728f4d2ebec1a8f3408ec00c0c7a69391768 plus the staged cycle-3 tree
+== uv run pytest -p no:cacheprovider -q
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1463 passed, 1 xfailed, 2 warnings in 238.76s (0:03:58)
+exit=0
+== uv run pytest -m postgres
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+435 passed, 1029 deselected, 2 warnings in 218.18s (0:03:38)
+exit=0
+== uv run pytest -m 'not postgres'
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1028 passed, 435 deselected, 1 xfailed, 2 warnings in 25.12s
+exit=0
+== package data
+............                                                             [100%]
+12 passed in 0.93s
+exit=0
+== focused story suites
+...................................                                      [100%]
+106 passed, 1 xfailed in 4.78s
+exit=0

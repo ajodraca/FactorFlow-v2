@@ -1,0 +1,54 @@
+.....................................x.......F
+=================================== FAILURES ===================================
+_________ test_set_context_resolves_date_latest_trading_day_and_roster _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60911 user=test database=test_2e660c5816d3431f8ed786ba562ff39a) at 0x10a6d7a40>
+postgres_connection_string = 'postgresql://test:test@localhost:60911/test_2e660c5816d3431f8ed786ba562ff39a'
+
+    def test_set_context_resolves_date_latest_trading_day_and_roster(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        a = add_instrument(conn, "AAA")
+        b = add_instrument(conn, "BBB")
+        c = add_instrument(conn, "CCC")
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, a, date(2026, 10, 1))
+        add_bar(conn, b, date(2026, 10, 2))
+        add_bar(conn, c, date(2026, 9, 1))
+        add_bar(conn, retired, date(2026, 10, 9))
+        run_id = add_run(conn)
+        set_id = add_building_set(conn, run_id, date(2026, 10, 3))
+    
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+            with other.cursor() as cur:
+>               first = engine._read_context(cur, set_id)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_context.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cur = <psycopg.Cursor [closed] [BAD] at 0x10adbfa10>
+set_id = UUID('19c6906b-6a37-4a1d-a797-3cf3e7d30362')
+
+    def _read_context(cur: psycopg.Cursor, set_id: UUID) -> BuildContext:
+        cur.execute(_SET_CONTEXT_SQL, {"set_id": set_id})
+        row = cur.fetchone()
+        if row is None:
+            raise LookupError(f"classification set {set_id} does not exist")
+        return BuildContext(
+            set_id=row[0],
+            run_id=row[1],
+            classification_date=row[2],
+            latest_trading_day=row[3],
+            active_ids=tuple(row[4]),
+>           retired_ids=tuple(row[6]),
+                              ^^^^^^
+        )
+E       IndexError: tuple index out of range
+
+src/factorflow/classification/engine.py:79: IndexError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 44 passed, 1 xfailed in 2.20s

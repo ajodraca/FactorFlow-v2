@@ -1,0 +1,52 @@
+.....................................x..............F
+=================================== FAILURES ===================================
+______ test_qualified_counts_are_this_sets_classification_set_factor_rows ______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63135 user=test database=test_ef29779798ab410d9f657a6cce4de8c7) at 0x10af7fd40>
+building_set = (UUID('7b608409-d5e7-4be6-87f1-b8481b29ad49'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10af7f590>
+
+    def test_qualified_counts_are_this_sets_classification_set_factor_rows(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-10 (IR-003): the result carries the set's own counts and no other set's."""
+        set_id, _ = building_set
+        other_run = add_run(conn)
+        other_set = conn.execute(
+            "INSERT INTO classification_set (run_id, state, classification_date, latest_trading_day, "
+            "active_instruments, ended_at) VALUES (%s, 'complete', %s, %s, 1, now()) RETURNING set_id",
+            (other_run, date(2026, 10, 2), date(2026, 10, 1)),
+        ).fetchone()
+        assert other_set is not None
+        conn.execute(
+            "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
+            "VALUES (%s, 'growth', 99, true)",
+            (other_set[0],),
+        )
+        conn.commit()
+    
+        def write_counts(stage_conn: psycopg.Connection, context: engine.BuildContext) -> None:
+            stage_conn.execute(
+                "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
+                "VALUES (%s, 'value', 3, true), (%s, 'momentum', 5, false)",
+                (context.set_id, context.set_id),
+            )
+    
+        monkeypatch.setattr(engine, "_STAGES", [write_counts])
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "complete"
+>       assert result.qualified_counts == {"value": 3, "momentum": 5}
+E       AssertionError: assert {} == {'value': 3, 'momentum': 5}
+E         
+E         Right contains 2 more items:
+E         {'momentum': 5, 'value': 3}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:315: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_qualified_counts_are_this_sets_classification_set_factor_rows
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 51 passed, 1 xfailed in 2.73s

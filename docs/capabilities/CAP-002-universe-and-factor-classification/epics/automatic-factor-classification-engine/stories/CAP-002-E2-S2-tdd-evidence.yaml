@@ -1,0 +1,260 @@
+# TDD evidence for CAP-002-E2-S2 - Factor engine build transaction: constants, set context, completion, failure and timeout.
+# One cycle: the package is a single spine (transaction, three statements, constants, line items) whose tests share fixtures.
+# Decisions applied: DEC-0111 (REPEATABLE READ), DEC-0112 (_STAGES seam), DEC-0113 (strict xfail), DEC-0114 (no price data), DEC-0121 (registration order).
+# Rework: cycle-2 answers implementation review v1 (IR-001 to IR-006, IR-008, IR-009, IR-010); IR-007 is the mutation evidence regenerated with python -B (no stale bytecode) and only referenced logs kept.
+# Reviews: independent code-review and spec-drift subagents judged the staged diff three times. The first found BuildResult.set_id missing,
+# the second found line_items.py not verbatim from design 2.4 (labels, sentinel); both were fixed with tests and re-reviewed. The third approved.
+# Rework: cycle-3 answers implementation review v2 (IR-001 to IR-004, tests only). IR-005 is answered by labelling cycle-1's
+# mutation rerun with the state it ran on, re-capturing cycle-2's RED against the committed assertion and recording
+# cycle-2's full-suite result in this file.
+# Rework: cycle-4 answers implementation review v3 (IR-001 and IR-002, tests only): the two surviving manual mutants
+# ceil-to-round and isolation-serializable are each killed by one test change.
+# Rework: cycle-5 answers implementation review v4 (IR-001 and IR-002, tests only): the two surviving manual mutants
+# ctx-ltd-observed-on and commit-before-complete are each killed by one test change.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019]
+    description: >
+      factorflow.classification package: constants.py, line_items.py (seven items, every key REQUIRES_INPUT),
+      engine.build with the _STAGES seam inside one REPEATABLE READ transaction, and set_context.sql,
+      complete_set.sql, fail_set.sql. Tests: TC-COMP-159, 166, 167, 090 (integration), TC-COMP-160 (isolation and
+      append-only over classification/), TC-COMP-059 (strict xfail), constants, line items and statement loading.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-1-engine.log
+    red_log_sha256: 07a455db55b84295b573a8fe4f1e58ff807692ae6435141e5a059190616a37d1
+    red_evidence: >
+      6 collection errors before factorflow.classification.engine, line_items and constants existed
+      (ImportError: cannot import name 'engine'); the five new test modules that import factorflow.classification
+      failed to import. tests/unit/test_engine_sql_safety.py imports nothing from the package and is not in the RED
+      log: it passed from the start, and its ability to fail is shown by its own self-tests (TC-COMP-160). Review
+      IR-007 corrected an earlier claim that every new module failed to import.
+    green_evidence: >
+      Full suite with -m "postgres or not postgres": 1412 passed, 1 xfailed (TC-COMP-059, strict);
+      ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c2b459cbf3bf67c258ca06f22ca124576cac70c7c0cec498140cd32b122f84c
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation_state: >
+      Label added in the review v2 rework (IR-005). The results file below is the review v1 rerun (IR-007), made
+      on 2026-10-25 on repo_head 5368ae9 plus the cycle-2 working tree (its tree_patch_sha256 begins 1e33e4c2),
+      so its kills are those of the cycle-2 tests, not cycle 1's. The original cycle-1 run was on 3f897a7 plus
+      cycle-1.patch and also killed 35 of 35; implementation review v1 reproduced those 35 kills with python -B
+      on 7c7f377, the cycle-1 commit.
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: a705a0bf0b9803d32a195ec464609af05ee07559327e63f3dafc238cd610a6ef
+      generated: 35
+      killed: 35
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T006, T007, T008, T009, T010, T017]
+    description: >
+      Review rework for implementation review v1. Tests: the transaction tests read the terminal set state and row
+      counts from a second connection (IR-001); the timeout is local to the build transaction (IR-002); qualified_counts
+      come from this set's classification_set_factor rows only (IR-003); stages run in list order (IR-004); an unknown
+      set id and an empty active roster fail with their stated reasons (IR-005); the millisecond rounding is observed
+      from the set_config parameter sent, not by reading the setting back under a 1 ms timeout (IR-006); the other
+      writer's ended_at, the elapsed-time bound and the per-test AC traces T007 to T009 and T019 ask for (IR-009); the
+      engine SQL guard reuses CAP-002-E2-S1's patterns for qualified names, ONLY, upserts and statement bounds (IR-010).
+      Production: the failure log carries the exception (exc_info=True) so the stack trace reaches the structured log
+      while failure_reason stays one line (IR-008). IR-007: cycle-1's mutation evidence is regenerated with python -B and
+      the 16 unreferenced logs are removed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-2-rework.log
+    red_log_sha256: 50b708fa2c325ac359c46bd27294871cd86d5a1cbae54dcd6e2e97d5dad9cfec
+    red_evidence: >
+      With the exc_info line removed from engine.py, test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+      failed on the exc_info assertion (1 failed, 20 passed). The other findings are test strength: their RED is the
+      survival of the reviewer's 8 mutants against the cycle-1 tests (review v1), and each of those mutants is killed by
+      the cycle-2 tests (mutation-cycle-2-results.json). Correction (review v2 IR-005): red-cycle-2-rework.log was
+      captured against a draft of the TC-COMP-166 assertion (assert records[0].exc_info is not None), not the committed
+      one, which accepts exc_info or exc_text because RedactingFilter moves the traceback once another test installs
+      it. The RED of the committed assertion was re-captured on dda0207 with exc_info=True removed from engine.py:
+      1 failed, on assert record.exc_text is not None (red-cycle-2-committed-assertion.log under logs).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-2-committed-assertion.log
+        sha256: 3768d6a2e2182cf7777e219b246a4ea1986dbc281880acd7ed47c3106a81465f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/full-suite-cycle-2-dda0207.log
+        sha256: 8f0a614f5da93a20cfa6d6b18ad1975f9c6886e62780def8393068fc0ed743c2
+    green_evidence: >
+      tests/integration/test_engine_transaction.py, tests/unit/test_engine_sql_safety.py and
+      tests/unit/test_research_sql_is_append_only.py 74 passed; the full suite is run before hand-off (see the
+      completion summary); ruff check, ruff format --check and mypy src clean. Recorded here in the review v2 rework
+      (IR-005), because the completion summary is not in the repository: the full suite re-run on an unmodified clone
+      of dda0207, the cycle-2 commit, gave 1425 passed, 1 xfailed (full-suite-cycle-2-dda0207.log under logs), the
+      same count implementation review v2 recorded for that commit.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c71bb43fc36cc5a6d2120afa25cfea7903b34908354a289fe88980aebfb0db05
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 453df6249f5dfa746d6d06186cf717fbb019ae338a3f8109c8eea90dd4888eb0
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T005, T009]
+    description: >
+      Review rework for implementation review v2. Tests only; no production file changes. IR-001: a completing build
+      over two active instruments and one retired, all holding bars, asserts active_instruments == 2 on the committed
+      set row and in BuildResult. IR-002: a stage raising an exception with an empty message leaves the set committed
+      failed with the reason "RuntimeError: " (T017's format) and build does not raise. IR-003: a connection whose
+      transaction is aborted (INERROR) is refused with ValueError before any statement and the set stays building.
+      IR-004 (LOW): both rosters are asserted in instrument_id order over a heap whose order differs from id order,
+      with index and bitmap scans disabled so only the ORDER BY can supply it; the heap order is asserted as a
+      precondition. IR-005 (LOW): see cycle-1 mutation_state and the cycle-2 corrections.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-3-rework.log
+    red_log_sha256: 3a64391b409b43e216dccb6af7a5020576fbf454aabc329f58adf7b1665fb061
+    red_evidence: >
+      The seven cycle-3 mutants (the reviewer's five non-equivalent survivors, ctx-active-unordered and its retired
+      twin ctx-retired-unordered) were first reproduced as survivors of the unchanged seven story test files (7 of 7
+      survived). With all seven applied to production, the four new tests fail (4 failed): active_instruments 3 == 2,
+      DID NOT RAISE ValueError, IndexError from the failure handler, and roster (2, 1) == (1, 2). Unmutated they pass.
+    green_evidence: >
+      On 70d3728 plus the staged cycle-3 tree: the seven story test files 71 passed, 1 xfailed (four mutation
+      baselines); full suite 1463 passed, 1 xfailed; -m postgres 435 passed; -m "not postgres" 1028 passed,
+      1 xfailed; test_package_data_ships_sql.py and test_distribution_contents.py 12 passed (full-suite-cycle-3.log
+      under logs); uv build carries the classification/sql/*.sql files; ruff check, ruff format --check and mypy src
+      clean. The code review asked for two non-blocking fixes (the IR-003 docstring cited DAC-E2-S2-3, and an unused
+      bar in the IR-004 test); both were made, and the patch was re-fingerprinted, re-mutated and re-reviewed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/full-suite-cycle-3.log
+        sha256: f322a791134f377bee554a6e60f8afcb8a2a76abd682cd1b53a36f7e7a06443d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6c75ba20e1effe1731faffea57e0a561b4824c71622fe56ddf3a652bfa412000
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: d189e24bd725c2644b4822226c2e08bedcc0f12d30be72a907cd1070f5ee09b7
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T009]
+    description: >
+      Review rework for implementation review v3. Tests only; no production file changes. IR-001 (HIGH): the
+      millisecond conversion test gains the cases 0.0012 s -> "2" and 300.0004 s -> "300001", which rounding up
+      (T017 step 2, math.ceil) and rounding to nearest send differently; the earlier cases 0.0004, 0.0015 and 30
+      could not tell the two apart. IR-002 (LOW): test_build_transaction_runs_at_repeatable_read reads
+      SHOW transaction_isolation inside a stage and asserts "repeatable read" (DEC-0111), which SERIALIZABLE fails.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-4-rework.log
+    red_log_sha256: 7bb38c413071828fe51c9b75f3d2b8cf5bbeb5e4f9ecce3f898045176d617f2c
+    red_evidence: >
+      The two mutants (mutants-cycle-4.json, the reviewer's ceil-to-round and isolation-serializable) were first
+      reproduced as survivors of the unchanged seven story test files on 196b1a8 (2 of 2 survived, 71 passed and
+      1 xfailed under each). Then, on 196b1a8 plus the cycle-4 test diff, one mutant at a time: with ceil-to-round
+      the two new cases fail (1 != 2 and 300000 != 300001; 2 failed, 4 passed) while the three earlier cases pass;
+      with isolation-serializable the new isolation test fails ('serializable' != 'repeatable read'; 1 failed,
+      5 passed). Unmutated, all six pass.
+    green_evidence: >
+      Unmutated, the two cycle-4 tests 6 passed (red-cycle-4-rework.log); the seven story test files 74 passed,
+      1 xfailed in both mutation baselines. On 196b1a8 plus the staged cycle-4 tree: full suite 1466 passed,
+      1 xfailed; -m postgres 438 passed; -m "not postgres" 1028 passed, 1 xfailed; test_package_data_ships_sql.py
+      and test_distribution_contents.py 12 passed; uv build carries the three classification/sql/*.sql files;
+      ruff check, ruff format --check and mypy src clean (full-suite-cycle-4.log under logs). The code review
+      (APPROVED) and the spec-drift review (no drift) judged cycle-4.patch and asked for no change.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/full-suite-cycle-4.log
+        sha256: f6819d1cd0dcdf7e20297e9f767abfed93f079370d6ee6d10f89ce1aa7676642
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ea5f50f370bb40fdd4dfacf7474c3198e94e75508cfb3b6ee50e677f70b910c3
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: 2db633972e02c2b3409860bec3d973f847b8177660e8702b891cdf072630ac01
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T003, T005, T007]
+    description: >
+      Review rework for implementation review v4. Tests only; no production file changes. IR-001 (HIGH):
+      engine_support.add_bar takes an optional observed_on, defaulting to the session date so every existing
+      caller is unchanged, and TC-COMP-159 gives the newest active bar (Friday 2026-10-02) an observed_on of
+      Saturday 2026-10-03, the set's classification date, so only max(session_date) (T013) yields the asserted
+      latest trading day. IR-002 (HIGH): TC-COMP-167 (a) is parametrized with a second case in which a stage
+      writes one row to each child table before completion finds the set already failed; the build connection
+      and a second connection both read zero rows, so a stage's rows are committed only with the completion
+      (DAC-E2-10, DAC-E2-S2-2). The no-stage case keeps T007 (a) as written and every earlier assertion.
+      TC-COMP-166's stage helper is split into write_rows and write_rows_then_raise, behaviour unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-5-rework.log
+    red_log_sha256: ae7c38059040d3c7e677f20be4918df78a60121a59317db3a7efbbf37739f739
+    red_evidence: >
+      The two mutants (mutants-cycle-5.json, review v4's ctx-ltd-observed-on and commit-before-complete) were
+      first reproduced as survivors of the unchanged seven story test files on ed27721 (74 passed and 1 xfailed
+      under each). Then, on ed27721 plus the cycle-5 test diff, one mutant at a time, running the two changed
+      tests: with ctx-ltd-observed-on TC-COMP-159 fails (2026-10-03 == 2026-10-02; 1 failed, 2 passed); with
+      commit-before-complete the stage-wrote-rows case fails (one row in each child table where 0 is expected;
+      1 failed, 2 passed). Unmutated, all three pass.
+    green_evidence: >
+      Unmutated, the two changed tests 3 passed (red-cycle-5-rework.log); the seven story test files 75 passed,
+      1 xfailed in both mutation baselines. On ed27721 plus the staged cycle-5 tree: full suite 1467 passed,
+      1 xfailed; -m postgres 439 passed; -m "not postgres" 1028 passed, 1 xfailed; test_package_data_ships_sql.py
+      and test_distribution_contents.py 12 passed; uv build carries the classification/sql/*.sql files and no
+      tests/ entry; ruff check, ruff format --check and mypy src clean (full-suite-cycle-5.log under logs).
+      Review v4's 96 mutants, rerun against
+      the cycle-5 tests as a regression check: 95 killed; only log-without-reason survives, which reviews v3
+      and v4 found equivalent. The code review (APPROVED) and the spec-drift review (no drift) judged the first
+      patch and asked for no blocking change; their non-blocking notes (comment wording, an observed_on later
+      than the classification date, keeping the build-connection reads in TC-COMP-167 (a)) were taken, and the
+      patch was re-fingerprinted, re-mutated and re-reviewed (APPROVED, no drift).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/full-suite-cycle-5.log
+        sha256: a60726c1b9f9c99f0f5f2f15fdab27e914e4258b612acf3b16dbf9c827e9d425
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9fdfae52b13fb8cc04ae4904de50e5439e836bb8f7720baf75268d4bff47f945
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 0318f53157f2c00d4fcbdbc099e1bedc3e94a23e81d0d4d983c8501d88e095f0
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

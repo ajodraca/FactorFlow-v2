@@ -1,0 +1,16 @@
+.................................F
+=================================== FAILURES ===================================
+_____________ test_every_key_is_unresolved_and_every_sign_positive _____________
+
+    def test_every_key_is_unresolved_and_every_sign_positive() -> None:
+        for item in LINE_ITEMS.values():
+            assert item.payload_key == REQUIRES_INPUT
+>           assert item.sign == 1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = LineItem(label='shares outstanding', statement_type='balance_sheet', payload_key='[REQUIRES INPUT: Massive payload key]', sign=2).sign
+
+tests/unit/test_line_items.py:57: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_line_items.py::test_every_key_is_unresolved_and_every_sign_positive
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 33 passed in 0.36s

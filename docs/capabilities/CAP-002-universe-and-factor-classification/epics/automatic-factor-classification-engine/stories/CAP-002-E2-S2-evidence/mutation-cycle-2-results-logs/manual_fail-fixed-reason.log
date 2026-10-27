@@ -1,0 +1,59 @@
+.....................................x.........F
+=================================== FAILURES ===================================
+_____ test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set ______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=63519 user=test database=test_079b6c970da449e58b7066b1fc0fc24a) at 0x10b1b6690>
+building_set = (UUID('4cbbfd01-0a05-488d-bbbf-45c2128e19eb'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b1bf080>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10b1bf410>
+postgres_connection_string = 'postgresql://test:test@localhost:63519/test_079b6c970da449e58b7066b1fc0fc24a'
+
+    def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        postgres_connection_string: str,
+    ) -> None:
+        set_id, instrument_id = building_set
+        dsn = postgres_connection_string
+        injected = RuntimeError("injected failure")
+        stage = write_rows_then_raise(set_id, instrument_id, injected)
+        monkeypatch.setattr(engine, "_STAGES", [stage])
+    
+        with caplog.at_level(logging.ERROR):
+            result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "failed"
+        assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+        assert committed(dsn, set_id)[1] == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+        row, _ = committed(dsn, set_id)  # IR-001: the failed set is durable, not session-local
+        assert row["state"] == "failed"
+        assert row["ended_at"] is not None
+        reason = str(row["failure_reason"])
+>       assert reason.startswith("RuntimeError")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x10b1b4780>('RuntimeError')
+E        +    where <built-in method startswith of str object at 0x10b1b4780> = 'failed'.startswith
+
+tests/integration/test_engine_transaction.py:145: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: injected failure
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w1/src/factorflow/classification/engine.py", line 111, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mut/mutation-run-u49_w1w5/w1/tests/integration/test_engine_transaction.py", line 108, in stage
+    raise error
+RuntimeError: injected failure
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 46 passed, 1 xfailed in 2.27s

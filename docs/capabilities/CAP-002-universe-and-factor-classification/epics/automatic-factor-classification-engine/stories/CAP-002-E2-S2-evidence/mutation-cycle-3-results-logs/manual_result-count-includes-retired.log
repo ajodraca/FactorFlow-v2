@@ -1,0 +1,36 @@
+.....................................x...............F
+=================================== FAILURES ===================================
+____________ test_completed_set_is_sized_by_the_active_roster_only _____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=64307 user=test database=test_2a0ac3d07cc043b7b88cf6cc0b0f92b6) at 0x10ce743e0>
+building_set = (UUID('31dacd82-f39f-4a35-a9d3-aaf347cce5d8'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ce74ef0>
+postgres_connection_string = 'postgresql://test:test@localhost:64307/test_2a0ac3d07cc043b7b88cf6cc0b0f92b6'
+
+    def test_completed_set_is_sized_by_the_active_roster_only(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+    ) -> None:
+        """DAC-E2-10, AC-15 (IR-001): two active instruments and one retired, all holding bars,
+        size the set at two, on the committed row and in the result."""
+        set_id, _ = building_set
+        second = add_instrument(conn, "BBB")
+        add_bar(conn, second, date(2026, 10, 1))
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, retired, date(2026, 10, 2))
+        monkeypatch.setattr(engine, "_STAGES", [])
+    
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "complete"
+>       assert result.active_instruments == 2
+E       AssertionError: assert 3 == 2
+E        +  where 3 = BuildResult(set_id=UUID('31dacd82-f39f-4a35-a9d3-aaf347cce5d8'), state='complete', failure_reason=None, active_instruments=3, qualified_counts={}).active_instruments
+
+tests/integration/test_engine_transaction.py:301: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_completed_set_is_sized_by_the_active_roster_only
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 52 passed, 1 xfailed in 3.75s

@@ -1,0 +1,42 @@
+.....................................x.......F
+=================================== FAILURES ===================================
+_________ test_set_context_resolves_date_latest_trading_day_and_roster _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60910 user=test database=test_698ddf731cd4420d8ea57d573ae48b37) at 0x10a343590>
+postgres_connection_string = 'postgresql://test:test@localhost:60910/test_698ddf731cd4420d8ea57d573ae48b37'
+
+    def test_set_context_resolves_date_latest_trading_day_and_roster(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        a = add_instrument(conn, "AAA")
+        b = add_instrument(conn, "BBB")
+        c = add_instrument(conn, "CCC")
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, a, date(2026, 10, 1))
+        add_bar(conn, b, date(2026, 10, 2))
+        add_bar(conn, c, date(2026, 9, 1))
+        add_bar(conn, retired, date(2026, 10, 9))
+        run_id = add_run(conn)
+        set_id = add_building_set(conn, run_id, date(2026, 10, 3))
+    
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+            with other.cursor() as cur:
+                first = engine._read_context(cur, set_id)
+                assert first.set_id == set_id
+                assert first.run_id == run_id
+                assert first.classification_date == date(2026, 10, 3)
+                # The retired stock's later bar must not count (AC-15, compute side).
+                assert first.latest_trading_day == date(2026, 10, 2)
+>               assert first.active_ids == (a, b, c)
+E               assert (4,) == (1, 2, 3)
+E                 
+E                 At index 0 diff: 4 != 1
+E                 Right contains 2 more items, first extra item: 2
+E                 Use -v to get more diff
+
+tests/integration/test_engine_context.py:57: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 44 passed, 1 xfailed in 2.18s

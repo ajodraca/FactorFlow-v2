@@ -1,0 +1,38 @@
+.....................................x...............F
+=================================== FAILURES ===================================
+________________________ test_stages_run_in_list_order _________________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=63344 user=test database=test_f68e65c3973a4913b8040777613b29a2) at 0x10ae3a600>
+building_set = (UUID('7252fbb7-19a8-49c4-9c57-ce52f6f8611d'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ae3a1e0>
+
+    def test_stages_run_in_list_order(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-10, DEC-0121 (IR-004): inputs, then peer sets, then classification."""
+        set_id, _ = building_set
+        ran: list[str] = []
+    
+        def stage(name: str) -> engine.Stage:
+            def run(_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+                ran.append(name)
+    
+            return run
+    
+        monkeypatch.setattr(engine, "_STAGES", [stage("inputs"), stage("peers"), stage("classify")])
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "complete"
+>       assert ran == ["inputs", "peers", "classify"]
+E       AssertionError: assert ['classify', ...rs', 'inputs'] == ['inputs', 'p...', 'classify']
+E         
+E         At index 0 diff: 'classify' != 'inputs'
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:337: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_stages_run_in_list_order
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 52 passed, 1 xfailed in 2.83s

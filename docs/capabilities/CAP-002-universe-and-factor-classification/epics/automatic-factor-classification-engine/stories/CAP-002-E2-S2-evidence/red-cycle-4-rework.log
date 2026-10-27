@@ -1,0 +1,164 @@
+# RED, cycle-4 (review v3 rework): the two cycle-4 tests, as committed in this cycle, run against
+# production carrying one cycle-4 mutant at a time (mutants-cycle-4.json), then unmutated (GREEN).
+# Tree: 196b1a85c0ca48d62c65d3636882c956da5e5102 plus the cycle-4 test diff (tests/integration/test_engine_transaction.py only).
+# The two tests: test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero (5 cases, IR-001)
+# and test_build_transaction_runs_at_repeatable_read (IR-002).
+
+## RED 1: manual:ceil-to-round (math.ceil(timeout_seconds * 1000) -> round(timeout_seconds * 1000))
+ src/factorflow/classification/engine.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rA <the two cycle-4 tests>
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c4/red
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c4/red
+Installed 43 packages in 68ms
+..F.F.                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2] _
+
+building_set = (UUID('049ee9b8-10a3-4726-b964-b0f6ba94b334'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a37b0e0>
+postgres_connection_string = 'postgresql://test:test@localhost:64789/test_f5face975a3c4215b44f26a7ba6da408'
+seconds = 0.0012, sent = '2'
+
+    @pytest.mark.parametrize(
+        ("seconds", "sent"),
+        [(0.0004, "1"), (0.0015, "2"), (0.0012, "2"), (30, "30000"), (300.0004, "300001")],
+    )
+    def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        seconds: float,
+        sent: str,
+    ) -> None:
+        """AC-11 (IR-006): zero would disable statement_timeout, so 0.0004 s must send one ms.
+    
+        A fractional millisecond rounds up, not to the nearest (T017 step 2, review v3 IR-001):
+        0.0012 s sends 2 and 300.0004 s sends 300001, where rounding to nearest sends 1 and 300000.
+    
+        The parameter is recorded as sent: a 1 ms timeout can cancel any statement that observes
+        it, so reading the setting back would depend on the host's speed.
+        """
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+        with RecordingConnection.connect(postgres_connection_string) as recording:
+            engine.build(recording, set_id, seconds)
+>       assert recording.timeouts == [{"ms": sent}]
+E       AssertionError: assert [{'ms': '1'}] == [{'ms': '2'}]
+E         
+E         At index 0 diff: {'ms': '1'} != {'ms': '2'}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:494: AssertionError
+_ test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[300.0004-300001] _
+
+building_set = (UUID('d3b4b882-89bf-4673-9048-b434996549db'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a490d10>
+postgres_connection_string = 'postgresql://test:test@localhost:64789/test_28842c9287e540c3bfaafa209115d4ca'
+seconds = 300.0004, sent = '300001'
+
+    @pytest.mark.parametrize(
+        ("seconds", "sent"),
+        [(0.0004, "1"), (0.0015, "2"), (0.0012, "2"), (30, "30000"), (300.0004, "300001")],
+    )
+    def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        seconds: float,
+        sent: str,
+    ) -> None:
+        """AC-11 (IR-006): zero would disable statement_timeout, so 0.0004 s must send one ms.
+    
+        A fractional millisecond rounds up, not to the nearest (T017 step 2, review v3 IR-001):
+        0.0012 s sends 2 and 300.0004 s sends 300001, where rounding to nearest sends 1 and 300000.
+    
+        The parameter is recorded as sent: a 1 ms timeout can cancel any statement that observes
+        it, so reading the setting back would depend on the host's speed.
+        """
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+        with RecordingConnection.connect(postgres_connection_string) as recording:
+            engine.build(recording, set_id, seconds)
+>       assert recording.timeouts == [{"ms": sent}]
+E       AssertionError: assert [{'ms': '300000'}] == [{'ms': '300001'}]
+E         
+E         At index 0 diff: {'ms': '300000'} != {'ms': '300001'}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:494: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0004-1]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0015-2]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[30-30000]
+PASSED tests/integration/test_engine_transaction.py::test_build_transaction_runs_at_repeatable_read
+FAILED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2]
+FAILED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[300.0004-300001]
+2 failed, 4 passed in 2.70s
+exit=1
+
+## RED 2: manual:isolation-serializable (ISOLATION LEVEL REPEATABLE READ") -> ISOLATION LEVEL SERIALIZABLE"))
+ src/factorflow/classification/engine.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rA <the two cycle-4 tests>
+.....F                                                                   [100%]
+=================================== FAILURES ===================================
+________________ test_build_transaction_runs_at_repeatable_read ________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=64814 user=test database=test_8ea1c87fcc354433ba790de6ac6dcf91) at 0x10ae39df0>
+building_set = (UUID('4c259824-dd04-4656-bde9-e87b3fb7e80e'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10af50e00>
+
+    def test_build_transaction_runs_at_repeatable_read(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DEC-0111, DAC-E2-9, T017 step 2 (review v3 IR-002): the build runs at REPEATABLE READ,
+        the weakest level that fixes one snapshot; SERIALIZABLE also gives a snapshot, so the
+        level itself is observed from inside a stage."""
+        set_id, _ = building_set
+        observed: list[str] = []
+    
+        def read_isolation(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            row = stage_conn.execute("SHOW transaction_isolation").fetchone()
+            assert row is not None
+            observed.append(row[0])
+    
+        monkeypatch.setattr(engine, "_STAGES", [read_isolation])
+    
+        assert engine.build(conn, set_id, 30).state == "complete"
+>       assert observed == ["repeatable read"]
+E       AssertionError: assert ['serializable'] == ['repeatable read']
+E         
+E         At index 0 diff: 'serializable' != 'repeatable read'
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:440: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0004-1]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0015-2]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[30-30000]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[300.0004-300001]
+FAILED tests/integration/test_engine_transaction.py::test_build_transaction_runs_at_repeatable_read
+1 failed, 5 passed in 2.65s
+exit=1
+
+## GREEN: unmutated production
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rA <the two cycle-4 tests>
+......                                                                   [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0004-1]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0015-2]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[30-30000]
+PASSED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[300.0004-300001]
+PASSED tests/integration/test_engine_transaction.py::test_build_transaction_runs_at_repeatable_read
+6 passed in 2.52s
+exit=0
