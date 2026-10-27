@@ -1,0 +1,86 @@
+..F.................F.F                                                  [100%]
+=================================== FAILURES ===================================
+______________ test_reclaim_updates_only_building_rows_to_failed _______________
+
+    def test_reclaim_updates_only_building_rows_to_failed() -> None:
+        text = _sql("reclaim_interrupted.sql")
+>       assert re.search(r"WHERE\s+state\s*=\s*'building'", text)
+E       assert None
+E        +  where None = <function search at 0x100edbf60>("WHERE\\s+state\\s*=\\s*'building'", "-- Start-up reclaim: a set left building by an interrupted process is recorded failed (DAC-E2-12).\nUPDATE classifica...n = 'interrupted: the application restarted during the build'\n WHERE state <> 'complete'\nRETURNING set_id, run_id;\n")
+E        +    where <function search at 0x100edbf60> = re.search
+
+tests/unit/test_classification_scheduler_sql.py:44: AssertionError
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x1095cc190>, <psycopg.Connection [IDLE] (host=localhost port=60244 user=test database=test_cc1c10bde9d0482790be988e2eda3c6d) at 0x108f3c9e0>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+        reclaim_interrupted_sets(pool)
+    
+>       assert _full_rows(conn, [complete, failed]) == untouched_before
+E       assert [('(119454cc-...0:00+00",)',)] == [('(119454cc-...0:00+00",)',)]
+E         
+E         At index 0 diff: ('(119454cc-5f7b-406c-8b21-7248d3ac7970,132f3739-2431-41ea-8e4a-ee4d1b84300d,failed,2026-10-01,,,"2026-10-25 02:12:36.71228+00","2026-10-25 02:12:36.715036+00","interrupted: the application restarted during the build")',) != ('(119454cc-5f7b-406c-8b21-7248d3ac7970,132f3739-2431-41ea-8e4a-ee4d1b84300d,failed,2026-10-01,,,"2026-10-25 02:12:36.71228+00","2026-10-01 12:00:00+00","own reason")',)
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:81: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set 73c60b29-ca2e-46d2-afde-385f7d8ec64b for run d1fff4e5-b27a-4c73-9d01-425eb1baf8b8 was interrupted; recorded failed
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set 119454cc-5f7b-406c-8b21-7248d3ac7970 for run 132f3739-2431-41ea-8e4a-ee4d1b84300d was interrupted; recorded failed
+___________ test_reclaim_reports_and_logs_each_set_and_is_idempotent ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-13' at 0x1095cc410>, <psycopg.Connection [IDLE] (host=localhost port=60244 user=test database=test_076a78e2268647b1ab0958b138843cb8) at 0x1095e8380>)
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10943bb60>
+
+    def test_reclaim_reports_and_logs_each_set_and_is_idempotent(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """AC-20, DAC-E2-12, DAC-E2-S8-6: each reclaimed set is returned and logged once."""
+        pool, conn = store
+        run_a = add_run(conn, "succeeded")
+        stale = add_set(conn, run_a, "building")
+    
+        with caplog.at_level(logging.WARNING):
+            reclaimed = reclaim_interrupted_sets(pool)
+    
+        assert reclaimed == [ReclaimedSet(set_id=stale, run_id=run_a)]
+        warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+        assert len(warnings) == 1
+        assert str(stale) in warnings[0].getMessage()
+>       assert reclaim_interrupted_sets(pool) == []
+E       AssertionError: assert [ReclaimedSet...1f5bb41a26'))] == []
+E         
+E         Left contains one more item: ReclaimedSet(set_id=UUID('b536338d-1630-48d0-856c-463211a96722'), run_id=UUID('56a999c4-4776-4f5e-b9d7-2a1f5bb41a26'))
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:125: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set b536338d-1630-48d0-856c-463211a96722 for run 56a999c4-4776-4f5e-b9d7-2a1f5bb41a26 was interrupted; recorded failed
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set b536338d-1630-48d0-856c-463211a96722 for run 56a999c4-4776-4f5e-b9d7-2a1f5bb41a26 was interrupted; recorded failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_reclaim_updates_only_building_rows_to_failed
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_reports_and_logs_each_set_and_is_idempotent
+3 failed, 20 passed in 3.25s

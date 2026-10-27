@@ -1,0 +1,256 @@
+{
+ "schema": 1,
+ "repo_head": "3f897a7d6cc821e1d802613b260fde1d1bf570cd",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/scheduler.py:24:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 24,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:30:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 30,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:50:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 50,
+   "original": "            run_id = run[0]",
+   "mutated": "            run_id = run[1]"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:55:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 55,
+   "original": "            return ClaimedSet(set_id=created[0], run_id=run_id)",
+   "mutated": "            return ClaimedSet(set_id=created[1], run_id=run_id)"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:64:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 64,
+   "original": "        reclaimed = [ReclaimedSet(set_id=row[0], run_id=row[1]) for row in cur.fetchall()]",
+   "mutated": "        reclaimed = [ReclaimedSet(set_id=row[1], run_id=row[1]) for row in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:64:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 64,
+   "original": "        reclaimed = [ReclaimedSet(set_id=row[0], run_id=row[1]) for row in cur.fetchall()]",
+   "mutated": "        reclaimed = [ReclaimedSet(set_id=row[0], run_id=row[2]) for row in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/sql/claim_set.sql:1:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/claim_set.sql",
+   "line": 1,
+   "original": "-- Claim a run: one building set, stamped with the Chicago date (STD-UI-5; DEC-0125 adds the at parameter).",
+   "mutated": "-- Claim a run: one building set, stamped with the Chicago date (STD-UI-6; DEC-0125 adds the at parameter)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/claim_set.sql:1:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/claim_set.sql",
+   "line": 1,
+   "original": "-- Claim a run: one building set, stamped with the Chicago date (STD-UI-5; DEC-0125 adds the at parameter).",
+   "mutated": "-- Claim a run: one building set, stamped with the Chicago date (STD-UI-5; DEC-126 adds the at parameter)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/qualifying_run.sql:1:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 1,
+   "original": "-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-4).",
+   "mutated": "-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-11, DAC-E2-4)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/qualifying_run.sql:1:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 1,
+   "original": "-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-4).",
+   "mutated": "-- The oldest ended run that acquired a set-worthy outcome and has no set yet (AC-10, DAC-E2-5)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/qualifying_run.sql:5:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 5,
+   "original": "   AND NOT EXISTS (SELECT 1 FROM classification_set s WHERE s.run_id = r.run_id)",
+   "mutated": "   AND NOT EXISTS (SELECT 2 FROM classification_set s WHERE s.run_id = r.run_id)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/qualifying_run.sql:7:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 7,
+   "original": " LIMIT 1;",
+   "mutated": " LIMIT 2;"
+  },
+  {
+   "id": "src/factorflow/classification/sql/reclaim_interrupted.sql:1:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/reclaim_interrupted.sql",
+   "line": 1,
+   "original": "-- Start-up reclaim: a set left building by an interrupted process is recorded failed (DAC-E2-12).",
+   "mutated": "-- Start-up reclaim: a set left building by an interrupted process is recorded failed (DAC-E2-13)."
+  },
+  {
+   "id": "manual:exc-error",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 56,
+   "original": "    except psycopg.errors.UniqueViolation:",
+   "old": "    except psycopg.errors.UniqueViolation:",
+   "mutated": "    except psycopg.Error:",
+   "new": "    except psycopg.Error:"
+  },
+  {
+   "id": "manual:exc-exception",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 56,
+   "original": "    except psycopg.errors.UniqueViolation:",
+   "old": "    except psycopg.errors.UniqueViolation:",
+   "mutated": "    except Exception:",
+   "new": "    except Exception:"
+  },
+  {
+   "id": "manual:q-state",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 4,
+   "original": " WHERE r.state IN ('succeeded', 'partial')",
+   "old": " WHERE r.state IN ('succeeded', 'partial')",
+   "mutated": " WHERE r.state IN ('succeeded')",
+   "new": " WHERE r.state IN ('succeeded')"
+  },
+  {
+   "id": "manual:q-state2",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 4,
+   "original": " WHERE r.state IN ('succeeded', 'partial')",
+   "old": " WHERE r.state IN ('succeeded', 'partial')",
+   "mutated": " WHERE r.state IN ('succeeded', 'partial', 'failed')",
+   "new": " WHERE r.state IN ('succeeded', 'partial', 'failed')"
+  },
+  {
+   "id": "manual:q-notexists",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 5,
+   "original": "   AND NOT EXISTS (",
+   "old": "   AND NOT EXISTS (",
+   "mutated": "   AND EXISTS (",
+   "new": "   AND EXISTS ("
+  },
+  {
+   "id": "manual:q-desc",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/qualifying_run.sql",
+   "line": 6,
+   "original": " ORDER BY r.ended_at ASC",
+   "old": " ORDER BY r.ended_at ASC",
+   "mutated": " ORDER BY r.ended_at DESC",
+   "new": " ORDER BY r.ended_at DESC"
+  },
+  {
+   "id": "manual:c-utc",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/claim_set.sql",
+   "line": 4,
+   "original": "AT TIME ZONE 'America/Chicago'",
+   "old": "AT TIME ZONE 'America/Chicago'",
+   "mutated": "AT TIME ZONE 'UTC'",
+   "new": "AT TIME ZONE 'UTC'"
+  },
+  {
+   "id": "manual:c-coalesce",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/claim_set.sql",
+   "line": 4,
+   "original": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+   "old": "COALESCE(%(at)s::timestamptz, CURRENT_TIMESTAMP)",
+   "mutated": "CURRENT_TIMESTAMP",
+   "new": "CURRENT_TIMESTAMP"
+  },
+  {
+   "id": "manual:r-where",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/reclaim_interrupted.sql",
+   "line": 6,
+   "original": " WHERE state = 'building'",
+   "old": " WHERE state = 'building'",
+   "mutated": " WHERE state <> 'complete'",
+   "new": " WHERE state <> 'complete'"
+  },
+  {
+   "id": "manual:r-reason",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/reclaim_interrupted.sql",
+   "line": 5,
+   "original": "interrupted: the",
+   "old": "interrupted: the",
+   "mutated": "interrupted: The",
+   "new": "interrupted: The"
+  },
+  {
+   "id": "manual:r-ended",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/reclaim_interrupted.sql",
+   "line": 4,
+   "original": "       ended_at = now(),",
+   "old": "       ended_at = now(),",
+   "mutated": "       ended_at = NULL,",
+   "new": "       ended_at = NULL,"
+  },
+  {
+   "id": "manual:r-ended2",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/reclaim_interrupted.sql",
+   "line": 4,
+   "original": "       ended_at = now(),",
+   "old": "       ended_at = now(),",
+   "mutated": "       ended_at = started_at,",
+   "new": "       ended_at = started_at,"
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "repo_head": "3f897a7d6cc821e1d802613b260fde1d1bf570cd",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/settings.py:14:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/settings.py",
+   "line": 14,
+   "original": "    poll_interval_seconds: float = Field(default=5.0, ge=1)",
+   "mutated": "    poll_interval_seconds: float = Field(default=5.0, ge=2)"
+  },
+  {
+   "id": "src/factorflow/classification/settings.py:15:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/settings.py",
+   "line": 15,
+   "original": "    build_timeout_seconds: float = Field(default=300.0, ge=1)",
+   "mutated": "    build_timeout_seconds: float = Field(default=300.0, ge=2)"
+  },
+  {
+   "id": "src/factorflow/classification/settings.py:17:remove-attribute:1",
+   "cycle": "cycle-1",
+   "operator": "remove-attribute",
+   "file": "src/factorflow/classification/settings.py",
+   "line": 17,
+   "original": "    @model_validator(mode=\"after\")",
+   "mutated": "    pass"
+  },
+  {
+   "id": "src/factorflow/classification/settings.py:23:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/settings.py",
+   "line": 23,
+   "original": "        if self.poll_interval_seconds >= self.build_timeout_seconds:",
+   "mutated": "        if self.poll_interval_seconds > self.build_timeout_seconds:"
+  },
+  {
+   "id": "manual:poll-int",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/settings.py",
+   "line": 14,
+   "original": "    poll_interval_seconds: float = Field(default=5.0, ge=1)",
+   "mutated": "    poll_interval_seconds: int = Field(default=5, ge=1)"
+  }
+ ]
+}

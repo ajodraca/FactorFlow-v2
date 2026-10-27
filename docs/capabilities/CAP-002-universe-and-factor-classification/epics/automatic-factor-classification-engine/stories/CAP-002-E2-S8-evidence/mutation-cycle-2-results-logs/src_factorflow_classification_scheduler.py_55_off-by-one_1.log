@@ -1,0 +1,476 @@
+..........FFF.FFFFF.F..                                                  [100%]
+=================================== FAILURES ===================================
+_________ test_only_succeeded_and_partial_runs_are_claimed[succeeded] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-1' at 0x10aaf7230>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_0983dbe7f15748bcbbe019be8bb574d0) at 0x10ac5cb90>)
+qualifying = 'succeeded'
+
+    @pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
+    def test_only_succeeded_and_partial_runs_are_claimed(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
+    ) -> None:
+        pool, conn = store
+        for state in ("failed", "cancelled", "abandoned", "requested", "running"):
+            add_run(conn, state)
+    
+        assert claim_next_set(pool) is None
+        assert set_rows(conn) == []
+    
+        run_id = add_run(conn, qualifying)
+>       claimed = claim_next_set(pool)
+                  ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-1' at 0x10aaf7230>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+__________ test_only_succeeded_and_partial_runs_are_claimed[partial] ___________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-2' at 0x10ac5c2d0>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_646e8a8127dd4224afbabe9d57b0ff88) at 0x10ac6c8d0>)
+qualifying = 'partial'
+
+    @pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
+    def test_only_succeeded_and_partial_runs_are_claimed(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
+    ) -> None:
+        pool, conn = store
+        for state in ("failed", "cancelled", "abandoned", "requested", "running"):
+            add_run(conn, state)
+    
+        assert claim_next_set(pool) is None
+        assert set_rows(conn) == []
+    
+        run_id = add_run(conn, qualifying)
+>       claimed = claim_next_set(pool)
+                  ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-2' at 0x10ac5c2d0>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+___________ test_qualifying_runs_are_claimed_oldest_first_once_each ____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-3' at 0x10ac5c050>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_52e8b47903c7434fbbeb545af7a5df46) at 0x10ac6c380>)
+
+    def test_qualifying_runs_are_claimed_oldest_first_once_each(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        second = add_run(conn, "succeeded", T0 + timedelta(hours=1))
+        third = add_run(conn, "partial", T0 + timedelta(hours=2))
+        first = add_run(conn, "succeeded", T0)
+    
+        order = []
+        for _ in range(3):
+>           claimed = claim_next_set(pool)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-3' at 0x10ac5c050>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+__________ test_claim_stamps_the_chicago_date[instant0-chicago_date0] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10ac5dd10>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_8475d6e3ee8043eaaad035186582c27b) at 0x10ac6d150>)
+instant = datetime.datetime(2026, 10, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 10, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+>       claimed = claim_next_set(pool, at=instant)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10ac5dd10>
+at = datetime.datetime(2026, 10, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+__________ test_claim_stamps_the_chicago_date[instant1-chicago_date1] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-6' at 0x10ac5df90>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_d51b524d6a3d441c8bfe01ba21be9251) at 0x10ac6e030>)
+instant = datetime.datetime(2026, 12, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 12, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+>       claimed = claim_next_set(pool, at=instant)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-6' at 0x10ac5df90>
+at = datetime.datetime(2026, 12, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+_________ test_claim_without_at_stamps_the_database_clock_chicago_date _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-7' at 0x10ac5e5d0>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_c3eef74afc7a482ea2f972dfab15dcda) at 0x10ac6ebe0>)
+
+    def test_claim_without_at_stamps_the_database_clock_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+>       claimed = claim_next_set(pool)
+                  ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-7' at 0x10ac5e5d0>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+_____________ test_failed_set_for_run_a_does_not_block_later_run_b _____________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-8' at 0x10ac5e850>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_8528f61bff304c0fbba836c103088a9a) at 0x10ac6f790>)
+
+    def test_failed_set_for_run_a_does_not_block_later_run_b(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        failed = add_set(conn, run_a, "failed", failure_reason="own reason")
+        run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
+    
+>       claimed = claim_next_set(pool)
+                  ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:175: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-8' at 0x10ac5e850>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+____ test_claim_returns_none_when_the_run_acquired_a_set_between_statements ____
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-9' at 0x10ac5e5d0>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_7c82d0938ed74b3885d9bcd5164af821) at 0x10ac6e8b0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10abf7230>
+
+    def test_claim_returns_none_when_the_run_acquired_a_set_between_statements(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-4, AC-10 (design 2.4): a run_id UniqueViolation yields None and rolls back."""
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        add_set(conn, run_a, "failed")
+        monkeypatch.setattr(scheduler, "_QUALIFYING_RUN_SQL", f"SELECT '{run_a}'::uuid")
+    
+        assert claim_next_set(pool) is None
+    
+        assert len(set_rows(conn)) == 1
+        monkeypatch.undo()
+        run_b = add_run(conn, "succeeded", T0 + timedelta(hours=1))
+>       follow_up = claim_next_set(pool)
+                    ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_claim.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-9' at 0x10ac5e5d0>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+_________________ test_reclaim_fails_stale_building_sets_only __________________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-11' at 0x10ac5df90>, <psycopg.Connection [IDLE] (host=localhost port=59108 user=test database=test_8c6f80af00a64983ae71c881df0af2a6) at 0x10ac6f130>)
+
+    def test_reclaim_fails_stale_building_sets_only(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+    ) -> None:
+        pool, conn = store
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        complete = add_set(conn, add_run(conn, "succeeded", T0 + timedelta(hours=1)), "complete")
+        failed = add_set(
+            conn,
+            add_run(conn, "partial", T0 + timedelta(hours=2)),
+            "failed",
+            failure_reason="own reason",
+        )
+        run_d = add_run(conn, "succeeded", T0 + timedelta(hours=3))
+        untouched_before = _full_rows(conn, [complete, failed])
+        with conn.cursor() as cur:
+            cur.execute("SELECT clock_timestamp()")
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+        before_reclaim = row[0]
+    
+        reclaim_interrupted_sets(pool)
+    
+        assert _full_rows(conn, [complete, failed]) == untouched_before
+        rows = {r[0]: r for r in set_rows(conn)}
+        assert rows[stale][2] == "failed"
+        assert rows[stale][3] == INTERRUPTED_REASON
+        with conn.cursor() as cur:
+            cur.execute("SELECT ended_at FROM classification_set WHERE set_id = %s", (stale,))
+            ended = cur.fetchone()
+        conn.rollback()
+        assert ended is not None
+        assert ended[0] >= before_reclaim
+    
+>       claimed = claim_next_set(pool)
+                  ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_scheduler_restart.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+pool = <psycopg_pool.pool.ConnectionPool 'pool-11' at 0x10ac5df90>, at = None
+
+    def claim_next_set(pool: "ConnectionPool[Any]", *, at: datetime | None = None) -> ClaimedSet | None:
+        """Create a building set for the oldest qualifying run, or return None.
+    
+        `at` fixes the instant the classification date is taken from (DEC-0125); production
+        passes nothing and the database clock is used. A UniqueViolation means a set is
+        already building or the run acquired one between the two statements: both mean
+        "not now", so the transaction is rolled back and None is returned.
+        """
+        try:
+            with pool.connection() as conn, conn.cursor() as cur:
+                cur.execute(_QUALIFYING_RUN_SQL)
+                run = cur.fetchone()
+                if run is None:
+                    return None
+                run_id = run[0]
+                cur.execute(_CLAIM_SET_SQL, {"run_id": run_id, "at": at})
+                created = cur.fetchone()
+                if created is None:
+                    raise RuntimeError("claim_set.sql returned no set_id")
+>               return ClaimedSet(set_id=created[1], run_id=run_id)
+                                         ^^^^^^^^^^
+E               IndexError: tuple index out of range
+
+src/factorflow/classification/scheduler.py:55: IndexError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:66 classification set d2564045-129f-4aec-adc1-c66a3b9acc90 for run 13b1a75b-dea3-4ca3-85cb-409d9f3201d6 was interrupted; recorded failed
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_claim.py::test_only_succeeded_and_partial_runs_are_claimed[succeeded]
+FAILED tests/integration/test_scheduler_claim.py::test_only_succeeded_and_partial_runs_are_claimed[partial]
+FAILED tests/integration/test_scheduler_claim.py::test_qualifying_runs_are_claimed_oldest_first_once_each
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant0-chicago_date0]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant1-chicago_date1]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_without_at_stamps_the_database_clock_chicago_date
+FAILED tests/integration/test_scheduler_claim.py::test_failed_set_for_run_a_does_not_block_later_run_b
+FAILED tests/integration/test_scheduler_claim.py::test_claim_returns_none_when_the_run_acquired_a_set_between_statements
+FAILED tests/integration/test_scheduler_restart.py::test_reclaim_fails_stale_building_sets_only
+9 failed, 14 passed in 3.38s

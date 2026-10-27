@@ -1,0 +1,136 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______ test_claim_without_at_stamps_the_database_clock_chicago_date[UTC] _______
+
+postgres_connection_string = 'postgresql://test:test@localhost:52168/test_66daa670540b476db283aede1d256dc9'
+session_zone = 'UTC'
+
+    @pytest.mark.parametrize("session_zone", ["UTC", "Etc/GMT+4", "Etc/GMT-14"])
+    def test_claim_without_at_stamps_the_database_clock_chicago_date(
+        postgres_connection_string: str, session_zone: str
+    ) -> None:
+        migrate_all(postgres_connection_string)
+        pool: ConnectionPool[Any] = ConnectionPool(
+            postgres_connection_string,
+            min_size=1,
+            max_size=2,
+            kwargs={"options": f"-c TimeZone={session_zone}"},
+            open=True,
+        )
+        conn = psycopg.connect(postgres_connection_string)
+        try:
+            add_run(conn, "succeeded")
+    
+            claimed = claim_next_set(pool)
+    
+            assert claimed is not None
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT classification_date, (started_at AT TIME ZONE 'America/Chicago')::date "
+                    "FROM classification_set WHERE set_id = %s",
+                    (claimed.set_id,),
+                )
+                row = cur.fetchone()
+            conn.rollback()
+        finally:
+            conn.close()
+            pool.close()
+        assert row is not None
+        stamped, expected = row
+        # started_at defaults to now(), the claim transaction's own timestamp, so no Chicago midnight
+        # can fall between the two reads.
+>       assert stamped == expected
+E       assert datetime.date(2026, 10, 23) == datetime.date(2026, 10, 24)
+
+tests/integration/test_scheduler_claim.py:179: AssertionError
+___ test_claim_without_at_stamps_the_database_clock_chicago_date[Etc/GMT+4] ____
+
+postgres_connection_string = 'postgresql://test:test@localhost:52168/test_63b89e86508c48cebb476abd4d68acfb'
+session_zone = 'Etc/GMT+4'
+
+    @pytest.mark.parametrize("session_zone", ["UTC", "Etc/GMT+4", "Etc/GMT-14"])
+    def test_claim_without_at_stamps_the_database_clock_chicago_date(
+        postgres_connection_string: str, session_zone: str
+    ) -> None:
+        migrate_all(postgres_connection_string)
+        pool: ConnectionPool[Any] = ConnectionPool(
+            postgres_connection_string,
+            min_size=1,
+            max_size=2,
+            kwargs={"options": f"-c TimeZone={session_zone}"},
+            open=True,
+        )
+        conn = psycopg.connect(postgres_connection_string)
+        try:
+            add_run(conn, "succeeded")
+    
+            claimed = claim_next_set(pool)
+    
+            assert claimed is not None
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT classification_date, (started_at AT TIME ZONE 'America/Chicago')::date "
+                    "FROM classification_set WHERE set_id = %s",
+                    (claimed.set_id,),
+                )
+                row = cur.fetchone()
+            conn.rollback()
+        finally:
+            conn.close()
+            pool.close()
+        assert row is not None
+        stamped, expected = row
+        # started_at defaults to now(), the claim transaction's own timestamp, so no Chicago midnight
+        # can fall between the two reads.
+>       assert stamped == expected
+E       assert datetime.date(2026, 10, 23) == datetime.date(2026, 10, 24)
+
+tests/integration/test_scheduler_claim.py:179: AssertionError
+___ test_claim_without_at_stamps_the_database_clock_chicago_date[Etc/GMT-14] ___
+
+postgres_connection_string = 'postgresql://test:test@localhost:52168/test_27a0fa23e71c471ba331518b91735f86'
+session_zone = 'Etc/GMT-14'
+
+    @pytest.mark.parametrize("session_zone", ["UTC", "Etc/GMT+4", "Etc/GMT-14"])
+    def test_claim_without_at_stamps_the_database_clock_chicago_date(
+        postgres_connection_string: str, session_zone: str
+    ) -> None:
+        migrate_all(postgres_connection_string)
+        pool: ConnectionPool[Any] = ConnectionPool(
+            postgres_connection_string,
+            min_size=1,
+            max_size=2,
+            kwargs={"options": f"-c TimeZone={session_zone}"},
+            open=True,
+        )
+        conn = psycopg.connect(postgres_connection_string)
+        try:
+            add_run(conn, "succeeded")
+    
+            claimed = claim_next_set(pool)
+    
+            assert claimed is not None
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT classification_date, (started_at AT TIME ZONE 'America/Chicago')::date "
+                    "FROM classification_set WHERE set_id = %s",
+                    (claimed.set_id,),
+                )
+                row = cur.fetchone()
+            conn.rollback()
+        finally:
+            conn.close()
+            pool.close()
+        assert row is not None
+        stamped, expected = row
+        # started_at defaults to now(), the claim transaction's own timestamp, so no Chicago midnight
+        # can fall between the two reads.
+>       assert stamped == expected
+E       assert datetime.date(2026, 10, 23) == datetime.date(2026, 10, 24)
+
+tests/integration/test_scheduler_claim.py:179: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_claim.py::test_claim_without_at_stamps_the_database_clock_chicago_date[UTC]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_without_at_stamps_the_database_clock_chicago_date[Etc/GMT+4]
+FAILED tests/integration/test_scheduler_claim.py::test_claim_without_at_stamps_the_database_clock_chicago_date[Etc/GMT-14]
+3 failed, 9 deselected in 1.91s

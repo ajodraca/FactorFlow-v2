@@ -1,0 +1,42 @@
+....F
+=================================== FAILURES ===================================
+__________ test_claim_stamps_the_chicago_date[instant0-chicago_date0] __________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10d7bf890>, <psycopg.Connection [IDLE] (host=localhost port=52104 user=test database=test_996b1d2cfc7b4b49b8247928b254297d) at 0x10d2bf8a0>)
+instant = datetime.datetime(2026, 10, 15, 23, 30, tzinfo=zoneinfo.ZoneInfo(key='America/Chicago'))
+chicago_date = datetime.date(2026, 10, 15)
+
+    @pytest.mark.parametrize(
+        ("instant", "chicago_date"),
+        [
+            (datetime(2026, 10, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 10, 15)),
+            (datetime(2026, 12, 15, 23, 30, tzinfo=ZoneInfo("America/Chicago")), date(2026, 12, 15)),
+        ],
+    )
+    def test_claim_stamps_the_chicago_date(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        instant: datetime,
+        chicago_date: date,
+    ) -> None:
+        pool, conn = store
+        add_run(conn, "succeeded")
+    
+        claimed = claim_next_set(pool, at=instant)
+    
+        assert claimed is not None
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT classification_date FROM classification_set WHERE set_id = %s",
+                (claimed.set_id,),
+            )
+            row = cur.fetchone()
+        conn.rollback()
+        assert row is not None
+>       assert row[0] == chicago_date
+E       assert datetime.date(2026, 10, 24) == datetime.date(2026, 10, 15)
+
+tests/integration/test_scheduler_claim.py:139: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_scheduler_claim.py::test_claim_stamps_the_chicago_date[instant0-chicago_date0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 4 passed in 2.12s
