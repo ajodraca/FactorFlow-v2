@@ -1,0 +1,43 @@
+.....................................x............................F
+=================================== FAILURES ===================================
+_ test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2] _
+
+building_set = (UUID('119b99ec-3a5d-4bc8-9aca-7d52e27458c3'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ae92e70>
+postgres_connection_string = 'postgresql://test:test@localhost:65069/test_098d0384a9d9478a9ae79f3ec50085cb'
+seconds = 0.0012, sent = '2'
+
+    @pytest.mark.parametrize(
+        ("seconds", "sent"),
+        [(0.0004, "1"), (0.0015, "2"), (0.0012, "2"), (30, "30000"), (300.0004, "300001")],
+    )
+    def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        seconds: float,
+        sent: str,
+    ) -> None:
+        """AC-11 (IR-006): zero would disable statement_timeout, so 0.0004 s must send one ms.
+    
+        A fractional millisecond rounds up, not to the nearest (T017 step 2, review v3 IR-001):
+        0.0012 s sends 2 and 300.0004 s sends 300001, where rounding to nearest sends 1 and 300000.
+    
+        The parameter is recorded as sent: a 1 ms timeout can cancel any statement that observes
+        it, so reading the setting back would depend on the host's speed.
+        """
+        set_id, _ = building_set
+        monkeypatch.setattr(engine, "_STAGES", [])
+        with RecordingConnection.connect(postgres_connection_string) as recording:
+            engine.build(recording, set_id, seconds)
+>       assert recording.timeouts == [{"ms": sent}]
+E       AssertionError: assert [{'ms': '1'}] == [{'ms': '2'}]
+E         
+E         At index 0 diff: {'ms': '1'} != {'ms': '2'}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:494: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 65 passed, 1 xfailed in 4.88s

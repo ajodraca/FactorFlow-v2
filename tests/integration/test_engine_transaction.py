@@ -418,6 +418,28 @@ def test_inputs_are_read_from_one_snapshot(
     assert set_row(conn, set_id)["latest_trading_day"] == date(2026, 10, 2)
 
 
+def test_build_transaction_runs_at_repeatable_read(
+    conn: psycopg.Connection,
+    building_set: tuple[UUID, int],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """DEC-0111, DAC-E2-9, T017 step 2 (review v3 IR-002): the build runs at REPEATABLE READ,
+    the weakest level that fixes one snapshot; SERIALIZABLE also gives a snapshot, so the
+    level itself is observed from inside a stage."""
+    set_id, _ = building_set
+    observed: list[str] = []
+
+    def read_isolation(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+        row = stage_conn.execute("SHOW transaction_isolation").fetchone()
+        assert row is not None
+        observed.append(row[0])
+
+    monkeypatch.setattr(engine, "_STAGES", [read_isolation])
+
+    assert engine.build(conn, set_id, 30).state == "complete"
+    assert observed == ["repeatable read"]
+
+
 def test_no_price_data_held_fails_the_set_with_a_reason(
     conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -446,7 +468,10 @@ def test_non_positive_timeout_is_refused_before_touching_the_database(
     assert set_row(conn, set_id)["state"] == "building"
 
 
-@pytest.mark.parametrize(("seconds", "sent"), [(0.0004, "1"), (0.0015, "2"), (30, "30000")])
+@pytest.mark.parametrize(
+    ("seconds", "sent"),
+    [(0.0004, "1"), (0.0015, "2"), (0.0012, "2"), (30, "30000"), (300.0004, "300001")],
+)
 def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
     building_set: tuple[UUID, int],
     monkeypatch: pytest.MonkeyPatch,
@@ -455,6 +480,9 @@ def test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero(
     sent: str,
 ) -> None:
     """AC-11 (IR-006): zero would disable statement_timeout, so 0.0004 s must send one ms.
+
+    A fractional millisecond rounds up, not to the nearest (T017 step 2, review v3 IR-001):
+    0.0012 s sends 2 and 300.0004 s sends 300001, where rounding to nearest sends 1 and 300000.
 
     The parameter is recorded as sent: a 1 ms timeout can cancel any statement that observes
     it, so reading the setting back would depend on the host's speed.
