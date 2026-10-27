@@ -39,7 +39,9 @@ def test_set_context_resolves_date_latest_trading_day_and_roster(
     c = add_instrument(conn, "CCC")
     retired = add_instrument(conn, "OLD", lifecycle="retired")
     add_bar(conn, a, date(2026, 10, 1))
-    add_bar(conn, b, date(2026, 10, 2))
+    # Friday's session acquired on Saturday: observed_on is later than every active session
+    # date, so only max(session_date) gives 2026-10-02 (T013, review v4 IR-001).
+    add_bar(conn, b, date(2026, 10, 2), observed_on=date(2026, 10, 3))
     add_bar(conn, c, date(2026, 9, 1))
     add_bar(conn, retired, date(2026, 10, 9))
     run_id = add_run(conn)
@@ -52,7 +54,8 @@ def test_set_context_resolves_date_latest_trading_day_and_roster(
             assert first.set_id == set_id
             assert first.run_id == run_id
             assert first.classification_date == date(2026, 10, 3)
-            # The retired stock's later bar must not count (AC-15, compute side).
+            # The retired stock's later bar must not count (AC-15, compute side), nor the
+            # day a bar was observed.
             assert first.latest_trading_day == date(2026, 10, 2)
             assert first.active_ids == (a, b, c)
             assert first.retired_ids == (retired,)

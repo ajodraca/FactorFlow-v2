@@ -86,7 +86,9 @@ def set_row(conn: psycopg.Connection, set_id: UUID) -> dict[str, object]:
     return dict(zip(keys, row, strict=True))
 
 
-def write_rows_then_raise(set_id: UUID, instrument_id: int, error: Exception) -> engine.Stage:
+def write_rows(set_id: UUID, instrument_id: int) -> engine.Stage:
+    """A stage writing one row for the set into each child table, as later stages will."""
+
     def stage(conn: psycopg.Connection, context: engine.BuildContext) -> None:
         with conn.cursor() as cur:
             cur.execute(
@@ -105,6 +107,15 @@ def write_rows_then_raise(set_id: UUID, instrument_id: int, error: Exception) ->
                 "score, percentile) VALUES (%s, %s, 'value', 'classified', 1, 50)",
                 (set_id, instrument_id),
             )
+
+    return stage
+
+
+def write_rows_then_raise(set_id: UUID, instrument_id: int, error: Exception) -> engine.Stage:
+    write = write_rows(set_id, instrument_id)
+
+    def stage(conn: psycopg.Connection, context: engine.BuildContext) -> None:
+        write(conn, context)
         raise error
 
     return stage
@@ -165,15 +176,23 @@ def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
 
 
 # Implements TC-COMP-167
+@pytest.mark.parametrize("stage_writes_rows", [False, True], ids=["no-stage", "stage-wrote-rows"])
 def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
     conn: psycopg.Connection,
     building_set: tuple[UUID, int],
     monkeypatch: pytest.MonkeyPatch,
     postgres_connection_string: str,
+    stage_writes_rows: bool,
 ) -> None:
-    """DAC-E2-S2-2: the other writer's failure stands; the build writes nothing."""
-    set_id, _ = building_set
-    monkeypatch.setattr(engine, "_STAGES", [])
+    """DAC-E2-S2-2: the other writer's failure stands; the build writes nothing.
+
+    When a stage wrote rows before completion found the set no longer building, those rows
+    roll back with it: they are committed only with the completion (DAC-E2-10, review v4
+    IR-002). The counts are also read through a second connection, which sees only commits.
+    """
+    set_id, instrument_id = building_set
+    stages = [write_rows(set_id, instrument_id)] if stage_writes_rows else []
+    monkeypatch.setattr(engine, "_STAGES", stages)
     with psycopg.connect(postgres_connection_string) as other:
         other.execute(
             "UPDATE classification_set SET state = 'failed', ended_at = now(), "
@@ -188,6 +207,11 @@ def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
     assert result.active_instruments == 0
     assert result.qualified_counts == {}
     assert count_classification_rows(conn, set_id) == {
+        "classification_set_factor": 0,
+        "factor_input": 0,
+        "factor_classification": 0,
+    }
+    assert committed(postgres_connection_string, set_id)[1] == {
         "classification_set_factor": 0,
         "factor_input": 0,
         "factor_classification": 0,

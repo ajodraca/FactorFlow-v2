@@ -1,0 +1,64 @@
+.....................................x............F
+=================================== FAILURES ===================================
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows] _
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=55885 user=test database=test_59dd3179e75449d0bd3f9e0acd71b736) at 0x10a94c6b0>
+building_set = (UUID('3cafd644-4bde-4caa-99d7-a46cddb4f572'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a94cb30>
+postgres_connection_string = 'postgresql://test:test@localhost:55885/test_59dd3179e75449d0bd3f9e0acd71b736'
+stage_writes_rows = True
+
+    @pytest.mark.parametrize("stage_writes_rows", [False, True], ids=["no-stage", "stage-wrote-rows"])
+    def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        stage_writes_rows: bool,
+    ) -> None:
+        """DAC-E2-S2-2: the other writer's failure stands; the build writes nothing.
+    
+        When a stage wrote rows before completion found the set no longer building, those rows
+        roll back with it: they are committed only with the completion (DAC-E2-10, review v4
+        IR-002). The counts are also read through a second connection, which sees only commits.
+        """
+        set_id, instrument_id = building_set
+        stages = [write_rows(set_id, instrument_id)] if stage_writes_rows else []
+        monkeypatch.setattr(engine, "_STAGES", stages)
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute(
+                "UPDATE classification_set SET state = 'failed', ended_at = now(), "
+                "failure_reason = 'other writer' WHERE set_id = %s",
+                (set_id,),
+            )
+        other_ended_at = committed(postgres_connection_string, set_id)[0]["ended_at"]
+        assert other_ended_at is not None
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "failed"
+        assert result.active_instruments == 0
+        assert result.qualified_counts == {}
+>       assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+E       AssertionError: assert {'classificat...ification': 1} == {'classificat...ification': 0}
+E         
+E         Differing items:
+E         {'factor_input': 1} != {'factor_input': 0}
+E         {'factor_classification': 1} != {'factor_classification': 0}
+E         {'classification_set_factor': 1} != {'classification_set_factor': 0}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:209: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:130 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/work/mutation-run-pnlcg07_/w1/src/factorflow/classification/engine.py", line 123, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 49 passed, 1 xfailed in 2.84s

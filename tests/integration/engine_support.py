@@ -43,8 +43,13 @@ def add_instrument(conn: psycopg.Connection, symbol: str, lifecycle: str = "acti
 
 
 def add_bar(
-    conn: psycopg.Connection, instrument_id: int, session_date: date, close: int = 10
+    conn: psycopg.Connection,
+    instrument_id: int,
+    session_date: date,
+    close: int = 10,
+    observed_on: date | None = None,
 ) -> None:
+    """A bar observed on its own session date unless ``observed_on`` says otherwise."""
     conn.execute(
         "INSERT INTO daily_bar (instrument_id, session_date, observed_on, value_hash, "
         "open_price, high_price, low_price, close_price, volume) "
@@ -52,7 +57,7 @@ def add_bar(
         (
             instrument_id,
             session_date,
-            session_date,
+            session_date if observed_on is None else observed_on,
             f"{instrument_id}{session_date}{close}",
             close,
             close,

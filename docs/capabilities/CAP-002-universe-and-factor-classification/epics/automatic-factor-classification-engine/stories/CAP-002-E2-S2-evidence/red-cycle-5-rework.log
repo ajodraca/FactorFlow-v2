@@ -1,0 +1,196 @@
+# RED, cycle-5 (review v4 rework): the cycle-5 test changes, run against production carrying one
+# cycle-5 mutant at a time (mutants-cycle-5.json, the reviewer's ctx-ltd-observed-on and commit-before-complete).
+# Clone: ed27721780bacce15e3301d2cbc28be517186991 (production unchanged since dda0207), outside repos/.
+# Reproduction: each mutant first survives the unchanged seven story test files on ed27721780bacce15e3301d2cbc28be517186991.
+# RED: the same clone plus the cycle-5 test diff (engine_support.py, test_engine_context.py,
+# test_engine_transaction.py), one mutant at a time, running the two changed tests; GREEN: unmutated.
+
+## Reproduction 1: manual:ctx-ltd-observed-on survives the unchanged story tests
+ src/factorflow/classification/sql/set_context.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the seven story test files>
+...                                                                      [100%]
+74 passed, 1 xfailed in 5.26s
+exit=0
+
+## Reproduction 2: manual:commit-before-complete survives the unchanged story tests
+ src/factorflow/classification/engine.py | 1 +
+ 1 file changed, 1 insertion(+)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the seven story test files>
+...                                                                      [100%]
+74 passed, 1 xfailed in 5.04s
+exit=0
+
+## Cycle-5 test diff applied
+ tests/integration/engine_support.py          |  9 ++++++--
+ tests/integration/test_engine_context.py     |  7 ++++--
+ tests/integration/test_engine_transaction.py | 32 ++++++++++++++++++++++++----
+ 3 files changed, 40 insertions(+), 8 deletions(-)
+
+## RED 1: manual:ctx-ltd-observed-on
+ src/factorflow/classification/sql/set_context.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rA <the two changed tests>
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_________ test_set_context_resolves_date_latest_trading_day_and_roster _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=55614 user=test database=test_0467682b4e9a4cdbb905028cad0dd81a) at 0x10ccd7a40>
+postgres_connection_string = 'postgresql://test:test@localhost:55614/test_0467682b4e9a4cdbb905028cad0dd81a'
+
+    def test_set_context_resolves_date_latest_trading_day_and_roster(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        a = add_instrument(conn, "AAA")
+        b = add_instrument(conn, "BBB")
+        c = add_instrument(conn, "CCC")
+        retired = add_instrument(conn, "OLD", lifecycle="retired")
+        add_bar(conn, a, date(2026, 10, 1))
+        # Friday's session acquired on Saturday: observed_on is later than every active session
+        # date, so only max(session_date) gives 2026-10-02 (T013, review v4 IR-001).
+        add_bar(conn, b, date(2026, 10, 2), observed_on=date(2026, 10, 3))
+        add_bar(conn, c, date(2026, 9, 1))
+        add_bar(conn, retired, date(2026, 10, 9))
+        run_id = add_run(conn)
+        set_id = add_building_set(conn, run_id, date(2026, 10, 3))
+    
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+            with other.cursor() as cur:
+                first = engine._read_context(cur, set_id)
+                assert first.set_id == set_id
+                assert first.run_id == run_id
+                assert first.classification_date == date(2026, 10, 3)
+                # The retired stock's later bar must not count (AC-15, compute side), nor the
+                # day a bar was observed.
+>               assert first.latest_trading_day == date(2026, 10, 2)
+E               AssertionError: assert datetime.date(2026, 10, 3) == datetime.date(2026, 10, 2)
+E                +  where datetime.date(2026, 10, 3) = BuildContext(set_id=UUID('6ee25b73-29c7-4fa7-9013-c95010490c88'), run_id=UUID('ccc4fa10-51ba-4743-88a3-7ecf49f81a57'),...date=datetime.date(2026, 10, 3), latest_trading_day=datetime.date(2026, 10, 3), active_ids=(1, 2, 3), retired_ids=(4,)).latest_trading_day
+E                +  and   datetime.date(2026, 10, 2) = date(2026, 10, 2)
+
+tests/integration/test_engine_context.py:59: AssertionError
+==================================== PASSES ====================================
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage] _
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/red/src/factorflow/classification/engine.py", line 122, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows] _
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/red/src/factorflow/classification/engine.py", line 122, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage]
+PASSED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows]
+FAILED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+1 failed, 2 passed in 2.27s
+exit=1
+
+## RED 2: manual:commit-before-complete
+ src/factorflow/classification/engine.py | 1 +
+ 1 file changed, 1 insertion(+)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rA <the two changed tests>
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows] _
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=55635 user=test database=test_923f10d6b56e4fc6906e2ee1fa7a5d0e) at 0x1090dec00>
+building_set = (UUID('1a9eb67c-25c1-45ac-befa-c0dabdf2a631'), 1)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1090dec90>
+postgres_connection_string = 'postgresql://test:test@localhost:55635/test_923f10d6b56e4fc6906e2ee1fa7a5d0e'
+stage_writes_rows = True
+
+    @pytest.mark.parametrize("stage_writes_rows", [False, True], ids=["no-stage", "stage-wrote-rows"])
+    def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
+        conn: psycopg.Connection,
+        building_set: tuple[UUID, int],
+        monkeypatch: pytest.MonkeyPatch,
+        postgres_connection_string: str,
+        stage_writes_rows: bool,
+    ) -> None:
+        """DAC-E2-S2-2: the other writer's failure stands; the build writes nothing.
+    
+        When a stage wrote rows before completion found the set no longer building, those rows
+        roll back with it: they are committed only with the completion (DAC-E2-10, review v4
+        IR-002). The counts are also read through a second connection, which sees only commits.
+        """
+        set_id, instrument_id = building_set
+        stages = [write_rows(set_id, instrument_id)] if stage_writes_rows else []
+        monkeypatch.setattr(engine, "_STAGES", stages)
+        with psycopg.connect(postgres_connection_string) as other:
+            other.execute(
+                "UPDATE classification_set SET state = 'failed', ended_at = now(), "
+                "failure_reason = 'other writer' WHERE set_id = %s",
+                (set_id,),
+            )
+        other_ended_at = committed(postgres_connection_string, set_id)[0]["ended_at"]
+        assert other_ended_at is not None
+        result = engine.build(conn, set_id, 30)
+    
+        assert result.state == "failed"
+        assert result.active_instruments == 0
+        assert result.qualified_counts == {}
+>       assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+E       AssertionError: assert {'classificat...ification': 1} == {'classificat...ification': 0}
+E         
+E         Differing items:
+E         {'factor_input': 1} != {'factor_input': 0}
+E         {'classification_set_factor': 1} != {'classification_set_factor': 0}
+E         {'factor_classification': 1} != {'factor_classification': 0}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:209: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:130 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/red/src/factorflow/classification/engine.py", line 123, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+==================================== PASSES ====================================
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage] _
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:130 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/red/src/factorflow/classification/engine.py", line 123, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+PASSED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage]
+FAILED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows]
+1 failed, 2 passed in 2.26s
+exit=1
+
+## GREEN: unmutated production
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rA <the two changed tests>
+...                                                                      [100%]
+==================================== PASSES ====================================
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage] _
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/red/src/factorflow/classification/engine.py", line 122, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+_ test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows] _
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: RuntimeError: classification set is no longer building
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/red/src/factorflow/classification/engine.py", line 122, in build
+    raise RuntimeError("classification set is no longer building")
+RuntimeError: classification set is no longer building
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_context.py::test_set_context_resolves_date_latest_trading_day_and_roster
+PASSED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage]
+PASSED tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows]
+3 passed in 2.20s
+exit=0

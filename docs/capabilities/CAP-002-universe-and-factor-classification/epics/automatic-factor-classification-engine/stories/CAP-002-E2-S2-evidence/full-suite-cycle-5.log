@@ -1,0 +1,45 @@
+# Validation at ed27721780bacce15e3301d2cbc28be517186991 plus the cycle-5 test diff (staged, cycle-5.patch) and its evidence files; the story status line was the only other change, and no test reads it
+== uv sync --all-extras --offline
+Resolved 46 packages in 19ms
+Checked 43 packages in 6ms
+exit=0
+== uv run pytest -p no:cacheprovider -q
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1467 passed, 1 xfailed, 2 warnings in 238.88s (0:03:58)
+exit=0
+== uv run pytest -m postgres
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+439 passed, 1029 deselected, 2 warnings in 212.47s (0:03:32)
+exit=0
+== uv run pytest -m 'not postgres'
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1028 passed, 439 deselected, 1 xfailed, 2 warnings in 24.84s
+exit=0
+== uv run ruff check .
+All checks passed!
+exit=0
+== uv run ruff format --check .
+228 files already formatted
+exit=0
+== uv run mypy src
+Success: no issues found in 56 source files
+exit=0
+== package data (test_package_data_ships_sql.py, test_distribution_contents.py)
+............                                                             [100%]
+12 passed in 0.92s
+exit=0
+== focused story suites (seven story test files)
+....                                                                     [100%]
+75 passed, 1 xfailed in 4.56s
+exit=0
+== uv build --offline (out-dir outside the repository)
+Successfully built /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/dist/factorflow-0.1.0.tar.gz
+Successfully built /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-run-factorlow-v2-72853f/db9cff1c-3430-41b3-8755-e50004235c55/scratchpad/c5/dist/factorflow-0.1.0-py3-none-any.whl
+exit=0
+== classification/sql in the wheel
+factorflow/classification/sql/claim_set.sql
+factorflow/classification/sql/complete_set.sql
+factorflow/classification/sql/fail_set.sql
+factorflow/classification/sql/qualifying_run.sql
+factorflow/classification/sql/reclaim_interrupted.sql
+factorflow/classification/sql/set_context.sql

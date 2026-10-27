@@ -9,6 +9,8 @@
 # cycle-2's full-suite result in this file.
 # Rework: cycle-4 answers implementation review v3 (IR-001 and IR-002, tests only): the two surviving manual mutants
 # ceil-to-round and isolation-serializable are each killed by one test change.
+# Rework: cycle-5 answers implementation review v4 (IR-001 and IR-002, tests only): the two surviving manual mutants
+# ctx-ltd-observed-on and commit-before-complete are each killed by one test change.
 
 cycles:
   - id: cycle-1
@@ -194,6 +196,61 @@ cycles:
       runner: scripts/mutation-run.py
       results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-4-results.json
       results_sha256: 2db633972e02c2b3409860bec3d973f847b8177660e8702b891cdf072630ac01
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T003, T005, T007]
+    description: >
+      Review rework for implementation review v4. Tests only; no production file changes. IR-001 (HIGH):
+      engine_support.add_bar takes an optional observed_on, defaulting to the session date so every existing
+      caller is unchanged, and TC-COMP-159 gives the newest active bar (Friday 2026-10-02) an observed_on of
+      Saturday 2026-10-03, the set's classification date, so only max(session_date) (T013) yields the asserted
+      latest trading day. IR-002 (HIGH): TC-COMP-167 (a) is parametrized with a second case in which a stage
+      writes one row to each child table before completion finds the set already failed; the build connection
+      and a second connection both read zero rows, so a stage's rows are committed only with the completion
+      (DAC-E2-10, DAC-E2-S2-2). The no-stage case keeps T007 (a) as written and every earlier assertion.
+      TC-COMP-166's stage helper is split into write_rows and write_rows_then_raise, behaviour unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/red-cycle-5-rework.log
+    red_log_sha256: ae7c38059040d3c7e677f20be4918df78a60121a59317db3a7efbbf37739f739
+    red_evidence: >
+      The two mutants (mutants-cycle-5.json, review v4's ctx-ltd-observed-on and commit-before-complete) were
+      first reproduced as survivors of the unchanged seven story test files on ed27721 (74 passed and 1 xfailed
+      under each). Then, on ed27721 plus the cycle-5 test diff, one mutant at a time, running the two changed
+      tests: with ctx-ltd-observed-on TC-COMP-159 fails (2026-10-03 == 2026-10-02; 1 failed, 2 passed); with
+      commit-before-complete the stage-wrote-rows case fails (one row in each child table where 0 is expected;
+      1 failed, 2 passed). Unmutated, all three pass.
+    green_evidence: >
+      Unmutated, the two changed tests 3 passed (red-cycle-5-rework.log); the seven story test files 75 passed,
+      1 xfailed in both mutation baselines. On ed27721 plus the staged cycle-5 tree: full suite 1467 passed,
+      1 xfailed; -m postgres 439 passed; -m "not postgres" 1028 passed, 1 xfailed; test_package_data_ships_sql.py
+      and test_distribution_contents.py 12 passed; uv build carries the classification/sql/*.sql files and no
+      tests/ entry; ruff check, ruff format --check and mypy src clean (full-suite-cycle-5.log under logs).
+      Review v4's 96 mutants, rerun against
+      the cycle-5 tests as a regression check: 95 killed; only log-without-reason survives, which reviews v3
+      and v4 found equivalent. The code review (APPROVED) and the spec-drift review (no drift) judged the first
+      patch and asked for no blocking change; their non-blocking notes (comment wording, an observed_on later
+      than the classification date, keeping the build-connection reads in TC-COMP-167 (a)) were taken, and the
+      patch was re-fingerprinted, re-mutated and re-reviewed (APPROVED, no drift).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/full-suite-cycle-5.log
+        sha256: a60726c1b9f9c99f0f5f2f15fdab27e914e4258b612acf3b16dbf9c827e9d425
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9fdfae52b13fb8cc04ae4904de50e5439e836bb8f7720baf75268d4bff47f945
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 0318f53157f2c00d4fcbdbc099e1bedc3e94a23e81d0d4d983c8501d88e095f0
       generated: 2
       killed: 2
       survived: 0

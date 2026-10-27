@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "repo_head": "ed27721780bacce15e3301d2cbc28be517186991",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:ctx-ltd-observed-on",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/set_context.sql",
+   "line": 1,
+   "old": "(SELECT max(b.session_date)",
+   "new": "(SELECT max(b.observed_on)"
+  },
+  {
+   "id": "manual:commit-before-complete",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "        for stage in _STAGES:\n            stage(conn, context)\n",
+   "new": "        for stage in _STAGES:\n            stage(conn, context)\n        conn.commit()\n"
+  }
+ ]
+}
