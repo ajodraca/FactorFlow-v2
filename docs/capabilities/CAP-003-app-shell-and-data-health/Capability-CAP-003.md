@@ -11,17 +11,17 @@ description: >-
   whether the data can be trusted, with CAP-001's market data surfaces reached
   through it in the product's own words.
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-26
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: capability-definition-agent
   agent_version: "1.0"
   model: claude-fable-5-1
   tool: Claude Code
   tool_version: unknown
-  timestamp: 2026-10-24T23:26:09Z
+  timestamp: 2026-10-25T19:41:02Z
   source_artifacts:
     - id: PRODUCT-UX
       version: "6"
@@ -39,6 +39,12 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-10-26T02:36:24Z
+  reviewed_revision: sha256:52cd12cd9b606e6691d9ba1617949d778a1e7431d646c157c0b393a016d8a3f8
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # App Shell & Data Health
@@ -284,7 +290,9 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
     `/data/downloads/:id` and `/settings`.
 18. **AC-18 — Old paths still arrive:** Each path CAP-001 shipped MUST take the
     owner to the same screen at its new path for one release after this
-    capability ships, and MUST then be removed.
+    capability ships. (Their removal in the following release is the
+    out-of-scope item in §2; the clause requiring it was dropped on 2026-10-25,
+    review v1 FINDING-5, because it cannot be exercised at this delivery.)
 19. **AC-19 — Product vocabulary:** Every user-visible label on the screens
     this capability delivers or takes over MUST use the display label STD-UI-1
     defines and MUST NOT show the domain term beside it.
@@ -311,10 +319,18 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
 26. **AC-26 — Built from the design system:** Every surface this capability
     delivers or takes over MUST be built from the product's design-system
     components and consume its theme tokens, with no spacing, size or colour
-    literal outside the theme.
+    literal outside the theme. The layout dimensions the approved blueprint
+    and screen specifications fix (the 208 px rail, the 1180 px measure, the
+    260 to 300 px side column, 28 px, 16 px and 70ch) are approved-specification
+    values held in one layout-constants module, not theme literals and not new
+    tokens (owner decision 2026-10-25, review v1 FINDING-6).
 27. **AC-27 — CAP-002 keeps its routes:** Replacing the interim Research entry
     CAP-002 appended to CAP-001's rail MUST leave every CAP-002 route
     unchanged and reachable from the new rail.
+28. **AC-28 — Data health answers in bounded time:** With 3,000 followed
+    stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th
+    percentile, measured by the volume test (owner decision 2026-10-25, review
+    v1 FINDING-4).
 
 ## 5. Dependencies and Constraints
 
@@ -381,18 +397,18 @@ mirror of it, and the two must agree.
 | STD-UI-15 | yes | Only recorded outcomes are shown; a partial download is never shown complete (AC-12) |
 | STD-UI-16 | yes | Missing data is named as Incomplete and skipped, never filled (AC-13; blueprint principle 5) |
 | STD-UI-17 | partial | Carried by CAP-002's scores; these screens show counts, not percentiles, so no restatement mark is rendered here |
-| STD-UI-18 | yes | The daily prices check states that gaps are judged against the days other followed stocks hold (S09 §8) |
+| STD-UI-18 | yes | The daily prices check states that gaps and currency are judged against the days and the newest session other followed stocks hold, not a trading calendar (S09 §8; DEC-0201, DEC-0206), and a clean result asserts that nothing is missing, never that prices are current to the market (review v1 FINDING-2, resolved 2026-10-25) |
 | STD-UI-19 | yes | Following and downloading are routine, stopping following is consequential; every refusal names the operation, the stock and the reason (AC-13, AC-14, AC-15) |
 | STD-UI-20 | no | No promotion in M1 |
 | STD-UI-21 | no | No order path in M1; the kill switch ships with paper trading (D-7). Section 5.2 records it as a non-dependency |
 | STD-UI-22 | no | No capital-at-risk or destructive control on these screens |
 | STD-UI-23 | yes | AC-24; the UX brief enumerates all eight states per region, starting from the screen specs' states tables |
 | STD-UI-24 | yes | AC-25; the screen specs' accessibility sections are the starting point |
-| STD-UI-25 | yes | AC-25; cadences recorded in the design, starting from the screen specs |
+| STD-UI-25 | yes | AC-25; cadences recorded in the design, starting from the screen specs. **Specialization (permitted):** the rail chips are polled but carry no time of their own; the *checked {time}* lines on Home and Data health, read on the same cadence, stand for them (owner decision 2026-10-25, review v1 FINDING-11) |
 | STD-UI-26 | yes | AC-3: setup shows steps, position and what remains, and going back keeps entered data |
 | STD-UI-27 | no | No chart in M1 |
 | STD-UI-28 | no | No chart in M1 |
-| STD-UI-29 | yes | AC-26; density inherits the theme's tier (STD-UI OQ-UI-4 still open) |
+| STD-UI-29 | yes | AC-26; density inherits the theme's tier (STD-UI OQ-UI-4 still open). The approved-specification layout dimensions AC-26 names are held in one layout-constants module and are not theme literals (owner decision 2026-10-25, review v1 FINDING-6) |
 | STD-UI-30 | yes | The followed-stock and coverage lists CAP-001 committed to 3000 stocks (CAP-001 AC-4) keep CAP-001's volume handling when taken over; no new list reaches that volume |
 
 ## 6. Assumptions
@@ -400,16 +416,16 @@ mirror of it, and the two must agree.
 - **The rail shows only shipped destinations in M1** — Home, Research, Data
   health and Settings — and gains Strategies and Portfolio when their
   capabilities ship (AC-1). Blueprint §2.1 lists all six and S01 §2 says
-  undelivered regions are absent, not disabled; the owner confirms this reading
-  for destinations at the first review.
+  undelivered regions are absent, not disabled. **Confirmed by the owner on
+  2026-10-25** (specification review v1).
 - **CAP-002 ships within M1 and its score-currency read (DEC-0071) is how Home
   and Data health learn when scores were produced.** Until it is deployed, the
   *Factor scores* card and the score as-of render as not determinable. If
   CAP-002 lands after this capability, those two regions are verified at
   integration rather than at this capability's delivery.
 - **"One release" in AC-18 means the next release after the one carrying this
-  capability**, releases being the images CAP-001 E1-S9 defined. The owner
-  confirms at review.
+  capability**, releases being the images CAP-001 E1-S9 defined. **Confirmed by
+  the owner on 2026-10-25** (specification review v1).
 - **Setup is complete when the first download has been started, not finished**
   (S02 §6), so an owner who leaves mid-download still lands on Home.
 
@@ -419,16 +435,24 @@ mirror of it, and the two must agree.
   this `[REQUIRES INPUT]` for the owner and names this capability as its likely
   owner. It decides how *Recent downloads* rows, the download detail title and
   setup's progress line name a download; the interim rendering is the start
-  time in America/Chicago. Affects AC-11 and AC-17 copy.
+  time in America/Chicago. Affects AC-11 and AC-17 copy. **Answered 2026-10-25
+  by the owner: no.** A download is named by its start time in America/Chicago,
+  with the zone, everywhere; no stored or derived number is added in M1 or
+  planned. The interim rendering of DEC-0083 is the permanent one, and CAP-002's
+  system design question 11 can be closed the same way.
 - **OQ-2 — Which lands first, this shell or CAP-002's Research screens?** Both
   edit the shell. If this capability lands first, CAP-002 never builds the
   interim Research entry of DEC-0069; if CAP-002 lands first, AC-27 replaces
-  it. Affects sequencing, not scope.
+  it. Affects sequencing, not scope. **Answered 2026-10-25 by the owner:
+  CAP-002 lands first.** Its Research screens ship with their interim rail entry
+  (DEC-0069) and AC-27 replaces it.
 - **OQ-3 — Is uploading a CSV an M1 way to name stocks?** S02 step 3 offers
   *Paste a list*, *Upload a CSV* and *Add later*, and S02 §11 notes the file
   control the design system lacks. AC-5 covers pasting only; if the owner wants
   the upload in M1, it becomes a criterion here and a component gap for the
-  design system's intake.
+  design system's intake. **Answered 2026-10-25 by the owner: no.** M1 setup
+  offers *Paste a list* and *Add later*; the *Upload a CSV* departure from S02
+  step 3 stays recorded in the UX design, with no file control and no intake.
 - **OQ-4 — Does the first vendoring of design-system components into the
   repository need a tech-stack amendment?** `tech-stack.md` approves
   `shadcn/ui` on Radix (OQ-TS-6) but the owner interface has so far hand-built
@@ -436,16 +460,22 @@ mirror of it, and the two must agree.
   vendored components and of the new `command`, `stepper`, `progress` and
   `radio-group` specs; whether the utility libraries they bring are within the
   approved stack is a `$tech-stack` question, raised here so system design
-  does not decide it silently.
+  does not decide it silently. **Answered 2026-10-25 by the owner: yes, and all
+  ten packages are confirmed** in `tech-stack.md` v6 (OQ-TS-10): `cmdk`,
+  `sonner`, `clsx`, `tailwind-merge`, `class-variance-authority` and
+  `lucide-react` (DEC-0205) and `@tanstack/react-table`, `react-hook-form`,
+  `zod` and `@hookform/resolvers` (DEC-0215), beside the `@radix-ui/react-*`
+  primitives. Review v1 FINDING-1 is resolved; each licence is recorded when the
+  package is added (SEC-DEP-003).
 
 ## 8. Readiness Assessment
 
 **Readiness Score: 85/100**
 
-Problem, users, outcome, scope, flows and 27 acceptance criteria are defined
+Problem, users, outcome, scope, flows and 28 acceptance criteria are defined
 against an approved blueprint and three approved screen specifications, and
-every dependency is typed and cited. Four product questions stay open: the
-visible download number (OQ-1), delivery order relative to CAP-002 (OQ-2),
-CSV upload in M1 (OQ-3) and the tech-stack standing of the vendored components
-(OQ-4). None blocks system design; OQ-1 and OQ-3 change copy and one criterion
-and are best answered before the UX design starts.
+every dependency is typed and cited. The four product questions raised at
+definition — the visible download number (OQ-1), delivery order relative to
+CAP-002 (OQ-2), CSV upload in M1 (OQ-3) and the tech-stack standing of the
+vendored components (OQ-4) — were answered by the owner on 2026-10-25 after
+specification review v1; none changed the scope or a criterion.

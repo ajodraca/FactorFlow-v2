@@ -2,11 +2,11 @@
 artifact_schema_version: 1
 artifact_id: tech-stack
 artifact_type: tech-stack
-artifact_version: 5
+artifact_version: 6
 product: FactorFlow
 created: 2026-09-02
-updated: 2026-10-12
-last_updated: 2026-10-12
+updated: 2026-10-25
+last_updated: 2026-10-25
 owner: Alvaro de Jodra
 owner_github: ajodraca
 status: approved
@@ -29,8 +29,8 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-13T00:46:11Z
-  reviewed_revision: sha256:cf11e1b49118a18cac2b4f24110f365afa354c57f5a2555749c26e456bbb74a7
+  approved_at: 2026-10-26T02:12:08Z
+  reviewed_revision: sha256:2288cb2558800b084a811c561f87008e09d79a352281b146ddbbdf058b5a37d6
 ---
 
 # Tech Stack: FactorFlow
@@ -94,7 +94,7 @@ interface, and the specifications and constitution that govern them.
 | Package Manager | uv (Python); npm (frontend) |
 | Execution Runtime | An in-process scheduler inside the application container drives strategy evaluation cycles (`APScheduler`, or the equivalent chosen at system design). It reaches the order path only through the chokepoint that checks the kill-switch flag |
 | Container Runtime | Docker, self-hosted. PostgreSQL, the application and the ingestion process each run as a container on a machine the owner controls |
-| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), `psycopg_pool` (connection pooling, CAP-001-E1-S6), FastAPI / Starlette / Pydantic (API and validation), `pydantic-settings` (environment-based configuration), `massive` (official Massive REST and WebSocket client), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `react-router-dom` (client routing; the shell's active-destination state is its `NavLink` `aria-current`), `tailwindcss` with `autoprefixer` (`postcss.config.js` runs both on every build, so autoprefixer is in the CSS path for every rendered surface), `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
+| Key Libraries | **Python:** `psycopg` 3 (PostgreSQL driver), `psycopg_pool` (connection pooling, CAP-001-E1-S6), FastAPI / Starlette / Pydantic (API and validation), `pydantic-settings` (environment-based configuration), `massive` (official Massive REST and WebSocket client), `ruff` (lint and format), `mypy` (type checking), `pytest`, `testcontainers[postgres]`, an in-process scheduler (`APScheduler` or equivalent), `alpaca-py` (broker). **TypeScript:** `react`, `react-dom`, `vite`, `react-router-dom` (client routing; the shell's active-destination state is its `NavLink` `aria-current`), `tailwindcss` with `autoprefixer` (`postcss.config.js` runs both on every build, so autoprefixer is in the CSS path for every rendered surface), `vitest`, `@testing-library/react`, `@playwright/test`, `biome` (lint and format), **`shadcn/ui` on Radix primitives** (components, vendored into `web/src/components/ui/` as shadcn/ui ships them, with the `@radix-ui/react-*` primitive each needs and, confirmed 2026-10-25 (OQ-TS-10), the packages the vendored components import: `cmdk` for `command`, `sonner` for `toast`, `@tanstack/react-table` for `data-table`, `react-hook-form`, `zod` and `@hookform/resolvers` for `form`, and shadcn/ui's own utilities `clsx`, `tailwind-merge`, `class-variance-authority` and `lucide-react`; licences MIT except `class-variance-authority` (Apache-2.0) and `lucide-react` (ISC), each to be verified against the package's `LICENSE` file when the story adds it, per SEC-DEP-003) and **TradingView `lightweight-charts`** (charting). The numeric library for factor computation and backtesting remains deferred — see OQ-TS-3 |
 
 **Rationale:**
 
@@ -364,6 +364,7 @@ Notes for agents:
 | OQ-TS-3 | **Which numeric library for factor computation and backtest replay** — `pandas`, `polars`, or SQL window functions? **Deferred by owner decision on 2026-09-02** to the system design of the first capability that requires it, because no capability has yet stated the data volumes or the computation shape and choosing without them would be guessing | Capability owner, at the system design of the first capability requiring factor computation | Classification and backtest implementation |
 | OQ-TS-4 | **How are Alpaca credentials stored and separated**, such that no test and no misconfiguration can reach the live environment? Alpaca's paper and live environments differ only by credentials and endpoint, which makes this a configuration-safety question rather than a theoretical one | Owner | Broker integration; test configuration |
 | ~~OQ-TS-5~~ | ~~Are exact dependency versions pinned now, or captured from the first lockfile?~~ **Answered 2026-09-02: captured from the first lockfile.** No version in this document is authoritative; `uv.lock` and `package-lock.json` are | — | — |
+| ~~OQ-TS-10~~ | ~~Are the npm packages the vendored shadcn/ui components import within the approved stack?~~ **Answered 2026-10-25: yes, all ten.** Raised by CAP-003, the first consumer of the vendored components (capability OQ-4; DEC-0205, DEC-0215; specification review v1 FINDING-1). `shadcn/ui` vendors component source that imports `cmdk`, `sonner`, `@tanstack/react-table`, `react-hook-form`, `zod`, `@hookform/resolvers`, `clsx`, `tailwind-merge`, `class-variance-authority` and `lucide-react`; the OQ-TS-6 approval named the library and not these packages. All ten are recorded in Key Libraries; no implementing story adds one before this record, and each licence is checked against the package when added | — | — |
 | ~~OQ-TS-6~~ | ~~Which component library and which charting library does the interface build on?~~ **Answered 2026-09-03: `shadcn/ui` on Radix primitives, and TradingView `lightweight-charts`.** The trigger fired earlier than expected: the deferral anticipated the M4 and M5 evidence screens, but CAP-001 delivers an ingestion view and so is the first capability carrying a UX design. Radix supplies keyboard and ARIA behaviour, which matters because Biome has no `jsx-a11y` equivalent; shadcn/ui vendors components into the repository rather than locking them behind a dependency, keeping the M5 promotion ceremony fully controllable. Charting is unused in CAP-001 and was chosen on the M4 and M5 screens: `lightweight-charts` is purpose-built for equity curves and OHLC series | — | — |
 
 ### Provider Evaluation — Massive
@@ -520,6 +521,7 @@ limitation as a stated constraint on the promotion evidence.
 
 | Date | Change |
 |------|--------|
+| 2026-10-25 | Confirmed the ten npm packages the vendored `shadcn/ui` components import, on the owner's direction, closing OQ-TS-10 and CAP-003 capability OQ-4 (specification review v1 FINDING-1): `cmdk`, `sonner`, `@tanstack/react-table`, `react-hook-form`, `zod`, `@hookform/resolvers`, `clsx`, `tailwind-merge`, `class-variance-authority` and `lucide-react`, with their licences. Approval was invalidated by this edit; the owner re-approves v6 |
 | 2026-10-12 | Recorded Node.js 22 as the runtime for the frontend toolchain, on the owner's direction. It is the version the frontend validation commands already run on, and the one the CAP-001 release image's interface build stage uses (`component-design-runtime-config.md` v12 section 2.8.2, its open question 7). No technology was added or changed |
 | 2026-09-08 | Recorded the frontend toolchain as built, from CAP-001-E1-S4's implementation. The note claiming the `npm` and `npx` commands "do not exist yet" was false once that story created `package.json`: all six are verified working, so the note now matches the seven Python commands' form and records two behaviours a reader would otherwise meet as surprises — `npm run test` drives a real Vite build and so writes into the API's static directory, and `npm run test:e2e` is defined but has no Playwright specs yet. Added `react-router-dom` to the TypeScript key libraries: it was adopted as a runtime dependency without being recorded here, and it is load-bearing rather than incidental, since the shell's active-destination state is its `NavLink` `aria-current` behaviour. Approval was invalidated by these edits and the artifact returned to draft pending the dedicated `$tech-stack` workflow. A `$tech-stack` review the same day added `autoprefixer`, the one further gap its research surfaced: it is installed and run by `postcss.config.js` on every build, so it sits in the CSS path for every rendered surface, and it had been carried as unrecorded build plumbing. That review confirmed the entry otherwise complete and found no missing or stale components, the project being a single repository |
 | 2026-09-05 | Adopted Massive's official Python client by owner decision, retaining the CAP-001 `MassiveClient` as the operational boundary around the SDK rather than a portability layer. Refreshed the document's source context and provenance against CAP-001 v7 and system design v5, and corrected the restatement-bias decision wording. |
