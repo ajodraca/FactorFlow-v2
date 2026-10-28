@@ -1,0 +1,51 @@
+............................F
+=================================== FAILURES ===================================
+________________ test_common_z_scores_are_already_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58207 user=test database=test_c9422854134340b1b7fa4b0132eaf...0x109918fe0>, run_id=UUID('84c41154-8b55-4f9d-9341-3c15c5766fef'), set_id=UUID('27f7de86-4701-4076-99c3-f887c80ab81e'))
+
+    def test_common_z_scores_are_already_standardised(store: Store) -> None:
+        """(a) Both inputs have the same z-scores, (v - 3) / sqrt(2.5) with the sample standard
+        deviation, so the composite equals them and re-standardising leaves it unchanged."""
+>       results = classify(store, "growth", growth([1, 2, 3, 4, 5], [10, 20, 30, 40, 50]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_composite_arithmetic.py:86: in classify
+    engine._classification_stage(
+src/factorflow/classification/engine.py:177: in _classification_stage
+    cur.execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [IDLE] (host=localhost port=58207 user=test database=test_c9422854134340b1b7fa4b0132eafb23) at 0x109ab3650>
+query = "-- One factor's classification rows for the build's set (CAP-002-E2-S5; factor-engine design\n-- 2.5). Runs once per ...etired',\n       NULL,\n       NULL,\n       false\n  FROM unnest(%(retired_ids)s::bigint[]) AS gone (instrument_id)\n"
+params = {'set_id': UUID('27f7de86-4701-4076-99c3-f887c80ab81e'), 'factor': 'growth', 'input_names': ['revenue_growth', 'eps_growth'], 'input_labels': ['revenue growth', 'earnings-per-share growth'], ...}
+prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.CheckViolation: new row for relation "factor_classification" violates check constraint "factor_classification_percentile_range"
+E           DETAIL:  Failing row contains (27f7de86-4701-4076-99c3-f887c80ab81e, 5, growth, classified, 1.264911, 101.000000, null, null, null, f).
+
+.venv/lib/python3.12/site-packages/psycopg/cursor.py:117: CheckViolation
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_common_z_scores_are_already_standardised
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 28 passed in 2.21s

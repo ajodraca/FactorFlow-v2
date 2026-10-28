@@ -1,0 +1,28 @@
+............................F
+=================================== FAILURES ===================================
+________________ test_common_z_scores_are_already_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58887 user=test database=test_5611c944c3d748f4b6e39d07a9bad...0x10990b980>, run_id=UUID('3e3bd1e0-25d0-410f-a59c-05525ae4f9d0'), set_id=UUID('7216970d-b613-452d-8369-ef275d5293dc'))
+
+    def test_common_z_scores_are_already_standardised(store: Store) -> None:
+        """(a) Both inputs have the same z-scores, (v - 3) / sqrt(2.5) with the sample standard
+        deviation, so the composite equals them and re-standardising leaves it unchanged."""
+        results = classify(store, "growth", growth([1, 2, 3, 4, 5], [10, 20, 30, 40, 50]))
+    
+>       assert results == literal(
+            ("-1.264911", "0"),
+            ("-0.632456", "25"),
+            ("0", "50"),
+            ("0.632456", "75"),
+            ("1.264911", "100"),
+        )
+E       AssertionError: assert [(Decimal('-1...100.000000'))] == [(Decimal('-1...cimal('100'))]
+E         
+E         At index 0 diff: (Decimal('-1.264911'), Decimal('20.000000')) != (Decimal('-1.264911'), Decimal('0'))
+E         Use -v to get more diff
+
+tests/unit/test_composite_arithmetic.py:123: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_common_z_scores_are_already_standardised
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 28 passed in 2.46s

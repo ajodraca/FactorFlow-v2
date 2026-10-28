@@ -18,3 +18,15 @@ INPUT_NAMES: Final[dict[str, tuple[str, ...]]] = {
     "growth": ("revenue_growth", "eps_growth"),
     "momentum": ("return_3m", "return_6m", "return_12m"),
 }
+
+# Source: factor-engine section 10, reader design 2.6, UX brief section 2 item 9 (DEC-0120).
+INPUT_LABELS: Final[dict[str, str]] = {
+    "book_to_price": "book-to-price",
+    "earnings_yield": "earnings yield",
+    "fcf_yield": "free-cash-flow yield",
+    "revenue_growth": "revenue growth",
+    "eps_growth": "earnings-per-share growth",
+    "return_3m": "3-month total return",
+    "return_6m": "6-month total return",
+    "return_12m": "12-month total return",
+}

@@ -21,12 +21,16 @@ from uuid import UUID
 
 import psycopg
 
+from factorflow.classification import constants
+
 log = logging.getLogger(__name__)
 
 _SQL_DIR = Path(__file__).parent / "sql"
 _SET_CONTEXT_SQL: Final = (_SQL_DIR / "set_context.sql").read_text()
 _COMPLETE_SET_SQL: Final = (_SQL_DIR / "complete_set.sql").read_text()
 _FAIL_SET_SQL: Final = (_SQL_DIR / "fail_set.sql").read_text()
+_PEER_SETS_SQL: Final = (_SQL_DIR / "peer_sets.sql").read_text()
+_CLASSIFY_SQL: Final = (_SQL_DIR / "classify.sql").read_text()
 _QUALIFIED_COUNTS_SQL: Final = (
     "SELECT factor, qualified_count FROM classification_set_factor WHERE set_id = %(set_id)s"
 )
@@ -149,3 +153,41 @@ def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> Bui
         active_instruments=len(context.active_ids),
         qualified_counts=qualified_counts,
     )
+
+
+def _classification_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
+    """Write the set's peer-set sizes, then each factor's classification rows (design 2.5).
+
+    Both statements read this set's ``factor_input`` rows for ``ctx.active_ids`` (DEC-0119).
+    The constants are read at call time, so a test may patch the peer-set floor.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            _PEER_SETS_SQL,
+            {
+                "set_id": ctx.set_id,
+                "factors": list(constants.FACTORS),
+                "input_counts": [len(constants.INPUT_NAMES[f]) for f in constants.FACTORS],
+                "min_peer_set_size": constants.MIN_PEER_SET_SIZE,
+                "active_ids": list(ctx.active_ids),
+            },
+        )
+        for factor in constants.FACTORS:
+            names = constants.INPUT_NAMES[factor]
+            cur.execute(
+                _CLASSIFY_SQL,
+                {
+                    "set_id": ctx.set_id,
+                    "factor": factor,
+                    "input_names": list(names),
+                    "input_labels": [constants.INPUT_LABELS[name] for name in names],
+                    "min_peer_set_size": constants.MIN_PEER_SET_SIZE,
+                    "active_ids": list(ctx.active_ids),
+                    "retired_ids": list(ctx.retired_ids),
+                },
+            )
+
+
+# Stages that produce inputs are registered above this line; this stays the module's last
+# statement (DEC-0121).
+_STAGES.append(_classification_stage)
