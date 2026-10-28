@@ -1,0 +1,38 @@
+........................................................................ [ 67%]
+...................F
+=================================== FAILURES ===================================
+_________ test_missing_input_carries_the_last_fundamentals_acquisition _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54763 user=test database=test_58c28ff4b26a4459b97e7631894f3d3e) at 0x108bf2750>, stock=1, set_id=UUID('9aeca759-aa7c-4e7e-8811-cec1079cd77a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108bf2fc0>
+
+    def test_missing_input_carries_the_last_fundamentals_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, AC-12: a missing value or growth input names the last fundamentals
+        outcome, not the prices one (T019: growth's data type is fundamentals); a present one
+        carries no acquisition."""
+        values = standard()
+        del values[0]["net_income"]
+        del values[0]["revenue"]
+        add_quarters(env.conn, env.stock, P1, 8, values)
+        _acquisition(env, env.stock, "fundamentals", "not_found")
+        _acquisition(env, env.stock, "prices", "written")
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in ("earnings_yield", "revenue_growth"):
+            assert rows[name]["status"] == "missing", name
+            acquisition = rows[name]["detail"]["last_acquisition"]
+>           assert (acquisition["data_type"], acquisition["outcome"]) == ("fundamentals", "not_found")
+E           AssertionError: assert ('prices', 'written') == ('fundamentals', 'not_found')
+E             
+E             At index 0 diff: 'prices' != 'fundamentals'
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:1242: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_input_carries_the_last_fundamentals_acquisition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 91 passed in 8.73s

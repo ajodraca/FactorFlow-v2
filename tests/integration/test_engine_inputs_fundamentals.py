@@ -140,6 +140,15 @@ def ends_of(detail_periods: list[dict[str, Any]]) -> list[str]:
     return [p["fiscal_period_end"] for p in detail_periods]
 
 
+def periods_found(*parts: tuple[str, list[date]]) -> list[dict[str, str]]:
+    """``detail.periods_found`` for the given (statement type, period ends) parts, in order."""
+    return [
+        {"statement_type": statement_type, "fiscal_period_end": str(end)}
+        for statement_type, ends in parts
+        for end in ends
+    ]
+
+
 # --- T004: trailing twelve months over the prior twelve ----------------------------------
 
 
@@ -280,7 +289,9 @@ def test_quarter_absent_from_the_trailing_window_forms_no_window(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """DAC-E2-S3-2, DEC-0221: with the third quarter absent the second and third periods
-    held are six months apart, so the trailing window is not formed."""
+    held are six months apart, so the trailing window is not formed. A missing value input
+    lists what exists of every type it reads (design 2.4, AC-12), in the stage's order:
+    statement type, then newest first."""
     found = _income_with_gap(env, gap=2)
 
     build(env, monkeypatch)
@@ -290,6 +301,10 @@ def test_quarter_absent_from_the_trailing_window_forms_no_window(
         assert rows[name]["status"] == "missing", name
         assert rows[name]["detail"]["cause"] == "periods_missing"
     assert ends_of(rows["revenue_growth"]["detail"]["periods_found"]) == [str(e) for e in found]
+    balance_sheets = [months_before(P1, 3 * k) for k in range(8)]
+    assert rows["earnings_yield"]["detail"]["periods_found"] == periods_found(
+        ("balance_sheet", balance_sheets), ("income_statement", found)
+    )
     assert rows["book_to_price"]["status"] == "present"
     assert rows["fcf_yield"]["status"] == "present"
 
@@ -311,8 +326,9 @@ def test_gap_between_third_and_fourth_quarters_forms_no_trailing_window(
 
 def test_three_quarters_form_no_trailing_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     """DEC-0221: a trailing-only input needs four periods, P1 to P4; the most recent
-    balance sheet alone still serves book_to_price."""
-    _quarters_at(env, [months_before(P1, 3 * k) for k in range(3)])
+    balance sheet alone still serves book_to_price. Design 2.4, AC-12: each missing value
+    input lists the balance sheets and its window type's periods that exist."""
+    ends = _quarters_at(env, [months_before(P1, 3 * k) for k in range(3)])
 
     build(env, monkeypatch)
 
@@ -320,6 +336,14 @@ def test_three_quarters_form_no_trailing_window(env: Env, monkeypatch: pytest.Mo
     for name in ("earnings_yield", "fcf_yield", *GROWTH):
         assert rows[name]["status"] == "missing", name
         assert rows[name]["detail"]["cause"] == "periods_missing"
+    for name, window_type in (
+        ("earnings_yield", "income_statement"),
+        ("fcf_yield", "cash_flow_statement"),
+    ):
+        assert rows[name]["detail"] == {
+            "cause": "periods_missing",
+            "periods_found": periods_found(("balance_sheet", ends), (window_type, ends)),
+        }, name
     assert rows["book_to_price"]["status"] == "present"
 
 
@@ -592,6 +616,9 @@ def test_non_positive_prior_year_base_makes_growth_not_computable(
     assert rows[name]["status"] == "not_computable"
     assert rows[name]["value"] is None
     assert rows[name]["as_of"] == P1
+    # DEC-0116 (5): the rows used are determined, so both dates are set; the newest of the
+    # eight income statements is observed last, 15 days after P1 (add_statement).
+    assert rows[name]["known_on"] == P1 + timedelta(days=15)
     assert rows[name]["detail"]["cause"] == "prior_year_base_not_positive"
     assert rows[name]["detail"]["prior_year_base"] == base
     assert len(rows[name]["detail"]["periods"]) == 8
@@ -614,6 +641,10 @@ def test_non_positive_shares_make_every_value_input_not_computable(
     for name in VALUE:
         assert rows[name]["status"] == "not_computable", name
         assert rows[name]["value"] is None
+        # DEC-0116 (5): set on every row whose rows used are determined. Each input's
+        # latest period is P1; its rows are observed by P1 + 15 days and the bar on L.
+        assert rows[name]["as_of"] == P1, name
+        assert rows[name]["known_on"] == max(P1 + timedelta(days=15), L), name
         assert rows[name]["detail"]["cause"] == "market_capitalisation_not_positive"
         assert rows[name]["detail"]["shares_outstanding"] == shares
         assert rows[name]["detail"]["market_capitalisation"] == shares * 10
@@ -827,6 +858,53 @@ def test_market_capitalisation_is_latest_close_times_newest_shares(
     assert detail["market_capitalisation"] == 1200
 
 
+def _bar_recorded(
+    env: Env, instrument_id: int, session: date, observed: date, close: int, recorded: datetime
+) -> None:
+    """A bar with its recorded_at given, which engine_support.add_bar leaves to now()."""
+    env.conn.execute(
+        "INSERT INTO daily_bar (instrument_id, session_date, observed_on, value_hash, "
+        "open_price, high_price, low_price, close_price, volume, recorded_at) "
+        "VALUES (%s, %s, %s, sha256(%s::text::bytea), %s, %s, %s, %s, 1000, %s)",
+        (
+            instrument_id,
+            session,
+            observed,
+            f"{instrument_id}{session}{close}{recorded}",
+            close,
+            close,
+            close,
+            close,
+            recorded,
+        ),
+    )
+    env.conn.commit()
+
+
+def test_equal_bar_observation_is_decided_by_the_later_recorded_at(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0117 (1), design 2.4: a session observed twice on one day gives the close of the
+    later recording (observed_on DESC, then recorded_at DESC). One stock has the later
+    recording inserted last and one has it inserted first, so neither insertion nor heap
+    order can stand in for recorded_at."""
+    other = add_instrument(env.conn, "BBB")
+    seen = L + timedelta(days=1)  # later than the fixture's bar, observed on L
+    late = datetime(2026, 10, 17, 18, tzinfo=UTC)
+    for stock, later_last in ((env.stock, True), (other, False)):
+        add_quarters(env.conn, stock, P1, 8, standard())
+        recordings = [(8, late - timedelta(hours=6)), (12, late)]
+        for close, recorded in recordings if later_last else recordings[::-1]:
+            _bar_recorded(env, stock, L, seen, close, recorded)
+
+    build(env, monkeypatch)
+
+    for stock in (env.stock, other):
+        row = inputs_for(env.conn, env.set_id, stock)["book_to_price"]
+        assert row["value"] == ratio(Decimal(500), Decimal(1200)), stock
+        assert row["detail"]["close"] == 12, stock
+
+
 def test_value_detail_lists_the_balance_sheet_and_trailing_rows(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -895,17 +973,21 @@ def test_quarter_ending_on_the_classification_date_is_used(
 def test_absent_item_in_newest_balance_sheet_does_not_fall_back(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """DEC-0055 (1): the single most recent quarterly balance sheet, never an older one."""
+    """DEC-0055 (1): the single most recent quarterly balance sheet, never an older one.
+    Design 2.4, AC-12: the missing input lists every balance sheet that exists."""
     values = standard()
     del values[0]["book_equity"]
-    add_quarters(env.conn, env.stock, P1, 8, values)
+    ends = add_quarters(env.conn, env.stock, P1, 8, values)
 
     build(env, monkeypatch)
 
     rows = inputs_for(env.conn, env.set_id, env.stock)
     assert rows["book_to_price"]["status"] == "missing"
-    assert rows["book_to_price"]["detail"]["cause"] == "line_item_absent"
-    assert rows["book_to_price"]["detail"]["line_items"] == ["book_equity"]
+    assert rows["book_to_price"]["detail"] == {
+        "cause": "line_item_absent",
+        "line_items": ["book_equity"],
+        "periods_found": periods_found(("balance_sheet", ends)),
+    }
     assert rows["earnings_yield"]["status"] == "present"
 
 
@@ -1060,17 +1142,29 @@ def test_stale_and_non_positive_base_is_outdated(env: Env, monkeypatch: pytest.M
 
 
 def test_absent_line_item_and_stale_is_missing(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
-    """DEC-0116 (1): missing ranks before outdated."""
+    """DEC-0116 (1): missing ranks before outdated. Design 2.4, AC-12: a line item absent
+    from a period's payload lists, in periods_found, every period that exists of the types
+    the input reads."""
     values = standard()
     del values[0]["revenue"]
     del values[0]["net_income"]
-    add_quarters(env.conn, env.stock, STALE, 8, values)
+    ends = add_quarters(env.conn, env.stock, STALE, 8, values)
 
     build(env, monkeypatch)
 
     rows = inputs_for(env.conn, env.set_id, env.stock)
     assert rows["revenue_growth"]["status"] == "missing"
+    growth = rows["revenue_growth"]["detail"]
+    # Design 2.4 and T019 give a growth input missing a line item a cause and periods_found;
+    # its one line item is the input's own, so detail.line_items is not pinned.
+    assert growth["cause"] == "line_item_absent"
+    assert growth["periods_found"] == periods_found(("income_statement", ends))
     assert rows["earnings_yield"]["status"] == "missing"
+    assert rows["earnings_yield"]["detail"] == {
+        "cause": "line_item_absent",
+        "line_items": ["net_income"],
+        "periods_found": periods_found(("balance_sheet", ends), ("income_statement", ends)),
+    }
     assert rows["book_to_price"]["status"] == "outdated"
 
 
@@ -1129,10 +1223,12 @@ def _acquisition(env: Env, instrument_id: int, data_type: str, outcome: str) -> 
 def test_missing_input_carries_the_last_fundamentals_acquisition(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Design 2.3 step 5, AC-12: a missing input names the last fundamentals outcome; a
-    present one carries no acquisition."""
+    """Design 2.3 step 5, AC-12: a missing value or growth input names the last fundamentals
+    outcome, not the prices one (T019: growth's data type is fundamentals); a present one
+    carries no acquisition."""
     values = standard()
     del values[0]["net_income"]
+    del values[0]["revenue"]
     add_quarters(env.conn, env.stock, P1, 8, values)
     _acquisition(env, env.stock, "fundamentals", "not_found")
     _acquisition(env, env.stock, "prices", "written")
@@ -1140,11 +1236,13 @@ def test_missing_input_carries_the_last_fundamentals_acquisition(
     build(env, monkeypatch)
 
     rows = inputs_for(env.conn, env.set_id, env.stock)
-    acquisition = rows["earnings_yield"]["detail"]["last_acquisition"]
-    assert (acquisition["data_type"], acquisition["outcome"]) == ("fundamentals", "not_found")
-    assert datetime.fromisoformat(acquisition["acquired_at"]) == datetime(
-        2026, 10, 16, 21, tzinfo=UTC
-    )
+    for name in ("earnings_yield", "revenue_growth"):
+        assert rows[name]["status"] == "missing", name
+        acquisition = rows[name]["detail"]["last_acquisition"]
+        assert (acquisition["data_type"], acquisition["outcome"]) == ("fundamentals", "not_found")
+        assert datetime.fromisoformat(acquisition["acquired_at"]) == datetime(
+            2026, 10, 16, 21, tzinfo=UTC
+        )
     assert "last_acquisition" not in rows["book_to_price"]["detail"]
 
 

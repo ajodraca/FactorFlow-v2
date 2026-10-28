@@ -1,0 +1,34 @@
+........................................................................ [ 67%]
+.................F
+=================================== FAILURES ===================================
+__________________ test_absent_line_item_and_stale_is_missing __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54745 user=test database=test_bd57764d848c46d4976bcfffcd392e26) at 0x10898f5f0>, stock=1, set_id=UUID('fa43c5cf-872f-4fad-8cca-62e6b192dcaf'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10898e810>
+
+    def test_absent_line_item_and_stale_is_missing(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0116 (1): missing ranks before outdated. Design 2.4, AC-12: a line item absent
+        from a period's payload lists, in periods_found, every period that exists of the types
+        the input reads."""
+        values = standard()
+        del values[0]["revenue"]
+        del values[0]["net_income"]
+        ends = add_quarters(env.conn, env.stock, STALE, 8, values)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        assert rows["revenue_growth"]["status"] == "missing"
+        growth = rows["revenue_growth"]["detail"]
+        # Design 2.4 and T019 give a growth input missing a line item a cause and periods_found;
+        # its one line item is the input's own, so detail.line_items is not pinned.
+        assert growth["cause"] == "line_item_absent"
+>       assert growth["periods_found"] == periods_found(("income_statement", ends))
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'periods_found'
+
+tests/integration/test_engine_inputs_fundamentals.py:1161: KeyError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_line_item_and_stale_is_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 89 passed in 8.72s

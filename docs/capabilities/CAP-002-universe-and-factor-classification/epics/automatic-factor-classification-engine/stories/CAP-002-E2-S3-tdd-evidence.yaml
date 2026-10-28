@@ -7,6 +7,7 @@
 # RED (red-cycle-1-dec-0221.log), and both reviews then judged the final patch: APPROVED, no drift.
 # Decisions applied: DEC-0055, DEC-0056, DEC-0111, DEC-0115, DEC-0116, DEC-0117, DEC-0121, DEC-0122,
 # DEC-0221.
+# cycle-2 is the review rework for implementation review v1 (tests only, no production change).
 
 cycles:
   - id: cycle-1
@@ -399,3 +400,85 @@ cycles:
           reason: >
             the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
             discards before planning; no statement changes.
+
+  - id: cycle-2
+    tasks: [T005, T008, T009, T010, T012]
+    decisions: [DEC-0055, DEC-0116, DEC-0117, DEC-0221]
+    description: >
+      Review rework for implementation review v1. Tests only; no production file changes. IR-001
+      (HIGH): the TC-COMP-062 tests assert as_of and known_on on the not_computable value rows and
+      known_on on the not_computable growth rows; the TC-COMP-100 test asserts known_on on every
+      fundamentals-outdated row (the bar's observation for value inputs, the newest statement's for
+      growth); the TC-COMP-101 test asserts as_of and known_on on the price-outdated value rows
+      (DEC-0116 (5), DEC-0055 (7)). IR-002 (HIGH): exact detail.periods_found on periods_missing value
+      inputs that read a trailing window (three quarters; a quarter absent from the trailing window),
+      on book_to_price missing a line item, and on a value and a growth input whose cause is
+      line_item_absent (design 2.4, T018, T019). IR-003 (HIGH): the fundamentals-acquisition test also
+      makes revenue_growth missing, with fundamentals and prices acquisition_state rows of different
+      outcomes, and asserts the fundamentals outcome (design 2.3 step 5, T019). IR-004 (MEDIUM): a new
+      test gives two stocks a session observed twice on one day with different recorded_at and close,
+      the later recording inserted last for one stock and first for the other, and asserts the later
+      recording's close (DEC-0117 (1), design 2.4). Expected values are computed from the fixtures;
+      no assertion is removed or weakened. IR-005 is answered in the rework commit message; IR-006 is
+      left to the owner.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/red-cycle-2-rework.log
+    red_log_sha256: f63f106fc9e1316781687b35141f3d5e8afa2b400114f98cb537b26a49b4c6d2
+    red_evidence: >
+      The eight mutants (mutants-cycle-2.json: review v1's value-known-on-present-only,
+      value-as-of-present-or-outdated, growth-known-on-present-only, value-found-window-only,
+      value-absent-periods-found-dropped, growth-absent-periods-found-dropped, growth-data-type-prices
+      and value-bar-recorded-asc) were first reproduced as survivors of the unchanged five story test
+      files on f1d6607 (106 passed under each). Then, on f1d6607 plus the cycle-2 test diff, one mutant
+      at a time, running the ten changed tests: each mutant fails at least one of them (4, 2, 5, 4, 2,
+      1, 1 and 1 failed, in that order), on an assertion, or for growth-absent-periods-found-dropped on
+      the KeyError of the periods_found key it removes. Unmutated, the ten changed tests pass (14
+      passed, counting parameters).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/full-suite-cycle-2.log
+        sha256: 6d9babd8f87ab3330b5c84adb441ea9e536e493db42f490db415734f460b0e92
+    green_evidence: >
+      Unmutated, the ten changed tests 14 passed (red-cycle-2-rework.log), and the five story test
+      files 107 passed in each of the four cycle-2 mutation baselines. As a regression check, review
+      v1's 170 mutants were rerun against the cycle-2 tests (mutation-cycle-2-review-v1-rerun.json,
+      mutants tagged review): 107 killed, 63 survived. The eight cycle-2 mutants are the only changes
+      of state, and the 63 survivors are the 62 catalogue mutants on SQL comment lines plus
+      growth-absent-line-items-dropped, all of which review v1 judged equivalent. On f1d6607 plus the
+      cycle-2 working tree (full-suite-cycle-2.log): uv sync and uv build succeed; uv run pytest 1540
+      passed, 1 xfailed; -m postgres 507 passed; -m "not postgres" 1033 passed, 1 xfailed; ruff check,
+      ruff format --check (232 files) and mypy src (56 files) clean; npm ci, npm run build, npm run
+      test (41 files, 297 tests), npx tsc --noEmit and npm run test:e2e (18 passed) pass. npm run lint
+      and npm run format first failed on build/lib/factorflow/api/static/assets/*.js, a copy of the
+      Vite bundle in uv build's ignored setuptools output, which biome.json does not ignore; with
+      build/ moved out of the tree both pass over 97 files.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    code_review: >
+      An independent code-review subagent APPROVED the first patch (43593cba) with four non-blocking
+      notes, and an independent spec-drift subagent found no drift, with notes. Taken: the TC-COMP-101
+      comment now says its statements and bar give the same day, so it pins that known_on is set, not
+      which row decides it; the periods_found order is credited to the stage, not to design 2.4; the
+      growth line_item_absent check says why detail.line_items is not pinned. Left as written: the
+      TC-COMP-101 fixture, and the local _bar_recorded helper (engine_support.add_bar takes no
+      recorded_at and T023 forbids editing it). The patch was re-fingerprinted, RED and the cycle-2
+      mutants were rerun, and both reviewers judged the final patch: APPROVED, no drift, no new
+      findings.
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e0bead6469ada1ec126a0f59c64513459f64d365b75824777f63146ed29a27aa
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: fb362e42fac71e4f827f08bd2446df342e618ca517acd05233d1ecec4840deac
+      generated: 8
+      killed: 8
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      manual_mutants: >
+        All eight are review v1's behaviour-changing survivors, carried as hand-written mutants
+        (operator manual) tagged cycle-2. The cycle changes no production line, so the catalogue
+        operators generate nothing for it.
+      survivors: []

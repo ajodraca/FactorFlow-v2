@@ -1,0 +1,40 @@
+........................................................................ [ 67%]
+......F
+=================================== FAILURES ===================================
+________ test_equal_bar_observation_is_decided_by_the_later_recorded_at ________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54764 user=test database=test_8ecfb0865f9a4a1bbe8d117a6155f5ff) at 0x10cc32660>, stock=1, set_id=UUID('f6cc2122-c823-433e-9974-4c37216a21fd'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cc30d40>
+
+    def test_equal_bar_observation_is_decided_by_the_later_recorded_at(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1), design 2.4: a session observed twice on one day gives the close of the
+        later recording (observed_on DESC, then recorded_at DESC). One stock has the later
+        recording inserted last and one has it inserted first, so neither insertion nor heap
+        order can stand in for recorded_at."""
+        other = add_instrument(env.conn, "BBB")
+        seen = L + timedelta(days=1)  # later than the fixture's bar, observed on L
+        late = datetime(2026, 10, 17, 18, tzinfo=UTC)
+        for stock, later_last in ((env.stock, True), (other, False)):
+            add_quarters(env.conn, stock, P1, 8, standard())
+            recordings = [(8, late - timedelta(hours=6)), (12, late)]
+            for close, recorded in recordings if later_last else recordings[::-1]:
+                _bar_recorded(env, stock, L, seen, close, recorded)
+    
+        build(env, monkeypatch)
+    
+        for stock in (env.stock, other):
+            row = inputs_for(env.conn, env.set_id, stock)["book_to_price"]
+>           assert row["value"] == ratio(Decimal(500), Decimal(1200)), stock
+E           AssertionError: 1
+E           assert Decimal('0.6250000000') == Decimal('0.4166666667')
+E            +  where Decimal('0.4166666667') = ratio(Decimal('500'), Decimal('1200'))
+E            +    where Decimal('500') = Decimal(500)
+E            +    and   Decimal('1200') = Decimal(1200)
+
+tests/integration/test_engine_inputs_fundamentals.py:904: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_equal_bar_observation_is_decided_by_the_later_recorded_at
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 78 passed in 7.19s

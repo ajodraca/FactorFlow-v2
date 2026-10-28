@@ -98,6 +98,11 @@ def test_fundamentals_outdated_at_six_months_and_a_day(
 ) -> None:
     latest = date(2026, 4, 16)
     add_quarters(env.conn, env.stock, latest, 8, quarters())
+    # DEC-0116 (5), DEC-0055 (7): the newest statement is observed 15 days after its period
+    # end (add_statement); a value input also used the bar observed on the latest trading day.
+    known_on = {name: env.latest_trading_day for name in VALUE} | {
+        name: latest + timedelta(days=15) for name in GROWTH
+    }
 
     rows = build(env, monkeypatch)
 
@@ -105,6 +110,7 @@ def test_fundamentals_outdated_at_six_months_and_a_day(
         assert rows[name]["status"] == "outdated", name
         assert rows[name]["value"] is None
         assert rows[name]["as_of"] == latest
+        assert rows[name]["known_on"] == known_on[name], name
         assert rows[name]["detail"]["cause"] == "outdated"
         assert rows[name]["detail"]["outdated"] == {
             "fundamentals": {"latest_period_end": str(latest), "stale_before": "2026-04-17"}
@@ -170,9 +176,14 @@ def test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth(
 
     current = build(env, monkeypatch)
 
+    # DEC-0116 (5): the rows used are determined, so both dates are set. Here the statements
+    # (observed 15 days after their period end) and the bar (observed on its session) give
+    # the same day, so this pins that known_on is set, not which row decides it.
+    known_on = max(date(2026, 9, 30) + timedelta(days=15), day_before)
     rows = inputs_for(env.conn, env.set_id, stale)
     for name in VALUE:
         assert rows[name]["status"] == "outdated", name
+        assert (rows[name]["as_of"], rows[name]["known_on"]) == (date(2026, 9, 30), known_on)
         assert rows[name]["detail"]["outdated"] == {
             "prices": {
                 "bar_date": str(day_before),

@@ -1,0 +1,43 @@
+.........................................................F
+=================================== FAILURES ===================================
+_ test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior0-base0] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54579 user=test database=test_a45277cdf3014283980ea22e0b469b9d) at 0x10d07ba40>, stock=1, set_id=UUID('029fda21-b1cd-4c3e-97f6-6f611ec2e870'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d07a510>
+item = 'revenue', prior = ['10', '-10', '5', '-5'], base = Decimal('0')
+
+    @pytest.mark.parametrize(
+        ("item", "prior", "base"),
+        [
+            ("revenue", ["10", "-10", "5", "-5"], Decimal(0)),
+            ("revenue", ["-10", "-20", "-30", "-40"], Decimal(-100)),
+            ("diluted_eps", ["0.5", "-0.5", "0.25", "-0.25"], Decimal("0.00")),
+            ("diluted_eps", ["-0.1", "-0.2", "-0.3", "-0.4"], Decimal("-1.0")),
+        ],
+    )
+    def test_non_positive_prior_year_base_makes_growth_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, item: str, prior: list[str], base: Decimal
+    ) -> None:
+        values = standard()
+        for k, amount in enumerate(prior, start=4):
+            values[k][item] = Decimal(amount)
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        name, other = ("revenue_growth", "eps_growth") if item == "revenue" else GROWTH[::-1]
+        assert rows[name]["status"] == "not_computable"
+        assert rows[name]["value"] is None
+        assert rows[name]["as_of"] == P1
+        # DEC-0116 (5): the rows used are determined, so both dates are set; the newest of the
+        # eight income statements is observed last, 15 days after P1 (add_statement).
+>       assert rows[name]["known_on"] == P1 + timedelta(days=15)
+E       assert None == (datetime.date(2026, 9, 30) + datetime.timedelta(days=15))
+E        +  where datetime.timedelta(days=15) = timedelta(days=15)
+
+tests/integration/test_engine_inputs_fundamentals.py:621: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior0-base0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 57 passed in 4.69s

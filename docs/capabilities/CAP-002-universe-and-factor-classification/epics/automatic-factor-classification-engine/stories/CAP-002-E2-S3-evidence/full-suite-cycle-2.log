@@ -1,0 +1,103 @@
+# Full validation, CAP-002-E2-S3 cycle-2 final tree (HEAD f1d6607 plus the cycle-2 working tree, test diff e0bead6469ada1ec), 2026-10-28T03:38:44Z
+## uv sync --all-extras --offline
+Resolved 46 packages in 16ms
+Checked 43 packages in 7ms
+# exit: 0
+## uv build --offline
+adding 'factorflow-0.1.0.dist-info/RECORD'
+removing build/bdist.macosx-11.0-arm64/wheel
+Successfully built dist/factorflow-0.1.0.tar.gz
+Successfully built dist/factorflow-0.1.0-py3-none-any.whl
+# exit: 0
+## uv run --offline pytest
+1540 passed, 1 xfailed, 2 warnings in 239.63s (0:03:59)
+# exit: 0
+## uv run --offline pytest -m postgres
+507 passed, 1034 deselected, 2 warnings in 211.40s (0:03:31)
+# exit: 0
+## uv run --offline pytest -m 'not postgres'
+1033 passed, 507 deselected, 1 xfailed, 2 warnings in 25.16s
+# exit: 0
+## uv run --offline ruff check .
+All checks passed!
+# exit: 0
+## uv run --offline ruff format --check .
+232 files already formatted
+# exit: 0
+## uv run --offline mypy src
+Success: no issues found in 56 source files
+# exit: 0
+## npm ci --offline --no-audit --no-fund
+npm warn allow-scripts   esbuild@0.21.5 (postinstall: node install.js)
+npm warn allow-scripts   fsevents@2.3.3 (install: (install scripts present))
+npm warn allow-scripts
+npm warn allow-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+# exit: 0
+## npm run build
+../src/factorflow/api/static/index.html                   0.40 kB │ gzip:  0.27 kB
+../src/factorflow/api/static/assets/index-Dy0VB8M_.css   16.33 kB │ gzip:  3.90 kB
+../src/factorflow/api/static/assets/index-BFn-kDOZ.js   222.28 kB │ gzip: 68.03 kB
+✓ built in 582ms
+# exit: 0
+## npm run test
+ ✓ src/app/build-output.test.tsx (2 tests) 862ms
+   ✓ Build output — lands in the API static directory (DAC-E1-S4-6) > a real build places index.html in the static directory and leaves its tracked marker intact 832ms
+ Test Files  41 passed (41)
+      Tests  297 passed (297)
+   Start at  22:46:48
+   Duration  3.68s (transform 834ms, setup 2.15s, collect 4.89s, tests 9.41s, environment 12.09s, prepare 2.44s)
+# exit: 0
+## npm run lint
+Checked 99 files in 271ms. No fixes applied.
+Found 40 errors.
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  × Some errors were emitted while running checks.
+# exit: 1
+## npm run format
+Checked 99 files in 96ms. No fixes applied.
+Found 2 errors.
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  × Some errors were emitted while running checks.
+# exit: 1
+## npx tsc --noEmit
+# exit: 0
+## npm run test:e2e
+[WebServer] [massive-stub] "GET /stocks/v1/dividends?ticker=UQA&ex_dividend_date.gte=2025-10-27&ex_dividend_date.lte=2026-10-27 HTTP/1.1" 200 -
+[WebServer] [massive-stub] "GET /vX/reference/ipos?ticker=UQA&listing_date.lte=2026-10-27&listing_date.gte=2025-10-27 HTTP/1.1" 200 -
+[WebServer] [massive-stub] "GET /vX/reference/tickers/UQA/events?types=ticker_change HTTP/1.1" 200 -
+  18 passed (2.9m)
+> factorflow-web@0.1.0 posttest:e2e
+> docker rm -f factorflow-e2e-postgres >/dev/null 2>&1 || true
+# exit: 0
+## git status --porcelain (tracked changes after validation)
+A  docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/cycle-2.patch
+A  docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutants-cycle-2.json
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-growth-absent-periods-found-dropped.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-growth-data-type-prices.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-growth-known-on-present-only.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-absent-periods-found-dropped.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-as-of-present-or-outdated.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-bar-recorded-asc.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-found-window-only.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-known-on-present-only.log
+AM docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results.json
+A  docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/red-cycle-2-rework.log
+ M docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-tdd-evidence.yaml
+ M docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3.md
+M  tests/integration/test_engine_currency.py
+M  tests/integration/test_engine_inputs_fundamentals.py
+## Biome rerun. The two failures above are all in build/lib/factorflow/api/static/assets/*.js: uv build's ignored setuptools output, which copied the Vite bundle an earlier npm run build left in src/factorflow/api/static/. biome.json ignores src/factorflow/api/static/** and dist/** but not build/**. build/ moved out of the tree (not deleted), then:
+## npm run lint
+> factorflow-web@0.1.0 lint
+> biome lint .
+Checked 97 files in 41ms. No fixes applied.
+# exit: 0
+## npm run format
+> factorflow-web@0.1.0 format
+> biome format .
+Checked 97 files in 18ms. No fixes applied.
+# exit: 0
