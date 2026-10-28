@@ -1,0 +1,2419 @@
+diff --git a/src/factorflow/classification/engine.py b/src/factorflow/classification/engine.py
+index 8ca22c4..4961cc3 100644
+--- a/src/factorflow/classification/engine.py
++++ b/src/factorflow/classification/engine.py
+@@ -21,12 +21,19 @@ from uuid import UUID
+ 
+ import psycopg
+ 
++from factorflow.classification import constants, line_items
++
+ log = logging.getLogger(__name__)
+ 
+ _SQL_DIR = Path(__file__).parent / "sql"
+ _SET_CONTEXT_SQL: Final = (_SQL_DIR / "set_context.sql").read_text()
+ _COMPLETE_SET_SQL: Final = (_SQL_DIR / "complete_set.sql").read_text()
+ _FAIL_SET_SQL: Final = (_SQL_DIR / "fail_set.sql").read_text()
++# The fundamentals stage (CAP-002-E2-S3).
++_STATEMENTS_SQL: Final = (_SQL_DIR / "statements.sql").read_text()
++_VALUE_INPUTS_SQL: Final = (_SQL_DIR / "value_inputs.sql").read_text()
++_GROWTH_INPUTS_SQL: Final = (_SQL_DIR / "growth_inputs.sql").read_text()
++_INSERT_INPUTS_SQL: Final = (_SQL_DIR / "insert_inputs.sql").read_text()
+ _QUALIFIED_COUNTS_SQL: Final = (
+     "SELECT factor, qualified_count FROM classification_set_factor WHERE set_id = %(set_id)s"
+ )
+@@ -149,3 +156,52 @@ def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> Bui
+         active_instruments=len(context.active_ids),
+         qualified_counts=qualified_counts,
+     )
++
++
++def _line_item_parameters() -> dict[str, object]:
++    """The seven line items as parallel arrays of bound parameters (SEC-INP-002).
++
++    Read from ``line_items.LINE_ITEMS`` at call time. A ``REQUIRES_INPUT`` key is passed as
++    ``None``, so the sentinel never reaches SQL and the inputs that need it are ``missing``
++    with ``unresolved_cause`` (factor-engine design 2.4).
++    """
++    items = line_items.LINE_ITEMS
++    return {
++        "line_item_names": list(items),
++        "line_item_statement_types": [item.statement_type for item in items.values()],
++        "line_item_keys": [
++            None if item.payload_key == line_items.REQUIRES_INPUT else item.payload_key
++            for item in items.values()
++        ],
++        "line_item_signs": [item.sign for item in items.values()],
++        "unresolved": line_items.unresolved(),
++        "unresolved_cause": line_items.UNRESOLVED_CAUSE,
++    }
++
++
++def _fundamental_inputs_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
++    """Derive the value and growth inputs of every active instrument and append them.
++
++    Implements factor-engine design 2.3 steps 3 to 5 and 2.4 for the value and growth
++    factors (CAP-002-E2-S3; DEC-0115): ``statements.sql`` fills the temporary table
++    ``stmt``, ``value_inputs.sql`` creates ``inputs``, ``growth_inputs.sql`` adds to it and
++    ``insert_inputs.sql`` writes the two factors' rows to ``factor_input``.
++    """
++    params = {
++        "set_id": ctx.set_id,
++        "active_ids": list(ctx.active_ids),
++        "classification_date": ctx.classification_date,
++        "latest_trading_day": ctx.latest_trading_day,
++        "stale_months": constants.FUNDAMENTALS_STALE_AFTER_MONTHS,
++        **_line_item_parameters(),
++    }
++    with conn.cursor() as cur:
++        cur.execute(_STATEMENTS_SQL, params)
++        cur.execute(_VALUE_INPUTS_SQL, params)
++        cur.execute(_GROWTH_INPUTS_SQL, params)
++        cur.execute(_INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["value", "growth"]})
++
++
++# Input-producing stages are registered here, above CAP-002-E2-S5's classification stage
++# when it is present (DEC-0121): fundamentals, then CAP-002-E2-S4's momentum.
++_STAGES.append(_fundamental_inputs_stage)
+diff --git a/src/factorflow/classification/sql/growth_inputs.sql b/src/factorflow/classification/sql/growth_inputs.sql
+new file mode 100644
+index 0000000..40bae1f
+--- /dev/null
++++ b/src/factorflow/classification/sql/growth_inputs.sql
+@@ -0,0 +1,125 @@
++-- revenue_growth and eps_growth for every active instrument: the trailing four quarters
++-- over the four quarters a year earlier, minus one (factor-engine design 2.4;
++-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql
++-- creates (DEC-0115). Depends on no price. Reads only. CAP-002-E2-S3.
++INSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, known_on,
++                    restated_possible, detail, missing_data_type)
++WITH roster AS (
++    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id
++),
++line_item AS (
++    -- The seven line items with their bound payload keys and signs. A NULL key is one the
++    -- owner has not supplied yet (line_items.REQUIRES_INPUT).
++    SELECT m.name, m.payload_key, m.sign
++      FROM unnest(%(line_item_names)s::text[], %(line_item_keys)s::text[],
++                  %(line_item_signs)s::integer[])
++           AS m (name, payload_key, sign)
++),
++needed (input_name, line_item) AS (
++    VALUES ('revenue_growth', 'revenue'), ('eps_growth', 'diluted_eps')
++),
++used AS (
++    -- The eight quarterly income statements of the trailing and prior-year windows, each
++    -- line item read through the guard of value_inputs.sql (DEC-0116 (4)).
++    SELECT r.instrument_id, n.input_name, s.fiscal_period_end, s.observed_on,
++           s.ttm_slot IS NOT NULL AS in_ttm,
++           jsonb_build_object('statement_type', s.statement_type,
++                              'fiscal_period_end', s.fiscal_period_end,
++                              'observed_on', s.observed_on,
++                              'provider_filing_date', s.provider_filing_date,
++                              'backfilled', s.backfilled) AS period,
++           CASE WHEN jsonb_typeof(s.payload -> m.payload_key) IN ('number', 'string')
++                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\.[0-9]+)?$'
++                THEN (s.payload ->> m.payload_key)::numeric * m.sign
++           END AS amount
++      FROM roster r
++      CROSS JOIN needed n
++      JOIN line_item m ON m.name = n.line_item
++      JOIN stmt s ON s.instrument_id = r.instrument_id
++                 AND s.statement_type = 'income_statement'
++                 AND (s.ttm_slot IS NOT NULL OR s.prior_slot IS NOT NULL)
++),
++windows AS (
++    SELECT instrument_id, input_name,
++           count(*) FILTER (WHERE in_ttm) AS trailing_quarters,
++           count(*) FILTER (WHERE NOT in_ttm) AS prior_quarters,
++           sum(amount) FILTER (WHERE in_ttm) AS trailing_sum,
++           sum(amount) FILTER (WHERE NOT in_ttm) AS prior_sum,
++           bool_or(amount IS NULL) AS absent,
++           max(fiscal_period_end) AS as_of,
++           max(observed_on) AS known_on,
++           jsonb_agg(period ORDER BY fiscal_period_end DESC) AS periods
++      FROM used
++     GROUP BY instrument_id, input_name
++),
++found AS (
++    -- Every quarterly income statement held on or before the classification date.
++    SELECT instrument_id,
++           jsonb_agg(jsonb_build_object('statement_type', statement_type,
++                                        'fiscal_period_end', fiscal_period_end)
++                     ORDER BY fiscal_period_end DESC) AS periods_found
++      FROM stmt
++     WHERE statement_type = 'income_statement'
++     GROUP BY instrument_id
++),
++decided AS (
++    -- Missing before outdated before not computable (DEC-0116 (1)); a bar is never read.
++    SELECT r.instrument_id, n.input_name, n.line_item, w.trailing_sum, w.prior_sum,
++           w.as_of, w.known_on, f.periods_found,
++           jsonb_build_object('periods', w.periods) AS base,
++           CASE WHEN n.line_item = ANY(%(unresolved)s::text[]) THEN %(unresolved_cause)s::text
++                -- either window short, or no row of either (w is NULL)
++                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, true)
++                THEN 'periods_missing'
++                WHEN w.absent THEN 'line_item_absent'
++           END AS missing_cause,
++           (%(classification_date)s::date
++               - make_interval(months => %(stale_months)s::integer))::date AS stale_before
++      FROM roster r
++      CROSS JOIN needed n
++      LEFT JOIN windows w ON w.instrument_id = r.instrument_id AND w.input_name = n.input_name
++      LEFT JOIN found f ON f.instrument_id = r.instrument_id
++),
++statused AS (
++    SELECT d.*,
++           CASE WHEN d.missing_cause IS NOT NULL THEN 'missing'
++                WHEN d.as_of < d.stale_before THEN 'outdated'
++                WHEN d.prior_sum <= 0 THEN 'not_computable'
++                ELSE 'present'
++           END AS status
++      FROM decided d
++)
++SELECT s.instrument_id,
++       'growth'::text,
++       s.input_name,
++       s.status,
++       CASE WHEN s.status = 'present' THEN s.trailing_sum / s.prior_sum - 1 END,
++       CASE WHEN s.status <> 'missing' THEN s.as_of END,
++       CASE WHEN s.status <> 'missing' THEN s.known_on END,
++       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods
++       -- into the mark (DEC-0056, DEC-0122).
++       false,
++       CASE s.status
++            WHEN 'missing' THEN jsonb_strip_nulls(jsonb_build_object(
++                'cause', s.missing_cause,
++                'line_items', CASE WHEN s.missing_cause IN (%(unresolved_cause)s::text,
++                                                            'line_item_absent')
++                                   THEN jsonb_build_array(s.line_item)
++                              END,
++                'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',
++                                                               'line_item_absent')
++                                      THEN coalesce(s.periods_found, jsonb_build_array())
++                                 END))
++            WHEN 'outdated' THEN jsonb_set(
++                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),
++                ARRAY['outdated'],
++                jsonb_build_object('fundamentals',
++                                   jsonb_build_object('latest_period_end', s.as_of,
++                                                      'stale_before', s.stale_before)))
++            WHEN 'not_computable' THEN jsonb_set(
++                jsonb_set(s.base, ARRAY['cause'], to_jsonb('prior_year_base_not_positive'::text)),
++                ARRAY['prior_year_base'], to_jsonb(s.prior_sum))
++            ELSE s.base
++       END,
++       'fundamentals'::text
++  FROM statused s
+diff --git a/src/factorflow/classification/sql/insert_inputs.sql b/src/factorflow/classification/sql/insert_inputs.sql
+new file mode 100644
+index 0000000..3c51519
+--- /dev/null
++++ b/src/factorflow/classification/sql/insert_inputs.sql
+@@ -0,0 +1,21 @@
++-- Append the named factors' rows of the temporary table inputs to factor_input
++-- (factor-engine design 2.3 step 5; DEC-0115). A missing input's detail gains the
++-- instrument's last acquisition outcome for the data type it lacks, so the evidence can
++-- say what the last download of it found (AC-12). Writes only factor_input.
++-- CAP-002-E2-S3; CAP-002-E2-S4 runs it again for momentum.
++INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, as_of,
++                          known_on, restated_possible, detail)
++SELECT %(set_id)s::uuid, i.instrument_id, i.factor, i.input_name, i.status, i.value, i.as_of,
++       i.known_on, i.restated_possible,
++       CASE WHEN a.instrument_id IS NULL THEN i.detail
++            ELSE jsonb_set(i.detail, ARRAY['last_acquisition'],
++                           jsonb_build_object('data_type', a.data_type,
++                                              'outcome', a.last_outcome,
++                                              'acquired_at', a.last_acquired_at))
++       END
++  FROM inputs i
++  LEFT JOIN acquisition_state a
++         ON i.status = 'missing'
++        AND a.instrument_id = i.instrument_id
++        AND a.data_type = i.missing_data_type
++ WHERE i.factor = ANY(%(factors)s::text[])
+diff --git a/src/factorflow/classification/sql/statements.sql b/src/factorflow/classification/sql/statements.sql
+new file mode 100644
+index 0000000..1d0e42f
+--- /dev/null
++++ b/src/factorflow/classification/sql/statements.sql
+@@ -0,0 +1,60 @@
++-- The latest observation of every quarterly statement period of the active instruments
++-- on or before the classification date, with its backfill flag and its slot in the
++-- trailing-twelve-month and prior-year windows (factor-engine design 2.3 step 3 and 2.4;
++-- DEC-0055 (1), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's
++-- 12-month span rule. Reads only. CAP-002-E2-S3.
++CREATE TEMP TABLE stmt ON COMMIT DROP AS
++WITH latest AS (
++    -- Annual rows are excluded before the latest observation is chosen, so an FY row
++    -- sharing a quarter's period end never displaces or joins that quarter.
++    SELECT DISTINCT ON (f.instrument_id, f.statement_type, f.fiscal_period_end)
++           f.instrument_id, f.statement_type, f.fiscal_period_end, f.payload,
++           f.observed_on, f.provider_filing_date
++      FROM fundamental_observation f
++     WHERE f.instrument_id = ANY(%(active_ids)s::bigint[])
++       AND f.statement_type IN ('balance_sheet', 'income_statement', 'cash_flow_statement')
++       AND f.fiscal_period <> 'FY'
++       AND f.fiscal_period_end <= %(classification_date)s::date
++     ORDER BY f.instrument_id, f.statement_type, f.fiscal_period_end,
++              f.observed_on DESC, f.recorded_at DESC
++),
++first_observed AS (
++    -- The day FactorFlow first observed any fundamental of the instrument: every row it
++    -- holds, of every statement type, period kind and version (DEC-0056).
++    SELECT f.instrument_id, min(f.observed_on) AS first_observed_on
++      FROM fundamental_observation f
++     WHERE f.instrument_id = ANY(%(active_ids)s::bigint[])
++     GROUP BY f.instrument_id
++),
++ranked AS (
++    SELECT l.instrument_id, l.statement_type, l.fiscal_period_end, l.payload, l.observed_on,
++           l.provider_filing_date,
++           coalesce(l.provider_filing_date < o.first_observed_on, false) AS backfilled,
++           row_number() OVER newest_first AS period_rank,
++           -- Consecutive with the next older period: at most 4 months before it (DEC-0221).
++           lead(l.fiscal_period_end) OVER newest_first
++               >= l.fiscal_period_end - interval '4 months' AS consecutive
++      FROM latest l
++      JOIN first_observed o USING (instrument_id)
++    WINDOW newest_first AS (PARTITION BY l.instrument_id, l.statement_type
++                            ORDER BY l.fiscal_period_end DESC)
++),
++windows AS (
++    -- The trailing window P1 to P4 is formed when its three adjacent pairs are
++    -- consecutive; the prior-year window P5 to P8 when all seven pairs of P1 to P8 are
++    -- (DEC-0221, DEC-0055 (1)). Too few periods leave a pair without an older end.
++    SELECT instrument_id, statement_type,
++           count(*) FILTER (WHERE period_rank <= 3 AND consecutive) = 3 AS trailing_formed,
++           count(*) FILTER (WHERE period_rank <= 7 AND consecutive) = 7 AS prior_formed
++      FROM ranked
++     GROUP BY instrument_id, statement_type
++)
++-- A window that is not formed gives none of its rows a slot, and the inputs read it as
++-- missing.
++SELECT r.instrument_id, r.statement_type, r.fiscal_period_end, r.payload, r.observed_on,
++       r.provider_filing_date, r.backfilled, r.period_rank,
++       CASE WHEN w.trailing_formed AND r.period_rank <= 4 THEN r.period_rank END AS ttm_slot,
++       CASE WHEN w.prior_formed AND r.period_rank BETWEEN 5 AND 8
++            THEN r.period_rank - 4 END AS prior_slot
++  FROM ranked r
++  JOIN windows w USING (instrument_id, statement_type)
+diff --git a/src/factorflow/classification/sql/value_inputs.sql b/src/factorflow/classification/sql/value_inputs.sql
+new file mode 100644
+index 0000000..9de900d
+--- /dev/null
++++ b/src/factorflow/classification/sql/value_inputs.sql
+@@ -0,0 +1,198 @@
++-- book_to_price, earnings_yield and fcf_yield for every active instrument (factor-engine
++-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,
++-- which growth_inputs.sql and CAP-002-E2-S4's momentum_inputs.sql insert into (DEC-0115).
++-- Reads only. CAP-002-E2-S3.
++CREATE TEMP TABLE inputs ON COMMIT DROP AS
++WITH roster AS (
++    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id
++),
++line_item AS (
++    -- The seven line items with their bound payload keys and signs. A NULL key is one the
++    -- owner has not supplied yet (line_items.REQUIRES_INPUT).
++    SELECT m.name, m.statement_type, m.payload_key, m.sign
++      FROM unnest(%(line_item_names)s::text[], %(line_item_statement_types)s::text[],
++                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[])
++           AS m (name, statement_type, payload_key, sign)
++),
++needed (input_name, line_items, window_type) AS (
++    -- The line items each input reads and the statement type of its trailing window.
++    -- Market capitalisation needs shares outstanding for every input.
++    VALUES ('book_to_price', ARRAY['book_equity', 'shares_outstanding'], NULL::text),
++           ('earnings_yield', ARRAY['net_income', 'shares_outstanding'], 'income_statement'),
++           ('fcf_yield', ARRAY['operating_cash_flow', 'capital_expenditure',
++                               'shares_outstanding'], 'cash_flow_statement')
++),
++used AS (
++    -- The rows an input reads: the most recent quarterly balance sheet and the four
++    -- quarters of its trailing window.
++    SELECT r.instrument_id, n.input_name, s.statement_type, s.fiscal_period_end,
++           s.observed_on, s.period_rank, s.payload,
++           jsonb_build_object('statement_type', s.statement_type,
++                              'fiscal_period_end', s.fiscal_period_end,
++                              'observed_on', s.observed_on,
++                              'provider_filing_date', s.provider_filing_date,
++                              'backfilled', s.backfilled) AS period
++      FROM roster r
++      CROSS JOIN needed n
++      JOIN stmt s ON s.instrument_id = r.instrument_id
++     WHERE (s.statement_type = 'balance_sheet' AND s.period_rank = 1)
++        OR (s.statement_type = n.window_type AND s.ttm_slot IS NOT NULL)
++),
++amount AS (
++    -- Each needed line item of each row used, times its sign. A value is read only from a
++    -- JSON number or a JSON string holding a plain decimal, checked before the cast, so
++    -- anything else reads as absent rather than failing the set (DEC-0116 (4),
++    -- DEC-0117 (2)).
++    SELECT u.instrument_id, u.input_name, m.name,
++           CASE WHEN jsonb_typeof(u.payload -> m.payload_key) IN ('number', 'string')
++                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\.[0-9]+)?$'
++                THEN (u.payload ->> m.payload_key)::numeric * m.sign
++           END AS amount
++      FROM used u
++      JOIN needed n USING (input_name)
++      JOIN line_item m ON m.statement_type = u.statement_type AND m.name = ANY(n.line_items)
++),
++items AS (
++    SELECT instrument_id, input_name,
++           sum(amount) FILTER (WHERE name = 'book_equity') AS book_equity,
++           sum(amount) FILTER (WHERE name = 'shares_outstanding') AS shares_outstanding,
++           sum(amount) FILTER (WHERE name = 'net_income') AS net_income,
++           sum(amount) FILTER (WHERE name = 'operating_cash_flow') AS operating_cash_flow,
++           sum(amount) FILTER (WHERE name = 'capital_expenditure') AS capital_expenditure,
++           array_agg(DISTINCT name ORDER BY name) FILTER (WHERE amount IS NULL) AS absent
++      FROM amount
++     GROUP BY instrument_id, input_name
++),
++periods AS (
++    SELECT instrument_id, input_name,
++           count(*) FILTER (WHERE statement_type = 'balance_sheet') AS balance_sheets,
++           count(*) FILTER (WHERE statement_type <> 'balance_sheet') AS window_quarters,
++           max(fiscal_period_end) FILTER (WHERE statement_type = 'balance_sheet')
++               AS balance_sheet_period_end,
++           -- The earliest of the latest period ends used (DEC-0116 (3)).
++           min(fiscal_period_end) FILTER (WHERE period_rank = 1) AS as_of,
++           max(observed_on) AS known_on,
++           jsonb_agg(period ORDER BY statement_type, fiscal_period_end DESC) AS periods
++      FROM used
++     GROUP BY instrument_id, input_name
++),
++found AS (
++    -- Every quarterly period held of the statement types an input reads.
++    SELECT r.instrument_id, n.input_name,
++           jsonb_agg(jsonb_build_object('statement_type', s.statement_type,
++                                        'fiscal_period_end', s.fiscal_period_end)
++                     ORDER BY s.statement_type, s.fiscal_period_end DESC) AS periods_found
++      FROM roster r
++      CROSS JOIN needed n
++      JOIN stmt s ON s.instrument_id = r.instrument_id
++                 AND s.statement_type IN ('balance_sheet', n.window_type)
++     GROUP BY r.instrument_id, n.input_name
++),
++bar AS (
++    -- The latest bar: the latest session, then its latest observation (DEC-0055 (5), (6)).
++    SELECT r.instrument_id, b.session_date, b.close_price, b.observed_on
++      FROM roster r
++      CROSS JOIN LATERAL (
++          SELECT d.session_date, d.close_price, d.observed_on
++            FROM daily_bar d
++           WHERE d.instrument_id = r.instrument_id
++           ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC
++           LIMIT 1
++      ) b
++),
++judged AS (
++    SELECT r.instrument_id, n.input_name, n.window_type, p.balance_sheets, p.window_quarters,
++           p.as_of, p.periods, i.absent, f.periods_found, b.session_date AS bar_date,
++           -- DEC-0055 (7): the latest observation among the statement rows and the bar.
++           greatest(p.known_on, b.observed_on) AS known_on,
++           CASE n.input_name
++                WHEN 'book_to_price' THEN i.book_equity
++                WHEN 'earnings_yield' THEN i.net_income
++                WHEN 'fcf_yield' THEN i.operating_cash_flow - i.capital_expenditure
++           END AS numerator,
++           -- DEC-0055 (6): the latest close times the newest balance sheet's shares.
++           b.close_price * i.shares_outstanding AS market_capitalisation,
++           ARRAY(SELECT u.x FROM unnest(n.line_items) WITH ORDINALITY AS u (x, k)
++                  WHERE u.x = ANY(%(unresolved)s::text[]) ORDER BY u.k) AS unresolved,
++           (%(classification_date)s::date
++               - make_interval(months => %(stale_months)s::integer))::date AS stale_before,
++           jsonb_build_object('periods', p.periods,
++                              'balance_sheet_period_end', p.balance_sheet_period_end,
++                              'shares_outstanding', i.shares_outstanding,
++                              'close', b.close_price,
++                              'bar_date', b.session_date,
++                              'bar_observed_on', b.observed_on,
++                              'market_capitalisation', b.close_price * i.shares_outstanding)
++               AS base,
++           b.instrument_id IS NOT NULL AS has_bar
++      FROM roster r
++      CROSS JOIN needed n
++      LEFT JOIN periods p ON p.instrument_id = r.instrument_id AND p.input_name = n.input_name
++      LEFT JOIN items i ON i.instrument_id = r.instrument_id AND i.input_name = n.input_name
++      LEFT JOIN found f ON f.instrument_id = r.instrument_id AND f.input_name = n.input_name
++      LEFT JOIN bar b ON b.instrument_id = r.instrument_id
++),
++decided AS (
++    -- Missing before outdated before not computable (DEC-0116 (1), (2)).
++    SELECT j.*,
++           CASE WHEN cardinality(j.unresolved) > 0 THEN %(unresolved_cause)s::text
++                WHEN coalesce(j.balance_sheets, 0) = 0
++                  OR (j.window_type IS NOT NULL AND j.window_quarters = 0)
++                THEN 'periods_missing'
++                WHEN j.absent IS NOT NULL THEN 'line_item_absent'
++                WHEN NOT j.has_bar THEN 'price_missing'
++           END AS missing_cause,
++           j.as_of < j.stale_before AS fundamentals_outdated,
++           j.bar_date < %(latest_trading_day)s::date AS prices_outdated
++      FROM judged j
++),
++statused AS (
++    SELECT d.*,
++           CASE WHEN d.missing_cause IS NOT NULL THEN 'missing'
++                WHEN d.fundamentals_outdated OR d.prices_outdated THEN 'outdated'
++                WHEN d.market_capitalisation <= 0 THEN 'not_computable'
++                ELSE 'present'
++           END AS status
++      FROM decided d
++)
++SELECT s.instrument_id,
++       'value'::text AS factor,
++       s.input_name,
++       s.status,
++       CASE WHEN s.status = 'present' THEN s.numerator / s.market_capitalisation END AS value,
++       CASE WHEN s.status <> 'missing' THEN s.as_of END AS as_of,
++       CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,
++       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods
++       -- into the mark (DEC-0056, DEC-0122).
++       false AS restated_possible,
++       CASE s.status
++            WHEN 'missing' THEN jsonb_strip_nulls(jsonb_build_object(
++                'cause', s.missing_cause,
++                'line_items', CASE s.missing_cause
++                                   WHEN %(unresolved_cause)s::text THEN to_jsonb(s.unresolved)
++                                   WHEN 'line_item_absent' THEN to_jsonb(s.absent)
++                              END,
++                'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',
++                                                               'line_item_absent')
++                                      THEN coalesce(s.periods_found, jsonb_build_array())
++                                 END))
++            WHEN 'outdated' THEN jsonb_set(
++                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),
++                ARRAY['outdated'],
++                jsonb_strip_nulls(jsonb_build_object(
++                    'fundamentals', CASE WHEN s.fundamentals_outdated
++                                         THEN jsonb_build_object('latest_period_end', s.as_of,
++                                                                 'stale_before', s.stale_before)
++                                    END,
++                    'prices', CASE WHEN s.prices_outdated
++                                   THEN jsonb_build_object('bar_date', s.bar_date,
++                                                           'latest_trading_day',
++                                                           %(latest_trading_day)s::date)
++                              END)))
++            WHEN 'not_computable' THEN jsonb_set(
++                s.base, ARRAY['cause'], to_jsonb('market_capitalisation_not_positive'::text))
++            ELSE s.base
++       END AS detail,
++       CASE WHEN s.missing_cause = 'price_missing' THEN 'prices' ELSE 'fundamentals' END
++           AS missing_data_type
++  FROM statused s
+diff --git a/tests/integration/engine_inputs_support.py b/tests/integration/engine_inputs_support.py
+new file mode 100644
+index 0000000..d8ccd9b
+--- /dev/null
++++ b/tests/integration/engine_inputs_support.py
+@@ -0,0 +1,217 @@
++"""Helpers for the factor engine's fundamentals-stage tests (CAP-002-E2-S3).
++
++A plain module rather than ``conftest.py``. It builds on CAP-002-E2-S2's
++``engine_support`` without editing it. The real Massive payload keys are the owner's
++open question (factor-engine design section 14 question 1), so the tests install their
++own keys (design section 7: "fixtures declare their own payload keys"). Every writing
++helper commits, so the build's connection sees what a test wrote.
++"""
++
++import calendar
++import hashlib
++import json
++from datetime import date, datetime, timedelta
++from decimal import Decimal
++from typing import Any
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import engine, line_items
++from factorflow.classification.engine import BuildResult
++from factorflow.classification.line_items import LineItem
++from tests.integration.engine_support import (
++    add_bar,
++    add_building_set,
++    add_instrument,
++    add_run,
++    migrate_through_classification,
++)
++
++__all__ = [
++    "TEST_KEYS",
++    "add_bar",
++    "add_building_set",
++    "add_instrument",
++    "add_quarters",
++    "add_run",
++    "add_statement",
++    "install_test_line_items",
++    "inputs_for",
++    "migrate_through_classification",
++    "months_before",
++    "run_fundamentals_stage",
++]
++
++TEST_KEYS: dict[str, str] = {
++    "book_equity": "t_book_equity",
++    "shares_outstanding": "t_shares_outstanding",
++    "net_income": "t_net_income",
++    "diluted_eps": "t_diluted_eps",
++    "revenue": "t_revenue",
++    "operating_cash_flow": "t_operating_cash_flow",
++    "capital_expenditure": "t_capital_expenditure",
++}
++"""A test payload key per line item; never a real Massive key."""
++
++# Capital expenditure is reported as an outflow (negative) in the fixtures, so the
++# sign path of design 2.4 ``LineItem.sign`` is exercised.
++_TEST_SIGNS: dict[str, int] = {"capital_expenditure": -1}
++
++STATEMENT_TYPES = ("balance_sheet", "income_statement", "cash_flow_statement")
++
++
++def install_test_line_items(
++    monkeypatch: pytest.MonkeyPatch, overrides: dict[str, tuple[str, int]] | None = None
++) -> None:
++    """Replace every ``LINE_ITEMS`` entry with its test key; ``overrides`` sets (key, sign)."""
++    for name, item in line_items.LINE_ITEMS.items():
++        key, sign = TEST_KEYS[name], _TEST_SIGNS.get(name, 1)
++        if overrides and name in overrides:
++            key, sign = overrides[name]
++        monkeypatch.setitem(
++            line_items.LINE_ITEMS, name, LineItem(item.label, item.statement_type, key, sign)
++        )
++
++
++def months_before(day: date, months: int) -> date:
++    """``day`` minus whole calendar months, clamped to the month's last day."""
++    index = day.year * 12 + day.month - 1 - months
++    year, month = divmod(index, 12)
++    last = calendar.monthrange(year, month + 1)[1]
++    return date(year, month + 1, min(day.day, last))
++
++
++def _json_value(value: Any, numbers: bool) -> str:
++    if isinstance(value, Decimal):
++        # model_dump(mode="json") writes a Decimal as a JSON string (DEC-0117).
++        plain = format(value, "f")
++        return plain if numbers else json.dumps(plain)
++    return json.dumps(value)
++
++
++def _payload_text(payload: dict[str, Any], numbers: bool) -> str:
++    return (
++        "{"
++        + ", ".join(f"{json.dumps(k)}: {_json_value(v, numbers)}" for k, v in payload.items())
++        + "}"
++    )
++
++
++def add_statement(
++    conn: psycopg.Connection,
++    instrument_id: int,
++    period_end: date,
++    statement_type: str,
++    payload: dict[str, Any],
++    fiscal_period: str = "Q1",
++    observed_on: date | None = None,
++    provider_filing_date: date | None = None,
++    *,
++    numbers: bool = False,
++    recorded_at: datetime | None = None,
++) -> None:
++    """One ``fundamental_observation`` row; ``payload`` maps payload keys to values.
++
++    ``observed_on`` defaults to 15 days after the period end. A ``Decimal`` value is
++    written as a JSON string holding its plain decimal, or as a JSON number when
++    ``numbers`` is true; any other value is written as the JSON value given.
++    ``recorded_at`` defaults to the database's ``now()``.
++    """
++    observed = period_end + timedelta(days=15) if observed_on is None else observed_on
++    text = _payload_text(payload, numbers)
++    digest = hashlib.sha256(
++        json.dumps(
++            [
++                instrument_id,
++                str(period_end),
++                fiscal_period,
++                statement_type,
++                str(observed),
++                str(provider_filing_date),
++                text,
++                str(recorded_at),
++            ]
++        ).encode()
++    ).digest()
++    conn.execute(
++        "INSERT INTO fundamental_observation (instrument_id, fiscal_period_end, fiscal_period, "
++        "statement_type, observed_on, value_hash, provider_filing_date, payload, recorded_at) "
++        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s::jsonb, coalesce(%s, now()))",
++        (
++            instrument_id,
++            period_end,
++            fiscal_period,
++            statement_type,
++            observed,
++            digest,
++            provider_filing_date,
++            text,
++            recorded_at,
++        ),
++    )
++    conn.commit()
++
++
++def add_quarters(
++    conn: psycopg.Connection,
++    instrument_id: int,
++    latest_period_end: date,
++    n: int,
++    values: list[dict[str, Any]],
++    *,
++    numbers: bool = False,
++) -> list[date]:
++    """``n`` quarterly period ends, 3 calendar months apart and newest first, each with a
++    balance sheet, an income statement and a cash-flow statement.
++
++    ``values[k]`` maps line-item names to the values of period ``k``; each item lands in
++    its own statement type under its test key, and an item omitted from a period's dict
++    is absent from that payload. Returns the period ends, newest first.
++    """
++    assert len(values) == n
++    ends = [months_before(latest_period_end, 3 * k) for k in range(n)]
++    for end, period in zip(ends, values, strict=True):
++        for statement_type in STATEMENT_TYPES:
++            payload = {
++                TEST_KEYS[name]: value
++                for name, value in period.items()
++                if line_items.LINE_ITEMS[name].statement_type == statement_type
++            }
++            add_statement(conn, instrument_id, end, statement_type, payload, numbers=numbers)
++    return ends
++
++
++def run_fundamentals_stage(
++    conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
++) -> BuildResult:
++    """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
++    monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
++    return engine.build(conn, set_id, 60)
++
++
++def inputs_for(conn: psycopg.Connection, set_id: UUID, instrument_id: int) -> dict[str, dict]:
++    """The stock's ``factor_input`` rows of the set, by input name.
++
++    ``detail`` is parsed with ``Decimal`` for JSON numbers with a fraction, so numeric
++    components compare exactly.
++    """
++    rows = conn.execute(
++        "SELECT input_name, factor, status, value, as_of, known_on, restated_possible, "
++        "detail::text FROM factor_input WHERE set_id = %s AND instrument_id = %s",
++        (set_id, instrument_id),
++    ).fetchall()
++    conn.commit()
++    return {
++        row[0]: {
++            "factor": row[1],
++            "status": row[2],
++            "value": row[3],
++            "as_of": row[4],
++            "known_on": row[5],
++            "restated_possible": row[6],
++            "detail": json.loads(row[7], parse_float=Decimal),
++        }
++        for row in rows
++    }
+diff --git a/tests/integration/test_engine_currency.py b/tests/integration/test_engine_currency.py
+new file mode 100644
+index 0000000..22aee79
+--- /dev/null
++++ b/tests/integration/test_engine_currency.py
+@@ -0,0 +1,291 @@
++"""Currency of the value and growth inputs (CAP-002-E2-S3).
++
++Satisfies AC-13, DAC-E2-6, DAC-E2-S3-5 and DAC-E2-S3-6: a fundamental input is outdated
++when its latest period end is earlier than the classification date minus 6 months
++(``interval`` arithmetic, design 2.4), and a value input also when the stock's latest bar
++precedes the latest trading day held across active instruments (DEC-0055 (5)).
++"""
++
++from collections.abc import Iterator
++from dataclasses import dataclass
++from datetime import date, timedelta
++from decimal import Decimal
++from typing import Any
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import line_items
++from tests.integration.engine_inputs_support import (
++    TEST_KEYS,
++    add_bar,
++    add_building_set,
++    add_instrument,
++    add_quarters,
++    add_run,
++    add_statement,
++    inputs_for,
++    install_test_line_items,
++    migrate_through_classification,
++    months_before,
++    run_fundamentals_stage,
++)
++
++pytestmark = pytest.mark.postgres
++
++VALUE = ("book_to_price", "earnings_yield", "fcf_yield")
++GROWTH = ("revenue_growth", "eps_growth")
++
++
++@dataclass(frozen=True)
++class Env:
++    conn: psycopg.Connection
++    stock: int
++    set_id: UUID
++    latest_trading_day: date
++
++
++@pytest.fixture
++def classification_date() -> date:
++    return date(2026, 10, 17)
++
++
++@pytest.fixture
++def env(postgres_connection_string: str, classification_date: date) -> Iterator[Env]:
++    """The stock under test and one peer, both with a bar on the latest trading day."""
++    latest = classification_date - timedelta(days=1)
++    conn = migrate_through_classification(postgres_connection_string)
++    try:
++        stock = add_instrument(conn, "AAA")
++        peer = add_instrument(conn, "PEER")
++        add_bar(conn, peer, latest)
++        add_bar(conn, stock, latest)
++        set_id = add_building_set(conn, add_run(conn), classification_date)
++        yield Env(conn, stock, set_id, latest)
++    finally:
++        conn.close()
++
++
++def quarters(n: int = 8) -> list[dict[str, Any]]:
++    return [
++        {
++            "book_equity": Decimal(500),
++            "shares_outstanding": Decimal(100),
++            "net_income": Decimal(10 + k),
++            "diluted_eps": Decimal(1 + k),
++            "revenue": Decimal(100 + k),
++            "operating_cash_flow": Decimal(30),
++            "capital_expenditure": Decimal(-5),
++        }
++        for k in range(n)
++    ]
++
++
++def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> dict[str, dict]:
++    install_test_line_items(monkeypatch)
++    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
++    assert result.state == "complete", result.failure_reason
++    return inputs_for(env.conn, env.set_id, env.stock)
++
++
++# --- T009: the 6-month rule ----------------------------------------------------------------
++
++
++# Implements TC-COMP-100
++def test_fundamentals_outdated_at_six_months_and_a_day(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    latest = date(2026, 4, 16)
++    add_quarters(env.conn, env.stock, latest, 8, quarters())
++
++    rows = build(env, monkeypatch)
++
++    for name in (*VALUE, *GROWTH):
++        assert rows[name]["status"] == "outdated", name
++        assert rows[name]["value"] is None
++        assert rows[name]["as_of"] == latest
++        assert rows[name]["detail"]["cause"] == "outdated"
++        assert rows[name]["detail"]["outdated"] == {
++            "fundamentals": {"latest_period_end": str(latest), "stale_before": "2026-04-17"}
++        }, name
++
++
++# Implements TC-COMP-100
++def test_fundamentals_present_at_exactly_six_months(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    latest = date(2026, 4, 17)
++    add_quarters(env.conn, env.stock, latest, 8, quarters())
++
++    rows = build(env, monkeypatch)
++
++    for name in (*VALUE, *GROWTH):
++        assert rows[name]["status"] == "present", name
++        assert rows[name]["as_of"] == latest
++        assert "cause" not in rows[name]["detail"]
++
++
++@pytest.mark.parametrize("classification_date", [date(2026, 8, 31)])
++@pytest.mark.parametrize(
++    ("latest", "status"), [(date(2026, 2, 28), "present"), (date(2026, 2, 27), "outdated")]
++)
++def test_six_months_before_a_month_end_is_the_shorter_month_end(
++    env: Env, monkeypatch: pytest.MonkeyPatch, latest: date, status: str
++) -> None:
++    """DAC-E2-S3-5, design 2.4: 2026-08-31 minus interval '6 months' is 2026-02-28."""
++    add_quarters(env.conn, env.stock, latest, 8, quarters())
++
++    rows = build(env, monkeypatch)
++
++    assert {rows[name]["status"] for name in (*VALUE, *GROWTH)} == {status}
++
++
++def test_growth_currency_uses_the_newest_period(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """DAC-E2-6: the newest period P1 decides, though older quarters are years old."""
++    latest = date(2026, 4, 17)
++    add_quarters(env.conn, env.stock, latest, 8, quarters())
++
++    rows = build(env, monkeypatch)
++
++    assert {rows[name]["status"] for name in GROWTH} == {"present"}
++    assert {rows[name]["as_of"] for name in GROWTH} == {latest}
++    assert rows["revenue_growth"]["detail"]["periods"][-1]["fiscal_period_end"] == str(
++        months_before(latest, 21)
++    )
++
++
++# --- T010: the latest trading day ----------------------------------------------------------
++
++
++# Implements TC-COMP-101
++def test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    stale = add_instrument(env.conn, "STALE")
++    day_before = env.latest_trading_day - timedelta(days=1)
++    add_bar(env.conn, stale, day_before)
++    add_quarters(env.conn, stale, date(2026, 9, 30), 8, quarters())
++    add_quarters(env.conn, env.stock, date(2026, 9, 30), 8, quarters())
++
++    current = build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, stale)
++    for name in VALUE:
++        assert rows[name]["status"] == "outdated", name
++        assert rows[name]["detail"]["outdated"] == {
++            "prices": {
++                "bar_date": str(day_before),
++                "latest_trading_day": str(env.latest_trading_day),
++            }
++        }
++    assert {rows[name]["status"] for name in GROWTH} == {"present"}
++    assert {current[name]["status"] for name in (*VALUE, *GROWTH)} == {"present"}
++
++
++def test_stock_without_any_bar_has_value_inputs_missing(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0116 (2): no bar at all is missing, not outdated; growth is unaffected."""
++    barless = add_instrument(env.conn, "NOBAR")
++    add_quarters(env.conn, barless, date(2026, 9, 30), 8, quarters())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, barless)
++    assert {rows[name]["status"] for name in VALUE} == {"missing"}
++    assert {rows[name]["detail"]["cause"] for name in VALUE} == {"price_missing"}
++    assert {rows[name]["status"] for name in GROWTH} == {"present"}
++
++
++def test_retired_stock_bar_does_not_move_the_latest_trading_day(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0055 (5): the latest trading day is held across active instruments only."""
++    retired = add_instrument(env.conn, "OLD", lifecycle="retired")
++    add_bar(env.conn, retired, env.latest_trading_day + timedelta(days=1))
++    add_quarters(env.conn, env.stock, date(2026, 9, 30), 8, quarters())
++
++    rows = build(env, monkeypatch)
++
++    assert {rows[name]["status"] for name in VALUE} == {"present"}
++
++
++# --- T013: combined and mixed cases --------------------------------------------------------
++
++
++def test_stale_period_and_stale_bar_are_both_named(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-13: every applicable cause is named."""
++    both = add_instrument(env.conn, "BOTH")
++    day_before = env.latest_trading_day - timedelta(days=1)
++    add_bar(env.conn, both, day_before)
++    add_quarters(env.conn, both, date(2026, 3, 31), 8, quarters())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, both)
++    for name in VALUE:
++        assert rows[name]["status"] == "outdated", name
++        assert rows[name]["detail"]["outdated"] == {
++            "fundamentals": {"latest_period_end": "2026-03-31", "stale_before": "2026-04-17"},
++            "prices": {
++                "bar_date": str(day_before),
++                "latest_trading_day": str(env.latest_trading_day),
++            },
++        }
++    assert rows["revenue_growth"]["detail"]["outdated"] == {
++        "fundamentals": {"latest_period_end": "2026-03-31", "stale_before": "2026-04-17"}
++    }
++
++
++def _statements(env: Env, statement_type: str, latest: date, n: int = 8) -> None:
++    for k, period in enumerate(quarters(n)):
++        payload = {
++            TEST_KEYS[name]: value
++            for name, value in period.items()
++            if line_items.LINE_ITEMS[name].statement_type == statement_type
++        }
++        add_statement(env.conn, env.stock, months_before(latest, 3 * k), statement_type, payload)
++
++
++def test_mixed_statement_input_is_dated_by_its_earliest_latest_period(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0116 (3): as_of and the staleness test use the earliest of the latest period
++    ends an input reads."""
++    _statements(env, "balance_sheet", date(2026, 9, 30))
++    _statements(env, "income_statement", date(2026, 3, 31))
++    _statements(env, "cash_flow_statement", date(2026, 6, 30))
++
++    rows = build(env, monkeypatch)
++
++    assert (rows["book_to_price"]["status"], rows["book_to_price"]["as_of"]) == (
++        "present",
++        date(2026, 9, 30),
++    )
++    assert (rows["fcf_yield"]["status"], rows["fcf_yield"]["as_of"]) == (
++        "present",
++        date(2026, 6, 30),
++    )
++    assert (rows["earnings_yield"]["status"], rows["earnings_yield"]["as_of"]) == (
++        "outdated",
++        date(2026, 3, 31),
++    )
++    assert rows["earnings_yield"]["detail"]["outdated"] == {
++        "fundamentals": {"latest_period_end": "2026-03-31", "stale_before": "2026-04-17"}
++    }
++
++
++def test_growth_ignores_bar_currency(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """AC-13, design 2.4: growth depends on no price, so a year-old bar leaves it present."""
++    old = add_instrument(env.conn, "OLDBAR")
++    add_bar(env.conn, old, env.latest_trading_day - timedelta(days=365))
++    add_quarters(env.conn, old, date(2026, 9, 30), 8, quarters())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, old)
++    assert {rows[name]["status"] for name in GROWTH} == {"present"}
++    assert {rows[name]["status"] for name in VALUE} == {"outdated"}
+diff --git a/tests/integration/test_engine_inputs_fundamentals.py b/tests/integration/test_engine_inputs_fundamentals.py
+new file mode 100644
+index 0000000..2599bec
+--- /dev/null
++++ b/tests/integration/test_engine_inputs_fundamentals.py
+@@ -0,0 +1,1282 @@
++"""Value and growth inputs from quarterly fundamentals (CAP-002-E2-S3).
++
++Satisfies AC-7, AC-12, AC-19, DAC-E2-1, DAC-E2-9 and DAC-E2-S3-1 to DAC-E2-S3-4 and
++DAC-E2-S3-7 against ``engine._fundamental_inputs_stage``. Payload keys are the test keys
++of ``engine_inputs_support`` (factor-engine design section 7); no real Massive key is
++used.
++"""
++
++from collections.abc import Iterator
++from dataclasses import dataclass
++from datetime import UTC, date, datetime, timedelta
++from decimal import ROUND_HALF_UP, Decimal, localcontext
++from typing import Any
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import engine, line_items
++from factorflow.classification.engine import BuildContext, BuildResult
++from factorflow.classification.line_items import UNRESOLVED_CAUSE, LineItem
++from tests.integration.engine_inputs_support import (
++    TEST_KEYS,
++    add_bar,
++    add_building_set,
++    add_instrument,
++    add_quarters,
++    add_run,
++    add_statement,
++    inputs_for,
++    install_test_line_items,
++    migrate_through_classification,
++    months_before,
++    run_fundamentals_stage,
++)
++
++pytestmark = pytest.mark.postgres
++
++D = date(2026, 10, 17)  # classification date
++L = date(2026, 10, 16)  # latest trading day held
++P1 = date(2026, 9, 30)  # newest quarter, current against D
++
++VALUE = ("book_to_price", "earnings_yield", "fcf_yield")
++GROWTH = ("revenue_growth", "eps_growth")
++
++
++@dataclass(frozen=True)
++class Env:
++    conn: psycopg.Connection
++    stock: int
++    set_id: UUID
++
++
++@pytest.fixture
++def env(postgres_connection_string: str) -> Iterator[Env]:
++    """The stock under test and one peer, both with a bar of close 10 on ``L``."""
++    conn = migrate_through_classification(postgres_connection_string)
++    try:
++        stock = add_instrument(conn, "AAA")
++        peer = add_instrument(conn, "PEER")
++        add_bar(conn, peer, L)
++        add_bar(conn, stock, L)
++        set_id = add_building_set(conn, add_run(conn), D)
++        yield Env(conn, stock, set_id)
++    finally:
++        conn.close()
++
++
++def q10(value: Decimal) -> Decimal:
++    """``value`` as ``numeric(30, 10)`` stores it."""
++    return value.quantize(Decimal("1e-10"), rounding=ROUND_HALF_UP)
++
++
++def ratio(numerator: Decimal, denominator: Decimal, minus: int = 0) -> Decimal:
++    with localcontext() as ctx:
++        ctx.prec = 50
++        return q10(numerator / denominator - minus)
++
++
++REVENUE = [130, 120, 115, 110, 100, 95, 90, 85]
++EPS = ["1.3", "1.2", "1.1", "1.0", "0.9", "0.8", "0.7", "0.6"]
++
++
++def standard(n: int = 8) -> list[dict[str, Any]]:
++    """Distinct values per quarter (newest first), so a wrong window gives a wrong value.
++
++    Market capitalisation is 10 x 100 = 1000; book_to_price 0.5, earnings_yield 0.046,
++    fcf_yield (126 - 26) / 1000 = 0.1; revenue growth 475 / 370 - 1, EPS 4.6 / 3.0 - 1.
++    """
++    return [
++        {
++            "book_equity": Decimal(500 - 100 * k),
++            "shares_outstanding": Decimal(100 + 100 * k),
++            "net_income": Decimal(13 - k),
++            "diluted_eps": Decimal(EPS[k]),
++            "revenue": Decimal(REVENUE[k]),
++            "operating_cash_flow": Decimal(30 + k),
++            "capital_expenditure": Decimal(-5 - k),  # reported as an outflow
++        }
++        for k in range(n)
++    ]
++
++
++BOOK_TO_PRICE = ratio(Decimal(500), Decimal(1000))
++EARNINGS_YIELD = ratio(Decimal(46), Decimal(1000))
++FCF_YIELD = ratio(Decimal(100), Decimal(1000))
++REVENUE_GROWTH = ratio(Decimal(475), Decimal(370), 1)
++EPS_GROWTH = ratio(Decimal("4.6"), Decimal("3.0"), 1)
++
++
++def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> BuildResult:
++    install_test_line_items(monkeypatch)
++    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
++    assert result.state == "complete", result.failure_reason
++    return result
++
++
++def resolve_only(monkeypatch: pytest.MonkeyPatch, *names: str) -> None:
++    """Resolve the named line items to their test keys; the rest stay ``REQUIRES_INPUT``."""
++    for name in names:
++        item = line_items.LINE_ITEMS[name]
++        monkeypatch.setitem(
++            line_items.LINE_ITEMS,
++            name,
++            LineItem(item.label, item.statement_type, TEST_KEYS[name], item.sign),
++        )
++
++
++def period(statement_type: str, end: date, observed: date, filed: date | None, backfilled: bool):
++    return {
++        "statement_type": statement_type,
++        "fiscal_period_end": str(end),
++        "observed_on": str(observed),
++        "provider_filing_date": None if filed is None else str(filed),
++        "backfilled": backfilled,
++    }
++
++
++def ends_of(detail_periods: list[dict[str, Any]]) -> list[str]:
++    return [p["fiscal_period_end"] for p in detail_periods]
++
++
++# --- T004: trailing twelve months over the prior twelve ----------------------------------
++
++
++# Implements TC-COMP-060
++def test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    ends = [months_before(P1, 3 * k) for k in range(8)]
++    observed = [end + timedelta(days=15) for end in ends]
++    observed[5] = date(2026, 10, 16)  # a prior-window row re-acquired last sets known_on
++    filed = [end + timedelta(days=20) for end in ends]  # after the first observation
++    for k, end in enumerate(ends):
++        add_statement(
++            env.conn,
++            env.stock,
++            end,
++            "income_statement",
++            {TEST_KEYS["revenue"]: Decimal(REVENUE[k])},
++            observed_on=observed[k],
++            provider_filing_date=filed[k],
++        )
++
++    build(env, monkeypatch)
++
++    row = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]
++    assert row["status"] == "present"
++    assert row["value"] == REVENUE_GROWTH
++    assert row["as_of"] == P1
++    assert row["known_on"] == date(2026, 10, 16)
++    assert row["restated_possible"] is False
++    assert row["detail"] == {
++        "periods": [
++            period("income_statement", ends[k], observed[k], filed[k], False) for k in range(8)
++        ]
++    }
++
++
++def test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-1: diluted EPS over the same two windows."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    build(env, monkeypatch)
++
++    row = inputs_for(env.conn, env.set_id, env.stock)["eps_growth"]
++    assert (row["status"], row["value"], row["as_of"]) == ("present", EPS_GROWTH, P1)
++
++
++def test_growth_applies_the_line_item_sign(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """Design 2.4 LineItem.sign: a provider reporting revenue negative with sign -1 gives the
++    same growth as positive revenue with sign +1."""
++    values = standard()
++    for period in values:
++        period["revenue"] = -period["revenue"]
++    add_quarters(env.conn, env.stock, P1, 8, values)
++    install_test_line_items(monkeypatch, overrides={"revenue": (TEST_KEYS["revenue"], -1)})
++
++    assert run_fundamentals_stage(env.conn, env.set_id, monkeypatch).state == "complete"
++
++    row = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]
++    assert (row["status"], row["value"]) == ("present", REVENUE_GROWTH)
++
++
++# --- T005: seven quarters ----------------------------------------------------------------
++
++
++# Implements TC-COMP-094
++def test_seven_quarters_leave_growth_missing_and_value_unaffected(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    ends = add_quarters(env.conn, env.stock, P1, 7, standard(7))
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in GROWTH:
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["value"] is None
++        assert rows[name]["as_of"] is None and rows[name]["known_on"] is None
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++        assert ends_of(rows[name]["detail"]["periods_found"]) == [str(e) for e in ends]
++        assert {p["statement_type"] for p in rows[name]["detail"]["periods_found"]} == {
++            "income_statement"
++        }
++    assert {name: (rows[name]["status"], rows[name]["value"]) for name in VALUE} == {
++        "book_to_price": ("present", BOOK_TO_PRICE),
++        "earnings_yield": ("present", EARNINGS_YIELD),
++        "fcf_yield": ("present", FCF_YIELD),
++    }
++
++
++def _quarters_at(env: Env, ends: list[date], income_gap: int | None = None) -> list[date]:
++    """Every statement type at ``ends`` (newest first), with the standard values of each
++    rank, except the income statement of rank ``income_gap``; returns the income ends."""
++    values = (standard() + standard())[: len(ends)]
++    for k, end in enumerate(ends):
++        for statement_type in ("balance_sheet", "income_statement", "cash_flow_statement"):
++            if statement_type == "income_statement" and k == income_gap:
++                continue
++            payload = {
++                TEST_KEYS[name]: value
++                for name, value in values[k].items()
++                if line_items.LINE_ITEMS[name].statement_type == statement_type
++            }
++            add_statement(env.conn, env.stock, end, statement_type, payload)
++    return [end for k, end in enumerate(ends) if k != income_gap]
++
++
++def _income_with_gap(env: Env, gap: int, n: int = 8) -> list[date]:
++    """``n`` calendar quarters of every statement type except the income statement of
++    ``gap``."""
++    return _quarters_at(env, [months_before(P1, 3 * k) for k in range(n)], income_gap=gap)
++
++
++# 13-week quarters of a 52-week fiscal year: each year-ago quarter ends 364 days earlier,
++# later than P1 minus 12 months (DEC-0221).
++FIFTY_TWO_WEEK = [date(2026, 9, 26) - timedelta(weeks=13 * k) for k in range(9)]
++
++
++def test_quarter_absent_from_the_prior_window_leaves_growth_missing(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-S3-2: the sixth quarter is absent, so the prior window holds three."""
++    found = _income_with_gap(env, gap=5)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in GROWTH:
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++        assert ends_of(rows[name]["detail"]["periods_found"]) == [str(e) for e in found]
++    assert rows["earnings_yield"]["status"] == "present"
++
++
++def test_quarter_absent_from_the_trailing_window_forms_no_window(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-S3-2, DEC-0221: with the third quarter absent the second and third periods
++    held are six months apart, so the trailing window is not formed."""
++    found = _income_with_gap(env, gap=2)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in (*GROWTH, "earnings_yield"):
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++    assert ends_of(rows["revenue_growth"]["detail"]["periods_found"]) == [str(e) for e in found]
++    assert rows["book_to_price"]["status"] == "present"
++    assert rows["fcf_yield"]["status"] == "present"
++
++
++def test_gap_between_third_and_fourth_quarters_forms_no_trailing_window(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0221: the P3 to P4 pair must be consecutive too; with the fourth income
++    statement absent, the third and fourth held are six months apart."""
++    _income_with_gap(env, gap=3)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["earnings_yield"]["status"] == "missing"
++    assert rows["earnings_yield"]["detail"]["cause"] == "periods_missing"
++    assert rows["fcf_yield"]["status"] == "present"
++
++
++def test_three_quarters_form_no_trailing_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """DEC-0221: a trailing-only input needs four periods, P1 to P4; the most recent
++    balance sheet alone still serves book_to_price."""
++    _quarters_at(env, [months_before(P1, 3 * k) for k in range(3)])
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in ("earnings_yield", "fcf_yield", *GROWTH):
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++    assert rows["book_to_price"]["status"] == "present"
++
++
++def test_gap_inside_the_prior_window_leaves_growth_missing(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0221: with the eighth quarter absent and a ninth held, the seventh and eighth
++    periods held are six months apart, so the eight quarters growth needs are not
++    consecutive."""
++    found = _income_with_gap(env, gap=7, n=9)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in GROWTH:
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++    assert ends_of(rows["eps_growth"]["detail"]["periods_found"]) == [str(e) for e in found]
++    assert rows["earnings_yield"]["status"] == "present"
++
++
++def test_absent_year_ago_quarter_leaves_growth_missing(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0221, DEC-0055 (1): the prior year is the four quarters right after the trailing
++    four; with the fifth absent the window is not formed, never taken a quarter later.
++    Trailing-only inputs need P1 to P4 alone and stay present."""
++    found = _income_with_gap(env, gap=4, n=9)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in GROWTH:
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++    assert ends_of(rows["revenue_growth"]["detail"]["periods_found"]) == [str(e) for e in found]
++    assert (rows["earnings_yield"]["status"], rows["earnings_yield"]["value"]) == (
++        "present",
++        EARNINGS_YIELD,
++    )
++
++
++def test_fifty_two_week_filer_compares_with_the_year_ago_quarters(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0221: a 52-week filer's year-ago quarter ends later than P1 minus 12 months and
++    is still the first quarter of the prior window; P1 to P8 are the eight newest."""
++    _quarters_at(env, FIFTY_TWO_WEEK)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert (rows["revenue_growth"]["status"], rows["revenue_growth"]["value"]) == (
++        "present",
++        REVENUE_GROWTH,
++    )
++    assert rows["eps_growth"]["value"] == EPS_GROWTH
++    assert ends_of(rows["revenue_growth"]["detail"]["periods"]) == [
++        str(end) for end in FIFTY_TWO_WEEK[:8]
++    ]
++    assert rows["earnings_yield"]["value"] == EARNINGS_YIELD
++
++
++def test_fifty_two_week_filer_missing_a_quarter_forms_no_trailing_window(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0221: with its third income statement absent, a 52-week filer's four newest are
++    still within 12 months of P1, but two adjacent ones are six months apart, so the
++    trailing window is not formed."""
++    _quarters_at(env, FIFTY_TWO_WEEK, income_gap=2)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in (*GROWTH, "earnings_yield"):
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "periods_missing"
++    assert rows["fcf_yield"]["status"] == "present"
++    assert rows["book_to_price"]["status"] == "present"
++
++
++@pytest.mark.parametrize(
++    ("second", "status"), [(date(2026, 5, 30), "present"), (date(2026, 5, 29), "missing")]
++)
++def test_adjacent_quarters_at_most_four_months_apart_are_consecutive(
++    env: Env, monkeypatch: pytest.MonkeyPatch, second: date, status: str
++) -> None:
++    """DEC-0221: period ends 4 months apart (2026-09-30, 2026-05-30) are consecutive; 4
++    months and a day apart are not."""
++    _quarters_at(env, [P1, second, months_before(second, 3), months_before(second, 6)])
++
++    build(env, monkeypatch)
++
++    row = inputs_for(env.conn, env.set_id, env.stock)["earnings_yield"]
++    assert row["status"] == status
++    assert row["value"] == (EARNINGS_YIELD if status == "present" else None)
++
++
++# --- T006: annual statements --------------------------------------------------------------
++
++
++# Implements TC-COMP-061
++def test_annual_rows_enter_no_trailing_sum(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    ends = add_quarters(env.conn, env.stock, P1, 8, standard())
++    big = {
++        TEST_KEYS["revenue"]: Decimal(100000),
++        TEST_KEYS["net_income"]: Decimal(100000),
++        TEST_KEYS["diluted_eps"]: Decimal(1000),
++    }
++    # One shares the newest quarter's period end and is observed later; one has its own
++    # date inside the trailing window and one inside the prior window.
++    for end in (P1, date(2026, 8, 15), months_before(ends[5], 1)):
++        add_statement(
++            env.conn,
++            env.stock,
++            end,
++            "income_statement",
++            big,
++            fiscal_period="FY",
++            observed_on=D,
++        )
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert (rows["revenue_growth"]["status"], rows["revenue_growth"]["value"]) == (
++        "present",
++        REVENUE_GROWTH,
++    )
++    assert rows["eps_growth"]["value"] == EPS_GROWTH
++    assert rows["earnings_yield"]["value"] == EARNINGS_YIELD
++    assert (
++        str(P1 + timedelta(days=15))
++        == rows["revenue_growth"]["detail"]["periods"][0]["observed_on"]
++    )
++
++
++def test_stock_with_only_annual_statements_has_value_and_growth_missing(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-S3-3: annual rows form no window and no most recent quarterly balance sheet."""
++    values = standard(2)
++    for k, end in enumerate((date(2025, 12, 31), date(2024, 12, 31))):
++        for statement_type in ("balance_sheet", "income_statement", "cash_flow_statement"):
++            payload = {
++                TEST_KEYS[name]: value
++                for name, value in values[k].items()
++                if line_items.LINE_ITEMS[name].statement_type == statement_type
++            }
++            add_statement(env.conn, env.stock, end, statement_type, payload, fiscal_period="FY")
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in (*VALUE, *GROWTH):
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"] == {"cause": "periods_missing", "periods_found": []}
++
++
++# --- T007: the latest observation of a period ---------------------------------------------
++
++
++def _seven_older_quarters(env: Env, latest: date) -> None:
++    add_quarters(env.conn, env.stock, months_before(latest, 3), 7, standard()[1:])
++
++
++# Implements TC-COMP-161
++def test_later_observation_of_a_period_is_used_and_earlier_untouched(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    latest = date(2026, 5, 31)
++    _seven_older_quarters(env, latest)
++    newest = standard()[0]
++    for statement_type, names in (
++        ("balance_sheet", ("book_equity", "shares_outstanding")),
++        ("cash_flow_statement", ("operating_cash_flow", "capital_expenditure")),
++    ):
++        payload = {TEST_KEYS[n]: newest[n] for n in names}
++        add_statement(
++            env.conn, env.stock, latest, statement_type, payload, observed_on=date(2026, 6, 1)
++        )
++    first = {TEST_KEYS["revenue"]: Decimal(130), TEST_KEYS["net_income"]: Decimal(13)}
++    second = {TEST_KEYS["revenue"]: Decimal(140), TEST_KEYS["net_income"]: Decimal(23)}
++    add_statement(
++        env.conn, env.stock, latest, "income_statement", first, observed_on=date(2026, 6, 1)
++    )
++    add_statement(
++        env.conn, env.stock, latest, "income_statement", second, observed_on=date(2026, 7, 15)
++    )
++    before = _period_rows(env, latest)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["revenue_growth"]["value"] == ratio(Decimal(485), Decimal(370), 1)
++    assert rows["revenue_growth"]["known_on"] == date(2026, 7, 15)
++    assert rows["earnings_yield"]["value"] == ratio(Decimal(56), Decimal(1000))
++    assert _period_rows(env, latest) == before
++    assert len(before) == 2
++
++
++def _period_rows(env: Env, end: date) -> list[tuple[Any, ...]]:
++    rows = env.conn.execute(
++        "SELECT fiscal_period, statement_type, observed_on, value_hash, provider_filing_date, "
++        "payload::text, recorded_at FROM fundamental_observation "
++        "WHERE instrument_id = %s AND fiscal_period_end = %s AND statement_type = "
++        "'income_statement' ORDER BY observed_on, recorded_at",
++        (env.stock, end),
++    ).fetchall()
++    env.conn.commit()
++    return rows
++
++
++def test_equal_observed_on_is_decided_by_the_later_recorded_at(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.3 step 3: observed_on DESC, then recorded_at DESC (DAC-E2-9). One stock has
++    the later recording inserted last and one has it inserted first, so neither insertion
++    nor heap order can stand in for recorded_at."""
++    other = add_instrument(env.conn, "BBB")
++    add_bar(env.conn, other, L)
++    seen = date(2026, 10, 15)
++    late = datetime(2026, 10, 15, 18, tzinfo=UTC)
++    for stock, later_last in ((env.stock, True), (other, False)):
++        add_quarters(env.conn, stock, months_before(P1, 3), 7, standard()[1:])
++        recordings = [(Decimal(140), late - timedelta(hours=6)), (Decimal(150), late)]
++        for revenue, recorded in recordings if later_last else recordings[::-1]:
++            add_statement(
++                env.conn,
++                stock,
++                P1,
++                "income_statement",
++                {TEST_KEYS["revenue"]: revenue},
++                observed_on=seen,
++                recorded_at=recorded,
++            )
++
++    build(env, monkeypatch)
++
++    for stock in (env.stock, other):
++        row = inputs_for(env.conn, env.set_id, stock)["revenue_growth"]
++        assert row["value"] == ratio(Decimal(495), Decimal(370), 1), stock
++
++
++# --- T008: non-positive bases --------------------------------------------------------------
++
++
++# Implements TC-COMP-062
++@pytest.mark.parametrize(
++    ("item", "prior", "base"),
++    [
++        ("revenue", ["10", "-10", "5", "-5"], Decimal(0)),
++        ("revenue", ["-10", "-20", "-30", "-40"], Decimal(-100)),
++        ("diluted_eps", ["0.5", "-0.5", "0.25", "-0.25"], Decimal("0.00")),
++        ("diluted_eps", ["-0.1", "-0.2", "-0.3", "-0.4"], Decimal("-1.0")),
++    ],
++)
++def test_non_positive_prior_year_base_makes_growth_not_computable(
++    env: Env, monkeypatch: pytest.MonkeyPatch, item: str, prior: list[str], base: Decimal
++) -> None:
++    values = standard()
++    for k, amount in enumerate(prior, start=4):
++        values[k][item] = Decimal(amount)
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    name, other = ("revenue_growth", "eps_growth") if item == "revenue" else GROWTH[::-1]
++    assert rows[name]["status"] == "not_computable"
++    assert rows[name]["value"] is None
++    assert rows[name]["as_of"] == P1
++    assert rows[name]["detail"]["cause"] == "prior_year_base_not_positive"
++    assert rows[name]["detail"]["prior_year_base"] == base
++    assert len(rows[name]["detail"]["periods"]) == 8
++    assert rows[other]["status"] == "present"
++    assert {rows[n]["status"] for n in VALUE} == {"present"}
++
++
++# Implements TC-COMP-062
++@pytest.mark.parametrize("shares", [Decimal(0), Decimal(-100)])
++def test_non_positive_shares_make_every_value_input_not_computable(
++    env: Env, monkeypatch: pytest.MonkeyPatch, shares: Decimal
++) -> None:
++    values = standard()
++    values[0]["shares_outstanding"] = shares
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name in VALUE:
++        assert rows[name]["status"] == "not_computable", name
++        assert rows[name]["value"] is None
++        assert rows[name]["detail"]["cause"] == "market_capitalisation_not_positive"
++        assert rows[name]["detail"]["shares_outstanding"] == shares
++        assert rows[name]["detail"]["market_capitalisation"] == shares * 10
++    assert {rows[n]["status"] for n in GROWTH} == {"present"}
++
++
++def test_market_capitalisation_of_one_is_computable(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.4: only a market capitalisation of zero or less is not computable."""
++    values = standard()
++    values[0]["shares_outstanding"] = Decimal("0.1")  # times the close of 10
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    row = inputs_for(env.conn, env.set_id, env.stock)["book_to_price"]
++    assert (row["status"], row["value"]) == ("present", Decimal(500))
++
++
++def test_small_positive_prior_year_base_is_computable(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0055 (2): only a prior-year base of zero or less is not computable."""
++    values = standard()
++    for k in range(4, 8):
++        values[k]["diluted_eps"] = Decimal("0.25")
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    row = inputs_for(env.conn, env.set_id, env.stock)["eps_growth"]
++    assert (row["status"], row["value"]) == ("present", ratio(Decimal("4.6"), Decimal(1), 1))
++
++
++# --- T012 (a): unresolved line items --------------------------------------------------------
++
++NEEDS = {
++    "book_to_price": ["book_equity", "shares_outstanding"],
++    "earnings_yield": ["net_income", "shares_outstanding"],
++    "fcf_yield": ["capital_expenditure", "operating_cash_flow", "shares_outstanding"],
++    "revenue_growth": ["revenue"],
++    "eps_growth": ["diluted_eps"],
++}
++
++
++def test_unresolved_line_items_leave_value_and_growth_missing(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Supporting case for TC-COMP-059 (AC-12): with every key REQUIRES_INPUT the five
++    inputs are missing naming the line items each needs, and the set completes."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
++
++    assert result.state == "complete"
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    for name, needed in NEEDS.items():
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == UNRESOLVED_CAUSE
++        assert sorted(rows[name]["detail"]["line_items"]) == sorted(needed), name
++
++
++def test_only_unresolved_line_items_are_named(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """AC-12: with net income resolved, earnings_yield names only shares outstanding."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++    resolve_only(monkeypatch, "net_income")
++
++    run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["earnings_yield"]["detail"]["cause"] == UNRESOLVED_CAUSE
++    assert rows["earnings_yield"]["detail"]["line_items"] == ["shares_outstanding"]
++    assert sorted(rows["book_to_price"]["detail"]["line_items"]) == NEEDS["book_to_price"]
++
++
++def test_resolved_items_classify_independently_of_unresolved_ones(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-12: with net income and shares outstanding resolved, earnings_yield is present
++    while book_to_price and fcf_yield stay missing naming their own items."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++    resolve_only(monkeypatch, "net_income", "shares_outstanding")
++
++    run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert (rows["earnings_yield"]["status"], rows["earnings_yield"]["value"]) == (
++        "present",
++        EARNINGS_YIELD,
++    )
++    assert rows["book_to_price"]["detail"] == {
++        "cause": UNRESOLVED_CAUSE,
++        "line_items": ["book_equity"],
++    }
++    assert sorted(rows["fcf_yield"]["detail"]["line_items"]) == [
++        "capital_expenditure",
++        "operating_cash_flow",
++    ]
++
++
++# --- T012 (b): the stored form of a line item ---------------------------------------------
++
++
++def test_plain_decimal_strings_and_json_numbers_read_alike(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0116 (4): a JSON number and a JSON string holding a plain decimal are both read."""
++    other = add_instrument(env.conn, "NUM")
++    add_bar(env.conn, other, L)
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++    add_quarters(env.conn, other, P1, 8, standard(), numbers=True)
++
++    build(env, monkeypatch)
++
++    strings = inputs_for(env.conn, env.set_id, env.stock)
++    numbers = inputs_for(env.conn, env.set_id, other)
++    expected = {
++        "book_to_price": BOOK_TO_PRICE,
++        "earnings_yield": EARNINGS_YIELD,
++        "fcf_yield": FCF_YIELD,
++    }
++    assert {n: (strings[n]["status"], strings[n]["value"]) for n in VALUE} == {
++        n: ("present", v) for n, v in expected.items()
++    }
++    assert {n: (numbers[n]["status"], numbers[n]["value"]) for n in VALUE} == {
++        n: ("present", v) for n, v in expected.items()
++    }
++
++
++_OMIT = object()
++
++
++@pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
++def test_unusable_line_item_value_reads_as_absent(
++    env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
++) -> None:
++    """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
++    never a cast error; the input is missing and the set completes."""
++    values = standard()
++    if stored is _OMIT:
++        del values[0]["net_income"]
++    else:
++        values[0]["net_income"] = stored
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["earnings_yield"]["status"] == "missing"
++    assert rows["earnings_yield"]["detail"]["cause"] == "line_item_absent"
++    assert rows["earnings_yield"]["detail"]["line_items"] == ["net_income"]
++    assert rows["book_to_price"]["status"] == "present"
++
++
++def test_plain_decimal_fractions_are_read_exactly(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0116 (4): a plain decimal's fraction is read, zero digits included."""
++    values = standard()
++    values[0]["book_equity"] = Decimal("500.05")
++    for k in range(4):
++        values[k]["net_income"] = Decimal(f"{13 - k}.10")
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["book_to_price"]["value"] == ratio(Decimal("500.05"), Decimal(1000))
++    assert rows["earnings_yield"]["value"] == ratio(Decimal("46.40"), Decimal(1000))
++
++
++# --- T012 (c), (d): the value formulas -----------------------------------------------------
++
++
++def test_fcf_yield_subtracts_signed_capital_expenditure(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.4: (TTM operating cash flow - TTM capital expenditure) / MC, with the
++    outflow-negative capital expenditure turned positive by its sign of -1."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert (rows["fcf_yield"]["status"], rows["fcf_yield"]["value"]) == ("present", FCF_YIELD)
++    # No row is backfilled, so CAP-002-E2-S6's mark leaves the column false as well.
++    assert {rows[name]["restated_possible"] for name in VALUE} == {False}
++
++
++def test_market_capitalisation_is_latest_close_times_newest_shares(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0055 (6): the latest session's latest observation of the close, times shares
++    outstanding from the most recent quarterly balance sheet; detail carries the parts."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++    add_bar(env.conn, env.stock, L - timedelta(days=1), close=99)
++    add_bar(env.conn, env.stock, L, close=12, observed_on=L + timedelta(days=1))
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["book_to_price"]["value"] == ratio(Decimal(500), Decimal(1200))
++    assert rows["earnings_yield"]["value"] == ratio(Decimal(46), Decimal(1200))
++    detail = rows["book_to_price"]["detail"]
++    assert detail["close"] == 12
++    assert detail["bar_date"] == str(L)
++    assert detail["bar_observed_on"] == str(L + timedelta(days=1))
++    assert detail["shares_outstanding"] == 100
++    assert detail["balance_sheet_period_end"] == str(P1)
++    assert detail["market_capitalisation"] == 1200
++
++
++def test_value_detail_lists_the_balance_sheet_and_trailing_rows(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.4 and DEC-0122: each period used, balance sheet first; book_to_price reads
++    the balance sheet only."""
++    ends = add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++
++    def used(detail: dict[str, Any]) -> list[tuple[str, str]]:
++        return [(p["statement_type"], p["fiscal_period_end"]) for p in detail["periods"]]
++
++    balance = [("balance_sheet", str(P1))]
++    assert used(rows["book_to_price"]["detail"]) == balance
++    assert used(rows["earnings_yield"]["detail"]) == balance + [
++        ("income_statement", str(e)) for e in ends[:4]
++    ]
++    assert used(rows["fcf_yield"]["detail"]) == balance + [
++        ("cash_flow_statement", str(e)) for e in ends[:4]
++    ]
++
++
++# --- T012 (e), (f): which statements are read -----------------------------------------------
++
++
++def test_balance_sheet_dated_after_the_classification_date_is_never_used(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.3 step 3: only periods ending on or before the classification date."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++    later = date(2026, 12, 31)
++    add_statement(
++        env.conn,
++        env.stock,
++        later,
++        "balance_sheet",
++        {TEST_KEYS["book_equity"]: Decimal(9000), TEST_KEYS["shares_outstanding"]: Decimal(1)},
++    )
++    add_statement(
++        env.conn, env.stock, later, "income_statement", {TEST_KEYS["net_income"]: Decimal(9000)}
++    )
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["book_to_price"]["value"] == BOOK_TO_PRICE
++    assert rows["earnings_yield"]["value"] == EARNINGS_YIELD
++    assert rows["book_to_price"]["as_of"] == P1
++
++
++def test_quarter_ending_on_the_classification_date_is_used(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.3 step 3: a period ending on the classification date is on or before it."""
++    add_quarters(env.conn, env.stock, D, 8, standard())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert {rows[name]["as_of"] for name in (*VALUE, *GROWTH)} == {D}
++    assert rows["revenue_growth"]["value"] == REVENUE_GROWTH
++
++
++def test_absent_item_in_newest_balance_sheet_does_not_fall_back(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0055 (1): the single most recent quarterly balance sheet, never an older one."""
++    values = standard()
++    del values[0]["book_equity"]
++    add_quarters(env.conn, env.stock, P1, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["book_to_price"]["status"] == "missing"
++    assert rows["book_to_price"]["detail"]["cause"] == "line_item_absent"
++    assert rows["book_to_price"]["detail"]["line_items"] == ["book_equity"]
++    assert rows["earnings_yield"]["status"] == "present"
++
++
++def _capture_stmt(captured: list[tuple[Any, ...]]):
++    def stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
++        captured.extend(
++            conn.execute(
++                "SELECT instrument_id, statement_type, fiscal_period_end, period_rank, ttm_slot, "
++                "prior_slot, backfilled FROM stmt "
++                "ORDER BY instrument_id, statement_type, fiscal_period_end DESC"
++            ).fetchall()
++        )
++
++    return stage
++
++
++def test_ratios_statements_are_never_read(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """Design 2.3 step 3: the three statement types only; a ratios row is not selected."""
++    ends = add_quarters(env.conn, env.stock, P1, 8, standard())
++    for end in (P1, date(2026, 10, 1)):
++        add_statement(env.conn, env.stock, end, "ratios", {TEST_KEYS["net_income"]: Decimal(9000)})
++    captured: list[tuple[Any, ...]] = []
++    install_test_line_items(monkeypatch)
++    monkeypatch.setattr(
++        engine, "_STAGES", [engine._fundamental_inputs_stage, _capture_stmt(captured)]
++    )
++
++    assert engine.build(env.conn, env.set_id, 60).state == "complete"
++
++    assert {row[1] for row in captured} == {
++        "balance_sheet",
++        "income_statement",
++        "cash_flow_statement",
++    }
++    assert len(captured) == 3 * len(ends)
++    assert inputs_for(env.conn, env.set_id, env.stock)["earnings_yield"]["value"] == (
++        EARNINGS_YIELD
++    )
++
++
++def test_statement_windows_assign_trailing_and_prior_slots(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0055 (1), DEC-0221: ranks newest first, the four newest fill the trailing
++    window and the next four, ranks 5 to 8, the prior one."""
++    ends = add_quarters(env.conn, env.stock, P1, 9, standard() + standard(1))
++    captured: list[tuple[Any, ...]] = []
++    install_test_line_items(monkeypatch)
++    monkeypatch.setattr(
++        engine, "_STAGES", [engine._fundamental_inputs_stage, _capture_stmt(captured)]
++    )
++
++    assert engine.build(env.conn, env.set_id, 60).state == "complete"
++
++    income = [row for row in captured if row[1] == "income_statement"]
++    assert [(row[2], row[3], row[4], row[5]) for row in income] == [
++        (end, k + 1, k + 1 if k < 4 else None, k - 3 if 4 <= k < 8 else None)
++        for k, end in enumerate(ends)
++    ]
++
++
++# --- T012 (g): the roster ---------------------------------------------------------------------
++
++
++def test_retired_instrument_gets_no_input_and_active_gets_five(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-15 compute side, design 2.3: inputs are written for the active roster only."""
++    retired = add_instrument(env.conn, "OLD", lifecycle="retired")
++    add_quarters(env.conn, retired, P1, 8, standard())
++    add_bar(env.conn, retired, L)
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    build(env, monkeypatch)
++
++    assert inputs_for(env.conn, env.set_id, retired) == {}
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert {name: row["factor"] for name, row in rows.items()} == {
++        "book_to_price": "value",
++        "earnings_yield": "value",
++        "fcf_yield": "value",
++        "revenue_growth": "growth",
++        "eps_growth": "growth",
++    }
++
++
++def test_stock_with_no_statements_gets_five_missing_inputs(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-12: the roster, not the statements, decides which rows are written."""
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert {name: row["detail"]["cause"] for name, row in rows.items()} == {
++        name: "periods_missing" for name in (*VALUE, *GROWTH)
++    }
++
++
++def test_insert_inputs_writes_only_the_named_factors(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0115: a later stage adds its rows to inputs and runs insert_inputs.sql for its own
++    factor; only that factor's rows are written, so no value or growth row is written twice."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    def momentum_stub(conn: psycopg.Connection, ctx: BuildContext) -> None:
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, "
++                "known_on, restated_possible, detail, missing_data_type) VALUES "
++                "(%s, 'momentum', 'return_3m', 'present', 0.1, %s, %s, false, "
++                "jsonb_build_object(), 'prices')",
++                (env.stock, L, L),
++            )
++            cur.execute(engine._INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["momentum"]})
++
++    install_test_line_items(monkeypatch)
++    monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage, momentum_stub])
++
++    result = engine.build(env.conn, env.set_id, 60)
++
++    assert result.state == "complete", result.failure_reason
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert {name: row["factor"] for name, row in rows.items()} == {
++        "book_to_price": "value",
++        "earnings_yield": "value",
++        "fcf_yield": "value",
++        "revenue_growth": "growth",
++        "eps_growth": "growth",
++        "return_3m": "momentum",
++    }
++
++
++# --- T012 (h): reason precedence (DEC-0116 (1)) -----------------------------------------------
++
++STALE = date(2026, 3, 31)  # earlier than D minus 6 months (2026-04-17)
++
++
++def test_stale_and_non_positive_base_is_outdated(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """DEC-0116 (1): outdated ranks before not_computable."""
++    values = standard()
++    for k in range(4, 8):
++        values[k]["revenue"] = Decimal(-1)
++    values[0]["shares_outstanding"] = Decimal(0)
++    add_quarters(env.conn, env.stock, STALE, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["revenue_growth"]["status"] == "outdated"
++    assert {rows[name]["status"] for name in VALUE} == {"outdated"}
++
++
++def test_absent_line_item_and_stale_is_missing(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
++    """DEC-0116 (1): missing ranks before outdated."""
++    values = standard()
++    del values[0]["revenue"]
++    del values[0]["net_income"]
++    add_quarters(env.conn, env.stock, STALE, 8, values)
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    assert rows["revenue_growth"]["status"] == "missing"
++    assert rows["earnings_yield"]["status"] == "missing"
++    assert rows["book_to_price"]["status"] == "outdated"
++
++
++# --- T012 (i): known_on (DEC-0055 (7)) ---------------------------------------------------------
++
++
++def test_value_known_on_is_the_latest_observation_of_statements_and_bar(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0055 (7): every statement row and the bar an input used decide its known_on."""
++    values = standard()
++    ends = [months_before(P1, 3 * k) for k in range(8)]
++    # Later than the stock's bar (observed on L), so a statement row decides known_on.
++    seen = {
++        "balance_sheet": date(2026, 10, 20),
++        "income_statement": date(2026, 10, 21),
++        "cash_flow_statement": date(2026, 10, 22),
++    }
++    for k, end in enumerate(ends):
++        for statement_type, observed in seen.items():
++            payload = {
++                TEST_KEYS[name]: value
++                for name, value in values[k].items()
++                if line_items.LINE_ITEMS[name].statement_type == statement_type
++            }
++            # Only the third quarter of each type carries its type's latest observation.
++            on = observed if k == 2 else end + timedelta(days=1)
++            add_statement(env.conn, env.stock, end, statement_type, payload, observed_on=on)
++    other = add_instrument(env.conn, "LATEBAR")
++    add_bar(env.conn, other, L, observed_on=date(2026, 10, 20))
++    add_quarters(env.conn, other, P1, 8, standard())
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    # book_to_price reads the newest balance sheet only, not the third quarter's.
++    assert rows["book_to_price"]["known_on"] == L
++    assert rows["earnings_yield"]["known_on"] == date(2026, 10, 21)
++    assert rows["fcf_yield"]["known_on"] == date(2026, 10, 22)
++    late = inputs_for(env.conn, env.set_id, other)
++    assert {late[name]["known_on"] for name in VALUE} == {date(2026, 10, 20)}
++
++
++# --- T012 (j): the last acquisition of a missing input -----------------------------------------
++
++
++def _acquisition(env: Env, instrument_id: int, data_type: str, outcome: str) -> None:
++    env.conn.execute(
++        "INSERT INTO acquisition_state (instrument_id, data_type, last_acquired_at, "
++        "last_run_id, last_outcome) VALUES (%s, %s, %s, gen_random_uuid(), %s)",
++        (instrument_id, data_type, datetime(2026, 10, 16, 21, tzinfo=UTC), outcome),
++    )
++    env.conn.commit()
++
++
++def test_missing_input_carries_the_last_fundamentals_acquisition(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.3 step 5, AC-12: a missing input names the last fundamentals outcome; a
++    present one carries no acquisition."""
++    values = standard()
++    del values[0]["net_income"]
++    add_quarters(env.conn, env.stock, P1, 8, values)
++    _acquisition(env, env.stock, "fundamentals", "not_found")
++    _acquisition(env, env.stock, "prices", "written")
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    acquisition = rows["earnings_yield"]["detail"]["last_acquisition"]
++    assert (acquisition["data_type"], acquisition["outcome"]) == ("fundamentals", "not_found")
++    assert datetime.fromisoformat(acquisition["acquired_at"]) == datetime(
++        2026, 10, 16, 21, tzinfo=UTC
++    )
++    assert "last_acquisition" not in rows["book_to_price"]["detail"]
++
++
++def test_missing_price_carries_the_last_prices_acquisition(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.3 step 5, DEC-0116 (2): no bar at all is missing, sourced to prices."""
++    barless = add_instrument(env.conn, "NOBAR")
++    add_quarters(env.conn, barless, P1, 8, standard())
++    _acquisition(env, barless, "prices", "failed")
++    _acquisition(env, barless, "fundamentals", "written")
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, barless)
++    for name in VALUE:
++        assert rows[name]["status"] == "missing", name
++        assert rows[name]["detail"]["cause"] == "price_missing"
++        assert rows[name]["detail"]["last_acquisition"]["data_type"] == "prices"
++        assert rows[name]["detail"]["last_acquisition"]["outcome"] == "failed"
++    assert {rows[name]["status"] for name in GROWTH} == {"present"}
++
++
++def test_missing_input_without_acquisition_state_has_no_acquisition_key(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.3 step 5: no acquisition_state row leaves detail unchanged."""
++    add_quarters(env.conn, env.stock, P1, 7, standard(7))
++
++    build(env, monkeypatch)
++
++    detail = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]["detail"]
++    assert set(detail) == {"cause", "periods_found"}
++
++
++# --- T012 (k): the backfill flag (DEC-0056) ------------------------------------------------------
++
++
++def test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0056: filed before the instrument's first fundamentals observed_on, over every
++    row it has, is backfilled; filed on or after it, or with no filing date, is not."""
++    first = date(2026, 1, 5)
++    # The instrument's first observation is an annual ratios row, so the comparison date
++    # spans every statement type and period kind.
++    add_statement(
++        env.conn, env.stock, date(2025, 12, 31), "ratios", {}, fiscal_period="FY", observed_on=first
++    )
++    values = standard()
++    ends = [months_before(P1, 3 * k) for k in range(8)]
++    filed = {
++        3: first - timedelta(days=1),  # backfilled
++        2: first,  # filed on the first observation: not backfilled
++        1: None,  # no filing date: not backfilled
++    }
++    for k, end in enumerate(ends):
++        for statement_type in ("balance_sheet", "income_statement", "cash_flow_statement"):
++            payload = {
++                TEST_KEYS[name]: value
++                for name, value in values[k].items()
++                if line_items.LINE_ITEMS[name].statement_type == statement_type
++            }
++            add_statement(
++                env.conn,
++                env.stock,
++                end,
++                statement_type,
++                payload,
++                observed_on=date(2026, 10, 1),
++                provider_filing_date=filed.get(k, date(2026, 9, 1)),
++            )
++
++    build(env, monkeypatch)
++
++    rows = inputs_for(env.conn, env.set_id, env.stock)
++    flags = {
++        p["fiscal_period_end"]: p["backfilled"] for p in rows["revenue_growth"]["detail"]["periods"]
++    }
++    assert flags == {str(end): k == 3 for k, end in enumerate(ends)}
++    income = {
++        p["fiscal_period_end"]: p["backfilled"]
++        for p in rows["earnings_yield"]["detail"]["periods"]
++        if p["statement_type"] == "income_statement"
++    }
++    assert income == {str(end): k == 3 for k, end in enumerate(ends[:4])}
++    cash = {
++        p["fiscal_period_end"]: p["backfilled"]
++        for p in rows["fcf_yield"]["detail"]["periods"]
++        if p["statement_type"] == "cash_flow_statement"
++    }
++    assert cash == {str(end): k == 3 for k, end in enumerate(ends[:4])}
++
++
++# --- T014: one snapshot per build (DEC-0111) ---------------------------------------------------
++
++
++def test_statement_committed_during_the_build_is_not_used(
++    env: Env, monkeypatch: pytest.MonkeyPatch, postgres_connection_string: str
++) -> None:
++    """DAC-E2-9, AC-19: a newer observation committed after the build began is not seen;
++    the next set uses it and the first set's rows are unchanged."""
++    add_quarters(env.conn, env.stock, P1, 8, standard())
++
++    def commit_newer_statement(conn: psycopg.Connection, ctx: BuildContext) -> None:
++        with psycopg.connect(postgres_connection_string) as other:
++            add_statement(
++                other,
++                env.stock,
++                P1,
++                "income_statement",
++                {
++                    TEST_KEYS["revenue"]: Decimal(230),
++                    TEST_KEYS["net_income"]: Decimal(113),
++                    TEST_KEYS["diluted_eps"]: Decimal("1.3"),
++                },
++                observed_on=date(2026, 10, 17),
++            )
++
++    install_test_line_items(monkeypatch)
++    monkeypatch.setattr(
++        engine, "_STAGES", [commit_newer_statement, engine._fundamental_inputs_stage]
++    )
++    assert engine.build(env.conn, env.set_id, 60).state == "complete"
++    first = inputs_for(env.conn, env.set_id, env.stock)
++    assert first["revenue_growth"]["value"] == REVENUE_GROWTH
++    assert first["revenue_growth"]["known_on"] == P1 + timedelta(days=15)
++
++    second_set = add_building_set(env.conn, add_run(env.conn), D)
++    assert run_fundamentals_stage(env.conn, second_set, monkeypatch).state == "complete"
++
++    second = inputs_for(env.conn, second_set, env.stock)
++    assert second["revenue_growth"]["value"] == ratio(Decimal(575), Decimal(370), 1)
++    assert second["revenue_growth"]["known_on"] == date(2026, 10, 17)
++    assert inputs_for(env.conn, env.set_id, env.stock) == first
+diff --git a/tests/unit/test_engine_line_item_params.py b/tests/unit/test_engine_line_item_params.py
+new file mode 100644
+index 0000000..242760f
+--- /dev/null
++++ b/tests/unit/test_engine_line_item_params.py
+@@ -0,0 +1,100 @@
++"""The line-item parameters the fundamentals stage binds (CAP-002-E2-S3).
++
++Traces to AC-7 and SEC-INP-002: payload keys reach SQL as bound parameters, never
++interpolated, and the ``REQUIRES_INPUT`` sentinel never reaches SQL at all.
++"""
++
++from typing import Any
++
++import pytest
++
++from factorflow.classification import engine, line_items
++from factorflow.classification.line_items import (
++    LINE_ITEMS,
++    REQUIRES_INPUT,
++    UNRESOLVED_CAUSE,
++    LineItem,
++)
++
++NAMES = list(LINE_ITEMS)
++
++
++def by_name(params: dict[str, Any]) -> dict[str, tuple[str, str | None, int]]:
++    return {
++        name: (statement_type, key, sign)
++        for name, statement_type, key, sign in zip(
++            params["line_item_names"],
++            params["line_item_statement_types"],
++            params["line_item_keys"],
++            params["line_item_signs"],
++            strict=True,
++        )
++    }
++
++
++def strings(value: object) -> list[str]:
++    if isinstance(value, str):
++        return [value]
++    if isinstance(value, dict):
++        return [s for v in value.values() for s in strings(v)]
++    if isinstance(value, list | tuple):
++        return [s for v in value for s in strings(v)]
++    return []
++
++
++def test_real_line_items_pass_every_key_as_none_and_every_item_unresolved() -> None:
++    """Design 2.4, AC-12: while every key is REQUIRES_INPUT each is bound as None."""
++    params = engine._line_item_parameters()
++
++    assert params["line_item_names"] == NAMES
++    assert by_name(params) == {
++        name: (item.statement_type, None, item.sign) for name, item in LINE_ITEMS.items()
++    }
++    assert params["unresolved"] == NAMES
++    assert params["unresolved_cause"] == UNRESOLVED_CAUSE
++
++
++def test_a_resolved_item_carries_its_key_and_sign(monkeypatch: pytest.MonkeyPatch) -> None:
++    """Design 2.4 LineItem, AC-7: a resolved item is bound with its own key and sign, read
++    from line_items.LINE_ITEMS at call time."""
++    item = LINE_ITEMS["capital_expenditure"]
++    monkeypatch.setitem(
++        line_items.LINE_ITEMS,
++        "capital_expenditure",
++        LineItem(item.label, item.statement_type, "X", -1),
++    )
++
++    resolved = by_name(engine._line_item_parameters())
++
++    assert resolved["capital_expenditure"] == ("cash_flow_statement", "X", -1)
++    assert {
++        name: value[1] for name, value in resolved.items() if name != "capital_expenditure"
++    } == {name: None for name in NAMES if name != "capital_expenditure"}
++    assert engine._line_item_parameters()["unresolved"] == [
++        name for name in NAMES if name != "capital_expenditure"
++    ]
++
++
++def test_a_replaced_mapping_is_read_at_call_time(monkeypatch: pytest.MonkeyPatch) -> None:
++    """T016: the module attribute is read at call time, never a name imported into engine."""
++    replaced = {
++        name: LineItem(item.label, item.statement_type, f"k_{name}", item.sign)
++        for name, item in LINE_ITEMS.items()
++    }
++    monkeypatch.setattr(line_items, "LINE_ITEMS", replaced)
++
++    params = engine._line_item_parameters()
++
++    assert params["line_item_keys"] == [f"k_{name}" for name in NAMES]
++    assert params["unresolved"] == []
++
++
++def test_the_sentinel_never_appears_in_the_parameters() -> None:
++    """SEC-INP-002, design 2.4: the REQUIRES_INPUT sentinel never reaches SQL."""
++    assert REQUIRES_INPUT not in strings(engine._line_item_parameters())
++
++
++def test_the_fundamentals_stage_is_registered_once() -> None:
++    """T016, DEC-0121: the stage is in the build's stage list, once; CAP-002-E2-S4 and S5
++    add their own stages beside it."""
++    assert engine._STAGES.count(engine._fundamental_inputs_stage) == 1

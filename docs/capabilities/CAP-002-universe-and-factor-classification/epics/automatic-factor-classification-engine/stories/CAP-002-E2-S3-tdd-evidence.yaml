@@ -1,0 +1,401 @@
+# TDD evidence for CAP-002-E2-S3 - Value and growth inputs from quarterly fundamentals.
+# One cycle, as the task plan lays it out: Phase 2 writes every test (T002-T014) and observes RED,
+# Phase 3 makes them pass (T015-T020); T021-T023 validate and T024 is this file.
+# Review history: the first per-cycle code review rejected the cycle (prior-year window rule of design
+# 2.4 and T015 against DEC-0055 (1)); the owner decided DEC-0221, which supersedes the 12-month span
+# rule of design 2.4 and the window wording of T015. The rework stayed in cycle-1 with its own observed
+# RED (red-cycle-1-dec-0221.log), and both reviews then judged the final patch: APPROVED, no drift.
+# Decisions applied: DEC-0055, DEC-0056, DEC-0111, DEC-0115, DEC-0116, DEC-0117, DEC-0121, DEC-0122,
+# DEC-0221.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019, T020]
+    decisions: [DEC-0055, DEC-0056, DEC-0111, DEC-0115, DEC-0116, DEC-0117, DEC-0121, DEC-0122, DEC-0221]
+    description: >
+      The fundamentals stage of the factor engine. statements.sql builds the ON COMMIT DROP table stmt
+      (latest observation per quarterly period and statement type, FY rows filtered before ranking,
+      the DEC-0056 backfilled flag over every row of the instrument, and ttm_slot and prior_slot).
+      The windows follow DEC-0221, not T015's wording: the trailing window is ranks 1 to 4 and the
+      prior-year window ranks 5 to 8, each formed only when its quarter ends are consecutive (each
+      adjacent pair at most 4 months apart; trailing-only inputs need P1 to P4, growth P1 to P8).
+      value_inputs.sql creates inputs with book_to_price, earnings_yield and fcf_yield;
+      growth_inputs.sql adds revenue_growth and eps_growth; insert_inputs.sql appends the named
+      factors' rows to factor_input with the acquisition_state outcome on missing rows (DEC-0115).
+      engine.py gains _line_item_parameters() and _fundamental_inputs_stage, registered at the end of
+      the module (no _classification_stage yet, DEC-0121). Tests implement TC-COMP-060, 061, 062, 094,
+      100, 101 and 161 plus the T011 to T014 cases and the DEC-0221 window cases (52-week filer,
+      absent year-ago quarter, 52-week filer missing a quarter, the 4-month boundary, a P3 to P4 gap,
+      three quarters).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/red-cycle-1.log
+    red_log_sha256: a080861c2529b6c31ce088a6d4e7d43285aa8cd81add89fd8d3841f6b2a6364d
+    red_evidence: >
+      Before any production code (HEAD 31359b2): 57 failed, 0 passed; 53 on AttributeError for
+      engine._fundamental_inputs_stage and 4 on AttributeError for engine._line_item_parameters
+      (red-cycle-1.log). Test-only corrections made while turning GREEN, none of which weakens an
+      assertion: the add_statement default observed_on moved from 30 to 15 days after the period end so
+      recent quarters are observed before the classification date, one known_on expectation that
+      ignored the bar's observation was corrected, and the recorded_at tie case was rewritten to insert
+      the later recording both last and first. DEC-0221 rework RED (red-cycle-1-dec-0221.log, staged
+      cycle-1 tree with the old statements.sql): 4 failed, 5 passed; the 52-week filer read present
+      0.1875 instead of 0.2837837838, and the absent year-ago quarter, the 52-week filer missing a
+      quarter and the 4-months-and-a-day pair read present instead of missing. The P3 to P4 gap and
+      three-quarter tests were added after the re-review showed the manual mutant
+      statements-trailing-two-pairs surviving; that mutant is killed in the final results.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/red-cycle-1-dec-0221.log
+        sha256: f9455a14952330409964bb5c0cec761179f31e301f450761b4d1b97eb7eed709
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/full-suite-cycle-1.log
+        sha256: 107cefb4b857a732e5daff478d988d077c8e2b90ee96839f620a6cdff1036cbf
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/t022-volume-probe.log
+        sha256: 91eac34b4c03b8ecd765afa33b92604e6e17b89626f8b42680fdaab5cefc6e30
+    green_evidence: >
+      On HEAD 31359b2 plus the staged cycle-1 tree (full-suite-cycle-1.log): uv run pytest 1539 passed,
+      1 xfailed (CAP-002-E2-S2's strict-xfail TC-COMP-059); -m postgres 506 passed; -m "not postgres"
+      1033 passed, 1 xfailed; ruff check, ruff format --check and mypy src clean; uv build succeeds and
+      the wheel carries classification/sql/statements.sql, value_inputs.sql, growth_inputs.sql and
+      insert_inputs.sql. T022 (t022-volume-probe.log, final statements.sql) built 3000 instruments
+      with 8 quarters of three statement types and 273 bars each in 0.9 s; statements.sql 0.14 s,
+      value_inputs.sql 0.56 s, growth_inputs.sql 0.22 s, insert_inputs.sql 0.12 s.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    code_review: >
+      Three rounds by independent code-review subagents. Round one REJECTED the cycle (patch
+      dd8fe3d7) on the prior-year window rule of design 2.4 and T015 against DEC-0055 (1); the owner
+      decided DEC-0221. Round two APPROVED the reworked patch (2b0c7481) with non-blocking findings;
+      the test gap it found (P3 to P4 pair, fewer than four periods) was closed. Round three APPROVED
+      the final patch with no findings. Left with the owner, as non-blocking follow-ups: the DEC-0221
+      4-month bound is a SQL literal because T023 allows no edit to constants.py; a present ratio of
+      1e20 or more overflows numeric(30,10) and fails the set; two quarterly period ends a few days
+      apart count as two quarters; the engine.py module docstring predates this stage (doc-sync).
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5bfc62844557f1ce30284f56a3d60dfefa0fb354f207132063d08ed6acdcc90e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 4a3c73db7bf5cd6c926418474271510a75f24fa5241bfad04b91b8d4ea1edd51
+      generated: 149
+      killed: 87
+      survived: 62
+      stillborn: 0
+      timeout: 0
+      score: 0.584
+      manual_mutants: >
+        39 of the 149 are hand-written (operator manual) over the semantics the generic
+        operators cannot reach, including DEC-0221's window rules and the reviewer's
+        statements-trailing-two-pairs; all 39 are killed. Every generated mutant outside a SQL comment
+        is killed.
+      survivors:
+        - id: src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:5
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:4:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:23:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:23:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:66:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:66:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:99:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:99:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:100:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/growth_inputs.sql:100:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/insert_inputs.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/insert_inputs.sql:2:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/insert_inputs.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/insert_inputs.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/insert_inputs.sql:5:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:4:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:4:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:4:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:5:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:23:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:34:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:34:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:45:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:45:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/statements.sql:45:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:5
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:6
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:3:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:44:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:44:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:45:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:45:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:72:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:72:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:92:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:92:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:92:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:106:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:106:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:113:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:113:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:136:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:136:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:136:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:165:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:165:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:166:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.
+        - id: src/factorflow/classification/sql/value_inputs.sql:166:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated digit or word sits inside a SQL -- comment line, which PostgreSQL
+            discards before planning; no statement changes.

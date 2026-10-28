@@ -1,0 +1,112 @@
+# RED, CAP-002-E2-S3 cycle-1 rework for DEC-0221 (owner decision after the cycle-1 code review rejected the 12-month span rule): window tests before statements.sql changes (2026-10-28T01:58:30Z, HEAD 31359b2 plus the staged cycle-1 tree)
+# uv run --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider tests/integration/test_engine_inputs_fundamentals.py -k 'absent_year_ago or fifty_two_week or four_months_apart or gap_inside_the_prior or absent_from_the_trailing or absent_from_the_prior or slots'
+...FFF.F.                                                                [100%]
+=================================== FAILURES ===================================
+______________ test_absent_year_ago_quarter_leaves_growth_missing ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62635 user=test database=test_eb0fdde02676401fbc8ab78e65cb1efc) at 0x108ea2240>, stock=1, set_id=UUID('0f6a270d-2461-4be2-be6f-b25bfe353e1b'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108ea0c20>
+
+    def test_absent_year_ago_quarter_leaves_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221, DEC-0055 (1): the prior year is the four quarters right after the trailing
+        four; with the fifth absent the window is not formed, never taken a quarter later.
+        Trailing-only inputs need P1 to P4 alone and stay present."""
+        found = _income_with_gap(env, gap=4, n=9)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in GROWTH:
+>           assert rows[name]["status"] == "missing", name
+E           AssertionError: revenue_growth
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_fundamentals.py:327: AssertionError
+________ test_fifty_two_week_filer_compares_with_the_year_ago_quarters _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62635 user=test database=test_7f7eb8b8f7504fb2aa9fec420ae40256) at 0x108e9fb90>, stock=1, set_id=UUID('175b2fa1-03de-4ebe-b565-c2d53ab8dc83'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d86510>
+
+    def test_fifty_two_week_filer_compares_with_the_year_ago_quarters(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221: a 52-week filer's year-ago quarter ends later than P1 minus 12 months and
+        is still the first quarter of the prior window; P1 to P8 are the eight newest."""
+        _quarters_at(env, FIFTY_TWO_WEEK)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert (rows["revenue_growth"]["status"], rows["revenue_growth"]["value"]) == (
+            "present",
+            REVENUE_GROWTH,
+        )
+E       AssertionError: assert ('present', D....1875000000')) == ('present', D....2837837838'))
+E         
+E         At index 1 diff: Decimal('0.1875000000') != Decimal('0.2837837838')
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:346: AssertionError
+_____ test_fifty_two_week_filer_missing_a_quarter_forms_no_trailing_window _____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62635 user=test database=test_4ef9e4f96dd6479a98291cc7efd43fd2) at 0x108ea3590>, stock=1, set_id=UUID('3b0a2bcc-6c1e-4149-af5d-e37860e00298'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108ea0d40>
+
+    def test_fifty_two_week_filer_missing_a_quarter_forms_no_trailing_window(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221: with its third income statement absent, a 52-week filer's four newest are
+        still within 12 months of P1, but two adjacent ones are six months apart, so the
+        trailing window is not formed."""
+        _quarters_at(env, FIFTY_TWO_WEEK, income_gap=2)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in (*GROWTH, "earnings_yield"):
+>           assert rows[name]["status"] == "missing", name
+E           AssertionError: revenue_growth
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_fundamentals.py:369: AssertionError
+_ test_adjacent_quarters_at_most_four_months_apart_are_consecutive[second1-missing] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62635 user=test database=test_afabe3415c1c476b86951770f816fe91) at 0x108ea0ad0>, stock=1, set_id=UUID('d8726f59-7c66-49fe-9c99-a4a79789ada2'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108ea3ce0>
+second = datetime.date(2026, 5, 29), status = 'missing'
+
+    @pytest.mark.parametrize(
+        ("second", "status"), [(date(2026, 5, 30), "present"), (date(2026, 5, 29), "missing")]
+    )
+    def test_adjacent_quarters_at_most_four_months_apart_are_consecutive(
+        env: Env, monkeypatch: pytest.MonkeyPatch, second: date, status: str
+    ) -> None:
+        """DEC-0221: period ends 4 months apart (2026-09-30, 2026-05-30) are consecutive; 4
+        months and a day apart are not."""
+        _quarters_at(env, [P1, second, months_before(second, 3), months_before(second, 6)])
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["earnings_yield"]
+>       assert row["status"] == status
+E       AssertionError: assert 'present' == 'missing'
+E         
+E         - missing
+E         + present
+
+tests/integration/test_engine_inputs_fundamentals.py:388: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_year_ago_quarter_leaves_growth_missing
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_fifty_two_week_filer_compares_with_the_year_ago_quarters
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_fifty_two_week_filer_missing_a_quarter_forms_no_trailing_window
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_adjacent_quarters_at_most_four_months_apart_are_consecutive[second1-missing]
+4 failed, 5 passed, 45 deselected in 3.17s
+# exit: 1

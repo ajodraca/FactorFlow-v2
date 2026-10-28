@@ -1,0 +1,27 @@
+........................................F
+=================================== FAILURES ===================================
+________ test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62057 user=test database=test_98c38a1e693f4ad8a442bd75daed21ed) at 0x10833ad50>, stock=1, set_id=UUID('de8d8d30-db33-4056-a044-bfe6abc147ef'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1083398e0>
+
+    def test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-1: diluted EPS over the same two windows."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["eps_growth"]
+>       assert (row["status"], row["value"], row["as_of"]) == ("present", EPS_GROWTH, P1)
+E       AssertionError: assert ('missing', None, None) == ('present', D...(2026, 9, 30))
+E         
+E         At index 0 diff: 'missing' != 'present'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:189: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 40 passed in 2.40s

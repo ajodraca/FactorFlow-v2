@@ -1,0 +1,34 @@
+........................................................................ [ 67%]
+....F
+=================================== FAILURES ===================================
+_____________ test_fcf_yield_subtracts_signed_capital_expenditure ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54855 user=test database=test_92cc216cfb0e444cac950274f901259d) at 0x10d12ed50>, stock=1, set_id=UUID('edc2acd6-dca1-4970-bdef-f051d1905639'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d12c680>
+
+    def test_fcf_yield_subtracts_signed_capital_expenditure(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4: (TTM operating cash flow - TTM capital expenditure) / MC, with the
+        outflow-negative capital expenditure turned positive by its sign of -1."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        assert (rows["fcf_yield"]["status"], rows["fcf_yield"]["value"]) == ("present", FCF_YIELD)
+        # No row is backfilled, so CAP-002-E2-S6's mark leaves the column false as well.
+>       assert {rows[name]["restated_possible"] for name in VALUE} == {False}
+E       assert {True} == {False}
+E         
+E         Extra items in the left set:
+E         True
+E         Extra items in the right set:
+E         False
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:804: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_fcf_yield_subtracts_signed_capital_expenditure
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 76 passed in 7.82s

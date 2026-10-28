@@ -1,0 +1,21 @@
+# Full validation, CAP-002-E2-S3 cycle-1 final tree (HEAD 31359b2 plus staged diff 5bfc62844557f1ce), 2026-10-28T02:23:43Z
+## uv run --offline ruff check .
+All checks passed!
+# exit: 0
+## uv run --offline ruff format --check .
+232 files already formatted
+# exit: 0
+## uv run --offline mypy src
+Success: no issues found in 56 source files
+# exit: 0
+## uv build --offline
+removing build/bdist.macosx-11.0-arm64/wheel
+Successfully built dist/factorflow-0.1.0.tar.gz
+Successfully built dist/factorflow-0.1.0-py3-none-any.whl
+# exit: 0
+## uv run pytest
+1539 passed, 1 xfailed, 2 warnings in 262.42s (0:04:22)
+## uv run pytest -m postgres
+506 passed, 1034 deselected, 2 warnings in 227.60s (0:03:47)
+## uv run pytest -m 'not postgres'
+1033 passed, 506 deselected, 1 xfailed, 2 warnings in 25.54s

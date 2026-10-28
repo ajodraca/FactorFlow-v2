@@ -1,0 +1,2127 @@
+# RED, CAP-002-E2-S3 cycle-1: new tests before any production code (HEAD 31359b2, 2026-10-27T23:52:58Z)
+# uv run --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider tests/unit/test_engine_line_item_params.py tests/integration/test_engine_inputs_fundamentals.py tests/integration/test_engine_currency.py
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                [100%]
+=================================== FAILURES ===================================
+____ test_real_line_items_pass_every_key_as_none_and_every_item_unresolved _____
+
+    def test_real_line_items_pass_every_key_as_none_and_every_item_unresolved() -> None:
+>       params = engine._line_item_parameters()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_line_item_parameters'
+
+tests/unit/test_engine_line_item_params.py:46: AttributeError
+________________ test_a_resolved_item_carries_its_key_and_sign _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e1a30>
+
+    def test_a_resolved_item_carries_its_key_and_sign(monkeypatch: pytest.MonkeyPatch) -> None:
+        """The function reads line_items.LINE_ITEMS at call time, so a substitution is seen."""
+        item = LINE_ITEMS["capital_expenditure"]
+        monkeypatch.setitem(
+            line_items.LINE_ITEMS,
+            "capital_expenditure",
+            LineItem(item.label, item.statement_type, "X", -1),
+        )
+    
+>       resolved = by_name(engine._line_item_parameters())
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_line_item_parameters'
+
+tests/unit/test_engine_line_item_params.py:65: AttributeError
+_________________ test_a_replaced_mapping_is_read_at_call_time _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e62a0>
+
+    def test_a_replaced_mapping_is_read_at_call_time(monkeypatch: pytest.MonkeyPatch) -> None:
+        replaced = {
+            name: LineItem(item.label, item.statement_type, f"k_{name}", item.sign)
+            for name, item in LINE_ITEMS.items()
+        }
+        monkeypatch.setattr(line_items, "LINE_ITEMS", replaced)
+    
+>       params = engine._line_item_parameters()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_line_item_parameters'
+
+tests/unit/test_engine_line_item_params.py:83: AttributeError
+______________ test_the_sentinel_never_appears_in_the_parameters _______________
+
+    def test_the_sentinel_never_appears_in_the_parameters() -> None:
+>       assert REQUIRES_INPUT not in strings(engine._line_item_parameters())
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_line_item_parameters'
+
+tests/unit/test_engine_line_item_params.py:90: AttributeError
+______ test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_981a536bbfb94428abc34133e27ba599) at 0x10888cda0>, stock=1, set_id=UUID('4b287707-35a2-4e98-b491-7ac5300ed25a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10888d250>
+
+    def test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        observed = [end + timedelta(days=15) for end in ends]
+        observed[5] = date(2026, 10, 16)  # a prior-window row re-acquired last sets known_on
+        filed = [end + timedelta(days=20) for end in ends]  # after the first observation
+        for k, end in enumerate(ends):
+            add_statement(
+                env.conn,
+                env.stock,
+                end,
+                "income_statement",
+                {TEST_KEYS["revenue"]: Decimal(REVENUE[k])},
+                observed_on=observed[k],
+                provider_filing_date=filed[k],
+            )
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:165: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_981a536bbfb94428abc34133e27ba599) at 0x10888cda0>
+set_id = UUID('4b287707-35a2-4e98-b491-7ac5300ed25a')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10888d250>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+________ test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e5d008344bfd489a9de662fc1c7d0a5b) at 0x108884da0>, stock=1, set_id=UUID('a792e57e-d9b8-4fb5-aa84-748e3689dbd0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086533b0>
+
+    def test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-1: diluted EPS over the same two windows."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e5d008344bfd489a9de662fc1c7d0a5b) at 0x108884da0>
+set_id = UUID('a792e57e-d9b8-4fb5-aa84-748e3689dbd0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086533b0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+________ test_seven_quarters_leave_growth_missing_and_value_unaffected _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_fd4522dc069a4be18f09573031310845) at 0x1087e2240>, stock=1, set_id=UUID('2c9a9282-6067-4177-a3cf-5a9e61d61698'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e3e00>
+
+    def test_seven_quarters_leave_growth_missing_and_value_unaffected(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ends = add_quarters(env.conn, env.stock, P1, 7, standard(7))
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_fd4522dc069a4be18f09573031310845) at 0x1087e2240>
+set_id = UUID('2c9a9282-6067-4177-a3cf-5a9e61d61698')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e3e00>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_______ test_quarter_absent_from_the_prior_window_leaves_growth_missing ________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_0de999c5cdf54a9996209d7efada2b87) at 0x108896d80>, stock=1, set_id=UUID('164378c5-6fa8-47ad-afe9-02330b4d8a0f'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108897ce0>
+
+    def test_quarter_absent_from_the_prior_window_leaves_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S3-2: the sixth quarter is absent, so the prior window holds three."""
+        found = _income_with_gap(env, gap=5)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:243: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_0de999c5cdf54a9996209d7efada2b87) at 0x108896d80>
+set_id = UUID('164378c5-6fa8-47ad-afe9-02330b4d8a0f')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108897ce0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________ test_quarter_absent_from_the_trailing_window_fails_its_span __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e784b0d8f66c451a9c5270747c1f71bc) at 0x108896090>, stock=1, set_id=UUID('88d2a7a5-edf6-4d69-a903-ece0fbaea9ff'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108896630>
+
+    def test_quarter_absent_from_the_trailing_window_fails_its_span(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S3-2, design 2.4 span rule: with the third quarter absent the four newest span
+        a full year (P4 is P1 minus 12 months), so the trailing window is not formed."""
+        found = _income_with_gap(env, gap=2)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:260: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e784b0d8f66c451a9c5270747c1f71bc) at 0x108896090>
+set_id = UUID('88d2a7a5-edf6-4d69-a903-ece0fbaea9ff')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108896630>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________________ test_annual_rows_enter_no_trailing_sum ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_4e6f5e94ca9545da933fa761554d7419) at 0x1088978c0>, stock=1, set_id=UUID('c9febf6e-0dd2-4a6e-96a2-9cb41ba42cb7'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1088977d0>
+
+    def test_annual_rows_enter_no_trailing_sum(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        ends = add_quarters(env.conn, env.stock, P1, 8, standard())
+        big = {
+            TEST_KEYS["revenue"]: Decimal(100000),
+            TEST_KEYS["net_income"]: Decimal(100000),
+            TEST_KEYS["diluted_eps"]: Decimal(1000),
+        }
+        # One shares the newest quarter's period end and is observed later; one has its own
+        # date inside the trailing window and one inside the prior window.
+        for end in (P1, date(2026, 8, 15), months_before(ends[5], 1)):
+            add_statement(
+                env.conn,
+                env.stock,
+                end,
+                "income_statement",
+                big,
+                fiscal_period="FY",
+                observed_on=D,
+            )
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:295: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_4e6f5e94ca9545da933fa761554d7419) at 0x1088978c0>
+set_id = UUID('c9febf6e-0dd2-4a6e-96a2-9cb41ba42cb7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1088977d0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____ test_stock_with_only_annual_statements_has_value_and_growth_missing ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_ac6a0dca62804a61932f17dbd74cbfbb) at 0x108d82e40>, stock=1, set_id=UUID('19aae3fd-8bb9-411d-9160-14de52da8b9a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d838f0>
+
+    def test_stock_with_only_annual_statements_has_value_and_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S3-3: annual rows form no window and no most recent quarterly balance sheet."""
+        values = standard(2)
+        for k, end in enumerate((date(2025, 12, 31), date(2024, 12, 31))):
+            for statement_type in ("balance_sheet", "income_statement", "cash_flow_statement"):
+                payload = {
+                    TEST_KEYS[name]: value
+                    for name, value in values[k].items()
+                    if line_items.LINE_ITEMS[name].statement_type == statement_type
+                }
+                add_statement(env.conn, env.stock, end, statement_type, payload, fiscal_period="FY")
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:324: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_ac6a0dca62804a61932f17dbd74cbfbb) at 0x108d82e40>
+set_id = UUID('19aae3fd-8bb9-411d-9160-14de52da8b9a')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d838f0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_______ test_later_observation_of_a_period_is_used_and_earlier_untouched _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_ac9106215c11436aa368d230cefcc72d) at 0x108896390>, stock=1, set_id=UUID('3fc3b9d8-0368-4028-b62f-140913859196'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108897440>
+
+    def test_later_observation_of_a_period_is_used_and_earlier_untouched(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        latest = date(2026, 5, 31)
+        _seven_older_quarters(env, latest)
+        newest = standard()[0]
+        for statement_type, names in (
+            ("balance_sheet", ("book_equity", "shares_outstanding")),
+            ("cash_flow_statement", ("operating_cash_flow", "capital_expenditure")),
+        ):
+            payload = {TEST_KEYS[n]: newest[n] for n in names}
+            add_statement(
+                env.conn, env.stock, latest, statement_type, payload, observed_on=date(2026, 6, 1)
+            )
+        first = {TEST_KEYS["revenue"]: Decimal(130), TEST_KEYS["net_income"]: Decimal(13)}
+        second = {TEST_KEYS["revenue"]: Decimal(140), TEST_KEYS["net_income"]: Decimal(23)}
+        add_statement(
+            env.conn, env.stock, latest, "income_statement", first, observed_on=date(2026, 6, 1)
+        )
+        add_statement(
+            env.conn, env.stock, latest, "income_statement", second, observed_on=date(2026, 7, 15)
+        )
+        before = _period_rows(env, latest)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:364: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_ac9106215c11436aa368d230cefcc72d) at 0x108896390>
+set_id = UUID('3fc3b9d8-0368-4028-b62f-140913859196')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108897440>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+__________ test_equal_observed_on_is_decided_by_the_later_recorded_at __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_3ea716b2ef4447afaa4420db1ebaab79) at 0x108897c20>, stock=1, set_id=UUID('a1c454aa-aff0-4365-b844-0e4dedda265a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10888d730>
+
+    def test_equal_observed_on_is_decided_by_the_later_recorded_at(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 3: observed_on DESC, then recorded_at DESC (DAC-E2-9)."""
+        _seven_older_quarters(env, P1)
+        newest = standard()[0]
+        for statement_type, names in (
+            ("balance_sheet", ("book_equity", "shares_outstanding")),
+            ("cash_flow_statement", ("operating_cash_flow", "capital_expenditure")),
+        ):
+            add_statement(
+                env.conn, env.stock, P1, statement_type, {TEST_KEYS[n]: newest[n] for n in names}
+            )
+        seen = date(2026, 10, 15)
+        late = datetime(2026, 10, 15, 18, tzinfo=UTC)
+        # The later recording is inserted first, so neither insertion order nor heap order
+        # can stand in for recorded_at.
+        add_statement(
+            env.conn,
+            env.stock,
+            P1,
+            "income_statement",
+            {TEST_KEYS["revenue"]: Decimal(150)},
+            observed_on=seen,
+            recorded_at=late,
+        )
+        add_statement(
+            env.conn,
+            env.stock,
+            P1,
+            "income_statement",
+            {TEST_KEYS["revenue"]: Decimal(140)},
+            observed_on=seen,
+            recorded_at=late - timedelta(hours=6),
+        )
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:422: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_3ea716b2ef4447afaa4420db1ebaab79) at 0x108897c20>
+set_id = UUID('a1c454aa-aff0-4365-b844-0e4dedda265a')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10888d730>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior0-base0] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_d431435b2d1245ab9ae0cc8a2badb634) at 0x108884f50>, stock=1, set_id=UUID('5758584e-a829-4e13-87c6-9c3f9941168c'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884f80>
+item = 'revenue', prior = ['10', '-10', '5', '-5'], base = Decimal('0')
+
+    @pytest.mark.parametrize(
+        ("item", "prior", "base"),
+        [
+            ("revenue", ["10", "-10", "5", "-5"], Decimal(0)),
+            ("revenue", ["-10", "-20", "-30", "-40"], Decimal(-100)),
+            ("diluted_eps", ["0.5", "-0.5", "0.25", "-0.25"], Decimal("0.00")),
+            ("diluted_eps", ["-0.1", "-0.2", "-0.3", "-0.4"], Decimal("-1.0")),
+        ],
+    )
+    def test_non_positive_prior_year_base_makes_growth_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, item: str, prior: list[str], base: Decimal
+    ) -> None:
+        values = standard()
+        for k, amount in enumerate(prior, start=4):
+            values[k][item] = Decimal(amount)
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_d431435b2d1245ab9ae0cc8a2badb634) at 0x108884f50>
+set_id = UUID('5758584e-a829-4e13-87c6-9c3f9941168c')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884f80>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior1-base1] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_7e3b1ad3ff484ab782a3a20faa2cd162) at 0x108885220>, stock=1, set_id=UUID('a3ff59eb-f937-41cf-91c7-34e575bb2248'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884d10>
+item = 'revenue', prior = ['-10', '-20', '-30', '-40'], base = Decimal('-100')
+
+    @pytest.mark.parametrize(
+        ("item", "prior", "base"),
+        [
+            ("revenue", ["10", "-10", "5", "-5"], Decimal(0)),
+            ("revenue", ["-10", "-20", "-30", "-40"], Decimal(-100)),
+            ("diluted_eps", ["0.5", "-0.5", "0.25", "-0.25"], Decimal("0.00")),
+            ("diluted_eps", ["-0.1", "-0.2", "-0.3", "-0.4"], Decimal("-1.0")),
+        ],
+    )
+    def test_non_positive_prior_year_base_makes_growth_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, item: str, prior: list[str], base: Decimal
+    ) -> None:
+        values = standard()
+        for k, amount in enumerate(prior, start=4):
+            values[k][item] = Decimal(amount)
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_7e3b1ad3ff484ab782a3a20faa2cd162) at 0x108885220>
+set_id = UUID('a3ff59eb-f937-41cf-91c7-34e575bb2248')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884d10>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior2-base2] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_49a363d158a2416d9a8b7ede99b3e037) at 0x108d80200>, stock=1, set_id=UUID('d1a8f9e3-e06f-4105-b5d8-4e5203f06dd3'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d834a0>
+item = 'diluted_eps', prior = ['0.5', '-0.5', '0.25', '-0.25']
+base = Decimal('0.00')
+
+    @pytest.mark.parametrize(
+        ("item", "prior", "base"),
+        [
+            ("revenue", ["10", "-10", "5", "-5"], Decimal(0)),
+            ("revenue", ["-10", "-20", "-30", "-40"], Decimal(-100)),
+            ("diluted_eps", ["0.5", "-0.5", "0.25", "-0.25"], Decimal("0.00")),
+            ("diluted_eps", ["-0.1", "-0.2", "-0.3", "-0.4"], Decimal("-1.0")),
+        ],
+    )
+    def test_non_positive_prior_year_base_makes_growth_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, item: str, prior: list[str], base: Decimal
+    ) -> None:
+        values = standard()
+        for k, amount in enumerate(prior, start=4):
+            values[k][item] = Decimal(amount)
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_49a363d158a2416d9a8b7ede99b3e037) at 0x108d80200>
+set_id = UUID('d1a8f9e3-e06f-4105-b5d8-4e5203f06dd3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d834a0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior3-base3] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_480e52287e154dc2a55f20b1f588ffe0) at 0x108d82e70>, stock=1, set_id=UUID('1d131b3f-e099-4955-801c-6917371d59c2'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d80f50>
+item = 'diluted_eps', prior = ['-0.1', '-0.2', '-0.3', '-0.4']
+base = Decimal('-1.0')
+
+    @pytest.mark.parametrize(
+        ("item", "prior", "base"),
+        [
+            ("revenue", ["10", "-10", "5", "-5"], Decimal(0)),
+            ("revenue", ["-10", "-20", "-30", "-40"], Decimal(-100)),
+            ("diluted_eps", ["0.5", "-0.5", "0.25", "-0.25"], Decimal("0.00")),
+            ("diluted_eps", ["-0.1", "-0.2", "-0.3", "-0.4"], Decimal("-1.0")),
+        ],
+    )
+    def test_non_positive_prior_year_base_makes_growth_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, item: str, prior: list[str], base: Decimal
+    ) -> None:
+        values = standard()
+        for k, amount in enumerate(prior, start=4):
+            values[k][item] = Decimal(amount)
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_480e52287e154dc2a55f20b1f588ffe0) at 0x108d82e70>
+set_id = UUID('1d131b3f-e099-4955-801c-6917371d59c2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d80f50>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+___ test_non_positive_shares_make_every_value_input_not_computable[shares0] ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_4111d5d8d09449fd80837ed0f9a57786) at 0x10876e450>, stock=1, set_id=UUID('c6f62565-6622-4895-96a4-2c3bfa9d8458'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10876eb10>
+shares = Decimal('0')
+
+    @pytest.mark.parametrize("shares", [Decimal(0), Decimal(-100)])
+    def test_non_positive_shares_make_every_value_input_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, shares: Decimal
+    ) -> None:
+        values = standard()
+        values[0]["shares_outstanding"] = shares
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:472: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_4111d5d8d09449fd80837ed0f9a57786) at 0x10876e450>
+set_id = UUID('c6f62565-6622-4895-96a4-2c3bfa9d8458')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10876eb10>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+___ test_non_positive_shares_make_every_value_input_not_computable[shares1] ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_fa85f7d86d6b42629b21efd1b7ebaefd) at 0x10876e8a0>, stock=1, set_id=UUID('e0aa091c-26dc-4a7a-8453-0c1ea9510e6d'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108885c40>
+shares = Decimal('-100')
+
+    @pytest.mark.parametrize("shares", [Decimal(0), Decimal(-100)])
+    def test_non_positive_shares_make_every_value_input_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, shares: Decimal
+    ) -> None:
+        values = standard()
+        values[0]["shares_outstanding"] = shares
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:472: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_fa85f7d86d6b42629b21efd1b7ebaefd) at 0x10876e8a0>
+set_id = UUID('e0aa091c-26dc-4a7a-8453-0c1ea9510e6d')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108885c40>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+__________ test_unresolved_line_items_leave_value_and_growth_missing ___________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_6d17b8460f17457092bbfa7b567422ed) at 0x108886330>, stock=1, set_id=UUID('51bebaa2-0ea0-4794-a58d-2b38d26ca156'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1088865a0>
+
+    def test_unresolved_line_items_leave_value_and_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Supporting case for TC-COMP-059 (AC-12): with every key REQUIRES_INPUT the five
+        inputs are missing naming the line items each needs, and the set completes."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+>       result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_fundamentals.py:502: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_6d17b8460f17457092bbfa7b567422ed) at 0x108886330>
+set_id = UUID('51bebaa2-0ea0-4794-a58d-2b38d26ca156')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1088865a0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+__________________ test_only_unresolved_line_items_are_named ___________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_6957fe26a64e40ae8a35ee09a4c25cb1) at 0x1088873e0>, stock=1, set_id=UUID('39549a38-0c49-4b33-a4ca-7d12cfb6a7f0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108887c80>
+
+    def test_only_unresolved_line_items_are_named(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """AC-12: with net income resolved, earnings_yield names only shares outstanding."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        resolve_only(monkeypatch, "net_income")
+    
+>       run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:517: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_6957fe26a64e40ae8a35ee09a4c25cb1) at 0x1088873e0>
+set_id = UUID('39549a38-0c49-4b33-a4ca-7d12cfb6a7f0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108887c80>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+________ test_resolved_items_classify_independently_of_unresolved_ones _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_5aeae664a4054c2b83994a24b380e347) at 0x1086e2450>, stock=1, set_id=UUID('bf85b207-1837-4a63-85cd-eca6efb88698'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e1760>
+
+    def test_resolved_items_classify_independently_of_unresolved_ones(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12: with net income and shares outstanding resolved, earnings_yield is present
+        while book_to_price and fcf_yield stay missing naming their own items."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        resolve_only(monkeypatch, "net_income", "shares_outstanding")
+    
+>       run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:532: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_5aeae664a4054c2b83994a24b380e347) at 0x1086e2450>
+set_id = UUID('bf85b207-1837-4a63-85cd-eca6efb88698')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e1760>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________ test_plain_decimal_strings_and_json_numbers_read_alike ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_96141925674f467e96266f73aa4d006a) at 0x1087de6c0>, stock=1, set_id=UUID('cdded3d2-1a11-4896-aa33-60a35af84441'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087de5a0>
+
+    def test_plain_decimal_strings_and_json_numbers_read_alike(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (4): a JSON number and a JSON string holding a plain decimal are both read."""
+        other = add_instrument(env.conn, "NUM")
+        add_bar(env.conn, other, L)
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        add_quarters(env.conn, other, P1, 8, standard(), numbers=True)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:561: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_96141925674f467e96266f73aa4d006a) at 0x1087de6c0>
+set_id = UUID('cdded3d2-1a11-4896-aa33-60a35af84441')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087de5a0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____________ test_unusable_line_item_value_reads_as_absent[None] ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e1568a63b7904b42b4473be6d7815b34) at 0x1086e1d90>, stock=1, set_id=UUID('25cf1726-eb67-439b-8fa4-f036067add2d'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e1fd0>
+stored = None
+
+    @pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
+    def test_unusable_line_item_value_reads_as_absent(
+        env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
+    ) -> None:
+        """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
+        never a cast error; the input is missing and the set completes."""
+        values = standard()
+        if stored is _OMIT:
+            del values[0]["net_income"]
+        else:
+            values[0]["net_income"] = stored
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:594: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e1568a63b7904b42b4473be6d7815b34) at 0x1086e1d90>
+set_id = UUID('25cf1726-eb67-439b-8fa4-f036067add2d')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e1fd0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+______________ test_unusable_line_item_value_reads_as_absent[n/a] ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_cc29c27b5f6e419482cb4074aa8e56b7) at 0x108884e60>, stock=1, set_id=UUID('b21897d4-13e0-4831-9d67-32e7abc9069a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108886de0>
+stored = 'n/a'
+
+    @pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
+    def test_unusable_line_item_value_reads_as_absent(
+        env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
+    ) -> None:
+        """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
+        never a cast error; the input is missing and the set completes."""
+        values = standard()
+        if stored is _OMIT:
+            del values[0]["net_income"]
+        else:
+            values[0]["net_income"] = stored
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:594: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_cc29c27b5f6e419482cb4074aa8e56b7) at 0x108884e60>
+set_id = UUID('b21897d4-13e0-4831-9d67-32e7abc9069a')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108886de0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________ test_unusable_line_item_value_reads_as_absent[1,250.5] ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_fdfaff4f3cea4de6b61404b01fb11236) at 0x10876f020>, stock=1, set_id=UUID('573a0b6d-25a5-454b-baec-af440998afe1'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10876d910>
+stored = '1,250.5'
+
+    @pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
+    def test_unusable_line_item_value_reads_as_absent(
+        env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
+    ) -> None:
+        """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
+        never a cast error; the input is missing and the set completes."""
+        values = standard()
+        if stored is _OMIT:
+            del values[0]["net_income"]
+        else:
+            values[0]["net_income"] = stored
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:594: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_fdfaff4f3cea4de6b61404b01fb11236) at 0x10876f020>
+set_id = UUID('573a0b6d-25a5-454b-baec-af440998afe1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10876d910>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_______________ test_unusable_line_item_value_reads_as_absent[] ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_28f2de26e5c24a20a79b56dc946f41a5) at 0x1087dcb60>, stock=1, set_id=UUID('42933656-8c2f-4fe4-bb23-efd289ee6194'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dd4c0>
+stored = ''
+
+    @pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
+    def test_unusable_line_item_value_reads_as_absent(
+        env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
+    ) -> None:
+        """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
+        never a cast error; the input is missing and the set completes."""
+        values = standard()
+        if stored is _OMIT:
+            del values[0]["net_income"]
+        else:
+            values[0]["net_income"] = stored
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:594: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_28f2de26e5c24a20a79b56dc946f41a5) at 0x1087dcb60>
+set_id = UUID('42933656-8c2f-4fe4-bb23-efd289ee6194')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dd4c0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____________ test_unusable_line_item_value_reads_as_absent[True] ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_92f101623852492fb1dd6da50e8b05ab) at 0x1087de0c0>, stock=1, set_id=UUID('e07f50d4-06a2-4f2f-a5bd-7d7c5db3d027'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087ddf40>
+stored = True
+
+    @pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
+    def test_unusable_line_item_value_reads_as_absent(
+        env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
+    ) -> None:
+        """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
+        never a cast error; the input is missing and the set completes."""
+        values = standard()
+        if stored is _OMIT:
+            del values[0]["net_income"]
+        else:
+            values[0]["net_income"] = stored
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:594: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_92f101623852492fb1dd6da50e8b05ab) at 0x1087de0c0>
+set_id = UUID('e07f50d4-06a2-4f2f-a5bd-7d7c5db3d027')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087ddf40>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________ test_unusable_line_item_value_reads_as_absent[stored5] ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_595d90e085484151a02aab8d574a0108) at 0x1087daba0>, stock=1, set_id=UUID('f472e8bf-5f17-4384-a668-887fa873e8d7'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087db650>
+stored = <object object at 0x1060aa680>
+
+    @pytest.mark.parametrize("stored", [None, "n/a", "1,250.5", "", True, _OMIT])
+    def test_unusable_line_item_value_reads_as_absent(
+        env: Env, monkeypatch: pytest.MonkeyPatch, stored: object
+    ) -> None:
+        """DEC-0116 (4): JSON null, a non-numeric string, a boolean or an absent key is absent,
+        never a cast error; the input is missing and the set completes."""
+        values = standard()
+        if stored is _OMIT:
+            del values[0]["net_income"]
+        else:
+            values[0]["net_income"] = stored
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:594: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_595d90e085484151a02aab8d574a0108) at 0x1087daba0>
+set_id = UUID('f472e8bf-5f17-4384-a668-887fa873e8d7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087db650>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____________ test_fcf_yield_subtracts_signed_capital_expenditure ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_0332818ecce04a0ba67f8d11d1575213) at 0x1087dd520>, stock=1, set_id=UUID('876adf4e-2bad-42ff-a197-2241d8df7ea7'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dc170>
+
+    def test_fcf_yield_subtracts_signed_capital_expenditure(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4: (TTM operating cash flow - TTM capital expenditure) / MC, with the
+        outflow-negative capital expenditure turned positive by its sign of -1."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:613: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_0332818ecce04a0ba67f8d11d1575213) at 0x1087dd520>
+set_id = UUID('876adf4e-2bad-42ff-a197-2241d8df7ea7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dc170>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+________ test_market_capitalisation_is_latest_close_times_newest_shares ________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_a0c23d4abc3145e992b39513c7d7ae12) at 0x10876f1d0>, stock=1, set_id=UUID('1acaca68-d636-4926-b7d0-018872a145e7'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10876e780>
+
+    def test_market_capitalisation_is_latest_close_times_newest_shares(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (6): the latest session's latest observation of the close, times shares
+        outstanding from the most recent quarterly balance sheet; detail carries the parts."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        add_bar(env.conn, env.stock, L - timedelta(days=1), close=99)
+        add_bar(env.conn, env.stock, L, close=12, observed_on=L + timedelta(days=1))
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:628: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_a0c23d4abc3145e992b39513c7d7ae12) at 0x10876f1d0>
+set_id = UUID('1acaca68-d636-4926-b7d0-018872a145e7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10876e780>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________ test_value_detail_lists_the_balance_sheet_and_trailing_rows __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_95b57048a1604b189579100832475e82) at 0x108884c20>, stock=1, set_id=UUID('9f226877-2655-4acb-8a93-5e15970368d9'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108886e10>
+
+    def test_value_detail_lists_the_balance_sheet_and_trailing_rows(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4 and DEC-0122: each period used, balance sheet first; book_to_price reads
+        the balance sheet only."""
+        ends = add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:649: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_95b57048a1604b189579100832475e82) at 0x108884c20>
+set_id = UUID('9f226877-2655-4acb-8a93-5e15970368d9')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108886e10>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____ test_balance_sheet_dated_after_the_classification_date_is_never_used _____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_5cb764c33f2841e3b9a9cc2c4bda1242) at 0x108886b70>, stock=1, set_id=UUID('d7734202-b35f-483b-922f-7b4890d98e3c'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884f50>
+
+    def test_balance_sheet_dated_after_the_classification_date_is_never_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 3: only periods ending on or before the classification date."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        later = date(2026, 12, 31)
+        add_statement(
+            env.conn,
+            env.stock,
+            later,
+            "balance_sheet",
+            {TEST_KEYS["book_equity"]: Decimal(9000), TEST_KEYS["shares_outstanding"]: Decimal(1)},
+        )
+        add_statement(
+            env.conn, env.stock, later, "income_statement", {TEST_KEYS["net_income"]: Decimal(9000)}
+        )
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:686: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_5cb764c33f2841e3b9a9cc2c4bda1242) at 0x108886b70>
+set_id = UUID('d7734202-b35f-483b-922f-7b4890d98e3c')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884f50>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________ test_absent_item_in_newest_balance_sheet_does_not_fall_back __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_3f8f186b716440a2801f923c24ebe6b0) at 0x108888890>, stock=1, set_id=UUID('5f9d4f58-e66b-4a6b-ad13-de9c26e42130'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e3b60>
+
+    def test_absent_item_in_newest_balance_sheet_does_not_fall_back(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (1): the single most recent quarterly balance sheet, never an older one."""
+        values = standard()
+        del values[0]["book_equity"]
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:702: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_3f8f186b716440a2801f923c24ebe6b0) at 0x108888890>
+set_id = UUID('5f9d4f58-e66b-4a6b-ad13-de9c26e42130')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e3b60>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________________ test_ratios_statements_are_never_read _____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_57cc10d2c20d43419c26653d1739ee63) at 0x1087e1160>, stock=1, set_id=UUID('a1b830e3-0f12-43b6-9260-ffc87aa6a57e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e10d0>
+
+    def test_ratios_statements_are_never_read(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Design 2.3 step 3: the three statement types only; a ratios row is not selected."""
+        ends = add_quarters(env.conn, env.stock, P1, 8, standard())
+        for end in (P1, date(2026, 10, 1)):
+            add_statement(env.conn, env.stock, end, "ratios", {TEST_KEYS["net_income"]: Decimal(9000)})
+        captured: list[tuple[Any, ...]] = []
+        install_test_line_items(monkeypatch)
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, _capture_stmt(captured)]
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/test_engine_inputs_fundamentals.py:732: AttributeError
+____________ test_statement_windows_assign_trailing_and_prior_slots ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_069d0348242c4e4ca884c1bbc8754298) at 0x1087e12e0>, stock=1, set_id=UUID('530806b9-eaac-4c6c-b439-5d0885806630'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e09e0>
+
+    def test_statement_windows_assign_trailing_and_prior_slots(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (1), design 2.4: ranks newest first, the four newest fill the trailing
+        window and the four on or before P1 minus 12 months the prior one."""
+        ends = add_quarters(env.conn, env.stock, P1, 9, standard() + standard(1))
+        captured: list[tuple[Any, ...]] = []
+        install_test_line_items(monkeypatch)
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, _capture_stmt(captured)]
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/test_engine_inputs_fundamentals.py:757: AttributeError
+__________ test_retired_instrument_gets_no_input_and_active_gets_five __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_4995b49efa9244c988da1849fb36cfd0) at 0x1087e1340>, stock=1, set_id=UUID('b37774b7-288c-4c22-958b-5a7135023e42'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e12b0>
+
+    def test_retired_instrument_gets_no_input_and_active_gets_five(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-15 compute side, design 2.3: inputs are written for the active roster only."""
+        retired = add_instrument(env.conn, "OLD", lifecycle="retired")
+        add_quarters(env.conn, retired, P1, 8, standard())
+        add_bar(env.conn, retired, L)
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:781: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_4995b49efa9244c988da1849fb36cfd0) at 0x1087e1340>
+set_id = UUID('b37774b7-288c-4c22-958b-5a7135023e42')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e12b0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________ test_stock_with_no_statements_gets_five_missing_inputs ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_be80338580014aa7aaa71f4333bf054c) at 0x1086e3b60>, stock=1, set_id=UUID('397d8955-5ad2-418b-8f2b-1b36bac6a232'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e1a30>
+
+    def test_stock_with_no_statements_gets_five_missing_inputs(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12: the roster, not the statements, decides which rows are written."""
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:798: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_be80338580014aa7aaa71f4333bf054c) at 0x1086e3b60>
+set_id = UUID('397d8955-5ad2-418b-8f2b-1b36bac6a232')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086e1a30>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________________ test_stale_and_non_positive_base_is_outdated _________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_cf305e009e4d4916a6444fe5d486318b) at 0x108887680>, stock=1, set_id=UUID('68366ad9-d7b4-4b70-8fbf-8b8b8553afba'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108887440>
+
+    def test_stale_and_non_positive_base_is_outdated(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0116 (1): outdated ranks before not_computable."""
+        values = standard()
+        for k in range(4, 8):
+            values[k]["revenue"] = Decimal(-1)
+        values[0]["shares_outstanding"] = Decimal(0)
+        add_quarters(env.conn, env.stock, STALE, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:819: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_cf305e009e4d4916a6444fe5d486318b) at 0x108887680>
+set_id = UUID('68366ad9-d7b4-4b70-8fbf-8b8b8553afba')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108887440>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+__________________ test_absent_line_item_and_stale_is_missing __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_dfd73560c5f54dd58b90b0e6236f82c0) at 0x108885010>, stock=1, set_id=UUID('4a96c58e-7903-4cb0-a5f8-37924faa9d5b'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108885c10>
+
+    def test_absent_line_item_and_stale_is_missing(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0116 (1): missing ranks before outdated."""
+        values = standard()
+        del values[0]["revenue"]
+        del values[0]["net_income"]
+        add_quarters(env.conn, env.stock, STALE, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:833: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_dfd73560c5f54dd58b90b0e6236f82c0) at 0x108885010>
+set_id = UUID('4a96c58e-7903-4cb0-a5f8-37924faa9d5b')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108885c10>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____ test_value_known_on_is_the_latest_observation_of_statements_and_bar ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_2cef4582a8ba465cbd830cd74d379500) at 0x1087db830>, stock=1, set_id=UUID('b1e11d15-7e82-4bac-a4c6-b58ec2ba35ff'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dbd70>
+
+    def test_value_known_on_is_the_latest_observation_of_statements_and_bar(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (7): every statement row and the bar an input used decide its known_on."""
+        values = standard()
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        # Later than the stock's bar (observed on L), so a statement row decides known_on.
+        seen = {
+            "balance_sheet": date(2026, 10, 20),
+            "income_statement": date(2026, 10, 21),
+            "cash_flow_statement": date(2026, 10, 22),
+        }
+        for k, end in enumerate(ends):
+            for statement_type, observed in seen.items():
+                payload = {
+                    TEST_KEYS[name]: value
+                    for name, value in values[k].items()
+                    if line_items.LINE_ITEMS[name].statement_type == statement_type
+                }
+                # Only the third quarter of each type carries its type's latest observation.
+                on = observed if k == 2 else end + timedelta(days=1)
+                add_statement(env.conn, env.stock, end, statement_type, payload, observed_on=on)
+        other = add_instrument(env.conn, "LATEBAR")
+        add_bar(env.conn, other, L, observed_on=date(2026, 10, 20))
+        add_quarters(env.conn, other, P1, 8, standard())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:870: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_2cef4582a8ba465cbd830cd74d379500) at 0x1087db830>
+set_id = UUID('b1e11d15-7e82-4bac-a4c6-b58ec2ba35ff')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dbd70>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________ test_missing_input_carries_the_last_fundamentals_acquisition _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_b58d4b5ce68a4b6cb2118c22f57cbf9e) at 0x1088971d0>, stock=1, set_id=UUID('9f977499-13ce-4256-9b33-53ea9403404d'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108897f50>
+
+    def test_missing_input_carries_the_last_fundamentals_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, AC-12: a missing input names the last fundamentals outcome; a
+        present one carries no acquisition."""
+        values = standard()
+        del values[0]["net_income"]
+        add_quarters(env.conn, env.stock, P1, 8, values)
+        _acquisition(env, env.stock, "fundamentals", "not_found")
+        _acquisition(env, env.stock, "prices", "written")
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:904: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_b58d4b5ce68a4b6cb2118c22f57cbf9e) at 0x1088971d0>
+set_id = UUID('9f977499-13ce-4256-9b33-53ea9403404d')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108897f50>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________ test_missing_price_carries_the_last_prices_acquisition ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_d7e8656aab4f4e938bef81d079c9e8fa) at 0x1087db830>, stock=1, set_id=UUID('1c41b4a9-5ec3-4232-af20-a78d7966d2bd'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dbb90>
+
+    def test_missing_price_carries_the_last_prices_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, DEC-0116 (2): no bar at all is missing, sourced to prices."""
+        barless = add_instrument(env.conn, "NOBAR")
+        add_quarters(env.conn, barless, P1, 8, standard())
+        _acquisition(env, barless, "prices", "failed")
+        _acquisition(env, barless, "fundamentals", "written")
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:924: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_d7e8656aab4f4e938bef81d079c9e8fa) at 0x1087db830>
+set_id = UUID('1c41b4a9-5ec3-4232-af20-a78d7966d2bd')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087dbb90>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____ test_missing_input_without_acquisition_state_has_no_acquisition_key ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_0f1bb4021eaf41d5916382bda4379464) at 0x108886cc0>, stock=1, set_id=UUID('e75cb527-5a58-42f1-a42a-758f89dacdc1'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884a40>
+
+    def test_missing_input_without_acquisition_state_has_no_acquisition_key(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5: no acquisition_state row leaves detail unchanged."""
+        add_quarters(env.conn, env.stock, P1, 7, standard(7))
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:941: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_0f1bb4021eaf41d5916382bda4379464) at 0x108886cc0>
+set_id = UUID('e75cb527-5a58-42f1-a42a-758f89dacdc1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108884a40>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_6c40978a3e0b46ba85d447a73bb332d4) at 0x108885be0>, stock=1, set_id=UUID('47777a24-9525-4d15-8ee4-f10ba4dcd89d'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108887380>
+
+    def test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0056: filed before the instrument's first fundamentals observed_on, over every
+        row it has, is backfilled; filed on or after it, or with no filing date, is not."""
+        first = date(2026, 1, 5)
+        # The instrument's first observation is an annual ratios row, so the comparison date
+        # spans every statement type and period kind.
+        add_statement(
+            env.conn, env.stock, date(2025, 12, 31), "ratios", {}, fiscal_period="FY", observed_on=first
+        )
+        values = standard()
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        filed = {
+            3: first - timedelta(days=1),  # backfilled
+            2: first,  # filed on the first observation: not backfilled
+            1: None,  # no filing date: not backfilled
+        }
+        for k, end in enumerate(ends):
+            for statement_type in ("balance_sheet", "income_statement", "cash_flow_statement"):
+                payload = {
+                    TEST_KEYS[name]: value
+                    for name, value in values[k].items()
+                    if line_items.LINE_ITEMS[name].statement_type == statement_type
+                }
+                add_statement(
+                    env.conn,
+                    env.stock,
+                    end,
+                    statement_type,
+                    payload,
+                    observed_on=date(2026, 10, 1),
+                    provider_filing_date=filed.get(k, date(2026, 9, 1)),
+                )
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:985: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_fundamentals.py:113: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_6c40978a3e0b46ba85d447a73bb332d4) at 0x108885be0>
+set_id = UUID('47777a24-9525-4d15-8ee4-f10ba4dcd89d')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108887380>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+____________ test_statement_committed_during_the_build_is_not_used _____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_06ae072f863f4de6885504b4b546cd33) at 0x1087e3ef0>, stock=1, set_id=UUID('81161473-b7cb-4ed9-8926-1e78a9f1d278'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e0770>
+postgres_connection_string = 'postgresql://test:test@localhost:60332/test_06ae072f863f4de6885504b4b546cd33'
+
+    def test_statement_committed_during_the_build_is_not_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, postgres_connection_string: str
+    ) -> None:
+        """DAC-E2-9, AC-19: a newer observation committed after the build began is not seen;
+        the next set uses it and the first set's rows are unchanged."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+        def commit_newer_statement(conn: psycopg.Connection, ctx: BuildContext) -> None:
+            with psycopg.connect(postgres_connection_string) as other:
+                add_statement(
+                    other,
+                    env.stock,
+                    P1,
+                    "income_statement",
+                    {
+                        TEST_KEYS["revenue"]: Decimal(230),
+                        TEST_KEYS["net_income"]: Decimal(113),
+                        TEST_KEYS["diluted_eps"]: Decimal("1.3"),
+                    },
+                    observed_on=date(2026, 10, 17),
+                )
+    
+        install_test_line_items(monkeypatch)
+        monkeypatch.setattr(
+>           engine, "_STAGES", [commit_newer_statement, engine._fundamental_inputs_stage]
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/test_engine_inputs_fundamentals.py:1033: AttributeError
+______________ test_fundamentals_outdated_at_six_months_and_a_day ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_8647ba6e3a90497e8efe1a50666cd15...8d80ad0>, stock=1, set_id=UUID('8ab535b8-3cc7-4ba0-8bb5-ce3ddde53ec1'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d80830>
+
+    def test_fundamentals_outdated_at_six_months_and_a_day(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        latest = date(2026, 4, 16)
+        add_quarters(env.conn, env.stock, latest, 8, quarters())
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_8647ba6e3a90497e8efe1a50666cd154) at 0x108d80ad0>
+set_id = UUID('8ab535b8-3cc7-4ba0-8bb5-ce3ddde53ec1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d80830>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_______________ test_fundamentals_present_at_exactly_six_months ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_c9956a9cfa6345989381df70c268a40...8d82030>, stock=1, set_id=UUID('b77c2019-49ef-4267-882b-31a0dd3cf7c4'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d81fa0>
+
+    def test_fundamentals_present_at_exactly_six_months(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        latest = date(2026, 4, 17)
+        add_quarters(env.conn, env.stock, latest, 8, quarters())
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_c9956a9cfa6345989381df70c268a40b) at 0x108d82030>
+set_id = UUID('b77c2019-49ef-4267-882b-31a0dd3cf7c4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d81fa0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_six_months_before_a_month_end_is_the_shorter_month_end[latest0-present-classification_date0] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_cf604c668c0f463f965e33e4648bd00...08d81cd0>, stock=1, set_id=UUID('604f578e-b488-4c4e-b42d-29151441c8b7'), latest_trading_day=datetime.date(2026, 8, 30))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d811c0>
+latest = datetime.date(2026, 2, 28), status = 'present'
+
+    @pytest.mark.parametrize("classification_date", [date(2026, 8, 31)])
+    @pytest.mark.parametrize(
+        ("latest", "status"), [(date(2026, 2, 28), "present"), (date(2026, 2, 27), "outdated")]
+    )
+    def test_six_months_before_a_month_end_is_the_shorter_month_end(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: date, status: str
+    ) -> None:
+        """DAC-E2-S3-5, design 2.4: 2026-08-31 minus interval '6 months' is 2026-02-28."""
+        add_quarters(env.conn, env.stock, latest, 8, quarters())
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_cf604c668c0f463f965e33e4648bd004) at 0x108d81cd0>
+set_id = UUID('604f578e-b488-4c4e-b42d-29151441c8b7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d811c0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_ test_six_months_before_a_month_end_is_the_shorter_month_end[latest1-outdated-classification_date0] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_75b9c6b716024d3c92496f499a93eb4...08d80710>, stock=1, set_id=UUID('32b0444c-12c0-4afa-bf57-4f161bf79f66'), latest_trading_day=datetime.date(2026, 8, 30))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d81f40>
+latest = datetime.date(2026, 2, 27), status = 'outdated'
+
+    @pytest.mark.parametrize("classification_date", [date(2026, 8, 31)])
+    @pytest.mark.parametrize(
+        ("latest", "status"), [(date(2026, 2, 28), "present"), (date(2026, 2, 27), "outdated")]
+    )
+    def test_six_months_before_a_month_end_is_the_shorter_month_end(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: date, status: str
+    ) -> None:
+        """DAC-E2-S3-5, design 2.4: 2026-08-31 minus interval '6 months' is 2026-02-28."""
+        add_quarters(env.conn, env.stock, latest, 8, quarters())
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_75b9c6b716024d3c92496f499a93eb45) at 0x108d80710>
+set_id = UUID('32b0444c-12c0-4afa-bf57-4f161bf79f66')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d81f40>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________________ test_growth_currency_uses_the_newest_period __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_81937b61793e4a08b37fcb9ffc4ceb5...8d81c40>, stock=1, set_id=UUID('0d77a3a1-dace-4664-9df5-6235db4e83c4'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e0c20>
+
+    def test_growth_currency_uses_the_newest_period(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DAC-E2-6: the newest period P1 decides, though older quarters are years old."""
+        latest = date(2026, 4, 17)
+        add_quarters(env.conn, env.stock, latest, 8, quarters())
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_81937b61793e4a08b37fcb9ffc4ceb57) at 0x108d81c40>
+set_id = UUID('0d77a3a1-dace-4664-9df5-6235db4e83c4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087e0c20>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____ test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_5f4b1ef8733f4586af7b3e893582857...8888560>, stock=1, set_id=UUID('4e6cec7d-fb3c-4c79-8335-5358c10c0815'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108888350>
+
+    def test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stale = add_instrument(env.conn, "STALE")
+        day_before = env.latest_trading_day - timedelta(days=1)
+        add_bar(env.conn, stale, day_before)
+        add_quarters(env.conn, stale, date(2026, 9, 30), 8, quarters())
+        add_quarters(env.conn, env.stock, date(2026, 9, 30), 8, quarters())
+    
+>       current = build(env, monkeypatch)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:171: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_5f4b1ef8733f4586af7b3e8935828577) at 0x108888560>
+set_id = UUID('4e6cec7d-fb3c-4c79-8335-5358c10c0815')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108888350>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_____________ test_stock_without_any_bar_has_value_inputs_missing ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_b584b09625d24cac88653731a1a3a91...87dc8c0>, stock=1, set_id=UUID('82e49fb5-fbba-4533-8be1-16c214964ccd'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087da210>
+
+    def test_stock_without_any_bar_has_value_inputs_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (2): no bar at all is missing, not outdated; growth is unaffected."""
+        barless = add_instrument(env.conn, "NOBAR")
+        add_quarters(env.conn, barless, date(2026, 9, 30), 8, quarters())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_currency.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_b584b09625d24cac88653731a1a3a91b) at 0x1087dc8c0>
+set_id = UUID('82e49fb5-fbba-4533-8be1-16c214964ccd')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087da210>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_________ test_retired_stock_bar_does_not_move_the_latest_trading_day __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_1f2b2a9808ae4505b3e42315e17cf93...8d86960>, stock=1, set_id=UUID('ccff4796-4ecc-46aa-ad7c-7a002b8d70ac'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d87080>
+
+    def test_retired_stock_bar_does_not_move_the_latest_trading_day(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (5): the latest trading day is held across active instruments only."""
+        retired = add_instrument(env.conn, "OLD", lifecycle="retired")
+        add_bar(env.conn, retired, env.latest_trading_day + timedelta(days=1))
+        add_quarters(env.conn, env.stock, date(2026, 9, 30), 8, quarters())
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_1f2b2a9808ae4505b3e42315e17cf933) at 0x108d86960>
+set_id = UUID('ccff4796-4ecc-46aa-ad7c-7a002b8d70ac')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d87080>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+________________ test_stale_period_and_stale_bar_are_both_named ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_a3fe50781cf948ceb46414fb498b545...8d87710>, stock=1, set_id=UUID('d7270683-97e3-475e-a490-49bdd69e5c5a'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d873e0>
+
+    def test_stale_period_and_stale_bar_are_both_named(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-13: every applicable cause is named."""
+        both = add_instrument(env.conn, "BOTH")
+        day_before = env.latest_trading_day - timedelta(days=1)
+        add_bar(env.conn, both, day_before)
+        add_quarters(env.conn, both, date(2026, 3, 31), 8, quarters())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_currency.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_a3fe50781cf948ceb46414fb498b5456) at 0x108d87710>
+set_id = UUID('d7270683-97e3-475e-a490-49bdd69e5c5a')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d873e0>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+______ test_mixed_statement_input_is_dated_by_its_earliest_latest_period _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e55a5365b2204a708015b096066c374...8886cc0>, stock=1, set_id=UUID('27596c2d-e058-4051-9ae2-94cdccc5a996'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108885c10>
+
+    def test_mixed_statement_input_is_dated_by_its_earliest_latest_period(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (3): as_of and the staleness test use the earliest of the latest period
+        ends an input reads."""
+        _statements(env, "balance_sheet", date(2026, 9, 30))
+        _statements(env, "income_statement", date(2026, 3, 31))
+        _statements(env, "cash_flow_statement", date(2026, 6, 30))
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_currency.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_e55a5365b2204a708015b096066c3743) at 0x108886cc0>
+set_id = UUID('27596c2d-e058-4051-9ae2-94cdccc5a996')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108885c10>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+_______________________ test_growth_ignores_bar_currency _______________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_1eb6609a3bc140d59d3986901553d3b...8d82d80>, stock=1, set_id=UUID('c5925be3-e529-46b4-8098-a88b63bbe6c6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d81790>
+
+    def test_growth_ignores_bar_currency(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """AC-13, design 2.4: growth depends on no price, so a year-old bar leaves it present."""
+        old = add_instrument(env.conn, "OLDBAR")
+        add_bar(env.conn, old, env.latest_trading_day - timedelta(days=365))
+        add_quarters(env.conn, old, date(2026, 9, 30), 8, quarters())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_currency.py:287: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_currency.py:87: in build
+    result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60332 user=test database=test_1eb6609a3bc140d59d3986901553d3b3) at 0x108d82d80>
+set_id = UUID('c5925be3-e529-46b4-8098-a88b63bbe6c6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d81790>
+
+    def run_fundamentals_stage(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with only this story's stage, so later stories' stages never run."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_fundamental_inputs_stage'
+
+tests/integration/engine_inputs_support.py:190: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_engine_line_item_params.py::test_real_line_items_pass_every_key_as_none_and_every_item_unresolved
+FAILED tests/unit/test_engine_line_item_params.py::test_a_resolved_item_carries_its_key_and_sign
+FAILED tests/unit/test_engine_line_item_params.py::test_a_replaced_mapping_is_read_at_call_time
+FAILED tests/unit/test_engine_line_item_params.py::test_the_sentinel_never_appears_in_the_parameters
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_seven_quarters_leave_growth_missing_and_value_unaffected
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_quarter_absent_from_the_prior_window_leaves_growth_missing
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_quarter_absent_from_the_trailing_window_fails_its_span
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_annual_rows_enter_no_trailing_sum
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_stock_with_only_annual_statements_has_value_and_growth_missing
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_later_observation_of_a_period_is_used_and_earlier_untouched
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_equal_observed_on_is_decided_by_the_later_recorded_at
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior0-base0]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior1-base1]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior2-base2]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior3-base3]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares0]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares1]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unresolved_line_items_leave_value_and_growth_missing
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_only_unresolved_line_items_are_named
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_resolved_items_classify_independently_of_unresolved_ones
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_plain_decimal_strings_and_json_numbers_read_alike
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unusable_line_item_value_reads_as_absent[None]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unusable_line_item_value_reads_as_absent[n/a]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unusable_line_item_value_reads_as_absent[1,250.5]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unusable_line_item_value_reads_as_absent[]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unusable_line_item_value_reads_as_absent[True]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unusable_line_item_value_reads_as_absent[stored5]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_fcf_yield_subtracts_signed_capital_expenditure
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_market_capitalisation_is_latest_close_times_newest_shares
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_value_detail_lists_the_balance_sheet_and_trailing_rows
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_balance_sheet_dated_after_the_classification_date_is_never_used
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_item_in_newest_balance_sheet_does_not_fall_back
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_ratios_statements_are_never_read
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_statement_windows_assign_trailing_and_prior_slots
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_retired_instrument_gets_no_input_and_active_gets_five
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_stock_with_no_statements_gets_five_missing_inputs
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_stale_and_non_positive_base_is_outdated
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_line_item_and_stale_is_missing
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_value_known_on_is_the_latest_observation_of_statements_and_bar
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_input_carries_the_last_fundamentals_acquisition
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_price_carries_the_last_prices_acquisition
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_input_without_acquisition_state_has_no_acquisition_key
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_statement_committed_during_the_build_is_not_used
+FAILED tests/integration/test_engine_currency.py::test_fundamentals_outdated_at_six_months_and_a_day
+FAILED tests/integration/test_engine_currency.py::test_fundamentals_present_at_exactly_six_months
+FAILED tests/integration/test_engine_currency.py::test_six_months_before_a_month_end_is_the_shorter_month_end[latest0-present-classification_date0]
+FAILED tests/integration/test_engine_currency.py::test_six_months_before_a_month_end_is_the_shorter_month_end[latest1-outdated-classification_date0]
+FAILED tests/integration/test_engine_currency.py::test_growth_currency_uses_the_newest_period
+FAILED tests/integration/test_engine_currency.py::test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth
+FAILED tests/integration/test_engine_currency.py::test_stock_without_any_bar_has_value_inputs_missing
+FAILED tests/integration/test_engine_currency.py::test_retired_stock_bar_does_not_move_the_latest_trading_day
+FAILED tests/integration/test_engine_currency.py::test_stale_period_and_stale_bar_are_both_named
+FAILED tests/integration/test_engine_currency.py::test_mixed_statement_input_is_dated_by_its_earliest_latest_period
+FAILED tests/integration/test_engine_currency.py::test_growth_ignores_bar_currency
+57 failed in 8.58s
+# exit: 1

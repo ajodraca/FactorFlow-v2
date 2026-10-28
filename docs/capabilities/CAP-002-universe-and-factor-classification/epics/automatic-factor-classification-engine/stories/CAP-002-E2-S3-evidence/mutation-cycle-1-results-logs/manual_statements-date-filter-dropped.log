@@ -1,0 +1,36 @@
+........................................................................ [ 67%]
+.......F
+=================================== FAILURES ===================================
+_____ test_balance_sheet_dated_after_the_classification_date_is_never_used _____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55211 user=test database=test_ad9bb7e638574e04bd7d836471ee61ac) at 0x10ae01a00>, stock=1, set_id=UUID('c7aa663f-e6b1-48c9-9793-b657ca1cf047'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ae03f50>
+
+    def test_balance_sheet_dated_after_the_classification_date_is_never_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 3: only periods ending on or before the classification date."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        later = date(2026, 12, 31)
+        add_statement(
+            env.conn,
+            env.stock,
+            later,
+            "balance_sheet",
+            {TEST_KEYS["book_equity"]: Decimal(9000), TEST_KEYS["shares_outstanding"]: Decimal(1)},
+        )
+        add_statement(
+            env.conn, env.stock, later, "income_statement", {TEST_KEYS["net_income"]: Decimal(9000)}
+        )
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert rows["book_to_price"]["value"] == BOOK_TO_PRICE
+E       AssertionError: assert Decimal('900.0000000000') == Decimal('0.5000000000')
+
+tests/integration/test_engine_inputs_fundamentals.py:877: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_balance_sheet_dated_after_the_classification_date_is_never_used
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 79 passed in 12.71s

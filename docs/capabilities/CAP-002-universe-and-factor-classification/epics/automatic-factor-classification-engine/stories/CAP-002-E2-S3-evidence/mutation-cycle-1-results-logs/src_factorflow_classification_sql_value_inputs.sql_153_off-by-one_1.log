@@ -1,0 +1,49 @@
+.............................................................F
+=================================== FAILURES ===================================
+___ test_non_positive_shares_make_every_value_input_not_computable[shares0] ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54150 user=test database=test_b57c114e8af5465e98201c027d0e3305) at 0x10cb42750>, stock=1, set_id=UUID('42f8c694-fdef-4997-98d2-a3fe3d46e3fe'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb40440>
+shares = Decimal('0')
+
+    @pytest.mark.parametrize("shares", [Decimal(0), Decimal(-100)])
+    def test_non_positive_shares_make_every_value_input_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, shares: Decimal
+    ) -> None:
+        values = standard()
+        values[0]["shares_outstanding"] = shares
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:611: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54150 user=test database=test_b57c114e8af5465e98201c027d0e3305) at 0x10cb42750>, stock=1, set_id=UUID('42f8c694-fdef-4997-98d2-a3fe3d46e3fe'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb40440>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> BuildResult:
+        install_test_line_items(monkeypatch)
+        result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: DivisionByZero: division by zero
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_fundamentals.py:114: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:136 classification build failed: DivisionByZero: division by zero
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/src/factorflow/classification/engine.py", line 118, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/src/factorflow/classification/engine.py", line 200, in _fundamental_inputs_stage
+    cur.execute(_VALUE_INPUTS_SQL, params)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DivisionByZero: division by zero
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 61 passed in 8.58s
