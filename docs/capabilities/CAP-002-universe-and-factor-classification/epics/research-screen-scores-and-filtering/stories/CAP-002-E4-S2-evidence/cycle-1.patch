@@ -1,0 +1,328 @@
+diff --git a/web/src/screens/research/format.test.ts b/web/src/screens/research/format.test.ts
+new file mode 100644
+index 0000000..6bd17c6
+--- /dev/null
++++ b/web/src/screens/research/format.test.ts
+@@ -0,0 +1,175 @@
++import { afterEach, beforeEach, describe, expect, it } from "vitest";
++import {
++  formatAmount,
++  formatDate,
++  formatPercentile,
++  formatRate,
++  formatRatio,
++  formatScore,
++  formatTimestamp,
++} from "./format";
++
++// Implements TC-COMP-071 (T001): one assertion per DAC-E4-S2-3 clause, on the
++// decimal strings the API sends at stored precision (DEC-0063).
++describe("TC-COMP-071: score, percentile, ratio, rate and date formatting", () => {
++  it("signs a standardised score at two decimals with an ASCII hyphen-minus", () => {
++    expect(formatScore("1.2700000000")).toBe("+1.27");
++    expect(formatScore("-0.4500000000")).toBe("-0.45");
++    expect(formatScore("-0.4500000000").charCodeAt(0)).toBe(0x2d);
++  });
++
++  it("leaves a zero standardised score unsigned", () => {
++    expect(formatScore("0.0000000000")).toBe("0.00");
++    expect(formatScore("0E-10")).toBe("0.00");
++  });
++
++  it("renders a percentile as a whole number with no sign and no %", () => {
++    expect(formatPercentile("84.0000000000")).toBe("84");
++  });
++
++  it("renders a ratio at two decimals", () => {
++    expect(formatRatio("1.2345")).toBe("1.23");
++  });
++
++  it("renders a rate fraction as a signed percentage at two decimals", () => {
++    expect(formatRate("0.1240")).toBe("+12.40%");
++    expect(formatRate("-0.0500")).toBe("-5.00%");
++  });
++
++  it("renders a timestamp in America/Chicago with the zone as the instant falls", () => {
++    expect(formatTimestamp("2026-10-15T22:46:00Z")).toBe("2026-10-15 17:46 CDT");
++    expect(formatTimestamp("2026-01-15T23:46:00Z")).toBe("2026-01-15 17:46 CST");
++  });
++
++  it("passes a date through unconverted, including the daylight-saving change day", () => {
++    expect(formatDate("2026-10-15")).toBe("2026-10-15");
++    expect(formatDate("2026-03-08")).toBe("2026-03-08");
++    expect(formatDate("2026-11-01")).toBe("2026-11-01");
++  });
++});
++
++// T005: edge cases (AC-9, DAC-E4-S2-3; DEC-0147).
++describe("format.ts edge cases", () => {
++  it("rounds half away from zero on the decimal string, not through a float", () => {
++    expect(formatScore("0.0050000000")).toBe("+0.01");
++    expect(formatScore("-0.0050000000")).toBe("-0.01");
++    expect(formatScore("1.0050000000")).toBe("+1.01");
++    expect(formatScore("1.0049999999")).toBe("+1.00");
++    expect(formatScore("9.9950000000")).toBe("+10.00");
++    expect(formatScore("-9.9950000000")).toBe("-10.00");
++    expect(formatScore("2")).toBe("+2.00");
++    expect(formatScore("+0.5")).toBe("+0.50");
++  });
++
++  it("never signs a value that rounds to zero", () => {
++    expect(formatScore("-0.0040000000")).toBe("0.00");
++    expect(formatScore("0.0040000000")).toBe("0.00");
++    expect(formatScore("-0")).toBe("0.00");
++    expect(formatRatio("-0.004")).toBe("0.00");
++    expect(formatRate("-0.00004")).toBe("0.00%");
++  });
++
++  it("rounds a percentile to a whole number", () => {
++    expect(formatPercentile("87.5000000000")).toBe("88");
++    expect(formatPercentile("87.4999999999")).toBe("87");
++    expect(formatPercentile("99.5000000000")).toBe("100");
++    expect(formatPercentile("0.0000000000")).toBe("0");
++    expect(formatPercentile("100.0000000000")).toBe("100");
++    expect(formatPercentile("0E-10")).toBe("0");
++  });
++
++  it("keeps the sign of a negative ratio and never adds a plus", () => {
++    expect(formatRatio("-1.2350")).toBe("-1.24");
++    expect(formatRatio("0.004")).toBe("0.00");
++    expect(formatRatio("0.005")).toBe("0.01");
++    expect(formatRatio("12")).toBe("12.00");
++  });
++
++  it("leaves a zero rate unsigned and shifts the fraction by two places", () => {
++    expect(formatRate("0.0000")).toBe("0.00%");
++    expect(formatRate("1.5")).toBe("+150.00%");
++    expect(formatRate("0.000050")).toBe("+0.01%");
++    expect(formatRate("-0.123456")).toBe("-12.35%");
++  });
++
++  it("renders an amount in whole units with comma separators, no symbol, no abbreviation", () => {
++    expect(formatAmount("1234567.5")).toBe("1,234,568");
++    expect(formatAmount("-9876543")).toBe("-9,876,543");
++    expect(formatAmount("999")).toBe("999");
++    expect(formatAmount("1000")).toBe("1,000");
++    expect(formatAmount("999999.5")).toBe("1,000,000");
++    expect(formatAmount("-0.4")).toBe("0");
++  });
++
++  it.each(["", "abc", "NaN", "Infinity", "-Infinity", "1e3", "1,5", "1.", ".5", " 1.0", "1E-10"])(
++    "throws RangeError on the non-decimal input %j rather than render a value",
++    (input) => {
++      for (const format of [formatScore, formatPercentile, formatRatio, formatRate, formatAmount]) {
++        expect(() => format(input)).toThrow(RangeError);
++      }
++    },
++  );
++
++  it("renders minutes by default and seconds when asked", () => {
++    expect(formatTimestamp("2026-10-15T22:52:10Z")).toBe("2026-10-15 17:52 CDT");
++    expect(formatTimestamp("2026-10-15T22:52:10Z", { seconds: true })).toBe(
++      "2026-10-15 17:52:10 CDT",
++    );
++  });
++
++  it("spells midnight 00, not 24", () => {
++    expect(formatTimestamp("2026-10-16T05:00:00Z")).toBe("2026-10-16 00:00 CDT");
++    expect(formatTimestamp("2026-01-16T06:00:30Z", { seconds: true })).toBe(
++      "2026-01-16 00:00:30 CST",
++    );
++  });
++
++  it("takes the zone as the instant falls across the autumn change", () => {
++    expect(formatTimestamp("2026-11-01T06:30:00Z")).toBe("2026-11-01 01:30 CDT");
++    expect(formatTimestamp("2026-11-01T07:30:00Z")).toBe("2026-11-01 01:30 CST");
++  });
++
++  it("accepts an instant with an explicit offset", () => {
++    expect(formatTimestamp("2026-10-15T17:46:00-05:00")).toBe("2026-10-15 17:46 CDT");
++    expect(formatTimestamp("2026-10-15T22:46:00.123456+00:00")).toBe("2026-10-15 17:46 CDT");
++  });
++
++  it.each(["", "2026-10-15", "2026-10-15T22:46:00", "not a time", "2026-13-45T99:00:00Z"])(
++    "throws RangeError on %j, which is not an ISO-8601 instant with a zone",
++    (input) => {
++      expect(() => formatTimestamp(input)).toThrow(RangeError);
++      expect(() => formatTimestamp(input)).toThrow(
++        `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
++      );
++    },
++  );
++
++  it.each(["", "2026-1-5", "20261015", "2026-10-15T00:00:00Z", "15/10/2026"])(
++    "throws RangeError on the non-date %j",
++    (input) => {
++      expect(() => formatDate(input)).toThrow(RangeError);
++      expect(() => formatDate(input)).toThrow(`Not an ISO-8601 date: ${JSON.stringify(input)}`);
++    },
++  );
++
++  describe.each(["Asia/Tokyo", "UTC", "America/Los_Angeles"])("under TZ=%s", (zone) => {
++    let previous: string | undefined;
++    beforeEach(() => {
++      previous = process.env.TZ;
++      process.env.TZ = zone;
++    });
++    afterEach(() => {
++      if (previous === undefined) {
++        Reflect.deleteProperty(process.env, "TZ");
++      } else {
++        process.env.TZ = previous;
++      }
++    });
++
++    it("does not read the machine zone", () => {
++      expect(formatTimestamp("2026-10-15T22:46:00Z")).toBe("2026-10-15 17:46 CDT");
++      expect(formatTimestamp("2026-01-15T23:46:00Z")).toBe("2026-01-15 17:46 CST");
++      expect(formatDate("2026-03-08")).toBe("2026-03-08");
++    });
++  });
++});
+diff --git a/web/src/screens/research/format.ts b/web/src/screens/research/format.ts
+new file mode 100644
+index 0000000..767d415
+--- /dev/null
++++ b/web/src/screens/research/format.ts
+@@ -0,0 +1,141 @@
++/**
++ * The one place a CAP-002 number or date becomes text (classification-ui
++ * section 2.4; STD-UI-3, STD-UI-5, STD-UI-6; DEC-0063; DEC-0147).
++ *
++ * Every numeric input is the wire's decimal string at stored precision and is
++ * rounded by string arithmetic, half away from zero, never through a float. A
++ * value that rounds to zero is never signed, and a string that is not a plain
++ * decimal throws `RangeError` rather than render a value the API never sent
++ * (STD-UI-4). Signs use the ASCII hyphen-minus (CAP-002-E4-S2 Resolved
++ * Conflict 2).
++ */
++
++const PLAIN_DECIMAL = /^([+-]?)(\d+)(?:\.(\d+))?$/;
++
++/** The zero spelling a `Decimal` column can emit at a scale (`0E-10`). */
++const ZERO_EXPONENT = /^[+-]?0E[+-]?\d+$/;
++
++const TIME_ZONE = "America/Chicago";
++
++interface Decimal {
++  negative: boolean;
++  whole: string;
++  fraction: string;
++}
++
++function parseDecimal(value: string): Decimal {
++  const match = PLAIN_DECIMAL.exec(ZERO_EXPONENT.test(value) ? "0" : value);
++  if (match === null) {
++    throw new RangeError(`Not a decimal string: ${JSON.stringify(value)}`);
++  }
++  return { negative: match[1] === "-", whole: match[2] as string, fraction: match[3] ?? "" };
++}
++
++/** Multiplies by 10^places by moving the decimal point (a rate's fraction to percent). */
++function shiftLeft(decimal: Decimal, places: number): Decimal {
++  const fraction = decimal.fraction.padEnd(places, "0");
++  return {
++    negative: decimal.negative,
++    whole: decimal.whole + fraction.slice(0, places),
++    fraction: fraction.slice(places),
++  };
++}
++
++/**
++ * Rounds the magnitude to `places` decimals, half away from zero. `sign` is
++ * the one to print: empty when the rounded magnitude is zero.
++ */
++function round(decimal: Decimal, places: number): { sign: "" | "+" | "-"; digits: string } {
++  const kept = decimal.fraction.slice(0, places).padEnd(places, "0");
++  let units = BigInt(decimal.whole + kept);
++  if (decimal.fraction.charAt(places) >= "5") {
++    units += 1n;
++  }
++  const padded = units.toString().padStart(places + 1, "0");
++  const digits =
++    places === 0
++      ? padded
++      : `${padded.slice(0, padded.length - places)}.${padded.slice(padded.length - places)}`;
++  const sign = units === 0n ? "" : decimal.negative ? "-" : "+";
++  return { sign, digits };
++}
++
++function signed(decimal: Decimal, places: number): string {
++  const { sign, digits } = round(decimal, places);
++  return `${sign}${digits}`;
++}
++
++/** Keeps a `-`, never prints a `+`. */
++function unsigned(decimal: Decimal, places: number): string {
++  const { sign, digits } = round(decimal, places);
++  return `${sign === "-" ? "-" : ""}${digits}`;
++}
++
++/** A standardised score: two decimals, `+` or `-`, `0.00` unsigned (DAC-E4-S2-3). */
++export function formatScore(value: string): string {
++  return signed(parseDecimal(value), 2);
++}
++
++/** A percentile: a whole number 0 to 100, no sign and no `%` (DAC-E4-S2-3, AC-9). */
++export function formatPercentile(value: string): string {
++  return unsigned(parseDecimal(value), 0);
++}
++
++/** A ratio input: two decimals, a negative keeps `-`, never a `+` (DAC-E4-S2-3). */
++export function formatRatio(value: string): string {
++  return unsigned(parseDecimal(value), 2);
++}
++
++/** A rate input, the engine's fraction: times 100, two decimals, signed, `%` (DAC-E4-S2-3). */
++export function formatRate(value: string): string {
++  return `${signed(shiftLeft(parseDecimal(value), 2), 2)}%`;
++}
++
++/** An amount: whole units, `,` thousands separators, no symbol, no abbreviation (STD-UI-6). */
++export function formatAmount(value: string): string {
++  return unsigned(parseDecimal(value), 0).replace(/\B(?=(\d{3})+$)/g, ",");
++}
++
++/** An ISO-8601 instant with its zone: `Z` or an offset, never a local wall-clock time. */
++const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
++
++/**
++ * An instant in America/Chicago with the zone as the instant falls:
++ * `2026-10-15 17:46 CDT`, or `17:52:10 CDT` with `seconds` for the polled
++ * *checked* clause (DAC-E4-S2-3; DEC-0147). Never reads the machine zone.
++ */
++export function formatTimestamp(value: string, options?: { seconds?: boolean }): string {
++  const when = new Date(value);
++  if (!ISO_INSTANT.test(value) || Number.isNaN(when.getTime())) {
++    throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(value)}`);
++  }
++  const parts = new Intl.DateTimeFormat("en-US", {
++    timeZone: TIME_ZONE,
++    year: "numeric",
++    month: "2-digit",
++    day: "2-digit",
++    hour: "2-digit",
++    minute: "2-digit",
++    second: "2-digit",
++    // h23, not hour12: false, so midnight is "00" on every engine, never "24".
++    hourCycle: "h23",
++    timeZoneName: "short",
++  }).formatToParts(when);
++  const part = (type: Intl.DateTimeFormatPartTypes): string =>
++    parts.find((candidate) => candidate.type === type)?.value ?? "";
++  const clock = options?.seconds
++    ? `${part("hour")}:${part("minute")}:${part("second")}`
++    : `${part("hour")}:${part("minute")}`;
++  return `${part("year")}-${part("month")}-${part("day")} ${clock} ${part("timeZoneName")}`;
++}
++
++/**
++ * A calendar date (`classification_date`, `known_on`, an input's `as_of`):
++ * returned as received after a shape check, never through `Date` (STD-UI-5).
++ */
++export function formatDate(value: string): string {
++  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
++    throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value)}`);
++  }
++  return value;
++}
