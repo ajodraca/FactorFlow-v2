@@ -290,6 +290,11 @@ describe("research-query codec edge cases", () => {
     "value.measure=percentile&value.direction=atLeast&value.value=-1",
     "value.measure=percentile&value.direction=atLeast&value.value=101",
     "value.measure=percentile&value.direction=atLeast&value.value=100.01",
+    // Above 100 by less than a float can tell from 100 (IR-004).
+    "value.measure=percentile&value.direction=atLeast&value.value=100.00000000000000001",
+    "value.measure=percentile&value.direction=atLeast&value.value=-0.00000000000000001",
+    "value.measure=percentile&value.direction=atLeast&value.value=-0.5",
+    "value.measure=percentile&value.direction=atLeast&value.value=%2B100.5",
     "value.measure=percentile&value.direction=atLeast&value.value=abc",
     "value.measure=standardisedScore&value.direction=atLeast&value.value=abc",
     "value.measure=standardisedScore&value.direction=atLeast&value.value=NaN",
@@ -304,6 +309,11 @@ describe("research-query codec edge cases", () => {
     ["percentile", "0"],
     ["percentile", "100"],
     ["percentile", "99.5"],
+    ["percentile", "100.0000000000"],
+    ["percentile", "0.00"],
+    ["percentile", "099.99999999999999999"],
+    ["percentile", "-0.00"],
+    ["percentile", "+100"],
     ["standardisedScore", "-0.45"],
     ["standardisedScore", "+1.27"],
     ["standardisedScore", "250"],
@@ -379,6 +389,56 @@ describe("research-query codec edge cases", () => {
   it("uses the first value of a repeated key", () => {
     expect(decode("symbol=AA&symbol=BB").symbol).toBe("AA");
     expect(decode("scope=u1&scope=u2").scope).toBe("u1");
+    expect(
+      decode(
+        "value.measure=percentile&value.measure=standardisedScore&value.direction=atLeast&value.direction=atMost&value.value=10&value.value=90",
+      ).sentences,
+    ).toEqual({ value: { measure: "percentile", direction: "atLeast", value: "10" } });
+    expect(
+      decode(
+        "growth.measure=standardisedScore&growth.measure=percentile&growth.direction=atMost&growth.direction=atLeast&growth.value=1.5&growth.value=50",
+      ).sentences,
+    ).toEqual({ growth: { measure: "standardisedScore", direction: "atMost", value: "1.5" } });
+    expect(decode("sort=symbol&sort=value_score").sort).toEqual({ key: "symbol", order: "asc" });
+    expect(decode("sort=symbol&order=desc&order=asc").sort).toEqual({
+      key: "symbol",
+      order: "desc",
+    });
+    expect(decode("sort=symbol&order=asc&order=desc").sort).toEqual({
+      key: "symbol",
+      order: "asc",
+    });
+    expect(decode("hide_incomplete=false&hide_incomplete=true").hideIncomplete).toBe(false);
+    expect(decode("hide_incomplete=true&hide_incomplete=false").hideIncomplete).toBe(true);
+  });
+
+  it("removes every factor's sentence keys when the new query omits its sentence", () => {
+    const all = encodeResearchQuery(
+      query({
+        sentences: {
+          value: { measure: "percentile", direction: "atLeast", value: "10" },
+          growth: { measure: "standardisedScore", direction: "atMost", value: "1.5" },
+          momentum: { measure: "percentile", direction: "atLeast", value: "50" },
+        },
+      }),
+    );
+    all.set("tab", "history");
+    const cleared = applyResearchQuery(all, DEFAULT_RESEARCH_QUERY);
+    expect(cleared.toString()).toBe("tab=history");
+    for (const factor of ["value", "growth", "momentum"] as const) {
+      const kept = applyResearchQuery(
+        all,
+        query({ sentences: { [factor]: decodeResearchQuery(all).sentences[factor] } }),
+      );
+      for (const other of ["value", "growth", "momentum"].filter((name) => name !== factor)) {
+        for (const suffix of ["measure", "direction", "value"]) {
+          expect(kept.has(`${other}.${suffix}`), `${other}.${suffix} after keeping ${factor}`).toBe(
+            false,
+          );
+        }
+      }
+      expect(Object.keys(decodeResearchQuery(kept).sentences)).toEqual([factor]);
+    }
   });
 
   it("sends only what is set, as the list read names it", () => {

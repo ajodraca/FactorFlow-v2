@@ -15,7 +15,7 @@
 # ("operator": "manual").
 # Decisions applied: DEC-0145 (UNIVERSE_LIFECYCLE allow-list), DEC-0146 (bare-score rule), DEC-0147 (format.ts
 # conventions), DEC-0148 (URL codec conventions, with its 2026-10-18 amendment), DEC-0149 (operation and resource
-# labels); all owner-upheld. No new decision was recorded.
+# labels); all owner-upheld. No new decision was recorded in cycles 1-3; cycle 4 applies DEC-0226 (PROVISIONAL, agent).
 
 cycles:
   - id: cycle-1
@@ -151,3 +151,64 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T001, T006, T009, T010, T014]
+    description: >
+      Rework of implementation review v1 (CAP-002-E4-S2-implementation-review-v1.md). IR-001: the repeated-key
+      test now covers {factor}.measure, {factor}.direction, {factor}.value, sort, order and hide_incomplete with
+      distinguishing first and later values. IR-002: a new apply test removes every factor's three sentence keys
+      when the new query omits that factor. IR-003: TC-COMP-071's date rows add shape-valid non-calendar dates
+      (2026-02-29, 2026-04-31, 2026-13-01) returned untouched. IR-004 (production): the percentile range check
+      compares the decimal string exactly (BigInt whole part, all-zero fraction) instead of Number, and is pinned
+      by values a float cannot tell from 0 or 100. IR-005: TC-COMP-072 renders and scans every failureSentence
+      composition under DEC-0226 (PROVISIONAL): a retire-bearing string passes only as an UNIVERSE_LIFECYCLE
+      string or as "<UNIVERSE_LIFECYCLE string>: <remainder without retire>". IR-006: DAC-naming doc comments on
+      every exported type, formatAmount and formatDate.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/red-cycle-4.log
+    red_log_sha256: 7f7e23736c97296468390f3c093c8908118b550370469812d8de194922c32326
+    red_evidence: >
+      With the new tests written and the production range check unchanged, research-query.test.ts failed on
+      value.value=100.00000000000000001 (kept instead of dropped): 1 failed, 415 passed (red-cycle-4.log). The
+      IR-001, IR-002, IR-003 and IR-005 tests pin behaviour the production code already had; their RED is the
+      review's nine surviving mutants, which this cycle's mutation run now kills.
+    green_evidence: >
+      Focused suites 420 passed (green-cycle-4.log); full web suite 772 passed in 45 files (full-suite-cycle-4.log);
+      tsc --noEmit, biome lint, biome format and npm run build clean. The code review's one LOW note (a +100.5
+      drop row decoded as a space by URLSearchParams) was fixed by encoding the sign as %2B before the final
+      fingerprint.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/green-cycle-4.log
+        sha256: cecab9be0f8cc08e24df4b82ae4b65a06d595474c54f2177f042fda9f82c0c0f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/full-suite-cycle-4.log
+        sha256: 14dac181d18a935ca4f308f36a7bdf0afe14716a7766170bd531ee2840e76252
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8eae0ddacba69ef3e798e6485e5a259cc9ebdfcb730c07a9c8276649c194bb33
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: 697657774fcba3a4997f7eb6bdf460b621bb705000ea6e4a8064a812770721a9
+      generated: 73
+      killed: 71
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: manual:cycle-4:review-value-null-guard-removed
+          disposition: equivalent
+          reason: >
+            Removing the value === null guard lets a null value reach isValidValue, where PLAIN_DECIMAL.test(null)
+            coerces it to "null", which fails, so the sentence is dropped as before; no input distinguishes the two
+            (the review's and cycle-2's disposition).
+        - id: manual:cycle-4:review-download-route-unencoded
+          disposition: equivalent
+          reason: >
+            T011 specifies exactly (runId) => /runs/${runId}; run ids are UUIDs (classification-ui 2.6, migration
+            0004), for which encodeURIComponent is the identity, so the two differ only on run ids no artifact
+            admits (the review's disposition).

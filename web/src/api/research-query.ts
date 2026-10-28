@@ -18,19 +18,24 @@ import type {
   Thresholds,
 } from "./classification-types";
 
+/** A sentence's measure: the percentile or the standardised score (DAC-E4-S2-1). */
 export type Measure = "percentile" | "standardisedScore";
+/** A sentence's direction: *at least* or *at most* (DAC-E4-S2-1). */
 export type Direction = "atLeast" | "atMost";
 
-/** One factor's *[measure] [direction] [value]* sentence; `value` stays the string given. */
+/** One factor's *[measure] [direction] [value]* sentence; `value` stays the string given (DAC-E4-S2-1). */
 export interface ThresholdSentence {
   measure: Measure;
   direction: Direction;
   value: string;
 }
 
+/** A sort the URL may carry: the API's allowlist (DAC-E4-3). */
 export type SortKey = ClassificationSort;
+/** A sort's order; `asc` is written by omission (DAC-E4-3). */
 export type Order = "asc" | "desc";
 
+/** Everything the Research URL holds: scope, sentences, hide-incomplete, search and sort (DAC-E4-3). */
 export interface ResearchQuery {
   /** `null` is all followed stocks; otherwise a universe id. */
   scope: string | null;
@@ -42,7 +47,7 @@ export interface ResearchQuery {
   sort: { key: SortKey; order: Order } | null;
 }
 
-/** All followed stocks, no sentence, nothing hidden, no search, unsorted. */
+/** All followed stocks, no sentence, nothing hidden, no search, unsorted (DAC-E4-3). */
 export const DEFAULT_RESEARCH_QUERY: ResearchQuery = {
   scope: null,
   sentences: {},
@@ -64,6 +69,7 @@ const SORT_KEYS: readonly SortKey[] = [
   "momentum_percentile",
 ];
 
+/** One of the twelve bounds the list read accepts (DAC-E4-S2-1). */
 export type BoundKey = keyof ThresholdBounds;
 
 /** The one table from a sentence to its bound: four pairs per factor, twelve in all. */
@@ -110,12 +116,26 @@ function isSortKey(value: string | null): value is SortKey {
   return SORT_KEYS.some((key) => key === value);
 }
 
+/**
+ * 0 to 100 inclusive, compared on the decimal string as the API's `Decimal`
+ * does, never through a float (DEC-0148; DEC-0147).
+ */
+function isPercentile(value: string): boolean {
+  const [whole = "", fraction = ""] = value.split(".");
+  const integer = BigInt(whole);
+  const zeroFraction = /^0*$/.test(fraction);
+  if (value.startsWith("-")) {
+    return integer === 0n && zeroFraction;
+  }
+  return integer < 100n || (integer === 100n && zeroFraction);
+}
+
 /** Percentile 0 to 100 inclusive; standardised score any finite plain decimal (API 2.4). */
 function isValidValue(measure: Measure, value: string): boolean {
   if (!PLAIN_DECIMAL.test(value)) {
     return false;
   }
-  return measure === "standardisedScore" || (Number(value) >= 0 && Number(value) <= 100);
+  return measure === "standardisedScore" || isPercentile(value);
 }
 
 function decodeSentence(params: URLSearchParams, factor: FactorName): ThresholdSentence | null {

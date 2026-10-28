@@ -103,6 +103,25 @@ const CATALOGUE: string[] = Object.entries(copy)
 
 const UNIVERSE_LIFECYCLE_STRINGS: string[] = flatten(copy.UNIVERSE_LIFECYCLE, "UNIVERSE_LIFECYCLE");
 
+/**
+ * Every sentence `failureSentence` can compose: each operation, resource and
+ * code (an unknown and an absent code included), with and without the
+ * optional context (IR-005; DEC-0226).
+ */
+const COMPOSED_FAILURES: string[] = [
+  ...new Set(
+    (Object.keys(copy.OPERATION_LABELS) as ClassificationOperation[]).flatMap((operation) =>
+      (Object.keys(copy.RESOURCE_LABELS) as ClassificationResource[]).flatMap((resource) =>
+        [...Object.keys(copy.ERROR_SENTENCES), "not_a_code", null].flatMap((code) =>
+          [{ symbols: ["MSFT", "TSLA"], universeName: "Tech" }, {}].map((context) =>
+            copy.failureSentence({ operation, resource, code, ...context }),
+          ),
+        ),
+      ),
+    ),
+  ),
+];
+
 const FORBIDDEN: RegExp[] = [/\binstruments?\b/i, /\bacquisition runs?\b/i, /\bnot classified\b/i];
 const RETIRE = /\bretir(?:e|ed|es|ing)\b/i;
 
@@ -117,10 +136,22 @@ const BARE_SCORE: RegExp[] = [
   /\bstandardized\b/i,
 ];
 
+/**
+ * DEC-0145 as applied by DEC-0226 (PROVISIONAL): *retire* may appear only inside an
+ * allow-listed string, either the whole text or the `{allowed}: ` prefix of a
+ * composed failure sentence whose remainder says *retire* nowhere.
+ */
+function retireAllowed(text: string, allowed: readonly string[]): boolean {
+  return allowed.some(
+    (entry) =>
+      text === entry || (text.startsWith(`${entry}: `) && !RETIRE.test(text.slice(entry.length))),
+  );
+}
+
 /** The STD-UI-19 vocabulary violations of `text` (DAC-E4-S2-4; DEC-0145, DEC-0146). */
 function violations(text: string, allowed: readonly string[]): string[] {
   const found = FORBIDDEN.filter((pattern) => pattern.test(text)).map(String);
-  if (RETIRE.test(text) && !allowed.includes(text)) {
+  if (RETIRE.test(text) && !retireAllowed(text, allowed)) {
     found.push("retire outside UNIVERSE_LIFECYCLE");
   }
   found.push(...BARE_SCORE.filter((pattern) => pattern.test(text)).map(String));
@@ -158,6 +189,25 @@ describe("TC-COMP-072: copy.ts contains no forbidden vocabulary", () => {
       expect(violations(good, []), good).toEqual([]);
     }
     expect(violations("Retire Tech", ["Retire Tech"])).toEqual([]);
+    const label = "Could not retire the universe";
+    expect(violations(`${label}: FactorFlow hit an unexpected problem.`, [label])).toEqual([]);
+    for (const bad of [`${label}: retire AAPL instead.`, `${label}; try again.`, `${label}:`]) {
+      expect(violations(bad, [label]), bad).not.toEqual([]);
+    }
+    expect(violations(`${label}: FactorFlow hit an unexpected problem.`, [])).not.toEqual([]);
+  });
+
+  it("scans every composed failure sentence, the retire-universe ones included", () => {
+    expect(COMPOSED_FAILURES.length).toBeGreaterThan(200);
+    expect(
+      COMPOSED_FAILURES.filter((text) => text.startsWith(copy.UNIVERSE_LIFECYCLE.retireFailed))
+        .length,
+    ).toBeGreaterThan(10);
+    const flagged = COMPOSED_FAILURES.map((text) => ({
+      text,
+      found: violations(text, UNIVERSE_LIFECYCLE_STRINGS),
+    })).filter(({ found }) => found.length > 0);
+    expect(flagged).toEqual([]);
   });
 
   it.each(CATALOGUE)("%j uses only STD-UI-1 display labels", (text) => {

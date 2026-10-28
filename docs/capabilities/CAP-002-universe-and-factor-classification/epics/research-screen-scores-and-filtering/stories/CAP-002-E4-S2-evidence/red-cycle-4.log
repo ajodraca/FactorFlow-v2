@@ -1,0 +1,41 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-49f4f9/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/api/research-query.test.ts (78 tests | 1 failed) 16ms
+   × research-query codec edge cases > drops the invalid sentence value.measure=percentile&value.direction=atLeast&value.value=100.00000000000000001 whole 4ms
+     → expected { value: { …(3) } } to deeply equal {}
+ ✓ src/screens/research/format.test.ts (41 tests) 44ms
+ ✓ src/screens/research/copy.test.ts (297 tests) 26ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/research-query.test.ts > research-query codec edge cases > drops the invalid sentence value.measure=percentile&value.direction=atLeast&value.value=100.00000000000000001 whole
+AssertionError: expected { value: { …(3) } } to deeply equal {}
+
+- Expected
++ Received
+
+- Object {}
++ Object {
++   "value": Object {
++     "direction": "atLeast",
++     "measure": "percentile",
++     "value": "100.00000000000000001",
++   },
++ }
+
+ ❯ src/api/research-query.test.ts:303:38
+    301|     "value.measure=standardisedScore&value.direction=atLeast&value.val…
+    302|   ])("drops the invalid sentence %s whole", (search) => {
+    303|     expect(decode(search).sentences).toEqual({});
+       |                                      ^
+    304|   });
+    305| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 415 passed (416)
+   Start at  17:17:48
+   Duration  811ms (transform 118ms, setup 175ms, collect 152ms, tests 86ms, environment 863ms, prepare 101ms)
+

@@ -91,7 +91,7 @@ export function formatRate(value: string): string {
   return `${signed(shiftLeft(parseDecimal(value), 2), 2)}%`;
 }
 
-/** An amount: whole units, `,` thousands separators, no symbol, no abbreviation (STD-UI-6). */
+/** An amount: whole units, `,` thousands separators, no symbol, no abbreviation (DAC-E4-S2-3; STD-UI-6). */
 export function formatAmount(value: string): string {
   return unsigned(parseDecimal(value), 0).replace(/\B(?=(\d{3})+$)/g, ",");
 }
@@ -131,7 +131,8 @@ export function formatTimestamp(value: string, options?: { seconds?: boolean }):
 
 /**
  * A calendar date (`classification_date`, `known_on`, an input's `as_of`):
- * returned as received after a shape check, never through `Date` (STD-UI-5).
+ * returned as received after a shape check, never through `Date` (DAC-E4-S2-3;
+ * STD-UI-5).
  */
 export function formatDate(value: string): string {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {

@@ -45,6 +45,10 @@ describe("TC-COMP-071: score, percentile, ratio, rate and date formatting", () =
     expect(formatDate("2026-10-15")).toBe("2026-10-15");
     expect(formatDate("2026-03-08")).toBe("2026-03-08");
     expect(formatDate("2026-11-01")).toBe("2026-11-01");
+    // Shape-valid strings no calendar has: any trip through `Date` changes or rejects them.
+    expect(formatDate("2026-02-29")).toBe("2026-02-29");
+    expect(formatDate("2026-04-31")).toBe("2026-04-31");
+    expect(formatDate("2026-13-01")).toBe("2026-13-01");
   });
 });
 
