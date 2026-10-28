@@ -1,0 +1,517 @@
+diff --git a/web/src/api/classification-client.test.ts b/web/src/api/classification-client.test.ts
+index b7cc4de..91d4231 100644
+--- a/web/src/api/classification-client.test.ts
++++ b/web/src/api/classification-client.test.ts
+@@ -1,5 +1,6 @@
+ import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
+ import {
++  ClassificationApiError,
+   addUniverseMembers,
+   createUniverse,
+   getClassificationSet,
+@@ -1262,3 +1263,329 @@ describe("request bodies for writes", () => {
+     expect(init.headers).not.toHaveProperty("Content-Type");
+   });
+ });
++
++async function rejection(call: () => Promise<unknown>): Promise<unknown> {
++  return call().then(
++    () => {
++      throw new Error("expected the call to reject");
++    },
++    (caught: unknown) => caught,
++  );
++}
++
++function envelope(status: number, error: Record<string, unknown>): Response {
++  return jsonResponse(status, { error });
++}
++
++// Implements TC-COMP-182 (DAC-E4-S1-2, AC-22): an error envelope reaches the
++// caller as code, operation, resource and reason, read from fields and never
++// from the prose in `message`.
++describe("TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason", () => {
++  it("surfaces instrument_not_acquired with its symbols list, not the prose", async () => {
++    stubFetch(
++      envelope(409, {
++        code: "instrument_not_acquired",
++        message: "MISLEADING PROSE naming QQQ",
++        resource: "universe",
++        request_id: "r-1",
++        symbols: ["MSFT", "TSLA"],
++      }),
++    );
++    const error = await rejection(() => createUniverse({ name: "Mine", symbols: ["MSFT"] }));
++    expect(error).toBeInstanceOf(ClassificationApiError);
++    expect(error).toBeInstanceOf(ApiError);
++    const apiError = error as ClassificationApiError;
++    expect(apiError.code).toBe("instrument_not_acquired");
++    expect(apiError.reason).toBe("instrument_not_acquired");
++    expect(apiError.resource).toBe("universe");
++    expect(apiError.operation).toBe("create-universe");
++    expect(apiError.requestId).toBe("r-1");
++    expect(apiError.symbols).toStrictEqual(["MSFT", "TSLA"]);
++    expect(apiError.name).toBe("ClassificationApiError");
++    expect(apiError.state).toBeNull();
++  });
++
++  it("surfaces universe_not_found on getUniverse", async () => {
++    stubFetch(
++      envelope(404, {
++        code: "universe_not_found",
++        message: "PROSE about a classification-set and create-universe",
++        resource: "universe",
++        request_id: "r-2",
++      }),
++    );
++    const error = (await rejection(() => getUniverse("u-404"))) as ClassificationApiError;
++    expect(error).toBeInstanceOf(ClassificationApiError);
++    expect(error.code).toBe("universe_not_found");
++    expect(error.reason).toBe("universe_not_found");
++    expect(error.resource).toBe("universe");
++    expect(error.operation).toBe("get-universe");
++    expect(error.requestId).toBe("r-2");
++    expect(error.symbols).toStrictEqual([]);
++  });
++
++  it("keeps the envelope's resource when it is a ClassificationResource", async () => {
++    stubFetch(
++      envelope(404, {
++        code: "universe_not_found",
++        message: "PROSE naming universe-member",
++        resource: "universe",
++        request_id: "r-3",
++      }),
++    );
++    const error = (await rejection(() =>
++      addUniverseMembers("u-404", ["AAPL"]),
++    )) as ClassificationApiError;
++    expect(error.resource).toBe("universe");
++    expect(error.operation).toBe("add-universe-members");
++    expect(error.reason).toBe("universe_not_found");
++  });
++
++  it("keeps each of the four ClassificationResource values from the envelope", async () => {
++    for (const resource of [
++      "universe",
++      "universe-member",
++      "classification",
++      "classification-set",
++    ]) {
++      stubFetch(envelope(404, { code: "c", message: "m", resource, request_id: "r" }));
++      const error = (await rejection(() => getStockEvidence("AAPL"))) as ClassificationApiError;
++      expect(error.resource).toBe(resource);
++      expect(error.operation).toBe("get-stock-evidence");
++    }
++  });
++
++  it("constructs with the ApiError shape, symbols empty and reason null by default", () => {
++    const error = new ClassificationApiError("m", "r", {
++      operation: "get-universe",
++      resource: "universe",
++    });
++    expect(error).toBeInstanceOf(ApiError);
++    expect(error.message).toBe("m");
++    expect(error.requestId).toBe("r");
++    expect(error.code).toBeNull();
++    expect(error.state).toBeNull();
++    expect(error.reason).toBeNull();
++    expect(error.symbols).toStrictEqual([]);
++    const coded = new ClassificationApiError("m", "r", {
++      code: "universe_retired",
++      state: "s",
++      operation: "rename-universe",
++      resource: "universe",
++      symbols: ["A"],
++    });
++    expect(coded.reason).toBe("universe_retired");
++    expect(coded.state).toBe("s");
++    expect(coded.symbols).toStrictEqual(["A"]);
++  });
++
++  it("replaces a path-segment resource with the operation's own on listClassifications", async () => {
++    stubFetch(
++      envelope(422, {
++        code: "validation_error",
++        message: "PROSE naming universe",
++        resource: "classifications",
++        request_id: "r-4",
++      }),
++    );
++    const error = (await rejection(() =>
++      listClassifications({ symbols: ["AAPL"] }),
++    )) as ClassificationApiError;
++    expect(error.resource).toBe("classification");
++    expect(error.operation).toBe("list-classifications");
++    expect(error.reason).toBe("validation_error");
++    expect(error.requestId).toBe("r-4");
++  });
++
++  it("replaces a path-segment resource with the operation's own on createUniverse", async () => {
++    stubFetch(
++      envelope(422, {
++        code: "validation_error",
++        message: "PROSE naming classification",
++        resource: "universes",
++        request_id: "r-5",
++      }),
++    );
++    const error = (await rejection(() =>
++      createUniverse({ name: "", symbols: ["AAPL"] }),
++    )) as ClassificationApiError;
++    expect(error.resource).toBe("universe");
++    expect(error.operation).toBe("create-universe");
++  });
++
++  it("names each function's own operation and resource", async () => {
++    const cases: [() => Promise<unknown>, string, string][] = [
++      [() => listUniverses(), "list-universes", "universe"],
++      [() => createUniverse({ name: "n", symbols: ["A"] }), "create-universe", "universe"],
++      [() => getUniverse("u"), "get-universe", "universe"],
++      [() => renameUniverse("u", "n"), "rename-universe", "universe"],
++      [() => retireUniverse("u"), "retire-universe", "universe"],
++      [() => listUniverseEvents("u"), "list-universe-events", "universe"],
++      [() => addUniverseMembers("u", ["A"]), "add-universe-members", "universe-member"],
++      [() => removeUniverseMember("u", "A"), "remove-universe-member", "universe-member"],
++      [() => listClassifications(), "list-classifications", "classification"],
++      [() => getClassificationSummary(), "get-classification-summary", "classification"],
++      [() => listClassificationSets(), "list-classification-sets", "classification-set"],
++      [() => getClassificationSet("s"), "get-classification-set", "classification-set"],
++      [() => getStockEvidence("A"), "get-stock-evidence", "classification"],
++      [() => getStockHistory("A"), "get-stock-history", "classification"],
++    ];
++    for (const [call, operation, resource] of cases) {
++      stubFetch(
++        envelope(500, { code: "internal_error", resource: "path-segment", request_id: "r-x" }),
++      );
++      const error = (await rejection(call)) as ClassificationApiError;
++      expect(error).toBeInstanceOf(ClassificationApiError);
++      expect(error.operation).toBe(operation);
++      expect(error.resource).toBe(resource);
++    }
++  });
++});
++
++// AC-22, DAC-E4-S1-2: the error path's edge cases.
++describe("error-path edge cases", () => {
++  it("degrades a non-JSON error body to null code and reason and the operation's resource", async () => {
++    stubFetch(new Response("<html>bad gateway</html>", { status: 502 }));
++    const error = (await rejection(() =>
++      removeUniverseMember("u-1", "AAPL"),
++    )) as ClassificationApiError;
++    expect(error).toBeInstanceOf(ClassificationApiError);
++    expect(error.code).toBeNull();
++    expect(error.reason).toBeNull();
++    expect(error.symbols).toStrictEqual([]);
++    expect(error.requestId).toBe("unknown");
++    expect(error.operation).toBe("remove-universe-member");
++    expect(error.resource).toBe("universe-member");
++  });
++
++  it("degrades a JSON error body with no error object the same way", async () => {
++    stubFetch(jsonResponse(500, { detail: "not an envelope", resource: "universe" }));
++    const error = (await rejection(() => getClassificationSet("s-1"))) as ClassificationApiError;
++    expect(error).toBeInstanceOf(ClassificationApiError);
++    expect(error.code).toBeNull();
++    expect(error.reason).toBeNull();
++    expect(error.symbols).toStrictEqual([]);
++    expect(error.requestId).toBe("unknown");
++    expect(error.operation).toBe("get-classification-set");
++    expect(error.resource).toBe("classification-set");
++  });
++
++  it("degrades a JSON null body, a null error and a string error the same way", async () => {
++    for (const body of [null, { error: null }, { error: "universe" }]) {
++      stubFetch(jsonResponse(500, body));
++      const error = (await rejection(() => getStockHistory("AAPL"))) as ClassificationApiError;
++      expect(error).toBeInstanceOf(ClassificationApiError);
++      expect(error.code).toBeNull();
++      expect(error.resource).toBe("classification");
++      expect(error.symbols).toStrictEqual([]);
++    }
++  });
++
++  it("keeps symbols empty when the envelope's symbols is not a list of strings", async () => {
++    stubFetch(
++      envelope(409, {
++        code: "instrument_not_acquired",
++        message: "m",
++        resource: 7,
++        request_id: "r-6",
++        symbols: "MSFT,TSLA",
++      }),
++    );
++    const error = (await rejection(() =>
++      addUniverseMembers("u-1", ["MSFT"]),
++    )) as ClassificationApiError;
++    expect(error.symbols).toStrictEqual([]);
++    expect(error.resource).toBe("universe-member");
++    stubFetch(
++      envelope(409, {
++        code: "instrument_not_acquired",
++        message: "m",
++        resource: "universe-member",
++        request_id: "r-7",
++        symbols: ["MSFT", 3],
++      }),
++    );
++    const mixed = (await rejection(() =>
++      addUniverseMembers("u-1", ["MSFT"]),
++    )) as ClassificationApiError;
++    expect(mixed.symbols).toStrictEqual([]);
++  });
++
++  it("rejects a failed fetch with ApiUnreachableError, not a ClassificationApiError", async () => {
++    vi.stubGlobal(
++      "fetch",
++      vi.fn(async () => {
++        throw new TypeError("network down");
++      }),
++    );
++    const error = await rejection(() => listClassifications());
++    expect(error).toBeInstanceOf(ApiUnreachableError);
++    expect(error).not.toBeInstanceOf(ApiError);
++  });
++
++  it("rejects a 200 body that is not JSON with ApiUnreachableError", async () => {
++    stubFetch(new Response("not json", { status: 200 }));
++    const error = await rejection(() => getClassificationSummary());
++    expect(error).toBeInstanceOf(ApiUnreachableError);
++    expect(error).not.toBeInstanceOf(ClassificationApiError);
++  });
++
++  it("leaves globalThis.fetch as the stubbed function after a failed and a successful call", async () => {
++    const failing = stubFetch(envelope(404, { code: "universe_not_found", request_id: "r" }));
++    const pending = rejection(() => getUniverse("u-1"));
++    // Restored as soon as the call has started, not when it settles.
++    expect(globalThis.fetch).toBe(failing);
++    await pending;
++    expect(globalThis.fetch).toBe(failing);
++    expect(failing).toHaveBeenCalledTimes(1);
++    const succeeding = stubFetch(jsonResponse(200, WIRE_SUMMARY_BODY));
++    const resolving = getClassificationSummary();
++    expect(globalThis.fetch).toBe(succeeding);
++    await resolving;
++    expect(globalThis.fetch).toBe(succeeding);
++    expect(succeeding).toHaveBeenCalledTimes(1);
++  });
++
++  it("keeps two concurrent failures' envelopes apart", async () => {
++    let releaseFirst: () => void = () => {};
++    const firstHeld = new Promise<void>((resolve) => {
++      releaseFirst = resolve;
++    });
++    const concurrentFetch = vi.fn(async (input: string) => {
++      if (input.includes("u-a")) {
++        await firstHeld;
++        return envelope(409, {
++          code: "instrument_not_acquired",
++          message: "m",
++          resource: "universe-member",
++          request_id: "r-a",
++          symbols: ["AAA"],
++        });
++      }
++      releaseFirst();
++      return envelope(404, {
++        code: "universe_not_found",
++        message: "m",
++        resource: "universe",
++        request_id: "r-b",
++      });
++    });
++    vi.stubGlobal("fetch", concurrentFetch);
++    const calls = [addUniverseMembers("u-a", ["AAA"]), addUniverseMembers("u-b", ["BBB"])];
++    expect(globalThis.fetch).toBe(concurrentFetch);
++    const [first, second] = await Promise.allSettled(calls);
++    expect(globalThis.fetch).toBe(concurrentFetch);
++    expect(first.status).toBe("rejected");
++    expect(second.status).toBe("rejected");
++    const a = (first as PromiseRejectedResult).reason as ClassificationApiError;
++    const b = (second as PromiseRejectedResult).reason as ClassificationApiError;
++    expect(a.code).toBe("instrument_not_acquired");
++    expect(a.resource).toBe("universe-member");
++    expect(a.symbols).toStrictEqual(["AAA"]);
++    expect(a.requestId).toBe("r-a");
++    expect(b.code).toBe("universe_not_found");
++    expect(b.resource).toBe("universe");
++    expect(b.symbols).toStrictEqual([]);
++    expect(b.requestId).toBe("r-b");
++  });
++});
+diff --git a/web/src/api/classification-client.ts b/web/src/api/classification-client.ts
+index 7b37a23..9d42bf3 100644
+--- a/web/src/api/classification-client.ts
++++ b/web/src/api/classification-client.ts
+@@ -4,10 +4,10 @@
+  * `classification-api` section 11).
+  *
+  * Every call goes through the delivered `requestJson` (DEC-0064), so a
+- * transport failure is `ApiUnreachableError` and a non-2xx status an error
+- * carrying the envelope's `code`, never conflated. Responses are mapped from
+- * the snake_case wire field by field, as `client.ts` does; decimal strings
+- * and dates stay the wire's strings.
++ * transport failure is `ApiUnreachableError` and a non-2xx status a
++ * `ClassificationApiError` carrying the envelope's `code`, never conflated.
++ * Responses are mapped from the snake_case wire field by field, as
++ * `client.ts` does; decimal strings and dates stay the wire's strings.
+  */
+ 
+ import type {
+@@ -43,7 +43,7 @@ import type {
+   UniverseMember,
+   UniverseOrigin,
+ } from "./classification-types";
+-import { requestJson } from "./client";
++import { ApiError, requestJson } from "./client";
+ 
+ // --- Wire shapes (classification-api section 2.7) ---------------------------
+ 
+@@ -393,16 +393,144 @@ function jsonBody(method: string, body: unknown): RequestInit {
+   };
+ }
+ 
++// --- Errors ----------------------------------------------------------------
++
++/**
++ * A non-2xx answer from a classification endpoint (DAC-E4-S1-2). It is an
++ * `ApiError`, so a screen builds its `error` state from it as from any other,
++ * and adds what the envelope and the call know without any prose being
++ * parsed (DEC-0143): `operation`, the client's identifier for the call;
++ * `resource`, the envelope's when it is one of the four of classification-api
++ * section 2.5 and otherwise the operation's own; `reason`, the envelope's
++ * `code`; and `symbols`, the `instrument_not_acquired` list, `[]` when absent.
++ */
++export class ClassificationApiError extends ApiError {
++  readonly operation: ClassificationOperation;
++  readonly resource: ClassificationResource;
++  readonly reason: string | null;
++  readonly symbols: string[];
++
++  constructor(
++    message: string,
++    requestId: string,
++    details: {
++      code?: string | null;
++      state?: string | null;
++      operation: ClassificationOperation;
++      resource: ClassificationResource;
++      symbols?: string[];
++    },
++  ) {
++    super(message, requestId, { code: details.code, state: details.state });
++    this.name = "ClassificationApiError";
++    this.operation = details.operation;
++    this.resource = details.resource;
++    this.reason = this.code;
++    this.symbols = details.symbols ?? [];
++  }
++}
++
++const CLASSIFICATION_RESOURCES: readonly ClassificationResource[] = [
++  "universe",
++  "universe-member",
++  "classification",
++  "classification-set",
++];
++
++/**
++ * The envelope's `resource` when it is a `ClassificationResource`, else
++ * `fallback`. A `validation_error` from the delivered handler carries the
++ * path's last segment (`universes`, `classifications`, ...; classification-api
++ * section 2.3), which is not one, so it becomes the operation's own resource.
++ */
++function toClassificationResource(
++  value: unknown,
++  fallback: ClassificationResource,
++): ClassificationResource {
++  return CLASSIFICATION_RESOURCES.find((resource) => resource === value) ?? fallback;
++}
++
++/** The `error` object of an envelope, or `{}` when the body is not one. */
++async function readEnvelope(response: Response | undefined): Promise<Record<string, unknown>> {
++  try {
++    const body = (await response?.json()) as { error?: unknown } | null | undefined;
++    const error = body?.error;
++    if (typeof error === "object" && error !== null) {
++      return error as Record<string, unknown>;
++    }
++  } catch {
++    // Not JSON: the envelope fields stay absent, as `toApiError` degrades too.
++  }
++  return {};
++}
++
++function toSymbols(value: unknown): string[] {
++  return Array.isArray(value) && value.every((symbol) => typeof symbol === "string")
++    ? [...value]
++    : [];
++}
++
++/**
++ * Starts `requestJson` with `fetch` wrapped so that a non-2xx response is
++ * cloned for this call alone (Open Gap 2 of the story's task plan): the
++ * delivered `toApiError` drops the envelope's `resource` and `symbols`, and
++ * `client.ts` may change by the `export` keyword only (DAC-E4-S1-1).
++ *
++ * `requestJson` calls `fetch` before its first `await`, so the wrapper is
++ * installed only for that synchronous start and the global is restored in
++ * `finally` before anything is awaited; no other call can see the wrapper
++ * or another call's response. If `requestJson` ever awaits before calling
++ * `fetch`, the restoration and concurrency tests fail first.
++ */
++function startCapturingErrorResponse<T>(
++  input: string,
++  init: RequestInit | undefined,
++): { pending: Promise<T>; errorResponse: () => Response | undefined } {
++  let captured: Response | undefined;
++  const original = globalThis.fetch;
++  const capturing: typeof fetch = async (...args) => {
++    const response = await original(...args);
++    // Only an error response is cloned; a 2xx body is read by `requestJson` alone.
++    if (!response.ok) {
++      captured = response.clone();
++    }
++    return response;
++  };
++  globalThis.fetch = capturing;
++  try {
++    return { pending: requestJson<T>(input, init), errorResponse: () => captured };
++  } finally {
++    globalThis.fetch = original;
++  }
++}
++
+ /**
+  * One request on behalf of `operation`, whose own resource is `resource`.
++ * `ApiUnreachableError` passes through untouched; an `ApiError` becomes a
++ * `ClassificationApiError`.
+  */
+ async function request<T>(
+-  _operation: ClassificationOperation,
+-  _resource: ClassificationResource,
++  operation: ClassificationOperation,
++  resource: ClassificationResource,
+   input: string,
+   init?: RequestInit,
+ ): Promise<T> {
+-  return requestJson<T>(input, init);
++  const { pending, errorResponse } = startCapturingErrorResponse<T>(input, init);
++  try {
++    return await pending;
++  } catch (caught) {
++    if (!(caught instanceof ApiError)) {
++      throw caught;
++    }
++    const envelope = await readEnvelope(errorResponse());
++    throw new ClassificationApiError(caught.message, caught.requestId, {
++      code: caught.code,
++      state: caught.state,
++      operation,
++      resource: toClassificationResource(envelope.resource, resource),
++      symbols: toSymbols(envelope.symbols),
++    });
++  }
+ }
+ 
+ // --- Universes -------------------------------------------------------------

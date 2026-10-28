@@ -1,0 +1,134 @@
+# TDD evidence for CAP-002-E4-S1 - Classification fetch layer, response types and the requestJson export.
+# Three cycles, as the task plan's Other Notes lay out: (1) T001 then T008; (2) T002, T004, T005, T006 then
+# T009 and T011 (success path, `request` only delegating); (3) T003, T007 then T010 (ClassificationApiError).
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is
+# its own diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch and cycle-3.patch are the diffs between
+# the index trees written after each cycle (git write-tree), so the three apply in order onto the stage parent.
+# Reviews: each cycle's staged diff was judged by an independent code-review subagent and an independent
+# spec-drift subagent before the next cycle began. Cycle 3 was re-fingerprinted, re-mutated and re-reviewed
+# after the first code review's non-blocking note (restoration asserted before the call settles) was applied.
+# Mutation: scripts/mutation-run.py with the focused suite (vitest compiles with esbuild and does not type-check,
+# so a mutant runs on its runtime behaviour); generated operators plus hand-written mutants ("operator": "manual").
+# Decisions applied: DEC-0064 and DEC-0086 (the export), DEC-0097 (null member factors and name), DEC-0140
+# (evidence factors may be {}), DEC-0143 (operation, reason, resource normalisation, fetch capture), DEC-0144
+# (repeated symbols key, pass-through values). No new decision was recorded.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T008]
+    description: >
+      TC-COMP-130: classification-client.test.ts imports requestJson from ./client and asserts it is a function,
+      returns a 200 JSON body unchanged, rejects a 404 envelope with ApiError carrying code and requestId, and
+      rejects a failed fetch with ApiUnreachableError. Production: the `export` keyword on requestJson in
+      web/src/api/client.ts, nothing else (git diff --numstat 1 1).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/red-cycle-1.log
+    red_log_sha256: 188089942d0db78dee8f542af2f3d3c7191f50698a611986e1f5687cb4fd92cd
+    red_evidence: >
+      Before the export, all 4 TC-COMP-130 tests failed (4 failed of 4): the imported requestJson was undefined.
+    green_evidence: >
+      classification-client.test.ts 4 passed; full web suite 301 passed in 42 files; tsc --noEmit, biome lint and
+      biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c2c3313fa99ee5ff7fe2a3928e0541040b3218788dbe2d3f26675b8a443cdb66
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: b91b370f294fce721b7b69d419b325d88c8d083b2bab12a4525cf3a6d325b447
+      generated: 1
+      killed: 1
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T004, T005, T006, T009, T011]
+    description: >
+      Tests: TC-COMP-131 (one fixture and one toStrictEqual mapped result per classification-api section 2.7
+      response, including a member with factors and name null, a by_hand origin with five nulls, a from_filter
+      origin keeping its thresholds keys and strings, a missing input row with value, as_of and known_on null,
+      a building SetResponse with its nullable columns null, match_count 1200 over 2 rows, and an evidence read
+      with factors {} per DEC-0140); TC-COMP-183 (expectTypeOf on neverClassified, set and later, and the
+      never-classified building and failed, not-current and quiet shapes on both reads); request encoding (twelve
+      bounds, present-only parameters, hide_incomplete only when true, repeated symbols keys, encoded path
+      segments, Accept header) and request bodies (by hand, from a result with every bound, PATCH, DELETE, members).
+      Production: classification-types.ts and classification-client.ts with the fourteen endpoint functions, the
+      shared mappers and a `request` that only delegates to requestJson (no ClassificationApiError).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/red-cycle-2.log
+    red_log_sha256: c3bb4344d1d1581d5f26f894270ced8867f36ab70d92f0cc61db207046861511
+    red_evidence: >
+      With the cycle-2 tests written and neither classification-client.ts nor classification-types.ts present,
+      the test file failed to load: Failed to resolve import "./classification-client" (no tests ran). After the
+      first mutation run one manual mutant (history run_outcome fixed to "succeeded") survived; the StockHistory
+      fixture gained a "partial" row and the whole mutant set was rerun on the final tree.
+    green_evidence: >
+      classification-client.test.ts 39 passed; full web suite 336 passed in 42 files; tsc --noEmit, biome lint
+      and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 04d60d217789bd07ddc61f945a6e7563817e4ce5cf3c1bacb0269b9b6b639b6f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: c6a3127a381f4790d2c504b79b2980c3c13c9f3043bb42020426c4ad38c0ee4d
+      generated: 80
+      killed: 80
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T003, T007, T010]
+    description: >
+      Tests: TC-COMP-182 (instrument_not_acquired with misleading prose surfaces code, reason, resource,
+      operation, requestId and the symbols field; universe_not_found on getUniverse and addUniverseMembers;
+      validation_error path-segment resources normalised to the operation's own; every function's operation and
+      resource; each of the four ClassificationResource values kept; the constructor's defaults) and error-path
+      edge cases (non-JSON, non-envelope, null and string error bodies; non-list symbols; failed fetch and
+      non-JSON 200 stay ApiUnreachableError; globalThis.fetch is the stub while a call is in flight and after it
+      settles; two concurrent failures keep their own envelopes). Production: ClassificationApiError, the
+      envelope reader, toClassificationResource and the per-call fetch capture of Open Gap 2 in `request`.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/red-cycle-3.log
+    red_log_sha256: 238fd03e9506c4ca39fbc93786646fb3659df2f475d465bfee02eeae44135bba
+    red_evidence: >
+      With the cycle-3 tests written and no ClassificationApiError, 12 tests failed and 41 passed (53). The two
+      tests that passed in RED (the failed-fetch and restoration cases) pin behaviour requestJson already had and
+      that the capture must keep. Two later survivors (resource list without universe-member, symbols default)
+      were killed by adding the four-resources and constructor tests; the restore-late mutant was added after the
+      first code review and is killed by the in-flight restoration assertions.
+    green_evidence: >
+      classification-client.test.ts 55 passed; full web suite 352 passed in 42 files (full-suite.log under
+      logs); tsc --noEmit, biome lint, biome format and npm run build clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/full-suite.log
+        sha256: 7d5e6b2c6126a3268cf0c292384e3037d3c06d94126870a5094194d1a3e1d66a
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 34b11bd341ea34d0c655b66008fbc1164ec370673d1cfb5e59a7ee552030687d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: 069a86cea47618df04835b87845645a7ccf932af7b349259d05cf8355514894f
+      generated: 24
+      killed: 24
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
