@@ -151,7 +151,7 @@ export async function fetchHealth(): Promise<HealthResponse> {
  * unreachable state, DAC-E1-15) and a non-2xx status into `ApiError` (a
  * screen-level `error` state, never conflated with unreachable).
  */
-async function requestJson<T>(input: string, init?: RequestInit): Promise<T> {
+export async function requestJson<T>(input: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
     response = await fetch(input, {

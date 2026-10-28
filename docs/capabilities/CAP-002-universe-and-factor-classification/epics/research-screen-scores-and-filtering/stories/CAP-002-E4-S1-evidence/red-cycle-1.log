@@ -1,0 +1,95 @@
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-49f4f9/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/api/classification-client.test.ts (4 tests | 4 failed) 10ms
+   × TC-COMP-130 — requestJson is exported unchanged > is a function 5ms
+     → expected 'undefined' to be 'function' // Object.is equality
+   × TC-COMP-130 — requestJson is exported unchanged > returns a 200 JSON body unchanged 3ms
+     → requestJson is not a function
+   × TC-COMP-130 — requestJson is exported unchanged > rejects a 404 envelope with ApiError carrying its code and request id 0ms
+     → requestJson is not a function
+   × TC-COMP-130 — requestJson is exported unchanged > rejects a failed fetch with ApiUnreachableError 0ms
+     → requestJson is not a function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-130 — requestJson is exported unchanged > is a function
+AssertionError: expected 'undefined' to be 'function' // Object.is equality
+
+Expected: "function"
+Received: "undefined"
+
+ ❯ src/api/classification-client.test.ts:26:32
+     24| describe("TC-COMP-130 — requestJson is exported unchanged", () => {
+     25|   it("is a function", () => {
+     26|     expect(typeof requestJson).toBe("function");
+       |                                ^
+     27|   });
+     28| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-130 — requestJson is exported unchanged > returns a 200 JSON body unchanged
+TypeError: requestJson is not a function
+ ❯ src/api/classification-client.test.ts:32:18
+     30|     const body = { a: 1, nested: { b_c: "1.2300000000" }, list: [null,…
+     31|     stubFetch(jsonResponse(200, body));
+     32|     await expect(requestJson("/api/anything")).resolves.toEqual(body);
+       |                  ^
+     33|   });
+     34| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-130 — requestJson is exported unchanged > rejects a 404 envelope with ApiError carrying its code and request id
+TypeError: requestJson is not a function
+ ❯ src/api/classification-client.test.ts:46:25
+     44|       }),
+     45|     );
+     46|     const error = await requestJson("/api/universes/x").catch((caught:…
+       |                         ^
+     47|     expect(error).toBeInstanceOf(ApiError);
+     48|     expect((error as ApiError).code).toBe("universe_not_found");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-130 — requestJson is exported unchanged > rejects a failed fetch with ApiUnreachableError
+TypeError: requestJson is not a function
+ ❯ src/api/classification-client.test.ts:59:18
+     57|       }),
+     58|     );
+     59|     await expect(requestJson("/api/universes")).rejects.toBeInstanceOf…
+       |                  ^
+     60|   });
+     61| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  21:05:18
+   Duration  1.04s (transform 41ms, setup 77ms, collect 23ms, tests 10ms, environment 474ms, prepare 266ms)
+
+npm notice
+npm notice New minor version of npm available! 11.18.0 -> 11.21.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.1
+npm notice To update run: npm install -g npm@11.21.1
+npm notice

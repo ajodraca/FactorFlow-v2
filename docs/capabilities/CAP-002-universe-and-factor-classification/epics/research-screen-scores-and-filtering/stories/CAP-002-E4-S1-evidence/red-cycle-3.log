@@ -1,0 +1,238 @@
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+ERROR: failed to copy trust settings of system certificate-25291
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-49f4f9/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/api/classification-client.test.ts (53 tests | 12 failed) 24ms
+   × TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > surfaces instrument_not_acquired with its symbols list, not the prose 4ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > surfaces universe_not_found on getUniverse 0ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > keeps the envelope's resource when it is a ClassificationResource 1ms
+     → expected undefined to be 'universe' // Object.is equality
+   × TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > replaces a path-segment resource with the operation's own on listClassifications 0ms
+     → expected undefined to be 'classification' // Object.is equality
+   × TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > replaces a path-segment resource with the operation's own on createUniverse 0ms
+     → expected undefined to be 'universe' // Object.is equality
+   × TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > names each function's own operation and resource 0ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × error-path edge cases > degrades a non-JSON error body to null code and reason and the operation's resource 0ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × error-path edge cases > degrades a JSON error body with no error object the same way 0ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × error-path edge cases > degrades a JSON null error body the same way 0ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × error-path edge cases > keeps symbols empty when the envelope's symbols is not a list of strings 0ms
+     → expected undefined to strictly equal []
+   × error-path edge cases > rejects a 200 body that is not JSON with ApiUnreachableError 0ms
+     → The instanceof assertion needs a constructor but undefined was given.
+   × error-path edge cases > keeps two concurrent failures' envelopes apart 0ms
+     → expected undefined to be 'universe-member' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > surfaces instrument_not_acquired with its symbols list, not the prose
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1295:19
+    1293|     );
+    1294|     const error = await rejection(() => createUniverse({ name: "Mine",…
+    1295|     expect(error).toBeInstanceOf(ClassificationApiError);
+       |                   ^
+    1296|     expect(error).toBeInstanceOf(ApiError);
+    1297|     const apiError = error as ClassificationApiError;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > surfaces universe_not_found on getUniverse
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1318:19
+    1316|     );
+    1317|     const error = (await rejection(() => getUniverse("u-404"))) as Cla…
+    1318|     expect(error).toBeInstanceOf(ClassificationApiError);
+       |                   ^
+    1319|     expect(error.code).toBe("universe_not_found");
+    1320|     expect(error.reason).toBe("universe_not_found");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > keeps the envelope's resource when it is a ClassificationResource
+AssertionError: expected undefined to be 'universe' // Object.is equality
+
+- Expected: 
+"universe"
+
++ Received: 
+undefined
+
+ ❯ src/api/classification-client.test.ts:1339:28
+    1337|       addUniverseMembers("u-404", ["AAPL"]),
+    1338|     )) as ClassificationApiError;
+    1339|     expect(error.resource).toBe("universe");
+       |                            ^
+    1340|     expect(error.operation).toBe("add-universe-members");
+    1341|     expect(error.reason).toBe("universe_not_found");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > replaces a path-segment resource with the operation's own on listClassifications
+AssertionError: expected undefined to be 'classification' // Object.is equality
+
+- Expected: 
+"classification"
+
++ Received: 
+undefined
+
+ ❯ src/api/classification-client.test.ts:1356:28
+    1354|       listClassifications({ symbols: ["AAPL"] }),
+    1355|     )) as ClassificationApiError;
+    1356|     expect(error.resource).toBe("classification");
+       |                            ^
+    1357|     expect(error.operation).toBe("list-classifications");
+    1358|     expect(error.reason).toBe("validation_error");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > replaces a path-segment resource with the operation's own on createUniverse
+AssertionError: expected undefined to be 'universe' // Object.is equality
+
+- Expected: 
+"universe"
+
++ Received: 
+undefined
+
+ ❯ src/api/classification-client.test.ts:1374:28
+    1372|       createUniverse({ name: "", symbols: ["AAPL"] }),
+    1373|     )) as ClassificationApiError;
+    1374|     expect(error.resource).toBe("universe");
+       |                            ^
+    1375|     expect(error.operation).toBe("create-universe");
+    1376|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > TC-COMP-182 — the fetch layer surfaces code, operation, resource and reason > names each function's own operation and resource
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1400:21
+    1398|       );
+    1399|       const error = (await rejection(call)) as ClassificationApiError;
+    1400|       expect(error).toBeInstanceOf(ClassificationApiError);
+       |                     ^
+    1401|       expect(error.operation).toBe(operation);
+    1402|       expect(error.resource).toBe(resource);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > error-path edge cases > degrades a non-JSON error body to null code and reason and the operation's resource
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1414:19
+    1412|       removeUniverseMember("u-1", "AAPL"),
+    1413|     )) as ClassificationApiError;
+    1414|     expect(error).toBeInstanceOf(ClassificationApiError);
+       |                   ^
+    1415|     expect(error.code).toBeNull();
+    1416|     expect(error.reason).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > error-path edge cases > degrades a JSON error body with no error object the same way
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1426:19
+    1424|     stubFetch(jsonResponse(500, { detail: "not an envelope", resource:…
+    1425|     const error = (await rejection(() => getClassificationSet("s-1")))…
+    1426|     expect(error).toBeInstanceOf(ClassificationApiError);
+       |                   ^
+    1427|     expect(error.code).toBeNull();
+    1428|     expect(error.reason).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > error-path edge cases > degrades a JSON null error body the same way
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1438:19
+    1436|     stubFetch(jsonResponse(500, null));
+    1437|     const error = (await rejection(() => getStockHistory("AAPL"))) as …
+    1438|     expect(error).toBeInstanceOf(ClassificationApiError);
+       |                   ^
+    1439|     expect(error.resource).toBe("classification");
+    1440|     expect(error.symbols).toStrictEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > error-path edge cases > keeps symbols empty when the envelope's symbols is not a list of strings
+AssertionError: expected undefined to strictly equal []
+
+- Expected: 
+Array []
+
++ Received: 
+undefined
+
+ ❯ src/api/classification-client.test.ts:1456:27
+    1454|       addUniverseMembers("u-1", ["MSFT"]),
+    1455|     )) as ClassificationApiError;
+    1456|     expect(error.symbols).toStrictEqual([]);
+       |                           ^
+    1457|     expect(error.resource).toBe("universe-member");
+    1458|     stubFetch(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > error-path edge cases > rejects a 200 body that is not JSON with ApiUnreachableError
+AssertionError: The instanceof assertion needs a constructor but undefined was given.
+ ❯ src/api/classification-client.test.ts:1489:23
+    1487|     const error = await rejection(() => getClassificationSummary());
+    1488|     expect(error).toBeInstanceOf(ApiUnreachableError);
+    1489|     expect(error).not.toBeInstanceOf(ClassificationApiError);
+       |                       ^
+    1490|   });
+    1491| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL  src/api/classification-client.test.ts > error-path edge cases > keeps two concurrent failures' envelopes apart
+AssertionError: expected undefined to be 'universe-member' // Object.is equality
+
+- Expected: 
+"universe-member"
+
++ Received: 
+undefined
+
+ ❯ src/api/classification-client.test.ts:1539:24
+    1537|     const b = (second as PromiseRejectedResult).reason as Classificati…
+    1538|     expect(a.code).toBe("instrument_not_acquired");
+    1539|     expect(a.resource).toBe("universe-member");
+       |                        ^
+    1540|     expect(a.symbols).toStrictEqual(["AAA"]);
+    1541|     expect(a.requestId).toBe("r-a");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+ Test Files  1 failed (1)
+      Tests  12 failed | 41 passed (53)
+   Start at  21:17:33
+   Duration  1.05s (transform 61ms, setup 41ms, collect 54ms, tests 24ms, environment 421ms, prepare 242ms)
+
+npm notice
+npm notice New minor version of npm available! 11.18.0 -> 11.21.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.1
+npm notice To update run: npm install -g npm@11.21.1
+npm notice

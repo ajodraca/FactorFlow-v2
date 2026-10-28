@@ -1,0 +1,2343 @@
+diff --git a/web/src/api/classification-client.test.ts b/web/src/api/classification-client.test.ts
+index a81b28f..b7cc4de 100644
+--- a/web/src/api/classification-client.test.ts
++++ b/web/src/api/classification-client.test.ts
+@@ -1,4 +1,26 @@
+-import { afterEach, describe, expect, it, vi } from "vitest";
++import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
++import {
++  addUniverseMembers,
++  createUniverse,
++  getClassificationSet,
++  getClassificationSummary,
++  getStockEvidence,
++  getStockHistory,
++  getUniverse,
++  listClassificationSets,
++  listClassifications,
++  listUniverseEvents,
++  listUniverses,
++  removeUniverseMember,
++  renameUniverse,
++  retireUniverse,
++} from "./classification-client";
++import type {
++  ClassificationList,
++  ClassificationSummary,
++  CurrentSet,
++  LaterSet,
++} from "./classification-types";
+ import { ApiError, ApiUnreachableError, requestJson } from "./client";
+ 
+ function jsonResponse(status: number, body: unknown): Response {
+@@ -59,3 +81,1184 @@ describe("TC-COMP-130 — requestJson is exported unchanged", () => {
+     await expect(requestJson("/api/universes")).rejects.toBeInstanceOf(ApiUnreachableError);
+   });
+ });
++
++// --- Fixtures: made-up wire JSON written from classification-api section 2.7.
++
++const WIRE_CELL_CLASSIFIED = {
++  status: "classified",
++  score: "1.2300000000",
++  percentile: "87.0000000000",
++  reason_code: null,
++  reason_input: null,
++  reason_detail: null,
++  restated_possible: false,
++};
++const CELL_CLASSIFIED = {
++  status: "classified",
++  score: "1.2300000000",
++  percentile: "87.0000000000",
++  reasonCode: null,
++  reasonInput: null,
++  reasonDetail: null,
++  restatedPossible: false,
++};
++const WIRE_CELL_NOT_CLASSIFIED = {
++  status: "not_classified",
++  score: null,
++  percentile: null,
++  reason_code: "input_missing",
++  reason_input: "book_value",
++  reason_detail: "no filing on record",
++  restated_possible: true,
++};
++const CELL_NOT_CLASSIFIED = {
++  status: "not_classified",
++  score: null,
++  percentile: null,
++  reasonCode: "input_missing",
++  reasonInput: "book_value",
++  reasonDetail: "no filing on record",
++  restatedPossible: true,
++};
++const WIRE_CELL_ZERO = {
++  status: "classified",
++  score: "-0.5000000000",
++  percentile: "0.0000000000",
++  reason_code: null,
++  reason_input: null,
++  reason_detail: null,
++  restated_possible: false,
++};
++const CELL_ZERO = {
++  status: "classified",
++  score: "-0.5000000000",
++  percentile: "0.0000000000",
++  reasonCode: null,
++  reasonInput: null,
++  reasonDetail: null,
++  restatedPossible: false,
++};
++const WIRE_CELLS = {
++  value: WIRE_CELL_CLASSIFIED,
++  growth: WIRE_CELL_NOT_CLASSIFIED,
++  momentum: WIRE_CELL_ZERO,
++};
++const CELLS = { value: CELL_CLASSIFIED, growth: CELL_NOT_CLASSIFIED, momentum: CELL_ZERO };
++
++const WIRE_SET = {
++  set_id: "set-1",
++  classification_date: "2026-10-15",
++  run_id: "run-1",
++  run_started_at: "2026-10-15T17:30:00-05:00",
++  run_outcome: "partial",
++  state: "complete",
++  started_at: "2026-10-15T17:40:00-05:00",
++  ended_at: "2026-10-15T17:46:00-05:00",
++  latest_trading_day: "2026-10-14",
++  active_instruments: 1250,
++  not_current: false,
++};
++const SET: CurrentSet = {
++  setId: "set-1",
++  classificationDate: "2026-10-15",
++  runId: "run-1",
++  runStartedAt: "2026-10-15T17:30:00-05:00",
++  runOutcome: "partial",
++  state: "complete",
++  startedAt: "2026-10-15T17:40:00-05:00",
++  endedAt: "2026-10-15T17:46:00-05:00",
++  latestTradingDay: "2026-10-14",
++  activeInstruments: 1250,
++  notCurrent: false,
++};
++const WIRE_LATER_BUILDING = {
++  set_id: "set-2",
++  state: "building",
++  started_at: "2026-10-16T17:40:00-05:00",
++  ended_at: null,
++  failure_reason: null,
++  run_id: "run-2",
++  run_started_at: "2026-10-16T17:30:00-05:00",
++};
++const LATER_BUILDING: LaterSet = {
++  setId: "set-2",
++  state: "building",
++  startedAt: "2026-10-16T17:40:00-05:00",
++  endedAt: null,
++  failureReason: null,
++  runId: "run-2",
++  runStartedAt: "2026-10-16T17:30:00-05:00",
++};
++const WIRE_LATER_FAILED = {
++  set_id: "set-3",
++  state: "failed",
++  started_at: "2026-10-17T17:40:00-05:00",
++  ended_at: "2026-10-17T17:41:00-05:00",
++  failure_reason: "statement timeout",
++  run_id: "run-3",
++  run_started_at: "2026-10-17T17:30:00-05:00",
++};
++const LATER_FAILED: LaterSet = {
++  setId: "set-3",
++  state: "failed",
++  startedAt: "2026-10-17T17:40:00-05:00",
++  endedAt: "2026-10-17T17:41:00-05:00",
++  failureReason: "statement timeout",
++  runId: "run-3",
++  runStartedAt: "2026-10-17T17:30:00-05:00",
++};
++const WIRE_SUMMARIES = {
++  value: { qualified_count: 1100, ranked: true, min_peer_set_size: 30 },
++  growth: { qualified_count: 12, ranked: false, min_peer_set_size: 30 },
++  momentum: { qualified_count: 0, ranked: false, min_peer_set_size: 31 },
++};
++const SUMMARIES = {
++  value: { qualifiedCount: 1100, ranked: true, minPeerSetSize: 30 },
++  growth: { qualifiedCount: 12, ranked: false, minPeerSetSize: 30 },
++  momentum: { qualifiedCount: 0, ranked: false, minPeerSetSize: 31 },
++};
++
++const WIRE_UNIVERSE_BY_HAND = {
++  universe_id: "u-1",
++  name: "Tech",
++  lifecycle: "active",
++  created_at: "2026-10-01T09:00:00-05:00",
++  retired_at: null,
++  member_count: 2,
++  as_of: "2026-10-18",
++  as_of_before_creation: false,
++  origin: {
++    kind: "by_hand",
++    set_id: null,
++    classification_date: null,
++    thresholds: null,
++    hide_incomplete: null,
++    symbol: null,
++  },
++  members: [
++    {
++      symbol: "AAPL",
++      name: "Apple Inc.",
++      lifecycle: "active",
++      member_since: "2026-10-01T09:00:00-05:00",
++      factors: WIRE_CELLS,
++    },
++    {
++      symbol: "NEWCO",
++      name: null,
++      lifecycle: "retired",
++      member_since: "2026-10-02T10:00:00-05:00",
++      factors: null,
++    },
++  ],
++  set: WIRE_SET,
++};
++const UNIVERSE_BY_HAND = {
++  universeId: "u-1",
++  name: "Tech",
++  lifecycle: "active",
++  createdAt: "2026-10-01T09:00:00-05:00",
++  retiredAt: null,
++  memberCount: 2,
++  asOf: "2026-10-18",
++  asOfBeforeCreation: false,
++  origin: {
++    kind: "by_hand",
++    setId: null,
++    classificationDate: null,
++    thresholds: null,
++    hideIncomplete: null,
++    symbol: null,
++  },
++  members: [
++    {
++      symbol: "AAPL",
++      name: "Apple Inc.",
++      lifecycle: "active",
++      memberSince: "2026-10-01T09:00:00-05:00",
++      factors: CELLS,
++    },
++    {
++      symbol: "NEWCO",
++      name: null,
++      lifecycle: "retired",
++      memberSince: "2026-10-02T10:00:00-05:00",
++      factors: null,
++    },
++  ],
++  set: SET,
++};
++const WIRE_UNIVERSE_FROM_FILTER = {
++  ...WIRE_UNIVERSE_BY_HAND,
++  universe_id: "u-2",
++  name: "Cheap",
++  lifecycle: "retired",
++  retired_at: "2026-10-20T08:00:00-05:00",
++  member_count: 1,
++  as_of: "2026-09-30",
++  as_of_before_creation: true,
++  origin: {
++    kind: "from_filter",
++    set_id: "set-1",
++    classification_date: "2026-10-15",
++    thresholds: { value_percentile_min: "80.0000000000", momentum_score_min: "0.0000000000" },
++    hide_incomplete: true,
++    symbol: "AA",
++  },
++  members: [],
++  set: null,
++};
++const UNIVERSE_FROM_FILTER = {
++  ...UNIVERSE_BY_HAND,
++  universeId: "u-2",
++  name: "Cheap",
++  lifecycle: "retired",
++  retiredAt: "2026-10-20T08:00:00-05:00",
++  memberCount: 1,
++  asOf: "2026-09-30",
++  asOfBeforeCreation: true,
++  origin: {
++    kind: "from_filter",
++    setId: "set-1",
++    classificationDate: "2026-10-15",
++    thresholds: { value_percentile_min: "80.0000000000", momentum_score_min: "0.0000000000" },
++    hideIncomplete: true,
++    symbol: "AA",
++  },
++  members: [],
++  set: null,
++};
++
++const WIRE_LIST = {
++  never_classified: false,
++  set: WIRE_SET,
++  later: null,
++  factors: WIRE_SUMMARIES,
++  match_count: 1200,
++  stocks: [
++    { symbol: "AAPL", name: "Apple Inc.", lifecycle: "active", factors: WIRE_CELLS },
++    {
++      symbol: "BRK.B",
++      name: "Berkshire Hathaway",
++      lifecycle: "retired",
++      factors: { value: WIRE_CELL_ZERO, growth: WIRE_CELL_CLASSIFIED, momentum: WIRE_CELL_ZERO },
++    },
++  ],
++  unknown_symbols: ["ZZZZ"],
++  next_cursor: "cursor-2",
++};
++
++const WIRE_SUMMARY_BODY = {
++  never_classified: false,
++  set: WIRE_SET,
++  later: null,
++  factors: WIRE_SUMMARIES,
++  stocks_current: { current_count: 1180, followed_count: 1250 },
++};
++
++type FetchCall = [string, RequestInit & { headers: Record<string, string> }];
++
++function lastCall(fetchMock: ReturnType<typeof vi.fn>): FetchCall {
++  return fetchMock.mock.calls[fetchMock.mock.calls.length - 1] as FetchCall;
++}
++
++function requestedUrl(fetchMock: ReturnType<typeof vi.fn>): URL {
++  return new URL(lastCall(fetchMock)[0], "http://localhost");
++}
++
++function sentBody(fetchMock: ReturnType<typeof vi.fn>): unknown {
++  return JSON.parse(String(lastCall(fetchMock)[1].body));
++}
++
++// Implements TC-COMP-131 (DAC-E4-S1-4, DAC-E4-3, AC-16): every field of
++// every section 2.7 response has a camelCase counterpart, decimal strings
++// and dates stay the wire's strings, and a null stays null.
++describe("TC-COMP-131 — every response field has a typed counterpart", () => {
++  it("maps UniverseListResponse", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        universes: [
++          {
++            universe_id: "u-1",
++            name: "Tech",
++            lifecycle: "active",
++            member_count: 2,
++            created_at: "2026-10-01T09:00:00-05:00",
++            retired_at: null,
++          },
++          {
++            universe_id: "u-2",
++            name: "Old",
++            lifecycle: "retired",
++            member_count: 0,
++            created_at: "2026-09-01T09:00:00-05:00",
++            retired_at: "2026-09-02T09:00:00-05:00",
++          },
++        ],
++        active_count: 1,
++        retired_count: 4,
++        next_cursor: null,
++      }),
++    );
++    await expect(listUniverses()).resolves.toStrictEqual({
++      universes: [
++        {
++          universeId: "u-1",
++          name: "Tech",
++          lifecycle: "active",
++          memberCount: 2,
++          createdAt: "2026-10-01T09:00:00-05:00",
++          retiredAt: null,
++        },
++        {
++          universeId: "u-2",
++          name: "Old",
++          lifecycle: "retired",
++          memberCount: 0,
++          createdAt: "2026-09-01T09:00:00-05:00",
++          retiredAt: "2026-09-02T09:00:00-05:00",
++        },
++      ],
++      activeCount: 1,
++      retiredCount: 4,
++      nextCursor: null,
++    });
++  });
++
++  it("maps a by_hand UniverseResponse, a member with null factors and name included", async () => {
++    stubFetch(jsonResponse(200, WIRE_UNIVERSE_BY_HAND));
++    const universe = await getUniverse("u-1");
++    expect(universe).toStrictEqual(UNIVERSE_BY_HAND);
++    const [, nullMember] = universe.members;
++    expect(nullMember.factors).toBeNull();
++    expect(nullMember.name).toBeNull();
++    expect(nullMember.symbol).toBe("NEWCO");
++    expect(nullMember.lifecycle).toBe("retired");
++    expect(nullMember.memberSince).toBe("2026-10-02T10:00:00-05:00");
++    expect(universe.origin.setId).toBeNull();
++    expect(universe.origin.classificationDate).toBeNull();
++    expect(universe.origin.thresholds).toBeNull();
++    expect(universe.origin.hideIncomplete).toBeNull();
++    expect(universe.origin.symbol).toBeNull();
++  });
++
++  it("maps a from_filter UniverseResponse, keeping the thresholds keys and strings", async () => {
++    stubFetch(jsonResponse(201, WIRE_UNIVERSE_FROM_FILTER));
++    const universe = await createUniverse({
++      name: "Cheap",
++      filter: { valuePercentileMin: "80", hideIncomplete: true, symbol: "AA" },
++      setId: "set-1",
++    });
++    expect(universe).toStrictEqual(UNIVERSE_FROM_FILTER);
++    expect(universe.origin.thresholds).toStrictEqual({
++      value_percentile_min: "80.0000000000",
++      momentum_score_min: "0.0000000000",
++    });
++    expect(universe.origin.thresholds).not.toHaveProperty("valuePercentileMin");
++  });
++
++  it("maps a from_filter origin saved with no search active", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        ...WIRE_UNIVERSE_FROM_FILTER,
++        origin: { ...WIRE_UNIVERSE_FROM_FILTER.origin, symbol: null, hide_incomplete: false },
++      }),
++    );
++    const universe = await getUniverse("u-2");
++    expect(universe.origin.symbol).toBeNull();
++    expect(universe.origin.hideIncomplete).toBe(false);
++  });
++
++  it("maps UniverseEventsResponse, passing filter_provenance through unrenamed", async () => {
++    const provenance = {
++      thresholds: { value_percentile_min: 80 },
++      hide_incomplete: true,
++      set_id: "set-1",
++      classification_date: "2026-10-15",
++    };
++    stubFetch(
++      jsonResponse(200, {
++        events: [
++          {
++            event_id: 7,
++            event_type: "created",
++            name: "Cheap",
++            symbol: null,
++            recorded_at: "2026-10-15T18:00:00-05:00",
++            recorded_on: "2026-10-15",
++            filter_provenance: provenance,
++          },
++          {
++            event_id: 8,
++            event_type: "member_removed",
++            name: null,
++            symbol: "AAPL",
++            recorded_at: "2026-10-16T18:00:00-05:00",
++            recorded_on: "2026-10-16",
++            filter_provenance: null,
++          },
++        ],
++        next_cursor: "cursor-e",
++      }),
++    );
++    const page = await listUniverseEvents("u-2");
++    expect(page).toStrictEqual({
++      events: [
++        {
++          eventId: 7,
++          eventType: "created",
++          name: "Cheap",
++          symbol: null,
++          recordedAt: "2026-10-15T18:00:00-05:00",
++          recordedOn: "2026-10-15",
++          filterProvenance: provenance,
++        },
++        {
++          eventId: 8,
++          eventType: "member_removed",
++          name: null,
++          symbol: "AAPL",
++          recordedAt: "2026-10-16T18:00:00-05:00",
++          recordedOn: "2026-10-16",
++          filterProvenance: null,
++        },
++      ],
++      nextCursor: "cursor-e",
++    });
++  });
++
++  it("maps AddMembersResponse, RemoveMemberResponse and RetireUniverseResponse", async () => {
++    stubFetch(jsonResponse(200, { added: ["MSFT"], already_member: ["AAPL", "TSLA"] }));
++    await expect(addUniverseMembers("u-1", ["MSFT", "AAPL", "TSLA"])).resolves.toStrictEqual({
++      added: ["MSFT"],
++      alreadyMember: ["AAPL", "TSLA"],
++    });
++    stubFetch(jsonResponse(200, { removed_at: "2026-10-16T18:00:00-05:00" }));
++    await expect(removeUniverseMember("u-1", "AAPL")).resolves.toStrictEqual({
++      removedAt: "2026-10-16T18:00:00-05:00",
++    });
++    stubFetch(jsonResponse(200, { lifecycle: "retired", retired_at: "2026-10-20T08:00:00-05:00" }));
++    await expect(retireUniverse("u-1")).resolves.toStrictEqual({
++      lifecycle: "retired",
++      retiredAt: "2026-10-20T08:00:00-05:00",
++    });
++  });
++
++  it("maps ClassificationListResponse, with matchCount from match_count and not the rows", async () => {
++    stubFetch(jsonResponse(200, WIRE_LIST));
++    const list = await listClassifications();
++    expect(list).toStrictEqual({
++      neverClassified: false,
++      set: SET,
++      later: null,
++      factors: SUMMARIES,
++      matchCount: 1200,
++      stocks: [
++        { symbol: "AAPL", name: "Apple Inc.", lifecycle: "active", factors: CELLS },
++        {
++          symbol: "BRK.B",
++          name: "Berkshire Hathaway",
++          lifecycle: "retired",
++          factors: { value: CELL_ZERO, growth: CELL_CLASSIFIED, momentum: CELL_ZERO },
++        },
++      ],
++      unknownSymbols: ["ZZZZ"],
++      nextCursor: "cursor-2",
++    });
++    expect(list.matchCount).toBe(1200);
++    expect(list.stocks).toHaveLength(2);
++    const cell = list.stocks[0].factors.value;
++    expect(typeof cell.score).toBe("string");
++    expect(typeof cell.percentile).toBe("string");
++    expect(cell.score).toBe("1.2300000000");
++    expect(cell.percentile).toBe("87.0000000000");
++    expect(list.stocks[0].factors.momentum.percentile).toBe("0.0000000000");
++    expect(list.stocks[0].factors.growth.score).toBeNull();
++    expect(typeof list.set?.classificationDate).toBe("string");
++  });
++
++  it("maps ClassificationSummaryResponse with stocks_current as an object and as null", async () => {
++    stubFetch(jsonResponse(200, WIRE_SUMMARY_BODY));
++    await expect(getClassificationSummary()).resolves.toStrictEqual({
++      neverClassified: false,
++      set: SET,
++      later: null,
++      factors: SUMMARIES,
++      stocksCurrent: { currentCount: 1180, followedCount: 1250 },
++    });
++    stubFetch(jsonResponse(200, { ...WIRE_SUMMARY_BODY, stocks_current: null }));
++    const summary = await getClassificationSummary();
++    expect(summary.stocksCurrent).toBeNull();
++  });
++
++  it("maps StockEvidenceResponse, a missing input row's nulls and detail included", async () => {
++    const detail = { thresholds: { value_percentile_min: 80 }, hide_incomplete: true };
++    stubFetch(
++      jsonResponse(200, {
++        symbol: "AAPL",
++        name: "Apple Inc.",
++        lifecycle: "active",
++        set: WIRE_SET,
++        factors: WIRE_CELLS,
++        inputs: [
++          {
++            factor: "value",
++            input_name: "book_to_price",
++            label: "Book to price",
++            status: "present",
++            value: "0.0412000000",
++            as_of: "2026-09-30",
++            known_on: "2026-10-02",
++            restated_possible: true,
++            detail,
++          },
++          {
++            factor: "growth",
++            input_name: "sales_growth",
++            label: "Sales growth",
++            status: "missing",
++            value: null,
++            as_of: null,
++            known_on: null,
++            restated_possible: false,
++            detail: {},
++          },
++        ],
++        memberships: [
++          { universe_id: "u-9", name: "Dividend growers" },
++          { universe_id: "u-1", name: "Tech" },
++        ],
++      }),
++    );
++    const evidence = await getStockEvidence("AAPL");
++    expect(evidence).toStrictEqual({
++      symbol: "AAPL",
++      name: "Apple Inc.",
++      lifecycle: "active",
++      set: SET,
++      factors: CELLS,
++      inputs: [
++        {
++          factor: "value",
++          inputName: "book_to_price",
++          label: "Book to price",
++          status: "present",
++          value: "0.0412000000",
++          asOf: "2026-09-30",
++          knownOn: "2026-10-02",
++          restatedPossible: true,
++          detail,
++        },
++        {
++          factor: "growth",
++          inputName: "sales_growth",
++          label: "Sales growth",
++          status: "missing",
++          value: null,
++          asOf: null,
++          knownOn: null,
++          restatedPossible: false,
++          detail: {},
++        },
++      ],
++      memberships: [
++        { universeId: "u-9", name: "Dividend growers" },
++        { universeId: "u-1", name: "Tech" },
++      ],
++    });
++    expect(evidence.inputs[0].detail).toEqual(detail);
++    expect(evidence.inputs[1].value).toBeNull();
++    expect(evidence.inputs[1].asOf).toBeNull();
++    expect(evidence.inputs[1].knownOn).toBeNull();
++  });
++
++  it("maps a StockEvidenceResponse with no set and no cells (DEC-0140)", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        symbol: "NEWCO",
++        name: "New Co",
++        lifecycle: "active",
++        set: null,
++        factors: {},
++        inputs: [],
++        memberships: [],
++      }),
++    );
++    await expect(getStockEvidence("NEWCO")).resolves.toStrictEqual({
++      symbol: "NEWCO",
++      name: "New Co",
++      lifecycle: "active",
++      set: null,
++      factors: {},
++      inputs: [],
++      memberships: [],
++    });
++  });
++
++  it("maps StockHistoryResponse", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        symbol: "AAPL",
++        sets: [
++          {
++            set_id: "set-0",
++            classification_date: "2026-10-08",
++            run_id: "run-0",
++            run_outcome: "succeeded",
++            ended_at: "2026-10-08T17:46:00-05:00",
++            factors: WIRE_CELLS,
++          },
++          {
++            set_id: "set-x",
++            classification_date: "2026-10-01",
++            run_id: "run-x",
++            run_outcome: "partial",
++            ended_at: "2026-10-01T17:46:00-05:00",
++            factors: { value: WIRE_CELL_ZERO, growth: WIRE_CELL_ZERO, momentum: WIRE_CELL_ZERO },
++          },
++        ],
++        next_cursor: "cursor-h",
++      }),
++    );
++    await expect(getStockHistory("AAPL")).resolves.toStrictEqual({
++      symbol: "AAPL",
++      sets: [
++        {
++          setId: "set-0",
++          classificationDate: "2026-10-08",
++          runId: "run-0",
++          runOutcome: "succeeded",
++          endedAt: "2026-10-08T17:46:00-05:00",
++          factors: CELLS,
++        },
++        {
++          setId: "set-x",
++          classificationDate: "2026-10-01",
++          runId: "run-x",
++          runOutcome: "partial",
++          endedAt: "2026-10-01T17:46:00-05:00",
++          factors: { value: CELL_ZERO, growth: CELL_ZERO, momentum: CELL_ZERO },
++        },
++      ],
++      nextCursor: "cursor-h",
++    });
++  });
++
++  const WIRE_SET_ROW_COMPLETE = {
++    set_id: "set-1",
++    state: "complete",
++    classification_date: "2026-10-15",
++    run_id: "run-1",
++    run_started_at: "2026-10-15T17:30:00-05:00",
++    run_outcome: "partial",
++    started_at: "2026-10-15T17:40:00-05:00",
++    ended_at: "2026-10-15T17:46:00-05:00",
++    failure_reason: null,
++    latest_trading_day: "2026-10-14",
++    active_instruments: 1250,
++    factors: WIRE_SUMMARIES,
++  };
++  const SET_ROW_COMPLETE = {
++    setId: "set-1",
++    state: "complete",
++    classificationDate: "2026-10-15",
++    runId: "run-1",
++    runStartedAt: "2026-10-15T17:30:00-05:00",
++    runOutcome: "partial",
++    startedAt: "2026-10-15T17:40:00-05:00",
++    endedAt: "2026-10-15T17:46:00-05:00",
++    failureReason: null,
++    latestTradingDay: "2026-10-14",
++    activeInstruments: 1250,
++    factors: SUMMARIES,
++  };
++
++  it("maps SetListResponse", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        sets: [
++          WIRE_SET_ROW_COMPLETE,
++          {
++            ...WIRE_SET_ROW_COMPLETE,
++            set_id: "set-3",
++            state: "failed",
++            ended_at: "2026-10-17T17:41:00-05:00",
++            failure_reason: "statement timeout",
++          },
++        ],
++        next_cursor: "cursor-s",
++      }),
++    );
++    await expect(listClassificationSets()).resolves.toStrictEqual({
++      sets: [
++        SET_ROW_COMPLETE,
++        {
++          ...SET_ROW_COMPLETE,
++          setId: "set-3",
++          state: "failed",
++          endedAt: "2026-10-17T17:41:00-05:00",
++          failureReason: "statement timeout",
++        },
++      ],
++      nextCursor: "cursor-s",
++    });
++  });
++
++  it("maps a building SetResponse whose nullable columns are null", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        ...WIRE_SET_ROW_COMPLETE,
++        set_id: "set-2",
++        state: "building",
++        ended_at: null,
++        failure_reason: null,
++        latest_trading_day: null,
++        active_instruments: null,
++      }),
++    );
++    await expect(getClassificationSet("set-2")).resolves.toStrictEqual({
++      ...SET_ROW_COMPLETE,
++      setId: "set-2",
++      state: "building",
++      endedAt: null,
++      failureReason: null,
++      latestTradingDay: null,
++      activeInstruments: null,
++    });
++  });
++});
++
++// Implements TC-COMP-183 (DAC-E4-S1-3, AC-20, AC-22): `neverClassified`,
++// `set` and `later` are one shape on the list and the summary reads.
++describe("TC-COMP-183 — neverClassified, set and later are one shape", () => {
++  it("declares the three fields with the same types on both reads", () => {
++    expectTypeOf<ClassificationList["later"]>().toEqualTypeOf<LaterSet | null>();
++    expectTypeOf<ClassificationSummary["later"]>().toEqualTypeOf<LaterSet | null>();
++    expectTypeOf<ClassificationList["later"]>().toEqualTypeOf<ClassificationSummary["later"]>();
++    expectTypeOf<ClassificationList["set"]>().toEqualTypeOf<ClassificationSummary["set"]>();
++    expectTypeOf<ClassificationList["set"]>().toEqualTypeOf<CurrentSet | null>();
++    expectTypeOf<ClassificationList["neverClassified"]>().toEqualTypeOf<
++      ClassificationSummary["neverClassified"]
++    >();
++  });
++
++  const NEVER = { never_classified: true, set: null, factors: WIRE_SUMMARIES };
++
++  it("maps a never-classified list and summary with a building first set", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        ...NEVER,
++        later: WIRE_LATER_BUILDING,
++        match_count: 0,
++        stocks: [],
++        unknown_symbols: [],
++        next_cursor: null,
++      }),
++    );
++    const list = await listClassifications();
++    stubFetch(jsonResponse(200, { ...NEVER, later: WIRE_LATER_BUILDING, stocks_current: null }));
++    const summary = await getClassificationSummary();
++    for (const read of [list, summary]) {
++      expect(read.neverClassified).toBe(true);
++      expect(read.set).toBeNull();
++      expect(read.later).toStrictEqual(LATER_BUILDING);
++    }
++  });
++
++  it("maps a never-classified list and summary with a failed first set and its reason", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        ...NEVER,
++        later: WIRE_LATER_FAILED,
++        match_count: 0,
++        stocks: [],
++        unknown_symbols: [],
++        next_cursor: null,
++      }),
++    );
++    const list = await listClassifications();
++    stubFetch(jsonResponse(200, { ...NEVER, later: WIRE_LATER_FAILED, stocks_current: null }));
++    const summary = await getClassificationSummary();
++    for (const read of [list, summary]) {
++      expect(read.neverClassified).toBe(true);
++      expect(read.set).toBeNull();
++      expect(read.later).toStrictEqual(LATER_FAILED);
++      expect(read.later?.failureReason).toBe("statement timeout");
++    }
++  });
++
++  it("maps a not-current set beside a later set, and a quiet one", async () => {
++    stubFetch(
++      jsonResponse(200, {
++        ...WIRE_LIST,
++        set: { ...WIRE_SET, not_current: true },
++        later: WIRE_LATER_BUILDING,
++      }),
++    );
++    const stale = await listClassifications();
++    expect(stale.neverClassified).toBe(false);
++    expect(stale.set).toStrictEqual({ ...SET, notCurrent: true });
++    expect(stale.later).toStrictEqual(LATER_BUILDING);
++
++    stubFetch(jsonResponse(200, WIRE_SUMMARY_BODY));
++    const quiet = await getClassificationSummary();
++    expect(quiet.set?.notCurrent).toBe(false);
++    expect(quiet.later).toBeNull();
++  });
++
++  it("keeps never-classified apart from a set that matched nothing (AC-22)", async () => {
++    stubFetch(jsonResponse(200, { ...WIRE_LIST, match_count: 0, stocks: [], next_cursor: null }));
++    const noMatch = await listClassifications({ valuePercentileMin: "99" });
++    expect(noMatch.neverClassified).toBe(false);
++    expect(noMatch.set).toStrictEqual(SET);
++    expect(noMatch.matchCount).toBe(0);
++  });
++});
++
++const EMPTY_LIST = {
++  never_classified: true,
++  set: null,
++  later: null,
++  factors: WIRE_SUMMARIES,
++  match_count: 0,
++  stocks: [],
++  unknown_symbols: [],
++  next_cursor: null,
++};
++const EMPTY_UNIVERSES = { universes: [], active_count: 0, retired_count: 0, next_cursor: null };
++const EMPTY_PAGE = { events: [], sets: [], next_cursor: null };
++
++// AC-16, DAC-E4-3: the list read's filters travel as query parameters, and
++// only the ones present are sent.
++describe("request encoding for reads", () => {
++  it("sends no query for a list read with no parameters", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, EMPTY_LIST));
++    await listClassifications();
++    expect(lastCall(fetchMock)[0]).toBe("/api/classifications");
++  });
++
++  it("sends each of the twelve bounds under its wire name, as the given string", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, EMPTY_LIST));
++    await listClassifications({
++      valuePercentileMin: "80",
++      valuePercentileMax: "99.5",
++      valueScoreMin: "-1.25",
++      valueScoreMax: "2.0",
++      growthPercentileMin: "10",
++      growthPercentileMax: "90",
++      growthScoreMin: "-3",
++      growthScoreMax: "3",
++      momentumPercentileMin: "0",
++      momentumPercentileMax: "100",
++      momentumScoreMin: "0.0",
++      momentumScoreMax: "0.50",
++    });
++    const url = requestedUrl(fetchMock);
++    expect(url.pathname).toBe("/api/classifications");
++    expect([...url.searchParams.entries()].sort()).toStrictEqual(
++      [
++        ["value_percentile_min", "80"],
++        ["value_percentile_max", "99.5"],
++        ["value_score_min", "-1.25"],
++        ["value_score_max", "2.0"],
++        ["growth_percentile_min", "10"],
++        ["growth_percentile_max", "90"],
++        ["growth_score_min", "-3"],
++        ["growth_score_max", "3"],
++        ["momentum_percentile_min", "0"],
++        ["momentum_percentile_max", "100"],
++        ["momentum_score_min", "0.0"],
++        ["momentum_score_max", "0.50"],
++      ].sort(),
++    );
++  });
++
++  it("sends scope, search, sort, paging and hide_incomplete when present", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, EMPTY_LIST));
++    await listClassifications({
++      universeId: "u-1",
++      symbol: "AA",
++      sort: "momentum_percentile",
++      order: "desc",
++      hideIncomplete: true,
++      limit: 50,
++      cursor: "c-1",
++      valueScoreMin: "1",
++    });
++    expect([...requestedUrl(fetchMock).searchParams.entries()].sort()).toStrictEqual(
++      [
++        ["universe_id", "u-1"],
++        ["symbol", "AA"],
++        ["sort", "momentum_percentile"],
++        ["order", "desc"],
++        ["hide_incomplete", "true"],
++        ["limit", "50"],
++        ["cursor", "c-1"],
++        ["value_score_min", "1"],
++      ].sort(),
++    );
++  });
++
++  it("leaves hide_incomplete out when false", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, EMPTY_LIST));
++    await listClassifications({ hideIncomplete: false, sort: "symbol" });
++    const url = requestedUrl(fetchMock);
++    expect(url.searchParams.has("hide_incomplete")).toBe(false);
++    expect([...url.searchParams.keys()]).toStrictEqual(["sort"]);
++  });
++
++  it("sends compare symbols as one repeated key per entry (DEC-0144)", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, EMPTY_LIST));
++    await listClassifications({ symbols: ["AAPL", "MSFT", "BRK.B"] });
++    const url = requestedUrl(fetchMock);
++    expect(url.searchParams.getAll("symbols")).toStrictEqual(["AAPL", "MSFT", "BRK.B"]);
++    expect(lastCall(fetchMock)[0]).toBe(
++      "/api/classifications?symbols=AAPL&symbols=MSFT&symbols=BRK.B",
++    );
++  });
++
++  it("sends only the present listUniverses parameters", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, EMPTY_UNIVERSES));
++    await listUniverses();
++    expect(lastCall(fetchMock)[0]).toBe("/api/universes");
++    const second = stubFetch(jsonResponse(200, EMPTY_UNIVERSES));
++    await listUniverses({ lifecycle: "all", name: "Te", limit: 10, cursor: "c-u" });
++    expect([...requestedUrl(second).searchParams.entries()].sort()).toStrictEqual(
++      [
++        ["lifecycle", "all"],
++        ["name", "Te"],
++        ["limit", "10"],
++        ["cursor", "c-u"],
++      ].sort(),
++    );
++    const third = stubFetch(jsonResponse(200, EMPTY_UNIVERSES));
++    await listUniverses({ name: "Te" });
++    expect(lastCall(third)[0]).toBe("/api/universes?name=Te");
++  });
++
++  it("sends as_of on getUniverse only when given", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, WIRE_UNIVERSE_BY_HAND));
++    await getUniverse("u-1");
++    expect(lastCall(fetchMock)[0]).toBe("/api/universes/u-1");
++    const second = stubFetch(jsonResponse(200, WIRE_UNIVERSE_BY_HAND));
++    await getUniverse("u-1", { asOf: "2026-10-01" });
++    expect(lastCall(second)[0]).toBe("/api/universes/u-1?as_of=2026-10-01");
++  });
++
++  it("sends only the present paging parameters on events, sets and history", async () => {
++    let fetchMock = stubFetch(jsonResponse(200, EMPTY_PAGE));
++    await listUniverseEvents("u-1");
++    expect(lastCall(fetchMock)[0]).toBe("/api/universes/u-1/events");
++    fetchMock = stubFetch(jsonResponse(200, EMPTY_PAGE));
++    await listUniverseEvents("u-1", { limit: 5, cursor: "c-e" });
++    expect(lastCall(fetchMock)[0]).toBe("/api/universes/u-1/events?limit=5&cursor=c-e");
++
++    fetchMock = stubFetch(jsonResponse(200, EMPTY_PAGE));
++    await listClassificationSets();
++    expect(lastCall(fetchMock)[0]).toBe("/api/classifications/sets");
++    fetchMock = stubFetch(jsonResponse(200, EMPTY_PAGE));
++    await listClassificationSets({ cursor: "c-s" });
++    expect(lastCall(fetchMock)[0]).toBe("/api/classifications/sets?cursor=c-s");
++    fetchMock = stubFetch(jsonResponse(200, EMPTY_PAGE));
++    await listClassificationSets({ limit: 20 });
++    expect(lastCall(fetchMock)[0]).toBe("/api/classifications/sets?limit=20");
++
++    fetchMock = stubFetch(jsonResponse(200, { symbol: "AAPL", ...EMPTY_PAGE }));
++    await getStockHistory("AAPL");
++    expect(lastCall(fetchMock)[0]).toBe("/api/classifications/stocks/AAPL/history");
++    fetchMock = stubFetch(jsonResponse(200, { symbol: "AAPL", ...EMPTY_PAGE }));
++    await getStockHistory("AAPL", { limit: 3, cursor: "c-h" });
++    expect(lastCall(fetchMock)[0]).toBe(
++      "/api/classifications/stocks/AAPL/history?limit=3&cursor=c-h",
++    );
++  });
++
++  it("encodes every path segment", async () => {
++    const evidence = {
++      symbol: "A/B",
++      name: "x",
++      lifecycle: "active",
++      set: null,
++      factors: {},
++      inputs: [],
++      memberships: [],
++    };
++    const cases: [() => Promise<unknown>, unknown, string][] = [
++      [() => getUniverse("u/1"), WIRE_UNIVERSE_BY_HAND, "/api/universes/u%2F1"],
++      [() => renameUniverse("u/1", "n"), WIRE_UNIVERSE_BY_HAND, "/api/universes/u%2F1"],
++      [
++        () => retireUniverse("u/1"),
++        { lifecycle: "retired", retired_at: "2026-10-20T08:00:00-05:00" },
++        "/api/universes/u%2F1",
++      ],
++      [() => listUniverseEvents("u/1"), EMPTY_PAGE, "/api/universes/u%2F1/events"],
++      [
++        () => addUniverseMembers("u/1", ["A"]),
++        { added: [], already_member: [] },
++        "/api/universes/u%2F1/members",
++      ],
++      [
++        () => removeUniverseMember("u/1", "A/B"),
++        { removed_at: "2026-10-16T18:00:00-05:00" },
++        "/api/universes/u%2F1/members/A%2FB",
++      ],
++      [() => getStockEvidence("BRK.B"), evidence, "/api/classifications/stocks/BRK.B"],
++      [() => getStockEvidence("A/B"), evidence, "/api/classifications/stocks/A%2FB"],
++      [
++        () => getStockHistory("A/B"),
++        { symbol: "A/B", ...EMPTY_PAGE },
++        "/api/classifications/stocks/A%2FB/history",
++      ],
++      [
++        () => getClassificationSet("s/1"),
++        { ...EMPTY_PAGE, ...WIRE_SET, failure_reason: null, factors: WIRE_SUMMARIES },
++        "/api/classifications/sets/s%2F1",
++      ],
++    ];
++    for (const [call, body, expected] of cases) {
++      const fetchMock = stubFetch(jsonResponse(200, body));
++      await call();
++      expect(lastCall(fetchMock)[0]).toBe(expected);
++    }
++  });
++
++  it("asks for JSON on every read, with no body and no Content-Type", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, WIRE_SUMMARY_BODY));
++    await getClassificationSummary();
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/classifications/summary");
++    expect(init.headers.Accept).toBe("application/json");
++    expect(init.headers).not.toHaveProperty("Content-Type");
++    expect(init.body).toBeUndefined();
++    expect(init.method ?? "GET").toBe("GET");
++  });
++});
++
++// AC-16: the write calls send the bodies classification-api section 11 names.
++describe("request bodies for writes", () => {
++  it("creates a universe by hand with name and symbols and no filter", async () => {
++    const fetchMock = stubFetch(jsonResponse(201, WIRE_UNIVERSE_BY_HAND));
++    await createUniverse({ name: "Tech", symbols: ["AAPL", "MSFT"] });
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/universes");
++    expect(init.method).toBe("POST");
++    expect(init.headers["Content-Type"]).toBe("application/json");
++    expect(init.headers.Accept).toBe("application/json");
++    expect(sentBody(fetchMock)).toStrictEqual({ name: "Tech", symbols: ["AAPL", "MSFT"] });
++  });
++
++  it("creates a universe from a result with every bound under its wire name", async () => {
++    const fetchMock = stubFetch(jsonResponse(201, WIRE_UNIVERSE_FROM_FILTER));
++    await createUniverse({
++      name: "Cheap",
++      setId: "set-1",
++      filter: {
++        valuePercentileMin: "80",
++        valuePercentileMax: "99.5",
++        valueScoreMin: "-1.25",
++        valueScoreMax: "2.0",
++        growthPercentileMin: "10",
++        growthPercentileMax: "90",
++        growthScoreMin: "-3",
++        growthScoreMax: "3",
++        momentumPercentileMin: "0",
++        momentumPercentileMax: "100",
++        momentumScoreMin: "0.0",
++        momentumScoreMax: "0.50",
++        hideIncomplete: true,
++        symbol: "AA",
++      },
++    });
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/universes");
++    expect(init.method).toBe("POST");
++    expect(init.headers["Content-Type"]).toBe("application/json");
++    expect(sentBody(fetchMock)).toStrictEqual({
++      name: "Cheap",
++      set_id: "set-1",
++      filter: {
++        value_percentile_min: "80",
++        value_percentile_max: "99.5",
++        value_score_min: "-1.25",
++        value_score_max: "2.0",
++        growth_percentile_min: "10",
++        growth_percentile_max: "90",
++        growth_score_min: "-3",
++        growth_score_max: "3",
++        momentum_percentile_min: "0",
++        momentum_percentile_max: "100",
++        momentum_score_min: "0.0",
++        momentum_score_max: "0.50",
++        hide_incomplete: true,
++        symbol: "AA",
++      },
++    });
++  });
++
++  it("sends only the set bounds, hide_incomplete false and a null symbol when no search is active", async () => {
++    const fetchMock = stubFetch(jsonResponse(201, WIRE_UNIVERSE_FROM_FILTER));
++    await createUniverse({
++      name: "Cheap",
++      setId: "set-1",
++      filter: {
++        valuePercentileMin: "80",
++        momentumScoreMin: "0",
++        hideIncomplete: false,
++        symbol: null,
++      },
++    });
++    expect(sentBody(fetchMock)).toStrictEqual({
++      name: "Cheap",
++      set_id: "set-1",
++      filter: {
++        value_percentile_min: "80",
++        momentum_score_min: "0",
++        hide_incomplete: false,
++        symbol: null,
++      },
++    });
++  });
++
++  it("renames with PATCH and a name body", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, WIRE_UNIVERSE_BY_HAND));
++    const universe = await renameUniverse("u-1", "Big tech");
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/universes/u-1");
++    expect(init.method).toBe("PATCH");
++    expect(init.headers["Content-Type"]).toBe("application/json");
++    expect(sentBody(fetchMock)).toStrictEqual({ name: "Big tech" });
++    expect(universe).toStrictEqual(UNIVERSE_BY_HAND);
++  });
++
++  it("retires with DELETE and no body", async () => {
++    const fetchMock = stubFetch(
++      jsonResponse(200, { lifecycle: "retired", retired_at: "2026-10-20T08:00:00-05:00" }),
++    );
++    await retireUniverse("u-1");
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/universes/u-1");
++    expect(init.method).toBe("DELETE");
++    expect(init.body).toBeUndefined();
++    expect(init.headers).not.toHaveProperty("Content-Type");
++  });
++
++  it("adds members with POST and a symbols body", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, { added: ["MSFT"], already_member: [] }));
++    await addUniverseMembers("u-1", ["MSFT", "TSLA"]);
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/universes/u-1/members");
++    expect(init.method).toBe("POST");
++    expect(init.headers["Content-Type"]).toBe("application/json");
++    expect(sentBody(fetchMock)).toStrictEqual({ symbols: ["MSFT", "TSLA"] });
++  });
++
++  it("removes a member with DELETE and no body", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, { removed_at: "2026-10-16T18:00:00-05:00" }));
++    await removeUniverseMember("u-1", "AAPL");
++    const [input, init] = lastCall(fetchMock);
++    expect(input).toBe("/api/universes/u-1/members/AAPL");
++    expect(init.method).toBe("DELETE");
++    expect(init.body).toBeUndefined();
++    expect(init.headers).not.toHaveProperty("Content-Type");
++  });
++});
+diff --git a/web/src/api/classification-client.ts b/web/src/api/classification-client.ts
+new file mode 100644
+index 0000000..7b37a23
+--- /dev/null
++++ b/web/src/api/classification-client.ts
+@@ -0,0 +1,747 @@
++/**
++ * Typed fetch layer over `/api/universes` and `/api/classifications`
++ * (component design `classification-ui` sections 2.1 and 2.4; endpoints of
++ * `classification-api` section 11).
++ *
++ * Every call goes through the delivered `requestJson` (DEC-0064), so a
++ * transport failure is `ApiUnreachableError` and a non-2xx status an error
++ * carrying the envelope's `code`, never conflated. Responses are mapped from
++ * the snake_case wire field by field, as `client.ts` does; decimal strings
++ * and dates stay the wire's strings.
++ */
++
++import type {
++  AddMembersResult,
++  ClassificationList,
++  ClassificationListParams,
++  ClassificationOperation,
++  ClassificationResource,
++  ClassificationSet,
++  ClassificationSetPage,
++  ClassificationSummary,
++  CreateUniverseRequest,
++  CurrentSet,
++  FactorCell,
++  FactorName,
++  FactorSummary,
++  InputRow,
++  LaterSet,
++  Lifecycle,
++  RemoveMemberResult,
++  RetireUniverseResult,
++  RunOutcome,
++  StockEvidence,
++  StockHistory,
++  StockRow,
++  ThresholdBounds,
++  Thresholds,
++  UniverseDetail,
++  UniverseEvent,
++  UniverseEventPage,
++  UniverseEventType,
++  UniverseList,
++  UniverseMember,
++  UniverseOrigin,
++} from "./classification-types";
++import { requestJson } from "./client";
++
++// --- Wire shapes (classification-api section 2.7) ---------------------------
++
++interface WireFactorCell {
++  status: FactorCell["status"];
++  score: string | null;
++  percentile: string | null;
++  reason_code: FactorCell["reasonCode"];
++  reason_input: string | null;
++  reason_detail: string | null;
++  restated_possible: boolean;
++}
++
++type WireFactorCells = Partial<Record<FactorName, WireFactorCell>>;
++
++interface WireFactorSummary {
++  qualified_count: number;
++  ranked: boolean;
++  min_peer_set_size: number;
++}
++
++type WireFactorSummaries = Record<FactorName, WireFactorSummary>;
++
++interface WireSetBlock {
++  set_id: string;
++  classification_date: string;
++  run_id: string;
++  run_started_at: string;
++  run_outcome: RunOutcome;
++  state: "complete";
++  started_at: string;
++  ended_at: string;
++  latest_trading_day: string;
++  active_instruments: number;
++  not_current: boolean;
++}
++
++interface WireLaterBlock {
++  set_id: string;
++  state: LaterSet["state"];
++  started_at: string;
++  ended_at: string | null;
++  failure_reason: string | null;
++  run_id: string;
++  run_started_at: string;
++}
++
++interface WireSetState {
++  never_classified: boolean;
++  set: WireSetBlock | null;
++  later: WireLaterBlock | null;
++  factors: WireFactorSummaries;
++}
++
++interface WireStockRow {
++  symbol: string;
++  name: string;
++  lifecycle: Lifecycle;
++  factors: WireFactorCells;
++}
++
++interface WireClassificationList extends WireSetState {
++  match_count: number;
++  stocks: WireStockRow[];
++  unknown_symbols: string[];
++  next_cursor: string | null;
++}
++
++interface WireClassificationSummary extends WireSetState {
++  stocks_current: { current_count: number; followed_count: number } | null;
++}
++
++interface WireInputRow {
++  factor: FactorName;
++  input_name: string;
++  label: string;
++  status: InputRow["status"];
++  value: string | null;
++  as_of: string | null;
++  known_on: string | null;
++  restated_possible: boolean;
++  detail: unknown;
++}
++
++interface WireStockEvidence {
++  symbol: string;
++  name: string;
++  lifecycle: Lifecycle;
++  set: WireSetBlock | null;
++  factors: WireFactorCells;
++  inputs: WireInputRow[];
++  memberships: { universe_id: string; name: string }[];
++}
++
++interface WireStockHistory {
++  symbol: string;
++  sets: {
++    set_id: string;
++    classification_date: string;
++    run_id: string;
++    run_outcome: RunOutcome;
++    ended_at: string;
++    factors: WireFactorCells;
++  }[];
++  next_cursor: string | null;
++}
++
++interface WireClassificationSet {
++  set_id: string;
++  state: ClassificationSet["state"];
++  classification_date: string;
++  run_id: string;
++  run_started_at: string;
++  run_outcome: RunOutcome;
++  started_at: string;
++  ended_at: string | null;
++  failure_reason: string | null;
++  latest_trading_day: string | null;
++  active_instruments: number | null;
++  factors: WireFactorSummaries;
++}
++
++interface WireUniverseList {
++  universes: {
++    universe_id: string;
++    name: string;
++    lifecycle: Lifecycle;
++    member_count: number;
++    created_at: string;
++    retired_at: string | null;
++  }[];
++  active_count: number;
++  retired_count: number;
++  next_cursor: string | null;
++}
++
++interface WireUniverseMember {
++  symbol: string;
++  name: string | null;
++  lifecycle: Lifecycle;
++  member_since: string;
++  factors: WireFactorCells | null;
++}
++
++interface WireUniverse {
++  universe_id: string;
++  name: string;
++  lifecycle: Lifecycle;
++  created_at: string;
++  retired_at: string | null;
++  member_count: number;
++  as_of: string;
++  as_of_before_creation: boolean;
++  origin: {
++    kind: UniverseOrigin["kind"];
++    set_id: string | null;
++    classification_date: string | null;
++    thresholds: Record<string, string> | null;
++    hide_incomplete: boolean | null;
++    symbol: string | null;
++  };
++  members: WireUniverseMember[];
++  set: WireSetBlock | null;
++}
++
++interface WireUniverseEvents {
++  events: {
++    event_id: number;
++    event_type: UniverseEventType;
++    name: string | null;
++    symbol: string | null;
++    recorded_at: string;
++    recorded_on: string;
++    filter_provenance: unknown;
++  }[];
++  next_cursor: string | null;
++}
++
++// --- Shared mappers --------------------------------------------------------
++
++const FACTOR_NAMES: readonly FactorName[] = ["value", "growth", "momentum"];
++
++/** The twelve bounds: camelCase field and its query-parameter name (section 2.4). */
++const BOUND_PARAMS: readonly [keyof ThresholdBounds, string][] = [
++  ["valuePercentileMin", "value_percentile_min"],
++  ["valuePercentileMax", "value_percentile_max"],
++  ["valueScoreMin", "value_score_min"],
++  ["valueScoreMax", "value_score_max"],
++  ["growthPercentileMin", "growth_percentile_min"],
++  ["growthPercentileMax", "growth_percentile_max"],
++  ["growthScoreMin", "growth_score_min"],
++  ["growthScoreMax", "growth_score_max"],
++  ["momentumPercentileMin", "momentum_percentile_min"],
++  ["momentumPercentileMax", "momentum_percentile_max"],
++  ["momentumScoreMin", "momentum_score_min"],
++  ["momentumScoreMax", "momentum_score_max"],
++];
++
++function toFactorCell(cell: WireFactorCell): FactorCell {
++  return {
++    status: cell.status,
++    score: cell.score,
++    percentile: cell.percentile,
++    reasonCode: cell.reason_code,
++    reasonInput: cell.reason_input,
++    reasonDetail: cell.reason_detail,
++    restatedPossible: cell.restated_possible,
++  };
++}
++
++/**
++ * Maps the cells the wire carries. The evidence read sends `{}` for a stock
++ * with no cells (DEC-0140), so a factor absent on the wire is absent here
++ * rather than read through `undefined`.
++ */
++function toFactorCells(cells: WireFactorCells): Record<FactorName, FactorCell> {
++  const mapped: Partial<Record<FactorName, FactorCell>> = {};
++  for (const factor of FACTOR_NAMES) {
++    const cell = cells[factor];
++    if (cell !== undefined) {
++      mapped[factor] = toFactorCell(cell);
++    }
++  }
++  return mapped as Record<FactorName, FactorCell>;
++}
++
++function toFactorSummary(summary: WireFactorSummary): FactorSummary {
++  return {
++    qualifiedCount: summary.qualified_count,
++    ranked: summary.ranked,
++    minPeerSetSize: summary.min_peer_set_size,
++  };
++}
++
++function toFactorSummaries(summaries: WireFactorSummaries): Record<FactorName, FactorSummary> {
++  return {
++    value: toFactorSummary(summaries.value),
++    growth: toFactorSummary(summaries.growth),
++    momentum: toFactorSummary(summaries.momentum),
++  };
++}
++
++function toCurrentSet(set: WireSetBlock | null): CurrentSet | null {
++  if (set === null) {
++    return null;
++  }
++  return {
++    setId: set.set_id,
++    classificationDate: set.classification_date,
++    runId: set.run_id,
++    runStartedAt: set.run_started_at,
++    runOutcome: set.run_outcome,
++    state: set.state,
++    startedAt: set.started_at,
++    endedAt: set.ended_at,
++    latestTradingDay: set.latest_trading_day,
++    activeInstruments: set.active_instruments,
++    notCurrent: set.not_current,
++  };
++}
++
++function toLaterSet(later: WireLaterBlock | null): LaterSet | null {
++  if (later === null) {
++    return null;
++  }
++  return {
++    setId: later.set_id,
++    state: later.state,
++    startedAt: later.started_at,
++    endedAt: later.ended_at,
++    failureReason: later.failure_reason,
++    runId: later.run_id,
++    runStartedAt: later.run_started_at,
++  };
++}
++
++function toUniverse(body: WireUniverse): UniverseDetail {
++  return {
++    universeId: body.universe_id,
++    name: body.name,
++    lifecycle: body.lifecycle,
++    createdAt: body.created_at,
++    retiredAt: body.retired_at,
++    memberCount: body.member_count,
++    asOf: body.as_of,
++    asOfBeforeCreation: body.as_of_before_creation,
++    origin: {
++      kind: body.origin.kind,
++      setId: body.origin.set_id,
++      classificationDate: body.origin.classification_date,
++      thresholds: body.origin.thresholds,
++      hideIncomplete: body.origin.hide_incomplete,
++      symbol: body.origin.symbol,
++    },
++    members: body.members.map(
++      (member): UniverseMember => ({
++        symbol: member.symbol,
++        name: member.name,
++        lifecycle: member.lifecycle,
++        memberSince: member.member_since,
++        // Null when the reader has no row for the member (CAP-002-E1-S6, DEC-0097).
++        factors: member.factors === null ? null : toFactorCells(member.factors),
++      }),
++    ),
++    set: toCurrentSet(body.set),
++  };
++}
++
++function toClassificationSet(row: WireClassificationSet): ClassificationSet {
++  return {
++    setId: row.set_id,
++    state: row.state,
++    classificationDate: row.classification_date,
++    runId: row.run_id,
++    runStartedAt: row.run_started_at,
++    runOutcome: row.run_outcome,
++    startedAt: row.started_at,
++    endedAt: row.ended_at,
++    failureReason: row.failure_reason,
++    latestTradingDay: row.latest_trading_day,
++    activeInstruments: row.active_instruments,
++    factors: toFactorSummaries(row.factors),
++  };
++}
++
++function withQuery(path: string, query: URLSearchParams): string {
++  const queryString = query.toString();
++  return queryString ? `${path}?${queryString}` : path;
++}
++
++function pagingQuery(params: { limit?: number; cursor?: string }): URLSearchParams {
++  const query = new URLSearchParams();
++  if (params.limit !== undefined) {
++    query.set("limit", String(params.limit));
++  }
++  if (params.cursor) {
++    query.set("cursor", params.cursor);
++  }
++  return query;
++}
++
++function jsonBody(method: string, body: unknown): RequestInit {
++  return {
++    method,
++    headers: { "Content-Type": "application/json" },
++    body: JSON.stringify(body),
++  };
++}
++
++/**
++ * One request on behalf of `operation`, whose own resource is `resource`.
++ */
++async function request<T>(
++  _operation: ClassificationOperation,
++  _resource: ClassificationResource,
++  input: string,
++  init?: RequestInit,
++): Promise<T> {
++  return requestJson<T>(input, init);
++}
++
++// --- Universes -------------------------------------------------------------
++
++/** `GET /api/universes` parameters. */
++export interface UniverseListParams {
++  lifecycle?: Lifecycle | "all";
++  name?: string;
++  limit?: number;
++  cursor?: string;
++}
++
++/** `GET /api/universes` (AC-3, AC-4). Only the present parameters are sent. */
++export async function listUniverses(params: UniverseListParams = {}): Promise<UniverseList> {
++  const query = new URLSearchParams();
++  if (params.lifecycle) {
++    query.set("lifecycle", params.lifecycle);
++  }
++  if (params.name) {
++    query.set("name", params.name);
++  }
++  if (params.limit !== undefined) {
++    query.set("limit", String(params.limit));
++  }
++  if (params.cursor) {
++    query.set("cursor", params.cursor);
++  }
++  const body = await request<WireUniverseList>(
++    "list-universes",
++    "universe",
++    withQuery("/api/universes", query),
++  );
++  return {
++    universes: body.universes.map((row) => ({
++      universeId: row.universe_id,
++      name: row.name,
++      lifecycle: row.lifecycle,
++      memberCount: row.member_count,
++      createdAt: row.created_at,
++      retiredAt: row.retired_at,
++    })),
++    activeCount: body.active_count,
++    retiredCount: body.retired_count,
++    nextCursor: body.next_cursor,
++  };
++}
++
++function toFilterBody(filter: Thresholds): Record<string, string | boolean | null> {
++  const body: Record<string, string | boolean | null> = {};
++  for (const [field, param] of BOUND_PARAMS) {
++    const value = filter[field];
++    if (value !== undefined) {
++      body[param] = value;
++    }
++  }
++  body.hide_incomplete = filter.hideIncomplete;
++  body.symbol = filter.symbol;
++  return body;
++}
++
++/**
++ * `POST /api/universes` (AC-1, AC-2, S03-7): by hand with `symbols`, or from
++ * a result with the filter and the set it was read against (DEC-0085).
++ */
++export async function createUniverse(universe: CreateUniverseRequest): Promise<UniverseDetail> {
++  const payload =
++    "symbols" in universe
++      ? { name: universe.name, symbols: universe.symbols }
++      : { name: universe.name, filter: toFilterBody(universe.filter), set_id: universe.setId };
++  const body = await request<WireUniverse>(
++    "create-universe",
++    "universe",
++    "/api/universes",
++    jsonBody("POST", payload),
++  );
++  return toUniverse(body);
++}
++
++/** `GET /api/universes/{id}` (AC-3, AC-6, AC-15), optionally as of a date. */
++export async function getUniverse(
++  universeId: string,
++  params: { asOf?: string } = {},
++): Promise<UniverseDetail> {
++  const query = new URLSearchParams();
++  if (params.asOf) {
++    query.set("as_of", params.asOf);
++  }
++  const body = await request<WireUniverse>(
++    "get-universe",
++    "universe",
++    withQuery(`/api/universes/${encodeURIComponent(universeId)}`, query),
++  );
++  return toUniverse(body);
++}
++
++/** `PATCH /api/universes/{id}` (AC-4). */
++export async function renameUniverse(universeId: string, name: string): Promise<UniverseDetail> {
++  const body = await request<WireUniverse>(
++    "rename-universe",
++    "universe",
++    `/api/universes/${encodeURIComponent(universeId)}`,
++    jsonBody("PATCH", { name }),
++  );
++  return toUniverse(body);
++}
++
++/** `DELETE /api/universes/{id}` (AC-4, AC-6): retires, never deletes. */
++export async function retireUniverse(universeId: string): Promise<RetireUniverseResult> {
++  const body = await request<{ lifecycle: "retired"; retired_at: string }>(
++    "retire-universe",
++    "universe",
++    `/api/universes/${encodeURIComponent(universeId)}`,
++    { method: "DELETE" },
++  );
++  return { lifecycle: body.lifecycle, retiredAt: body.retired_at };
++}
++
++/** `GET /api/universes/{id}/events` (AC-6), newest first. */
++export async function listUniverseEvents(
++  universeId: string,
++  params: { limit?: number; cursor?: string } = {},
++): Promise<UniverseEventPage> {
++  const body = await request<WireUniverseEvents>(
++    "list-universe-events",
++    "universe",
++    withQuery(`/api/universes/${encodeURIComponent(universeId)}/events`, pagingQuery(params)),
++  );
++  return {
++    events: body.events.map(
++      (event): UniverseEvent => ({
++        eventId: event.event_id,
++        eventType: event.event_type,
++        name: event.name,
++        symbol: event.symbol,
++        recordedAt: event.recorded_at,
++        recordedOn: event.recorded_on,
++        filterProvenance: event.filter_provenance,
++      }),
++    ),
++    nextCursor: body.next_cursor,
++  };
++}
++
++/** `POST /api/universes/{id}/members` (AC-1, AC-4). */
++export async function addUniverseMembers(
++  universeId: string,
++  symbols: string[],
++): Promise<AddMembersResult> {
++  const body = await request<{ added: string[]; already_member: string[] }>(
++    "add-universe-members",
++    "universe-member",
++    `/api/universes/${encodeURIComponent(universeId)}/members`,
++    jsonBody("POST", { symbols }),
++  );
++  return { added: body.added, alreadyMember: body.already_member };
++}
++
++/** `DELETE /api/universes/{id}/members/{symbol}` (AC-4, AC-5, AC-6). */
++export async function removeUniverseMember(
++  universeId: string,
++  symbol: string,
++): Promise<RemoveMemberResult> {
++  const body = await request<{ removed_at: string }>(
++    "remove-universe-member",
++    "universe-member",
++    `/api/universes/${encodeURIComponent(universeId)}/members/${encodeURIComponent(symbol)}`,
++    { method: "DELETE" },
++  );
++  return { removedAt: body.removed_at };
++}
++
++// --- Classifications -------------------------------------------------------
++
++function toStockRow(row: WireStockRow): StockRow {
++  return {
++    symbol: row.symbol,
++    name: row.name,
++    lifecycle: row.lifecycle,
++    factors: toFactorCells(row.factors),
++  };
++}
++
++/**
++ * `GET /api/classifications` (AC-16, AC-20, AC-22, DAC-E4-3). Only the
++ * present parameters are sent; `hide_incomplete` only when true (the API's
++ * default is false), and compare `symbols` as one repeated key per entry
++ * (DEC-0144). `matchCount` is the server's count, never the rows loaded.
++ */
++export async function listClassifications(
++  params: ClassificationListParams = {},
++): Promise<ClassificationList> {
++  const query = new URLSearchParams();
++  if (params.universeId) {
++    query.set("universe_id", params.universeId);
++  }
++  for (const symbol of params.symbols ?? []) {
++    query.append("symbols", symbol);
++  }
++  if (params.symbol) {
++    query.set("symbol", params.symbol);
++  }
++  if (params.sort) {
++    query.set("sort", params.sort);
++  }
++  if (params.order) {
++    query.set("order", params.order);
++  }
++  for (const [field, param] of BOUND_PARAMS) {
++    const value = params[field];
++    if (value !== undefined) {
++      query.set(param, value);
++    }
++  }
++  if (params.hideIncomplete === true) {
++    query.set("hide_incomplete", "true");
++  }
++  if (params.limit !== undefined) {
++    query.set("limit", String(params.limit));
++  }
++  if (params.cursor) {
++    query.set("cursor", params.cursor);
++  }
++  const body = await request<WireClassificationList>(
++    "list-classifications",
++    "classification",
++    withQuery("/api/classifications", query),
++  );
++  return {
++    neverClassified: body.never_classified,
++    set: toCurrentSet(body.set),
++    later: toLaterSet(body.later),
++    factors: toFactorSummaries(body.factors),
++    matchCount: body.match_count,
++    stocks: body.stocks.map(toStockRow),
++    unknownSymbols: body.unknown_symbols,
++    nextCursor: body.next_cursor,
++  };
++}
++
++/** `GET /api/classifications/summary` (AC-13, AC-20 to AC-22; DEC-0071). */
++export async function getClassificationSummary(): Promise<ClassificationSummary> {
++  const body = await request<WireClassificationSummary>(
++    "get-classification-summary",
++    "classification",
++    "/api/classifications/summary",
++  );
++  return {
++    neverClassified: body.never_classified,
++    set: toCurrentSet(body.set),
++    later: toLaterSet(body.later),
++    factors: toFactorSummaries(body.factors),
++    stocksCurrent:
++      body.stocks_current === null
++        ? null
++        : {
++            currentCount: body.stocks_current.current_count,
++            followedCount: body.stocks_current.followed_count,
++          },
++  };
++}
++
++/** `GET /api/classifications/sets` (AC-20, AC-21; DEC-0083), newest first. */
++export async function listClassificationSets(
++  params: { limit?: number; cursor?: string } = {},
++): Promise<ClassificationSetPage> {
++  const body = await request<{ sets: WireClassificationSet[]; next_cursor: string | null }>(
++    "list-classification-sets",
++    "classification-set",
++    withQuery("/api/classifications/sets", pagingQuery(params)),
++  );
++  return { sets: body.sets.map(toClassificationSet), nextCursor: body.next_cursor };
++}
++
++/** `GET /api/classifications/sets/{set_id}` (AC-21; DEC-0083). */
++export async function getClassificationSet(setId: string): Promise<ClassificationSet> {
++  const body = await request<WireClassificationSet>(
++    "get-classification-set",
++    "classification-set",
++    `/api/classifications/sets/${encodeURIComponent(setId)}`,
++  );
++  return toClassificationSet(body);
++}
++
++/** `GET /api/classifications/stocks/{symbol}` (AC-12, AC-17, AC-23; DEC-0071). */
++export async function getStockEvidence(symbol: string): Promise<StockEvidence> {
++  const body = await request<WireStockEvidence>(
++    "get-stock-evidence",
++    "classification",
++    `/api/classifications/stocks/${encodeURIComponent(symbol)}`,
++  );
++  return {
++    symbol: body.symbol,
++    name: body.name,
++    lifecycle: body.lifecycle,
++    set: toCurrentSet(body.set),
++    factors: toFactorCells(body.factors),
++    inputs: body.inputs.map(
++      (row): InputRow => ({
++        factor: row.factor,
++        inputName: row.input_name,
++        label: row.label,
++        status: row.status,
++        value: row.value,
++        asOf: row.as_of,
++        knownOn: row.known_on,
++        restatedPossible: row.restated_possible,
++        detail: row.detail,
++      }),
++    ),
++    memberships: body.memberships.map((membership) => ({
++      universeId: membership.universe_id,
++      name: membership.name,
++    })),
++  };
++}
++
++/** `GET /api/classifications/stocks/{symbol}/history` (AC-18, AC-19), newest first. */
++export async function getStockHistory(
++  symbol: string,
++  params: { limit?: number; cursor?: string } = {},
++): Promise<StockHistory> {
++  const body = await request<WireStockHistory>(
++    "get-stock-history",
++    "classification",
++    withQuery(
++      `/api/classifications/stocks/${encodeURIComponent(symbol)}/history`,
++      pagingQuery(params),
++    ),
++  );
++  return {
++    symbol: body.symbol,
++    sets: body.sets.map((row) => ({
++      setId: row.set_id,
++      classificationDate: row.classification_date,
++      runId: row.run_id,
++      runOutcome: row.run_outcome,
++      endedAt: row.ended_at,
++      factors: toFactorCells(row.factors),
++    })),
++    nextCursor: body.next_cursor,
++  };
++}
+diff --git a/web/src/api/classification-types.ts b/web/src/api/classification-types.ts
+new file mode 100644
+index 0000000..95de271
+--- /dev/null
++++ b/web/src/api/classification-types.ts
+@@ -0,0 +1,367 @@
++/**
++ * Public types of the classification fetch layer (component design
++ * `classification-ui` section 2.4), mirroring the response shapes of
++ * `classification-api` section 2.7 field for field in camelCase.
++ *
++ * Scores, percentiles and input values are the wire's decimal strings at
++ * stored precision (DEC-0063), and dates and timestamps are the wire's
++ * ISO-8601 strings, never `Date` (STD-UI-5): `format.ts` is the one place
++ * either becomes text. A field is `| null` exactly where its source says the
++ * wire can carry null.
++ */
++
++export type FactorName = "value" | "growth" | "momentum";
++
++export type ReasonCode =
++  | "input_missing"
++  | "input_outdated"
++  | "input_not_computable"
++  | "not_enough_stocks"
++  | "retired";
++
++export type Lifecycle = "active" | "retired";
++
++/** `acquisition_run.state` of the download a set was built from. */
++export type RunOutcome = "succeeded" | "partial";
++
++/** `FactorCellResponse`. */
++export interface FactorCell {
++  status: "classified" | "not_classified";
++  score: string | null;
++  percentile: string | null;
++  reasonCode: ReasonCode | null;
++  reasonInput: string | null;
++  reasonDetail: string | null;
++  restatedPossible: boolean;
++}
++
++/** One factor's entry in a read's `factors {qualified_count, ranked, min_peer_set_size}`. */
++export interface FactorSummary {
++  qualifiedCount: number;
++  ranked: boolean;
++  minPeerSetSize: number;
++}
++
++/** `SetBlock`: the current, complete set (classification-reader `CurrentSet`). */
++export interface CurrentSet {
++  setId: string;
++  classificationDate: string;
++  runId: string;
++  /** The download's start time: how every surface names it (DEC-0083). */
++  runStartedAt: string;
++  runOutcome: RunOutcome;
++  state: "complete";
++  startedAt: string;
++  endedAt: string;
++  latestTradingDay: string;
++  activeInstruments: number;
++  /** True exactly when the read's `later` is non-null (DEC-0082). */
++  notCurrent: boolean;
++}
++
++/** `LaterBlock`: the newer building or failed set, or the first while none is complete (DEC-0082). */
++export interface LaterSet {
++  setId: string;
++  state: "building" | "failed";
++  startedAt: string;
++  endedAt: string | null;
++  failureReason: string | null;
++  runId: string;
++  runStartedAt: string;
++}
++
++/**
++ * The one shape the list and the summary reads share (DAC-E4-S1-3, AC-20,
++ * AC-22): `neverClassified` is true exactly when `set` is null, and `later`
++ * carries a building or failed set in both states.
++ */
++export interface SetState {
++  neverClassified: boolean;
++  set: CurrentSet | null;
++  later: LaterSet | null;
++}
++
++export interface StockRow {
++  symbol: string;
++  name: string;
++  lifecycle: Lifecycle;
++  factors: Record<FactorName, FactorCell>;
++}
++
++/** `ClassificationListResponse` (`GET /api/classifications`). */
++export interface ClassificationList extends SetState {
++  factors: Record<FactorName, FactorSummary>;
++  /** Over the whole filtered scope, never the page (S03-2, DAC-E4-3). */
++  matchCount: number;
++  stocks: StockRow[];
++  /** Compare only. */
++  unknownSymbols: string[];
++  nextCursor: string | null;
++}
++
++export interface StocksCurrent {
++  currentCount: number;
++  followedCount: number;
++}
++
++/** `ClassificationSummaryResponse` (`GET /api/classifications/summary`, DEC-0071). */
++export interface ClassificationSummary extends SetState {
++  factors: Record<FactorName, FactorSummary>;
++  stocksCurrent: StocksCurrent | null;
++}
++
++export type InputStatus = "present" | "missing" | "outdated" | "not_computable";
++
++/** One `factor_input` row of the current set; `value`, `asOf` and `knownOn` are nullable columns. */
++export interface InputRow {
++  factor: FactorName;
++  inputName: string;
++  label: string;
++  status: InputStatus;
++  value: string | null;
++  asOf: string | null;
++  knownOn: string | null;
++  restatedPossible: boolean;
++  /** Passed through as received; no key is renamed (DEC-0144). */
++  detail: unknown;
++}
++
++export interface Membership {
++  universeId: string;
++  name: string;
++}
++
++/** `StockEvidenceResponse` (`GET /api/classifications/stocks/{symbol}`). */
++export interface StockEvidence {
++  symbol: string;
++  name: string;
++  lifecycle: Lifecycle;
++  set: CurrentSet | null;
++  /** Holds only the cells the API sent: `{}` when the stock has none (DEC-0140). */
++  factors: Record<FactorName, FactorCell>;
++  inputs: InputRow[];
++  memberships: Membership[];
++}
++
++/** One earlier set's result for a stock (`StockHistoryResponse.sets[]`). */
++export interface StockHistoryRow {
++  setId: string;
++  classificationDate: string;
++  runId: string;
++  runOutcome: RunOutcome;
++  endedAt: string;
++  factors: Record<FactorName, FactorCell>;
++}
++
++/** `StockHistoryResponse` (`GET /api/classifications/stocks/{symbol}/history`). */
++export interface StockHistory {
++  symbol: string;
++  sets: StockHistoryRow[];
++  nextCursor: string | null;
++}
++
++/** `SetResponse` (`GET /api/classifications/sets/{set_id}`) and one `SetListResponse` row. */
++export interface ClassificationSet {
++  setId: string;
++  state: "building" | "complete" | "failed";
++  classificationDate: string;
++  runId: string;
++  runStartedAt: string;
++  runOutcome: RunOutcome;
++  startedAt: string;
++  endedAt: string | null;
++  failureReason: string | null;
++  latestTradingDay: string | null;
++  activeInstruments: number | null;
++  factors: Record<FactorName, FactorSummary>;
++}
++
++/** `SetListResponse` (`GET /api/classifications/sets`). */
++export interface ClassificationSetPage {
++  sets: ClassificationSet[];
++  nextCursor: string | null;
++}
++
++/** One `UniverseListResponse` row. */
++export interface UniverseSummary {
++  universeId: string;
++  name: string;
++  lifecycle: Lifecycle;
++  memberCount: number;
++  createdAt: string;
++  retiredAt: string | null;
++}
++
++/** `UniverseListResponse` (`GET /api/universes`). */
++export interface UniverseList {
++  universes: UniverseSummary[];
++  activeCount: number;
++  retiredCount: number;
++  nextCursor: string | null;
++}
++
++/**
++ * How a universe was created (universe-service `Origin`, DEC-0065). All five
++ * nullable fields are null for `by_hand`; `symbol` is also null for a
++ * `from_filter` origin saved with no search active.
++ */
++export interface UniverseOrigin {
++  kind: "by_hand" | "from_filter";
++  setId: string | null;
++  classificationDate: string | null;
++  /** Keyed by query-parameter name, as received (`value_percentile_min`; DEC-0144). */
++  thresholds: Record<string, string> | null;
++  hideIncomplete: boolean | null;
++  symbol: string | null;
++}
++
++/**
++ * One member on the universe read. `name` and `factors` are null when the
++ * reader has no row for the member (CAP-002-E1-S6, DEC-0097).
++ */
++export interface UniverseMember {
++  symbol: string;
++  name: string | null;
++  lifecycle: Lifecycle;
++  memberSince: string;
++  factors: Record<FactorName, FactorCell> | null;
++}
++
++/** `UniverseResponse` (`GET`, `POST`, `PATCH /api/universes/...`). */
++export interface UniverseDetail {
++  universeId: string;
++  name: string;
++  lifecycle: Lifecycle;
++  createdAt: string;
++  retiredAt: string | null;
++  memberCount: number;
++  asOf: string;
++  asOfBeforeCreation: boolean;
++  origin: UniverseOrigin;
++  members: UniverseMember[];
++  set: CurrentSet | null;
++}
++
++export type UniverseEventType =
++  | "created"
++  | "renamed"
++  | "member_added"
++  | "member_removed"
++  | "retired";
++
++export interface UniverseEvent {
++  eventId: number;
++  eventType: UniverseEventType;
++  name: string | null;
++  symbol: string | null;
++  recordedAt: string;
++  recordedOn: string;
++  /** Passed through as received; no key is renamed (DEC-0144). */
++  filterProvenance: unknown;
++}
++
++/** `UniverseEventsResponse` (`GET /api/universes/{id}/events`). */
++export interface UniverseEventPage {
++  events: UniverseEvent[];
++  nextCursor: string | null;
++}
++
++/** `AddMembersResponse`. */
++export interface AddMembersResult {
++  added: string[];
++  alreadyMember: string[];
++}
++
++/** `RemoveMemberResponse`. */
++export interface RemoveMemberResult {
++  removedAt: string;
++}
++
++/** `RetireUniverseResponse`. */
++export interface RetireUniverseResult {
++  lifecycle: "retired";
++  retiredAt: string;
++}
++
++/** The twelve optional bounds, as decimal strings (classification-api section 2.4). */
++export interface ThresholdBounds {
++  valuePercentileMin?: string;
++  valuePercentileMax?: string;
++  valueScoreMin?: string;
++  valueScoreMax?: string;
++  growthPercentileMin?: string;
++  growthPercentileMax?: string;
++  growthScoreMin?: string;
++  growthScoreMax?: string;
++  momentumPercentileMin?: string;
++  momentumPercentileMax?: string;
++  momentumScoreMin?: string;
++  momentumScoreMax?: string;
++}
++
++/**
++ * The filter a universe is saved from: the bounds, `hideIncomplete` and the
++ * Find a stock prefix, `null` when no search is active (DEC-0076, DEC-0085).
++ */
++export interface Thresholds extends ThresholdBounds {
++  hideIncomplete: boolean;
++  symbol: string | null;
++}
++
++export type ClassificationSort = "symbol" | `${FactorName}_score` | `${FactorName}_percentile`;
++
++/**
++ * `GET /api/classifications` parameters. Every field is optional and only
++ * present ones are sent (classification-api section 2.4; owner-directed fix
++ * E4-F11), so it does not extend `Thresholds`.
++ */
++export interface ClassificationListParams extends ThresholdBounds {
++  universeId?: string;
++  /** Compare: 2 to 6 symbols. */
++  symbols?: string[];
++  sort?: ClassificationSort;
++  order?: "asc" | "desc";
++  hideIncomplete?: boolean;
++  symbol?: string;
++  limit?: number;
++  cursor?: string;
++}
++
++/** `POST /api/universes` by hand. */
++export interface CreateUniverseByHand {
++  name: string;
++  symbols: string[];
++}
++
++/** `POST /api/universes` from a result: the filter and the set it was read against. */
++export interface CreateUniverseFromFilter {
++  name: string;
++  filter: Thresholds;
++  setId: string;
++}
++
++export type CreateUniverseRequest = CreateUniverseByHand | CreateUniverseFromFilter;
++
++/** The client's own identifier for each call: kebab-case of the function name (DEC-0143). */
++export type ClassificationOperation =
++  | "list-universes"
++  | "create-universe"
++  | "get-universe"
++  | "rename-universe"
++  | "retire-universe"
++  | "list-universe-events"
++  | "add-universe-members"
++  | "remove-universe-member"
++  | "list-classifications"
++  | "get-classification-summary"
++  | "list-classification-sets"
++  | "get-classification-set"
++  | "get-stock-evidence"
++  | "get-stock-history";
++
++/** The four resources of classification-api section 2.5 (DEC-0143, DEC-0149). */
++export type ClassificationResource =
++  | "universe"
++  | "universe-member"
++  | "classification"
++  | "classification-set";
