@@ -1,14 +1,19 @@
 # Interface API access (`web/src/api/`)
 
 `web/src/api/` is the owner interface's typed access to the JSON API. It holds
-two layers:
+two layers and one codec:
 
 - the delivered client, `types.ts` and `client.ts`, for health, instruments,
   settings, acquisition runs and coverage;
 - the classification fetch layer, `classification-types.ts` and
   `classification-client.ts`, for `/api/universes` and `/api/classifications`
   (CAP-002-E4-S1; `component-design-classification-ui.md` sections 2.1 and
-  2.4). No screen, hook or copy imports it yet.
+  2.4). No screen or hook imports it yet;
+- the Research URL codec, `research-query.ts`, between the Research URL query
+  and the list read's parameters (CAP-002-E4-S2;
+  `component-design-classification-ui.md` section 2.4). Only
+  `web/src/screens/research/copy.ts` imports it, for the `ResearchQuery` type;
+  no screen reads the URL through it yet.
 
 Same-origin only: the bundle is served by the API process, so every path is
 relative.
@@ -159,3 +164,74 @@ non-2xx response for that call, and restores the global in `finally` before
 anything is awaited. Concurrent calls each keep their own envelope. This relies
 on `requestJson` calling `fetch` before its first `await`; the restoration and
 concurrency tests in `classification-client.test.ts` fail if it stops doing so.
+
+## Research URL codec (`research-query.ts`)
+
+The Research filter is held in the URL query and nowhere else (DEC-0148).
+`research-query.ts` is a pure, round-trippable codec between
+`URLSearchParams` and a `ResearchQuery`, and the one mapping from that query to
+the list read's parameters and to the filter a universe is saved from. It does
+no I/O.
+
+### `ResearchQuery`
+
+| Field | Meaning |
+|-------|---------|
+| `scope` | `null` for all followed stocks, otherwise a universe id |
+| `sentences` | at most one `ThresholdSentence` per factor: `{measure, direction, value}`, `measure` being `percentile` or `standardisedScore`, `direction` `atLeast` or `atMost`, and `value` the decimal string as given |
+| `hideIncomplete` | hide stocks with an incomplete score |
+| `symbol` | the *Find a stock* prefix, upper-cased, or `null` |
+| `sort` | `{key, order}` or `null` (unsorted, the API's default order). `key` is one of the API's sort allowlist: `symbol`, `{factor}_score`, `{factor}_percentile` |
+
+`DEFAULT_RESEARCH_QUERY` is all followed stocks, no sentence, nothing hidden,
+no search and unsorted.
+
+### URL keys
+
+| Key | Written when | Read as |
+|-----|--------------|---------|
+| `scope` | `scope` is not `null` | a universe id; absent or `all` is all followed stocks |
+| `{factor}.measure`, `{factor}.direction`, `{factor}.value` | the factor has a sentence | a sentence only when all three are present and valid |
+| `hide_incomplete` | `hideIncomplete` is true, as `true` | true only for the value `true` |
+| `symbol` | `symbol` is not `null` | upper-cased, kept only if it matches `^[A-Z][A-Z0-9.-]{0,15}$` |
+| `sort` | `sort` is not `null` | kept only if it is on the allowlist |
+| `order` | the sort is descending, as `desc` | `desc`, otherwise ascending |
+
+No default is ever written, so `encodeResearchQuery(DEFAULT_RESEARCH_QUERY)`
+is the empty query.
+
+Decoding (`decodeResearchQuery(params)`):
+
+- reads only the keys above and ignores every other key;
+- reads a repeated key at its first value;
+- drops an invalid key, never repairing it, so nothing invalid is sent. A
+  sentence's `value` must be a plain decimal (`^[+-]?\d+(\.\d+)?$`). A
+  percentile must also lie in 0 to 100 inclusive, compared on the decimal
+  string with `BigInt`, never through a float. So `100.00000000000000001` and
+  `-0.5` are dropped, and `100.0000000000`, `-0.00` and `+100` are kept. A
+  standardised score may be any plain decimal.
+
+Encoding:
+
+- `applyResearchQuery(params, query)` returns a copy of `params` with the
+  codec's keys deleted and rewritten from `query`, keeping every other key;
+- `encodeResearchQuery(query)` applies the query to an empty query.
+
+### Mapping to the API
+
+Each sentence becomes exactly one of the twelve bounds the list read accepts.
+`sentenceToBound(factor, sentence)` returns that bound's `BoundKey` and the
+sentence's value:
+
+| Measure | `atLeast` | `atMost` |
+|---------|-----------|----------|
+| `percentile` | `{factor}PercentileMin` | `{factor}PercentileMax` |
+| `standardisedScore` | `{factor}ScoreMin` | `{factor}ScoreMax` |
+
+- `toThresholds(query)` is the filter a universe is saved from: the bounds
+  set, `hideIncomplete` and `symbol` (`null` with no search), never the scope
+  or the sort (DEC-0085).
+- `toListParams(query, paging?)` is the `GET /api/classifications`
+  parameters: the same bounds, `hideIncomplete: true` and `symbol` only when
+  set, `universeId` from a non-null scope, `sort` and `order` from a non-null
+  sort, and `limit` and `cursor` when given.
