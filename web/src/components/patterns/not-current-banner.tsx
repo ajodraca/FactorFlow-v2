@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import type { CurrentSet, LaterSet } from "../../api/classification-types";
 import { SCORE_SET } from "../../screens/research/copy";
 import { formatTimestamp } from "../../screens/research/format";
+import { StatusBadge } from "./status-badge";
 
 /**
  * The not-current banner every scored CAP-002 surface shows above its scores
@@ -17,34 +18,6 @@ import { formatTimestamp } from "../../screens/research/format";
  * the scheduler does not retry a failed set, so nothing is offered to retry
  * (STD-UI-2).
  */
-
-const BADGE = "inline-flex w-fit items-center gap-1 rounded px-2 py-1 text-xs";
-
-function Shape({ children }: { children: JSX.Element }): JSX.Element {
-  return (
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
-      {children}
-    </svg>
-  );
-}
-
-/** A warning triangle: the badge shape of the warning tier (STD-UI-8). */
-function WarningShape(): JSX.Element {
-  return (
-    <Shape>
-      <path d="M6 1 11 11H1Z" fill="currentColor" />
-    </Shape>
-  );
-}
-
-/** A square: the badge shape of the critical tier (UX design 1.2, Accessibility). */
-function CriticalShape(): JSX.Element {
-  return (
-    <Shape>
-      <rect x="1.5" y="1.5" width="9" height="9" fill="currentColor" />
-    </Shape>
-  );
-}
 
 /** The sentence under the badge, from the shipped catalogue (CAP-002-E4-S2). */
 function bannerBody(set: CurrentSet, later: LaterSet): string {
@@ -82,21 +55,13 @@ export function NotCurrentBanner({ set, later }: NotCurrentBannerProps): JSX.Ele
       className="flex flex-col gap-2 rounded border border-border bg-card p-4 text-base text-card-foreground"
     >
       {building ? (
-        <span
-          data-variant="status-warning"
-          className={`${BADGE} bg-status-warning-muted text-status-warning`}
-        >
-          <WarningShape />
+        <StatusBadge tier="warning" className="w-fit">
           {SCORE_SET.notReflecting}
-        </span>
+        </StatusBadge>
       ) : (
-        <span
-          data-variant="status-critical"
-          className={`${BADGE} bg-status-critical-muted text-status-critical`}
-        >
-          <CriticalShape />
+        <StatusBadge tier="critical" className="w-fit">
           {SCORE_SET.scoreUpdateFailed}
-        </span>
+        </StatusBadge>
       )}
       <p>{bannerBody(set, later)}</p>
     </div>

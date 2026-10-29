@@ -71,6 +71,7 @@ function summary(current: CurrentSet | null, later: LaterSet | null): Classifica
   };
 }
 
+const A_DONE = summary(SET_A, null);
 const A_BUILDING = summary(SET_A, { ...BUILDING, setId: "B" });
 const B_DONE = summary(SET_B, null);
 const C_DONE = summary(SET_C, null);
@@ -263,11 +264,121 @@ describe("TC-COMP-184: a never-populated store polls from first load (DAC-E4-S4-
 
     healthMock.mockReturnValue(health("succeeded"));
     hook.rerender({ callback: hook.onNewSet });
+    // Exactly one further read follows the terminal report (T006; DEC-0233), then the stop.
     await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(4);
+    await tick(60 * SECOND);
+    expect(readMock).toHaveBeenCalledTimes(4);
+  });
+});
+
+describe("classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233)", () => {
+  it("reads once more after the terminal report, sees the building set, keeps polling, and hands the completion over once", async () => {
+    healthMock.mockReturnValue(health("running"));
+    readMock.mockResolvedValue(A_DONE);
+    const hook = await mount();
+    await tick(2 * POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(3);
+    expect(hook.result.current.summary?.later).toBeNull();
+
+    // The scheduler claims the set and the shell's health reports the download
+    // terminal before any read has seen the claim.
+    readMock.mockResolvedValue(A_BUILDING);
+    healthMock.mockReturnValue(health("succeeded"));
+    hook.rerender({ callback: hook.onNewSet });
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(4);
+    // The banner's input: the previous set with the building later block.
+    expect(hook.result.current.summary).toBe(A_BUILDING);
+    expect(hook.result.current.summary?.set?.setId).toBe("A");
+    expect(hook.result.current.summary?.later?.state).toBe("building");
+    expect(hook.onNewSet).not.toHaveBeenCalled();
+    expect(hook.result.current.announcement).toBeNull();
+
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(5);
+
+    readMock.mockResolvedValue(B_DONE);
+    await tick(POLL_INTERVAL_MS);
+    expect(hook.onNewSet).toHaveBeenCalledTimes(1);
+    expect(hook.onNewSet).toHaveBeenCalledWith(B_DONE);
+    expect(hook.result.current.announcement).toBe(
+      SCORE_SET.scoresUpdatedTo(
+        formatTimestamp(SET_B.endedAt),
+        formatTimestamp(SET_B.runStartedAt),
+      ),
+    );
+    expect(hook.result.current.summary).toBe(B_DONE);
+
     const settled = readMock.mock.calls.length;
-    expect(settled).toBeLessThanOrEqual(4);
     await tick(60 * SECOND);
     expect(readMock).toHaveBeenCalledTimes(settled);
+    expect(hook.onNewSet).toHaveBeenCalledTimes(1);
+  });
+
+  it("carries a never-populated store through the same handoff to its first set", async () => {
+    healthMock.mockReturnValue(health("running"));
+    readMock.mockResolvedValue(NEVER_NOTHING);
+    const hook = await mount();
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(2);
+
+    readMock.mockResolvedValue(NEVER_BUILDING);
+    healthMock.mockReturnValue(health("succeeded"));
+    hook.rerender({ callback: hook.onNewSet });
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(3);
+    expect(hook.result.current.summary).toBe(NEVER_BUILDING);
+    expect(hook.result.current.summary?.set).toBeNull();
+    expect(hook.result.current.summary?.later?.state).toBe("building");
+    expect(hook.onNewSet).not.toHaveBeenCalled();
+
+    const firstSet = summary(SET_A, null);
+    readMock.mockResolvedValue(firstSet);
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(4);
+    expect(hook.onNewSet).toHaveBeenCalledTimes(1);
+    expect(hook.onNewSet).toHaveBeenCalledWith(firstSet);
+    expect(hook.result.current.summary).toBe(firstSet);
+
+    await tick(60 * SECOND);
+    expect(readMock).toHaveBeenCalledTimes(4);
+    expect(hook.onNewSet).toHaveBeenCalledTimes(1);
+  });
+
+  it("still owes the further read when the read in flight at the terminal report was issued while the download ran", async () => {
+    healthMock.mockReturnValue(health("running"));
+    let resolveSlow: (value: ClassificationSummary) => void = () => undefined;
+    readMock.mockResolvedValueOnce(A_DONE).mockReturnValueOnce(
+      new Promise<ClassificationSummary>((resolve) => {
+        resolveSlow = resolve;
+      }),
+    );
+    const hook = await mount();
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(2);
+
+    // The download ends while that read is still in flight.
+    healthMock.mockReturnValue(health("succeeded"));
+    hook.rerender({ callback: hook.onNewSet });
+    readMock.mockResolvedValue(A_DONE);
+    await act(async () => {
+      resolveSlow(A_DONE);
+    });
+    expect(readMock).toHaveBeenCalledTimes(2);
+
+    // A read issued while the download ran cannot have seen its end: one more follows.
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(3);
+    await tick(60 * SECOND);
+    expect(readMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("owes no further read when health was terminal before the mount read", async () => {
+    readMock.mockResolvedValue(A_DONE);
+    await mount();
+    await tick(60 * SECOND);
+    expect(readMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -307,6 +418,20 @@ describe("hook behaviour: cadence, stop, checkedAt, failure, unmount, StrictMode
     },
   );
 
+  it("(b) resumes polling when a new download starts after the hook has stopped", async () => {
+    readMock.mockResolvedValue(B_DONE);
+    const hook = await mount();
+    await tick(60 * SECOND);
+    expect(readMock).toHaveBeenCalledTimes(1);
+
+    healthMock.mockReturnValue(health("requested"));
+    hook.rerender({ callback: hook.onNewSet });
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(2);
+    await tick(POLL_INTERVAL_MS);
+    expect(readMock).toHaveBeenCalledTimes(3);
+  });
+
   it("(c) returns checkedAt as null, then the ISO instant of each successful read, advancing", async () => {
     let resolveFirst: (value: ClassificationSummary) => void = () => undefined;
     readMock.mockReturnValueOnce(
@@ -326,7 +451,10 @@ describe("hook behaviour: cadence, stop, checkedAt, failure, unmount, StrictMode
     const first = result.current.checkedAt;
     expect(typeof first).toBe("string");
     expect(first).toMatch(ISO_INSTANT);
-    expect(first).toBe("2026-10-16T22:50:00.000Z");
+    // Bounded, not exact: shouldAdvanceTime moves the fake clock with real elapsed time.
+    const start = Date.parse("2026-10-16T22:50:00Z");
+    expect(Date.parse(first as string)).toBeGreaterThanOrEqual(start);
+    expect(Date.parse(first as string)).toBeLessThan(start + SECOND);
 
     await tick(POLL_INTERVAL_MS);
     const second = result.current.checkedAt;

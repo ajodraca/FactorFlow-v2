@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import type { CurrentSet, LaterSet } from "../../api/classification-types";
 import { SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
+import { formatTimestamp } from "../../screens/research/format";
 import { AsOfLine, type AsOfLineProps } from "./as-of-line";
 import { NotCurrentBanner } from "./not-current-banner";
 
@@ -78,6 +79,15 @@ function badges(container: HTMLElement): HTMLElement[] {
 
 function badgeByVariant(container: HTMLElement, variant: string): HTMLElement | null {
   return badges(container).find((b) => b.dataset.variant === variant) ?? null;
+}
+
+/** The one `min-h-*` class an element carries: the height the line and its skeleton share. */
+function heightToken(element: Element): string {
+  const tokens = element.className.match(/\bmin-h-\S+/g) ?? [];
+  if (tokens.length !== 1) {
+    throw new Error(`expected one min-h class, found ${tokens.join(" ") || "none"}`);
+  }
+  return tokens[0];
 }
 
 describe("TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3)", () => {
@@ -203,8 +213,12 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
     ).toHaveLength(2);
     expect(updating).toHaveClass("bg-status-active-muted");
     expect(updating).toHaveClass("text-status-active");
+    // The building set's start time is the badge's tooltip (UX design 1.2).
+    expect(updating).toHaveAttribute("title", formatTimestamp(BUILDING.startedAt));
+    expect(updating).toHaveAttribute("title", "2026-10-16 17:40 CDT");
     expect(container).toHaveTextContent(SCORE_SET.checked("2026-10-15 17:52:10 CDT"));
     expect(container).toHaveTextContent("checked 2026-10-15 17:52:10 CDT");
+    expect(screen.getByText("checked 2026-10-15 17:52:10 CDT")).toHaveClass("font-numeric");
     // The 10-second tick is not announced.
     expect(screen.getByRole("status").textContent).not.toContain("checked");
   });
@@ -308,6 +322,20 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
     expect(outside).toMatch(/Try again$/);
   });
 
+  it("separates the completion announcement from the text before it, with and without a sort clause", () => {
+    const announcement = SCORE_SET.scoresUpdatedTo("2026-10-16 17:48 CDT", "2026-10-16 17:30 CDT");
+    const sorted = renderLine({ announcement, sortLabel: "value" });
+    expect(visibleText(sorted.container)).toBe(
+      `Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value ${announcement}`,
+    );
+    sorted.unmount();
+
+    const building = renderLine({ announcement, later: BUILDING, checkedAt: CHECKED_AT });
+    expect(visibleText(building.container)).toBe(
+      `Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete checked 2026-10-15 17:52:10 CDT ${announcement} Updating`,
+    );
+  });
+
   it("reads Updating then the failure text when nothing else is in the region", () => {
     renderLine({ later: BUILDING, pollFailed: true });
     const status = screen.getByRole("status");
@@ -320,11 +348,17 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
     expect(screen.queryByRole("status")).toBeNull();
   });
 
-  it("renders a fixed-height skeleton and no live region while loading with no set", () => {
+  it("renders the skeleton at the line's own height, and no live region, while loading with no set", () => {
+    const line = renderLine();
+    const lineHeight = heightToken(screen.getByTestId("as-of-line"));
+    line.unmount();
+
     const { container } = renderLine({ set: null, loading: true });
     const skeleton = screen.getByTestId("as-of-line-skeleton");
     expect(skeleton).toHaveAttribute("aria-hidden", "true");
-    expect(skeleton.className).toMatch(/\bh-\d\b/);
+    // One class fixes both heights, so the table beneath does not shift (UX design 1.2, Loading).
+    expect(heightToken(skeleton)).toBe(lineHeight);
+    expect(skeleton.className).not.toMatch(/(^|\s)h-\d/);
     expect(container.textContent).toBe("");
     expect(screen.queryByRole("status")).toBeNull();
     expect(screen.queryByRole("link")).toBeNull();
@@ -342,5 +376,7 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
     expect(line).toHaveClass("text-xs");
     expect(line).toHaveClass("text-muted-foreground");
     expect(screen.getByRole("link")).toHaveClass("font-numeric");
+    // Every time on the line is in the numeric face (UX design 1.2, Token Usage).
+    expect(screen.getByText("2026-10-15 17:46 CDT")).toHaveClass("font-numeric");
   });
 });

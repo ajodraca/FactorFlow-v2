@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { CurrentSet, LaterSet, RunOutcome } from "../../api/classification-types";
 import { RESULTS, SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
 import { formatTimestamp } from "../../screens/research/format";
+import { StatusBadge, type StatusTier } from "./status-badge";
 
 /**
  * The as-of line under a scored surface's title (UX design 1.2; classification-ui
@@ -12,7 +13,9 @@ import { formatTimestamp } from "../../screens/research/format";
  * outcome badge, the optional *sorted by* clause, *Updating* with *checked
  * {time}* while a later set builds (STD-UI-25), **Earlier sets…** when the host
  * supplies the dialog (DEC-0154) and, after a failed poll, *Could not check for
- * newer scores.* with **Try again** (DEC-0155).
+ * newer scores.* with **Try again** (DEC-0155). Every time is in the numeric
+ * face, and the *Updating* badge carries the building set's start time as its
+ * tooltip (UX design 1.2, Token Usage and Section 1.2).
  *
  * The line holds exactly one polite live region, an `output`, which carries
  * only what should be announced: the completion announcement, *Updating*, the
@@ -40,59 +43,32 @@ export interface AsOfLineProps {
   loading?: boolean;
 }
 
-type Tier = "good" | "warning" | "active";
-
-const BADGE = "inline-flex items-center gap-1 rounded px-2 py-1 text-xs";
-
-const TIER_CLASSES: Record<Tier, string> = {
-  good: "bg-status-good-muted text-status-good",
-  warning: "bg-status-warning-muted text-status-warning",
-  active: "bg-status-active-muted text-status-active",
-};
-
 /**
- * One shape per tier so the badges stay distinct in greyscale (STD-UI-8; UX
- * design 1.2, Accessibility): good a filled circle, warning a triangle, active
- * a ringed dot.
+ * The one height the line and its skeleton share, so the skeleton stands in at
+ * the line's final height and the table beneath does not shift (UX design 1.2,
+ * Loading; DEC-0154).
  */
-const TIER_SHAPES: Record<Tier, JSX.Element> = {
-  good: <circle cx="6" cy="6" r="5" fill="currentColor" />,
-  warning: <path d="M6 1 11 11H1Z" fill="currentColor" />,
-  active: (
-    <>
-      <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="6" cy="6" r="2" fill="currentColor" />
-    </>
-  ),
-};
+const LINE_HEIGHT = "min-h-7";
 
-function Badge({ tier, children }: { tier: Tier; children: string }): JSX.Element {
-  return (
-    <span data-variant={`status-${tier}`} className={`${BADGE} ${TIER_CLASSES[tier]}`}>
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
-        {TIER_SHAPES[tier]}
-      </svg>
-      {children}
-    </span>
-  );
-}
-
-const OUTCOME: Record<RunOutcome, { tier: Tier; word: string }> = {
+const OUTCOME: Record<RunOutcome, { tier: StatusTier; word: string }> = {
   succeeded: { tier: "good", word: SCORE_SET.complete },
   partial: { tier: "warning", word: SCORE_SET.partial },
 };
 
 /** *Scores from {time} · from the download started {time}*, the start time linked to the run. */
 function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
+  const produced = formatTimestamp(set.endedAt);
+  const scores = SCORE_SET.scoresFrom(produced);
   const started = formatTimestamp(set.runStartedAt);
   const clause = SCORE_SET.fromTheDownloadStarted(started);
-  // The clause's words precede its time, which is the link.
-  const words = clause.slice(0, clause.length - started.length);
+  // Each builder's words precede its time: the produced time takes the numeric
+  // face, the start time is the link.
   return (
     <>
-      {SCORE_SET.scoresFrom(formatTimestamp(set.endedAt))}
+      {scores.slice(0, scores.length - produced.length)}
+      <span className="font-numeric">{produced}</span>
       {SCORE_SET.separator}
-      {words}
+      {clause.slice(0, clause.length - started.length)}
       <Link
         to={SHELL_ROUTES.download(set.runId)}
         aria-label={SCORE_SET.openDownload(started)}
@@ -106,12 +82,13 @@ function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
 
 function LiveRegion({
   announcement,
-  building,
+  buildingSince,
   pollFailed,
   onOpenEarlierSets,
 }: {
   announcement: string | null;
-  building: boolean;
+  /** The building set's formatted start time, or `null` when no set builds. */
+  buildingSince: string | null;
   pollFailed: boolean;
   onOpenEarlierSets?: () => void;
 }): JSX.Element {
@@ -120,11 +97,18 @@ function LiveRegion({
     // unreachable state relies on; the explicit polite and non-atomic
     // attributes are what this region needs beyond the default.
     <output aria-live="polite" aria-atomic="false" data-testid="as-of-line-status">
-      {announcement ? <span>{announcement}</span> : null}
-      {building ? (
+      {announcement ? (
         <>
           {" "}
-          <Badge tier="active">{SCORE_SET.updating}</Badge>
+          <span>{announcement}</span>
+        </>
+      ) : null}
+      {buildingSince !== null ? (
+        <>
+          {" "}
+          <StatusBadge tier="active" title={buildingSince}>
+            {SCORE_SET.updating}
+          </StatusBadge>
         </>
       ) : null}
       {onOpenEarlierSets ? (
@@ -171,15 +155,16 @@ export function AsOfLine({
       <div
         data-testid="as-of-line-skeleton"
         aria-hidden="true"
-        className="h-7 w-full animate-pulse rounded bg-secondary"
+        className={`${LINE_HEIGHT} w-full animate-pulse rounded bg-secondary`}
       />
     ) : null;
   }
   const building = later?.state === "building";
+  const buildingSince = later?.state === "building" ? formatTimestamp(later.startedAt) : null;
   const outcome = OUTCOME[set.runOutcome];
   return (
-    <p data-testid="as-of-line" className="text-xs text-muted-foreground">
-      <SetSentence set={set} /> <Badge tier={outcome.tier}>{outcome.word}</Badge>
+    <p data-testid="as-of-line" className={`${LINE_HEIGHT} text-xs text-muted-foreground`}>
+      <SetSentence set={set} /> <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
       {sortLabel === undefined ? null : `${SCORE_SET.separator}${SCORE_SET.sortedBy(sortLabel)}`}
       {building && checkedAt !== null ? (
         <>
@@ -191,7 +176,7 @@ export function AsOfLine({
       ) : null}
       <LiveRegion
         announcement={announcement}
-        building={building}
+        buildingSince={buildingSince}
         pollFailed={pollFailed}
         onOpenEarlierSets={onOpenEarlierSets}
       />

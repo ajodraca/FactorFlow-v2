@@ -13,6 +13,10 @@
 # Decisions applied: DEC-0153 (hook interface and new-set trigger), DEC-0154 (banner and line props), DEC-0155
 # (a failed poll stops polling until Try again), all owner-upheld; DEC-0232 (PROVISIONAL, agent, this run): the
 # banner's clause for a failed set that recorded no reason, and the start time named when its end time is null.
+# Rework: rework-1 is the review-rework cycle against CAP-002-E4-S4-implementation-review-v1.md (CHANGES-REQUIRED,
+# IR-001 to IR-008), staged on top of the stage commit 58fc558 and the review commit 00c22fd; its reviewed_patch is
+# HEAD..index. DEC-0233 (PROVISIONAL, agent, this run): exactly one further summary read after the shell's health
+# reports the download terminal, never an open-ended poll for the ended download's set.
 
 cycles:
   - id: cycle-1
@@ -190,3 +194,93 @@ cycles:
             mountedRef.current = true synchronously after the first commit, before the mount read's promise can
             resolve, and every reader of the ref runs after an await; so the initial value is never observed and
             no sequence of reads, ticks or unmounts distinguishes the two.
+
+  - id: rework-1
+    tasks: [T002, T006, T007, T008, T009, T011, T012, T013]
+    description: >
+      Review rework against CAP-002-E4-S4-implementation-review-v1.md (CHANGES-REQUIRED), one cycle for its eight
+      findings. IR-001 (HIGH): the hook now keeps its 10-second cadence while its latest successful read was
+      issued before the shell's health reported the download terminal, so exactly one further read follows the
+      terminal report and that read's later block then governs (classification-ui 2.6 handoff; T006 case 3 now
+      pins 4 reads, not 3 or 4); the choice between one further read and polling until the ended download's set
+      is seen was decided from the design and recorded as DEC-0233 (PROVISIONAL, agent). New tests drive the 2.6
+      handoff for a populated and a never-populated store (building seen on the further read, polling kept, then
+      exactly one onNewSet and the stop), the read in flight at the terminal report (issued while running, so one
+      more follows), terminal health before the mount read (none owed) and a download starting after the hook
+      stopped (polling resumes). IR-002 (HIGH): a banner test renders a failed later with endedAt null and asserts
+      the sentence names formatTimestamp(later.startedAt) and not the set's end time; both reviewer survivors are
+      killed. IR-003 (HIGH): one LINE_HEIGHT class (min-h-7) sits on both the line and its skeleton, the test
+      asserts the skeleton carries the line's own min-h token and no bare h-N, and the checked {time} span is
+      asserted font-numeric; both reviewer survivors (the skeleton one restated for the new line) are killed.
+      IR-004 (MEDIUM): the announcement gets the leading space the region's other children have, and a test pins
+      the full visible line text with and without a sort clause. IR-005 (MEDIUM):
+      web/src/components/patterns/status-badge.tsx (new) carries the one badge wrapper and the four CAP-002 shapes
+      and imports the delivered TIER_CLASSES from web/src/screens/runs/outcome-badge.tsx; the banner and the line
+      render through it with their class sets and shapes unchanged (the banner's w-fit is now asserted). IR-006
+      (LOW): the Updating badge carries the building set's start time as its title tooltip and the Scores from
+      time is in the numeric face, both asserted; the banner's body stays one text paragraph as T007 pins, so its
+      times are not in the numeric face, recorded as a plan gap in the tasks file's Other Notes. IR-007 (LOW): the
+      exact checkedAt literal is replaced by a one-second bound. IR-008 (LOW, optional): downloadRunning,
+      announcementFor, useLatest and usePollTimer are extracted from the hook; the hook and the line still exceed
+      SA-FUNC-003's 30 lines, as the delivered useHealthPolling does.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-rework-1.log
+    red_log_sha256: a0669027300db2a5603285f5936854af3a47cb2d6880520384a2e102b96536f2
+    red_evidence: >
+      With the tests written against the reviewed code (58fc558 plus the review commit 00c22fd), the three
+      focused files ran 8 failed, 63 passed: case 3 and the three handoff tests saw 3 reads where 4 were owed (2
+      where 3 in the never-populated and in-flight cases); the as-of line had no min-h class, no Updating tooltip
+      and no numeric Scores from time, and its announcement ran into the text before it. The IR-002 banner test
+      passed on the reviewed code by construction: the DEC-0232 fallback was implemented and untested, and its
+      RED is the two reviewer mutants it now kills (TEST-TDD-006).
+    green_evidence: >
+      The four focused files 370 passed (green-rework-1.log, captured after the mutation step added the w-fit
+      and resume-polling assertions); tsc --noEmit, biome lint and biome format clean; full web suite 845 passed
+      in 48 files (full-suite-rework-1.log); npm run build clean and the built CSS carries min-h-7, w-fit,
+      font-numeric and the four status-*-muted grounds. Mutation: 84 mutants (9 generated over the staged lines,
+      25 hand-written for the rework, among them the review's four non-equivalent survivors, and the 50 earlier
+      hand-written mutants whose target lines still exist); the first run left three survivors, one of them real
+      (dropping the download's non-terminal state from the continuation condition, which the owed read masked
+      while a download ran): a test now mounts with terminal health, rerenders it as requested and asserts
+      polling resumes, and the rerun left only the two equivalents disposed below. Reviews: code review APPROVED
+      with LOW notes (the hook and the line still exceed SA-FUNC-003; the banner-body half of IR-006 needed a
+      record, now in the plan's Other Notes; a download that starts and ends between two 30-second health polls
+      never shows non-terminal, so a stopped hook issues no further read, a design exposure DEC-0233 does not
+      cover, surfaced for the owner; the height test pins the sharing, not the value, as IR-003 asked); spec
+      drift none, with the same banner-body note.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-rework-1.log
+        sha256: 8fe82ba192a51755868485acb7f7bf995710f6fd33fc33def32c64fd3205eab5
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/full-suite-rework-1.log
+        sha256: 154f30098cf9bb1fab6388ac67758038c0571180e92df06416eb9980083a19a5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5f2e8ef30643fe159063c4c817b913963be539c3f860107707c6300479697034
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/rework-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-rework-1-results.json
+      results_sha256: 8988b047c62bf37e7beba63e8fe6e6dd5adb564d4384755e8c34990898190a20
+      generated: 84
+      killed: 82
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.976
+      survivors:
+        - id: web/src/screens/research/use-score-set-poll.ts:98:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The mutant initialises mountedRef to false instead of true, as cycle-3's survivor did. The mount
+            effect assigns mountedRef.current = true synchronously after the first commit, before the mount
+            read's promise can resolve, and every reader of the ref runs after an await; so the initial value is
+            never observed and no sequence of reads, ticks or unmounts distinguishes the two.
+        - id: manual:rework-1:line-height-value-changed-on-both
+          disposition: equivalent
+          reason: >
+            The mutant changes LINE_HEIGHT from min-h-7 to min-h-1, which moves the line and its skeleton
+            together. The contract (UX design 1.2 Loading; DEC-0154) is that the skeleton stands at the line's
+            final height so the table beneath does not shift, which holds for any one shared value, and no
+            artifact fixes the value; IR-003 asked for the sharing to be pinned, and the test pins exactly that.

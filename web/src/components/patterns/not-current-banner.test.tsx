@@ -140,6 +140,18 @@ describe("TC-COMP-175: a failed attempt shows the recorded reason and nothing to
     );
     expect(container).not.toHaveTextContent(/null|undefined/);
   });
+
+  // Implements TC-COMP-175
+  it("names the attempt's start time when a failed set recorded no end time (DEC-0232)", () => {
+    const { container } = render(
+      <NotCurrentBanner set={SET} later={{ ...FAILED, endedAt: null }} />,
+    );
+    expect(container).toHaveTextContent(
+      `Score update failed ${formatTimestamp(FAILED.startedAt)}: Factor engine could not read prices.`,
+    );
+    expect(container).toHaveTextContent("Score update failed 2026-10-16 17:40 CDT:");
+    expect(container).not.toHaveTextContent(`Score update failed ${PRODUCED}`);
+  });
 });
 
 describe("banner details: reads set and later only, a card with the badge first, no live region (AC-20, DAC-E4-2, DAC-E4-4)", () => {
@@ -194,6 +206,8 @@ describe("banner details: reads set and later only, a card with the badge first,
       const mark = badge(container);
       expect(mark).toHaveClass(ground);
       expect(mark).toHaveClass(ink);
+      // The badge keeps its own width inside the card's column.
+      expect(mark).toHaveClass("w-fit");
       const words = container.querySelector("p") as HTMLElement;
       expect(words.className).not.toMatch(/status-/);
     },
