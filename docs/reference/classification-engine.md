@@ -2,13 +2,19 @@
 
 `src/factorflow/classification/engine.py` is the factor engine's build
 transaction (CAP-002-E2-S2; `component-design-factor-engine.md` sections 2.1
-to 2.4). With it come `constants.py`, `line_items.py` and three statements in
+to 2.4). With it come `constants.py`, `line_items.py` and five statements in
 `classification/sql/`: `set_context.sql`, `complete_set.sql` and
-`fail_set.sql`. `build` either commits a whole classification set or records
-the set `failed` with its reason, so no reader ever sees half a set.
+`fail_set.sql` for the transaction, and `peer_sets.sql` and `classify.sql`
+for the classification stage (CAP-002-E2-S5). `build` either commits a whole
+classification set or records the set `failed` with its reason, so no reader
+ever sees half a set.
 
-No factor is computed yet. The stage list is empty, so a successful build
-completes a set with no factor rows. No production code calls `build` yet.
+One stage is registered. It forms each factor's peer set from the set's
+`factor_input` rows and writes every instrument's classification on each
+factor (see [Classification](#classification)). No stage derives an input
+yet, so a build finds no `factor_input` row for its set: every factor has 0
+qualifying stocks, and every active instrument is `not_classified` with
+`not_enough_stocks`. No production code calls `build` yet.
 
 ## `build`
 
@@ -53,8 +59,8 @@ Otherwise it runs one transaction, in this order:
 
 On success `build` returns a `BuildResult` with `state="complete"`,
 `failure_reason=None`, `active_instruments` equal to the active roster's size
-and `qualified_counts` mapping each factor to its count. The counts are `{}`
-while no stage writes `classification_set_factor`.
+and `qualified_counts` mapping each factor to its count. The classification
+stage writes a count for each of the three factors, 0 included.
 
 ### Failure
 
@@ -109,13 +115,125 @@ every later statement.
 
 A stage is `Callable[[psycopg.Connection, BuildContext], None]`. It runs
 inside the build transaction and writes through the connection it is given.
-`_STAGES` is empty: this story registers no stage. The docstring under
-`_STAGES` records the order later stages must be registered in (DEC-0121,
-amending DEC-0112). Tests replace the list with `monkeypatch`.
+`_STAGES` holds one stage, `_classification_stage`, appended by the last
+statement of the module. The docstring under `_STAGES` records the order later
+stages must be registered in (DEC-0121, amending DEC-0112). Tests replace the
+list with `monkeypatch`.
+
+## Classification
+
+`_classification_stage` classifies every instrument on each factor
+(CAP-002-E2-S5; `component-design-factor-engine.md` section 2.5). It runs two
+statements on one cursor:
+
+1. `peer_sets.sql`, once, writes one `classification_set_factor` row per
+   factor.
+2. `classify.sql`, once per factor in `FACTORS` order (`value`, `growth`,
+   `momentum`), writes that factor's `factor_classification` rows.
+
+The stage binds the set's `set_id`, `active_ids` and `retired_ids`. It reads
+`FACTORS`, `INPUT_NAMES`, `INPUT_LABELS` and `MIN_PEER_SET_SIZE` from
+`constants.py` when it runs, not at import, so a test can patch the floor.
+Both statements read the committed `factor_input` rows of the build's own set,
+inside the build transaction (DEC-0119). Neither reads a universe table, so a
+stock's score and percentile on a factor are the same whatever universes it
+belongs to (AC-8). Neither reads the `inputs` temporary table.
+
+### Stage order
+
+`_STAGES.append(_classification_stage)` is the last statement of `engine.py`,
+and a stage that writes inputs is registered above it (DEC-0121). Peer sets
+are formed from those inputs, so they must be written first.
+`tests/unit/test_classification_stage_order.py` fails when
+`_fundamental_inputs_stage` or `_momentum_inputs_stage` is registered after
+`_classification_stage`. When neither is registered, the check passes
+vacuously.
+
+### Peer sets
+
+A stock qualifies on a factor when it is in `active_ids` and the set holds a
+`present` `factor_input` row for every input of the factor: three for `value`
+and `momentum`, two for `growth` (DAC-E2-2). An input with no row counts as
+missing. Rows of another set, and rows of an instrument not on the active
+roster, are ignored. A retired instrument is therefore in no peer set, even
+when it has `present` rows (DAC-E2-8).
+
+`peer_sets.sql` writes a row for every factor, even one no stock qualifies on.
+`qualified_count` is the number of qualifying stocks. `ranked` is true when
+that count is at least `MIN_PEER_SET_SIZE`, 30 (AC-14, DAC-E2-7).
+
+### Scores and percentiles
+
+For a ranked factor, `classify.sql` scores the peer set with PostgreSQL window
+functions, and no numeric library (DEC-0052, DEC-0053):
+
+1. Each input is z-scored over the peer set: the value minus the input's mean,
+   divided by its sample standard deviation (`stddev_samp`).
+2. The composite is the equal-weight mean of the stock's z-scores.
+3. The score is the composite re-standardised the same way, so the peer set's
+   scores have mean 0 and standard deviation 1.
+4. The percentile is `100 * percent_rank()` over the peer set, ordered by
+   score, so it runs from 0 to 100.
+
+A standard deviation of exactly 0 contributes 0 instead of dividing by zero
+(DAC-E2-3). An input with one value across the peer set gives every stock a
+z-score of 0 on it, and a constant composite gives every stock a score of 0.
+There is no tolerance (DEC-0228): when inputs cancel exactly but numeric
+rounding leaves the composite a tiny spread, that spread is re-standardised
+like any other. No winsorisation or other outlier step is applied.
+
+The percentile is ranked on the unrounded score. Migration
+`0006_classifications.sql` stores `score` as `numeric(18, 6)` and `percentile`
+as `numeric(9, 6)`, rounded to six decimal places. Two different scores that
+round to the same stored value therefore keep different percentiles. Equal
+unrounded scores share a percentile. The lowest score has percentile 0, and the highest
+has 100 unless another stock ties it.
+
+### Rows written
+
+`classify.sql` writes one `factor_classification` row for every instrument in
+`active_ids` and `retired_ids`. `score` and `percentile` are set on a
+`classified` row and null on every other.
+
+| Instruments | `status` | `reason_code` | `reason_input` | `reason_detail` |
+|---|---|---|---|---|
+| Peer set of a ranked factor | `classified` | null | null | null |
+| Every other active instrument, factor ranked | `not_classified` | `input_missing`, `input_outdated` or `input_not_computable` | The first input not `present` | The input's label and status, such as `free-cash-flow yield missing` |
+| Every active instrument, factor not ranked | `not_classified` | `not_enough_stocks` | null | `<qualified_count> of 30 stocks qualified`, such as `29 of 30 stocks qualified` |
+| Every retired instrument | `not_classified` | `retired` | null | null |
+
+- The input named is the first, in the factor's `INPUT_NAMES` order, whose row
+  is not `present`. An absent row is named as `missing` (AC-12, DEC-0120).
+  `reason_code` is `input_` followed by that status.
+- `reason_detail` is the input's label from `constants.INPUT_LABELS`, a space,
+  and the status in words: `missing`, `outdated` or `not computable`. The
+  labels reach `classify.sql` as the bound array `input_labels`, parallel to
+  `input_names`, and the statement holds no label text (DEC-0120, DEC-0130).
+- The 30 in the unranked sentence is the bound `min_peer_set_size`, so it is
+  always the floor in force.
+- `restated_possible` is `false` on every row. CAP-002-E2-S6 carries the
+  restatement mark onto the classification (DEC-0121).
+
+### Static checks
+
+`tests/unit/test_classify_sql_static.py` needs no database. It holds the two
+statements to these rules:
+
+- Each reads `factor_input`, and never a universe table or the `inputs`
+  temporary table.
+- Each takes only the stage's `%(name)s` parameters.
+- `peer_sets.sql` writes only `classification_set_factor`, and `classify.sql`
+  only `factor_classification`.
+- `classify.sql` calls `avg`, `stddev_samp` and `percent_rank`, and holds none
+  of the label text.
+
+It also asserts that no module under `classification/` imports `numpy`,
+`scipy`, `pandas` or `statistics`. `INPUT_LABELS` must have exactly one label
+per input name, and the labels must equal the product vocabulary.
 
 ## Statements
 
-All three are loaded once, at import, from `classification/sql/`. They ship as
+All five are loaded once, at import, from `classification/sql/`. They ship as
 package data (`classification/sql/*.sql` under
 `[tool.setuptools.package-data]` in `pyproject.toml`). Every value is bound as
 a `%(name)s` parameter.
@@ -125,11 +243,15 @@ a `%(name)s` parameter.
 | `set_context.sql` | One row: the set's id, run and classification date, the latest trading day, and the active and retired rosters. No row for an unknown set |
 | `complete_set.sql` | `building` to `complete`, with `ended_at = now()`, `latest_trading_day` and `active_instruments`. Guarded by `set_id` and `state = 'building'` |
 | `fail_set.sql` | `building` to `failed`, with `ended_at = now()` and `failure_reason`. Guarded by `set_id` and `state = 'building'` |
+| `peer_sets.sql` | Inserts one `classification_set_factor` row per factor: how many active instruments have every input of the factor `present`, and whether that count reaches the floor |
+| `classify.sql` | Inserts one factor's `factor_classification` rows: the score and percentile of each stock in a ranked factor's peer set, and a `not_classified` row with its reason for every other active or retired instrument |
 
 ## Constants
 
 `constants.py` holds the numbers and names classification is built on. Each
-value cites its source in the code. `engine.py` reads none of them yet.
+value cites its source in the code. `engine.py` reads `FACTORS`,
+`INPUT_NAMES`, `INPUT_LABELS` and `MIN_PEER_SET_SIZE`, in the classification
+stage.
 
 | Name | Value | Source |
 |---|---|---|
@@ -139,6 +261,7 @@ value cites its source in the code. `engine.py` reads none of them yet.
 | `MOMENTUM_WINDOWS_MONTHS` | `(3, 6, 12)` | Capability section 2 |
 | `FACTORS` | `("value", "growth", "momentum")` | Capability section 2 |
 | `INPUT_NAMES` | `value`: `book_to_price`, `earnings_yield`, `fcf_yield`; `growth`: `revenue_growth`, `eps_growth`; `momentum`: `return_3m`, `return_6m`, `return_12m` | Mirrors the `factor_input_name_matches_factor` check in migration `0006_classifications.sql` (DEC-0112) |
+| `INPUT_LABELS` | `book_to_price`: `book-to-price`; `earnings_yield`: `earnings yield`; `fcf_yield`: `free-cash-flow yield`; `revenue_growth`: `revenue growth`; `eps_growth`: `earnings-per-share growth`; `return_3m`: `3-month total return`; `return_6m`: `6-month total return`; `return_12m`: `12-month total return` | Factor-engine section 10, reader design 2.6, UX brief section 2 item 9 (DEC-0120) |
 
 ## Line items
 
