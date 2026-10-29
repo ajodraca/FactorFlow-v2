@@ -1,0 +1,278 @@
+diff --git a/web/src/api/research-query.test.ts b/web/src/api/research-query.test.ts
+index 05396fb..cee18b0 100644
+--- a/web/src/api/research-query.test.ts
++++ b/web/src/api/research-query.test.ts
+@@ -290,6 +290,11 @@ describe("research-query codec edge cases", () => {
+     "value.measure=percentile&value.direction=atLeast&value.value=-1",
+     "value.measure=percentile&value.direction=atLeast&value.value=101",
+     "value.measure=percentile&value.direction=atLeast&value.value=100.01",
++    // Above 100 by less than a float can tell from 100 (IR-004).
++    "value.measure=percentile&value.direction=atLeast&value.value=100.00000000000000001",
++    "value.measure=percentile&value.direction=atLeast&value.value=-0.00000000000000001",
++    "value.measure=percentile&value.direction=atLeast&value.value=-0.5",
++    "value.measure=percentile&value.direction=atLeast&value.value=%2B100.5",
+     "value.measure=percentile&value.direction=atLeast&value.value=abc",
+     "value.measure=standardisedScore&value.direction=atLeast&value.value=abc",
+     "value.measure=standardisedScore&value.direction=atLeast&value.value=NaN",
+@@ -304,6 +309,11 @@ describe("research-query codec edge cases", () => {
+     ["percentile", "0"],
+     ["percentile", "100"],
+     ["percentile", "99.5"],
++    ["percentile", "100.0000000000"],
++    ["percentile", "0.00"],
++    ["percentile", "099.99999999999999999"],
++    ["percentile", "-0.00"],
++    ["percentile", "+100"],
+     ["standardisedScore", "-0.45"],
+     ["standardisedScore", "+1.27"],
+     ["standardisedScore", "250"],
+@@ -379,6 +389,56 @@ describe("research-query codec edge cases", () => {
+   it("uses the first value of a repeated key", () => {
+     expect(decode("symbol=AA&symbol=BB").symbol).toBe("AA");
+     expect(decode("scope=u1&scope=u2").scope).toBe("u1");
++    expect(
++      decode(
++        "value.measure=percentile&value.measure=standardisedScore&value.direction=atLeast&value.direction=atMost&value.value=10&value.value=90",
++      ).sentences,
++    ).toEqual({ value: { measure: "percentile", direction: "atLeast", value: "10" } });
++    expect(
++      decode(
++        "growth.measure=standardisedScore&growth.measure=percentile&growth.direction=atMost&growth.direction=atLeast&growth.value=1.5&growth.value=50",
++      ).sentences,
++    ).toEqual({ growth: { measure: "standardisedScore", direction: "atMost", value: "1.5" } });
++    expect(decode("sort=symbol&sort=value_score").sort).toEqual({ key: "symbol", order: "asc" });
++    expect(decode("sort=symbol&order=desc&order=asc").sort).toEqual({
++      key: "symbol",
++      order: "desc",
++    });
++    expect(decode("sort=symbol&order=asc&order=desc").sort).toEqual({
++      key: "symbol",
++      order: "asc",
++    });
++    expect(decode("hide_incomplete=false&hide_incomplete=true").hideIncomplete).toBe(false);
++    expect(decode("hide_incomplete=true&hide_incomplete=false").hideIncomplete).toBe(true);
++  });
++
++  it("removes every factor's sentence keys when the new query omits its sentence", () => {
++    const all = encodeResearchQuery(
++      query({
++        sentences: {
++          value: { measure: "percentile", direction: "atLeast", value: "10" },
++          growth: { measure: "standardisedScore", direction: "atMost", value: "1.5" },
++          momentum: { measure: "percentile", direction: "atLeast", value: "50" },
++        },
++      }),
++    );
++    all.set("tab", "history");
++    const cleared = applyResearchQuery(all, DEFAULT_RESEARCH_QUERY);
++    expect(cleared.toString()).toBe("tab=history");
++    for (const factor of ["value", "growth", "momentum"] as const) {
++      const kept = applyResearchQuery(
++        all,
++        query({ sentences: { [factor]: decodeResearchQuery(all).sentences[factor] } }),
++      );
++      for (const other of ["value", "growth", "momentum"].filter((name) => name !== factor)) {
++        for (const suffix of ["measure", "direction", "value"]) {
++          expect(kept.has(`${other}.${suffix}`), `${other}.${suffix} after keeping ${factor}`).toBe(
++            false,
++          );
++        }
++      }
++      expect(Object.keys(decodeResearchQuery(kept).sentences)).toEqual([factor]);
++    }
+   });
+ 
+   it("sends only what is set, as the list read names it", () => {
+diff --git a/web/src/api/research-query.ts b/web/src/api/research-query.ts
+index 498b4dd..fc1a671 100644
+--- a/web/src/api/research-query.ts
++++ b/web/src/api/research-query.ts
+@@ -18,19 +18,24 @@ import type {
+   Thresholds,
+ } from "./classification-types";
+ 
++/** A sentence's measure: the percentile or the standardised score (DAC-E4-S2-1). */
+ export type Measure = "percentile" | "standardisedScore";
++/** A sentence's direction: *at least* or *at most* (DAC-E4-S2-1). */
+ export type Direction = "atLeast" | "atMost";
+ 
+-/** One factor's *[measure] [direction] [value]* sentence; `value` stays the string given. */
++/** One factor's *[measure] [direction] [value]* sentence; `value` stays the string given (DAC-E4-S2-1). */
+ export interface ThresholdSentence {
+   measure: Measure;
+   direction: Direction;
+   value: string;
+ }
+ 
++/** A sort the URL may carry: the API's allowlist (DAC-E4-3). */
+ export type SortKey = ClassificationSort;
++/** A sort's order; `asc` is written by omission (DAC-E4-3). */
+ export type Order = "asc" | "desc";
+ 
++/** Everything the Research URL holds: scope, sentences, hide-incomplete, search and sort (DAC-E4-3). */
+ export interface ResearchQuery {
+   /** `null` is all followed stocks; otherwise a universe id. */
+   scope: string | null;
+@@ -42,7 +47,7 @@ export interface ResearchQuery {
+   sort: { key: SortKey; order: Order } | null;
+ }
+ 
+-/** All followed stocks, no sentence, nothing hidden, no search, unsorted. */
++/** All followed stocks, no sentence, nothing hidden, no search, unsorted (DAC-E4-3). */
+ export const DEFAULT_RESEARCH_QUERY: ResearchQuery = {
+   scope: null,
+   sentences: {},
+@@ -64,6 +69,7 @@ const SORT_KEYS: readonly SortKey[] = [
+   "momentum_percentile",
+ ];
+ 
++/** One of the twelve bounds the list read accepts (DAC-E4-S2-1). */
+ export type BoundKey = keyof ThresholdBounds;
+ 
+ /** The one table from a sentence to its bound: four pairs per factor, twelve in all. */
+@@ -110,12 +116,26 @@ function isSortKey(value: string | null): value is SortKey {
+   return SORT_KEYS.some((key) => key === value);
+ }
+ 
++/**
++ * 0 to 100 inclusive, compared on the decimal string as the API's `Decimal`
++ * does, never through a float (DEC-0148; DEC-0147).
++ */
++function isPercentile(value: string): boolean {
++  const [whole = "", fraction = ""] = value.split(".");
++  const integer = BigInt(whole);
++  const zeroFraction = /^0*$/.test(fraction);
++  if (value.startsWith("-")) {
++    return integer === 0n && zeroFraction;
++  }
++  return integer < 100n || (integer === 100n && zeroFraction);
++}
++
+ /** Percentile 0 to 100 inclusive; standardised score any finite plain decimal (API 2.4). */
+ function isValidValue(measure: Measure, value: string): boolean {
+   if (!PLAIN_DECIMAL.test(value)) {
+     return false;
+   }
+-  return measure === "standardisedScore" || (Number(value) >= 0 && Number(value) <= 100);
++  return measure === "standardisedScore" || isPercentile(value);
+ }
+ 
+ function decodeSentence(params: URLSearchParams, factor: FactorName): ThresholdSentence | null {
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 49eb90b..47ce2ab 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -103,6 +103,25 @@ const CATALOGUE: string[] = Object.entries(copy)
+ 
+ const UNIVERSE_LIFECYCLE_STRINGS: string[] = flatten(copy.UNIVERSE_LIFECYCLE, "UNIVERSE_LIFECYCLE");
+ 
++/**
++ * Every sentence `failureSentence` can compose: each operation, resource and
++ * code (an unknown and an absent code included), with and without the
++ * optional context (IR-005; DEC-0226).
++ */
++const COMPOSED_FAILURES: string[] = [
++  ...new Set(
++    (Object.keys(copy.OPERATION_LABELS) as ClassificationOperation[]).flatMap((operation) =>
++      (Object.keys(copy.RESOURCE_LABELS) as ClassificationResource[]).flatMap((resource) =>
++        [...Object.keys(copy.ERROR_SENTENCES), "not_a_code", null].flatMap((code) =>
++          [{ symbols: ["MSFT", "TSLA"], universeName: "Tech" }, {}].map((context) =>
++            copy.failureSentence({ operation, resource, code, ...context }),
++          ),
++        ),
++      ),
++    ),
++  ),
++];
++
+ const FORBIDDEN: RegExp[] = [/\binstruments?\b/i, /\bacquisition runs?\b/i, /\bnot classified\b/i];
+ const RETIRE = /\bretir(?:e|ed|es|ing)\b/i;
+ 
+@@ -117,10 +136,22 @@ const BARE_SCORE: RegExp[] = [
+   /\bstandardized\b/i,
+ ];
+ 
++/**
++ * DEC-0145 as applied by DEC-0226 (PROVISIONAL): *retire* may appear only inside an
++ * allow-listed string, either the whole text or the `{allowed}: ` prefix of a
++ * composed failure sentence whose remainder says *retire* nowhere.
++ */
++function retireAllowed(text: string, allowed: readonly string[]): boolean {
++  return allowed.some(
++    (entry) =>
++      text === entry || (text.startsWith(`${entry}: `) && !RETIRE.test(text.slice(entry.length))),
++  );
++}
++
+ /** The STD-UI-19 vocabulary violations of `text` (DAC-E4-S2-4; DEC-0145, DEC-0146). */
+ function violations(text: string, allowed: readonly string[]): string[] {
+   const found = FORBIDDEN.filter((pattern) => pattern.test(text)).map(String);
+-  if (RETIRE.test(text) && !allowed.includes(text)) {
++  if (RETIRE.test(text) && !retireAllowed(text, allowed)) {
+     found.push("retire outside UNIVERSE_LIFECYCLE");
+   }
+   found.push(...BARE_SCORE.filter((pattern) => pattern.test(text)).map(String));
+@@ -158,6 +189,25 @@ describe("TC-COMP-072: copy.ts contains no forbidden vocabulary", () => {
+       expect(violations(good, []), good).toEqual([]);
+     }
+     expect(violations("Retire Tech", ["Retire Tech"])).toEqual([]);
++    const label = "Could not retire the universe";
++    expect(violations(`${label}: FactorFlow hit an unexpected problem.`, [label])).toEqual([]);
++    for (const bad of [`${label}: retire AAPL instead.`, `${label}; try again.`, `${label}:`]) {
++      expect(violations(bad, [label]), bad).not.toEqual([]);
++    }
++    expect(violations(`${label}: FactorFlow hit an unexpected problem.`, [])).not.toEqual([]);
++  });
++
++  it("scans every composed failure sentence, the retire-universe ones included", () => {
++    expect(COMPOSED_FAILURES.length).toBeGreaterThan(200);
++    expect(
++      COMPOSED_FAILURES.filter((text) => text.startsWith(copy.UNIVERSE_LIFECYCLE.retireFailed))
++        .length,
++    ).toBeGreaterThan(10);
++    const flagged = COMPOSED_FAILURES.map((text) => ({
++      text,
++      found: violations(text, UNIVERSE_LIFECYCLE_STRINGS),
++    })).filter(({ found }) => found.length > 0);
++    expect(flagged).toEqual([]);
+   });
+ 
+   it.each(CATALOGUE)("%j uses only STD-UI-1 display labels", (text) => {
+diff --git a/web/src/screens/research/format.test.ts b/web/src/screens/research/format.test.ts
+index 6bd17c6..a1bc27d 100644
+--- a/web/src/screens/research/format.test.ts
++++ b/web/src/screens/research/format.test.ts
+@@ -45,6 +45,10 @@ describe("TC-COMP-071: score, percentile, ratio, rate and date formatting", () =
+     expect(formatDate("2026-10-15")).toBe("2026-10-15");
+     expect(formatDate("2026-03-08")).toBe("2026-03-08");
+     expect(formatDate("2026-11-01")).toBe("2026-11-01");
++    // Shape-valid strings no calendar has: any trip through `Date` changes or rejects them.
++    expect(formatDate("2026-02-29")).toBe("2026-02-29");
++    expect(formatDate("2026-04-31")).toBe("2026-04-31");
++    expect(formatDate("2026-13-01")).toBe("2026-13-01");
+   });
+ });
+ 
+diff --git a/web/src/screens/research/format.ts b/web/src/screens/research/format.ts
+index 767d415..ab5c86b 100644
+--- a/web/src/screens/research/format.ts
++++ b/web/src/screens/research/format.ts
+@@ -91,7 +91,7 @@ export function formatRate(value: string): string {
+   return `${signed(shiftLeft(parseDecimal(value), 2), 2)}%`;
+ }
+ 
+-/** An amount: whole units, `,` thousands separators, no symbol, no abbreviation (STD-UI-6). */
++/** An amount: whole units, `,` thousands separators, no symbol, no abbreviation (DAC-E4-S2-3; STD-UI-6). */
+ export function formatAmount(value: string): string {
+   return unsigned(parseDecimal(value), 0).replace(/\B(?=(\d{3})+$)/g, ",");
+ }
+@@ -131,7 +131,8 @@ export function formatTimestamp(value: string, options?: { seconds?: boolean }):
+ 
+ /**
+  * A calendar date (`classification_date`, `known_on`, an input's `as_of`):
+- * returned as received after a shape check, never through `Date` (STD-UI-5).
++ * returned as received after a shape check, never through `Date` (DAC-E4-S2-3;
++ * STD-UI-5).
+  */
+ export function formatDate(value: string): string {
+   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
