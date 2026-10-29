@@ -1,0 +1,268 @@
+...FF....F...FF....................F.............                        [100%]
+=================================== FAILURES ===================================
+______ test_raising_claim_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d05dc10>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10d05e1b0>
+
+    def test_raising_claim_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: the failure is logged by ``log.exception``, the
+        failed iteration still waits the poll interval, and the next claim is made."""
+        boom = RuntimeError("boom")
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(boom, stop=waiter.stop))
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+>       assert len(errors) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_classification_scheduler_loop.py:268: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 109, in run_classification_loop
+    claimed = await dispatch(claim_next_set, pool)  # None, or (set_id, run_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 98, in claim
+    raise outcome
+RuntimeError: boom
+______ test_raising_build_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9e240>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10cf9cbc0>
+
+    def test_raising_build_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: a build that raises (the engine could not record
+        the failure) is logged the same way, and the loop waits and claims again."""
+        disk = OSError("disk")
+    
+        def raising_build(pool: Any, set_id: UUID, timeout_seconds: float) -> Any:
+            raise disk
+    
+        claimed = _claimed()
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed, stop=waiter.stop), build=raising_build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+>       assert len(errors) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_classification_scheduler_loop.py:295: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 111, in run_classification_loop
+    result = await dispatch(
+             ^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 139, in build_claimed_set
+    return self._build_impl(pool, set_id, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 284, in raising_build
+    raise disk
+OSError: disk
+_____ test_each_unresolved_line_item_is_warned_once_before_the_first_claim _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d053860>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10d053650>
+
+    def test_each_unresolved_line_item_is_warned_once_before_the_first_claim(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """AC-10 (design section 7, "Unresolved line items are warned"): one warning per
+        unresolved line item, before the first claim, never repeated on later iterations."""
+        warnings_at_first_claim: list[int] = []
+    
+        def claim(pool: Any) -> None:
+            if not warnings_at_first_claim:
+                warnings_at_first_claim.append(len(_scheduler_records(caplog, logging.WARNING)))
+            return None
+    
+        _Fakes(monkeypatch, claim=claim)
+        monkeypatch.setattr(line_items, "unresolved", lambda: ["net_income", "revenue"])
+        waiter = _RecordingWaiter(stop_after=2)
+    
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), waiter, _RecordingDispatcher())
+    
+        messages = [r.getMessage() for r in _scheduler_records(caplog, logging.WARNING)]
+>       assert messages == [
+            "line item net_income has no payload key; its inputs will be missing",
+            "line item revenue has no payload key; its inputs will be missing",
+        ]
+E       AssertionError: assert [] == ['line item n...l be missing']
+E         
+E         Right contains 2 more items, first extra item: 'line item net_income has no payload key; its inputs will be missing'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:424: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+________ test_build_outcome_is_logged_at_info_without_raising[complete] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0504d0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10d05cd70>
+state = 'complete'
+
+    @pytest.mark.parametrize("state", ["complete", "failed"])
+    def test_build_outcome_is_logged_at_info_without_raising(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, state: str
+    ) -> None:
+        """AC-20, AC-10: the engine records the outcome itself, so the loop logs the set, the
+        run and ``result.state`` at INFO (design 2.4; design section 4, Audit), logs no error,
+        and looks again at once. Both outcomes are pinned, so a fixed state cannot pass."""
+        claimed = _claimed()
+    
+        def build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            return _result(state, set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.INFO, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), _RecordingWaiter(), dispatcher)
+    
+        infos = [r.getMessage() for r in _scheduler_records(caplog, logging.INFO)]
+>       assert infos == [f"classification set {claimed.set_id} for run {claimed.run_id} ended {state}"]
+E       AssertionError: assert [] == ['classificat...ded complete']
+E         
+E         Right contains one more item: 'classification set 6e67e5ba-87cc-49e0-8056-2573b1f9b994 for run 2242c97b-5ac8-4320-a9b5-c2cecb25ce8d ended complete'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:528: AssertionError
+_________ test_build_outcome_is_logged_at_info_without_raising[failed] _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d05cfe0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10d05d340>
+state = 'failed'
+
+    @pytest.mark.parametrize("state", ["complete", "failed"])
+    def test_build_outcome_is_logged_at_info_without_raising(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, state: str
+    ) -> None:
+        """AC-20, AC-10: the engine records the outcome itself, so the loop logs the set, the
+        run and ``result.state`` at INFO (design 2.4; design section 4, Audit), logs no error,
+        and looks again at once. Both outcomes are pinned, so a fixed state cannot pass."""
+        claimed = _claimed()
+    
+        def build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            return _result(state, set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.INFO, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), _RecordingWaiter(), dispatcher)
+    
+        infos = [r.getMessage() for r in _scheduler_records(caplog, logging.INFO)]
+>       assert infos == [f"classification set {claimed.set_id} for run {claimed.run_id} ended {state}"]
+E       AssertionError: assert [] == ['classificat...ended failed']
+E         
+E         Right contains one more item: 'classification set d61f9602-e8de-49a3-9245-2767fca37b4e for run 8115860e-8124-4e84-8b12-09eacd9efb69 ended failed'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:528: AssertionError
+________ test_short_build_timeout_reaches_the_engine_and_fails_the_set _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-4' at 0x10d022570>, <psycopg.Connection [IDLE] (host=localhost port=62402 user=test database=test_2c862c6703584e23b10a7bdc9855de2f) at 0x10cfc6510>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfc63c0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10cfc62a0>
+
+    def test_short_build_timeout_reaches_the_engine_and_fails_the_set(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """DAC-E2-S9-4, AC-11, AC-20: a 50 ms build_timeout_seconds crosses the loop, a real
+        thread and a real pool to the engine, which cancels a five-second stage and records the
+        set failed with a timeout reason and no classification rows."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_id = add_run(conn, "succeeded", T0)
+    
+        def sleeping_stage(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            stage_conn.execute("SELECT pg_sleep(5)")
+    
+        monkeypatch.setattr(engine, "_STAGES", [sleeping_stage])
+        # model_construct skips the ge=1 bound and the poll-below-timeout validator on purpose:
+        # a 50 ms timeout is the only way to make a unit-sized store "too short", and
+        # CAP-002-E2-S8 already proves the validators. The poll interval is longer than the
+        # stage's sleep, so a build handed the poll interval instead would also outlast it.
+        settings = ClassificationSettings.model_construct(
+            poll_interval_seconds=10.0, build_timeout_seconds=0.05
+        )
+    
+        started = time.monotonic()
+        with caplog.at_level(logging.INFO, logger="factorflow.classification.scheduler"):
+            _run_loop_until_first_wait(pool, settings)
+        elapsed = time.monotonic() - started
+    
+        rows = [row for row in set_rows(conn) if row[1] == run_id]
+        assert len(rows) == 1
+        set_id, _, state, reason = rows[0]
+        assert state == "failed"
+        assert reason.startswith("QueryCanceled")
+        assert "timeout" in reason
+        assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+        conn.rollback()
+        infos = [
+            r.getMessage()
+            for r in caplog.records
+            if r.name == "factorflow.classification.scheduler" and r.levelno == logging.INFO
+        ]
+>       assert infos == [f"classification set {set_id} for run {run_id} ended failed"]
+E       AssertionError: assert [] == ['classificat...ended failed']
+E         
+E         Right contains one more item: 'classification set a72534a4-6191-4259-a849-2b74ce4b0534 for run b1116647-2054-4bfa-915e-95a363302ed8 ended failed'
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:206: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification:scheduler.py:105 line item book_equity has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item shares_outstanding has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item diluted_eps has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item operating_cash_flow has no payload key; its inputs will be missing
+WARNING  factorflow.classification:scheduler.py:105 line item capital_expenditure has no payload key; its inputs will be missing
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: QueryCanceled: canceling statement due to statement timeout
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/engine.py", line 111, in build
+    stage(conn, context)
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/integration/test_scheduler_restart.py", line 173, in sleeping_stage
+    stage_conn.execute("SELECT pg_sleep(5)")
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/psycopg/connection.py", line 300, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.QueryCanceled: canceling statement due to statement timeout
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_claim_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_build_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_each_unresolved_line_item_is_warned_once_before_the_first_claim
+FAILED tests/unit/test_classification_scheduler_loop.py::test_build_outcome_is_logged_at_info_without_raising[complete]
+FAILED tests/unit/test_classification_scheduler_loop.py::test_build_outcome_is_logged_at_info_without_raising[failed]
+FAILED tests/integration/test_scheduler_restart.py::test_short_build_timeout_reaches_the_engine_and_fails_the_set
+6 failed, 43 passed in 4.25s

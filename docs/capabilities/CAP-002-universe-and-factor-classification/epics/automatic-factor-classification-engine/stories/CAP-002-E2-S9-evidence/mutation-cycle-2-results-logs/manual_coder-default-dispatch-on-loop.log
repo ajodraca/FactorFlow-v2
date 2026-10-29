@@ -1,0 +1,41 @@
+...........F.....................................                        [100%]
+=================================== FAILURES ===================================
+___ test_default_dispatcher_runs_the_database_work_off_the_event_loop_thread ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b351730>
+
+    def test_default_dispatcher_runs_the_database_work_off_the_event_loop_thread(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10: with ``dispatch_fn`` omitted, reclaim and claim run on a worker
+        thread (``asyncio.to_thread``), never on the thread running the event loop."""
+        threads: dict[str, int] = {}
+    
+        def claim(pool: Any) -> None:
+            threads["claim"] = threading.get_ident()
+            return None
+    
+        fakes = _Fakes(monkeypatch, claim=claim)
+    
+        def reclaim(pool: Any) -> list[Any]:
+            threads["reclaim"] = threading.get_ident()
+            return []
+    
+        monkeypatch.setattr(scheduler, "reclaim_interrupted_sets", reclaim)
+        waiter = _RecordingWaiter(stop_after=1)
+    
+        asyncio.run(
+            scheduler.run_classification_loop(
+                MagicMock(name="pool"), _settings(), wait_fn=waiter.wait, stop_event=waiter.stop
+            )
+        )
+    
+        loop_thread = threading.get_ident()  # asyncio.run drives the loop on the calling thread
+        assert set(threads) == {"claim", "reclaim"}
+>       assert threads["claim"] != loop_thread
+E       assert 8693219200 != 8693219200
+
+tests/unit/test_classification_scheduler_loop.py:473: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_default_dispatcher_runs_the_database_work_off_the_event_loop_thread
+1 failed, 48 passed in 4.22s

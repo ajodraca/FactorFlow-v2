@@ -6,6 +6,9 @@
 # review rejected the first diff (the two TC-COMP-084-family tests read record.exc_info, which configure_logging's redacting
 # filter clears, so they failed whenever test_redaction.py ran earlier in the process); it was reworked and both re-reviewed
 # it: APPROVED and drift_detected false. diff_sha256, reviewed_patch and the mutation run are of the reworked diff.
+# Cycle 2 is the review-rework of CAP-002-E2-S9-implementation-review-v1 (tests only). Its staged diff was judged by a fresh
+# code-review subagent and a fresh spec-drift subagent: APPROVED and drift_detected false, re-confirmed by both after
+# two `# Implements` tag lines were removed (T015); diff_sha256, reviewed_patch and the mutation run are of that diff.
 
 cycles:
   - id: cycle-1
@@ -59,6 +62,55 @@ cycles:
       results_sha256: 5b9fd43a226ab4275e94d94da42f7c4badfa1fbdec2d4ff85265dad023f4a440
       generated: 23
       killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T005, T006]
+    description: >
+      Review rework of CAP-002-E2-S9-implementation-review-v1 (IR-001, IR-002, IR-003). Tests only; scheduler.py is
+      unchanged. IR-001: the INFO outcome-line test (T006 c) is parametrized over complete and failed, so the line must
+      carry result.state (design 2.4; design section 4, Audit; plan T012). IR-002: a new test makes the dispatched
+      reclaim_interrupted_sets raise and asserts the same exception leaves run_classification_loop, nothing but the reclaim
+      is dispatched and no wait is requested (DAC-E2-12; design 2.4; plan Open Gaps: no retry is added, the owner question
+      stays open). IR-003: a new test sets the stop event inside a successful build and asserts the loop claims again with
+      no wait and stops at the idle stop check (plan T012 and Other Notes, stop event, E2-F26). The two new tests cite their
+      ACs in their docstrings and carry no TC tag (T015). Mutation: no production line changed, so the catalogue
+      generates nothing new; the review's own 30 mutants (4 catalogue, 19 coder, 7 reviewer; its mutants file, sha256
+      3c3c55f3e82de0b7a89af0603187f976601ebff60c70ffa91da553648a5c5838, re-tagged cycle-2 as mutants-cycle-2.json) were
+      re-run with the review's focused command: 30 killed, the three v1 survivors among them.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/red-cycle-2-review-v1-survivors.log
+    red_log_sha256: a9337c0ae1432a658aa3cc71a15de6b86bdcd7561a8595f2bb7f92fca14b70f9
+    red_evidence: >
+      Observed against HEAD 267cd67's production code (git archive HEAD src into scratch copies, imported first through
+      PYTHONPATH), the working tree untouched: with each review-v1 survivor applied in its own copy, the cycle's tests fail,
+      1 failed and 3 passed each, and each mutant is failed only by the test written for it
+      (manual:review-outcome-state-constant by the complete case of the outcome-line test,
+      manual:review-reclaim-failure-swallowed by the raising-reclaim test, manual:review-stop-check-after-build by the
+      stop-during-build test). The unmutated control passes 4 of 4.
+    green_evidence: >
+      Focused suite (the three scheduler unit files, test_scheduler_restart.py and test_scheduler_claim.py against a real
+      PostgreSQL 16 container): 49 passed; test_redaction.py followed by the loop file: 31 passed (green-cycle-2-loop.log).
+      The full suite is recorded in the stage report.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/green-cycle-2-loop.log
+        sha256: 3682c28d2907c0ba518e65a755e5c77b2157f5a909f44bcc8dc19989f1e2c81d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7ca42da611afb3c302b25fd20d15e82c1177eb150560591a546fb970651d100f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/mutation-cycle-2-results.json
+      results_sha256: c6b0e85daee5609fe3183fed02c7376f4387f80c00f11d031ff7c03fc98a3b19
+      generated: 30
+      killed: 30
       survived: 0
       stillborn: 0
       timeout: 0

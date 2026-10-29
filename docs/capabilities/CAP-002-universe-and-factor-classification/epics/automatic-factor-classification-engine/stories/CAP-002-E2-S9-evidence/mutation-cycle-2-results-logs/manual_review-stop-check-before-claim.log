@@ -1,0 +1,59 @@
+..F....F.........................................                        [100%]
+=================================== FAILURES ===================================
+__ test_stop_event_set_during_a_successful_build_claims_again_before_stopping __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d4a52b0>
+
+    def test_stop_event_set_during_a_successful_build_claims_again_before_stopping(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-11: no stop check follows a build (design 2.4; plan T012 and Other
+        Notes, stop event, E2-F26), so a stop event set during a successful build is first
+        seen at the idle stop check: the loop claims again at once and stops before waiting."""
+        claimed = _claimed()
+        waiter = _RecordingWaiter(stop_after=1)
+    
+        def stopping_build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            waiter.stop.set()
+            return _result("complete", set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=stopping_build)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+E       assert [<function _F... 0x10d4b1bc0>] == [<function _F... 0x10d4b1760>]
+E         
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10d4b1760>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:244: AssertionError
+__________ test_reclaim_runs_even_when_the_stop_event_is_already_set ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d4a69c0>
+
+    def test_reclaim_runs_even_when_the_stop_event_is_already_set(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-3, DAC-E2-12: reclaim at start is unconditional, and a stop event set
+        before the loop starts allows one claim iteration and no wait."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        waiter.stop.set()
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.calls == [(fakes.reclaim, (pool,)), (fakes.claim, (pool,))]
+E       AssertionError: assert [(<function _...17953168'>,))] == [(<function _...17953168'>,))]
+E         
+E         Right contains one more item: (<function _scripted.<locals>.claim at 0x10d4b2480>, (<MagicMock name='pool' id='4517953168'>,))
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:371: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_stop_event_set_during_a_successful_build_claims_again_before_stopping
+FAILED tests/unit/test_classification_scheduler_loop.py::test_reclaim_runs_even_when_the_stop_event_is_already_set
+2 failed, 47 passed in 4.30s
