@@ -193,6 +193,33 @@ def test_opposite_inputs_cancel_to_a_constant_composite(store: Store) -> None:
     assert results == literal(*[("0", "0")] * 5)
 
 
+# Implements TC-COMP-069
+def test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores(
+    store: Store,
+) -> None:
+    """(f) T015, design 2.5: the percentile ranks the unrounded score, while the column keeps
+    6 decimals. The fourth stock's ``revenue_growth`` is 1e-7 above the third's and their
+    ``eps_growth`` is equal, so their unrounded scores differ by about 3e-8. Both store
+    0.134840, and they keep percentiles 50 and 75 of the unrounded ranking; ranking the
+    stored value would give both 50."""
+    stocks = [
+        [Decimal(a), Decimal(b)]
+        for a, b in zip(("1", "2", "3", "3.0000001", "5"), (10, 20, 30, 30, 50), strict=True)
+    ]
+    oracle = reference_scores(dict(enumerate(stocks)))
+    assert Decimal(0) < oracle[3][0] - oracle[2][0] < Decimal("1e-6")
+
+    results = classify(store, "growth", stocks)
+
+    assert results == literal(
+        ("-1.213560", "0"),
+        ("-0.539360", "25"),
+        ("0.134840", "50"),
+        ("0.134840", "75"),
+        ("1.483240", "100"),
+    )
+
+
 # --- properties over random peer sets -----------------------------------------------------
 
 VALUES = st.decimals(

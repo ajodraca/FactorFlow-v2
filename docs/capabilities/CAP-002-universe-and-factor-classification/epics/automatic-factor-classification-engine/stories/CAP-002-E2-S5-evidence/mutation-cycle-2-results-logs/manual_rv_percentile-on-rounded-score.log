@@ -1,0 +1,40 @@
+.................................F
+=================================== FAILURES ===================================
+_ test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=56006 user=test database=test_1e05c2b1f2ba46b0954e0f6b9e843...0x10b46ec30>, run_id=UUID('0a464fd1-9316-470a-a93e-df4c2d8ee987'), set_id=UUID('0fc38216-d3e4-443a-948b-9d5ced6d223f'))
+
+    def test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores(
+        store: Store,
+    ) -> None:
+        """(f) T015, design 2.5: the percentile ranks the unrounded score, while the column keeps
+        6 decimals. The fourth stock's ``revenue_growth`` is 1e-7 above the third's and their
+        ``eps_growth`` is equal, so their unrounded scores differ by about 3e-8. Both store
+        0.134840, and they keep percentiles 50 and 75 of the unrounded ranking; ranking the
+        stored value would give both 50."""
+        stocks = [
+            [Decimal(a), Decimal(b)]
+            for a, b in zip(("1", "2", "3", "3.0000001", "5"), (10, 20, 30, 30, 50), strict=True)
+        ]
+        oracle = reference_scores(dict(enumerate(stocks)))
+        assert Decimal(0) < oracle[3][0] - oracle[2][0] < Decimal("1e-6")
+    
+        results = classify(store, "growth", stocks)
+    
+>       assert results == literal(
+            ("-1.213560", "0"),
+            ("-0.539360", "25"),
+            ("0.134840", "50"),
+            ("0.134840", "75"),
+            ("1.483240", "100"),
+        )
+E       AssertionError: assert [(Decimal('-1...100.000000'))] == [(Decimal('-1...cimal('100'))]
+E         
+E         At index 3 diff: (Decimal('0.134840'), Decimal('50.000000')) != (Decimal('0.134840'), Decimal('75'))
+E         Use -v to get more diff
+
+tests/unit/test_composite_arithmetic.py:214: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 33 passed in 2.52s

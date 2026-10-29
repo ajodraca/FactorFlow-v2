@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "repo_head": "92453929e4ba48a23d92fbeb0f9c345490870da5",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "manual:rv:percentile-on-rounded-score",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 68,
+      "old": "percent_rank() OVER (ORDER BY score)",
+      "new": "percent_rank() OVER (ORDER BY round(score, 6))"
+    },
+    {
+      "id": "manual:rv:gap-order-by-name",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 82,
+      "old": "ORDER BY a.instrument_id, i.input_order",
+      "new": "ORDER BY a.instrument_id, i.input_name"
+    },
+    {
+      "id": "manual:rv:gap-order-by-label",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 82,
+      "old": "ORDER BY a.instrument_id, i.input_order",
+      "new": "ORDER BY a.instrument_id, i.label"
+    },
+    {
+      "id": "manual:rv:gap-unordered",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 82,
+      "old": "ORDER BY a.instrument_id, i.input_order",
+      "new": "ORDER BY a.instrument_id"
+    }
+  ]
+}

@@ -368,6 +368,91 @@ def test_the_reason_is_the_first_input_not_present_in_factor_order(
     )
 
 
+# (factor, statuses, inputs with no row, expected reason_code, reason_input, reason_detail)
+FIRST_GAP_CASES: tuple[tuple[str, dict[str, str], tuple[str, ...], str, str, str], ...] = (
+    (
+        "growth",
+        {"revenue_growth": "outdated", "eps_growth": "missing"},
+        (),
+        "input_outdated",
+        "revenue_growth",
+        "revenue growth outdated",
+    ),
+    (
+        "growth",
+        {"eps_growth": "not_computable"},
+        ("revenue_growth",),
+        "input_missing",
+        "revenue_growth",
+        "revenue growth missing",
+    ),
+    (  # a stale latest bar makes every momentum input outdated (factor-engine 2.4, AC-13)
+        "momentum",
+        {"return_3m": "outdated", "return_6m": "outdated", "return_12m": "outdated"},
+        (),
+        "input_outdated",
+        "return_3m",
+        "3-month total return outdated",
+    ),
+    (
+        "momentum",
+        {"return_3m": "not_computable", "return_6m": "outdated", "return_12m": "missing"},
+        (),
+        "input_not_computable",
+        "return_3m",
+        "3-month total return not computable",
+    ),
+    (
+        "momentum",
+        {"return_12m": "not_computable"},
+        ("return_6m",),
+        "input_missing",
+        "return_6m",
+        "6-month total return missing",
+    ),
+)
+
+
+def test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical(
+    store: Store, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """AC-12, DEC-0120, design 2.5: on ``growth`` and ``momentum`` the input order differs
+    from the alphabetical order of both names and labels (``eps_growth`` and ``return_12m``
+    sort first), and the reason still names the first input that is not present in
+    ``INPUT_NAMES`` order."""
+    assert constants.INPUT_NAMES["growth"] == ("revenue_growth", "eps_growth")
+    assert constants.INPUT_NAMES["momentum"] == ("return_3m", "return_6m", "return_12m")
+    conn, set_id = store.conn, store.set_id
+    add_full_roster(conn, set_id, 30)
+    stocks = []
+    for position, (gap_factor, statuses, omit, *_) in enumerate(FIRST_GAP_CASES):
+        stock = add_active_stock(conn, f"GAP{position}")
+        for factor in FACTORS:
+            if factor == gap_factor:
+                add_factor_inputs(conn, set_id, stock, factor, statuses=statuses, omit=omit)
+            else:
+                add_factor_inputs(conn, set_id, stock, factor)
+        stocks.append(stock)
+
+    assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+
+    rows = classifications_for(conn, set_id)
+    assert factor_counts_for(conn, set_id) == {
+        "value": (35, True),
+        "growth": (33, True),  # the three momentum cases have every growth input
+        "momentum": (32, True),  # the two growth cases have every momentum input
+    }
+    for stock, (factor, _, _, code, name, detail) in zip(stocks, FIRST_GAP_CASES, strict=True):
+        assert reason(rows[(stock, factor)]) == (
+            "not_classified",
+            code,
+            name,
+            detail,
+            None,
+            None,
+        ), (factor, name)
+
+
 def test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set(
     store: Store, monkeypatch: pytest.MonkeyPatch
 ) -> None:

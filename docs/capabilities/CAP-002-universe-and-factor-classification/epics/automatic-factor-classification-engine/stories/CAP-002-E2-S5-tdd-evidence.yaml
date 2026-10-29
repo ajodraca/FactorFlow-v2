@@ -1,12 +1,16 @@
 # TDD evidence for CAP-002-E2-S5 - Peer sets, composite score and percentile classification.
-# One cycle: peer_sets.sql, classify.sql and _classification_stage only work together (classify.sql reads the
-# classification_set_factor rows peer_sets.sql writes), and every new test failed for that one missing stage.
+# cycle-1 is the whole implementation: peer_sets.sql, classify.sql and _classification_stage only work together
+# (classify.sql reads the classification_set_factor rows peer_sets.sql writes), and every new test failed for that one
+# missing stage.
 # Decisions applied: DEC-0052 (no numeric library), DEC-0053 (composite), DEC-0119 (read factor_input),
 # DEC-0120 (reason_detail and INPUT_LABELS), DEC-0121 (registration order, restated_possible false), DEC-0130 (labels).
 # Reviews: independent code-review and spec-drift subagents judged the staged diff. The first round approved with no
 # drift and non-blocking notes; the notes on the tests were taken (see green_evidence), and the changed patch was
 # re-fingerprinted, re-mutated and re-reviewed twice (APPROVED, no drift each time); the last review judged the final patch.
 # Owner: the plan's open gap "near-constant composite caused by numeric rounding" was observed; see open_gap below.
+# It is settled by owner decision DEC-0228 (review v1 IR-003): no tolerance in classify.sql; the property test's
+# filter on composite spreads below 1e-9 stands.
+# cycle-2 is the rework of implementation review v1 (IR-001, IR-002): tests only, no production change.
 
 cycles:
   - id: cycle-1
@@ -55,7 +59,10 @@ cycles:
       The property test now skips examples whose oracle composite dispersion is below 1e-9 so that it does not
       generate the case; hand-built cases (d) and (e) pin the exactly constant composite. Owner question: should
       classify.sql treat a composite spread below some tolerance as zero dispersion, and if so which tolerance
-      (factor-engine 2.5, DEC-0053)?
+      (factor-engine 2.5, DEC-0053)? Answered by the owner in DEC-0228 (2026-10-28, review v1 IR-003): no
+      tolerance; classify.sql re-standardises exactly as DEC-0053 states and adds no spread threshold or constant,
+      an exactly constant composite (spread 0) still scores 0, and the property test's skip of generated examples
+      whose composite spread is below 1e-9 stands, since it excludes only the exact-cancellation case.
     logs:
       - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/full-suite-cycle-1.log
         sha256: 806ed58ab9f67fb4f53b7593f5d81c6756adc07db061f5354034426f533175d4
@@ -219,3 +226,67 @@ cycles:
             dropping the input mean shifts every stock's composite by the same constant, the mean over the inputs of
             mean / sd, and re-standardising subtracts the composite's mean, so scores and percentiles are identical
             in exact arithmetic; the input z-scores are internal to classify.sql
+
+  - id: cycle-2
+    tasks: [T009, T010]
+    description: >
+      Review rework for implementation review v1. Tests only; no production file changes. IR-001 (HIGH): TC-COMP-069
+      gains hand-built case (f), test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores, in
+      tests/unit/test_composite_arithmetic.py. On growth over five stocks, revenue_growth [1, 2, 3, 3.0000001, 5] and
+      eps_growth [10, 20, 30, 30, 50], the third and fourth stocks' unrounded scores differ by about 3.4e-8 (asserted
+      on reference_scores). Both store 0.134840 and keep percentiles 50 and 75, the ranking of the unrounded score
+      that T015, design 2.5 and the plan's Other Notes require. The literal scores and percentiles are written in the
+      test. IR-002 (HIGH): T010(d) gains test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical in
+      tests/integration/test_engine_peer_set.py. It has five stocks with at least two inputs not present, on growth
+      (revenue_growth, eps_growth) and momentum (return_3m, return_6m, return_12m). For both factors, INPUT_NAMES order
+      differs from the alphabetical order of the names and of the labels. Each case asserts the reason_code,
+      reason_input and reason_detail of the first input not present in INPUT_NAMES order: an absent row counted as
+      missing, all three momentum inputs outdated as a stale latest bar leaves them (design 2.4), and a later, more
+      severe status that does not win. IR-003 (MEDIUM) is settled by owner decision DEC-0228 with no code change:
+      classify.sql adds no spread tolerance, and the property test's filter on composite spreads below 1e-9 stands.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/red-cycle-2-rework.log
+    red_log_sha256: c6161506faceb7021bb0c6dc769ceb980fa24cd9f70768bc1cad54f76f41586c
+    red_evidence: >
+      The four non-equivalent survivors of review v1 (mutants-cycle-2.json, the reviewer's ids and edits) were first
+      reproduced as survivors of the cycle-1 tests: the seven focused files with the two cycle-2 tests deselected,
+      83 passed under each mutant (4 of 4 survived). Then the two cycle-2 tests were run under one mutant at a time.
+      rv:percentile-on-rounded-score fails case (f): the fourth stock gets (0.134840, 50) where 75 is expected.
+      rv:gap-order-by-name, rv:gap-order-by-label and rv:gap-unordered fail the first-gap test on its first growth
+      case: input_missing eps_growth where input_outdated revenue_growth is expected. Each run: 1 failed, 1 passed.
+      Unmutated, both pass (2 passed, four workers). The unordered mutant leaves the choice to the plan. On
+      PostgreSQL 16 the planner sorts the gap rows by (instrument_id, input_name) for a merge join with
+      factor_input's primary key, so the mutant names the alphabetically first input. A probe printing all five
+      cases' reason_input under it, run three times, found every case wrong each time. No test can make the order of
+      an unordered DISTINCT ON deterministic. The kill is observed on this plan, not guaranteed on every plan.
+    green_evidence: >
+      The seven focused files, as the review ran them: 85 passed in each of the four mutation baselines
+      (mutation-cycle-2-results.json). On 9245392 plus the staged cycle-2 tree, the full Python suite gave
+      1515 passed, 1 xfailed (full-suite-cycle-2.log under logs). ruff check, ruff format --check and mypy src are
+      clean, and strict mypy is also clean over the two changed test files. The tech-stack validation ran before
+      hand-off; its counts are in the completion summary. The code review (APPROVED) and the spec-drift review (no drift)
+      judged cycle-2.patch and asked for no change. Their non-blocking notes are recorded here:
+      case (f) extends T009's hand-built cases (a) to (e), as IR-001's remediation asks;
+      the unordered mutant's kill depends on the plan (see red_evidence);
+      and design 2.4 makes the value inputs outdated as well as the momentum inputs when the latest bar is stale.
+      The test leaves the value inputs present, because each factor classifies from its own rows (DEC-0119).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/full-suite-cycle-2.log
+        sha256: d7dc3bfd92bd3b0a4d9bb87ec0d14aa42a0202240d957acdc1b582aeef33c001
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c9ea64c39f92594ca320bf36ff5f5124cc951b1625e9ae93d3b50c4303a36dfa
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 233d59b8bd9fab2ee343f570d9e8668027dec4a70e7fdd689589a4ad1a727d40
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
