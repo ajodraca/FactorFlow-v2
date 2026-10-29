@@ -1,0 +1,176 @@
+# TDD evidence for CAP-002-E4-S5 - Filters pane and threshold sentences.
+# Three cycles, as the task plan's Other Notes lay out: (1) T007 then T008 (use-research-query.ts); (2) T001, T002,
+# T005 then T009, T010 (threshold-sentence.tsx and the copy.ts additions); (3) T003, T004, T006 then T011
+# (filters-pane.tsx). The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's
+# reviewed_patch is its own staged diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch and cycle-3.patch
+# are the diffs between the index trees after each cycle, so the three apply in order onto the stage parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began. The verdicts below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite; generated operators plus hand-written mutants
+# ("operator": "manual") where the operators find no line to mutate.
+# Decisions applied: DEC-0156 (URL binding and pane props), DEC-0157 (commit points, field errors, accessible names,
+# focus after Clear), DEC-0158 (Unavailable universe); all owner-upheld.
+
+cycles:
+  - id: cycle-1
+    tasks: [T007, T008]
+    description: >
+      T007: the hook reads decodeResearchQuery of the location search; setQuery writes applyResearchQuery over the
+      current params (unknown keys survive, defaults are not written) as one push, so back restores the earlier URL;
+      an equal query causes no navigation; clear keeps sort and order; two same-tick writes are two pushes, each a
+      full rewrite of the owned keys (react-router 6.26's functional setSearchParams receives the render snapshot,
+      so the test states that rather than a composition); query identity is stable while the search is unchanged.
+      Production: web/src/screens/research/use-research-query.ts (useResearchQuery; also exports the return shape
+      as the interface ResearchQueryBinding, a typing idiom the spec-drift review judged not to be drift).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log
+    red_log_sha256: d12cc88051193cd73eb199084448262416ae2d7ed3e4bc0221470b5859eb5d05
+    red_evidence: >
+      With use-research-query.test.tsx written and no use-research-query.ts, the file failed to load: Failed to
+      resolve import "./use-research-query" (no tests ran). Two test defects were then fixed against the hook (a
+      literal in the codec's key order; same-tick pushes observed through history entries, not render count).
+    green_evidence: >
+      use-research-query.test.tsx 8 passed (green-cycle-1.log); tsc --noEmit, biome lint and biome format clean.
+      The code review's one MEDIUM (the one-tick test's wording claimed a composition the functional form does not
+      deliver) was fixed in the test's title and comment and the patch re-reviewed; no production change.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log
+        sha256: ee080811dd0a339cc3c86aa42943ea5a33f1d898d830b5363d7f698f8bfe3008
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a664f707f19cbdfeffdc63adaa5ff444c423bbbcc26f90c77b439eb95b6aab14
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: a160f953ce48bebf178aa3e0665188ded4485b0b6faea3f29bdae27099dcba3c
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T001, T002, T005, T009, T010]
+    description: >
+      TC-COMP-134 (percentile 101, -1, abc, 1e3, 100.5 and standardised score NaN, Infinity, -Infinity, abc are
+      field errors on blur with DEC-0157's exact wording, aria-invalid and aria-describedby, and commit nothing; the
+      valid edges commit once each; blank after a committed value commits null; an always-blank field commits
+      nothing), TC-COMP-137 (Measure for / Direction for / Value threshold on the value row, Value threshold for
+      growth and momentum, options in order, placeholder any, w-14, one <p> with the hidden swatch, the display name
+      and the three blanks in order) and the T005 edge cases (verdict table agreeing with decodeResearchQuery,
+      type=text inputMode=decimal, select changes commit once or not at all, a measure change that invalidates the
+      value is an error with no write, nothing while typing, a shown error clears when valid or blank and stays
+      while invalid, re-sync from the value prop, nothing disabled, no commit of an unchanged sentence, the growth
+      row's error names growth). Production: web/src/screens/research/threshold-sentence.tsx (ThresholdSentence,
+      validateThresholdValue, which takes the codec's own verdict through decodeResearchQuery so the two rules
+      cannot drift) and the T009 additions to copy.ts (FILTERS.valueThresholdFor, FILTERS.unavailableUniverse,
+      thresholdFieldError) with their copy.test.ts anchors; UNIVERSES.invalidSymbol and FACTOR_LABELS reused.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-2.log
+    red_log_sha256: fd4581d519be0d94a84e8fa45df4cd0ab97febbf9aad33cbe192cd0c3a26b237
+    red_evidence: >
+      With threshold-sentence.test.tsx written and no threshold-sentence.tsx, the file failed to load: Failed to
+      resolve import "./threshold-sentence" (no tests ran). copy.test.ts's new anchors were added with the strings.
+    green_evidence: >
+      threshold-sentence.test.tsx 57 passed and copy.test.ts 302 passed (green-cycle-2.log); tsc --noEmit, biome
+      lint and biome format clean. The first mutation run left one real survivor (an error cleared while the field
+      was still invalid), killed by a new test; the two remaining survivors are equivalent (below). The code review's
+      MEDIUM is plan-level (w-14 is a Tailwind literal outside the token scale, mandated by T002/T010) and is carried
+      as a follow-up, not changed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-2.log
+        sha256: dde07de1883b6e643cd7527358e58b0c8f99cf9fd41e8e76915138db7e1cde59
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: dfb7445672e59ac8fc17778cc54fec52b1dcf17e1c7ca3fff7c94cf63f37ceeb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 0e0c4ee48bde6714951df47df120a188539e51993acb9d869f7f9b06a15c7949
+      generated: 25
+      killed: 23
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The re-sync effect's three keys are the fields of one optional `value` prop (ThresholdSentence |
+            undefined), so they are all defined or all undefined; `measure !== undefined || direction !== undefined
+            && raw !== undefined` evaluates exactly as the conjunction on every input the contract admits. The
+            split exists only so the effect's dependency list names primitives.
+        - id: web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:2
+          disposition: equivalent
+          reason: >
+            Same as above for the second conjunction: `measure !== undefined && direction !== undefined || raw !==
+            undefined` equals the conjunction whenever the three fields come from one object or are all absent.
+
+  - id: cycle-3
+    tasks: [T003, T004, T006, T011, T012, T013, T014]
+    description: >
+      TC-COMP-135 (one list request per change through a probe host keyed on useResearchQuery().query: a universe
+      in Look in, value percentile at least 80, momentum standardised score at most -0.5 beside it, hide-incomplete,
+      a symbol on Enter and none while typing; changes accumulate; the pane alone issues no request; blanking a
+      threshold drops its sentence in one request), TC-COMP-136 (Clear filters issues one request with the defaults
+      plus the sort, writes only sort, order and the unowned tab key, resets every control including an uncommitted
+      Find a stock draft, disappears, and is absent for a sort alone) and the T006 pane behaviour (structure and
+      order with every string from copy.ts, Look in options and names, All followed stocks removing scope, the
+      showLookIn=false mode keeping and never writing scope with children above Clear filters, Clear filters
+      visibility per filter, Find a stock on Enter, blur, Esc and a malformed entry, focus, back navigation, the
+      Unavailable universe option, a failed universe list without the envelope message). Production:
+      web/src/screens/research/filters-pane.tsx. T012: full web suite green with no delivered file changed beyond
+      copy.ts and copy.test.ts; T013: format, lint, tsc, test and build clean and the built CSS carries
+      --factor-value, --factor-growth and --factor-momentum. The code review's MEDIUM (Clear filters left a dirty
+      Find a stock draft when the URL carried no symbol) was fixed with a test and the patch re-reviewed; its LOW
+      notes (nextCursor paging ignored, Unavailable universe shown while the list loads or has failed, the blur
+      commit relying on the hook's equal-write drop) are carried as follow-ups.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-3.log
+    red_log_sha256: f30ad02c831bc5c465ab985f13c43c2c66f0442233363b834406116bf64135af
+    red_evidence: >
+      With filters-pane.test.tsx written and no filters-pane.tsx, the file failed to load: Failed to resolve import
+      "./filters-pane" (no tests ran).
+    green_evidence: >
+      filters-pane.test.tsx 29 passed (green-cycle-3.log); full web suite 871 passed in 48 files (full-suite.log);
+      tsc --noEmit, biome lint, biome format and npm run build clean. The first mutation run left two real
+      survivors: a dead unchanged-blur guard the hook already makes redundant (removed) and the null branch of
+      commitSentence (pinned by the blanking test); the remaining survivor is equivalent (below).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-3.log
+        sha256: bb4084d77f5da615c49882f35933dce641916eb6b72465ddf5f8a65d45526321
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/full-suite.log
+        sha256: 773290cc3af1250de8feb72eb6c440c7747ddbd8396d07e22bb4002ab8430def
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 62ea13f1538ce4b92271fb4be1494c81d4a08d499884b7682cf06f632a9e35a8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-3-results.json
+      results_sha256: 35603ee2190dee6d02edf53506d9ac552e56e8df68ed39dcd09dab0d54d489f5
+      generated: 27
+      killed: 26
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/filters-pane.tsx:82:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The mutant flips the effect cleanup's `cancelled = true` to `false`, so a listUniverses result arriving
+            after unmount would call setState on an unmounted component. React 18 drops such an update silently and
+            no longer warns, so no rendered output, request or log differs on any input; the flag is the plan's
+            defensive idiom, not observable behaviour.

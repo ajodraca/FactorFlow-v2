@@ -53,6 +53,10 @@ const CALLS: Record<string, unknown[][]> = {
     ],
   ],
   describeQuery: [[SAMPLE_QUERY]],
+  thresholdFieldError: [
+    ["value", "percentile"],
+    ["growth", "standardisedScore"],
+  ],
   savedFromFilter: [["2026-10-15", SAMPLE_QUERY]],
   "SELECTION.inUniverses": [[["Tech", "Dividend growers"]]],
   "SELECTION.inputsLine": [
@@ -433,6 +437,7 @@ describe("copy.ts completeness and keying", () => {
     "Open Data health",
     "Earlier sets…",
     "Find a stock",
+    "Unavailable universe",
     "A score is shown only when every input is present and current. This checks presence and currency, not whether the provider's values are correct.",
     "No stocks match these filters, so there is nothing to save.",
     "Could not save these stocks as a universe: the scores changed while you were reviewing them. Review the new result, then save again.",
@@ -442,6 +447,14 @@ describe("copy.ts completeness and keying", () => {
 
   it("(d) renders the templated design messages for the design's example arguments", () => {
     expect(copy.CELL.qualified(12, 30)).toBe("12 qualified, 30 needed");
+    expect(copy.FILTERS.valueThresholdFor("growth")).toBe("Value threshold for growth");
+    expect(copy.FILTERS.valueThresholdFor("momentum")).toBe("Value threshold for momentum");
+    expect(copy.thresholdFieldError("value", "percentile")).toBe(
+      "Could not set the value threshold: a percentile is a number from 0 to 100.",
+    );
+    expect(copy.thresholdFieldError("momentum", "standardisedScore")).toBe(
+      "Could not set the momentum threshold: a standardised score is a finite number.",
+    );
     expect(copy.DIALOGS.saved(14, "Tech")).toBe("Saved 14 stocks as Tech");
     expect(copy.DIALOGS.added(3, "Tech", 0)).toBe("Added 3 stocks to Tech");
     expect(copy.DIALOGS.added(3, "Tech", 1)).toBe(
