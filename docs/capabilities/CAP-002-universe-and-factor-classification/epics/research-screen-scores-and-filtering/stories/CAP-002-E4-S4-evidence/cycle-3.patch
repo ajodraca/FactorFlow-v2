@@ -1,0 +1,1687 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-3.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-3.log
+new file mode 100644
+index 0000000..1e2298b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-3.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/use-score-set-poll.test.ts (28 tests) 52ms
++
++ Test Files  1 passed (1)
++      Tests  28 passed (28)
++   Start at  23:02:47
++   Duration  685ms (transform 51ms, setup 50ms, collect 89ms, tests 52ms, environment 250ms, prepare 123ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-3.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-3.json
+new file mode 100644
+index 0000000..7ec7741
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-3.json
+@@ -0,0 +1,342 @@
++{
++ "schema": 1,
++ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:56:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 56,
++   "original": "  const [pollFailed, setPollFailed] = useState(false);",
++   "mutated": "  const [pollFailed, setPollFailed] = useState(true);"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:60:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 60,
++   "original": "  const mountedRef = useRef(true);",
++   "mutated": "  const mountedRef = useRef(false);"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:61:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 61,
++   "original": "  const inFlightRef = useRef(false);",
++   "mutated": "  const inFlightRef = useRef(true);"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:74:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 74,
++   "original": "    inFlightRef.current = true;",
++   "mutated": "    inFlightRef.current = false;"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:87:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 87,
++   "original": "        setPollFailed(true);",
++   "mutated": "        setPollFailed(false);"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:91:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 91,
++   "original": "      inFlightRef.current = false;",
++   "mutated": "      inFlightRef.current = true;"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:93:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 93,
++   "original": "    if (!mountedRef.current) {",
++   "mutated": "    if (mountedRef.current) {"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:101:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 101,
++   "original": "    setPollFailed(false);",
++   "mutated": "    setPollFailed(true);"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:102:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 102,
++   "original": "    if (next.set !== null && previous !== undefined && previous !== setId) {",
++   "mutated": "    if (next.set !== null || previous !== undefined && previous !== setId) {"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:102:negate-boolean:2",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 102,
++   "original": "    if (next.set !== null && previous !== undefined && previous !== setId) {",
++   "mutated": "    if (next.set !== null && previous !== undefined || previous !== setId) {"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:114:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 114,
++   "original": "    mountedRef.current = true;",
++   "mutated": "    mountedRef.current = false;"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:117:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 117,
++   "original": "      mountedRef.current = false;",
++   "mutated": "      mountedRef.current = true;"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:123:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 123,
++   "original": "    !pollFailed &&",
++   "mutated": "    pollFailed &&"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:125:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 125,
++   "original": "      (latestRun !== null && isNonTerminalRunState(latestRun.state)));",
++   "mutated": "      (latestRun !== null || isNonTerminalRunState(latestRun.state)));"
++  },
++  {
++   "id": "web/src/screens/research/use-score-set-poll.ts:128:negate-boolean:1",
++   "cycle": "cycle-3",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "line": 128,
++   "original": "    if (!polling) {",
++   "mutated": "    if (polling) {"
++  },
++  {
++   "id": "manual:cycle-3:fires-on-first-read",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
++   "new": "if (next.set !== null && previous !== setId) {"
++  },
++  {
++   "id": "manual:cycle-3:fires-on-every-set",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
++   "new": "if (next.set !== null && previous !== undefined) {"
++  },
++  {
++   "id": "manual:cycle-3:fires-on-null-set",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
++   "new": "if (previous !== undefined && previous !== setId) {"
++  },
++  {
++   "id": "manual:cycle-3:last-set-not-remembered",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    lastSetIdRef.current = setId;\n",
++   "new": "    lastSetIdRef.current = previous;\n"
++  },
++  {
++   "id": "manual:cycle-3:set-id-undefined-when-null",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "const setId = next.set?.setId ?? null;",
++   "new": "const setId = next.set?.setId;"
++  },
++  {
++   "id": "manual:cycle-3:checked-at-not-iso",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "setCheckedAt(new Date().toISOString());",
++   "new": "setCheckedAt(String(new Date()));"
++  },
++  {
++   "id": "manual:cycle-3:checked-at-on-failure",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "      if (mountedRef.current) {\n        setPollFailed(true);\n      }",
++   "new": "      if (mountedRef.current) {\n        setPollFailed(true);\n        setCheckedAt(new Date().toISOString());\n      }"
++  },
++  {
++   "id": "manual:cycle-3:poll-failed-never-cleared",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    setPollFailed(false);\n",
++   "new": "    \n"
++  },
++  {
++   "id": "manual:cycle-3:failure-not-recorded",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "        setPollFailed(true);\n",
++   "new": "        setPollFailed(false);\n"
++  },
++  {
++   "id": "manual:cycle-3:overlap-allowed",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    if (inFlightRef.current) {\n      return;\n    }\n",
++   "new": "    if (inFlightRef.current) {\n      inFlightRef.current = false;\n    }\n"
++  },
++  {
++   "id": "manual:cycle-3:in-flight-never-released",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    } finally {\n      inFlightRef.current = false;\n    }",
++   "new": "    } finally {\n      inFlightRef.current = inFlightRef.current;\n    }"
++  },
++  {
++   "id": "manual:cycle-3:state-after-unmount",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    if (!mountedRef.current) {\n      return;\n    }\n    const previous = lastSetIdRef.current;",
++   "new": "    const previous = lastSetIdRef.current;"
++  },
++  {
++   "id": "manual:cycle-3:failure-falls-through",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "      return;\n    } finally {",
++   "new": "    } finally {"
++  },
++  {
++   "id": "manual:cycle-3:mounted-never-cleared",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    return () => {\n      mountedRef.current = false;\n    };",
++   "new": "    return () => {\n      mountedRef.current = true;\n    };"
++  },
++  {
++   "id": "manual:cycle-3:polls-after-failure",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    !pollFailed &&\n    (summary",
++   "new": "    (summary"
++  },
++  {
++   "id": "manual:cycle-3:building-is-failed",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "summary?.later?.state === \"building\"",
++   "new": "summary?.later?.state === \"failed\""
++  },
++  {
++   "id": "manual:cycle-3:terminal-polls",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "isNonTerminalRunState(latestRun.state)",
++   "new": "!isNonTerminalRunState(latestRun.state)"
++  },
++  {
++   "id": "manual:cycle-3:null-run-polls",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "(latestRun !== null && isNonTerminalRunState(latestRun.state))",
++   "new": "isNonTerminalRunState((latestRun ?? { state: \"running\" }).state)"
++  },
++  {
++   "id": "manual:cycle-3:cadence-nine-seconds",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "export const POLL_INTERVAL_MS = 10_000;",
++   "new": "export const POLL_INTERVAL_MS = 9_000;"
++  },
++  {
++   "id": "manual:cycle-3:interval-never-cleared",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    return () => {\n      clearInterval(timer);\n    };",
++   "new": "    return () => undefined;"
++  },
++  {
++   "id": "manual:cycle-3:stale-callback",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "  useEffect(() => {\n    onNewSetRef.current = onNewSet;\n  }, [onNewSet]);\n",
++   "new": "  useEffect(() => {\n    onNewSetRef.current = onNewSetRef.current;\n  }, [onNewSet]);\n"
++  },
++  {
++   "id": "manual:cycle-3:announcement-args-swapped",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "          formatTimestamp(next.set.endedAt),\n          formatTimestamp(next.set.runStartedAt),",
++   "new": "          formatTimestamp(next.set.runStartedAt),\n          formatTimestamp(next.set.endedAt),"
++  },
++  {
++   "id": "manual:cycle-3:interval-effect-not-reactive",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "  }, [polling, read]);",
++   "new": "  }, [read]);"
++  },
++  {
++   "id": "manual:cycle-3:try-again-inert",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "tryAgain: read,",
++   "new": "tryAgain: async () => undefined,"
++  },
++  {
++   "id": "manual:cycle-3:no-mount-read",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-score-set-poll.ts",
++   "old": "    mountedRef.current = true;\n    void read();\n",
++   "new": "    mountedRef.current = true;\n"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-3-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-3-results.json
+new file mode 100644
+index 0000000..d7af62c
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-3-results.json
+@@ -0,0 +1,632 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/use-score-set-poll.test.ts",
++  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++  "tree_patch_sha256": "97704e1d72c55a5eb9daca802215d0cf9e497846ee3da148c56a88fd44b9a388",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutants-3.json",
++  "mutants_sha256": "5d0378de70cdcea87f3e25904d9f373555c17da0d607ede3ae9f3938f516b400",
++  "jobs": 6,
++  "started": "2026-10-29T04:02:50Z",
++  "baselines": [
++    {
++      "worker": 4,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/baseline-w4.log",
++      "log_sha256": "aca8e2318fb5ac3151b8489a249a19222af23329f8de33641fd7f567f80cbeca"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/baseline-w1.log",
++      "log_sha256": "f27e5306c02d17180aad363d902decf26984a963377ca57300c07fbbd8b32582"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/baseline-w0.log",
++      "log_sha256": "a0d8f9609c4dd7f91356922de586cba43d2be5a9c95427a6ecf1c21e97bcb12a"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/baseline-w2.log",
++      "log_sha256": "0716ae36c3ee33645148d3d41f4f9cc8f6f078ea43cc0050c85a5d106002e97f"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/baseline-w3.log",
++      "log_sha256": "14ad937edfca2427700e3ee555beab612894a907145a1c0ea29aa690cb2c0613"
++    },
++    {
++      "worker": 5,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/baseline-w5.log",
++      "log_sha256": "b2cd9a2fdb17e83470c99fafcb8a26550116438a0c7138b56ab15c283ae35635"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:56:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 56,
++      "original": "  const [pollFailed, setPollFailed] = useState(false);",
++      "mutated": "  const [pollFailed, setPollFailed] = useState(true);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_56_negate-boolean_1.log",
++      "log_sha256": "c7420af1960333a1bbbe35b2e86a2d59fd0c4f7a57d8175bd5d9247c0005f10a"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:60:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 60,
++      "original": "  const mountedRef = useRef(true);",
++      "mutated": "  const mountedRef = useRef(false);",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_60_negate-boolean_1.log",
++      "log_sha256": "bcc34687b721eefb395b5a5eb23f8c928d1d298149e00e17936a5bd675dad5db"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:61:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 61,
++      "original": "  const inFlightRef = useRef(false);",
++      "mutated": "  const inFlightRef = useRef(true);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_61_negate-boolean_1.log",
++      "log_sha256": "bbde003e2b9d06c868f400bd721552da6445e8bfe46d543694ab1b0f00f3b559"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:74:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 74,
++      "original": "    inFlightRef.current = true;",
++      "mutated": "    inFlightRef.current = false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_74_negate-boolean_1.log",
++      "log_sha256": "ce2433a33ec569c6bce835d1c1a9c3a3e11a9efe9555ae575294a714fe07ca95"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:87:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 87,
++      "original": "        setPollFailed(true);",
++      "mutated": "        setPollFailed(false);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_87_negate-boolean_1.log",
++      "log_sha256": "4e12e805cd220b8826c18813279c8eda8ff49324ed8a2d3e4c9f8ce2ca3f5f48"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:91:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 91,
++      "original": "      inFlightRef.current = false;",
++      "mutated": "      inFlightRef.current = true;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_91_negate-boolean_1.log",
++      "log_sha256": "d5da23f5c562060977cbb51f9015ac23fde81818a48fd3aeb792c4e1425239e9"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:93:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 93,
++      "original": "    if (!mountedRef.current) {",
++      "mutated": "    if (mountedRef.current) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_93_negate-boolean_1.log",
++      "log_sha256": "667206f14081939b287a629d895951c8bc4babf1d015b5f8fcedec2189049d7e"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:101:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 101,
++      "original": "    setPollFailed(false);",
++      "mutated": "    setPollFailed(true);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_101_negate-boolean_1.log",
++      "log_sha256": "811c8c78e2130ebcdae161dc8f5b54d9e817b63a8bda42e435333255a5c837e3"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:102:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 102,
++      "original": "    if (next.set !== null && previous !== undefined && previous !== setId) {",
++      "mutated": "    if (next.set !== null || previous !== undefined && previous !== setId) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_102_negate-boolean_1.log",
++      "log_sha256": "1d1437335f21ec68b8990ff1124e3209b688a8d9fa7a4622cdd80a26e62caf8d"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:102:negate-boolean:2",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 102,
++      "original": "    if (next.set !== null && previous !== undefined && previous !== setId) {",
++      "mutated": "    if (next.set !== null && previous !== undefined || previous !== setId) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_102_negate-boolean_2.log",
++      "log_sha256": "2b8ea935e02ff68742619915748ef74adb262caec40d8166e91a448db69c5e40"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:114:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 114,
++      "original": "    mountedRef.current = true;",
++      "mutated": "    mountedRef.current = false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_114_negate-boolean_1.log",
++      "log_sha256": "89046a90af5aae3571083266156d5e7e5c8b1536703ff61bd12c17404ce70219"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:117:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 117,
++      "original": "      mountedRef.current = false;",
++      "mutated": "      mountedRef.current = true;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_117_negate-boolean_1.log",
++      "log_sha256": "082f6dc40fce3ac455cde13356b2c97710c0f8e98a1c2842d200b846c73efd96"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:123:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 123,
++      "original": "    !pollFailed &&",
++      "mutated": "    pollFailed &&",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_123_negate-boolean_1.log",
++      "log_sha256": "c15a9254d2f3d8fadf535974ec371b3b7600513df5c71496921c62b8c6ac3a67"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:125:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 125,
++      "original": "      (latestRun !== null && isNonTerminalRunState(latestRun.state)));",
++      "mutated": "      (latestRun !== null || isNonTerminalRunState(latestRun.state)));",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_125_negate-boolean_1.log",
++      "log_sha256": "8f3176a6e495dc22ac7ad0807e8aaaf8c044f526faa8b375467f20d5f6f7e029"
++    },
++    {
++      "id": "web/src/screens/research/use-score-set-poll.ts:128:negate-boolean:1",
++      "cycle": "cycle-3",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "line": 128,
++      "original": "    if (!polling) {",
++      "mutated": "    if (polling) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/web_src_screens_research_use-score-set-poll.ts_128_negate-boolean_1.log",
++      "log_sha256": "a9f117e12a76a6ae6790aa173f495b2477d00d291623b5832bdd78a22bde8782"
++    },
++    {
++      "id": "manual:cycle-3:fires-on-first-read",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
++      "new": "if (next.set !== null && previous !== setId) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_fires-on-first-read.log",
++      "log_sha256": "eccb8c8de02e55a77e026b052a5082a54cdb03f88c143413217da1e9408a3fec"
++    },
++    {
++      "id": "manual:cycle-3:fires-on-every-set",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
++      "new": "if (next.set !== null && previous !== undefined) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_fires-on-every-set.log",
++      "log_sha256": "5cdf34150d2d1b7e82fdf032166b795c255c36b1eaf1a2a84d452b8806d087bc"
++    },
++    {
++      "id": "manual:cycle-3:fires-on-null-set",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
++      "new": "if (previous !== undefined && previous !== setId) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_fires-on-null-set.log",
++      "log_sha256": "ff2f10899f927f9b385e1384cdb8fc5294aec0389243d6843995dcaa53572285"
++    },
++    {
++      "id": "manual:cycle-3:last-set-not-remembered",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    lastSetIdRef.current = setId;\n",
++      "new": "    lastSetIdRef.current = previous;\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_last-set-not-remembered.log",
++      "log_sha256": "ed40a48b33287fd04716453a0ea3acd27632e2f3534d116e2b3957e81607b97d"
++    },
++    {
++      "id": "manual:cycle-3:set-id-undefined-when-null",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "const setId = next.set?.setId ?? null;",
++      "new": "const setId = next.set?.setId;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_set-id-undefined-when-null.log",
++      "log_sha256": "95f1839d2755fc96a13b0ec4b267978f6f3e1880b7078c2ce08ab05d85c52d9f"
++    },
++    {
++      "id": "manual:cycle-3:checked-at-not-iso",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "setCheckedAt(new Date().toISOString());",
++      "new": "setCheckedAt(String(new Date()));",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_checked-at-not-iso.log",
++      "log_sha256": "bd34074f6c257bf8a81678080d9de595397c50c5baf566b63bee97d88161a659"
++    },
++    {
++      "id": "manual:cycle-3:checked-at-on-failure",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "      if (mountedRef.current) {\n        setPollFailed(true);\n      }",
++      "new": "      if (mountedRef.current) {\n        setPollFailed(true);\n        setCheckedAt(new Date().toISOString());\n      }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_checked-at-on-failure.log",
++      "log_sha256": "c920880828105aebeb24e95636e3bd31d6aec3e6f1f609f605e5e4b76e5e40fd"
++    },
++    {
++      "id": "manual:cycle-3:poll-failed-never-cleared",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    setPollFailed(false);\n",
++      "new": "    \n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_poll-failed-never-cleared.log",
++      "log_sha256": "48158a8c3b742315d7dda8c1ac17178297289d1a42ecc0102d05376f7af38f89"
++    },
++    {
++      "id": "manual:cycle-3:failure-not-recorded",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "        setPollFailed(true);\n",
++      "new": "        setPollFailed(false);\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_failure-not-recorded.log",
++      "log_sha256": "49e71f331b082842e57dd45e09e03d48146663bff242d3323e05dfc80474f9f2"
++    },
++    {
++      "id": "manual:cycle-3:overlap-allowed",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    if (inFlightRef.current) {\n      return;\n    }\n",
++      "new": "    if (inFlightRef.current) {\n      inFlightRef.current = false;\n    }\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_overlap-allowed.log",
++      "log_sha256": "c6f6a7434b1cfdaddf25b8bbfaa74cde2a3320384ce3f505b7cea12aacd4fb92"
++    },
++    {
++      "id": "manual:cycle-3:in-flight-never-released",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    } finally {\n      inFlightRef.current = false;\n    }",
++      "new": "    } finally {\n      inFlightRef.current = inFlightRef.current;\n    }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_in-flight-never-released.log",
++      "log_sha256": "8c6a80a1b5311fb89aa9e72dac8420b5fcc977ba9b4359cd66c15d5c5be7e608"
++    },
++    {
++      "id": "manual:cycle-3:state-after-unmount",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    if (!mountedRef.current) {\n      return;\n    }\n    const previous = lastSetIdRef.current;",
++      "new": "    const previous = lastSetIdRef.current;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_state-after-unmount.log",
++      "log_sha256": "c609c9a18e5141d25c3216e39ea23a1e53646f1b677d34e0b34aad7773897f78"
++    },
++    {
++      "id": "manual:cycle-3:failure-falls-through",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "      return;\n    } finally {",
++      "new": "    } finally {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_failure-falls-through.log",
++      "log_sha256": "03ae4785963e3ef95dab2dc767ddc7421537860f29fc24aa59b5174743d17eaa"
++    },
++    {
++      "id": "manual:cycle-3:mounted-never-cleared",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    return () => {\n      mountedRef.current = false;\n    };",
++      "new": "    return () => {\n      mountedRef.current = true;\n    };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_mounted-never-cleared.log",
++      "log_sha256": "bec4075dabe9e2eaf34aee1f697d9f0d999bb35dc1ea028baf916e77579f4225"
++    },
++    {
++      "id": "manual:cycle-3:polls-after-failure",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    !pollFailed &&\n    (summary",
++      "new": "    (summary",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_polls-after-failure.log",
++      "log_sha256": "ebf645cbd8aa2c757580b4a8496f63878902e3f253457414e13ad29ca8cff51a"
++    },
++    {
++      "id": "manual:cycle-3:building-is-failed",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "summary?.later?.state === \"building\"",
++      "new": "summary?.later?.state === \"failed\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_building-is-failed.log",
++      "log_sha256": "f14b0bad02b9b9952bd06e59260ca4777fd0ce10a9beedbe77942f28cbaadd93"
++    },
++    {
++      "id": "manual:cycle-3:terminal-polls",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "isNonTerminalRunState(latestRun.state)",
++      "new": "!isNonTerminalRunState(latestRun.state)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_terminal-polls.log",
++      "log_sha256": "f2f31779ade3d0ff5bb6f2e682e5c17df5638b0d2f483d196ce19055b600e1d3"
++    },
++    {
++      "id": "manual:cycle-3:null-run-polls",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "(latestRun !== null && isNonTerminalRunState(latestRun.state))",
++      "new": "isNonTerminalRunState((latestRun ?? { state: \"running\" }).state)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_null-run-polls.log",
++      "log_sha256": "ec305564a0ea1bf92d18ccc14e70f7b22d3170cfe62029f37aa98eec91fc6a0d"
++    },
++    {
++      "id": "manual:cycle-3:cadence-nine-seconds",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "export const POLL_INTERVAL_MS = 10_000;",
++      "new": "export const POLL_INTERVAL_MS = 9_000;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_cadence-nine-seconds.log",
++      "log_sha256": "ba827eda03c5633da4dca66e23a4015d3bbbf8066863d56df1f19c20eb2b0d50"
++    },
++    {
++      "id": "manual:cycle-3:interval-never-cleared",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    return () => {\n      clearInterval(timer);\n    };",
++      "new": "    return () => undefined;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_interval-never-cleared.log",
++      "log_sha256": "359108c1ddf56621e43b6a3d9f4db05ccd4a2e3dba68bc5cd06bd561ea65fd1b"
++    },
++    {
++      "id": "manual:cycle-3:stale-callback",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "  useEffect(() => {\n    onNewSetRef.current = onNewSet;\n  }, [onNewSet]);\n",
++      "new": "  useEffect(() => {\n    onNewSetRef.current = onNewSetRef.current;\n  }, [onNewSet]);\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_stale-callback.log",
++      "log_sha256": "ed5edf4f93deb4b66a7510d1ca8003bd1512cc050f46dc47ccdb8c231c767ecb"
++    },
++    {
++      "id": "manual:cycle-3:announcement-args-swapped",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "          formatTimestamp(next.set.endedAt),\n          formatTimestamp(next.set.runStartedAt),",
++      "new": "          formatTimestamp(next.set.runStartedAt),\n          formatTimestamp(next.set.endedAt),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_announcement-args-swapped.log",
++      "log_sha256": "49f326f19ba1fa7113b2f7a9058658cde7aae38037b79b3f7b6e326983f9c31e"
++    },
++    {
++      "id": "manual:cycle-3:interval-effect-not-reactive",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "  }, [polling, read]);",
++      "new": "  }, [read]);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_interval-effect-not-reactive.log",
++      "log_sha256": "972e57eb4d07100ad50688f1744507867cb82de640e4fb1208a7dc07cecbca80"
++    },
++    {
++      "id": "manual:cycle-3:try-again-inert",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "tryAgain: read,",
++      "new": "tryAgain: async () => undefined,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_try-again-inert.log",
++      "log_sha256": "550fd944fb3dec34eba8711cee3d9d4e4883189845e1526b28feb73075f6bbeb"
++    },
++    {
++      "id": "manual:cycle-3:no-mount-read",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-score-set-poll.ts",
++      "old": "    mountedRef.current = true;\n    void read();\n",
++      "new": "    mountedRef.current = true;\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-3-results-logs/manual_cycle-3_no-mount-read.log",
++      "log_sha256": "9c9e8df8da180db61b6f56a8ea0b9563b4a8df8e5025d98576aef8a7e6aaab43"
++    }
++  ],
++  "finished": "2026-10-29T04:03:02Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-3.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-3.log
+new file mode 100644
+index 0000000..8d2b0ff
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-3.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/research/use-score-set-poll.test.ts (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/research/use-score-set-poll.test.ts [ src/screens/research/use-score-set-poll.test.ts ]
++Error: Failed to resolve import "./use-score-set-poll" from "web/src/screens/research/use-score-set-poll.test.ts". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/use-score-set-poll.test.ts:9:38
++  7  |  const __vi_import_4__ = await import('./copy')
++  8  |  const __vi_import_5__ = await import('./format')
++  9  |  const __vi_import_6__ = await import('./use-score-set-poll')
++     |                                       ^
++  10 |  
++  11 |  
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  22:51:38
++   Duration  622ms (transform 15ms, setup 50ms, collect 0ms, tests 0ms, environment 259ms, prepare 149ms)
++
+diff --git a/web/src/screens/research/use-score-set-poll.test.ts b/web/src/screens/research/use-score-set-poll.test.ts
+new file mode 100644
+index 0000000..547dda9
+--- /dev/null
++++ b/web/src/screens/research/use-score-set-poll.test.ts
+@@ -0,0 +1,494 @@
++import { act, renderHook } from "@testing-library/react";
++import { StrictMode } from "react";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { getClassificationSummary } from "../../api/classification-client";
++import type { ClassificationSummary, CurrentSet, LaterSet } from "../../api/classification-types";
++import type { RunState } from "../../api/types";
++import { type HealthState, useHealth } from "../../app/status-region";
++import { SCORE_SET } from "./copy";
++import { formatTimestamp } from "./format";
++import { POLL_INTERVAL_MS, useScoreSetPoll } from "./use-score-set-poll";
++
++vi.mock("../../api/classification-client", () => ({ getClassificationSummary: vi.fn() }));
++vi.mock("../../app/status-region", () => ({ useHealth: vi.fn() }));
++
++const readMock = vi.mocked(getClassificationSummary);
++const healthMock = vi.mocked(useHealth);
++
++const SECOND = 1_000;
++const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
++
++const FACTORS: ClassificationSummary["factors"] = {
++  value: { qualifiedCount: 120, ranked: true, minPeerSetSize: 30 },
++  growth: { qualifiedCount: 118, ranked: true, minPeerSetSize: 30 },
++  momentum: { qualifiedCount: 120, ranked: true, minPeerSetSize: 30 },
++};
++
++function set(setId: string, endedAt: string, runStartedAt: string): CurrentSet {
++  return {
++    setId,
++    classificationDate: endedAt.slice(0, 10),
++    runId: `run-of-${setId}`,
++    runStartedAt,
++    runOutcome: "succeeded",
++    state: "complete",
++    startedAt: runStartedAt,
++    endedAt,
++    latestTradingDay: endedAt.slice(0, 10),
++    activeInstruments: 120,
++    notCurrent: false,
++  };
++}
++
++const SET_A = set("A", "2026-10-15T22:46:00Z", "2026-10-15T22:30:00Z");
++const SET_B = set("B", "2026-10-16T22:48:00Z", "2026-10-16T22:30:00Z");
++const SET_C = set("C", "2026-10-17T22:47:00Z", "2026-10-17T22:30:00Z");
++
++const BUILDING: LaterSet = {
++  setId: "B",
++  state: "building",
++  startedAt: "2026-10-16T22:40:00Z",
++  endedAt: null,
++  failureReason: null,
++  runId: "run-of-B",
++  runStartedAt: "2026-10-16T22:30:00Z",
++};
++
++const FAILED: LaterSet = {
++  ...BUILDING,
++  state: "failed",
++  endedAt: "2026-10-16T22:43:00Z",
++  failureReason: "Factor engine could not read prices",
++};
++
++function summary(current: CurrentSet | null, later: LaterSet | null): ClassificationSummary {
++  return {
++    neverClassified: current === null,
++    set: current,
++    later,
++    factors: FACTORS,
++    stocksCurrent: current === null ? null : { currentCount: 100, followedCount: 120 },
++  };
++}
++
++const A_BUILDING = summary(SET_A, { ...BUILDING, setId: "B" });
++const B_DONE = summary(SET_B, null);
++const C_DONE = summary(SET_C, null);
++const NEVER_BUILDING = summary(null, { ...BUILDING, setId: "A" });
++const NEVER_FAILED = summary(null, { ...FAILED, setId: "A" });
++const NEVER_NOTHING = summary(null, null);
++
++function health(state: RunState | null): HealthState {
++  return {
++    liveness: "answering",
++    health: {
++      status: "ok",
++      database: "reachable",
++      credential_present: true,
++      schema_version: 4,
++      most_recent_run:
++        state === null ? null : { run_id: "run-latest", state, ended_at: "2026-10-16T22:35:00Z" },
++    },
++    lastUpdated: new Date(),
++  };
++}
++
++const TERMINAL: RunState[] = ["succeeded", "partial", "failed", "cancelled", "abandoned"];
++const NON_TERMINAL: RunState[] = ["requested", "running", "cancelling"];
++
++async function tick(ms: number): Promise<void> {
++  await act(async () => {
++    await vi.advanceTimersByTimeAsync(ms);
++  });
++}
++
++/** Mounts the hook and settles the mount read. */
++async function mount(onNewSet = vi.fn(), options: { strict?: boolean } = {}) {
++  const hook = renderHook(
++    ({ callback }: { callback: (next: ClassificationSummary) => void }) =>
++      useScoreSetPoll({ onNewSet: callback }),
++    { initialProps: { callback: onNewSet }, wrapper: options.strict ? StrictMode : undefined },
++  );
++  await tick(0);
++  return { ...hook, onNewSet };
++}
++
++beforeEach(() => {
++  readMock.mockReset();
++  healthMock.mockReset();
++  healthMock.mockReturnValue(health("succeeded"));
++  vi.useFakeTimers({ shouldAdvanceTime: true });
++  vi.setSystemTime(new Date("2026-10-16T22:50:00Z"));
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++describe("TC-COMP-177: a new complete set triggers exactly one announcement and one reload (DAC-E4-S4-5)", () => {
++  // Implements TC-COMP-177
++  it("announces B once and calls onNewSet once with B's summary, never again for the same set", async () => {
++    readMock.mockResolvedValueOnce(A_BUILDING).mockResolvedValue(B_DONE);
++    const { result, onNewSet } = await mount();
++    expect(result.current.summary).toBe(A_BUILDING);
++    expect(result.current.announcement).toBeNull();
++    expect(onNewSet).not.toHaveBeenCalled();
++
++    await tick(POLL_INTERVAL_MS);
++    const expected = SCORE_SET.scoresUpdatedTo(
++      formatTimestamp(SET_B.endedAt),
++      formatTimestamp(SET_B.runStartedAt),
++    );
++    expect(result.current.announcement).toBe(expected);
++    expect(result.current.announcement).toBe(
++      "Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT",
++    );
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    expect(onNewSet).toHaveBeenCalledWith(B_DONE);
++    expect(result.current.summary).toBe(B_DONE);
++
++    const callsAfterB = readMock.mock.calls.length;
++    await tick(60 * SECOND);
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    expect(result.current.announcement).toBe(expected);
++    // B with later null and a terminal download: polling stopped, so B is never re-read.
++    expect(readMock).toHaveBeenCalledTimes(callsAfterB);
++  });
++
++  // Implements TC-COMP-177
++  it("never re-fires when a poll returns the same set again", async () => {
++    healthMock.mockReturnValue(health("running"));
++    readMock.mockResolvedValueOnce(A_BUILDING).mockResolvedValue(B_DONE);
++    const { result, onNewSet } = await mount();
++    await tick(POLL_INTERVAL_MS);
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    const callsAfterB = readMock.mock.calls.length;
++
++    await tick(3 * POLL_INTERVAL_MS);
++    expect(readMock.mock.calls.length).toBeGreaterThan(callsAfterB);
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    expect(result.current.announcement).toBe(
++      SCORE_SET.scoresUpdatedTo(
++        formatTimestamp(SET_B.endedAt),
++        formatTimestamp(SET_B.runStartedAt),
++      ),
++    );
++  });
++
++  // Implements TC-COMP-177
++  it("fires only for a set: a read with no set after one with a set neither fires nor fails", async () => {
++    healthMock.mockReturnValue(health("running"));
++    readMock.mockResolvedValueOnce(A_BUILDING).mockResolvedValue(NEVER_BUILDING);
++    const { result, onNewSet } = await mount();
++    await tick(POLL_INTERVAL_MS);
++    expect(result.current.summary).toBe(NEVER_BUILDING);
++    expect(result.current.pollFailed).toBe(false);
++    expect(onNewSet).not.toHaveBeenCalled();
++    expect(result.current.announcement).toBeNull();
++  });
++
++  // Implements TC-COMP-177
++  it("fires a second, separate announcement and call for a later set C (one per new set, DEC-0153)", async () => {
++    healthMock.mockReturnValue(health("running"));
++    readMock
++      .mockResolvedValueOnce(A_BUILDING)
++      .mockResolvedValueOnce(B_DONE)
++      .mockResolvedValueOnce(B_DONE)
++      .mockResolvedValue(C_DONE);
++    const { result, onNewSet } = await mount();
++    await tick(3 * POLL_INTERVAL_MS);
++    expect(onNewSet).toHaveBeenCalledTimes(2);
++    expect(onNewSet).toHaveBeenNthCalledWith(1, B_DONE);
++    expect(onNewSet).toHaveBeenNthCalledWith(2, C_DONE);
++    expect(result.current.announcement).toBe(
++      SCORE_SET.scoresUpdatedTo(
++        formatTimestamp(SET_C.endedAt),
++        formatTimestamp(SET_C.runStartedAt),
++      ),
++    );
++  });
++});
++
++describe("TC-COMP-184: a never-populated store polls from first load (DAC-E4-S4-6)", () => {
++  // Implements TC-COMP-184
++  it("reads on mount, keeps polling while the first set builds, and hands the first completion to the host", async () => {
++    readMock.mockResolvedValue(NEVER_BUILDING);
++    const onNewSet = vi.fn();
++    const hook = renderHook(() => useScoreSetPoll({ onNewSet }));
++    expect(readMock).toHaveBeenCalledTimes(1);
++    await tick(0);
++    expect(hook.result.current.summary).toBe(NEVER_BUILDING);
++    expect(hook.result.current.summary?.set).toBeNull();
++
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(2);
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(3);
++    expect(onNewSet).not.toHaveBeenCalled();
++
++    const firstSet = summary(SET_A, null);
++    readMock.mockResolvedValue(firstSet);
++    await tick(POLL_INTERVAL_MS);
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    expect(onNewSet).toHaveBeenCalledWith(firstSet);
++    expect(hook.result.current.announcement).toBe(
++      SCORE_SET.scoresUpdatedTo(
++        formatTimestamp(SET_A.endedAt),
++        formatTimestamp(SET_A.runStartedAt),
++      ),
++    );
++    expect(hook.result.current.summary?.set).not.toBeNull();
++    expect(hook.result.current.summary).toBe(firstSet);
++  });
++
++  // Implements TC-COMP-184
++  it("reads once and stops when the first set failed and the download is terminal, keeping the reason", async () => {
++    readMock.mockResolvedValue(NEVER_FAILED);
++    const { result } = await mount();
++    await tick(60 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(1);
++    expect(result.current.summary?.later?.failureReason).toBe(
++      "Factor engine could not read prices",
++    );
++    expect(result.current.summary?.set).toBeNull();
++  });
++
++  // Implements TC-COMP-184
++  it("keeps polling an empty store while the download runs, and stops once health reports it ended", async () => {
++    healthMock.mockReturnValue(health("running"));
++    readMock.mockResolvedValue(NEVER_NOTHING);
++    const hook = await mount();
++    await tick(2 * POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(3);
++
++    healthMock.mockReturnValue(health("succeeded"));
++    hook.rerender({ callback: hook.onNewSet });
++    await tick(POLL_INTERVAL_MS);
++    const settled = readMock.mock.calls.length;
++    expect(settled).toBeLessThanOrEqual(4);
++    await tick(60 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(settled);
++  });
++});
++
++describe("hook behaviour: cadence, stop, checkedAt, failure, unmount, StrictMode, overlap, seams (AC-20, AC-22, DAC-E4-4, DAC-E4-S4-4 to DAC-E4-S4-6)", () => {
++  it("(a) reads at 0, 10 and 20 seconds while a later set builds, and not at 9", async () => {
++    readMock.mockResolvedValue(A_BUILDING);
++    await mount();
++    expect(readMock).toHaveBeenCalledTimes(1);
++    await tick(9 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(1);
++    await tick(SECOND);
++    expect(readMock).toHaveBeenCalledTimes(2);
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(3);
++    expect(POLL_INTERVAL_MS).toBe(10_000);
++  });
++
++  it.each([null, ...TERMINAL])(
++    "(b) stops after the mount read with later null and most_recent_run %s",
++    async (state) => {
++      healthMock.mockReturnValue(health(state));
++      readMock.mockResolvedValue(B_DONE);
++      await mount();
++      await tick(5 * 60 * SECOND);
++      expect(readMock).toHaveBeenCalledTimes(1);
++    },
++  );
++
++  it.each(NON_TERMINAL)(
++    "(b) keeps polling with later null while the download is %s",
++    async (state) => {
++      healthMock.mockReturnValue(health(state));
++      readMock.mockResolvedValue(B_DONE);
++      await mount();
++      await tick(3 * POLL_INTERVAL_MS);
++      expect(readMock).toHaveBeenCalledTimes(4);
++    },
++  );
++
++  it("(c) returns checkedAt as null, then the ISO instant of each successful read, advancing", async () => {
++    let resolveFirst: (value: ClassificationSummary) => void = () => undefined;
++    readMock.mockReturnValueOnce(
++      new Promise<ClassificationSummary>((resolve) => {
++        resolveFirst = resolve;
++      }),
++    );
++    readMock.mockResolvedValue(A_BUILDING);
++    const { result } = renderHook(() => useScoreSetPoll({ onNewSet: vi.fn() }));
++    expect(result.current.checkedAt).toBeNull();
++    expect(result.current.pollFailed).toBe(false);
++    expect(result.current.summary).toBeNull();
++
++    await act(async () => {
++      resolveFirst(A_BUILDING);
++    });
++    const first = result.current.checkedAt;
++    expect(typeof first).toBe("string");
++    expect(first).toMatch(ISO_INSTANT);
++    expect(first).toBe("2026-10-16T22:50:00.000Z");
++
++    await tick(POLL_INTERVAL_MS);
++    const second = result.current.checkedAt;
++    expect(second).toMatch(ISO_INSTANT);
++    expect(Date.parse(second as string)).toBeGreaterThan(Date.parse(first as string));
++  });
++
++  it("(d) a rejected read sets pollFailed, keeps the summary and checkedAt, and stops the timer", async () => {
++    readMock.mockResolvedValueOnce(A_BUILDING).mockRejectedValue(new Error("boom"));
++    const { result, onNewSet } = await mount();
++    const checkedAt = result.current.checkedAt;
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(2);
++    expect(result.current.pollFailed).toBe(true);
++    expect(result.current.summary).toBe(A_BUILDING);
++    expect(result.current.checkedAt).toBe(checkedAt);
++    expect(onNewSet).not.toHaveBeenCalled();
++
++    await tick(30 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(2);
++  });
++
++  it("(d) tryAgain performs exactly one read, clears pollFailed on success and resumes the cadence", async () => {
++    readMock.mockResolvedValueOnce(A_BUILDING).mockRejectedValueOnce(new Error("boom"));
++    const { result } = await mount();
++    await tick(POLL_INTERVAL_MS);
++    expect(result.current.pollFailed).toBe(true);
++
++    readMock.mockResolvedValue(A_BUILDING);
++    await act(async () => {
++      await result.current.tryAgain();
++    });
++    expect(readMock).toHaveBeenCalledTimes(3);
++    expect(result.current.pollFailed).toBe(false);
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(4);
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(5);
++  });
++
++  it("(d) a rejected tryAgain keeps pollFailed and performs no further read", async () => {
++    readMock.mockResolvedValueOnce(A_BUILDING).mockRejectedValue(new Error("boom"));
++    const { result } = await mount();
++    await tick(POLL_INTERVAL_MS);
++    await act(async () => {
++      await result.current.tryAgain();
++    });
++    expect(readMock).toHaveBeenCalledTimes(3);
++    expect(result.current.pollFailed).toBe(true);
++    await tick(30 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(3);
++  });
++
++  it("(d) a rejected first read leaves summary null, checkedAt null and pollFailed true", async () => {
++    readMock.mockRejectedValue(new Error("boom"));
++    const { result } = await mount();
++    expect(result.current.summary).toBeNull();
++    expect(result.current.checkedAt).toBeNull();
++    expect(result.current.pollFailed).toBe(true);
++    expect(result.current.announcement).toBeNull();
++  });
++
++  it("(d) the stop does not depend on set: a never-populated store stops too, and Try again carries the first completion", async () => {
++    readMock.mockResolvedValueOnce(NEVER_BUILDING).mockRejectedValueOnce(new Error("boom"));
++    const { result, onNewSet } = await mount();
++    await tick(POLL_INTERVAL_MS);
++    expect(result.current.pollFailed).toBe(true);
++    expect(result.current.summary).toBe(NEVER_BUILDING);
++    await tick(30 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(2);
++
++    const firstSet = summary(SET_A, null);
++    readMock.mockResolvedValue(firstSet);
++    await act(async () => {
++      await result.current.tryAgain();
++    });
++    expect(readMock).toHaveBeenCalledTimes(3);
++    expect(result.current.pollFailed).toBe(false);
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    expect(onNewSet).toHaveBeenCalledWith(firstSet);
++    expect(result.current.summary).toBe(firstSet);
++  });
++
++  it("(e) unmount clears the timer, and an in-flight read resolving afterwards changes nothing", async () => {
++    readMock.mockResolvedValue(A_BUILDING);
++    const { result, unmount, onNewSet } = await mount();
++    let resolveLate: (value: ClassificationSummary) => void = () => undefined;
++    readMock.mockReturnValueOnce(
++      new Promise<ClassificationSummary>((resolve) => {
++        resolveLate = resolve;
++      }),
++    );
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(2);
++    const before = result.current;
++    unmount();
++    await act(async () => {
++      resolveLate(B_DONE);
++    });
++    expect(onNewSet).not.toHaveBeenCalled();
++    expect(result.current).toBe(before);
++    await tick(60 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(2);
++  });
++
++  it("(f) a StrictMode double mount calls onNewSet once and leaves one interval", async () => {
++    readMock.mockResolvedValueOnce(A_BUILDING).mockResolvedValue(B_DONE);
++    healthMock.mockReturnValue(health("running"));
++    const { onNewSet } = await mount(vi.fn(), { strict: true });
++    await tick(3 * POLL_INTERVAL_MS);
++    expect(onNewSet).toHaveBeenCalledTimes(1);
++    // One read on mount and one per 10-second tick: a second interval would double the ticks.
++    expect(readMock).toHaveBeenCalledTimes(4);
++  });
++
++  it("(g) a read slower than the cadence is not overlapped by the next tick", async () => {
++    let resolveSlow: (value: ClassificationSummary) => void = () => undefined;
++    readMock.mockResolvedValueOnce(A_BUILDING).mockReturnValueOnce(
++      new Promise<ClassificationSummary>((resolve) => {
++        resolveSlow = resolve;
++      }),
++    );
++    const { result } = await mount();
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(2);
++    await tick(2 * POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(2);
++
++    readMock.mockResolvedValue(A_BUILDING);
++    await act(async () => {
++      resolveSlow(A_BUILDING);
++    });
++    expect(result.current.summary).toBe(A_BUILDING);
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(3);
++  });
++
++  it("(h) reads health from the shell's useHealth and issues no fetch of its own", async () => {
++    readMock.mockResolvedValue(A_BUILDING);
++    await mount();
++    await tick(2 * POLL_INTERVAL_MS);
++    expect(healthMock).toHaveBeenCalled();
++    expect(globalThis.fetch).not.toHaveBeenCalled();
++  });
++
++  it("(h) reads onNewSet from the latest render without restarting the cadence", async () => {
++    healthMock.mockReturnValue(health("running"));
++    readMock
++      .mockResolvedValueOnce(A_BUILDING)
++      .mockResolvedValueOnce(A_BUILDING)
++      .mockResolvedValue(B_DONE);
++    const first = vi.fn();
++    const hook = await mount(first);
++    await tick(5 * SECOND);
++    const latest = vi.fn();
++    hook.rerender({ callback: latest });
++    await tick(5 * SECOND);
++    expect(readMock).toHaveBeenCalledTimes(2);
++    await tick(POLL_INTERVAL_MS);
++    expect(readMock).toHaveBeenCalledTimes(3);
++    expect(first).not.toHaveBeenCalled();
++    expect(latest).toHaveBeenCalledTimes(1);
++    expect(latest).toHaveBeenCalledWith(B_DONE);
++  });
++});
+diff --git a/web/src/screens/research/use-score-set-poll.ts b/web/src/screens/research/use-score-set-poll.ts
+new file mode 100644
+index 0000000..eb548d7
+--- /dev/null
++++ b/web/src/screens/research/use-score-set-poll.ts
+@@ -0,0 +1,140 @@
++import { useCallback, useEffect, useRef, useState } from "react";
++import { getClassificationSummary } from "../../api/classification-client";
++import type { ClassificationSummary } from "../../api/classification-types";
++import { useHealth } from "../../app/status-region";
++import { isNonTerminalRunState } from "../runs/outcome-badge";
++import { SCORE_SET } from "./copy";
++import { formatTimestamp } from "./format";
++
++/**
++ * The score-set poll every scored CAP-002 surface runs (classification-ui 2.3,
++ * 2.6; UX design 1.2 Polling and Completion; AC-20, AC-22; DAC-E4-4,
++ * DAC-E4-S4-4, DAC-E4-S4-5, DAC-E4-S4-6; DEC-0153, DEC-0155).
++ *
++ * It reads `GET /api/classifications/summary` on mount, from first load and
++ * before any set exists, then every 10 seconds while the read's `later.state`
++ * is `building` or the shell's health reports a non-terminal download, and
++ * stops otherwise (STD-UI-25). A read whose `set.setId` differs from the last
++ * one seen, null to a first set included, is a new complete set: the hook
++ * sets `announcement` once and calls the host's `onNewSet` once, and the host
++ * reloads its table once with its state preserved (DEC-0062). A rejected read
++ * sets `pollFailed`, keeps the summary and stops the timer until `tryAgain`,
++ * whether or not a set exists yet (DEC-0155).
++ */
++
++/** The cadence classification-ui 2.3 records for this poll, mirroring `HEALTH_POLL_INTERVAL_MS`. */
++export const POLL_INTERVAL_MS = 10_000;
++
++export interface ScoreSetPoll {
++  /** The last successful read, `null` before the first. */
++  summary: ClassificationSummary | null;
++  /** The ISO-8601 instant of the last successful read, `null` before the first (DEC-0153). */
++  checkedAt: string | null;
++  /** True after a rejected read, until `tryAgain` succeeds. */
++  pollFailed: boolean;
++  /** One read, now; polling resumes while a continuation condition holds. */
++  tryAgain: () => Promise<void>;
++  /** *Scores updated to {time} from the download started {time}* for the latest new set. */
++  announcement: string | null;
++}
++
++/**
++ * `undefined` before the first successful read, then the last read's
++ * `set.setId`, or `null` when that read had no set. The two empty values are
++ * distinct so a first set arriving after a never-populated read counts as new
++ * while the very first read never fires.
++ */
++type LastSetId = string | null | undefined;
++
++export function useScoreSetPoll({
++  onNewSet,
++}: {
++  onNewSet: (summary: ClassificationSummary) => void;
++}): ScoreSetPoll {
++  const [summary, setSummary] = useState<ClassificationSummary | null>(null);
++  const [checkedAt, setCheckedAt] = useState<string | null>(null);
++  const [pollFailed, setPollFailed] = useState(false);
++  const [announcement, setAnnouncement] = useState<string | null>(null);
++  const { health } = useHealth();
++
++  const mountedRef = useRef(true);
++  const inFlightRef = useRef(false);
++  const lastSetIdRef = useRef<LastSetId>(undefined);
++  const onNewSetRef = useRef(onNewSet);
++
++  useEffect(() => {
++    onNewSetRef.current = onNewSet;
++  }, [onNewSet]);
++
++  const read = useCallback(async (): Promise<void> => {
++    // At most one read in flight: a tick that lands during a slow read is skipped.
++    if (inFlightRef.current) {
++      return;
++    }
++    inFlightRef.current = true;
++    let next: ClassificationSummary;
++    try {
++      // Only the read is guarded: a host callback that throws is the host's
++      // defect and must not be reported as a failed poll.
++      next = await getClassificationSummary();
++    } catch {
++      // The read failed, whether the API did not answer or refused. The error
++      // is not swallowed: it becomes the `pollFailed` state the as-of line
++      // renders as *Could not check for newer scores.* with **Try again**
++      // (DEC-0155), and the previous summary stays as it was. Its text is
++      // deliberately not rendered (STD-UI-23).
++      if (mountedRef.current) {
++        setPollFailed(true);
++      }
++      return;
++    } finally {
++      inFlightRef.current = false;
++    }
++    if (!mountedRef.current) {
++      return;
++    }
++    const previous = lastSetIdRef.current;
++    const setId = next.set?.setId ?? null;
++    lastSetIdRef.current = setId;
++    setSummary(next);
++    setCheckedAt(new Date().toISOString());
++    setPollFailed(false);
++    if (next.set !== null && previous !== undefined && previous !== setId) {
++      setAnnouncement(
++        SCORE_SET.scoresUpdatedTo(
++          formatTimestamp(next.set.endedAt),
++          formatTimestamp(next.set.runStartedAt),
++        ),
++      );
++      onNewSetRef.current(next);
++    }
++  }, []);
++
++  useEffect(() => {
++    mountedRef.current = true;
++    void read();
++    return () => {
++      mountedRef.current = false;
++    };
++  }, [read]);
++
++  const latestRun = health?.most_recent_run ?? null;
++  const polling =
++    !pollFailed &&
++    (summary?.later?.state === "building" ||
++      (latestRun !== null && isNonTerminalRunState(latestRun.state)));
++
++  useEffect(() => {
++    if (!polling) {
++      return;
++    }
++    const timer = setInterval(() => {
++      void read();
++    }, POLL_INTERVAL_MS);
++    return () => {
++      clearInterval(timer);
++    };
++  }, [polling, read]);
++
++  return { summary, checkedAt, pollFailed, tryAgain: read, announcement };
++}

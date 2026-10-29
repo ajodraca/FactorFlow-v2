@@ -388,6 +388,13 @@ export const SCORE_SET = {
     `Showing scores produced ${produced} from the download started ${downloadStarted}. A newer set is being produced and replaces this one when complete.`,
   failedBody: (failed: string, reason: string, produced: string, downloadStarted: string): string =>
     `Score update failed ${failed}: ${reason}. Showing scores produced ${produced} from the download started ${downloadStarted}. The next complete download will try again.`,
+  /**
+   * The reason clause of `failedBody` when a failed set recorded none. No
+   * design states it: `LaterSet.failureReason` is nullable, and the scheduler
+   * always records a reason, so the clause is defensive (CAP-002-E4-S4 T002,
+   * CAP-002-E4-S2 Open Gap 6; DEC-0232, PROVISIONAL).
+   */
+  noReasonRecorded: "no reason was recorded",
   scoresUpdatedTo: (scoresAt: string, downloadStarted: string): string =>
     `Scores updated to ${scoresAt} from the download started ${downloadStarted}`,
   scoresUpdatedToast: (scoresAt: string): string => `Scores updated to ${scoresAt}`,
