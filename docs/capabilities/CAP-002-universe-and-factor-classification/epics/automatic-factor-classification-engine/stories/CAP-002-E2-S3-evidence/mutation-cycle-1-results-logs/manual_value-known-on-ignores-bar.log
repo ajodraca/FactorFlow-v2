@@ -1,0 +1,46 @@
+........................................................................ [ 67%]
+.................F
+=================================== FAILURES ===================================
+_____ test_value_known_on_is_the_latest_observation_of_statements_and_bar ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55602 user=test database=test_6ef05085404542c6a46048a33a350147) at 0x10ccb6bd0>, stock=1, set_id=UUID('af088317-e066-433c-a5ac-82c8f409f50d'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ccb5850>
+
+    def test_value_known_on_is_the_latest_observation_of_statements_and_bar(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (7): every statement row and the bar an input used decide its known_on."""
+        values = standard()
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        # Later than the stock's bar (observed on L), so a statement row decides known_on.
+        seen = {
+            "balance_sheet": date(2026, 10, 20),
+            "income_statement": date(2026, 10, 21),
+            "cash_flow_statement": date(2026, 10, 22),
+        }
+        for k, end in enumerate(ends):
+            for statement_type, observed in seen.items():
+                payload = {
+                    TEST_KEYS[name]: value
+                    for name, value in values[k].items()
+                    if line_items.LINE_ITEMS[name].statement_type == statement_type
+                }
+                # Only the third quarter of each type carries its type's latest observation.
+                on = observed if k == 2 else end + timedelta(days=1)
+                add_statement(env.conn, env.stock, end, statement_type, payload, observed_on=on)
+        other = add_instrument(env.conn, "LATEBAR")
+        add_bar(env.conn, other, L, observed_on=date(2026, 10, 20))
+        add_quarters(env.conn, other, P1, 8, standard())
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        # book_to_price reads the newest balance sheet only, not the third quarter's.
+>       assert rows["book_to_price"]["known_on"] == L
+E       assert datetime.date(2026, 10, 1) == datetime.date(2026, 10, 16)
+
+tests/integration/test_engine_inputs_fundamentals.py:1110: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_value_known_on_is_the_latest_observation_of_statements_and_bar
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 89 passed in 9.99s

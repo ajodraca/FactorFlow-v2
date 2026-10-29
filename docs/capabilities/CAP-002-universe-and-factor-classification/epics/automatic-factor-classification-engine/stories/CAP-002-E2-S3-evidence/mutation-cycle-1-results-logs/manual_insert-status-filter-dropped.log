@@ -1,0 +1,35 @@
+........................................................................ [ 67%]
+..................F
+=================================== FAILURES ===================================
+_________ test_missing_input_carries_the_last_fundamentals_acquisition _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56359 user=test database=test_4843de2513404947a06e2c4b3bac17a4) at 0x10842e870>, stock=1, set_id=UUID('1acef8f8-ab9e-41af-ba2f-7f6a0af1f16a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1085e7320>
+
+    def test_missing_input_carries_the_last_fundamentals_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, AC-12: a missing input names the last fundamentals outcome; a
+        present one carries no acquisition."""
+        values = standard()
+        del values[0]["net_income"]
+        add_quarters(env.conn, env.stock, P1, 8, values)
+        _acquisition(env, env.stock, "fundamentals", "not_found")
+        _acquisition(env, env.stock, "prices", "written")
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        acquisition = rows["earnings_yield"]["detail"]["last_acquisition"]
+        assert (acquisition["data_type"], acquisition["outcome"]) == ("fundamentals", "not_found")
+        assert datetime.fromisoformat(acquisition["acquired_at"]) == datetime(
+            2026, 10, 16, 21, tzinfo=UTC
+        )
+>       assert "last_acquisition" not in rows["book_to_price"]["detail"]
+E       AssertionError: assert 'last_acquisition' not in {'close': Decimal('10.000000'), 'periods': [{'backfilled': False, 'observed_on': '2026-10-15', 'statement_type': 'balance_sheet', 'fiscal_period_end': '2026-09-30', ...}], 'bar_date': '2026-10-16', 'bar_observed_on': '2026-10-16', ...}
+
+tests/integration/test_engine_inputs_fundamentals.py:1148: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_input_carries_the_last_fundamentals_acquisition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 90 passed in 9.64s

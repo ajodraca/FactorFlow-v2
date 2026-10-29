@@ -1,0 +1,30 @@
+............................................F
+=================================== FAILURES ===================================
+_________ test_quarter_absent_from_the_trailing_window_forms_no_window _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56737 user=test database=test_180d00a8efe2436bb46e5d055c3ab6de) at 0x10c9e4d70>, stock=1, set_id=UUID('291e45fa-16b4-4e57-ba2d-b1394dfd05f0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca81940>
+
+    def test_quarter_absent_from_the_trailing_window_forms_no_window(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S3-2, DEC-0221: with the third quarter absent the second and third periods
+        held are six months apart, so the trailing window is not formed."""
+        found = _income_with_gap(env, gap=2)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in (*GROWTH, "earnings_yield"):
+>           assert rows[name]["status"] == "missing", name
+E           AssertionError: earnings_yield
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_fundamentals.py:290: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_quarter_absent_from_the_trailing_window_forms_no_window
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 44 passed in 3.16s

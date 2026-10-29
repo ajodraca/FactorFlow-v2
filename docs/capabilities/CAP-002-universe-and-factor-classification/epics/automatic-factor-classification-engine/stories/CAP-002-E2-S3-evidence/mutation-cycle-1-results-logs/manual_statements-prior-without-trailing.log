@@ -1,0 +1,31 @@
+...............................................F
+=================================== FAILURES ===================================
+____________ test_gap_inside_the_prior_window_leaves_growth_missing ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56801 user=test database=test_661583822e2d418e9da5acbdc212a7a1) at 0x10cf02d20>, stock=1, set_id=UUID('5dd7ca1e-bf8f-44cc-b69e-9ae2ab9a9bf0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf04140>
+
+    def test_gap_inside_the_prior_window_leaves_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221: with the eighth quarter absent and a ninth held, the seventh and eighth
+        periods held are six months apart, so the eight quarters growth needs are not
+        consecutive."""
+        found = _income_with_gap(env, gap=7, n=9)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in GROWTH:
+>           assert rows[name]["status"] == "missing", name
+E           AssertionError: revenue_growth
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_fundamentals.py:338: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_gap_inside_the_prior_window_leaves_growth_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 47 passed in 3.37s

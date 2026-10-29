@@ -1,0 +1,32 @@
+........................................................................ [ 67%]
+...F
+=================================== FAILURES ===================================
+________________ test_plain_decimal_fractions_are_read_exactly _________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51978 user=test database=test_60e55ffc9644418fa0a632aad496e44c) at 0x10d0a8b90>, stock=1, set_id=UUID('19aa1b28-afc3-47b6-a419-1428153f3202'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0a91f0>
+
+    def test_plain_decimal_fractions_are_read_exactly(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (4): a plain decimal's fraction is read, zero digits included."""
+        values = standard()
+        values[0]["book_equity"] = Decimal("500.05")
+        for k in range(4):
+            values[k]["net_income"] = Decimal(f"{13 - k}.10")
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert rows["book_to_price"]["value"] == ratio(Decimal("500.05"), Decimal(1000))
+E       AssertionError: assert None == Decimal('0.5000500000')
+E        +  where Decimal('0.5000500000') = ratio(Decimal('500.05'), Decimal('1000'))
+E        +    where Decimal('500.05') = Decimal('500.05')
+E        +    and   Decimal('1000') = Decimal(1000)
+
+tests/integration/test_engine_inputs_fundamentals.py:785: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_plain_decimal_fractions_are_read_exactly
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 75 passed in 6.69s

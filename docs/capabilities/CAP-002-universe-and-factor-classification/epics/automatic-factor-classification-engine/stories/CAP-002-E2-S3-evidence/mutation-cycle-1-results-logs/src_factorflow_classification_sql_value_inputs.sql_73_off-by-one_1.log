@@ -1,0 +1,47 @@
+........................................F
+=================================== FAILURES ===================================
+________ test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52272 user=test database=test_ec845abb06d549f3a32b7d4b8109f00c) at 0x10a72fb90>, stock=1, set_id=UUID('c8d53fe8-6c1c-4a91-90d4-1f925587f341'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a72fb60>
+
+    def test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-1: diluted EPS over the same two windows."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52272 user=test database=test_ec845abb06d549f3a32b7d4b8109f00c) at 0x10a72fb90>, stock=1, set_id=UUID('c8d53fe8-6c1c-4a91-90d4-1f925587f341'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a72fb60>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> BuildResult:
+        install_test_line_items(monkeypatch)
+        result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: CheckViolation: new row for relation "factor_input" violates check constraint "factor_input_present_is_dated"
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_fundamentals.py:114: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:136 classification build failed: CheckViolation: new row for relation "factor_input" violates check constraint "factor_input_present_is_dated"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/src/factorflow/classification/engine.py", line 118, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/src/factorflow/classification/engine.py", line 202, in _fundamental_inputs_stage
+    cur.execute(_INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["value", "growth"]})
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.CheckViolation: new row for relation "factor_input" violates check constraint "factor_input_present_is_dated"
+DETAIL:  Failing row contains (c8d53fe8-6c1c-4a91-90d4-1f925587f341, 1, value, book_to_price, present, 0.5000000000, null, 2026-10-16, f, {"close": 10.000000, "periods": [{"backfilled": false, "observed...).
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_eps_growth_is_four_quarter_sum_over_prior_four_minus_one
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 40 passed in 2.36s

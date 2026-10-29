@@ -1,0 +1,26 @@
+..................................................................F
+=================================== FAILURES ===================================
+__________________ test_only_unresolved_line_items_are_named ___________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53850 user=test database=test_fa7ae1f488cc404eab17ba9d2cd9ddad) at 0x10c754320>, stock=1, set_id=UUID('7b2913a6-db53-4e12-a2ab-81a3925ce1fb'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c756120>
+
+    def test_only_unresolved_line_items_are_named(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """AC-12: with net income resolved, earnings_yield names only shares outstanding."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        resolve_only(monkeypatch, "net_income")
+    
+        run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert rows["earnings_yield"]["detail"]["cause"] == UNRESOLVED_CAUSE
+E       AssertionError: assert 'line_item_absent' == 'line_item_mapping_unresolved'
+E         
+E         - line_item_mapping_unresolved
+E         + line_item_absent
+
+tests/integration/test_engine_inputs_fundamentals.py:688: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_only_unresolved_line_items_are_named
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 66 passed in 6.30s

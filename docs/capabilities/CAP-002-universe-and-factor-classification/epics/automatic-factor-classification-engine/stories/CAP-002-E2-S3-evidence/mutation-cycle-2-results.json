@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "command": "uv run --all-extras --offline python -B -m pytest -m \"postgres or not postgres\" -x -q -p no:cacheprovider tests/unit/test_engine_line_item_params.py tests/unit/test_engine_sql_safety.py tests/unit/test_classification_sql_ships.py tests/integration/test_engine_inputs_fundamentals.py tests/integration/test_engine_currency.py",
+  "repo_head": "f1d660782f95741cea9465663c798db1136cc1fa",
+  "tree_patch_sha256": "462ab0001ee097a43bd3e38e605c8057e22397f3a6b7be1da83677b50452de8f",
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutants-cycle-2.json",
+  "mutants_sha256": "920681ed08bc1f40085d70ee11ab77571b2d479c93b8e6753f11e4e7a227cbbf",
+  "jobs": 4,
+  "started": "2026-10-28T03:31:14Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 13.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
+      "log_sha256": "82a7183a098879f462c6b60d81b4fb245db59e1a1f8a05573e652a1bed5d40a7"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 13.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
+      "log_sha256": "6fb89bf0c9a56c8a8554cf112dfd7d5e542a836e93a973c8266e116391e31cbd"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 13.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
+      "log_sha256": "fca742f6059a5a8c7293b2f1a8ec2b4812e5e96a13d1c70079b468a28ab824dc"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 14.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
+      "log_sha256": "f03010835226ba9d7dcafbef78bb2cc09fcf31b98224c6b9ecabd9693e2db256"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:reviewer-value-known-on-present-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 164,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE WHEN s.status = 'present' THEN s.known_on END AS known_on,",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 6.5,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-known-on-present-only.log",
+      "log_sha256": "c36977a41a34062276877c76d67a60229e81c1f390b31fbc136bdc2539035e06"
+    },
+    {
+      "id": "manual:reviewer-value-as-of-present-or-outdated",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 163,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.as_of END AS as_of,",
+      "new": "CASE WHEN s.status IN ('present', 'outdated') THEN s.as_of END AS as_of,",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 6.5,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-as-of-present-or-outdated.log",
+      "log_sha256": "4a93e1e9fb35f82f36bdb5202827611902c30826ad48deecf92151d211f24749"
+    },
+    {
+      "id": "manual:reviewer-growth-known-on-present-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 98,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END,",
+      "new": "CASE WHEN s.status = 'present' THEN s.known_on END,",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.7,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-growth-known-on-present-only.log",
+      "log_sha256": "31c1df2a2cc4600dcaee2f72aea65e82aa6f1d01330b6242d90161788572772d"
+    },
+    {
+      "id": "manual:reviewer-value-found-window-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 88,
+      "old": "AND s.statement_type IN ('balance_sheet', n.window_type)",
+      "new": "AND s.statement_type = n.window_type",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 4.0,
+      "worker": 3,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-found-window-only.log",
+      "log_sha256": "df9200af2fe6fd7970e37abc1c6b42181f6f06f09c721d12203355934f81f8df"
+    },
+    {
+      "id": "manual:reviewer-value-absent-periods-found-dropped",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 175,
+      "old": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')",
+      "new": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'periods_missing')",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 9.2,
+      "worker": 3,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-absent-periods-found-dropped.log",
+      "log_sha256": "b1063032ee1721d7763d5d3403aa25166d063d8e790868e2b604518ea53ccb98"
+    },
+    {
+      "id": "manual:reviewer-growth-absent-periods-found-dropped",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 109,
+      "old": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')",
+      "new": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'periods_missing')",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 9.6,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-growth-absent-periods-found-dropped.log",
+      "log_sha256": "3c4fd8c4fa29016cc197d8946e19b79faeb510e5da8c4729ca5d425754219238"
+    },
+    {
+      "id": "manual:reviewer-growth-data-type-prices",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 124,
+      "old": "       'fundamentals'::text\n  FROM statused s",
+      "new": "       'prices'::text\n  FROM statused s",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 9.7,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-growth-data-type-prices.log",
+      "log_sha256": "90eeaa8bd28e5df56db5bba3a3a5ac46fe0e296daa2c1cc09b9fc523b2c6e894"
+    },
+    {
+      "id": "manual:reviewer-value-bar-recorded-asc",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 99,
+      "old": "ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+      "new": "ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at ASC",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 8.1,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S3-evidence/mutation-cycle-2-results-logs/manual_reviewer-value-bar-recorded-asc.log",
+      "log_sha256": "63fb1d7ae8c10848edd5b945c939a45f328588aeb6a4542d1a1d91805d45fb3c"
+    }
+  ],
+  "finished": "2026-10-28T03:31:44Z"
+}

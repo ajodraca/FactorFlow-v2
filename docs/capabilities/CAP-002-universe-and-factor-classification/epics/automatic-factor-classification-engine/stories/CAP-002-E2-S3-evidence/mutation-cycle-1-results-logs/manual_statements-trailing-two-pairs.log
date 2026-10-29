@@ -1,0 +1,28 @@
+.............................................F
+=================================== FAILURES ===================================
+_____ test_gap_between_third_and_fourth_quarters_forms_no_trailing_window ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56812 user=test database=test_e88fc4a4ad13446f98a91ef8728d59a6) at 0x10a68be90>, stock=1, set_id=UUID('30edc18d-1b86-47e7-a034-50065073d32a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a6886e0>
+
+    def test_gap_between_third_and_fourth_quarters_forms_no_trailing_window(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221: the P3 to P4 pair must be consecutive too; with the fourth income
+        statement absent, the third and fourth held are six months apart."""
+        _income_with_gap(env, gap=3)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert rows["earnings_yield"]["status"] == "missing"
+E       AssertionError: assert 'present' == 'missing'
+E         
+E         - missing
+E         + present
+
+tests/integration/test_engine_inputs_fundamentals.py:307: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_gap_between_third_and_fourth_quarters_forms_no_trailing_window
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 45 passed in 3.20s

@@ -1,0 +1,23 @@
+F
+=================================== FAILURES ===================================
+____ test_real_line_items_pass_every_key_as_none_and_every_item_unresolved _____
+
+    def test_real_line_items_pass_every_key_as_none_and_every_item_unresolved() -> None:
+        """Design 2.4, AC-12: while every key is REQUIRES_INPUT each is bound as None."""
+        params = engine._line_item_parameters()
+    
+        assert params["line_item_names"] == NAMES
+        assert by_name(params) == {
+            name: (item.statement_type, None, item.sign) for name, item in LINE_ITEMS.items()
+        }
+>       assert params["unresolved"] == NAMES
+E       AssertionError: assert [] == ['book_equity...sh_flow', ...]
+E         
+E         Right contains 7 more items, first extra item: 'book_equity'
+E         Use -v to get more diff
+
+tests/unit/test_engine_line_item_params.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_engine_line_item_params.py::test_real_line_items_pass_every_key_as_none_and_every_item_unresolved
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.41s
