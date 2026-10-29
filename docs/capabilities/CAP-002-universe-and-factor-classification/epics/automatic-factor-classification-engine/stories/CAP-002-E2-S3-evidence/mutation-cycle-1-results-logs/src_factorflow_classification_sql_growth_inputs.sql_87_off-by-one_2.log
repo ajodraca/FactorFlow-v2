@@ -1,0 +1,30 @@
+................................................................F
+=================================== FAILURES ===================================
+______________ test_small_positive_prior_year_base_is_computable _______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62501 user=test database=test_2097e1ae56d54dae9ee5b090645b84cf) at 0x10c799af0>, stock=1, set_id=UUID('a365e28a-1b03-4a2f-b221-4a9c88677c30'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c79b320>
+
+    def test_small_positive_prior_year_base_is_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (2): only a prior-year base of zero or less is not computable."""
+        values = standard()
+        for k in range(4, 8):
+            values[k]["diluted_eps"] = Decimal("0.25")
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["eps_growth"]
+>       assert (row["status"], row["value"]) == ("present", ratio(Decimal("4.6"), Decimal(1), 1))
+E       AssertionError: assert ('not_computable', None) == ('present', D....6000000000'))
+E         
+E         At index 0 diff: 'not_computable' != 'present'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:649: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_small_positive_prior_year_base_is_computable
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 64 passed in 5.73s

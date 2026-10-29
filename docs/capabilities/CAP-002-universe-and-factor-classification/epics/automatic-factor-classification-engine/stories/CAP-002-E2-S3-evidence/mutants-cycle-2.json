@@ -1,0 +1,79 @@
+{
+ "schema": 1,
+ "repo_head": "f1d660782f95741cea9465663c798db1136cc1fa",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:reviewer-value-known-on-present-only",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 164,
+   "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+   "new": "CASE WHEN s.status = 'present' THEN s.known_on END AS known_on,"
+  },
+  {
+   "id": "manual:reviewer-value-as-of-present-or-outdated",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 163,
+   "old": "CASE WHEN s.status <> 'missing' THEN s.as_of END AS as_of,",
+   "new": "CASE WHEN s.status IN ('present', 'outdated') THEN s.as_of END AS as_of,"
+  },
+  {
+   "id": "manual:reviewer-growth-known-on-present-only",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 98,
+   "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END,",
+   "new": "CASE WHEN s.status = 'present' THEN s.known_on END,"
+  },
+  {
+   "id": "manual:reviewer-value-found-window-only",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 88,
+   "old": "AND s.statement_type IN ('balance_sheet', n.window_type)",
+   "new": "AND s.statement_type = n.window_type"
+  },
+  {
+   "id": "manual:reviewer-value-absent-periods-found-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 175,
+   "old": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')",
+   "new": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'periods_missing')"
+  },
+  {
+   "id": "manual:reviewer-growth-absent-periods-found-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 109,
+   "old": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')",
+   "new": "'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'periods_missing')"
+  },
+  {
+   "id": "manual:reviewer-growth-data-type-prices",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 124,
+   "old": "       'fundamentals'::text\n  FROM statused s",
+   "new": "       'prices'::text\n  FROM statused s"
+  },
+  {
+   "id": "manual:reviewer-value-bar-recorded-asc",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 99,
+   "old": "ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+   "new": "ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at ASC"
+  }
+ ]
+}

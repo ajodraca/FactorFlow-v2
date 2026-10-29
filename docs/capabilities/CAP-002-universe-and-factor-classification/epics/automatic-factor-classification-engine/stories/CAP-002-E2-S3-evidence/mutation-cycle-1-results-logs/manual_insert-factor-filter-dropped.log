@@ -1,0 +1,54 @@
+........................................................................ [ 67%]
+..............F
+=================================== FAILURES ===================================
+_______________ test_insert_inputs_writes_only_the_named_factors _______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56417 user=test database=test_206732b76fe642de9279d2b03a6e95f8) at 0x10cf935c0>, stock=1, set_id=UUID('9c6d61d1-eda6-4dbe-88f7-72f56fec825f'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d475be0>
+
+    def test_insert_inputs_writes_only_the_named_factors(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0115: a later stage adds its rows to inputs and runs insert_inputs.sql for its own
+        factor; only that factor's rows are written, so no value or growth row is written twice."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+        def momentum_stub(conn: psycopg.Connection, ctx: BuildContext) -> None:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, "
+                    "known_on, restated_possible, detail, missing_data_type) VALUES "
+                    "(%s, 'momentum', 'return_3m', 'present', 0.1, %s, %s, false, "
+                    "jsonb_build_object(), 'prices')",
+                    (env.stock, L, L),
+                )
+                cur.execute(engine._INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["momentum"]})
+    
+        install_test_line_items(monkeypatch)
+        monkeypatch.setattr(engine, "_STAGES", [engine._fundamental_inputs_stage, momentum_stub])
+    
+        result = engine.build(env.conn, env.set_id, 60)
+    
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: UniqueViolation: duplicate key value violates unique constraint "factor_input_pkey"
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_fundamentals.py:1030: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:136 classification build failed: UniqueViolation: duplicate key value violates unique constraint "factor_input_pkey"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w0/src/factorflow/classification/engine.py", line 118, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w0/tests/integration/test_engine_inputs_fundamentals.py", line 1023, in momentum_stub
+    cur.execute(engine._INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["momentum"]})
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w0/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "factor_input_pkey"
+DETAIL:  Key (set_id, instrument_id, factor, input_name)=(9c6d61d1-eda6-4dbe-88f7-72f56fec825f, 1, value, book_to_price) already exists.
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_insert_inputs_writes_only_the_named_factors
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 86 passed in 8.70s

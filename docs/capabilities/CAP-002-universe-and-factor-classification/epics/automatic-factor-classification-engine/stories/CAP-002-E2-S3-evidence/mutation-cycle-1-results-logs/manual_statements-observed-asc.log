@@ -1,0 +1,45 @@
+.......................................................F
+=================================== FAILURES ===================================
+_______ test_later_observation_of_a_period_is_used_and_earlier_untouched _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55030 user=test database=test_ee322068cb434737959634156c731e9a) at 0x108667b90>, stock=1, set_id=UUID('0955cdd9-1ded-46f9-a6c0-dec16000b98e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108664dd0>
+
+    def test_later_observation_of_a_period_is_used_and_earlier_untouched(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        latest = date(2026, 5, 31)
+        _seven_older_quarters(env, latest)
+        newest = standard()[0]
+        for statement_type, names in (
+            ("balance_sheet", ("book_equity", "shares_outstanding")),
+            ("cash_flow_statement", ("operating_cash_flow", "capital_expenditure")),
+        ):
+            payload = {TEST_KEYS[n]: newest[n] for n in names}
+            add_statement(
+                env.conn, env.stock, latest, statement_type, payload, observed_on=date(2026, 6, 1)
+            )
+        first = {TEST_KEYS["revenue"]: Decimal(130), TEST_KEYS["net_income"]: Decimal(13)}
+        second = {TEST_KEYS["revenue"]: Decimal(140), TEST_KEYS["net_income"]: Decimal(23)}
+        add_statement(
+            env.conn, env.stock, latest, "income_statement", first, observed_on=date(2026, 6, 1)
+        )
+        add_statement(
+            env.conn, env.stock, latest, "income_statement", second, observed_on=date(2026, 7, 15)
+        )
+        before = _period_rows(env, latest)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert rows["revenue_growth"]["value"] == ratio(Decimal(485), Decimal(370), 1)
+E       AssertionError: assert Decimal('0.2837837838') == Decimal('0.3108108108')
+E        +  where Decimal('0.3108108108') = ratio(Decimal('485'), Decimal('370'), 1)
+E        +    where Decimal('485') = Decimal(485)
+E        +    and   Decimal('370') = Decimal(370)
+
+tests/integration/test_engine_inputs_fundamentals.py:517: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_later_observation_of_a_period_is_used_and_earlier_untouched
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 55 passed in 4.64s

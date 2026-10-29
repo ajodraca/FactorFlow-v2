@@ -1,0 +1,31 @@
+........................................................................ [ 67%]
+.....F
+=================================== FAILURES ===================================
+________ test_market_capitalisation_is_latest_close_times_newest_shares ________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55479 user=test database=test_98c6aec0f57f4cf2ab53e14562211dd6) at 0x1091583e0>, stock=1, set_id=UUID('9f98691c-06a9-4cb9-a603-02f0e05bd2cc'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109158c50>
+
+    def test_market_capitalisation_is_latest_close_times_newest_shares(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (6): the latest session's latest observation of the close, times shares
+        outstanding from the most recent quarterly balance sheet; detail carries the parts."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        add_bar(env.conn, env.stock, L - timedelta(days=1), close=99)
+        add_bar(env.conn, env.stock, L, close=12, observed_on=L + timedelta(days=1))
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert rows["book_to_price"]["value"] == ratio(Decimal(500), Decimal(1200))
+E       AssertionError: assert Decimal('0.5000000000') == Decimal('0.4166666667')
+E        +  where Decimal('0.4166666667') = ratio(Decimal('500'), Decimal('1200'))
+E        +    where Decimal('500') = Decimal(500)
+E        +    and   Decimal('1200') = Decimal(1200)
+
+tests/integration/test_engine_inputs_fundamentals.py:819: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_market_capitalisation_is_latest_close_times_newest_shares
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 77 passed in 12.38s

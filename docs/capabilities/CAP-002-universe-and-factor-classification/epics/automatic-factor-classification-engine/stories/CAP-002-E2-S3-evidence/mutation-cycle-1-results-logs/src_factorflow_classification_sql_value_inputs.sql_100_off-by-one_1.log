@@ -1,0 +1,51 @@
+........................................................................ [ 67%]
+.....F
+=================================== FAILURES ===================================
+________ test_market_capitalisation_is_latest_close_times_newest_shares ________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52792 user=test database=test_e08e94b48e9343e79fc287617c48d1a8) at 0x108e53950>, stock=1, set_id=UUID('674e87d2-d3bf-4fcd-b982-b4c1adbde92e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e53320>
+
+    def test_market_capitalisation_is_latest_close_times_newest_shares(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (6): the latest session's latest observation of the close, times shares
+        outstanding from the most recent quarterly balance sheet; detail carries the parts."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+        add_bar(env.conn, env.stock, L - timedelta(days=1), close=99)
+        add_bar(env.conn, env.stock, L, close=12, observed_on=L + timedelta(days=1))
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:816: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52792 user=test database=test_e08e94b48e9343e79fc287617c48d1a8) at 0x108e53950>, stock=1, set_id=UUID('674e87d2-d3bf-4fcd-b982-b4c1adbde92e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e53320>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> BuildResult:
+        install_test_line_items(monkeypatch)
+        result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: UniqueViolation: duplicate key value violates unique constraint "factor_input_pkey"
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_fundamentals.py:114: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:136 classification build failed: UniqueViolation: duplicate key value violates unique constraint "factor_input_pkey"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w3/src/factorflow/classification/engine.py", line 118, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w3/src/factorflow/classification/engine.py", line 202, in _fundamental_inputs_stage
+    cur.execute(_INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["value", "growth"]})
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w3/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "factor_input_pkey"
+DETAIL:  Key (set_id, instrument_id, factor, input_name)=(674e87d2-d3bf-4fcd-b982-b4c1adbde92e, 1, value, book_to_price) already exists.
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_market_capitalisation_is_latest_close_times_newest_shares
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 77 passed in 7.36s

@@ -1,0 +1,42 @@
+..........................................F
+=================================== FAILURES ===================================
+________ test_seven_quarters_leave_growth_missing_and_value_unaffected _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54146 user=test database=test_71e1e84fe8c1409c8534003c22a0a772) at 0x10b2f8e00>, stock=1, set_id=UUID('fb65b5e6-91b5-4d32-b5aa-a9cc11cdf379'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b2fa690>
+
+    def test_seven_quarters_leave_growth_missing_and_value_unaffected(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ends = add_quarters(env.conn, env.stock, P1, 7, standard(7))
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in GROWTH:
+            assert rows[name]["status"] == "missing", name
+            assert rows[name]["value"] is None
+            assert rows[name]["as_of"] is None and rows[name]["known_on"] is None
+            assert rows[name]["detail"]["cause"] == "periods_missing"
+            assert ends_of(rows[name]["detail"]["periods_found"]) == [str(e) for e in ends]
+            assert {p["statement_type"] for p in rows[name]["detail"]["periods_found"]} == {
+                "income_statement"
+            }
+>       assert {name: (rows[name]["status"], rows[name]["value"]) for name in VALUE} == {
+            "book_to_price": ("present", BOOK_TO_PRICE),
+            "earnings_yield": ("present", EARNINGS_YIELD),
+            "fcf_yield": ("present", FCF_YIELD),
+        }
+E       AssertionError: assert {'book_to_pri...dated', None)} == {'book_to_pri...1000000000'))}
+E         
+E         Differing items:
+E         {'book_to_price': ('outdated', None)} != {'book_to_price': ('present', Decimal('0.5000000000'))}
+E         {'earnings_yield': ('outdated', None)} != {'earnings_yield': ('present', Decimal('0.0460000000'))}
+E         {'fcf_yield': ('outdated', None)} != {'fcf_yield': ('present', Decimal('0.1000000000'))}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:228: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_seven_quarters_leave_growth_missing_and_value_unaffected
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 42 passed in 5.40s

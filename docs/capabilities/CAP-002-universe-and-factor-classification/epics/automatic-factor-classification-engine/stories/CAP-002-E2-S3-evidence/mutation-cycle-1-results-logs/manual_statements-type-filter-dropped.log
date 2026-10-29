@@ -1,0 +1,37 @@
+........................................................................ [ 67%]
+..........F
+=================================== FAILURES ===================================
+____________________ test_ratios_statements_are_never_read _____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55184 user=test database=test_99aa6dbe0a194cada9c742e898480459) at 0x10ac80170>, stock=1, set_id=UUID('54587dd0-6fca-4206-b0ac-e69c0c45617f'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ac80920>
+
+    def test_ratios_statements_are_never_read(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Design 2.3 step 3: the three statement types only; a ratios row is not selected."""
+        ends = add_quarters(env.conn, env.stock, P1, 8, standard())
+        for end in (P1, date(2026, 10, 1)):
+            add_statement(env.conn, env.stock, end, "ratios", {TEST_KEYS["net_income"]: Decimal(9000)})
+        captured: list[tuple[Any, ...]] = []
+        install_test_line_items(monkeypatch)
+        monkeypatch.setattr(
+            engine, "_STAGES", [engine._fundamental_inputs_stage, _capture_stmt(captured)]
+        )
+    
+        assert engine.build(env.conn, env.set_id, 60).state == "complete"
+    
+>       assert {row[1] for row in captured} == {
+            "balance_sheet",
+            "income_statement",
+            "cash_flow_statement",
+        }
+E       AssertionError: assert {'balance_she...nt', 'ratios'} == {'balance_she...me_statement'}
+E         
+E         Extra items in the left set:
+E         'ratios'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:938: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_ratios_statements_are_never_read
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 82 passed in 12.26s

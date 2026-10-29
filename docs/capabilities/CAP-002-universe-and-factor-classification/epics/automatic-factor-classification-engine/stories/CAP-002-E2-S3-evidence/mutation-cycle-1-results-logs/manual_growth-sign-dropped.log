@@ -1,0 +1,30 @@
+.........................................F
+=================================== FAILURES ===================================
+____________________ test_growth_applies_the_line_item_sign ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56302 user=test database=test_3410f881894b4d3688edfd228e21ad29) at 0x10a7702f0>, stock=1, set_id=UUID('ef7687f5-5f35-4bdd-903b-9c4524e211b3'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a773f50>
+
+    def test_growth_applies_the_line_item_sign(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Design 2.4 LineItem.sign: a provider reporting revenue negative with sign -1 gives the
+        same growth as positive revenue with sign +1."""
+        values = standard()
+        for period in values:
+            period["revenue"] = -period["revenue"]
+        add_quarters(env.conn, env.stock, P1, 8, values)
+        install_test_line_items(monkeypatch, overrides={"revenue": (TEST_KEYS["revenue"], -1)})
+    
+        assert run_fundamentals_stage(env.conn, env.set_id, monkeypatch).state == "complete"
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]
+>       assert (row["status"], row["value"]) == ("present", REVENUE_GROWTH)
+E       AssertionError: assert ('not_computable', None) == ('present', D....2837837838'))
+E         
+E         At index 0 diff: 'not_computable' != 'present'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:204: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_growth_applies_the_line_item_sign
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 41 passed in 2.38s

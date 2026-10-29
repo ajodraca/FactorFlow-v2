@@ -1,0 +1,36 @@
+.............................................................F
+=================================== FAILURES ===================================
+___ test_non_positive_shares_make_every_value_input_not_computable[shares0] ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54580 user=test database=test_fb4fb82c54ee4360b67b5ae5710a1813) at 0x10aaa7110>, stock=1, set_id=UUID('f9ff2dcb-230a-46dd-b374-a6c3d4538724'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10aaa53d0>
+shares = Decimal('0')
+
+    @pytest.mark.parametrize("shares", [Decimal(0), Decimal(-100)])
+    def test_non_positive_shares_make_every_value_input_not_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch, shares: Decimal
+    ) -> None:
+        values = standard()
+        values[0]["shares_outstanding"] = shares
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in VALUE:
+            assert rows[name]["status"] == "not_computable", name
+            assert rows[name]["value"] is None
+            # DEC-0116 (5): set on every row whose rows used are determined. Each input's
+            # latest period is P1; its rows are observed by P1 + 15 days and the bar on L.
+            assert rows[name]["as_of"] == P1, name
+>           assert rows[name]["known_on"] == max(P1 + timedelta(days=15), L), name
+E           AssertionError: book_to_price
+E           assert None == datetime.date(2026, 10, 16)
+E            +  where datetime.date(2026, 10, 16) = max((datetime.date(2026, 9, 30) + datetime.timedelta(days=15)), datetime.date(2026, 10, 16))
+E            +    where datetime.timedelta(days=15) = timedelta(days=15)
+
+tests/integration/test_engine_inputs_fundamentals.py:647: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 61 passed in 5.42s

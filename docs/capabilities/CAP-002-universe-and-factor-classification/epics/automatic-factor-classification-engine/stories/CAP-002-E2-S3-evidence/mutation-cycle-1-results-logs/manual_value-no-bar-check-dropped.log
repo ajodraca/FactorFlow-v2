@@ -1,0 +1,51 @@
+........................................................................ [ 67%]
+...................F
+=================================== FAILURES ===================================
+____________ test_missing_price_carries_the_last_prices_acquisition ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55836 user=test database=test_cd25051e15e3433c96746fd4f7642a0a) at 0x10d04d340>, stock=1, set_id=UUID('55f42af9-ca71-424f-a82c-fce93ea7dd31'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d04eb10>
+
+    def test_missing_price_carries_the_last_prices_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, DEC-0116 (2): no bar at all is missing, sourced to prices."""
+        barless = add_instrument(env.conn, "NOBAR")
+        add_quarters(env.conn, barless, P1, 8, standard())
+        _acquisition(env, barless, "prices", "failed")
+        _acquisition(env, barless, "fundamentals", "written")
+    
+>       build(env, monkeypatch)
+
+tests/integration/test_engine_inputs_fundamentals.py:1160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55836 user=test database=test_cd25051e15e3433c96746fd4f7642a0a) at 0x10d04d340>, stock=1, set_id=UUID('55f42af9-ca71-424f-a82c-fce93ea7dd31'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d04eb10>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> BuildResult:
+        install_test_line_items(monkeypatch)
+        result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: CheckViolation: new row for relation "factor_input" violates check constraint "factor_input_present_is_dated"
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_fundamentals.py:114: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:136 classification build failed: CheckViolation: new row for relation "factor_input" violates check constraint "factor_input_present_is_dated"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/src/factorflow/classification/engine.py", line 118, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/src/factorflow/classification/engine.py", line 202, in _fundamental_inputs_stage
+    cur.execute(_INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["value", "growth"]})
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hmcxnrh6/w2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.CheckViolation: new row for relation "factor_input" violates check constraint "factor_input_present_is_dated"
+DETAIL:  Failing row contains (55f42af9-ca71-424f-a82c-fce93ea7dd31, 3, value, book_to_price, present, null, 2026-09-30, 2026-10-15, f, {"close": null, "periods": [{"backfilled": false, "observed_on":...).
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_price_carries_the_last_prices_acquisition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 91 passed in 9.30s

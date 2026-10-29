@@ -1,0 +1,42 @@
+........................................................................ [ 67%]
+..........F
+=================================== FAILURES ===================================
+_________ test_absent_item_in_newest_balance_sheet_does_not_fall_back __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54719 user=test database=test_5711b348e55c4d46b0d85471ae161b7f) at 0x10d3a98e0>, stock=1, set_id=UUID('80654fba-a2db-4adb-b7af-5a2f532346d2'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d3a9b80>
+
+    def test_absent_item_in_newest_balance_sheet_does_not_fall_back(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (1): the single most recent quarterly balance sheet, never an older one.
+        Design 2.4, AC-12: the missing input lists every balance sheet that exists."""
+        values = standard()
+        del values[0]["book_equity"]
+        ends = add_quarters(env.conn, env.stock, P1, 8, values)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        assert rows["book_to_price"]["status"] == "missing"
+>       assert rows["book_to_price"]["detail"] == {
+            "cause": "line_item_absent",
+            "line_items": ["book_equity"],
+            "periods_found": periods_found(("balance_sheet", ends)),
+        }
+E       AssertionError: assert {'cause': 'li...book_equity']} == {'cause': 'li...06-30'}, ...]}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'periods_found': [{'fiscal_period_end': '2026-09-30',
+E                             'statement_type': 'balance_sheet'},
+E                            {'fiscal_period_end': '2026-06-30',
+E                             'statement_type': 'balance_sheet'},...
+E         
+E         ...Full output truncated (13 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_inputs_fundamentals.py:986: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_item_in_newest_balance_sheet_does_not_fall_back
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 82 passed in 8.25s

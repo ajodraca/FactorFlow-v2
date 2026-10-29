@@ -1,0 +1,39 @@
+.......................................F
+=================================== FAILURES ===================================
+______ test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49949 user=test database=test_a559742c790d479390574b1e7a341f9e) at 0x1086c4140>, stock=1, set_id=UUID('7cde13fb-a796-4b94-a88d-7711e8c145e8'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1086b5460>
+
+    def test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        observed = [end + timedelta(days=15) for end in ends]
+        observed[5] = date(2026, 10, 16)  # a prior-window row re-acquired last sets known_on
+        filed = [end + timedelta(days=20) for end in ends]  # after the first observation
+        for k, end in enumerate(ends):
+            add_statement(
+                env.conn,
+                env.stock,
+                end,
+                "income_statement",
+                {TEST_KEYS["revenue"]: Decimal(REVENUE[k])},
+                observed_on=observed[k],
+                provider_filing_date=filed[k],
+            )
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]
+>       assert row["status"] == "present"
+E       AssertionError: assert 'missing' == 'present'
+E         
+E         - present
+E         + missing
+
+tests/integration/test_engine_inputs_fundamentals.py:168: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 39 passed in 2.22s

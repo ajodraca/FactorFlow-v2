@@ -1,0 +1,32 @@
+....................................................F
+=================================== FAILURES ===================================
+_ test_adjacent_quarters_at_most_four_months_apart_are_consecutive[second1-missing] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49325 user=test database=test_3dabb455ec404c8a965ca6d536ad95e2) at 0x108912660>, stock=1, set_id=UUID('efeb3091-2b4a-4937-a0cf-3d0899fc2d24'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1089131d0>
+second = datetime.date(2026, 5, 29), status = 'missing'
+
+    @pytest.mark.parametrize(
+        ("second", "status"), [(date(2026, 5, 30), "present"), (date(2026, 5, 29), "missing")]
+    )
+    def test_adjacent_quarters_at_most_four_months_apart_are_consecutive(
+        env: Env, monkeypatch: pytest.MonkeyPatch, second: date, status: str
+    ) -> None:
+        """DEC-0221: period ends 4 months apart (2026-09-30, 2026-05-30) are consecutive; 4
+        months and a day apart are not."""
+        _quarters_at(env, [P1, second, months_before(second, 3), months_before(second, 6)])
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["earnings_yield"]
+>       assert row["status"] == status
+E       AssertionError: assert 'present' == 'missing'
+E         
+E         - missing
+E         + present
+
+tests/integration/test_engine_inputs_fundamentals.py:417: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_adjacent_quarters_at_most_four_months_apart_are_consecutive[second1-missing]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 52 passed in 4.32s

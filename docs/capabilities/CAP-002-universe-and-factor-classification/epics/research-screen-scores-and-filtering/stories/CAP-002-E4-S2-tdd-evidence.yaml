@@ -1,0 +1,214 @@
+# TDD evidence for CAP-002-E4-S2 - URL query model, display formatting and the owner-facing copy catalogue.
+# Three cycles, as the task plan's Other Notes lay out: (1) T001, T005 then T008 (format.ts); (2) T002, T003,
+# T006 then T009, T010 (research-query.ts); (3) T004, T007 then T011, T012 (copy.ts).
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is
+# its own diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch and cycle-3.patch are the diffs between
+# the index trees written after each cycle (git write-tree), so the three apply in order onto the stage parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began. Cycle 2 was reworked after its first spec-drift review (SORT_KEYS was an
+# export the plan does not list; now module-private) and re-reviewed; cycle 3 was reworked after its first code
+# review (failureSentence read an Error's own `name` as the universe name; now `universeName`) and first
+# spec-drift review (classification_set_changed reworded the design's sentence; now verbatim), then re-reviewed.
+# The verdicts below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (vitest compiles with esbuild and does not
+# type-check, so a mutant runs on its runtime behaviour); generated operators plus hand-written mutants
+# ("operator": "manual").
+# Decisions applied: DEC-0145 (UNIVERSE_LIFECYCLE allow-list), DEC-0146 (bare-score rule), DEC-0147 (format.ts
+# conventions), DEC-0148 (URL codec conventions, with its 2026-10-18 amendment), DEC-0149 (operation and resource
+# labels); all owner-upheld. No new decision was recorded in cycles 1-3; cycle 4 applies DEC-0226 (PROVISIONAL, agent).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T005, T008]
+    description: >
+      TC-COMP-071 and the T005 edge cases: standardised score signed at two decimals with an ASCII hyphen-minus
+      and zero unsigned, percentile whole, ratio two decimals, rate fraction times 100 signed with %, amount
+      whole units with comma separators, half-away-from-zero rounding on the decimal string, RangeError on
+      non-decimal input, America/Chicago timestamps with CDT/CST as the instant falls (minutes, or seconds on
+      request; midnight 00; the autumn change; independent of the machine TZ), dates passed through after a shape
+      check. Production: web/src/screens/research/format.ts. Deviation from T008's wording: hourCycle "h23"
+      replaces the 24-to-00 mapping, with the same pinned output on every engine.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/red-cycle-1.log
+    red_log_sha256: f7a78eaa01806ca2c167c8abf616bfa6a14f8cc4f7215abfcea06fa45dbb9c13
+    red_evidence: >
+      With format.test.ts written and no format.ts, the file failed to load: Failed to resolve import "./format"
+      (no tests ran).
+    green_evidence: >
+      format.test.ts 41 passed (green-cycle-1.log); tsc --noEmit, biome lint and biome format clean. The first
+      mutation run left survivors (two RangeError messages unasserted, two equivalent-by-construction lines and
+      the 24-to-00 mapping no engine here exercises); the tests now assert the messages and format.ts was
+      simplified so none remain.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/green-cycle-1.log
+        sha256: 4a018d7d8bf7d7fcf9e64ee4a93ee3a1238459be5a8222431a2ebeafd0f1dbc0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6fdccfbcc1888d742de40bab4a5ab2c8714959b9def9ab85bf2128e3d9566473
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 875a5e05b4d7cf3d0edafdd4e88ccd3586bd7016fb617ec30b6d822be7269a4f
+      generated: 47
+      killed: 46
+      survived: 0
+      stillborn: 1
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T003, T006, T009, T010]
+    description: >
+      TC-COMP-132 (round-trip of every sentence, scope, hide-incomplete, search and sort combination; the
+      one-to-one sentence-to-bound mapping over all twelve bounds; an invalid sentence dropped and not sent),
+      TC-COMP-133 (toThresholds carries only the twelve bounds, hideIncomplete and symbol, never scope or sort,
+      and equals the list read's filter once its left-out defaults are read back) and the T006 codec edge cases
+      (defaults never written, scope=all decoded as all followed stocks, other scopes unchecked, unknown keys
+      kept on apply, owned keys overwritten, drop rules, symbol shape and upper-casing, only literal true, first
+      value of a repeated key, list params present-only, paging, the sort allowlist). Production:
+      web/src/api/research-query.ts.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/red-cycle-2.log
+    red_log_sha256: 4b4ccc25f796b8621d6bcfbe2eedfeae81b7edc4d6cc3fee9bce871d7304efd5
+    red_evidence: >
+      With research-query.test.ts written and no research-query.ts, the file failed to load: Failed to resolve
+      import "./research-query" (no tests ran).
+    green_evidence: >
+      research-query.test.ts 72 passed (green-cycle-2.log); tsc --noEmit, biome lint and biome format clean. A
+      first-run survivor (one-character symbol) was killed by a new assertion.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/green-cycle-2.log
+        sha256: 6ce72a2680d9f92b92b713f3496b0a946d70e1b4d934661794e9adf1bf212865
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 1ccd20ef9907e9705ff9c173f279b28ef6bc76b59a3c30008874db431cb705ba
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: c935af5f57ef547b63ff67de1a8038bce0695478f5728a6c9401c7557b96f1fc
+      generated: 43
+      killed: 42
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: manual:cycle-2:value-not-required
+          disposition: equivalent
+          reason: >
+            The mutant removes the `value === null` guard in decodeSentence. A null value then reaches
+            isValidValue, where PLAIN_DECIMAL.test(null) coerces it to the string "null", which is not a plain
+            decimal, so the sentence is dropped exactly as before; no input distinguishes the two.
+
+  - id: cycle-3
+    tasks: [T004, T007, T011, T012]
+    description: >
+      TC-COMP-072 (every owner-facing string flattened from copy.ts, template functions rendered on every branch,
+      scanned for instrument, acquisition run, not classified, retire outside the UNIVERSE_LIFECYCLE allow-list
+      read from the export, and the DEC-0146 bare score; the scanner's self-checks; UNIVERSE_LIFECYCLE strings
+      mention no stock, instrument or following) and T007 (one sentence per classification-api 2.5 code, the
+      fallback never echoing the code, the word error or the envelope message, instrument_not_acquired naming
+      every symbol in order, labels for every operation and resource, the design's anchor strings verbatim and
+      its templated examples, no identifier or implementation word, SHELL_ROUTES resolving in routes.tsx).
+      Production: web/src/screens/research/copy.ts.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/red-cycle-3.log
+    red_log_sha256: 87e12021b4b39bef270dac133dd0c972507d18c3379e1747d332a5df3b39373d
+    red_evidence: >
+      With copy.test.ts written and no copy.ts, the file failed to load: Failed to resolve import "./copy" (no
+      tests ran).
+    green_evidence: >
+      copy.test.ts 296 passed (green-cycle-3.log); full web suite 761 passed in 45 files (full-suite.log);
+      tsc --noEmit, biome lint, biome format and npm run build clean. First-run survivors (the percentile helper
+      not anchored, the already-members clause at one) and a test defect the mutation run exposed (the catch-all
+      route broke the route matcher) were fixed before review.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/green-cycle-3.log
+        sha256: fc5964468f7467565685ff43302491d81fbede693954aed034f0c4fac4128dc0
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/full-suite.log
+        sha256: 9a02e019483acae212baf22c4510f8dbd792e2736b30a2206782ef18342e7986
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 939a7e173c62389cb8636142979796d003e085f9a712ed3eb84acd1c52c6121e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: 2481d5de135c4e95cb30bb00b80d28d6c3d0ee19f4528bf90a3bd6e604191a95
+      generated: 37
+      killed: 37
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T001, T006, T009, T010, T014]
+    description: >
+      Rework of implementation review v1 (CAP-002-E4-S2-implementation-review-v1.md). IR-001: the repeated-key
+      test now covers {factor}.measure, {factor}.direction, {factor}.value, sort, order and hide_incomplete with
+      distinguishing first and later values. IR-002: a new apply test removes every factor's three sentence keys
+      when the new query omits that factor. IR-003: TC-COMP-071's date rows add shape-valid non-calendar dates
+      (2026-02-29, 2026-04-31, 2026-13-01) returned untouched. IR-004 (production): the percentile range check
+      compares the decimal string exactly (BigInt whole part, all-zero fraction) instead of Number, and is pinned
+      by values a float cannot tell from 0 or 100. IR-005: TC-COMP-072 renders and scans every failureSentence
+      composition under DEC-0226 (PROVISIONAL): a retire-bearing string passes only as an UNIVERSE_LIFECYCLE
+      string or as "<UNIVERSE_LIFECYCLE string>: <remainder without retire>". IR-006: DAC-naming doc comments on
+      every exported type, formatAmount and formatDate.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/red-cycle-4.log
+    red_log_sha256: 7f7e23736c97296468390f3c093c8908118b550370469812d8de194922c32326
+    red_evidence: >
+      With the new tests written and the production range check unchanged, research-query.test.ts failed on
+      value.value=100.00000000000000001 (kept instead of dropped): 1 failed, 415 passed (red-cycle-4.log). The
+      IR-001, IR-002, IR-003 and IR-005 tests pin behaviour the production code already had; their RED is the
+      review's nine surviving mutants, which this cycle's mutation run now kills.
+    green_evidence: >
+      Focused suites 420 passed (green-cycle-4.log); full web suite 772 passed in 45 files (full-suite-cycle-4.log);
+      tsc --noEmit, biome lint, biome format and npm run build clean. The code review's one LOW note (a +100.5
+      drop row decoded as a space by URLSearchParams) was fixed by encoding the sign as %2B before the final
+      fingerprint.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/green-cycle-4.log
+        sha256: cecab9be0f8cc08e24df4b82ae4b65a06d595474c54f2177f042fda9f82c0c0f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/full-suite-cycle-4.log
+        sha256: 14dac181d18a935ca4f308f36a7bdf0afe14716a7766170bd531ee2840e76252
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8eae0ddacba69ef3e798e6485e5a259cc9ebdfcb730c07a9c8276649c194bb33
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: 697657774fcba3a4997f7eb6bdf460b621bb705000ea6e4a8064a812770721a9
+      generated: 73
+      killed: 71
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: manual:cycle-4:review-value-null-guard-removed
+          disposition: equivalent
+          reason: >
+            Removing the value === null guard lets a null value reach isValidValue, where PLAIN_DECIMAL.test(null)
+            coerces it to "null", which fails, so the sentence is dropped as before; no input distinguishes the two
+            (the review's and cycle-2's disposition).
+        - id: manual:cycle-4:review-download-route-unencoded
+          disposition: equivalent
+          reason: >
+            T011 specifies exactly (runId) => /runs/${runId}; run ids are UUIDs (classification-ui 2.6, migration
+            0004), for which encodeURIComponent is the identity, so the two differ only on run ids no artifact
+            admits (the review's disposition).

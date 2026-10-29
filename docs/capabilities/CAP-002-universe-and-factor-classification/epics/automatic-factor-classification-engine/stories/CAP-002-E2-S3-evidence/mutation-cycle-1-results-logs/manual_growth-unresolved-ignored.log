@@ -1,0 +1,31 @@
+.................................................................F
+=================================== FAILURES ===================================
+__________ test_unresolved_line_items_leave_value_and_growth_missing ___________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56331 user=test database=test_227f4b4289894d33be3e11bb289b632b) at 0x10a63c6e0>, stock=1, set_id=UUID('c75ce1a5-a61b-4e26-80ac-3f8342a7f810'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a63fe00>
+
+    def test_unresolved_line_items_leave_value_and_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Supporting case for TC-COMP-059 (AC-12): with every key REQUIRES_INPUT the five
+        inputs are missing naming the line items each needs, and the set completes."""
+        add_quarters(env.conn, env.stock, P1, 8, standard())
+    
+        result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
+    
+        assert result.state == "complete"
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name, needed in NEEDS.items():
+            assert rows[name]["status"] == "missing", name
+>           assert rows[name]["detail"]["cause"] == UNRESOLVED_CAUSE
+E           AssertionError: assert 'line_item_absent' == 'line_item_mapping_unresolved'
+E             
+E             - line_item_mapping_unresolved
+E             + line_item_absent
+
+tests/integration/test_engine_inputs_fundamentals.py:676: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unresolved_line_items_leave_value_and_growth_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 65 passed in 6.01s

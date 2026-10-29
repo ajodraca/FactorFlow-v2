@@ -1,0 +1,29 @@
+...............................................................F
+=================================== FAILURES ===================================
+_______________ test_market_capitalisation_of_one_is_computable ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54190 user=test database=test_0d7c62acb3a44678b5a8b86e6083c2d4) at 0x10c24ab10>, stock=1, set_id=UUID('9f9dcce6-00d3-4785-b6e6-728ada547c24'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c2484d0>
+
+    def test_market_capitalisation_of_one_is_computable(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4: only a market capitalisation of zero or less is not computable."""
+        values = standard()
+        values[0]["shares_outstanding"] = Decimal("0.1")  # times the close of 10
+        add_quarters(env.conn, env.stock, P1, 8, values)
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["book_to_price"]
+>       assert (row["status"], row["value"]) == ("present", Decimal(500))
+E       AssertionError: assert ('not_computable', None) == ('present', Decimal('500'))
+E         
+E         At index 0 diff: 'not_computable' != 'present'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:634: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_market_capitalisation_of_one_is_computable
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 63 passed in 6.06s

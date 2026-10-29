@@ -1,0 +1,31 @@
+................................................F
+=================================== FAILURES ===================================
+______________ test_absent_year_ago_quarter_leaves_growth_missing ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56741 user=test database=test_f24aad439a624f189c985bcb6e9b5351) at 0x108538a70>, stock=1, set_id=UUID('5e5e7d95-570c-4133-97f1-b26c963c97dc'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10853ade0>
+
+    def test_absent_year_ago_quarter_leaves_growth_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221, DEC-0055 (1): the prior year is the four quarters right after the trailing
+        four; with the fifth absent the window is not formed, never taken a quarter later.
+        Trailing-only inputs need P1 to P4 alone and stay present."""
+        found = _income_with_gap(env, gap=4, n=9)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in GROWTH:
+>           assert rows[name]["status"] == "missing", name
+E           AssertionError: revenue_growth
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_fundamentals.py:356: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_year_ago_quarter_leaves_growth_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 48 passed in 3.74s

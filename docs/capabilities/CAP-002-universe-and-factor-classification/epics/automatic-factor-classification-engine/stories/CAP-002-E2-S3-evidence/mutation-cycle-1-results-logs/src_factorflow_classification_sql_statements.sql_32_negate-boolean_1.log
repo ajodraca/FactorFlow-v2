@@ -1,0 +1,62 @@
+........................................................................ [ 67%]
+.....................F
+=================================== FAILURES ===================================
+_ test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=65030 user=test database=test_be02670c62ec4d2398704172de94d313) at 0x10a616bd0>, stock=1, set_id=UUID('707d8589-36f2-4a78-805a-5b2cb5a47d97'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a617350>
+
+    def test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0056: filed before the instrument's first fundamentals observed_on, over every
+        row it has, is backfilled; filed on or after it, or with no filing date, is not."""
+        first = date(2026, 1, 5)
+        # The instrument's first observation is an annual ratios row, so the comparison date
+        # spans every statement type and period kind.
+        add_statement(
+            env.conn, env.stock, date(2025, 12, 31), "ratios", {}, fiscal_period="FY", observed_on=first
+        )
+        values = standard()
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        filed = {
+            3: first - timedelta(days=1),  # backfilled
+            2: first,  # filed on the first observation: not backfilled
+            1: None,  # no filing date: not backfilled
+        }
+        for k, end in enumerate(ends):
+            for statement_type in ("balance_sheet", "income_statement", "cash_flow_statement"):
+                payload = {
+                    TEST_KEYS[name]: value
+                    for name, value in values[k].items()
+                    if line_items.LINE_ITEMS[name].statement_type == statement_type
+                }
+                add_statement(
+                    env.conn,
+                    env.stock,
+                    end,
+                    statement_type,
+                    payload,
+                    observed_on=date(2026, 10, 1),
+                    provider_filing_date=filed.get(k, date(2026, 9, 1)),
+                )
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        flags = {
+            p["fiscal_period_end"]: p["backfilled"] for p in rows["revenue_growth"]["detail"]["periods"]
+        }
+>       assert flags == {str(end): k == 3 for k, end in enumerate(ends)}
+E       AssertionError: assert {'2026-09-30'...0': True, ...} == {'2026-09-30'...0': True, ...}
+E         
+E         Omitting 7 identical items, use -vv to show
+E         Differing items:
+E         {'2026-06-30': True} != {'2026-06-30': False}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:1227: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_backfilled_flag_compares_filing_date_with_first_fundamentals_observation
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 93 passed in 10.10s

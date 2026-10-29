@@ -1,0 +1,1348 @@
+{
+ "schema": 1,
+ "repo_head": "31359b27afccf009da6efa9a68fea92a498a7aba",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/engine.py:173:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 173,
+   "original": "            None if item.payload_key == line_items.REQUIRES_INPUT else item.payload_key",
+   "mutated": "            None if item.payload_key != line_items.REQUIRES_INPUT else item.payload_key"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 3,
+   "original": "-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql",
+   "mutated": "-- DEC-56 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 3,
+   "original": "-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql",
+   "mutated": "-- DEC-0055 (2), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 3,
+   "original": "-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql",
+   "mutated": "-- DEC-0055 (1), (3), (7); DEC-0116). Inserts into the temporary table value_inputs.sql"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 3,
+   "original": "-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql",
+   "mutated": "-- DEC-0055 (1), (2), (8); DEC-0116). Inserts into the temporary table value_inputs.sql"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:3:off-by-one:5",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 3,
+   "original": "-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql",
+   "mutated": "-- DEC-0055 (1), (2), (7); DEC-117). Inserts into the temporary table value_inputs.sql"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:4:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 4,
+   "original": "-- creates (DEC-0115). Depends on no price. Reads only. CAP-002-E2-S3.",
+   "mutated": "-- creates (DEC-116). Depends on no price. Reads only. CAP-002-E2-S3."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:4:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 4,
+   "original": "-- creates (DEC-0115). Depends on no price. Reads only. CAP-002-E2-S3.",
+   "mutated": "-- creates (DEC-0115). Depends on no price. Reads only. CAP-3-E2-S3."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:23:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 23,
+   "original": "    -- line item read through the guard of value_inputs.sql (DEC-0116 (4)).",
+   "mutated": "    -- line item read through the guard of value_inputs.sql (DEC-117 (4))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:23:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 23,
+   "original": "    -- line item read through the guard of value_inputs.sql (DEC-0116 (4)).",
+   "mutated": "    -- line item read through the guard of value_inputs.sql (DEC-0116 (5))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:32:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 32,
+   "original": "                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND s.payload ->> m.payload_key ~ '^-?[1-9]+(\\.[0-9]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:32:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 32,
+   "original": "                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND s.payload ->> m.payload_key ~ '^-?[0-10]+(\\.[0-9]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:32:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 32,
+   "original": "                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[1-9]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:32:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 32,
+   "original": "                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND s.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-10]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:66:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 66,
+   "original": "    -- Missing before outdated before not computable (DEC-0116 (1)); a bar is never read.",
+   "mutated": "    -- Missing before outdated before not computable (DEC-117 (1)); a bar is never read."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:66:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 66,
+   "original": "    -- Missing before outdated before not computable (DEC-0116 (1)); a bar is never read.",
+   "mutated": "    -- Missing before outdated before not computable (DEC-0116 (2)); a bar is never read."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:72:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 72,
+   "original": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, true)",
+   "mutated": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, false)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:72:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 72,
+   "original": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, true)",
+   "mutated": "                WHEN coalesce(w.trailing_quarters <= 4 OR w.prior_quarters < 4, true)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:72:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 72,
+   "original": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, true)",
+   "mutated": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters <= 4, true)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:72:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 72,
+   "original": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, true)",
+   "mutated": "                WHEN coalesce(w.trailing_quarters < 5 OR w.prior_quarters < 4, true)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:72:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 72,
+   "original": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 4, true)",
+   "mutated": "                WHEN coalesce(w.trailing_quarters < 4 OR w.prior_quarters < 5, true)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:86:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 86,
+   "original": "                WHEN d.as_of < d.stale_before THEN 'outdated'",
+   "mutated": "                WHEN d.as_of <= d.stale_before THEN 'outdated'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:87:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 87,
+   "original": "                WHEN d.prior_sum <= 0 THEN 'not_computable'",
+   "mutated": "                WHEN d.prior_sum < 0 THEN 'not_computable'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:87:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 87,
+   "original": "                WHEN d.prior_sum <= 0 THEN 'not_computable'",
+   "mutated": "                WHEN d.prior_sum <= 1 THEN 'not_computable'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:96:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 96,
+   "original": "       CASE WHEN s.status = 'present' THEN s.trailing_sum / s.prior_sum - 1 END,",
+   "mutated": "       CASE WHEN s.status = 'present' THEN s.trailing_sum / s.prior_sum - 2 END,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:99:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 99,
+   "original": "       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods",
+   "mutated": "       -- The constant true: CAP-002-E2-S6 turns the backfilled flags of detail.periods"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:99:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 99,
+   "original": "       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods",
+   "mutated": "       -- The constant false: CAP-3-E2-S6 turns the backfilled flags of detail.periods"
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:100:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 100,
+   "original": "       -- into the mark (DEC-0056, DEC-0122).",
+   "mutated": "       -- into the mark (DEC-57, DEC-0122)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:100:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 100,
+   "original": "       -- into the mark (DEC-0056, DEC-0122).",
+   "mutated": "       -- into the mark (DEC-0056, DEC-123)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/growth_inputs.sql:101:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 101,
+   "original": "       false,",
+   "mutated": "       true,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/insert_inputs.sql:2:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 2,
+   "original": "-- (factor-engine design 2.3 step 5; DEC-0115). A missing input's detail gains the",
+   "mutated": "-- (factor-engine design 2.3 step 6; DEC-0115). A missing input's detail gains the"
+  },
+  {
+   "id": "src/factorflow/classification/sql/insert_inputs.sql:2:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 2,
+   "original": "-- (factor-engine design 2.3 step 5; DEC-0115). A missing input's detail gains the",
+   "mutated": "-- (factor-engine design 2.3 step 5; DEC-116). A missing input's detail gains the"
+  },
+  {
+   "id": "src/factorflow/classification/sql/insert_inputs.sql:4:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 4,
+   "original": "-- say what the last download of it found (AC-12). Writes only factor_input.",
+   "mutated": "-- say what the last download of it found (AC-13). Writes only factor_input."
+  },
+  {
+   "id": "src/factorflow/classification/sql/insert_inputs.sql:5:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 5,
+   "original": "-- CAP-002-E2-S3; CAP-002-E2-S4 runs it again for momentum.",
+   "mutated": "-- CAP-3-E2-S3; CAP-002-E2-S4 runs it again for momentum."
+  },
+  {
+   "id": "src/factorflow/classification/sql/insert_inputs.sql:5:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 5,
+   "original": "-- CAP-002-E2-S3; CAP-002-E2-S4 runs it again for momentum.",
+   "mutated": "-- CAP-002-E2-S3; CAP-3-E2-S4 runs it again for momentum."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:3:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 3,
+   "original": "-- trailing-twelve-month and prior-year windows (factor-engine design 2.3 step 3 and 2.4;",
+   "mutated": "-- trailing-twelve-month and prior-year windows (factor-engine design 2.3 step 4 and 2.4;"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:4:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 4,
+   "original": "-- DEC-0055 (1), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's",
+   "mutated": "-- DEC-56 (1), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:4:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 4,
+   "original": "-- DEC-0055 (1), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's",
+   "mutated": "-- DEC-0055 (2), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:4:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 4,
+   "original": "-- DEC-0055 (1), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's",
+   "mutated": "-- DEC-0055 (1), DEC-57). The windows follow DEC-0221, which replaces design 2.4's"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:4:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 4,
+   "original": "-- DEC-0055 (1), DEC-0056). The windows follow DEC-0221, which replaces design 2.4's",
+   "mutated": "-- DEC-0055 (1), DEC-0056). The windows follow DEC-222, which replaces design 2.4's"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:5:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 5,
+   "original": "-- 12-month span rule. Reads only. CAP-002-E2-S3.",
+   "mutated": "-- 13-month span rule. Reads only. CAP-002-E2-S3."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:5:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 5,
+   "original": "-- 12-month span rule. Reads only. CAP-002-E2-S3.",
+   "mutated": "-- 12-month span rule. Reads only. CAP-3-E2-S3."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:17:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 17,
+   "original": "       AND f.fiscal_period_end <= %(classification_date)s::date",
+   "mutated": "       AND f.fiscal_period_end < %(classification_date)s::date"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:23:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 23,
+   "original": "    -- holds, of every statement type, period kind and version (DEC-0056).",
+   "mutated": "    -- holds, of every statement type, period kind and version (DEC-57)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:32:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 32,
+   "original": "           coalesce(l.provider_filing_date < o.first_observed_on, false) AS backfilled,",
+   "mutated": "           coalesce(l.provider_filing_date < o.first_observed_on, true) AS backfilled,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:32:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 32,
+   "original": "           coalesce(l.provider_filing_date < o.first_observed_on, false) AS backfilled,",
+   "mutated": "           coalesce(l.provider_filing_date <= o.first_observed_on, false) AS backfilled,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:34:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 34,
+   "original": "           -- Consecutive with the next older period: at most 4 months before it (DEC-0221).",
+   "mutated": "           -- Consecutive with the next older period: at most 5 months before it (DEC-0221)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:34:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 34,
+   "original": "           -- Consecutive with the next older period: at most 4 months before it (DEC-0221).",
+   "mutated": "           -- Consecutive with the next older period: at most 4 months before it (DEC-222)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:36:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 36,
+   "original": "               >= l.fiscal_period_end - interval '4 months' AS consecutive",
+   "mutated": "               > l.fiscal_period_end - interval '4 months' AS consecutive"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:36:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 36,
+   "original": "               >= l.fiscal_period_end - interval '4 months' AS consecutive",
+   "mutated": "               >= l.fiscal_period_end - interval '5 months' AS consecutive"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:45:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 45,
+   "original": "    -- (DEC-0221, DEC-0055 (1)). Too few periods leave a pair without an older end.",
+   "mutated": "    -- (DEC-222, DEC-0055 (1)). Too few periods leave a pair without an older end."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:45:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 45,
+   "original": "    -- (DEC-0221, DEC-0055 (1)). Too few periods leave a pair without an older end.",
+   "mutated": "    -- (DEC-0221, DEC-56 (1)). Too few periods leave a pair without an older end."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:45:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 45,
+   "original": "    -- (DEC-0221, DEC-0055 (1)). Too few periods leave a pair without an older end.",
+   "mutated": "    -- (DEC-0221, DEC-0055 (2)). Too few periods leave a pair without an older end."
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:47:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 47,
+   "original": "           count(*) FILTER (WHERE period_rank <= 3 AND consecutive) = 3 AS trailing_formed,",
+   "mutated": "           count(*) FILTER (WHERE period_rank < 3 AND consecutive) = 3 AS trailing_formed,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:47:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 47,
+   "original": "           count(*) FILTER (WHERE period_rank <= 3 AND consecutive) = 3 AS trailing_formed,",
+   "mutated": "           count(*) FILTER (WHERE period_rank <= 4 AND consecutive) = 3 AS trailing_formed,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:47:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 47,
+   "original": "           count(*) FILTER (WHERE period_rank <= 3 AND consecutive) = 3 AS trailing_formed,",
+   "mutated": "           count(*) FILTER (WHERE period_rank <= 3 AND consecutive) = 4 AS trailing_formed,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:48:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 48,
+   "original": "           count(*) FILTER (WHERE period_rank <= 7 AND consecutive) = 7 AS prior_formed",
+   "mutated": "           count(*) FILTER (WHERE period_rank < 7 AND consecutive) = 7 AS prior_formed"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:48:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 48,
+   "original": "           count(*) FILTER (WHERE period_rank <= 7 AND consecutive) = 7 AS prior_formed",
+   "mutated": "           count(*) FILTER (WHERE period_rank <= 8 AND consecutive) = 7 AS prior_formed"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:48:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 48,
+   "original": "           count(*) FILTER (WHERE period_rank <= 7 AND consecutive) = 7 AS prior_formed",
+   "mutated": "           count(*) FILTER (WHERE period_rank <= 7 AND consecutive) = 8 AS prior_formed"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:56:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 56,
+   "original": "       CASE WHEN w.trailing_formed AND r.period_rank <= 4 THEN r.period_rank END AS ttm_slot,",
+   "mutated": "       CASE WHEN w.trailing_formed AND r.period_rank < 4 THEN r.period_rank END AS ttm_slot,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:56:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 56,
+   "original": "       CASE WHEN w.trailing_formed AND r.period_rank <= 4 THEN r.period_rank END AS ttm_slot,",
+   "mutated": "       CASE WHEN w.trailing_formed AND r.period_rank <= 5 THEN r.period_rank END AS ttm_slot,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:57:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 57,
+   "original": "       CASE WHEN w.prior_formed AND r.period_rank BETWEEN 5 AND 8",
+   "mutated": "       CASE WHEN w.prior_formed AND r.period_rank BETWEEN 6 AND 8"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:57:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 57,
+   "original": "       CASE WHEN w.prior_formed AND r.period_rank BETWEEN 5 AND 8",
+   "mutated": "       CASE WHEN w.prior_formed AND r.period_rank BETWEEN 5 AND 9"
+  },
+  {
+   "id": "src/factorflow/classification/sql/statements.sql:58:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 58,
+   "original": "            THEN r.period_rank - 4 END AS prior_slot",
+   "mutated": "            THEN r.period_rank - 5 END AS prior_slot"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 2,
+   "original": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,",
+   "mutated": "-- design 2.4; DEC-56 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 2,
+   "original": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,",
+   "mutated": "-- design 2.4; DEC-0055 (2), (5), (6), (7); DEC-0116). Creates the temporary table inputs,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 2,
+   "original": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,",
+   "mutated": "-- design 2.4; DEC-0055 (1), (6), (6), (7); DEC-0116). Creates the temporary table inputs,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 2,
+   "original": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,",
+   "mutated": "-- design 2.4; DEC-0055 (1), (5), (7), (7); DEC-0116). Creates the temporary table inputs,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:5",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 2,
+   "original": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,",
+   "mutated": "-- design 2.4; DEC-0055 (1), (5), (6), (8); DEC-0116). Creates the temporary table inputs,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:2:off-by-one:6",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 2,
+   "original": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,",
+   "mutated": "-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-117). Creates the temporary table inputs,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:3:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 3,
+   "original": "-- which growth_inputs.sql and CAP-002-E2-S4's momentum_inputs.sql insert into (DEC-0115).",
+   "mutated": "-- which growth_inputs.sql and CAP-3-E2-S4's momentum_inputs.sql insert into (DEC-0115)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:3:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 3,
+   "original": "-- which growth_inputs.sql and CAP-002-E2-S4's momentum_inputs.sql insert into (DEC-0115).",
+   "mutated": "-- which growth_inputs.sql and CAP-002-E2-S4's momentum_inputs.sql insert into (DEC-116)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:4:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 4,
+   "original": "-- Reads only. CAP-002-E2-S3.",
+   "mutated": "-- Reads only. CAP-3-E2-S3."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:38:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 38,
+   "original": "     WHERE (s.statement_type = 'balance_sheet' AND s.period_rank = 1)",
+   "mutated": "     WHERE (s.statement_type = 'balance_sheet' AND s.period_rank = 2)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:44:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 44,
+   "original": "    -- anything else reads as absent rather than failing the set (DEC-0116 (4),",
+   "mutated": "    -- anything else reads as absent rather than failing the set (DEC-117 (4),"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:44:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 44,
+   "original": "    -- anything else reads as absent rather than failing the set (DEC-0116 (4),",
+   "mutated": "    -- anything else reads as absent rather than failing the set (DEC-0116 (5),"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:45:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 45,
+   "original": "    -- DEC-0117 (2)).",
+   "mutated": "    -- DEC-118 (2))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:45:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 45,
+   "original": "    -- DEC-0117 (2)).",
+   "mutated": "    -- DEC-0117 (3))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:48:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 48,
+   "original": "                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND u.payload ->> m.payload_key ~ '^-?[1-9]+(\\.[0-9]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:48:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 48,
+   "original": "                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND u.payload ->> m.payload_key ~ '^-?[0-10]+(\\.[0-9]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:48:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 48,
+   "original": "                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[1-9]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:48:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 48,
+   "original": "                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "mutated": "                 AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\\.[0-10]+)?$'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:72:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 72,
+   "original": "           -- The earliest of the latest period ends used (DEC-0116 (3)).",
+   "mutated": "           -- The earliest of the latest period ends used (DEC-117 (3))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:72:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 72,
+   "original": "           -- The earliest of the latest period ends used (DEC-0116 (3)).",
+   "mutated": "           -- The earliest of the latest period ends used (DEC-0116 (4))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:73:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 73,
+   "original": "           min(fiscal_period_end) FILTER (WHERE period_rank = 1) AS as_of,",
+   "mutated": "           min(fiscal_period_end) FILTER (WHERE period_rank = 2) AS as_of,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:92:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 92,
+   "original": "    -- The latest bar: the latest session, then its latest observation (DEC-0055 (5), (6)).",
+   "mutated": "    -- The latest bar: the latest session, then its latest observation (DEC-56 (5), (6))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:92:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 92,
+   "original": "    -- The latest bar: the latest session, then its latest observation (DEC-0055 (5), (6)).",
+   "mutated": "    -- The latest bar: the latest session, then its latest observation (DEC-0055 (6), (6))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:92:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 92,
+   "original": "    -- The latest bar: the latest session, then its latest observation (DEC-0055 (5), (6)).",
+   "mutated": "    -- The latest bar: the latest session, then its latest observation (DEC-0055 (5), (7))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:100:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 100,
+   "original": "           LIMIT 1",
+   "mutated": "           LIMIT 2"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:106:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 106,
+   "original": "           -- DEC-0055 (7): the latest observation among the statement rows and the bar.",
+   "mutated": "           -- DEC-56 (7): the latest observation among the statement rows and the bar."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:106:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 106,
+   "original": "           -- DEC-0055 (7): the latest observation among the statement rows and the bar.",
+   "mutated": "           -- DEC-0055 (8): the latest observation among the statement rows and the bar."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:113:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 113,
+   "original": "           -- DEC-0055 (6): the latest close times the newest balance sheet's shares.",
+   "mutated": "           -- DEC-56 (6): the latest close times the newest balance sheet's shares."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:113:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 113,
+   "original": "           -- DEC-0055 (6): the latest close times the newest balance sheet's shares.",
+   "mutated": "           -- DEC-0055 (7): the latest close times the newest balance sheet's shares."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:136:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 136,
+   "original": "    -- Missing before outdated before not computable (DEC-0116 (1), (2)).",
+   "mutated": "    -- Missing before outdated before not computable (DEC-117 (1), (2))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:136:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 136,
+   "original": "    -- Missing before outdated before not computable (DEC-0116 (1), (2)).",
+   "mutated": "    -- Missing before outdated before not computable (DEC-0116 (2), (2))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:136:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 136,
+   "original": "    -- Missing before outdated before not computable (DEC-0116 (1), (2)).",
+   "mutated": "    -- Missing before outdated before not computable (DEC-0116 (1), (3))."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:138:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 138,
+   "original": "           CASE WHEN cardinality(j.unresolved) > 0 THEN %(unresolved_cause)s::text",
+   "mutated": "           CASE WHEN cardinality(j.unresolved) >= 0 THEN %(unresolved_cause)s::text"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:138:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 138,
+   "original": "           CASE WHEN cardinality(j.unresolved) > 0 THEN %(unresolved_cause)s::text",
+   "mutated": "           CASE WHEN cardinality(j.unresolved) > 1 THEN %(unresolved_cause)s::text"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:139:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 139,
+   "original": "                WHEN coalesce(j.balance_sheets, 0) = 0",
+   "mutated": "                WHEN coalesce(j.balance_sheets, 1) = 0"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:139:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 139,
+   "original": "                WHEN coalesce(j.balance_sheets, 0) = 0",
+   "mutated": "                WHEN coalesce(j.balance_sheets, 0) = 1"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:140:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 140,
+   "original": "                  OR (j.window_type IS NOT NULL AND j.window_quarters = 0)",
+   "mutated": "                  OR (j.window_type IS NOT NULL AND j.window_quarters = 1)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:145:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 145,
+   "original": "           j.as_of < j.stale_before AS fundamentals_outdated,",
+   "mutated": "           j.as_of <= j.stale_before AS fundamentals_outdated,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:146:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 146,
+   "original": "           j.bar_date < %(latest_trading_day)s::date AS prices_outdated",
+   "mutated": "           j.bar_date <= %(latest_trading_day)s::date AS prices_outdated"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:153:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 153,
+   "original": "                WHEN d.market_capitalisation <= 0 THEN 'not_computable'",
+   "mutated": "                WHEN d.market_capitalisation < 0 THEN 'not_computable'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:153:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 153,
+   "original": "                WHEN d.market_capitalisation <= 0 THEN 'not_computable'",
+   "mutated": "                WHEN d.market_capitalisation <= 1 THEN 'not_computable'"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:165:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 165,
+   "original": "       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods",
+   "mutated": "       -- The constant true: CAP-002-E2-S6 turns the backfilled flags of detail.periods"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:165:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 165,
+   "original": "       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods",
+   "mutated": "       -- The constant false: CAP-3-E2-S6 turns the backfilled flags of detail.periods"
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:166:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 166,
+   "original": "       -- into the mark (DEC-0056, DEC-0122).",
+   "mutated": "       -- into the mark (DEC-57, DEC-0122)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:166:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 166,
+   "original": "       -- into the mark (DEC-0056, DEC-0122).",
+   "mutated": "       -- into the mark (DEC-0056, DEC-123)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/value_inputs.sql:167:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 167,
+   "original": "       false AS restated_possible,",
+   "mutated": "       true AS restated_possible,"
+  },
+  {
+   "id": "manual:statements-fy-kept",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "       AND f.fiscal_period <> 'FY'\n",
+   "new": ""
+  },
+  {
+   "id": "manual:statements-observed-asc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "f.observed_on DESC, f.recorded_at DESC",
+   "new": "f.observed_on ASC, f.recorded_at DESC"
+  },
+  {
+   "id": "manual:statements-recorded-asc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "f.observed_on DESC, f.recorded_at DESC",
+   "new": "f.observed_on DESC, f.recorded_at ASC"
+  },
+  {
+   "id": "manual:statements-recorded-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "f.observed_on DESC, f.recorded_at DESC",
+   "new": "f.observed_on DESC"
+  },
+  {
+   "id": "manual:statements-first-observed-max",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "min(f.observed_on) AS first_observed_on",
+   "new": "max(f.observed_on) AS first_observed_on"
+  },
+  {
+   "id": "manual:statements-type-filter-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "       AND f.statement_type IN ('balance_sheet', 'income_statement', 'cash_flow_statement')\n",
+   "new": ""
+  },
+  {
+   "id": "manual:statements-date-filter-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "       AND f.fiscal_period_end <= %(classification_date)s::date\n",
+   "new": ""
+  },
+  {
+   "id": "manual:value-sign-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "(u.payload ->> m.payload_key)::numeric * m.sign",
+   "new": "(u.payload ->> m.payload_key)::numeric"
+  },
+  {
+   "id": "manual:value-numbers-only",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "jsonb_typeof(u.payload -> m.payload_key) IN ('number', 'string')",
+   "new": "jsonb_typeof(u.payload -> m.payload_key) IN ('number')"
+  },
+  {
+   "id": "manual:value-strings-only",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "jsonb_typeof(u.payload -> m.payload_key) IN ('number', 'string')",
+   "new": "jsonb_typeof(u.payload -> m.payload_key) IN ('string')"
+  },
+  {
+   "id": "manual:value-unsigned-regex",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "~ '^-?[0-9]+(\\.[0-9]+)?$'",
+   "new": "~ '^[0-9]+(\\.[0-9]+)?$'"
+  },
+  {
+   "id": "manual:value-fcf-plus",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "i.operating_cash_flow - i.capital_expenditure",
+   "new": "i.operating_cash_flow + i.capital_expenditure"
+  },
+  {
+   "id": "manual:value-bar-observed-asc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "ORDER BY d.session_date DESC, d.observed_on DESC",
+   "new": "ORDER BY d.session_date DESC, d.observed_on ASC"
+  },
+  {
+   "id": "manual:value-bar-session-asc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "ORDER BY d.session_date DESC",
+   "new": "ORDER BY d.session_date ASC"
+  },
+  {
+   "id": "manual:value-known-on-ignores-bar",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "greatest(p.known_on, b.observed_on) AS known_on",
+   "new": "p.known_on AS known_on"
+  },
+  {
+   "id": "manual:value-as-of-latest",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "min(fiscal_period_end) FILTER (WHERE period_rank = 1) AS as_of",
+   "new": "max(fiscal_period_end) FILTER (WHERE period_rank = 1) AS as_of"
+  },
+  {
+   "id": "manual:value-outdated-and",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "WHEN d.fundamentals_outdated OR d.prices_outdated THEN 'outdated'",
+   "new": "WHEN d.fundamentals_outdated AND d.prices_outdated THEN 'outdated'"
+  },
+  {
+   "id": "manual:value-no-bar-check-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "                WHEN NOT j.has_bar THEN 'price_missing'\n",
+   "new": ""
+  },
+  {
+   "id": "manual:value-price-data-type",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "WHEN s.missing_cause = 'price_missing' THEN 'prices' ELSE 'fundamentals'",
+   "new": "WHEN s.missing_cause = 'price_missing' THEN 'fundamentals' ELSE 'fundamentals'"
+  },
+  {
+   "id": "manual:value-every-balance-sheet",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "(s.statement_type = 'balance_sheet' AND s.period_rank = 1)",
+   "new": "(s.statement_type = 'balance_sheet')"
+  },
+  {
+   "id": "manual:value-window-prior-slot",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/value_inputs.sql",
+   "line": 1,
+   "old": "OR (s.statement_type = n.window_type AND s.ttm_slot IS NOT NULL)",
+   "new": "OR (s.statement_type = n.window_type AND s.prior_slot IS NOT NULL)"
+  },
+  {
+   "id": "manual:growth-ratio-inverted",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 1,
+   "old": "s.trailing_sum / s.prior_sum - 1",
+   "new": "s.prior_sum / s.trailing_sum - 1"
+  },
+  {
+   "id": "manual:growth-known-on-min",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 1,
+   "old": "max(observed_on) AS known_on",
+   "new": "min(observed_on) AS known_on"
+  },
+  {
+   "id": "manual:growth-sign-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 1,
+   "old": "(s.payload ->> m.payload_key)::numeric * m.sign",
+   "new": "(s.payload ->> m.payload_key)::numeric"
+  },
+  {
+   "id": "manual:growth-unresolved-ignored",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 1,
+   "old": "WHEN n.line_item = ANY(%(unresolved)s::text[])",
+   "new": "WHEN n.line_item IS NULL"
+  },
+  {
+   "id": "manual:growth-span-unknown-present",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/growth_inputs.sql",
+   "line": 1,
+   "old": "w.prior_quarters < 4, true)",
+   "new": "w.prior_quarters < 4, false)"
+  },
+  {
+   "id": "manual:insert-status-filter-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 1,
+   "old": "         ON i.status = 'missing'\n        AND a.instrument_id",
+   "new": "         ON a.instrument_id"
+  },
+  {
+   "id": "manual:insert-data-type-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 1,
+   "old": "        AND a.data_type = i.missing_data_type\n",
+   "new": ""
+  },
+  {
+   "id": "manual:insert-factor-filter-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/insert_inputs.sql",
+   "line": 1,
+   "old": " WHERE i.factor = ANY(%(factors)s::text[])\n",
+   "new": "\n"
+  },
+  {
+   "id": "manual:engine-unresolved-empty",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "\"unresolved\": line_items.unresolved(),",
+   "new": "\"unresolved\": [],"
+  },
+  {
+   "id": "manual:engine-factors-value-only",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "\"factors\": [\"value\", \"growth\"]",
+   "new": "\"factors\": [\"value\"]"
+  },
+  {
+   "id": "manual:engine-stage-unregistered",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/engine.py",
+   "line": 1,
+   "old": "_STAGES.append(_fundamental_inputs_stage)",
+   "new": "pass"
+  },
+  {
+   "id": "manual:statements-window-ascending",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "ORDER BY l.fiscal_period_end DESC)",
+   "new": "ORDER BY l.fiscal_period_end ASC)"
+  },
+  {
+   "id": "manual:statements-prior-skips-p4-p5",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "count(*) FILTER (WHERE period_rank <= 7 AND consecutive) = 7",
+   "new": "count(*) FILTER (WHERE period_rank BETWEEN 5 AND 7 AND consecutive) = 3"
+  },
+  {
+   "id": "manual:statements-twelve-month-gap",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "interval '4 months'",
+   "new": "interval '12 months'"
+  },
+  {
+   "id": "manual:statements-older-end-lag",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "lead(l.fiscal_period_end) OVER newest_first",
+   "new": "lag(l.fiscal_period_end) OVER newest_first"
+  },
+  {
+   "id": "manual:statements-trailing-needs-eight",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "CASE WHEN w.trailing_formed AND r.period_rank <= 4",
+   "new": "CASE WHEN w.prior_formed AND r.period_rank <= 4"
+  },
+  {
+   "id": "manual:statements-prior-without-trailing",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "CASE WHEN w.prior_formed AND r.period_rank BETWEEN 5 AND 8",
+   "new": "CASE WHEN r.period_rank BETWEEN 5 AND 8"
+  },
+  {
+   "id": "manual:statements-trailing-two-pairs",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/statements.sql",
+   "line": 1,
+   "old": "count(*) FILTER (WHERE period_rank <= 3 AND consecutive) = 3",
+   "new": "count(*) FILTER (WHERE period_rank <= 2 AND consecutive) = 2"
+  }
+ ]
+}

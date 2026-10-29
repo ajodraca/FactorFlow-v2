@@ -21,7 +21,7 @@ from uuid import UUID
 
 import psycopg
 
-from factorflow.classification import constants
+from factorflow.classification import constants, line_items
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +31,11 @@ _COMPLETE_SET_SQL: Final = (_SQL_DIR / "complete_set.sql").read_text()
 _FAIL_SET_SQL: Final = (_SQL_DIR / "fail_set.sql").read_text()
 _PEER_SETS_SQL: Final = (_SQL_DIR / "peer_sets.sql").read_text()
 _CLASSIFY_SQL: Final = (_SQL_DIR / "classify.sql").read_text()
+# The fundamentals stage (CAP-002-E2-S3).
+_STATEMENTS_SQL: Final = (_SQL_DIR / "statements.sql").read_text()
+_VALUE_INPUTS_SQL: Final = (_SQL_DIR / "value_inputs.sql").read_text()
+_GROWTH_INPUTS_SQL: Final = (_SQL_DIR / "growth_inputs.sql").read_text()
+_INSERT_INPUTS_SQL: Final = (_SQL_DIR / "insert_inputs.sql").read_text()
 _QUALIFIED_COUNTS_SQL: Final = (
     "SELECT factor, qualified_count FROM classification_set_factor WHERE set_id = %(set_id)s"
 )
@@ -153,6 +158,55 @@ def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> Bui
         active_instruments=len(context.active_ids),
         qualified_counts=qualified_counts,
     )
+
+
+def _line_item_parameters() -> dict[str, object]:
+    """The seven line items as parallel arrays of bound parameters (SEC-INP-002).
+
+    Read from ``line_items.LINE_ITEMS`` at call time. A ``REQUIRES_INPUT`` key is passed as
+    ``None``, so the sentinel never reaches SQL and the inputs that need it are ``missing``
+    with ``unresolved_cause`` (factor-engine design 2.4).
+    """
+    items = line_items.LINE_ITEMS
+    return {
+        "line_item_names": list(items),
+        "line_item_statement_types": [item.statement_type for item in items.values()],
+        "line_item_keys": [
+            None if item.payload_key == line_items.REQUIRES_INPUT else item.payload_key
+            for item in items.values()
+        ],
+        "line_item_signs": [item.sign for item in items.values()],
+        "unresolved": line_items.unresolved(),
+        "unresolved_cause": line_items.UNRESOLVED_CAUSE,
+    }
+
+
+def _fundamental_inputs_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
+    """Derive the value and growth inputs of every active instrument and append them.
+
+    Implements factor-engine design 2.3 steps 3 to 5 and 2.4 for the value and growth
+    factors (CAP-002-E2-S3; DEC-0115): ``statements.sql`` fills the temporary table
+    ``stmt``, ``value_inputs.sql`` creates ``inputs``, ``growth_inputs.sql`` adds to it and
+    ``insert_inputs.sql`` writes the two factors' rows to ``factor_input``.
+    """
+    params = {
+        "set_id": ctx.set_id,
+        "active_ids": list(ctx.active_ids),
+        "classification_date": ctx.classification_date,
+        "latest_trading_day": ctx.latest_trading_day,
+        "stale_months": constants.FUNDAMENTALS_STALE_AFTER_MONTHS,
+        **_line_item_parameters(),
+    }
+    with conn.cursor() as cur:
+        cur.execute(_STATEMENTS_SQL, params)
+        cur.execute(_VALUE_INPUTS_SQL, params)
+        cur.execute(_GROWTH_INPUTS_SQL, params)
+        cur.execute(_INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["value", "growth"]})
+
+
+# Input-producing stages are registered here, above CAP-002-E2-S5's classification stage
+# when it is present (DEC-0121): fundamentals, then CAP-002-E2-S4's momentum.
+_STAGES.append(_fundamental_inputs_stage)
 
 
 def _classification_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
