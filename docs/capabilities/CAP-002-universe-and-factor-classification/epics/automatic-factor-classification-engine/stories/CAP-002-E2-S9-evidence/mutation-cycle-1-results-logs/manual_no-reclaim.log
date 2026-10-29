@@ -1,0 +1,321 @@
+FFFF.FF..F.F.....................F............                           [100%]
+=================================== FAILURES ===================================
+_ test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c631640>
+
+    def test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10, AC-11: claim and build go through the dispatcher, the build
+        carries ``build_timeout_seconds``, and the only wait is the poll interval after the
+        idle claim: none between the claim, the build and the next claim."""
+        claimed = _claimed()
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed))
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+E       assert [<function _s... 0x10cd96a20>] == [<function _F... 0x10cd96a20>]
+E         
+E         At index 0 diff: <function _scripted.<locals>.claim at 0x10cd96a20> != <function _Fakes.__init__.<locals>.reclaim at 0x10cd96700>
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10cd96a20>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:202: AssertionError
+__ test_loop_with_nothing_to_claim_waits_the_poll_interval_and_builds_nothing __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd9cb30>
+
+    def test_loop_with_nothing_to_claim_waits_the_poll_interval_and_builds_nothing(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10: an idle first claim dispatches no build and waits the poll
+        interval once before the stop event ends the loop."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim]
+E       assert [<function _s... 0x10cc6cd60>] == [<function _F... 0x10cc6cd60>]
+E         
+E         At index 0 diff: <function _scripted.<locals>.claim at 0x10cc6cd60> != <function _Fakes.__init__.<locals>.reclaim at 0x10cc6ce00>
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10cc6cd60>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:221: AssertionError
+______ test_raising_claim_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd9faa0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10cc52510>
+
+    def test_raising_claim_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: the failure is logged by ``log.exception``, the
+        failed iteration still waits the poll interval, and the next claim is made."""
+        boom = RuntimeError("boom")
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(boom, stop=waiter.stop))
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+        assert len(errors) == 1
+        assert errors[0].getMessage() == "classification scheduler iteration failed"
+        assert _traceback(errors[0]).startswith("Traceback (most recent call last):")
+        assert _traceback(errors[0]).endswith("RuntimeError: boom")
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.claim]
+E       assert [<function _s... 0x10cd96de0>] == [<function _F... 0x10cd96de0>]
+E         
+E         At index 0 diff: <function _scripted.<locals>.claim at 0x10cd96de0> != <function _Fakes.__init__.<locals>.reclaim at 0x10cc6ccc0>
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10cd96de0>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:250: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/src/factorflow/classification/scheduler.py", line 109, in run_classification_loop
+    claimed = await dispatch(claim_next_set, pool)  # None, or (set_id, run_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/tests/unit/test_classification_scheduler_loop.py", line 98, in claim
+    raise outcome
+RuntimeError: boom
+______ test_raising_build_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd41b80>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10cd41c70>
+
+    def test_raising_build_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: a build that raises (the engine could not record
+        the failure) is logged the same way, and the loop waits and claims again."""
+        disk = OSError("disk")
+    
+        def raising_build(pool: Any, set_id: UUID, timeout_seconds: float) -> Any:
+            raise disk
+    
+        claimed = _claimed()
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed, stop=waiter.stop), build=raising_build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+        assert len(errors) == 1
+        assert errors[0].getMessage() == "classification scheduler iteration failed"
+        assert _traceback(errors[0]).startswith("Traceback (most recent call last):")
+        assert _traceback(errors[0]).endswith("OSError: disk")
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+E       assert [<function _s... 0x10cc6d300>] == [<function _F... 0x10cc6d300>]
+E         
+E         At index 0 diff: <function _scripted.<locals>.claim at 0x10cc6d300> != <function _Fakes.__init__.<locals>.reclaim at 0x10cc6d120>
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10cc6d300>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:277: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/src/factorflow/classification/scheduler.py", line 111, in run_classification_loop
+    result = await dispatch(
+             ^^^^^^^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/tests/unit/test_classification_scheduler_loop.py", line 139, in build_claimed_set
+    return self._build_impl(pool, set_id, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w1/tests/unit/test_classification_scheduler_loop.py", line 262, in raising_build
+    raise disk
+OSError: disk
+____________ test_reclaim_is_dispatched_once_before_the_first_claim ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd43830>
+
+    def test_reclaim_is_dispatched_once_before_the_first_claim(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-3, DAC-E2-12, AC-20: reclaim comes first, with the pool as its only
+        argument, and is never dispatched again across three idle iterations."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=3)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.calls[0] == (fakes.reclaim, (pool,))
+E       AssertionError: assert (<function _s...510202528'>,)) == (<function _F...510202528'>,))
+E         
+E         At index 0 diff: <function _scripted.<locals>.claim at 0x10cc6d6c0> != <function _Fakes.__init__.<locals>.reclaim at 0x10cc6cf40>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:329: AssertionError
+__________ test_reclaim_runs_even_when_the_stop_event_is_already_set ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd49e50>
+
+    def test_reclaim_runs_even_when_the_stop_event_is_already_set(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-3, DAC-E2-12: reclaim at start is unconditional, and a stop event set
+        before the loop starts allows one claim iteration and no wait."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        waiter.stop.set()
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.calls == [(fakes.reclaim, (pool,)), (fakes.claim, (pool,))]
+E       AssertionError: assert [(<function _...10226848'>,))] == [(<function _...10226848'>,))]
+E         
+E         At index 0 diff: (<function _scripted.<locals>.claim at 0x10cc6d1c0>, (<MagicMock name='pool' id='4510226848'>,)) != (<function _Fakes.__init__.<locals>.reclaim at 0x10cc6da80>, (<MagicMock name='pool' id='4510226848'>,))
+E         Right contains one more item: (<function _scripted.<locals>.claim at 0x10cc6d1c0>, (<MagicMock name='pool' id='4510226848'>,))
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:349: AssertionError
+___ test_default_dispatcher_runs_the_database_work_off_the_event_loop_thread ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cc51160>
+
+    def test_default_dispatcher_runs_the_database_work_off_the_event_loop_thread(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10: with ``dispatch_fn`` omitted, reclaim and claim run on a worker
+        thread (``asyncio.to_thread``), never on the thread running the event loop."""
+        threads: dict[str, int] = {}
+    
+        def claim(pool: Any) -> None:
+            threads["claim"] = threading.get_ident()
+            return None
+    
+        fakes = _Fakes(monkeypatch, claim=claim)
+    
+        def reclaim(pool: Any) -> list[Any]:
+            threads["reclaim"] = threading.get_ident()
+            return []
+    
+        monkeypatch.setattr(scheduler, "reclaim_interrupted_sets", reclaim)
+        waiter = _RecordingWaiter(stop_after=1)
+    
+        asyncio.run(
+            scheduler.run_classification_loop(
+                MagicMock(name="pool"), _settings(), wait_fn=waiter.wait, stop_event=waiter.stop
+            )
+        )
+    
+        loop_thread = threading.get_ident()  # asyncio.run drives the loop on the calling thread
+>       assert set(threads) == {"claim", "reclaim"}
+E       AssertionError: assert {'claim'} == {'claim', 'reclaim'}
+E         
+E         Extra items in the right set:
+E         'reclaim'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:426: AssertionError
+_____________ test_failed_build_is_logged_at_info_without_raising ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd4bbf0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10cd4a7e0>
+
+    def test_failed_build_is_logged_at_info_without_raising(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """AC-20, AC-10: the engine records the failure itself, so the loop logs the set, the
+        run and the state at INFO, logs no error, and looks again at once."""
+        claimed = _claimed()
+    
+        def failed_build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            return _result("failed", set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=failed_build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.INFO, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), _RecordingWaiter(), dispatcher)
+    
+        infos = [r.getMessage() for r in _scheduler_records(caplog, logging.INFO)]
+        assert infos == [f"classification set {claimed.set_id} for run {claimed.run_id} ended failed"]
+        assert _scheduler_records(caplog, logging.ERROR) == []
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+E       assert [<function _s... 0x10cc6f420>] == [<function _F... 0x10cc6f420>]
+E         
+E         At index 0 diff: <function _scripted.<locals>.claim at 0x10cc6f420> != <function _Fakes.__init__.<locals>.reclaim at 0x10cc6ea20>
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10cc6f420>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:482: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     factorflow.classification.scheduler:scheduler.py:114 classification set e5a0ca22-ad53-49f2-ae23-08d1d3391b44 for run a02eeb46-c9ee-4024-90fc-b7ec9feff471 ended failed
+___ test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run ____
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10cceb740>, <psycopg.Connection [IDLE] (host=localhost port=59038 user=test database=test_46d4b16f2be1420fbc3467dcbae75ae3) at 0x10ccf37a0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ccf2e10>
+
+    def test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-12, AC-10, AC-20, DAC-E2-4 (design acceptance criterion 10): after a restart
+        the stale building set is failed with the fixed reason before any claim, the next
+        qualifying run gets one complete set, a failed run gets none, and a second start
+        changes nothing."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
+        run_c = add_run(conn, "failed", T0 + timedelta(hours=2))
+        monkeypatch.setattr(engine, "_STAGES", [])
+        settings = ClassificationSettings(poll_interval_seconds=1, build_timeout_seconds=60)
+    
+        _run_loop_until_first_wait(pool, settings)
+    
+        rows = set_rows(conn)
+        by_run: dict[Any, list[tuple[Any, ...]]] = {}
+        for set_id, run_id, state, reason in rows:
+            by_run.setdefault(run_id, []).append((set_id, state, reason))
+>       assert by_run[run_a] == [(stale, "failed", INTERRUPTED_REASON)]
+E       AssertionError: assert [(UUID('06a36...lding', None)] == [(UUID('06a36...g the build')]
+E         
+E         At index 0 diff: (UUID('06a36dfd-8da0-47d2-8403-6348d28f907a'), 'building', None) != (UUID('06a36dfd-8da0-47d2-8403-6348d28f907a'), 'failed', 'interrupted: the application restarted during the build')
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:233: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item book_equity has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item shares_outstanding has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item diluted_eps has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item operating_cash_flow has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item capital_expenditure has no payload key; its inputs will be missing
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle
+FAILED tests/unit/test_classification_scheduler_loop.py::test_loop_with_nothing_to_claim_waits_the_poll_interval_and_builds_nothing
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_claim_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_build_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_reclaim_is_dispatched_once_before_the_first_claim
+FAILED tests/unit/test_classification_scheduler_loop.py::test_reclaim_runs_even_when_the_stop_event_is_already_set
+FAILED tests/unit/test_classification_scheduler_loop.py::test_default_dispatcher_runs_the_database_work_off_the_event_loop_thread
+FAILED tests/unit/test_classification_scheduler_loop.py::test_failed_build_is_logged_at_info_without_raising
+FAILED tests/integration/test_scheduler_restart.py::test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run
+9 failed, 37 passed in 4.43s

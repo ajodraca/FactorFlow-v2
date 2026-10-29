@@ -1,0 +1,66 @@
+# TDD evidence for CAP-002-E2-S9 - Classification loop: dispatch off the event loop, restart reclaim and build pass-through.
+# One cycle: the plan writes every test first (Phase 2, T002-T011), then one production task (T012) and the one S8 assertion
+# it falsifies (T013), so there is a single RED and a single GREEN. The driver commits once per stage: commit_hash is stage.
+# Decisions: none recorded by this stage.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged the staged diff. The code
+# review rejected the first diff (the two TC-COMP-084-family tests read record.exc_info, which configure_logging's redacting
+# filter clears, so they failed whenever test_redaction.py ran earlier in the process); it was reworked and both re-reviewed
+# it: APPROVED and drift_detected false. diff_sha256, reviewed_patch and the mutation run are of the reworked diff.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013]
+    description: >
+      scheduler.py gains build_claimed_set (one pooled connection handed to engine.build) and run_classification_loop
+      verbatim from design 2.4, with engine and line_items imported as modules. Tests: the new
+      tests/unit/test_classification_scheduler_loop.py (TC-COMP-083, 084, 085, 169, the unresolved line-item warnings, the
+      default to_thread dispatcher and asyncio.sleep wait, the INFO outcome line, CancelledError propagation and the
+      build_claimed_set connection handling); TC-COMP-092 and the restart-then-build case appended to S8's
+      tests/integration/test_scheduler_restart.py; the loop and build signatures and the source checks (no time.sleep, no
+      threading or ingestion import, every await is dispatch or wait) appended to S8's
+      tests/unit/test_classification_scheduler_shapes.py; and S8's asyncio-import guard removed from
+      tests/unit/test_classification_scheduler_sql.py (T013). Review rework: the TC-COMP-084-family tests assert the
+      logged traceback through a helper that accepts exc_info or the redacting filter's exc_text; TC-COMP-092 uses a
+      10 s poll interval instead of T009's 1.0, so a build handed the poll interval would outlast the 5 s stage and fail
+      the test (the 0.05 s model_construct timeout and assertions (a)-(d) are unchanged); the shapes check also catches
+      `from factorflow import ingestion`; the scheduler.py module docstring now describes both the S8 and S9 halves.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/red-cycle-1-loop.log
+    red_log_sha256: 53b19a01ff66d88c4fb8e421053d497058340de1520099bb674d1145acb5fcfe
+    red_evidence: >
+      Observed before scheduler.py changed (HEAD 7646ab7): 19 failed, 28 passed. Every new loop, build and signature test
+      failed with AttributeError (scheduler has no run_classification_loop, build_claimed_set or engine), the await check
+      found no loop, and TC-COMP-092 and the restart case failed the same way. The 28 passing are S8's existing tests and
+      three guards that hold before the loop exists, as T007 and T011 anticipate (both TC-COMP-085 tests and the
+      no-time.sleep/threading/ingestion check). The final, reworked tests were re-run against HEAD's production code
+      (git archive HEAD src beside the current tests): 19 failed, 27 passed, the same failures (red-cycle-1-final-tests.log;
+      27 because T013 had removed S8's asyncio guard). After T012 and before T013 the only failure was S8's
+      test_scheduler_module_does_not_import_asyncio (after-t012-before-t013.log), the assertion T013 removes.
+    green_evidence: >
+      Focused suite (the three scheduler unit files and test_scheduler_restart.py plus test_scheduler_claim.py against a
+      real PostgreSQL 16 container): 46 passed; test_redaction.py followed by the loop file: 28 passed
+      (green-cycle-1-loop.log). The full suite is recorded in the stage report.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/red-cycle-1-final-tests.log
+        sha256: a940d36d7535bad46659ad8ce81baaf59b95cad54cd3d3da3e2569ff7ec41f54
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/after-t012-before-t013.log
+        sha256: d4e16474de8cc2a3cbc6614fbcd4a7e6d89cee7db131d1f4fcb1dd54d6d45f50
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/green-cycle-1-loop.log
+        sha256: 4cf76af25cb6db76d9d8a58fbcccea96a92ad907c1c04b116d1e00024c763881
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e80a639aa2434725297945fe775f1161401b651330e78ef1d200d3b041369965
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S9-evidence/mutation-cycle-1-results.json
+      results_sha256: 5b9fd43a226ab4275e94d94da42f7c4badfa1fbdec2d4ff85265dad023f4a440
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
