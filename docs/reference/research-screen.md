@@ -7,7 +7,9 @@ the screens will share (CAP-002-E4-S2):
 - `format.ts`, the one place a CAP-002 number or date becomes text;
 - `copy.ts`, every owner-facing string of the CAP-002 screens.
 
-No route, screen or component imports either yet. The URL query model the
+No route or screen imports either yet. The factor cell and the *Possibly
+restated* mark in `web/src/components/patterns/` do (CAP-002-E4-S3); see
+[`component-patterns.md`](component-patterns.md). The URL query model the
 screens read lives in `web/src/api/research-query.ts`; see
 [`web-api.md`](web-api.md#research-url-codec-research-queryts).
 
@@ -65,7 +67,7 @@ section 14.
 | `failureSentence(failure)` | the statement of a failed call |
 | `FACTOR_LABELS`, `REGIONS` | factor names, and the Research panes' section labels |
 | `FILTERS`, `describeQuery(query)`, `savedFromFilter(date, query)` | the Filters pane, and a `ResearchQuery` in words |
-| `CELL`, `INPUT_STATUS` | the factor cell and column states, and an input's non-present status |
+| `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs |
 | `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail |
@@ -89,6 +91,25 @@ A string that starts with a `UNIVERSE_LIFECYCLE` string, followed by `: ` and a
 remainder without *retire*, is also allowed. This prefix rule is DEC-0226, a
 provisional agent decision. It admits the composed `retire-universe` failure
 sentences, and it applies to every scanned string.
+
+### Factor-cell sentences
+
+Every *Incomplete* sentence takes one shape, built by a private
+`incompleteSentence(cause, factor)`: *Incomplete: {cause}, so {factor} can't
+be compared fairly. It isn't guessed.* Three `CELL` functions fill it:
+
+| Function | `cause` |
+|----------|---------|
+| `incompleteReason(input, status, factor)` | `{input} {status}`, with `status` from `CELL.incompleteStatus` (*is missing*, *is outdated*, *couldn't be computed*) |
+| `incompleteDetail(detail, factor)` | the engine's owner-facing `reasonDetail`, as sent (DEC-0151) |
+| `incompleteGeneric(code, factor)` | *an input* followed by the status phrase `code` selects, where `code` is an `IncompleteReasonCode` (`input_missing`, `input_outdated`, `input_not_computable`) |
+
+The factor cell's *Incomplete* badge titles itself with `incompleteDetail`
+when the cell carries a `reasonDetail` and with `incompleteGeneric` otherwise
+([`component-patterns.md`](component-patterns.md)). `notFollowedNoDate`,
+*Not followed. Earlier scores stand.*, is the *Not followed* badge's title
+while no read carries the date a stock stopped being followed (DEC-0152);
+`notFollowedSince(date)` is the sentence for when one does.
 
 ### Failure sentences
 
