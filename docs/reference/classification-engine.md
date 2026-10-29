@@ -8,7 +8,9 @@ to 2.4). With it come `constants.py`, `line_items.py` and three statements in
 the set `failed` with its reason, so no reader ever sees half a set.
 
 No factor is computed yet. The stage list is empty, so a successful build
-completes a set with no factor rows. No production code calls `build` yet.
+completes a set with no factor rows. Only the
+[classification scheduler](classification-scheduler.md) calls `build`, and no
+running process starts it yet.
 
 ## `build`
 
