@@ -133,9 +133,10 @@ interface ScoredCellProps {
 /**
  * The percentile in the numeric face at weight 600, right-aligned in a fixed
  * box, then the `aria-hidden` bar filled to the printed whole number, then the
- * mark where the cell carries it, then the muted standardised score only when
- * asked for and present. The box and the bar take the theme's spacing tokens
- * nearest the design's 22 px and 52 px (DEC-0230).
+ * mark where the cell carries it, then the standardised score only when asked
+ * for and present, in the numeric face at `--text-xs` and `--muted-foreground`
+ * (UX design 1.1 Token Usage). The box and the bar take the theme's spacing
+ * tokens nearest the design's 22 px and 52 px (DEC-0230).
  */
 function ScoredCell({ cell, percentile, factor, showScore }: ScoredCellProps): JSX.Element {
   const printed = formatPercentile(percentile);
@@ -157,7 +158,7 @@ function ScoredCell({ cell, percentile, factor, showScore }: ScoredCellProps): J
       </span>
       {cell.restatedPossible ? <RestatedMark factor={factor} /> : null}
       {showScore && cell.score !== null ? (
-        <span data-testid="factor-score" className="text-muted-foreground">
+        <span data-testid="factor-score" className="font-numeric text-xs text-muted-foreground">
           {formatScore(cell.score)}
         </span>
       ) : null}

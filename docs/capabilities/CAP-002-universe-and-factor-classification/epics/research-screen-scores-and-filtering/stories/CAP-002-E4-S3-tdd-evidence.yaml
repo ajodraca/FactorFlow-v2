@@ -110,3 +110,71 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T003, T004, T005, T006, T007, T008, T011, T014]
+    description: >
+      Review rework of CAP-002-E4-S3-implementation-review-v1.md (CHANGES-REQUIRED). IR-001 to IR-005 are
+      test-only: factor-cell.test.tsx pins the number box (inline-block w-5 text-right), the bar track
+      (inline-block h-2 w-7 overflow-hidden) and the fill (block h-full) per DEC-0230; the full DOM order
+      number, bar, mark, score with showScore and restatedPossible set (T011); DEC-0151's precedence for
+      not_enough_stocks over a classified percentile and for a classified percentile carrying each input
+      reason; DEC-0229's no-title rule for the prototype member names toString, constructor and
+      hasOwnProperty; and text-xs and rounded on the three badges, with restated-mark.test.tsx pinning the
+      same two classes on the mark (T010, DEC-0075). IR-006 is the cycle's one production change: the
+      standardised-score span gains font-numeric and text-xs beside text-muted-foreground, the tokens the UX
+      design's Token Usage table gives the standardised score (ux-design.md 1.1), pinned by a new T006 test.
+      IR-007 is recorded as DEC-0231 (the mark and badges keep the plan's rounded; the --radius gap is the
+      owner's, in tailwind.config.js outside CAP-002's edit set) with no code change; IR-008 needs no code
+      change and is carried to the owner with DEC-0230. The task plan's frontmatter gains
+      last_reworked_review; no checkbox or body line changes. Production: web/src/components/patterns/factor-cell.tsx.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/red-cycle-3.log
+    red_log_sha256: 37102f92e240e9c333f1fab3297e18663427aeae7e4fd5d2a2d8b8892b337664
+    red_evidence: >
+      With the fifteen new tests written and the production untouched, the focused suite (factor-cell,
+      restated-mark, copy) ran 401 tests: 1 failed, 400 passed. The failure is the IR-006 test "sets the score
+      in the numeric face at the footnote size": the score span lacked font-numeric and text-xs. The fourteen
+      IR-001 to IR-005 tests pass against the unchanged production by design; their RED is the thirteen
+      reviewer mutants they exist to kill, which survived in the review's run
+      (CAP-002-E4-S3-implementation-review-v1-mutation.json) and are killed in this cycle's run below.
+    green_evidence: >
+      After the one-line class change, the focused suite passed 401 of 401 (green-cycle-3.log; factor-cell 90,
+      restated-mark 8, copy 303), then biome format rewrapped one test fixture; npm run lint, npm run format,
+      npx tsc --noEmit and npm run build clean; the full web suite 876 passed in 47 files
+      (full-suite-cycle-3.log). The built CSS (index-B2BGQX5s.css, unchanged hash) carries font-numeric,
+      text-xs, text-muted-foreground, w-5, w-7, h-2, h-full, text-right, rounded, sr-only and both --seq-1
+      and --seq-4 definitions. Eighteen hand-written mutants: the review's thirteen non-equivalent survivors
+      (IR-001 to IR-005), the review's one equivalent survivor carried for the record, and four for this
+      cycle's lines (font-numeric, text-xs and text-muted-foreground each dropped from the score; rounded
+      dropped from the badges). Seventeen killed; the one survivor is disposed below.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/green-cycle-3.log
+        sha256: b8b78ee62735300f8c3bbf857f5889342706f86ba4841225f5511a92fe8bf3d9
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/full-suite-cycle-3.log
+        sha256: 9dbba642fa245217b9267dc673ce64dbcef34c2da4b58b10310f9384e6cc6fa0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a19a482337bcf91df4a6f4936d1643709bce39980a735bb2c999058bcafadcf0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    decisions: [DEC-0231]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 955efdf8115bcc9db40321c5b573d347903aadd970a93495c9d969d317ba09ad
+      generated: 18
+      killed: 17
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.944
+      survivors:
+        - id: manual:cycle-3:mark-glyph-before-words
+          disposition: equivalent
+          reason: >
+            Swaps the sr-only words and the aria-hidden R glyph inside the mark. DEC-0075 places the glyph
+            "beside" the words and fixes no order; the sr-only child takes no layout, so the drawn mark is
+            identical, and assistive technology reads only the words, so the accessible text is identical.
+            The implementation review v1 reached the same disposition for this mutant.

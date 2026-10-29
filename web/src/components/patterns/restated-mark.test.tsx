@@ -47,6 +47,15 @@ describe("TC-COMP-097: the Possibly restated mark on value and growth only", () 
     expect(mark).toHaveClass("text-status-neutral");
   });
 
+  it.each<FactorName>(["value", "growth"])(
+    "takes the badge type size and corner classes on %s (DEC-0075)",
+    (factor) => {
+      const mark = renderMark(factor) as HTMLElement;
+      expect(mark).toHaveClass("text-xs");
+      expect(mark).toHaveClass("rounded");
+    },
+  );
+
   it("renders nothing on momentum", () => {
     const { container } = render(<RestatedMark factor="momentum" />);
     expect(container.innerHTML).toBe("");

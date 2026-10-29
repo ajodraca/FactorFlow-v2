@@ -295,6 +295,16 @@ describe("TC-COMP-109: every status has a word plus a shape, and no polarity col
     expect(root).toHaveClass(background);
     expect(root).toHaveClass(foreground);
   });
+
+  it.each([
+    ["Incomplete", cell({ reasonCode: "input_missing" })],
+    ["Not enough to rank", cell({ reasonCode: "not_enough_stocks" })],
+    ["Not followed", cell({ reasonCode: "retired" })],
+  ])("sizes the %s badge at the delivered badge size with its corners (IR-005)", (_name, data) => {
+    const root = renderCell({ cell: data });
+    expect(root).toHaveClass("text-xs");
+    expect(root).toHaveClass("rounded");
+  });
 });
 
 // T006: the scored cell (AC-9, DAC-E4-1; DEC-0150, Open Gap 4).
@@ -354,6 +364,44 @@ describe("the scored cell", () => {
     expect(root).not.toHaveAttribute("data-variant");
     expect(root.tagName).toBe("SPAN");
     expect(root.querySelector("div, p, table")).toBeNull();
+  });
+
+  it("boxes the number right-aligned and sizes the bar with the spacing tokens (DEC-0230)", () => {
+    const root = renderCell({ cell: scored("87.5000000000") });
+    const number = root.querySelector("[data-testid='factor-percentile']");
+    expect(number).toHaveClass("inline-block");
+    expect(number).toHaveClass("w-5");
+    expect(number).toHaveClass("text-right");
+    const track = bar(root) as HTMLElement;
+    expect(track).toHaveClass("inline-block");
+    expect(track).toHaveClass("h-2");
+    expect(track).toHaveClass("w-7");
+    expect(track).toHaveClass("overflow-hidden");
+    expect(fill(root)).toHaveClass("block");
+    expect(fill(root)).toHaveClass("h-full");
+  });
+
+  it("orders the number, the bar, the mark and the score", () => {
+    const root = renderCell({
+      cell: scored("87.5000000000", { score: "1.2700000000", restatedPossible: true }),
+      showScore: true,
+    });
+    const children = Array.from(root.children);
+    expect(children).toHaveLength(4);
+    expect(children[0]).toHaveAttribute("data-testid", "factor-percentile");
+    expect(children[1]).toHaveAttribute("data-testid", "factor-bar");
+    expect(children[2]).toBe(mark(root));
+    expect(children[3]).toHaveAttribute("data-testid", "factor-score");
+  });
+
+  it("sets the score in the numeric face at the footnote size (UX design Token Usage)", () => {
+    const root = renderCell({
+      cell: scored("87.5000000000", { score: "1.2700000000" }),
+      showScore: true,
+    });
+    expect(scoreElement(root)).toHaveClass("font-numeric");
+    expect(scoreElement(root)).toHaveClass("text-xs");
+    expect(scoreElement(root)).toHaveClass("text-muted-foreground");
   });
 });
 
@@ -438,6 +486,16 @@ describe("the Incomplete cell's reason", () => {
       "Incomplete: operating cash flow missing, so value can't be compared fairly. It isn't guessed.",
     );
   });
+
+  it.each(["toString", "constructor", "hasOwnProperty"])(
+    "carries no title when the unrecognised reason code is the prototype member %s (DEC-0229)",
+    (name) => {
+      const root = renderCell({ cell: cell({ reasonCode: name as unknown as ReasonCode }) });
+      expect(root).not.toHaveAttribute("title");
+      expect(label(root)).toBe("Incomplete");
+      expect(root.outerHTML).not.toContain("native code");
+    },
+  );
 });
 
 // T008: state selection, Not followed and Not enough to rank (AC-14, DAC-E4-1, DAC-E4-S3-1; DEC-0151, DEC-0152).
@@ -460,6 +518,34 @@ describe("state selection", () => {
       ),
     ).toBe("Incomplete");
   });
+
+  it("ranks Not enough to rank above a classified percentile (DEC-0151)", () => {
+    const root = renderCell({
+      cell: cell({
+        status: "classified",
+        reasonCode: "not_enough_stocks",
+        percentile: "50.0000000000",
+      }),
+    });
+    expect(label(root)).toBe("Not enough to rank");
+    expect(root).toHaveAttribute("data-variant", "coverage-unknown");
+    expect(bar(root)).toBeNull();
+  });
+
+  it.each(["input_missing", "input_outdated", "input_not_computable"] as const)(
+    "scores a classified cell with a percentile whatever input reason it carries (%s)",
+    (code) => {
+      const root = renderCell({
+        cell: scored("50.0000000000", {
+          reasonCode: code,
+          reasonDetail: "operating cash flow missing",
+        }),
+      });
+      expect(label(root)).toBe("50");
+      expect(root).not.toHaveAttribute("data-variant");
+      expect(bar(root)).not.toBeNull();
+    },
+  );
 
   it("titles Not followed without a date when none is given", () => {
     const root = renderCell({ cell: cell({ reasonCode: "retired" }) });
