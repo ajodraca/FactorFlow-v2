@@ -7,7 +7,7 @@ import { type ReactNode, useEffect } from "react";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as client from "../../api/classification-client";
-import type { UniverseList } from "../../api/classification-types";
+import type { UniverseList, UniverseSummary } from "../../api/classification-types";
 import { toListParams } from "../../api/research-query";
 import { FILTERS } from "./copy";
 import { FiltersPane, type FiltersPaneProps } from "./filters-pane";
@@ -164,6 +164,21 @@ describe("TC-COMP-135: one list request per filter change, URL updated", () => {
     expect(search()).toContain("symbol=AA");
   });
 
+  it("a threshold value committed on Enter issues one request, and the following blur none (DEC-0157)", async () => {
+    const user = userEvent.setup();
+    renderPane();
+    await settled();
+
+    await user.type(screen.getByRole("textbox", { name: "Value threshold" }), "80");
+    await user.keyboard("{Enter}");
+    expect(listCalls().length).toBe(1);
+    expect(listCalls()[0]?.[0]).toEqual({ valuePercentileMin: "80" });
+    expect(search()).toBe("value.measure=percentile&value.direction=atLeast&value.value=80");
+
+    await user.tab();
+    expect(listCalls().length).toBe(1);
+  });
+
   it("blanking a threshold drops that factor's sentence from the URL and the request, in one request", async () => {
     const user = userEvent.setup();
     renderPane(
@@ -240,6 +255,47 @@ describe("TC-COMP-136: Clear filters resets filters and keeps sort", () => {
     expect(listCalls().length).toBe(1);
   });
 
+  it("also resets an uncommitted threshold draft and its field error on a row with no sentence", async () => {
+    const user = userEvent.setup();
+    renderPane("?scope=u1");
+    await settled();
+    await user.type(screen.getByRole("textbox", { name: "Value threshold for growth" }), "abc");
+    await user.tab();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(listCalls().length).toBe(0);
+
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+
+    const growth = screen.getByRole("textbox", { name: "Value threshold for growth" });
+    expect(growth).toHaveValue("");
+    expect(growth).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(search()).toBe("");
+    expect(listCalls().length).toBe(1);
+  });
+
+  it("also resets select-only changes on a row with no committed sentence", async () => {
+    const user = userEvent.setup();
+    renderPane("?symbol=AA");
+    await settled();
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Measure for growth" }),
+      "standardisedScore",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Direction for growth" }),
+      "atMost",
+    );
+    expect(listCalls().length).toBe(0);
+
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+
+    expect(screen.getByRole("combobox", { name: "Measure for growth" })).toHaveValue("percentile");
+    expect(screen.getByRole("combobox", { name: "Direction for growth" })).toHaveValue("atLeast");
+    expect(search()).toBe("");
+    expect(listCalls().length).toBe(1);
+  });
+
   it("is not rendered when only a sort is set: sort is not a filter", async () => {
     renderPane("?sort=symbol");
     await settled();
@@ -287,6 +343,14 @@ describe("FiltersPane behaviour", () => {
     expect(hideIncomplete().getAttribute("aria-describedby")).toBe(helper.id);
   });
 
+  it("(a) sizes the Hide incomplete box and its target from the theme: a --space-4 box in a --control-min-target row", async () => {
+    renderPane();
+    await settled();
+
+    expect(hideIncomplete()).toHaveClass("h-4", "w-4");
+    expect(hideIncomplete().closest("label")?.style.minHeight).toBe("var(--control-min-target)");
+  });
+
   it("(a) types no owner-facing string in the component: every one is read from copy.ts", () => {
     const source = readFileSync(
       path.join(path.dirname(fileURLToPath(import.meta.url)), "filters-pane.tsx"),
@@ -310,6 +374,40 @@ describe("FiltersPane behaviour", () => {
     expect(lookIn()).toHaveAccessibleName("Look in: All followed stocks");
     expect(lookIn()).toHaveValue("");
     expect((lookIn() as HTMLSelectElement).selectedIndex).toBe(0);
+    expect(vi.mocked(client.listUniverses).mock.calls).toEqual([[{ lifecycle: "active" }]]);
+  });
+
+  it("(b) lists every active universe across the list's pages by following next_cursor (DEC-0235)", async () => {
+    const third: UniverseSummary = {
+      universeId: "u3",
+      name: "Growth",
+      lifecycle: "active",
+      memberCount: 5,
+      createdAt: "2026-10-17T17:46:00Z",
+      retiredAt: null,
+    };
+    vi.mocked(client.listUniverses)
+      .mockResolvedValueOnce({ ...UNIVERSES, activeCount: 3, nextCursor: "c1" })
+      .mockResolvedValueOnce({
+        universes: [third],
+        activeCount: 3,
+        retiredCount: 0,
+        nextCursor: null,
+      });
+    renderPane("?scope=u3");
+    await screen.findByRole("option", { name: "Growth" });
+
+    expect(vi.mocked(client.listUniverses).mock.calls).toEqual([
+      [{ lifecycle: "active" }],
+      [{ lifecycle: "active", cursor: "c1" }],
+    ]);
+    expect(
+      within(lookIn())
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["All followed stocks", "Tech", "Dividend growers", "Growth"]);
+    expect(lookIn()).toHaveValue("u3");
+    expect(lookIn()).toHaveAccessibleName("Look in: Growth");
   });
 
   it("(b) reads just All followed stocks when the count is unknown, and names the chosen universe", async () => {
@@ -426,6 +524,19 @@ describe("FiltersPane behaviour", () => {
     expect(search()).toBe("");
   });
 
+  it("(f) Esc empties an uncommitted Find a stock draft without a write when the URL has no search", async () => {
+    const user = userEvent.setup();
+    renderPane();
+    await settled();
+
+    await user.type(findStock(), "ms");
+    await user.keyboard("{Escape}");
+
+    expect(findStock()).toHaveValue("");
+    expect(listCalls().length).toBe(0);
+    expect(search()).toBe("");
+  });
+
   it("(f) a malformed symbol is a field error with the design's reason and no write", async () => {
     const user = userEvent.setup();
     renderPane();
@@ -494,6 +605,42 @@ describe("FiltersPane behaviour", () => {
     expect(lookIn()).toHaveValue("");
   });
 
+  it("(h) back navigation over a search restores the earlier symbol in Find a stock", async () => {
+    const user = userEvent.setup();
+    renderPane();
+    await settled();
+    await user.type(findStock(), "aa");
+    await user.keyboard("{Enter}");
+    await user.clear(findStock());
+    await user.type(findStock(), "ms");
+    await user.keyboard("{Enter}");
+    expect(search()).toBe("symbol=MS");
+
+    await user.click(screen.getByRole("button", { name: "probe back" }));
+
+    expect(search()).toBe("symbol=AA");
+    expect(findStock()).toHaveValue("AA");
+  });
+
+  it("(h) back navigation over a search clears a shown field error along with the text it belonged to", async () => {
+    const user = userEvent.setup();
+    renderPane();
+    await settled();
+    await user.type(findStock(), "aa");
+    await user.keyboard("{Enter}");
+    await user.clear(findStock());
+    await user.type(findStock(), "1!");
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(search()).toBe("symbol=AA");
+
+    await user.click(screen.getByRole("button", { name: "probe back" }));
+
+    expect(search()).toBe("");
+    expect(findStock()).toHaveValue("");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("(i) an unlisted scope adds a selected Unavailable universe option and writes nothing", async () => {
     renderPane("?scope=gone");
     await settled();
@@ -507,6 +654,33 @@ describe("FiltersPane behaviour", () => {
     expect(lookIn()).toHaveAccessibleName("Look in: Unavailable universe");
     expect(listCalls().length).toBe(0);
     expect(search()).toBe("scope=gone");
+  });
+
+  it("(i) a URL scope reads Loading universes… until the list has loaded (DEC-0237)", async () => {
+    vi.mocked(client.listUniverses).mockReturnValue(new Promise(() => {}));
+    renderPane("?scope=u1");
+    await waitFor(() => expect(listCalls().length).toBe(1));
+
+    expect(
+      within(lookIn())
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["All followed stocks", "Loading universes…"]);
+    expect(lookIn()).toHaveValue("u1");
+    expect(lookIn()).toHaveAccessibleName("Look in: Loading universes…");
+  });
+
+  it("(i) after the list has failed, a URL scope reads the failure's label, not Unavailable universe (DEC-0237)", async () => {
+    vi.mocked(client.listUniverses).mockRejectedValue(new Error("fetch failed"));
+    renderPane("?scope=u1");
+    await screen.findByRole("alert");
+
+    expect(
+      within(lookIn())
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["All followed stocks", "Could not load your universes"]);
+    expect(lookIn()).toHaveValue("u1");
   });
 
   it("(j) a failed universe list leaves All followed stocks usable and says so without the envelope message", async () => {
@@ -537,6 +711,22 @@ describe("FiltersPane behaviour", () => {
     await user.click(hideIncomplete());
     expect(listCalls().length).toBe(1);
     expect(listCalls()[0]?.[0]).toEqual({ hideIncomplete: true });
+  });
+
+  it("(j) a failed universe list with a coded reason reads that code's sentence", async () => {
+    vi.mocked(client.listUniverses).mockRejectedValue(
+      new client.ClassificationApiError("The envelope message", "req-2", {
+        code: "validation_error",
+        operation: "list-universes",
+        resource: "universe",
+      }),
+    );
+    renderPane();
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe(
+      "Could not load your universes: FactorFlow could not accept the universe as entered. Check it, then try again.",
+    );
   });
 
   it("(j) an unreachable API reads the same way", async () => {

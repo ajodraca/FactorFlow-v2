@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
-updated: 2026-10-18
+updated: 2026-10-29
+last_reworked_review: CAP-002-E4-S5-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -196,3 +197,11 @@ Working directory is the repository root `repos/factorflow-v2/FactorFlow-v2`. Th
 - **Universe detail.** The *Members as of* field belongs to CAP-002-E1-S8 (its AC DAC-E1-S8-1); this story only provides the `children` slot and the `showLookIn={false}` mode. Look in is the only part of the pane that depends on `listUniverses`. The pane is itself the `section` labelled *Filters* (T011; UX design 1.1 and 1.4), so a host mounts it directly and never wraps it in another *Filters* landmark (CAP-002-E1-S8 T014; CAP-002-E4-S9 already mounts it unwrapped).
 - **Sibling stories.** CAP-002-E4-S1 supplies `listUniverses`, `listClassifications` and the types the pane imports; CAP-002-E4-S3 (factor cell) and CAP-002-E4-S6 (results table) are results-side and share no import with the pane, so neither is a prerequisite; the table's sort requests and the pane's filter writes meet only in the URL.
 - **Risk.** The largest risk is the seam between the pane and S9: if S9 decodes the URL itself instead of importing `useResearchQuery`, the two could disagree on pushes versus replaces. T007 pins the push behaviour and the doc comment names the contract.
+
+### Rework notes (implementation review v1, 2026-10-29)
+
+- **T007/T008 deviation (IR-009).** The hook does not compose two `setQuery` calls in one tick: react-router 6.30's functional `setSearchParams` hands each updater the render's params, not the previous write's result, so the second write starts from the stale snapshot. The one-tick test asserts two pushes, each a full rewrite of the owned keys, and the hook's doc comment states the limitation for hosts (S9, E1-S8). The pane is unaffected: every write is a full query built from `query`.
+- **T011 (IR-005).** *Look in* follows `next_cursor` until it is null, so every active universe is listed, not the first page (DEC-0235). "Fetched once on mount" reads as one load, not one request.
+- **T002/T010 (IR-006).** The value field is `w-8` (`--space-8`), the spacing token nearest the design's 56 px, not the literal `w-14` (DEC-0236, PROVISIONAL; STD-UI-29).
+- **T011 (IR-008).** A URL scope reads *Loading universes…* while the list loads and the list operation's label after it fails; *Unavailable universe* applies only once the loaded list lacks it (DEC-0237, PROVISIONAL).
+- **T010 (IR-002), T011 (IR-001, IR-007), T010 (IR-010).** Enter commits the threshold value as blur does (DEC-0157); **Clear filters** remounts the threshold rows so a row with no committed sentence drops its draft and error; the checkbox is a `--space-4` box in a `--control-min-target` row; `validateThresholdValue` takes the factor.

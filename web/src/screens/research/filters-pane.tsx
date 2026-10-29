@@ -6,7 +6,7 @@ import {
   type ThresholdSentence as Sentence,
   decodeResearchQuery,
 } from "../../api/research-query";
-import { FILTERS, REGIONS, UNIVERSES, failureSentence } from "./copy";
+import { FILTERS, OPERATION_LABELS, REGIONS, UNIVERSES, failureSentence } from "./copy";
 import { ThresholdSentence } from "./threshold-sentence";
 import { useResearchQuery } from "./use-research-query";
 
@@ -33,6 +33,18 @@ function universesFailure(cause: unknown): string {
     : failureSentence({ operation: "list-universes", resource: "universe", code: null });
 }
 
+/** Every active universe, page after page until `nextCursor` is null (DEC-0235). */
+async function listActiveUniverses(): Promise<UniverseSummary[]> {
+  const universes: UniverseSummary[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await listUniverses({ lifecycle: "active", cursor });
+    universes.push(...page.universes);
+    cursor = page.nextCursor ?? undefined;
+  } while (cursor !== undefined);
+  return universes;
+}
+
 /**
  * The Research screen's Filters pane (UX design 1.1; classification-ui 2.5;
  * DEC-0156): *Find a stock*, *Look in*, one threshold sentence per factor,
@@ -50,8 +62,11 @@ export function FiltersPane({
   children,
 }: FiltersPaneProps): JSX.Element {
   const { query, setQuery } = useResearchQuery();
-  const [universes, setUniverses] = useState<UniverseSummary[]>([]);
+  /** `null` until the list has loaded: a scope is judged only against a loaded list (DEC-0237). */
+  const [universes, setUniverses] = useState<UniverseSummary[] | null>(null);
   const [universesError, setUniversesError] = useState<string | null>(null);
+  /** Bumped by Clear filters to remount the threshold rows, dropping any uncommitted draft. */
+  const [thresholdReset, setThresholdReset] = useState(0);
   const [symbolDraft, setSymbolDraft] = useState(query.symbol ?? "");
   const [symbolError, setSymbolError] = useState<string | null>(null);
   const findStockRef = useRef<HTMLInputElement>(null);
@@ -67,10 +82,10 @@ export function FiltersPane({
       return;
     }
     let cancelled = false;
-    listUniverses({ lifecycle: "active" })
+    listActiveUniverses()
       .then((list) => {
         if (!cancelled) {
-          setUniverses(list.universes);
+          setUniverses(list);
         }
       })
       .catch((cause: unknown) => {
@@ -116,6 +131,7 @@ export function FiltersPane({
   function clearFilters(): void {
     setSymbolDraft("");
     setSymbolError(null);
+    setThresholdReset((generation) => generation + 1);
     setQuery({
       ...DEFAULT_RESEARCH_QUERY,
       sort: query.sort,
@@ -125,12 +141,20 @@ export function FiltersPane({
   }
 
   const scope = query.scope;
-  const scopeListed = scope === null || universes.some((universe) => universe.universeId === scope);
+  const listed = universes ?? [];
+  const scopeListed = scope === null || listed.some((universe) => universe.universeId === scope);
+  // A scope the loaded list lacks is Unavailable (DEC-0158); before that it is
+  // only not yet known, or not readable (DEC-0237).
+  const unlistedScopeLabel =
+    universes !== null
+      ? FILTERS.unavailableUniverse
+      : universesError === null
+        ? FILTERS.loadingUniverses
+        : OPERATION_LABELS["list-universes"];
   const lookInLabel =
     scope === null
       ? FILTERS.allFollowedStocks
-      : (universes.find((universe) => universe.universeId === scope)?.name ??
-        FILTERS.unavailableUniverse);
+      : (listed.find((universe) => universe.universeId === scope)?.name ?? unlistedScopeLabel);
   const filterActive =
     Object.keys(query.sentences).length > 0 ||
     query.symbol !== null ||
@@ -202,12 +226,12 @@ export function FiltersPane({
                 ? FILTERS.allFollowedStocks
                 : FILTERS.allFollowedStocksOption(activeInstruments)}
             </option>
-            {universes.map((universe) => (
+            {listed.map((universe) => (
               <option key={universe.universeId} value={universe.universeId}>
                 {universe.name}
               </option>
             ))}
-            {scopeListed ? null : <option value={scope}>{FILTERS.unavailableUniverse}</option>}
+            {scopeListed ? null : <option value={scope}>{unlistedScopeLabel}</option>}
           </select>
           {universesError !== null ? (
             <p
@@ -225,7 +249,7 @@ export function FiltersPane({
       <div className={partClass}>
         {FACTORS.map((factor) => (
           <ThresholdSentence
-            key={factor}
+            key={`${factor}-${thresholdReset}`}
             factor={factor}
             value={query.sentences[factor]}
             onCommit={(next) => commitSentence(factor, next)}
@@ -235,10 +259,15 @@ export function FiltersPane({
       </div>
 
       <div className={partClass}>
-        <label htmlFor={hideIncompleteId} className="flex items-center gap-2 text-sm">
+        <label
+          htmlFor={hideIncompleteId}
+          className="flex items-center gap-2 text-sm"
+          style={{ minHeight: "var(--control-min-target)" }}
+        >
           <input
             id={hideIncompleteId}
             type="checkbox"
+            className="h-4 w-4"
             checked={query.hideIncomplete}
             aria-describedby={hideIncompleteHelperId}
             onChange={(event) => setQuery({ ...query, hideIncomplete: event.target.checked })}

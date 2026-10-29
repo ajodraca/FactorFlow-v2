@@ -14,13 +14,18 @@ const MEASURES: readonly Measure[] = ["percentile", "standardisedScore"];
 const DIRECTIONS: readonly Direction[] = ["atLeast", "atMost"];
 
 /**
- * The field error for `raw` under `measure`, or `null` when the value is valid
- * or blank (blank means no threshold on that measure; DAC-E4-S5-1). Validity
- * is the S2 codec's own verdict: the value is valid exactly when
- * `decodeResearchQuery` would keep a sentence carrying it, so the pane and the
- * URL cannot drift (DEC-0157). The wording is `copy.ts`'s.
+ * The `factor` row's field error for `raw` under `measure`, or `null` when the
+ * value is valid or blank (blank means no threshold on that measure;
+ * DAC-E4-S5-1). Validity is the S2 codec's own verdict: the value is valid
+ * exactly when `decodeResearchQuery` would keep a sentence carrying it, so the
+ * pane and the URL cannot drift (DEC-0157). The wording is `copy.ts`'s, for
+ * the factor given, so any caller gets its own row's sentence.
  */
-export function validateThresholdValue(measure: Measure, raw: string): string | null {
+export function validateThresholdValue(
+  factor: FactorName,
+  measure: Measure,
+  raw: string,
+): string | null {
   if (raw === "") {
     return null;
   }
@@ -30,7 +35,7 @@ export function validateThresholdValue(measure: Measure, raw: string): string | 
     "value.value": raw,
   });
   return decodeResearchQuery(params).sentences.value === undefined
-    ? thresholdFieldError("value", measure)
+    ? thresholdFieldError(factor, measure)
     : null;
 }
 
@@ -65,10 +70,11 @@ export interface ThresholdSentenceProps {
  * UX design 1.1 item 3; classification-ui 2.5): the swatch and name, then a
  * `<p>` holding the three blanks whose accessible names read as the sentence
  * (DAC-E4-S5-4; DEC-0157). The selects commit on change and the value on
- * blur; an invalid value is a field error before any request and nothing is
- * written (DAC-E4-S5-1). The draft re-syncs from `value`, so Clear filters and
- * back navigation reset it. Nothing here is ever `disabled`: rows stay usable
- * while a request is in flight.
+ * blur or Enter; an invalid value is a field error before any request and
+ * nothing is written (DAC-E4-S5-1). The draft re-syncs from `value`, so back
+ * navigation resets it; a host that must reset a row whose `value` is already
+ * `undefined` (Clear filters) remounts it. Nothing here is ever `disabled`:
+ * rows stay usable while a request is in flight.
  */
 export function ThresholdSentence({
   factor,
@@ -92,10 +98,9 @@ export function ThresholdSentence({
   }, [measure, direction, raw]);
 
   function commit(next: Draft): void {
-    const problem = validateThresholdValue(next.measure, next.raw);
-    const factorProblem = problem === null ? null : thresholdFieldError(factor, next.measure);
-    setError(factorProblem);
-    if (factorProblem !== null) {
+    const problem = validateThresholdValue(factor, next.measure, next.raw);
+    setError(problem);
+    if (problem !== null) {
       return;
     }
     if (next.raw === "") {
@@ -122,7 +127,7 @@ export function ThresholdSentence({
   function changeValue(nextRaw: string): void {
     const next = { ...draft, raw: nextRaw };
     setDraft(next);
-    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {
+    if (error !== null && validateThresholdValue(factor, next.measure, nextRaw) === null) {
       setError(null);
     }
   }
@@ -178,7 +183,12 @@ export function ThresholdSentence({
           aria-describedby={error !== null ? errorId : undefined}
           onChange={(event) => changeValue(event.target.value)}
           onBlur={() => commit(draft)}
-          className="w-14 rounded border border-input p-1 text-right font-numeric"
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              commit(draft);
+            }
+          }}
+          className="w-8 rounded border border-input p-1 text-right font-numeric"
         />
       </p>
       {error !== null ? (

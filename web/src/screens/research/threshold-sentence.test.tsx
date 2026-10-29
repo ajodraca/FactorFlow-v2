@@ -31,6 +31,8 @@ function expectFieldError(field: HTMLElement, text: string): void {
   expect(alert.textContent).toBe(text);
   expect(field).toHaveAttribute("aria-invalid", "true");
   expect(field.getAttribute("aria-describedby")?.split(" ")).toContain(alert.id);
+  // classification-ui 2.5, UX 1.1 item 3: the field error is in --destructive (IR-003).
+  expect(alert.style.color).toBe("hsl(var(--destructive))");
 }
 
 // Implements TC-COMP-134 (DAC-E4-S5-1): the field validates on blur, before any request.
@@ -140,6 +142,57 @@ describe("TC-COMP-134: threshold field validates percentile and non-finite score
     expect(onCommit.mock.calls.length).toBe(0);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  // DEC-0157: the threshold value commits on blur or Enter (IR-002).
+  it("(e) Enter commits a valid value once; a blur after the host applied it commits nothing more", async () => {
+    const user = userEvent.setup();
+    const onCommit = vi.fn();
+    const { rerender } = render(<ThresholdSentence factor="value" onCommit={onCommit} />);
+    const field = screen.getByRole("textbox", { name: "Value threshold" });
+
+    await user.type(field, "80");
+    await user.keyboard("{Enter}");
+
+    const sentence: Sentence = { measure: "percentile", direction: "atLeast", value: "80" };
+    expect(onCommit.mock.calls).toEqual([[sentence]]);
+    expect(field).toHaveFocus();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    rerender(<ThresholdSentence factor="value" value={sentence} onCommit={onCommit} />);
+    await user.tab();
+
+    expect(onCommit.mock.calls.length).toBe(1);
+  });
+
+  it("(e) Enter on an invalid value is the field error with nothing committed, before any blur", async () => {
+    const user = userEvent.setup();
+    const { field, onCommit } = renderValueRow();
+
+    await user.type(field, "801");
+    await user.keyboard("{Enter}");
+
+    expectFieldError(field, PERCENTILE_ERROR);
+    expect(onCommit.mock.calls.length).toBe(0);
+    expect(field).toHaveFocus();
+  });
+
+  it("(e) Enter on a blank field behaves as blur: null after a committed value, nothing otherwise", async () => {
+    const user = userEvent.setup();
+    const committed = renderValueRow({ measure: "percentile", direction: "atLeast", value: "70" });
+
+    await user.clear(committed.field);
+    await user.keyboard("{Enter}");
+
+    expect(committed.onCommit.mock.calls).toEqual([[null]]);
+    committed.view.unmount();
+
+    const blank = renderValueRow();
+    await user.click(blank.field);
+    await user.keyboard("{Enter}");
+
+    expect(blank.onCommit.mock.calls.length).toBe(0);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
 });
 
 // Implements TC-COMP-137 (DAC-E4-S5-4): each sentence reads as its blanks (DEC-0157).
@@ -179,7 +232,9 @@ describe("TC-COMP-137: threshold sentences have accessible names reading as sent
         .map((option) => option.textContent),
     ).toEqual(["at least", "at most"]);
     expect(field).toHaveAttribute("placeholder", "any");
-    expect(field).toHaveClass("w-14");
+    // DEC-0236: the design's 56 px is the nearest spacing token (--space-8), never a literal (STD-UI-29).
+    expect(field).toHaveClass("w-8");
+    expect(field).not.toHaveClass("w-14");
   });
 
   it.each<[FactorName, string]>([
@@ -196,6 +251,7 @@ describe("TC-COMP-137: threshold sentences have accessible names reading as sent
       const row = sentence[0] as HTMLElement;
       const swatch = row.querySelector("[aria-hidden='true']");
       expect(swatch).not.toBeNull();
+      expect((swatch as HTMLElement).style.backgroundColor).toBe(`hsl(var(--factor-${factor}))`);
       expect(row.textContent?.startsWith(name)).toBe(true);
       const controls = Array.from(row.querySelectorAll("select, input"));
       expect(controls.map((control) => control.getAttribute("aria-label"))).toEqual([
@@ -234,20 +290,26 @@ describe("ThresholdSentence behaviour", () => {
     params.set("value.direction", "atLeast");
     params.set("value.value", raw);
     const codecKeeps = decodeResearchQuery(params).sentences.value !== undefined;
-    const sentenceKeeps = raw !== "" && validateThresholdValue(measure, raw) === null;
+    const sentenceKeeps = raw !== "" && validateThresholdValue("value", measure, raw) === null;
 
     expect(codecKeeps).toBe(kept);
     expect(sentenceKeeps).toBe(codecKeeps);
   });
 
   it("(a) a blank value is not an error: it means no threshold", () => {
-    expect(validateThresholdValue("percentile", "")).toBeNull();
-    expect(validateThresholdValue("standardisedScore", "")).toBeNull();
+    expect(validateThresholdValue("value", "percentile", "")).toBeNull();
+    expect(validateThresholdValue("value", "standardisedScore", "")).toBeNull();
   });
 
-  it("(a) an invalid value's error names the factor and the measure's rule", () => {
-    expect(validateThresholdValue("percentile", "101")).toBe(PERCENTILE_ERROR);
-    expect(validateThresholdValue("standardisedScore", "NaN")).toBe(SCORE_ERROR);
+  it("(a) an invalid value's error names the caller's factor and the measure's rule", () => {
+    expect(validateThresholdValue("value", "percentile", "101")).toBe(PERCENTILE_ERROR);
+    expect(validateThresholdValue("value", "standardisedScore", "NaN")).toBe(SCORE_ERROR);
+    expect(validateThresholdValue("growth", "percentile", "101")).toBe(
+      "Could not set the growth threshold: a percentile is a number from 0 to 100.",
+    );
+    expect(validateThresholdValue("momentum", "standardisedScore", "abc")).toBe(
+      "Could not set the momentum threshold: a standardised score is a finite number.",
+    );
   });
 
   it("(b) the field is a text input in decimal mode, not a number input", () => {
@@ -408,6 +470,58 @@ describe("ThresholdSentence behaviour", () => {
     expect(screen.getByRole("combobox", { name: "Measure for value" })).toHaveValue(
       "standardisedScore",
     );
+    expect(screen.getByRole("combobox", { name: "Direction for value" })).toHaveValue("atMost");
+  });
+
+  it("(f) re-syncs when only the value of the sentence changes, as back navigation does", () => {
+    const onCommit = vi.fn();
+    const at = (value: string) => (
+      <ThresholdSentence
+        factor="value"
+        value={{ measure: "percentile", direction: "atLeast", value }}
+        onCommit={onCommit}
+      />
+    );
+    const { rerender } = render(at("90"));
+    expect(screen.getByRole("textbox", { name: "Value threshold" })).toHaveValue("90");
+
+    rerender(at("80"));
+
+    expect(screen.getByRole("textbox", { name: "Value threshold" })).toHaveValue("80");
+  });
+
+  it("(f) re-syncs when only the measure of the sentence changes", () => {
+    const onCommit = vi.fn();
+    const at = (measure: Measure) => (
+      <ThresholdSentence
+        factor="value"
+        value={{ measure, direction: "atLeast", value: "0.5" }}
+        onCommit={onCommit}
+      />
+    );
+    const { rerender } = render(at("standardisedScore"));
+    expect(screen.getByRole("combobox", { name: "Measure for value" })).toHaveValue(
+      "standardisedScore",
+    );
+
+    rerender(at("percentile"));
+
+    expect(screen.getByRole("combobox", { name: "Measure for value" })).toHaveValue("percentile");
+  });
+
+  it("(f) re-syncs when only the direction of the sentence changes", () => {
+    const onCommit = vi.fn();
+    const at = (direction: "atLeast" | "atMost") => (
+      <ThresholdSentence
+        factor="value"
+        value={{ measure: "percentile", direction, value: "70" }}
+        onCommit={onCommit}
+      />
+    );
+    const { rerender } = render(at("atLeast"));
+
+    rerender(at("atMost"));
+
     expect(screen.getByRole("combobox", { name: "Direction for value" })).toHaveValue("atMost");
   });
 

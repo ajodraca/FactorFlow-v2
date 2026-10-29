@@ -22,6 +22,11 @@ export interface ResearchQueryBinding {
  * and back navigation restores the earlier filter. A write that leaves the
  * search unchanged navigates nowhere.
  *
+ * Two writes in one tick do not compose: react-router's functional
+ * `setSearchParams` hands each updater the render's params, not the previous
+ * write's result, so a second write in the same tick must carry the whole
+ * query it wants. Every write here is a full query built from `query`.
+ *
  * The host that issues the list request (CAP-002-E4-S9 on Research,
  * CAP-002-E1-S8 on universe detail) must key it on `query`, whose identity is
  * stable while the search string is unchanged: one write, one URL, one request

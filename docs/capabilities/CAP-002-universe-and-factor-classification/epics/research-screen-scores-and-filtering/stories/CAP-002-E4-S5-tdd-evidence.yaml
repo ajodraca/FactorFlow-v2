@@ -174,3 +174,87 @@ cycles:
             after unmount would call setState on an unmounted component. React 18 drops such an update silently and
             no longer warns, so no rendered output, request or log differs on any input; the flag is the plan's
             defensive idiom, not observable behaviour.
+
+  # Review-rework cycle against CAP-002-E4-S5-implementation-review-v1.md (CHANGES-REQUIRED). The driver owns the
+  # commit; the rework below is recorded against the staged, uncommitted tree on usr/alvaro-de-jodra/CAP-002-E4-S5.
+  # Decisions recorded for it under docs/unattended-mode.md: DEC-0235 (IR-005, Look in follows next_cursor),
+  # DEC-0236 (IR-006, w-8 for the design's 56 px; PROVISIONAL), DEC-0237 (IR-008, the label of a scope before the
+  # list is known; PROVISIONAL). Decision-Id trailers for the stage commit: DEC-0235, DEC-0236, DEC-0237.
+  - id: cycle-4
+    tasks: [T001, T002, T004, T005, T006, T007, T008, T010, T011, T014]
+    description: >
+      Rework of implementation review v1 (CAP-002-E4-S5-implementation-review-v1.md). IR-001 (production): Clear
+      filters bumps a generation used in each ThresholdSentence key, so a row with no committed sentence remounts
+      and drops its uncommitted draft, field error and select-only changes; two new TC-COMP-136 cases (an invalid
+      draft with its error; a select-only change). IR-002 (production): Enter in a threshold field runs the same
+      commit as blur (DEC-0157): a valid changed value commits once and the following blur nothing, an invalid value
+      is the field error with no commit, blank behaves as on blur; pinned on the row and through the pane's probe
+      host. IR-003 (tests): re-sync when only the value, only the measure or only the direction changes; each row's
+      swatch token; the field error's --destructive colour on every error case. IR-004 (tests): the listUniverses
+      argument, a validation_error-coded list failure, Esc on an uncommitted draft with no URL symbol, back
+      navigation over a search and over a search with a shown field error. IR-005 (production, DEC-0235): Look in
+      follows nextCursor until null, with a two-page test. IR-006 (production, DEC-0236): the value field is w-8
+      (--space-8), and T002's assertion pins w-8 and the absence of w-14. IR-007 (production): the checkbox is h-4
+      w-4 (--space-4) inside a label with min-height var(--control-min-target), both asserted. IR-008 (production,
+      DEC-0237): universes state is null until loaded; an unlisted scope reads Loading universes… (new copy.ts
+      string with its copy.test.ts anchor) while loading, OPERATION_LABELS["list-universes"] after a failure, and
+      Unavailable universe only once the loaded list lacks it. IR-009 (docs): the one-tick limitation is stated in
+      the hook's doc comment and in the task plan's Rework notes. IR-010 (production): validateThresholdValue takes
+      the factor and returns that row's error; the component no longer recomputes it. IR-011: not taken (optional
+      per the review); cycle-4.patch is written after the staged diff is fingerprinted and is not part of it.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-4.log
+    red_log_sha256: fe6938fb3044a34b084b73d85d5a51f682aca8d3b815dd8a659dad01881c688c
+    red_evidence: >
+      With the new and strengthened tests written and the production code at 8fb44bc, the four focused suites ran
+      20 failed, 394 passed (red-cycle-4.log): the Enter cases, the two Clear filters cases, the Enter-through-pane
+      request count, the w-8 class, the three-argument validateThresholdValue, the paging test, the checkbox tokens,
+      the Loading universes… and failed-list labels, and the new copy anchor. The IR-003 and IR-004 strengthening
+      tests pin behaviour the code already had; their RED is the review's ten surviving mutants, each of which the
+      cycle's mutation run below now kills (manual:cycle-4:review-*).
+    green_evidence: >
+      Focused suites 415 passed in 4 files (green-cycle-4.log); full web suite 890 passed in 48 files
+      (full-suite-cycle-4.log); npm run format (check), npm run lint, npx tsc --noEmit and npm run build clean; the
+      built CSS defines --factor-value, --factor-growth and --factor-momentum (light and dark) and maps w-8, w-4 and
+      h-4 to --space-8 and --space-4. Code review APPROVED with four LOW notes carried as follow-ups: the paging loop
+      checks the cancel flag only after the last page (SA-RES-001; a cancelled pane may still fetch its remaining
+      pages, writing no state); the three inline-style assertions read jsdom's CSSStyleDeclaration, which keeps
+      var() values; the first page is requested with cursor undefined, equal to the asserted argument under toEqual.
+      Spec drift: none; the deviations from T010's re-sync mechanism, T011's one request and loading text, and
+      T002/T010's w-14 are each authorised by IR-001, DEC-0235, DEC-0237 and DEC-0236 and recorded in the plan's
+      Rework notes.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-4.log
+        sha256: 75b67766e75ae7cc6ff0186d4dba5d5bac89758f0aab73407958b7e0906db458
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/full-suite-cycle-4.log
+        sha256: b4fcfbe88a25c73cd1fabd17a8b37760306d4dc4accee7f574435c5e9b26a07c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ae5d8cb4ca9287aade7ed616f0f8bace594dbacdba29bc968bf6b576f3be2864
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-4-results.json
+      results_sha256: 020b99548ac4c50e741988b05ae90e7ce2c208fe5c21b9bfd2c290692f9f132e
+      generated: 28
+      killed: 26
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/filters-pane.tsx:69:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The mutant starts the threshold-reset generation at 1 instead of 0. The generation is read only as a
+            suffix of each ThresholdSentence key, whose contract is to change on every Clear filters so the rows
+            remount; its starting value is never rendered, compared or written, so no input distinguishes the two.
+        - id: web/src/screens/research/filters-pane.tsx:134:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The mutant advances the generation by 2 instead of 1 on Clear filters. Any change of the key remounts
+            the rows and the value itself is never rendered, compared or written, so the two differ on no input;
+            the non-equivalent neighbours (no bump: fp-clear-no-threshold-reset; key without the generation:
+            fp-reset-key-ignored) are both killed.

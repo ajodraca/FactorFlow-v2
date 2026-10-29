@@ -438,6 +438,7 @@ describe("copy.ts completeness and keying", () => {
     "Earlier sets…",
     "Find a stock",
     "Unavailable universe",
+    "Loading universes…",
     "A score is shown only when every input is present and current. This checks presence and currency, not whether the provider's values are correct.",
     "No stocks match these filters, so there is nothing to save.",
     "Could not save these stocks as a universe: the scores changed while you were reviewing them. Review the new result, then save again.",

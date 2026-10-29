@@ -263,6 +263,12 @@ export const FILTERS = {
    * CAP-002-E4-S5 Open Gap 3). No design contains it.
    */
   unavailableUniverse: "Unavailable universe",
+  /**
+   * The *Look in* option for a URL scope while the universe list is still
+   * loading, in the interface's loading idiom (DEC-0237, PROVISIONAL). Once
+   * the list has failed the option reuses `OPERATION_LABELS["list-universes"]`.
+   */
+  loadingUniverses: "Loading universes…",
 } as const;
 
 /**

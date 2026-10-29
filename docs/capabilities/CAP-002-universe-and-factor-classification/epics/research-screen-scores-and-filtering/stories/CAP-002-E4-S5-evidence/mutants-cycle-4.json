@@ -1,0 +1,235 @@
+{
+ "schema": 1,
+ "repo_head": "a6a01e1ab5755d9d20417d109d29b2d4c862a895",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:69:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 69,
+   "original": "  const [thresholdReset, setThresholdReset] = useState(0);",
+   "mutated": "  const [thresholdReset, setThresholdReset] = useState(1);"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:134:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 134,
+   "original": "    setThresholdReset((generation) => generation + 1);",
+   "mutated": "    setThresholdReset((generation) => generation + 2);"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:145:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 145,
+   "original": "  const scopeListed = scope === null || listed.some((universe) => universe.universeId === scope);",
+   "mutated": "  const scopeListed = scope === null && listed.some((universe) => universe.universeId === scope);"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:130:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 130,
+   "original": "    if (error !== null && validateThresholdValue(factor, next.measure, nextRaw) === null) {",
+   "mutated": "    if (error !== null || validateThresholdValue(factor, next.measure, nextRaw) === null) {"
+  },
+  {
+   "id": "manual:cycle-4:review-ts-effect-ignores-raw",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "  }, [measure, direction, raw]);",
+   "new": "  }, [measure, direction]);"
+  },
+  {
+   "id": "manual:cycle-4:review-ts-effect-ignores-measure",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "  }, [measure, direction, raw]);",
+   "new": "  }, [direction, raw]);"
+  },
+  {
+   "id": "manual:cycle-4:ts-effect-ignores-direction",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "  }, [measure, direction, raw]);",
+   "new": "  }, [measure, raw]);"
+  },
+  {
+   "id": "manual:cycle-4:review-ts-swatch-one-colour",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "style={{ backgroundColor: `hsl(var(--factor-${factor}))` }}",
+   "new": "style={{ backgroundColor: \"hsl(var(--factor-value))\" }}"
+  },
+  {
+   "id": "manual:cycle-4:review-ts-swatch-no-colour",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          style={{ backgroundColor: `hsl(var(--factor-${factor}))` }}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:review-ts-error-not-destructive",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          className=\"text-sm\"\n          style={{ color: \"hsl(var(--destructive))\" }}",
+   "new": "          className=\"text-sm\""
+  },
+  {
+   "id": "manual:cycle-4:ts-no-enter-commit",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          onKeyDown={(event) => {\n            if (event.key === \"Enter\") {\n              commit(draft);\n            }\n          }}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:ts-enter-commits-without-validation",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "            if (event.key === \"Enter\") {\n              commit(draft);\n            }",
+   "new": "            if (event.key === \"Enter\" && draft.raw !== \"\") {\n              onCommit({ measure: draft.measure, direction: draft.direction, value: draft.raw });\n            }"
+  },
+  {
+   "id": "manual:cycle-4:ts-width-literal",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "className=\"w-8 rounded border",
+   "new": "className=\"w-14 rounded border"
+  },
+  {
+   "id": "manual:cycle-4:review-ts-validate-names-value",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "    ? thresholdFieldError(factor, measure)",
+   "new": "    ? thresholdFieldError(\"value\", measure)"
+  },
+  {
+   "id": "manual:cycle-4:review-fp-lists-all-lifecycles",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "listUniverses({ lifecycle: \"active\", cursor })",
+   "new": "listUniverses({ lifecycle: \"all\", cursor })"
+  },
+  {
+   "id": "manual:cycle-4:review-fp-api-error-ignores-code",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "  return cause instanceof ClassificationApiError",
+   "new": "  return false && cause instanceof ClassificationApiError"
+  },
+  {
+   "id": "manual:cycle-4:review-fp-symbol-effect-no-draft-resync",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    setSymbolDraft(symbol ?? \"\");\n    setSymbolError(null);\n  }, [symbol]);",
+   "new": "    setSymbolError(null);\n  }, [symbol]);"
+  },
+  {
+   "id": "manual:cycle-4:review-fp-symbol-effect-keeps-error",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    setSymbolDraft(symbol ?? \"\");\n    setSymbolError(null);\n  }, [symbol]);",
+   "new": "    setSymbolDraft(symbol ?? \"\");\n  }, [symbol]);"
+  },
+  {
+   "id": "manual:cycle-4:review-fp-escape-keeps-draft",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "            } else if (event.key === \"Escape\") {\n              setSymbolDraft(\"\");\n",
+   "new": "            } else if (event.key === \"Escape\") {\n"
+  },
+  {
+   "id": "manual:cycle-4:fp-first-page-only",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    cursor = page.nextCursor ?? undefined;",
+   "new": "    cursor = undefined;"
+  },
+  {
+   "id": "manual:cycle-4:fp-pages-drop-first",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    universes.push(...page.universes);",
+   "new": "    universes.splice(0, universes.length, ...page.universes);"
+  },
+  {
+   "id": "manual:cycle-4:fp-clear-no-threshold-reset",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    setThresholdReset((generation) => generation + 1);\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:fp-reset-key-ignored",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "key={`${factor}-${thresholdReset}`}",
+   "new": "key={factor}"
+  },
+  {
+   "id": "manual:cycle-4:fp-unlisted-always-unavailable",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "  const unlistedScopeLabel =\n    universes !== null\n      ? FILTERS.unavailableUniverse\n      : universesError === null\n        ? FILTERS.loadingUniverses\n        : OPERATION_LABELS[\"list-universes\"];",
+   "new": "  const unlistedScopeLabel = FILTERS.unavailableUniverse;"
+  },
+  {
+   "id": "manual:cycle-4:fp-failed-reads-loading",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "        : OPERATION_LABELS[\"list-universes\"];",
+   "new": "        : FILTERS.loadingUniverses;"
+  },
+  {
+   "id": "manual:cycle-4:fp-loaded-reads-loading",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "      ? FILTERS.unavailableUniverse\n      : universesError === null",
+   "new": "      ? FILTERS.loadingUniverses\n      : universesError === null"
+  },
+  {
+   "id": "manual:cycle-4:fp-checkbox-unsized",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "            className=\"h-4 w-4\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:fp-checkbox-label-no-min-target",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "          style={{ minHeight: \"var(--control-min-target)\" }}\n",
+   "new": ""
+  }
+ ]
+}
