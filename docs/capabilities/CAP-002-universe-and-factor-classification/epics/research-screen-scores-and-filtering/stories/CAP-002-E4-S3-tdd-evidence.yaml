@@ -1,0 +1,112 @@
+# TDD evidence for CAP-002-E4-S3 - the factor cell and the Possibly restated mark patterns.
+# Two cycles, as the task plan's Other Notes lay out: (1) T003 then T010 (restated-mark.tsx); (2) T001, T002,
+# T004 to T008 then T009 and T011 (factor-cell.tsx, plus the copy.ts strings T009 adds).
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is
+# its own diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch is the diff between the index trees
+# written after each cycle (git write-tree), so the two apply in order onto the stage parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began. The verdicts below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (vitest compiles with esbuild and does not
+# type-check, so a mutant runs on its runtime behaviour). The operator catalogue derives nothing from JSX, so
+# every mutant is hand-written ("operator": "manual") against the cycle's changed lines.
+# Decisions applied: DEC-0075 (the mark as a composition), DEC-0150 (props, showScore, momentum guard),
+# DEC-0151 (Incomplete title sentence and state-selection order), DEC-0152 (Not followed without a date); all
+# owner-upheld. Decisions recorded by this run are named in the cycle that applies them.
+
+cycles:
+  - id: cycle-1
+    tasks: [T003, T010]
+    description: >
+      TC-COMP-097 (mark half): RestatedMark renders on value and growth an inline span carrying the
+      status-neutral tokens whose assistive-technology text is exactly Possibly restated from copy.ts in an
+      sr-only child, with the R glyph in a separate aria-hidden child; no role, aria-label, title, tabindex or
+      data-variant; nothing at all on momentum. Production: web/src/components/patterns/restated-mark.tsx.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/red-cycle-1.log
+    red_log_sha256: 1254928e1d1914977e362c2cf7e3bfdcbc2cb0a322f956ed6775623b8100e52d
+    red_evidence: >
+      With restated-mark.test.tsx written and no restated-mark.tsx, the file failed to load: Failed to resolve
+      import "./restated-mark" (no tests ran).
+    green_evidence: >
+      restated-mark.test.tsx 6 passed (green-cycle-1.log); tsc --noEmit, biome lint and biome format clean.
+      Twelve hand-written mutants (guard swapped, negated and removed; sr-only dropped; glyph unhidden,
+      lowercased, and swapped with the words; wrong catalogue string; each token dropped; a title and a role
+      added) were all killed on the first run.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/green-cycle-1.log
+        sha256: d51ba2b079d20cba6e03b1bb96920ccf36210f29edb7d411e81621a70c8d2b4f
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 0dcd848b1e3d95a014638ea3abde07484f31e6d98635e73c86e136ea4cf7fc38
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 45c6e6ba329fe4f88265522057162e4d3f1bb98f103ac9472f363849dc85497d
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T001, T002, T004, T005, T006, T007, T008, T009, T011]
+    description: >
+      TC-COMP-073 (every unscored state holds no digit, sign or placeholder, no bar, exactly its word with its
+      data-variant and a shape, the numbers an Incomplete cell carries never read), TC-COMP-074 (a measured
+      0.00 score prints 0.00 beside the percentile only with showScore; a measured 0 percentile is a scored cell
+      with an empty bar; +1.27 and -0.45 through formatScore), TC-COMP-097 cell half (exactly one mark after
+      the number on value and growth, none on momentum, none without restatedPossible, none on the three
+      badges, never the explanation sentence), TC-COMP-109 (word plus shape per state, four pairwise distinct
+      signatures, the hatch on Not enough to rank only, no gain/loss/factor-/neutral-value class, the Token
+      Usage pairs, the delivered unknown shape), T006 (formatPercentile text, aria-hidden bar with the printed
+      whole number as its fill width and --seq-4 on --seq-1 inline, font-numeric at weight 600, the muted score
+      only when asked and present, no data-variant, an inline span), T007 (the title sentence from reasonDetail
+      and the factor for each code, the generic clause by code, reasonInput never rendered, no title without a
+      cause per DEC-0229), T008 (selection by reasonCode then status, the Not followed title with and without the
+      date through formatDate, Not enough to rank with no count or title, fifty identical cells). Production:
+      web/src/components/patterns/factor-cell.tsx; copy.ts gains incompleteDetail, incompleteGeneric and
+      notFollowedNoDate (T009, DEC-0151, DEC-0152) with copy.test.ts anchors, incompleteReason unchanged in
+      output. Decisions recorded in this cycle: DEC-0229 (no title on an Incomplete cell naming no cause) and
+      DEC-0230 (the number box and the bar take the spacing tokens w-5 and w-7/h-2, no pixel literal, STD-UI-29).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/red-cycle-2.log
+    red_log_sha256: 6da2afed5361106de1179d472bf3f1de01f3ca4f151cad1c47c9a770723c097d
+    red_evidence: >
+      With factor-cell.test.tsx written and no factor-cell.tsx, the file failed to load: Failed to resolve
+      import "./factor-cell" (no tests ran).
+    green_evidence: >
+      factor-cell.test.tsx 77 and copy.test.ts 303 passed, 380 in all (green-cycle-2.log); tsc --noEmit, biome
+      lint and biome format clean; after T012 and T013 the full web suite 861 passed in 47 files (full-suite.log),
+      npm run build clean, and the built CSS holds every class the two components use and the --seq-1 and
+      --seq-4 definitions for both themes. The first green run had four test defects (the mark counted twice through its
+      sr-only child; an SVG className is not a string; a fragment and an index key biome rejects), fixed before
+      the mutation run. The first mutation run left one survivor (the Not enough to rank icon swapped for the
+      Not followed one); the test now pins that shape to the delivered coverage-unknown badge's and the rerun
+      killed all 47.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/green-cycle-2.log
+        sha256: d6d9284a259435dcda0fc622c9044c82ab76e55c17db8a0e27adab225e5dec3d
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/full-suite.log
+        sha256: 66a9f6915f1887999e85ed438bb9cb3108f1d077a31e4338e81a0e00935ae110
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: de87ecb3f1168cca023c119521bd4c3df27ed00572087c1c168a1734b7def0bc
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: b44d01323c01ff67c2eb54d3b2c87d6cd500cb1eab4c716b09366434daca57f3
+      generated: 47
+      killed: 47
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
