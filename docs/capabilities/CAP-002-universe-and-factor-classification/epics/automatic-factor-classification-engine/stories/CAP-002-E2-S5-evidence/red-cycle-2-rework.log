@@ -1,0 +1,295 @@
+# RED, CAP-002-E2-S5 cycle-2 (review v1 rework: IR-001, IR-002). Tests only; no production file changes.
+# Tree: 92453929e4ba48a23d92fbeb0f9c345490870da5 plus the staged cycle-2 test diff (cycle-2.patch, sha256 c9ea64c39f92594ca320bf36ff5f5124cc951b1625e9ae93d3b50c4303a36dfa).
+# Mutants: mutants-cycle-2.json, the four non-equivalent survivors of implementation review v1, applied one at a time by scripts/mutation-run.py.
+# 2026-10-28T23:59:04Z
+# sha256 8c81ad7d353e7bea6ae7da2591f3164502facf2dfe819a156d097d5b58718fbe tests/unit/test_composite_arithmetic.py (as staged)
+# sha256 e8525dcd0ac0e41ee4c8b02b37ddcec53dc81b4c02969a5da34f64e66027c526 tests/integration/test_engine_peer_set.py (as staged)
+
+## Part 1: the four mutants survive the unchanged story tests
+# The seven focused files with the two cycle-2 tests deselected, which is the cycle-1 test set: every mutant survives (as review v1 found).
+$ uv run --all-extras --offline python -B -m pytest -m "postgres or not postgres" -x -q -p no:cacheprovider tests/unit/test_classify_sql_static.py tests/unit/test_classification_stage_order.py tests/unit/test_composite_arithmetic.py tests/integration/test_engine_peer_set.py tests/unit/test_engine_sql_safety.py tests/unit/test_classification_constants.py tests/unit/test_classification_sql_ships.py --deselect "tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores" --deselect "tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical"
+baseline worker 3: exit 0
+baseline worker 0: exit 0
+baseline worker 1: exit 0
+baseline worker 2: exit 0
+survived  manual:rv:percentile-on-rounded-score (exit 0)
+survived  manual:rv:gap-order-by-name (exit 0)
+survived  manual:rv:gap-order-by-label (exit 0)
+survived  manual:rv:gap-unordered (exit 0)
+--- manual_rv_gap-order-by-label.log: 83 passed, 2 deselected in 7.48s
+--- manual_rv_gap-order-by-name.log: 83 passed, 2 deselected in 7.41s
+--- manual_rv_gap-unordered.log: 83 passed, 2 deselected in 7.50s
+--- manual_rv_percentile-on-rounded-score.log: 83 passed, 2 deselected in 7.14s
+
+## Part 2: the two cycle-2 tests under each mutant (RED), then unmutated (GREEN)
+$ uv run --all-extras --offline python -B -m pytest -m "postgres or not postgres" -q -p no:cacheprovider -rA "tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores" "tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical"
+
+### RED: manual:rv:percentile-on-rounded-score (src/factorflow/classification/sql/classify.sql:68  percent_rank() OVER (ORDER BY score) -> percent_rank() OVER (ORDER BY round(score, 6)))
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55817 user=test database=test_62dcca3ed4d64ba3905c9188999e5...0x108f86db0>, run_id=UUID('6cdb1a8d-e950-4a5d-9182-36cd45a0bb55'), set_id=UUID('1dd2ea20-09a5-4419-891f-4ab15df04113'))
+
+    def test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores(
+        store: Store,
+    ) -> None:
+        """(f) T015, design 2.5: the percentile ranks the unrounded score, while the column keeps
+        6 decimals. The fourth stock's ``revenue_growth`` is 1e-7 above the third's and their
+        ``eps_growth`` is equal, so their unrounded scores differ by about 3e-8. Both store
+        0.134840, and they keep percentiles 50 and 75 of the unrounded ranking; ranking the
+        stored value would give both 50."""
+        stocks = [
+            [Decimal(a), Decimal(b)]
+            for a, b in zip(("1", "2", "3", "3.0000001", "5"), (10, 20, 30, 30, 50), strict=True)
+        ]
+        oracle = reference_scores(dict(enumerate(stocks)))
+        assert Decimal(0) < oracle[3][0] - oracle[2][0] < Decimal("1e-6")
+    
+        results = classify(store, "growth", stocks)
+    
+>       assert results == literal(
+            ("-1.213560", "0"),
+            ("-0.539360", "25"),
+            ("0.134840", "50"),
+            ("0.134840", "75"),
+            ("1.483240", "100"),
+        )
+E       AssertionError: assert [(Decimal('-1...100.000000'))] == [(Decimal('-1...cimal('100'))]
+E         
+E         At index 3 diff: (Decimal('0.134840'), Decimal('50.000000')) != (Decimal('0.134840'), Decimal('75'))
+E         Use -v to get more diff
+
+tests/unit/test_composite_arithmetic.py:214: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+FAILED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+1 failed, 1 passed in 2.59s
+
+### RED: manual:rv:gap-order-by-name (src/factorflow/classification/sql/classify.sql:82  ORDER BY a.instrument_id, i.input_order -> ORDER BY a.instrument_id, i.input_name)
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55815 user=test database=test_9300d06835824525a2687fcd18eeb...0x10d4a12b0>, run_id=UUID('a2933374-e35d-4c36-b4cc-415e557f0d54'), set_id=UUID('d92ed227-6ad9-4a75-bb96-0870420a56ef'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d4a28a0>
+
+    def test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12, DEC-0120, design 2.5: on ``growth`` and ``momentum`` the input order differs
+        from the alphabetical order of both names and labels (``eps_growth`` and ``return_12m``
+        sort first), and the reason still names the first input that is not present in
+        ``INPUT_NAMES`` order."""
+        assert constants.INPUT_NAMES["growth"] == ("revenue_growth", "eps_growth")
+        assert constants.INPUT_NAMES["momentum"] == ("return_3m", "return_6m", "return_12m")
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 30)
+        stocks = []
+        for position, (gap_factor, statuses, omit, *_) in enumerate(FIRST_GAP_CASES):
+            stock = add_active_stock(conn, f"GAP{position}")
+            for factor in FACTORS:
+                if factor == gap_factor:
+                    add_factor_inputs(conn, set_id, stock, factor, statuses=statuses, omit=omit)
+                else:
+                    add_factor_inputs(conn, set_id, stock, factor)
+            stocks.append(stock)
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        assert factor_counts_for(conn, set_id) == {
+            "value": (35, True),
+            "growth": (33, True),  # the three momentum cases have every growth input
+            "momentum": (32, True),  # the two growth cases have every momentum input
+        }
+        for stock, (factor, _, _, code, name, detail) in zip(stocks, FIRST_GAP_CASES, strict=True):
+>           assert reason(rows[(stock, factor)]) == (
+                "not_classified",
+                code,
+                name,
+                detail,
+                None,
+                None,
+            ), (factor, name)
+E           AssertionError: ('growth', 'revenue_growth')
+E           assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E             
+E             At index 1 diff: 'input_missing' != 'input_outdated'
+E             Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:446: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+FAILED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+1 failed, 1 passed in 2.74s
+
+### RED: manual:rv:gap-order-by-label (src/factorflow/classification/sql/classify.sql:82  ORDER BY a.instrument_id, i.input_order -> ORDER BY a.instrument_id, i.label)
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55814 user=test database=test_18aaf4f1f030459fa8966ef95c89d...0x108c7d160>, run_id=UUID('9acf662d-7ea7-4d1f-bc0d-18cc01ce0503'), set_id=UUID('483f7788-5f30-4d4d-9d8a-0ec33553bc56'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108c7e750>
+
+    def test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12, DEC-0120, design 2.5: on ``growth`` and ``momentum`` the input order differs
+        from the alphabetical order of both names and labels (``eps_growth`` and ``return_12m``
+        sort first), and the reason still names the first input that is not present in
+        ``INPUT_NAMES`` order."""
+        assert constants.INPUT_NAMES["growth"] == ("revenue_growth", "eps_growth")
+        assert constants.INPUT_NAMES["momentum"] == ("return_3m", "return_6m", "return_12m")
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 30)
+        stocks = []
+        for position, (gap_factor, statuses, omit, *_) in enumerate(FIRST_GAP_CASES):
+            stock = add_active_stock(conn, f"GAP{position}")
+            for factor in FACTORS:
+                if factor == gap_factor:
+                    add_factor_inputs(conn, set_id, stock, factor, statuses=statuses, omit=omit)
+                else:
+                    add_factor_inputs(conn, set_id, stock, factor)
+            stocks.append(stock)
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        assert factor_counts_for(conn, set_id) == {
+            "value": (35, True),
+            "growth": (33, True),  # the three momentum cases have every growth input
+            "momentum": (32, True),  # the two growth cases have every momentum input
+        }
+        for stock, (factor, _, _, code, name, detail) in zip(stocks, FIRST_GAP_CASES, strict=True):
+>           assert reason(rows[(stock, factor)]) == (
+                "not_classified",
+                code,
+                name,
+                detail,
+                None,
+                None,
+            ), (factor, name)
+E           AssertionError: ('growth', 'revenue_growth')
+E           assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E             
+E             At index 1 diff: 'input_missing' != 'input_outdated'
+E             Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:446: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+FAILED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+1 failed, 1 passed in 2.66s
+
+### RED: manual:rv:gap-unordered (src/factorflow/classification/sql/classify.sql:82  ORDER BY a.instrument_id, i.input_order -> ORDER BY a.instrument_id)
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55816 user=test database=test_fe27bb0f31b44dedae668eefcdd5e...0x108e10200>, run_id=UUID('3ecbdb2b-8c69-4ad8-9276-42719fc42e8a'), set_id=UUID('e93ffca5-9660-41f6-8d3f-09802c7e899d'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e11700>
+
+    def test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12, DEC-0120, design 2.5: on ``growth`` and ``momentum`` the input order differs
+        from the alphabetical order of both names and labels (``eps_growth`` and ``return_12m``
+        sort first), and the reason still names the first input that is not present in
+        ``INPUT_NAMES`` order."""
+        assert constants.INPUT_NAMES["growth"] == ("revenue_growth", "eps_growth")
+        assert constants.INPUT_NAMES["momentum"] == ("return_3m", "return_6m", "return_12m")
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 30)
+        stocks = []
+        for position, (gap_factor, statuses, omit, *_) in enumerate(FIRST_GAP_CASES):
+            stock = add_active_stock(conn, f"GAP{position}")
+            for factor in FACTORS:
+                if factor == gap_factor:
+                    add_factor_inputs(conn, set_id, stock, factor, statuses=statuses, omit=omit)
+                else:
+                    add_factor_inputs(conn, set_id, stock, factor)
+            stocks.append(stock)
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        assert factor_counts_for(conn, set_id) == {
+            "value": (35, True),
+            "growth": (33, True),  # the three momentum cases have every growth input
+            "momentum": (32, True),  # the two growth cases have every momentum input
+        }
+        for stock, (factor, _, _, code, name, detail) in zip(stocks, FIRST_GAP_CASES, strict=True):
+>           assert reason(rows[(stock, factor)]) == (
+                "not_classified",
+                code,
+                name,
+                detail,
+                None,
+                None,
+            ), (factor, name)
+E           AssertionError: ('growth', 'revenue_growth')
+E           assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E             
+E             At index 1 diff: 'input_missing' != 'input_outdated'
+E             Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:446: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+FAILED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+1 failed, 1 passed in 2.79s
+
+### GREEN: unmutated (four workers)
+--- baseline-w0.log
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w0
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w0
+Installed 43 packages in 165ms
+..                                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+PASSED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+2 passed in 3.56s
+--- baseline-w1.log
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w1
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w1
+Installed 43 packages in 164ms
+..                                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+PASSED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+2 passed in 3.63s
+--- baseline-w2.log
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w2
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w2
+Installed 43 packages in 164ms
+..                                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+PASSED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+2 passed in 3.48s
+--- baseline-w3.log
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w3
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s5-rework-v1/work/mutation-run-5w4bj7oj/w3
+Installed 43 packages in 164ms
+..                                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/unit/test_composite_arithmetic.py::test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores
+PASSED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+2 passed in 3.55s

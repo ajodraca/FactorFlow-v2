@@ -1,0 +1,148 @@
+F..................................FF............                        [100%]
+=================================== FAILURES ===================================
+_ test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b241310>
+
+    def test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10, AC-11: claim and build go through the dispatcher, the build
+        carries ``build_timeout_seconds``, and the only wait is the poll interval after the
+        idle claim: none between the claim, the build and the next claim."""
+        claimed = _claimed()
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed))
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+        assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+>       assert dispatcher.calls[2] == (fakes.build, (pool, claimed.set_id, 300.0))
+E       AssertionError: assert (<function _F...e81'), 300.0)) == (<function _F...1fc'), 300.0))
+E         
+E         At index 1 diff: (<MagicMock name='pool' id='4481881088'>, UUID('6dcb80b6-fd87-4fb8-a885-3f4e3e328e81'), 300.0) != (<MagicMock name='pool' id='4481881088'>, UUID('45509df4-a304-4bd6-8fd1-0f095d0b51fc'), 300.0)
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:203: AssertionError
+________ test_short_build_timeout_reaches_the_engine_and_fails_the_set _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-4' at 0x10b8afd10>, <psycopg.Connection [IDLE] (host=localhost port=62392 user=test database=test_615a796fa2ec4afcbf70fb997a62c9f5) at 0x10b8f95b0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b8fa330>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10b8f8f20>
+
+    def test_short_build_timeout_reaches_the_engine_and_fails_the_set(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """DAC-E2-S9-4, AC-11, AC-20: a 50 ms build_timeout_seconds crosses the loop, a real
+        thread and a real pool to the engine, which cancels a five-second stage and records the
+        set failed with a timeout reason and no classification rows."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_id = add_run(conn, "succeeded", T0)
+    
+        def sleeping_stage(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            stage_conn.execute("SELECT pg_sleep(5)")
+    
+        monkeypatch.setattr(engine, "_STAGES", [sleeping_stage])
+        # model_construct skips the ge=1 bound and the poll-below-timeout validator on purpose:
+        # a 50 ms timeout is the only way to make a unit-sized store "too short", and
+        # CAP-002-E2-S8 already proves the validators. The poll interval is longer than the
+        # stage's sleep, so a build handed the poll interval instead would also outlast it.
+        settings = ClassificationSettings.model_construct(
+            poll_interval_seconds=10.0, build_timeout_seconds=0.05
+        )
+    
+        started = time.monotonic()
+        with caplog.at_level(logging.INFO, logger="factorflow.classification.scheduler"):
+            _run_loop_until_first_wait(pool, settings)
+        elapsed = time.monotonic() - started
+    
+        rows = [row for row in set_rows(conn) if row[1] == run_id]
+        assert len(rows) == 1
+        set_id, _, state, reason = rows[0]
+>       assert state == "failed"
+E       AssertionError: assert 'building' == 'failed'
+E         
+E         - failed
+E         + building
+
+tests/integration/test_scheduler_restart.py:192: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item book_equity has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item shares_outstanding has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item diluted_eps has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item operating_cash_flow has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item capital_expenditure has no payload key; its inputs will be missing
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: LookupError: classification set b5b148d0-141c-48d2-9ac1-3948761ff788 does not exist
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w0/src/factorflow/classification/engine.py", line 107, in build
+    context = _read_context(cur, set_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w0/src/factorflow/classification/engine.py", line 72, in _read_context
+    raise LookupError(f"classification set {set_id} does not exist")
+LookupError: classification set b5b148d0-141c-48d2-9ac1-3948761ff788 does not exist
+INFO     factorflow.classification.scheduler:scheduler.py:114 classification set 4c296166-ac80-45f7-98db-b7f5b0dbaa69 for run b5b148d0-141c-48d2-9ac1-3948761ff788 ended failed
+___ test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run ____
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10b8b23f0>, <psycopg.Connection [IDLE] (host=localhost port=62392 user=test database=test_9dac5435c9ad48a1aac4fd3594434b1e) at 0x10958e6f0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b881c40>
+
+    def test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-12, AC-10, AC-20, DAC-E2-4 (design acceptance criterion 10): after a restart
+        the stale building set is failed with the fixed reason before any claim, the next
+        qualifying run gets one complete set, a failed run gets none, and a second start
+        changes nothing."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
+        run_c = add_run(conn, "failed", T0 + timedelta(hours=2))
+        monkeypatch.setattr(engine, "_STAGES", [])
+        settings = ClassificationSettings(poll_interval_seconds=1, build_timeout_seconds=60)
+    
+        _run_loop_until_first_wait(pool, settings)
+    
+        rows = set_rows(conn)
+        by_run: dict[Any, list[tuple[Any, ...]]] = {}
+        for set_id, run_id, state, reason in rows:
+            by_run.setdefault(run_id, []).append((set_id, state, reason))
+        assert by_run[run_a] == [(stale, "failed", INTERRUPTED_REASON)]
+>       assert [(state, reason) for _, state, reason in by_run[run_b]] == [("complete", None)]
+E       AssertionError: assert [('building', None)] == [('complete', None)]
+E         
+E         At index 0 diff: ('building', None) != ('complete', None)
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:234: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:72 classification set 2642ed47-3119-4154-aa5b-d2e591968dfb for run 3f9b3f80-09f0-43ad-bf57-6da48ba81a56 was interrupted; recorded failed
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item book_equity has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item shares_outstanding has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item diluted_eps has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item operating_cash_flow has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item capital_expenditure has no payload key; its inputs will be missing
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: LookupError: classification set dc6bb5d3-ef58-4708-a385-94760d1c8881 does not exist
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w0/src/factorflow/classification/engine.py", line 107, in build
+    context = _read_context(cur, set_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w0/src/factorflow/classification/engine.py", line 72, in _read_context
+    raise LookupError(f"classification set {set_id} does not exist")
+LookupError: classification set dc6bb5d3-ef58-4708-a385-94760d1c8881 does not exist
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle
+FAILED tests/integration/test_scheduler_restart.py::test_short_build_timeout_reaches_the_engine_and_fails_the_set
+FAILED tests/integration/test_scheduler_restart.py::test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run
+3 failed, 46 passed in 4.37s

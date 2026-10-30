@@ -1,0 +1,35 @@
+.............................................F
+=================================== FAILURES ===================================
+______________ test_the_unranked_reason_states_the_floor_in_force ______________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59026 user=test database=test_ef5f3dfc261c43f9bb1e454292959...0x108e1e450>, run_id=UUID('b84c8148-c738-4c5a-b8d9-41685e0a482b'), set_id=UUID('38f6beb0-c146-4c09-a3db-d046e52d78c2'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e1d670>
+
+    def test_the_unranked_reason_states_the_floor_in_force(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0120: the floor in ``reason_detail`` is ``constants.MIN_PEER_SET_SIZE``, read when
+        the stage runs, as is the floor ``ranked`` is judged against (AC-14)."""
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 31)
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 32)
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        assert factor_counts_for(conn, set_id) == {factor: (31, False) for factor in FACTORS}
+        rows = classifications_for(conn, set_id)
+        assert len(rows) == 3 * 31
+>       assert {row["reason_detail"] for row in rows.values()} == {"31 of 32 stocks qualified"}
+E       AssertionError: assert {'31 of 30 stocks qualified'} == {'31 of 32 stocks qualified'}
+E         
+E         Extra items in the left set:
+E         '31 of 30 stocks qualified'
+E         Extra items in the right set:
+E         '31 of 32 stocks qualified'
+E         Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:482: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_the_unranked_reason_states_the_floor_in_force
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 45 passed in 6.26s

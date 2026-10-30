@@ -1,0 +1,56 @@
+............................F
+=================================== FAILURES ===================================
+________________ test_common_z_scores_are_already_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58609 user=test database=test_b904c7f4ea334255a152dfe70895e...0x10b693f20>, run_id=UUID('66820a32-3dca-4819-ab1d-6abb3a87f97a'), set_id=UUID('8d23c563-e25f-486c-8b6f-1f63d9165fde'))
+
+    def test_common_z_scores_are_already_standardised(store: Store) -> None:
+        """(a) Both inputs have the same z-scores, (v - 3) / sqrt(2.5) with the sample standard
+        deviation, so the composite equals them and re-standardising leaves it unchanged."""
+>       results = classify(store, "growth", growth([1, 2, 3, 4, 5], [10, 20, 30, 40, 50]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58609 user=test database=test_b904c7f4ea334255a152dfe70895e...0x10b693f20>, run_id=UUID('66820a32-3dca-4819-ab1d-6abb3a87f97a'), set_id=UUID('8d23c563-e25f-486c-8b6f-1f63d9165fde'))
+factor = 'growth'
+stocks = [[Decimal('1'), Decimal('10')], [Decimal('2'), Decimal('20')], [Decimal('3'), Decimal('30')], [Decimal('4'), Decimal('40')], [Decimal('5'), Decimal('50')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+                    engine._classification_stage(
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+                cur.execute(
+                    "SELECT instrument_id, status, score, percentile FROM factor_classification "
+                    "WHERE set_id = %s AND factor = %s",
+                    (store.set_id, factor),
+                )
+                found = {row[0]: row[1:] for row in cur.fetchall()}
+            assert sorted(found) == sorted(ids)
+>           assert {status for status, _, _ in found.values()} == {"classified"}
+E           AssertionError: assert {'not_classified'} == {'classified'}
+E             
+E             Extra items in the left set:
+E             'not_classified'
+E             Extra items in the right set:
+E             'classified'
+E             Use -v to get more diff
+
+tests/unit/test_composite_arithmetic.py:96: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_common_z_scores_are_already_standardised
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 28 passed in 2.08s

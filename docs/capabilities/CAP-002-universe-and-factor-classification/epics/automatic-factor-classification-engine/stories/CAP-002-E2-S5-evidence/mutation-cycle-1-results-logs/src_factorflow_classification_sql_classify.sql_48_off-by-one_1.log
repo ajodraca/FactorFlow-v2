@@ -1,0 +1,50 @@
+..............................F
+=================================== FAILURES ===================================
+________________ test_a_zero_dispersion_input_contributes_zero _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58121 user=test database=test_7512bd020b0b4306a9dd8ca1a3f76...0x10b6d0860>, run_id=UUID('0fa41056-84d9-4cdc-a448-824691cbfe90'), set_id=UUID('b913794c-eb10-4b13-b41f-5159aa1d0cea'))
+
+    def test_a_zero_dispersion_input_contributes_zero(store: Store) -> None:
+        """(c) ``eps_growth`` is 7 for every stock: its z-score is 0, so the composite is half
+        the other input's z-score, and re-standardising returns that z-score."""
+>       results = classify(store, "growth", growth([1, 2, 3, 4, 5], [7, 7, 7, 7, 7]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_composite_arithmetic.py:86: in classify
+    engine._classification_stage(
+src/factorflow/classification/engine.py:177: in _classification_stage
+    cur.execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [IDLE] (host=localhost port=58121 user=test database=test_7512bd020b0b4306a9dd8ca1a3f76be9) at 0x10b7ffc50>
+query = "-- One factor's classification rows for the build's set (CAP-002-E2-S5; factor-engine design\n-- 2.5). Runs once per ...etired',\n       NULL,\n       NULL,\n       false\n  FROM unnest(%(retired_ids)s::bigint[]) AS gone (instrument_id)\n"
+params = {'set_id': UUID('b913794c-eb10-4b13-b41f-5159aa1d0cea'), 'factor': 'growth', 'input_names': ['revenue_growth', 'eps_growth'], 'input_labels': ['revenue growth', 'earnings-per-share growth'], ...}
+prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.DivisionByZero: division by zero
+
+.venv/lib/python3.12/site-packages/psycopg/cursor.py:117: DivisionByZero
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_a_zero_dispersion_input_contributes_zero
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 30 passed in 2.17s

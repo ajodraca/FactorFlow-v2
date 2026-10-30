@@ -1,0 +1,48 @@
+..................................F
+=================================== FAILURES ===================================
+___ test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59054 user=test database=test_3290645065ec4cee9eec5f8bd8086...0x10d64f290>, run_id=UUID('ff7d174e-106b-450e-8f21-d3343e738467'), set_id=UUID('b5b18557-d7f1-4e0b-936c-28ed5ab2b66e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d64e240>
+
+    def test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 30)
+        a = add_active_stock(conn, "A")
+        b = add_active_stock(conn, "B")
+        add_factor_inputs(conn, set_id, a, "value", statuses={"fcf_yield": "missing"})
+        add_factor_inputs(conn, set_id, b, "value", omit=("fcf_yield",))  # no third row at all
+        for stock in (a, b):
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete"
+        assert factor_counts_for(conn, set_id) == {
+            "value": (30, True),
+            "growth": (32, True),
+            "momentum": (32, True),
+        }
+        rows = classifications_for(conn, set_id)
+        for stock in (a, b):
+>           assert reason(rows[(stock, "value")]) == (
+                "not_classified",
+                "input_missing",
+                "fcf_yield",
+                "free-cash-flow yield missing",
+                None,
+                None,
+            )
+E           AssertionError: assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E             
+E             At index 3 diff: 'fcf_yield missing' != 'free-cash-flow yield missing'
+E             Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:126: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 passed in 4.00s

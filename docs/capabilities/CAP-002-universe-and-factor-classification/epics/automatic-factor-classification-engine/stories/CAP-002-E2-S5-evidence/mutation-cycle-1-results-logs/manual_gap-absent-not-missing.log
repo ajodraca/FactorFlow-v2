@@ -1,0 +1,44 @@
+..................................F
+=================================== FAILURES ===================================
+___ test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58893 user=test database=test_6990f93eb12f4c009398022e1b35b...0x10941eb70>, run_id=UUID('70553fda-db50-4175-a64e-db6c9bb3fcf7'), set_id=UUID('0a1b48d1-1e81-4f1f-94e3-733ea7ef2656'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10941d340>
+
+    def test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 30)
+        a = add_active_stock(conn, "A")
+        b = add_active_stock(conn, "B")
+        add_factor_inputs(conn, set_id, a, "value", statuses={"fcf_yield": "missing"})
+        add_factor_inputs(conn, set_id, b, "value", omit=("fcf_yield",))  # no third row at all
+        for stock in (a, b):
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+>       assert result.state == "complete"
+E       AssertionError: assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_peer_set.py:118: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:133 classification build failed: CheckViolation: new row for relation "factor_classification" violates check constraint "factor_classification_reason_input_agrees"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/src/factorflow/classification/engine.py", line 115, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/src/factorflow/classification/engine.py", line 177, in _classification_stage
+    cur.execute(
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.CheckViolation: new row for relation "factor_classification" violates check constraint "factor_classification_reason_input_agrees"
+DETAIL:  Failing row contains (0a1b48d1-1e81-4f1f-94e3-733ea7ef2656, 32, value, not_classified, null, null, input_, fcf_yield, free-cash-flow yield , f).
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 passed in 4.16s

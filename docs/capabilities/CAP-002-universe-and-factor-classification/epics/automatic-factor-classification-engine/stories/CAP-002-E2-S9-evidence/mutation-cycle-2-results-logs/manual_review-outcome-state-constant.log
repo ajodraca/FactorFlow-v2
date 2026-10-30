@@ -1,0 +1,39 @@
+.............F...................................                        [100%]
+=================================== FAILURES ===================================
+________ test_build_outcome_is_logged_at_info_without_raising[complete] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109391910>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x109398c80>
+state = 'complete'
+
+    @pytest.mark.parametrize("state", ["complete", "failed"])
+    def test_build_outcome_is_logged_at_info_without_raising(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, state: str
+    ) -> None:
+        """AC-20, AC-10: the engine records the outcome itself, so the loop logs the set, the
+        run and ``result.state`` at INFO (design 2.4; design section 4, Audit), logs no error,
+        and looks again at once. Both outcomes are pinned, so a fixed state cannot pass."""
+        claimed = _claimed()
+    
+        def build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            return _result(state, set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.INFO, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), _RecordingWaiter(), dispatcher)
+    
+        infos = [r.getMessage() for r in _scheduler_records(caplog, logging.INFO)]
+>       assert infos == [f"classification set {claimed.set_id} for run {claimed.run_id} ended {state}"]
+E       AssertionError: assert ['classificat...ended failed'] == ['classificat...ded complete']
+E         
+E         At index 0 diff: 'classification set 50a4f6a3-3c79-489c-b714-aa6a2b6800d2 for run cdc3eedd-7a7d-426d-8343-a6dec27087fd ended failed' != 'classification set 50a4f6a3-3c79-489c-b714-aa6a2b6800d2 for run cdc3eedd-7a7d-426d-8343-a6dec27087fd ended complete'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:528: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     factorflow.classification.scheduler:scheduler.py:114 classification set 50a4f6a3-3c79-489c-b714-aa6a2b6800d2 for run cdc3eedd-7a7d-426d-8343-a6dec27087fd ended failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_build_outcome_is_logged_at_info_without_raising[complete]
+1 failed, 48 passed in 4.02s

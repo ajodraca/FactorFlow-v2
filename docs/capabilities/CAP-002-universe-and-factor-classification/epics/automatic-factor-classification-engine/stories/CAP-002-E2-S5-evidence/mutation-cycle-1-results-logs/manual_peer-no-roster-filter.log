@@ -1,0 +1,33 @@
+......................................F
+=================================== FAILURES ===================================
+___ test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58661 user=test database=test_57e7dc0635114a65aaa96cabf9880...0x109a5a780>, run_id=UUID('c2d2a1b9-08aa-42dc-a148-d10ecd391238'), set_id=UUID('912fc333-a6c5-41de-a945-c8883cf798c0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109a59ac0>
+
+    def test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, (r1, r2) = add_full_roster(conn, set_id, 31, n_retired=2)
+        for factor in FACTORS:  # R2's present rows prove the exclusion does not rest on absence
+            add_factor_inputs(conn, set_id, r2, factor)
+        assert (input_row_count(conn, r1), input_row_count(conn, r2)) == (0, 8)
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete"
+>       assert factor_counts_for(conn, set_id) == {factor: (31, True) for factor in FACTORS}
+E       AssertionError: assert {'growth': (3...': (32, True)} == {'value': (31...': (31, True)}
+E         
+E         Differing items:
+E         {'growth': (32, True)} != {'growth': (31, True)}
+E         {'value': (32, True)} != {'value': (31, True)}
+E         {'momentum': (32, True)} != {'momentum': (31, True)}
+E         Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:253: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 38 passed in 4.93s

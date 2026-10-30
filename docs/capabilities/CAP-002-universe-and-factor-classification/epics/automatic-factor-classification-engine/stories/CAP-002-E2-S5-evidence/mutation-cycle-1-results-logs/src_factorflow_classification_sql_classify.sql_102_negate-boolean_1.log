@@ -1,0 +1,48 @@
+............................................F
+=================================== FAILURES ===================================
+_ test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58340 user=test database=test_2066599d22824dc7826aaf68614c4...0x10ae5db20>, run_id=UUID('6a6943a5-18e1-416b-bbdc-2102ab636378'), set_id=UUID('2fb5ded0-46b5-4ec4-9e7e-4f556ef532cc'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ae5ddf0>
+
+    def test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-14, AC-15, DEC-0121: every active and retired instrument has exactly one row per
+        factor and no other instrument has any; no row is marked restated (CAP-002-E2-S6's mark);
+        a factor no stock qualifies on still has its count, unranked, with '0 of 30'."""
+        conn, set_id = store.conn, store.set_id
+        active = [add_active_stock(conn, f"M{i:03d}") for i in range(31)]
+        for stock in active[:30]:
+            add_factor_inputs(conn, set_id, stock, "value")
+        add_factor_inputs(conn, set_id, active[30], "value", statuses={"fcf_yield": "missing"})
+        for stock in active:
+            add_factor_inputs(conn, set_id, stock, "growth")  # no momentum row for anyone
+        retired = [add_instrument(conn, f"OLD{i}", "retired") for i in range(2)]
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete"
+        assert result.qualified_counts == {"value": 30, "growth": 31, "momentum": 0}
+        assert factor_counts_for(conn, set_id) == {
+            "value": (30, True),
+            "growth": (31, True),
+            "momentum": (0, False),
+        }
+        rows = classifications_for(conn, set_id)
+        assert sorted(rows) == sorted((s, f) for s in [*active, *retired] for f in FACTORS)
+        assert {(r["status"], r["reason_code"]) for r in rows.values()} == {
+            ("classified", None),
+            ("not_classified", "input_missing"),
+            ("not_classified", "not_enough_stocks"),
+            ("not_classified", "retired"),
+        }
+>       assert all(row["restated_possible"] is False for row in rows.values())
+E       assert False
+E        +  where False = all(<generator object test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count.<locals>.<genexpr> at 0x10ae2a4d0>)
+
+tests/integration/test_engine_peer_set.py:456: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 44 passed in 6.65s
