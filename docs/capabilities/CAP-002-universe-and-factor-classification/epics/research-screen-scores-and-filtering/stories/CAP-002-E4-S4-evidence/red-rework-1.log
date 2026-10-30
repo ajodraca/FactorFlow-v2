@@ -1,0 +1,241 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
+
+ ✓ src/components/patterns/not-current-banner.test.tsx (16 tests) 30ms
+ ❯ src/screens/research/use-score-set-poll.test.ts (32 tests | 4 failed) 52ms
+   × TC-COMP-184: a never-populated store polls from first load (DAC-E4-S4-6) > keeps polling an empty store while the download runs, and stops once health reports it ended 4ms
+     → expected "spy" to be called 4 times, but got 3 times
+   × classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233) > reads once more after the terminal report, sees the building set, keeps polling, and hands the completion over once 1ms
+     → expected "spy" to be called 4 times, but got 3 times
+   × classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233) > carries a never-populated store through the same handoff to its first set 1ms
+     → expected "spy" to be called 3 times, but got 2 times
+   × classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233) > still owes the further read when the read in flight at the terminal report was issued while the download ran 1ms
+     → expected "spy" to be called 3 times, but got 2 times
+stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/as-of-line.test.tsx (23 tests | 4 failed) 115ms
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > adds the status-active Updating badge with its ringed-dot shape and checked {time} with seconds while building 5ms
+     → expect(element).toHaveAttribute("title", "2026-10-16 17:40 CDT") // element.getAttribute("title") === "2026-10-16 17:40 CDT"
+
+Expected the element to have attribute:
+  title="2026-10-16 17:40 CDT"
+Received:
+  null
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause 2ms
+     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set 1ms
+     → expected one min-h class, found none
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > is a muted extra-small line and the link is numeric 3ms
+     → Unable to find an element with the text: 2026-10-15 17:46 CDT. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <p
+      class="text-xs text-muted-foreground"
+      data-testid="as-of-line"
+    >
+      Scores from 2026-10-15 17:46 CDT
+       · 
+      from the download started 
+      <a
+        aria-label="Open the download started 2026-10-15 17:30 CDT"
+        class="font-numeric underline"
+        href="/runs/0b2d4a6e-8c1f-4e3a-9b7d-2f6e8a0c4d1b"
+      >
+        2026-10-15 17:30 CDT
+      </a>
+       
+      <span
+        class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs bg-status-good-muted text-status-good"
+        data-variant="status-good"
+      >
+        <svg
+          aria-hidden="true"
+          class="h-3 w-3 shrink-0"
+          focusable="false"
+          viewBox="0 0 12 12"
+        >
+          <circle
+            cx="6"
+            cy="6"
+            fill="currentColor"
+            r="5"
+          />
+        </svg>
+        Complete
+      </span>
+      <output
+        aria-atomic="false"
+        aria-live="polite"
+        data-testid="as-of-line-status"
+      />
+    </p>
+  </div>
+</body>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > adds the status-active Updating badge with its ringed-dot shape and checked {time} with seconds while building
+Error: expect(element).toHaveAttribute("title", "2026-10-16 17:40 CDT") // element.getAttribute("title") === "2026-10-16 17:40 CDT"
+
+Expected the element to have attribute:
+  title="2026-10-16 17:40 CDT"
+Received:
+  null
+ ❯ src/components/patterns/as-of-line.test.tsx:217:22
+    215|     expect(updating).toHaveClass("text-status-active");
+    216|     // The building set's start time is the badge's tooltip (UX design…
+    217|     expect(updating).toHaveAttribute("title", formatTimestamp(BUILDING…
+       |                      ^
+    218|     expect(updating).toHaveAttribute("title", "2026-10-16 17:40 CDT");
+    219|     expect(container).toHaveTextContent(SCORE_SET.checked("2026-10-15 …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause
+AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
+
+Expected: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
+Received: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by valueScores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
+
+ ❯ src/components/patterns/as-of-line.test.tsx:328:43
+    326|     const announcement = SCORE_SET.scoresUpdatedTo("2026-10-16 17:48 C…
+    327|     const sorted = renderLine({ announcement, sortLabel: "value" });
+    328|     expect(visibleText(sorted.container)).toBe(
+       |                                           ^
+    329|       `Scores from 2026-10-15 17:46 CDT · from the download started 20…
+    330|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set
+Error: expected one min-h class, found none
+ ❯ heightToken src/components/patterns/as-of-line.test.tsx:88:11
+     86|   const tokens = element.className.match(/\bmin-h-\S+/g) ?? [];
+     87|   if (tokens.length !== 1) {
+     88|     throw new Error(`expected one min-h class, found ${tokens.join(" "…
+       |           ^
+     89|   }
+     90|   return tokens[0];
+ ❯ src/components/patterns/as-of-line.test.tsx:353:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > is a muted extra-small line and the link is numeric
+TestingLibraryElementError: Unable to find an element with the text: 2026-10-15 17:46 CDT. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <p
+      class="text-xs text-muted-foreground"
+      data-testid="as-of-line"
+    >
+      Scores from 2026-10-15 17:46 CDT
+       · 
+      from the download started 
+      <a
+        aria-label="Open the download started 2026-10-15 17:30 CDT"
+        class="font-numeric underline"
+        href="/runs/0b2d4a6e-8c1f-4e3a-9b7d-2f6e8a0c4d1b"
+      >
+        2026-10-15 17:30 CDT
+      </a>
+       
+      <span
+        class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs bg-status-good-muted text-status-good"
+        data-variant="status-good"
+      >
+        <svg
+          aria-hidden="true"
+          class="h-3 w-3 shrink-0"
+          focusable="false"
+          viewBox="0 0 12 12"
+        >
+          <circle
+            cx="6"
+            cy="6"
+            fill="currentColor"
+            r="5"
+          />
+        </svg>
+        Complete
+      </span>
+      <output
+        aria-atomic="false"
+        aria-live="polite"
+        data-testid="as-of-line-status"
+      />
+    </p>
+  </div>
+</body>
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/patterns/as-of-line.test.tsx:380:19
+    378|     expect(screen.getByRole("link")).toHaveClass("font-numeric");
+    379|     // Every time on the line is in the numeric face (UX design 1.2, T…
+    380|     expect(screen.getByText("2026-10-15 17:46 CDT")).toHaveClass("font…
+       |                   ^
+    381|   });
+    382| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/screens/research/use-score-set-poll.test.ts > TC-COMP-184: a never-populated store polls from first load (DAC-E4-S4-6) > keeps polling an empty store while the download runs, and stops once health reports it ended
+AssertionError: expected "spy" to be called 4 times, but got 3 times
+ ❯ src/screens/research/use-score-set-poll.test.ts:269:22
+    267|     // Exactly one further read follows the terminal report (T006; DEC…
+    268|     await tick(POLL_INTERVAL_MS);
+    269|     expect(readMock).toHaveBeenCalledTimes(4);
+       |                      ^
+    270|     await tick(60 * SECOND);
+    271|     expect(readMock).toHaveBeenCalledTimes(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/screens/research/use-score-set-poll.test.ts > classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233) > reads once more after the terminal report, sees the building set, keeps polling, and hands the completion over once
+AssertionError: expected "spy" to be called 4 times, but got 3 times
+ ❯ src/screens/research/use-score-set-poll.test.ts:290:22
+    288|     hook.rerender({ callback: hook.onNewSet });
+    289|     await tick(POLL_INTERVAL_MS);
+    290|     expect(readMock).toHaveBeenCalledTimes(4);
+       |                      ^
+    291|     // The banner's input: the previous set with the building later bl…
+    292|     expect(hook.result.current.summary).toBe(A_BUILDING);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/screens/research/use-score-set-poll.test.ts > classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233) > carries a never-populated store through the same handoff to its first set
+AssertionError: expected "spy" to be called 3 times, but got 2 times
+ ❯ src/screens/research/use-score-set-poll.test.ts:330:22
+    328|     hook.rerender({ callback: hook.onNewSet });
+    329|     await tick(POLL_INTERVAL_MS);
+    330|     expect(readMock).toHaveBeenCalledTimes(3);
+       |                      ^
+    331|     expect(hook.result.current.summary).toBe(NEVER_BUILDING);
+    332|     expect(hook.result.current.summary?.set).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/screens/research/use-score-set-poll.test.ts > classification-ui 2.6 handoff: health reports the download ended before a read has seen the claim (AC-20, DAC-E4-2, DAC-E4-4, DAC-E4-S4-6; DEC-0233) > still owes the further read when the read in flight at the terminal report was issued while the download ran
+AssertionError: expected "spy" to be called 3 times, but got 2 times
+ ❯ src/screens/research/use-score-set-poll.test.ts:372:22
+    370|     // A read issued while the download ran cannot have seen its end: …
+    371|     await tick(POLL_INTERVAL_MS);
+    372|     expect(readMock).toHaveBeenCalledTimes(3);
+       |                      ^
+    373|     await tick(60 * SECOND);
+    374|     expect(readMock).toHaveBeenCalledTimes(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  8 failed | 63 passed (71)
+   Start at  23:36:30
+   Duration  887ms (transform 134ms, setup 175ms, collect 352ms, tests 197ms, environment 860ms, prepare 100ms)
+

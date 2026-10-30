@@ -1,0 +1,218 @@
+{
+ "schema": 1,
+ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:46:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 46,
+   "original": "    : { measure: value.measure, direction: value.direction, raw: value.value };",
+   "mutated": "    : { measure: nil, direction: value.direction, raw: value.value };"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:46:drop-field-copy:2",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 46,
+   "original": "    : { measure: value.measure, direction: value.direction, raw: value.value };",
+   "mutated": "    : { measure: value.measure, direction: nil, raw: value.value };"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 51,
+   "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
+   "mutated": "    a !== undefined || a.measure === b.measure && a.direction === b.direction && a.value === b.value"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 51,
+   "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
+   "mutated": "    a !== undefined && a.measure === b.measure || a.direction === b.direction && a.value === b.value"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:3",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 51,
+   "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
+   "mutated": "    a !== undefined && a.measure === b.measure && a.direction === b.direction || a.value === b.value"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 87,
+   "original": "      measure !== undefined && direction !== undefined && raw !== undefined",
+   "mutated": "      measure !== undefined || direction !== undefined && raw !== undefined"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 87,
+   "original": "      measure !== undefined && direction !== undefined && raw !== undefined",
+   "mutated": "      measure !== undefined && direction !== undefined || raw !== undefined"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:108:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 108,
+   "original": "      measure: next.measure,",
+   "mutated": "      measure: nil,"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:109:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 109,
+   "original": "      direction: next.direction,",
+   "mutated": "      direction: nil,"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:112:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 112,
+   "original": "    if (!sameSentence(value, sentence)) {",
+   "mutated": "    if (sameSentence(value, sentence)) {"
+  },
+  {
+   "id": "web/src/screens/research/threshold-sentence.tsx:125:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "line": 125,
+   "original": "    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {",
+   "mutated": "    if (error !== null || validateThresholdValue(next.measure, nextRaw) === null) {"
+  },
+  {
+   "id": "manual:cycle-2:blank-after-set-guard-removed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "      if (value !== undefined) {\n        onCommit(null);\n      }\n",
+   "new": "      onCommit(null);\n"
+  },
+  {
+   "id": "manual:cycle-2:blank-is-an-error",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "  if (raw === \"\") {\n    return null;\n  }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:value-row-name-templated",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "factor === \"value\" ? FILTERS.thresholdFor(factor) : FILTERS.valueThresholdFor(factor)",
+   "new": "FILTERS.valueThresholdFor(factor)"
+  },
+  {
+   "id": "manual:cycle-2:inputmode-removed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          inputMode=\"decimal\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:error-not-cleared-on-change",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {\n      setError(null);\n    }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:resync-keeps-error",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "    setDraft(draftOf(synced));\n    setError(null);\n",
+   "new": "    setDraft(draftOf(synced));\n"
+  },
+  {
+   "id": "manual:cycle-2:swatch-not-hidden",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          aria-hidden=\"true\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:directions-swapped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "const DIRECTIONS: readonly Direction[] = [\"atLeast\", \"atMost\"];",
+   "new": "const DIRECTIONS: readonly Direction[] = [\"atMost\", \"atLeast\"];"
+  },
+  {
+   "id": "manual:cycle-2:width-changed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "className=\"w-14 rounded border border-input p-1 text-right font-numeric\"",
+   "new": "className=\"w-16 rounded border border-input p-1 text-right font-numeric\""
+  },
+  {
+   "id": "manual:cycle-2:placeholder-removed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          placeholder={FILTERS.valuePlaceholder}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:describedby-removed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          aria-describedby={error !== null ? errorId : undefined}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:blur-removed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "          onBlur={() => commit(draft)}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:error-names-value-row",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/threshold-sentence.tsx",
+   "old": "    setError(factorProblem);",
+   "new": "    setError(problem);"
+  },
+  {
+   "id": "manual:cycle-2:copy-rules-swapped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "    measure === \"percentile\"\n      ? \"a percentile is a number from 0 to 100\"\n      : \"a standardised score is a finite number\";",
+   "new": "    measure === \"percentile\"\n      ? \"a standardised score is a finite number\"\n      : \"a percentile is a number from 0 to 100\";"
+  }
+ ]
+}

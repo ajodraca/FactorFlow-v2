@@ -1,0 +1,106 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/as-of-line.test.tsx (24 tests | 4 failed) 144ms
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the succeeded download as a status-good badge reading Complete with a shape 7ms
+     → expect(element).toHaveClass("text-xs")
+
+Expected the element to have class:
+  text-xs
+Received:
+  inline-flex items-center gap-1 rounded px-2 py-1 text-sm bg-status-good-muted text-status-good
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the partial download as a status-warning badge reading Partial with a shape 1ms
+     → expect(element).toHaveClass("text-xs")
+
+Expected the element to have class:
+  text-xs
+Received:
+  inline-flex items-center gap-1 rounded px-2 py-1 text-sm bg-status-warning-muted text-status-warning
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > draws the Complete badge's shape as one filled circle, not the active tier's ring 1ms
+     → expect(element).toHaveAttribute("fill", "currentColor") // element.getAttribute("fill") === "currentColor"
+
+Expected the element to have attribute:
+  fill="currentColor"
+Received:
+  fill="none"
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set 2ms
+     → expected 'min-h-5' to be 'min-h-7' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the succeeded download as a status-good badge reading Complete with a shape
+Error: expect(element).toHaveClass("text-xs")
+
+Expected the element to have class:
+  text-xs
+Received:
+  inline-flex items-center gap-1 rounded px-2 py-1 text-sm bg-status-good-muted text-status-good
+ ❯ src/components/patterns/as-of-line.test.tsx:265:23
+    263|       expect(outcome).toHaveClass(ink);
+    264|       // Badges stay in the line's extra-small text size (UX design 1.…
+    265|       expect(outcome).toHaveClass("text-xs");
+       |                       ^
+    266|       expect(badges(container)).toHaveLength(1);
+    267|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the partial download as a status-warning badge reading Partial with a shape
+Error: expect(element).toHaveClass("text-xs")
+
+Expected the element to have class:
+  text-xs
+Received:
+  inline-flex items-center gap-1 rounded px-2 py-1 text-sm bg-status-warning-muted text-status-warning
+ ❯ src/components/patterns/as-of-line.test.tsx:265:23
+    263|       expect(outcome).toHaveClass(ink);
+    264|       // Badges stay in the line's extra-small text size (UX design 1.…
+    265|       expect(outcome).toHaveClass("text-xs");
+       |                       ^
+    266|       expect(badges(container)).toHaveLength(1);
+    267|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > draws the Complete badge's shape as one filled circle, not the active tier's ring
+Error: expect(element).toHaveAttribute("fill", "currentColor") // element.getAttribute("fill") === "currentColor"
+
+Expected the element to have attribute:
+  fill="currentColor"
+Received:
+  fill="none"
+ ❯ src/components/patterns/as-of-line.test.tsx:279:20
+    277|     const circle = shapes[0];
+    278|     expect(circle.tagName.toLowerCase()).toBe("circle");
+    279|     expect(circle).toHaveAttribute("fill", "currentColor");
+       |                    ^
+    280|     expect(circle).not.toHaveAttribute("stroke");
+    281|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set
+AssertionError: expected 'min-h-5' to be 'min-h-7' // Object.is equality
+
+Expected: "min-h-7"
+Received: "min-h-5"
+
+ ❯ src/components/patterns/as-of-line.test.tsx:386:24
+    384|     // line's content height (min-h-5 or less) leaves the line taller …
+    385|     // (implementation review v2 IR-001).
+    386|     expect(lineHeight).toBe(LINE_HEIGHT);
+       |                        ^
+    387|     expect(skeleton).toHaveClass(LINE_HEIGHT);
+    388|     expect(skeleton.className).not.toMatch(/(^|\s)h-\d/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 20 passed (24)
+   Start at  20:50:03
+   Duration  1.06s (transform 64ms, setup 68ms, collect 138ms, tests 144ms, environment 305ms, prepare 34ms)
+

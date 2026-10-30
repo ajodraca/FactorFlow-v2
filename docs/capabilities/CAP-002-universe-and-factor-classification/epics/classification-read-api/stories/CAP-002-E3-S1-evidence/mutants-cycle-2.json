@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "repo_head": "1cc28d83d2b5a27f8235071938eecdf29ebf670d",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "review:current-by-started-at",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "     ORDER BY s.ended_at DESC\n",
+      "new": "     ORDER BY s.started_at DESC\n"
+    },
+    {
+      "id": "review:factors-any-set",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "         WHERE f.set_id = c.set_id) AS factors,",
+      "new": "         WHERE f.set_id IS NOT NULL) AS factors,"
+    },
+    {
+      "id": "review:later-started-is-run-started",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/reader.py",
+      "old": "        started_at=c[\"later_started_at\"],",
+      "new": "        started_at=c[\"later_run_started_at\"],"
+    },
+    {
+      "id": "review:later-started-sql-is-current",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "       l.started_at     AS later_started_at,",
+      "new": "       c.started_at     AS later_started_at,"
+    },
+    {
+      "id": "review:later-after-current-end",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "COALESCE((SELECT started_at FROM current), '-infinity')",
+      "new": "COALESCE((SELECT ended_at FROM current), '-infinity')"
+    }
+  ]
+}

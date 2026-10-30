@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "repo_head": "cbc09c919d0e525cf995dd8ef05fd6065fabd38d",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:review-v2:fp2-later-page-failure-swallowed",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "  do {\n    const page = await listUniverses({ lifecycle: \"active\", cursor });\n    universes.push(...page.universes);\n    cursor = page.nextCursor ?? undefined;\n  } while (cursor !== undefined);\n  return universes;",
+   "new": "  try {\n    do {\n      const page = await listUniverses({ lifecycle: \"active\", cursor });\n      universes.push(...page.universes);\n      cursor = page.nextCursor ?? undefined;\n    } while (cursor !== undefined);\n  } catch (cause) {\n    if (universes.length === 0) {\n      throw cause;\n    }\n  }\n  return universes;"
+  }
+ ]
+}

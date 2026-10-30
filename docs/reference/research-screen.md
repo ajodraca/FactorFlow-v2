@@ -2,15 +2,29 @@
 
 `web/src/screens/research/` will hold the CAP-002 Research screens
 (`component-design-classification-ui.md`). So far it holds two pure modules
-the screens will share (CAP-002-E4-S2):
+the screens will share (CAP-002-E4-S2) and one hook (CAP-002-E4-S4):
 
 - `format.ts`, the one place a CAP-002 number or date becomes text;
-- `copy.ts`, every owner-facing string of the CAP-002 screens.
+- `copy.ts`, every owner-facing string of the CAP-002 screens;
+- `use-score-set-poll.ts`, the poll that learns when a score set completes
+  or fails; see [The score-set poll](#the-score-set-poll-use-score-set-pollts);
 
-No route or screen imports either yet. The factor cell and the *Possibly
-restated* mark in `web/src/components/patterns/` do (CAP-002-E4-S3); see
-[`component-patterns.md`](component-patterns.md). The URL query model the
-screens read lives in `web/src/api/research-query.ts`; see
+and the Filters pane with its two parts (CAP-002-E4-S5):
+
+- `use-research-query.ts`, the hook binding the URL to a `ResearchQuery`
+  ([URL binding](#url-binding-use-research-queryts));
+- `threshold-sentence.tsx`, one factor's threshold sentence
+  ([Threshold sentence](#threshold-sentence-threshold-sentencetsx));
+- `filters-pane.tsx`, the pane itself
+  ([Filters pane](#filters-pane-filters-panetsx)).
+
+No route or screen mounts any of them yet. The factor cell, the *Possibly
+restated* mark, the not-current banner and the as-of line in
+`web/src/components/patterns/` import `format.ts` and `copy.ts`
+(CAP-002-E4-S3, CAP-002-E4-S4); see
+[`component-patterns.md`](component-patterns.md). The poll hook's only
+importer is its test. The URL query model the screens read lives in
+`web/src/api/research-query.ts`; see
 [`web-api.md`](web-api.md#research-url-codec-research-queryts).
 
 ## Display formatting (`format.ts`)
@@ -66,7 +80,8 @@ section 14.
 | `ERROR_SENTENCES` | one sentence template per `ErrorCode` (STD-UI-19) |
 | `failureSentence(failure)` | the statement of a failed call |
 | `FACTOR_LABELS`, `REGIONS` | factor names, and the Research panes' section labels |
-| `FILTERS`, `describeQuery(query)`, `savedFromFilter(date, query)` | the Filters pane, and a `ResearchQuery` in words |
+| `FILTERS`, `describeQuery(query)`, `savedFromFilter(date, query)` | the Filters pane, and a `ResearchQuery` in words. Three `FILTERS` entries no design contains carry a doc comment saying so: `valueThresholdFor(factor)`, the growth and momentum rows' value-blank name (DEC-0157); `unavailableUniverse`, the *Look in* option for a scope the loaded list lacks (DEC-0158); `loadingUniverses`, the same option while the list loads (DEC-0237, provisional) |
+| `thresholdFieldError(factor, measure)` | the threshold field's error on blur, *Could not set the {factor} threshold: {rule}.*, where `rule` is *a percentile is a number from 0 to 100* or *a standardised score is a finite number* (DEC-0157, provisional). A standalone string: not `failureSentence` output and no `OPERATION_LABELS` entry |
 | `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs |
@@ -111,6 +126,23 @@ when the cell carries a `reasonDetail` and with `incompleteGeneric` otherwise
 while no read carries the date a stock stopped being followed (DEC-0152);
 `notFollowedSince(date)` is the sentence for when one does.
 
+### Score-set sentences
+
+`SCORE_SET` is read by the not-current banner, the as-of line and the
+score-set poll ([`component-patterns.md`](component-patterns.md)). The
+banner reads `notReflecting`, `scoreUpdateFailed`, `buildingBody` and
+`failedBody`; the line reads `scoresFrom`, `separator`,
+`fromTheDownloadStarted`, `openDownload`, `complete`, `partial`, `sortedBy`,
+`checked`, `updating`, `earlierSetsAction` and `couldNotCheck`, and
+`RESULTS.tryAgain`; the hook reads `scoresUpdatedTo`. CAP-002-E4-S4 added one
+string, `noReasonRecorded` (*no reason was recorded*): the reason clause
+`failedBody` takes when a failed set's `failureReason` is null. No design
+states it, because the scheduler always records a reason; it is defensive
+against the nullable wire type (DEC-0232, provisional). `asOfLine(scoresAt,
+downloadStarted, sortedBy)`, the whole line as one string, is not what the
+component renders: it composes the parts itself so the start time can be a
+link.
+
 ### Failure sentences
 
 `failureSentence({operation, resource, code, symbols?, universeName?})`
@@ -135,3 +167,205 @@ implementation review v2.
 The sentence never reads the envelope's `message` or the error's `name`. A
 `ClassificationApiError` can therefore be passed as is: its `operation`,
 `resource`, `code` and `symbols` are the fields read.
+
+## URL binding (`use-research-query.ts`)
+
+`useResearchQuery()` is the React binding between the URL and the codec's
+`ResearchQuery` (DAC-E4-3; DEC-0156). The URL is the only state. It returns a
+`ResearchQueryBinding`:
+
+| Member | Behaviour |
+|--------|-----------|
+| `query` | `decodeResearchQuery` of the location search, memoised on the search string, so its identity is stable while the URL is unchanged |
+| `setQuery(next)` | writes `applyResearchQuery` over the current params as a push: unknown keys survive, no default is written, and back navigation restores the earlier filter. A write that leaves the search string unchanged navigates nowhere |
+| `clear()` | `setQuery` of `DEFAULT_RESEARCH_QUERY` with the current `sort` kept |
+
+Every write is a full query built from `query`. Two writes in one tick do not
+compose: react-router's functional `setSearchParams` hands each updater the
+render's params, not the previous write's result, so a second write in the
+same tick must carry the whole query it wants.
+
+The hook never fetches. The host that issues the list request (CAP-002-E4-S9
+on Research, CAP-002-E1-S8 on universe detail) keys it on `query`: one write,
+one URL, one request (DAC-E4-S5-2). It runs inside a router; its tests
+(`use-research-query.test.tsx`) render under `MemoryRouter`.
+
+## Threshold sentence (`threshold-sentence.tsx`)
+
+`ThresholdSentence({ factor, value?, onCommit })` is one factor's *[measure]
+[direction] [value]* sentence (blueprint 4.7; UX design 1.1 item 3;
+classification-ui 2.5): a hidden swatch filled with the factor's
+`--factor-{factor}` token, the factor's label from `FACTOR_LABELS`, then one
+`<p>` holding three blanks. `value` is the factor's current
+`ThresholdSentence` from the URL, `undefined` for no threshold. `onCommit`
+is called once per change with the new sentence, or `null` to drop the
+factor's threshold.
+
+The three blanks and their accessible names (DAC-E4-S5-4; DEC-0157):
+
+| Blank | Control | Name | Options or placeholder |
+|-------|---------|------|------------------------|
+| measure | `select` | `FILTERS.measureFor(factor)`, *Measure for value* | *percentile* (default), *standardised score* |
+| direction | `select` | `FILTERS.directionFor(factor)`, *Direction for value* | *at least* (default), *at most* |
+| value | `text` input, `inputMode="decimal"`, `w-8` (DEC-0236, provisional) | *Value threshold* on the value row (`FILTERS.thresholdFor`), *Value threshold for growth* and *for momentum* otherwise (`FILTERS.valueThresholdFor`) | placeholder *any* |
+
+Commit and validation:
+
+- The selects commit on change; the value commits on blur or Enter. A blank
+  value with a committed sentence commits `null`; a blank value with none
+  commits nothing. A commit equal to `value` is not re-sent.
+- `validateThresholdValue(factor, measure, raw)` (exported) returns the
+  field error for `raw` under `measure`, or `null` when it is valid or blank.
+  Validity is the codec's own verdict: the value is valid exactly when
+  `decodeResearchQuery` would keep a sentence carrying it, so the pane and the
+  URL cannot drift (DEC-0157; see
+  [`web-api.md`](web-api.md#research-url-codec-research-queryts) for the
+  rule). The wording is `thresholdFieldError(factor, measure)`.
+- An invalid value is a field error before any request, and nothing is
+  written (DAC-E4-S5-1): a `role="alert"` paragraph in `--destructive`, the
+  input `aria-invalid` and `aria-describedby` it. Typing clears the error as
+  soon as the draft is valid; blur alone never raises one on a valid draft.
+- The draft re-syncs from `value`, so back navigation resets it. A host that
+  must reset a row whose `value` is already `undefined` remounts it (the pane
+  does this on Clear filters).
+- Nothing in the row is ever `disabled`: rows stay usable while a request is
+  in flight.
+
+Tests: `threshold-sentence.test.tsx` (TC-COMP-134, TC-COMP-137).
+
+## Filters pane (`filters-pane.tsx`)
+
+`FiltersPane({ showLookIn = true, activeInstruments = null, children })` is
+the Research screen's Filters pane (UX design 1.1; classification-ui 2.5;
+DEC-0156). It is itself the `section` labelled `REGIONS.filters`, so a host
+mounts it unwrapped. It is controlled by the URL through `useResearchQuery`:
+every change is one `setQuery`, hence one URL write and one list request by
+the host (DAC-E4-S5-2, DAC-E4-3). It never fetches the list and never reads
+an error's `message`.
+
+| Prop | Meaning |
+|------|---------|
+| `showLookIn` | `false` on universe detail: no *Look in*, and `scope` is neither read as a filter nor written |
+| `activeInstruments` | the followed-stock count for the *All followed stocks · {n}* option; `null` while unknown, when the option reads *All followed stocks* |
+| `children` | rendered above **Clear filters**: universe detail's *Members as of* slot |
+
+Its parts, in order, each a `py-3` block separated by a divider:
+
+- **Find a stock.** A text input whose draft commits on blur or Enter; Escape
+  clears it and commits the empty value. The symbol rule is the codec's: a raw
+  value is accepted exactly when `decodeResearchQuery` keeps it as `symbol`,
+  and it is written upper-cased. A rejected value shows
+  `UNIVERSES.invalidSymbol(raw)` as a `role="alert"` field error and writes
+  nothing. The draft re-syncs from the URL's `symbol`.
+- **Look in** (when `showLookIn`). A `select` named `FILTERS.lookInName` of its
+  current option, *Look in: All followed stocks*. On mount the pane lists
+  every active universe, page after page of `listUniverses({ lifecycle:
+  "active", cursor })` until `nextCursor` is `null` (DEC-0235); the list is
+  shown only once whole, and a failure on any page fails the whole list with
+  no partial options. A failure renders `failureSentence` of the
+  `ClassificationApiError`, or of `{ operation: "list-universes", resource:
+  "universe", code: null }` for any other cause, as an alert the select is
+  described by. A URL `scope` the options lack keeps its own selected option,
+  labelled by what is known of the list:
+
+  | List state | Option label |
+  |------------|--------------|
+  | loaded, scope absent | `FILTERS.unavailableUniverse`, *Unavailable universe* (DEC-0158) |
+  | still loading | `FILTERS.loadingUniverses`, *Loading universes…* (DEC-0237, provisional) |
+  | failed | `OPERATION_LABELS["list-universes"]`, *Could not load your universes* (DEC-0237, provisional) |
+
+- **Threshold sentences.** One `ThresholdSentence` per factor (value, growth,
+  momentum), then `FILTERS.percentileHelper`. A commit replaces or deletes
+  that factor's entry in `query.sentences`.
+- **Hide stocks with an incomplete score.** A checkbox bound to
+  `query.hideIncomplete`, described by `FILTERS.hideIncompleteHelper`; its
+  label row is at least `--control-min-target` tall.
+- `children`.
+- **Clear filters.** Shown only while a filter is active: a sentence, a
+  symbol, hide-incomplete, or (with *Look in*) a scope. Sort alone shows no
+  button. It writes `DEFAULT_RESEARCH_QUERY` with the current `sort` kept and,
+  without *Look in*, the current `scope` kept; clears the *Find a stock* draft
+  and error; remounts the three threshold rows, dropping any uncommitted
+  draft or error; and moves focus to *Find a stock* (DAC-E4-S5-3; DEC-0157).
+
+Tests: `filters-pane.test.tsx` (TC-COMP-135, TC-COMP-136), driven through a
+probe host that issues one `toListParams` request per `query` change.
+
+## The score-set poll (`use-score-set-poll.ts`)
+
+`useScoreSetPoll({ onNewSet })` is the poll every scored CAP-002 surface
+runs (classification-ui 2.3, 2.6; UX design 1.2 Polling and Completion;
+AC-20, AC-22; DAC-E4-4, DAC-E4-S4-4 to DAC-E4-S4-6; DEC-0153, DEC-0155,
+DEC-0233). It takes one callback, `onNewSet(summary: ClassificationSummary)`,
+read from the latest render through a ref, so a changed callback identity
+does not restart polling. It returns:
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `summary` | `ClassificationSummary \| null` | the last successful read; `null` before the first |
+| `checkedAt` | `string \| null` | `new Date().toISOString()` after each successful read; `null` before the first, unchanged by a rejected read |
+| `pollFailed` | `boolean` | true after a rejected read, until a read succeeds |
+| `tryAgain` | `() => Promise<void>` | one read, now; polling resumes while a continuation condition holds |
+| `announcement` | `string \| null` | `SCORE_SET.scoresUpdatedTo(endedAt, runStartedAt)` for the latest new set, both times through `formatTimestamp` |
+
+`POLL_INTERVAL_MS`, an exported constant, is `10_000` (STD-UI-25),
+mirroring `HEALTH_POLL_INTERVAL_MS` in `web/src/app/status-region.tsx`.
+
+**Reads.** The hook calls `getClassificationSummary()` from
+`web/src/api/classification-client.ts` once on mount, from first load and
+before any set exists, then on a `setInterval` of `POLL_INTERVAL_MS` while
+all of these hold:
+
+- no read has failed since the last success (`pollFailed` is false), and
+- the last read's `later.state` is `building`, or the shell's health reports
+  the latest download non-terminal, or one more read is owed (below).
+
+The download's state comes from the delivered `useHealth()` in
+`status-region.tsx`: `health.most_recent_run.state` is `requested`,
+`running` or `cancelling` (`isNonTerminalRunState` from
+`web/src/screens/runs/outcome-badge.tsx`). The hook issues no health read of
+its own, so the shell's single 30-second health interval is unchanged. The
+timer is cleared when the condition stops holding and on unmount. At most
+one read is in flight: a tick that lands during a slow read is skipped, not
+queued.
+
+**The owed read.** What a read can have seen is fixed when it is issued. A
+read issued while the download still ran cannot have seen the set it
+produced, so after the health reports the download terminal the hook keeps
+its cadence until a read issued after that report has landed; that read's
+`later` then governs (DEC-0233). The guarantee this gives is a further read
+0 to 10 seconds after the terminal report. Two handoff exposures remain the
+owner's question in DEC-0238 (open, provisional): the owed read's tick
+landing inside the scheduler's claim window, and a download shorter than one
+30-second health interval, which never shows non-terminal to the hook. If
+the owner picks a different rule the hook changes, and CAP-002-E4-S4 and
+CAP-002-E4-S9 are reworked.
+
+**A new set.** The hook remembers the last read's `set.setId`, or `null`
+when that read had no set, and distinguishes both from "not yet read". A
+successful read whose `set` is non-null and whose `setId` differs from the
+remembered value is a new complete set, a first set after a never-populated
+read included: the hook sets `announcement` once and calls `onNewSet(next)`
+once (DAC-E4-S4-5; DEC-0153). The very first read never fires, a read that
+returns the same set never re-fires, and each further new set fires once
+more. The host's reload with its sort, filters, selection and checked rows
+preserved runs from `onNewSet` and is the host's (CAP-002-E4-S6, E4-S9).
+
+**Failure.** A rejected read, whether the API did not answer or refused, sets
+`pollFailed` true, keeps `summary` and `checkedAt` as they were, and stops
+the timer until `tryAgain` (DEC-0155), whether or not a set exists yet. The
+error's text is not rendered (STD-UI-23); the as-of line shows *Could not
+check for newer scores.* with **Try again**, and in the never-populated
+state, which has no line, E4-S9's body does from the same two fields.
+`tryAgain` is the read itself: one call performs one read, a success clears
+`pollFailed` and resumes the cadence while a condition holds, and a new set
+it returns fires `onNewSet` as any read would. Only the read is guarded: a
+host callback that throws is the host's defect, not a failed poll.
+
+**Lifetime.** A mounted ref guards every state update and callback, so a
+read resolving after unmount sets nothing and calls nothing. A `StrictMode`
+double mount leaves one interval and fires `onNewSet` once. The hook keeps no
+module-level state and touches no storage.
+
+`use-score-set-poll.test.ts` beside it carries TC-COMP-177 and TC-COMP-184
+and drives the hook with fake timers, mocking the client and `useHealth`.

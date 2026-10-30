@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/use-research-query.test.tsx",
+  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+  "tree_patch_sha256": "c4c0f6dd44f8bc755e5f41c5aa8f64354bf488c9de6c0204023c9e4a43124942",
+  "mutants_file": "/tmp/claude-501/s5/mutants-1.json",
+  "mutants_sha256": "f8da630b62c1f533214534b1f3c6e21f2f2ca81c447e326e2ebbfb1cd88dbf1a",
+  "jobs": 3,
+  "started": "2026-10-29T05:22:16Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 1.4,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w1.log",
+      "log_sha256": "b07449c510066311aa975ce17a611a2a686d697d178d9029fd191d7900a741fe"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 1.5,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w2.log",
+      "log_sha256": "4f217d9ccb5193f209e4a7d329cbf2cafe5c285a26e1d34d1be4a907fd8ee7f0"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 1.5,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w0.log",
+      "log_sha256": "e4ffb36d34e0b46cbd876eb6acbb57bf275b5d12fa83467c13db6d888628e560"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:cycle-1:equal-write-navigates",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/research/use-research-query.ts",
+      "old": "      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {\n        return;\n      }\n",
+      "new": "",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.9,
+      "worker": 0,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_equal-write-navigates.log",
+      "log_sha256": "1aa2956fd5110fffadb1e94c6ecadc23866c1d6aadabd83fa2da48f1165afd44"
+    },
+    {
+      "id": "manual:cycle-1:unknown-keys-dropped",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/research/use-research-query.ts",
+      "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+      "new": "setSearchParams(() => applyResearchQuery(new URLSearchParams(), next));",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.9,
+      "worker": 1,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_unknown-keys-dropped.log",
+      "log_sha256": "1afdb8037fc01b843a955b2b63467c316d9979c124551e25e4a4d8bc84e06aeb"
+    },
+    {
+      "id": "manual:cycle-1:replace-not-push",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/research/use-research-query.ts",
+      "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+      "new": "setSearchParams((previous) => applyResearchQuery(previous, next), { replace: true });",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.9,
+      "worker": 2,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_replace-not-push.log",
+      "log_sha256": "e1d4b6eedb1d940e29a03caada49546e62af8b9e6100d6656cf084bdd57946c5"
+    },
+    {
+      "id": "manual:cycle-1:clear-drops-sort",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/research/use-research-query.ts",
+      "old": "setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort })",
+      "new": "setQuery({ ...DEFAULT_RESEARCH_QUERY })",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.9,
+      "worker": 0,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_clear-drops-sort.log",
+      "log_sha256": "8648e62714a49bbc1306f6c8ad7ccbcb8c0827c3fa644aef2a3788ef9d8f3ac3"
+    },
+    {
+      "id": "manual:cycle-1:query-not-memoised",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/research/use-research-query.ts",
+      "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+      "new": "const query = decodeResearchQuery(new URLSearchParams(search));",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.9,
+      "worker": 1,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_query-not-memoised.log",
+      "log_sha256": "cebe07740253e7fa3ef9f3ea5f6371fc89bf01fdb965f529e7a289c57637465e"
+    },
+    {
+      "id": "manual:cycle-1:query-ignores-search",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/research/use-research-query.ts",
+      "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+      "new": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams()), [search]);",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.9,
+      "worker": 2,
+      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_query-ignores-search.log",
+      "log_sha256": "9f0245987e0e886b4a403a9b08f9ca1cfdbd1829f47c2a62bd64d08a8b834eb1"
+    }
+  ],
+  "finished": "2026-10-29T05:22:20Z"
+}

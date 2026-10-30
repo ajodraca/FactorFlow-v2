@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/use-research-query.test.tsx src/screens/research/threshold-sentence.test.tsx src/screens/research/filters-pane.test.tsx src/screens/research/copy.test.ts",
+  "repo_head": "cbc09c919d0e525cf995dd8ef05fd6065fabd38d",
+  "tree_patch_sha256": "0b47203854252dfd59e4ce4a34793334f895bf5d577a8f0971a04f5066b90064",
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-5.json",
+  "mutants_sha256": "e29a4e0be182ebc8d3c3887e364c910d1525009b56b8c618dae7ba4a322dc0fe",
+  "jobs": 2,
+  "started": "2026-10-30T02:22:57Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 2.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/mut5-logs/baseline-w1.log",
+      "log_sha256": "f63335236c4cb4fe1a67f73a6e0f4ab2e9fc715d882815408a8ed507f694d7b5"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 2.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/mut5-logs/baseline-w0.log",
+      "log_sha256": "79f3d1b931134001c4974e4446523f235215f175964e31c193131b904d981f52"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:review-v2:fp2-later-page-failure-swallowed",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/research/filters-pane.tsx",
+      "old": "  do {\n    const page = await listUniverses({ lifecycle: \"active\", cursor });\n    universes.push(...page.universes);\n    cursor = page.nextCursor ?? undefined;\n  } while (cursor !== undefined);\n  return universes;",
+      "new": "  try {\n    do {\n      const page = await listUniverses({ lifecycle: \"active\", cursor });\n      universes.push(...page.universes);\n      cursor = page.nextCursor ?? undefined;\n    } while (cursor !== undefined);\n  } catch (cause) {\n    if (universes.length === 0) {\n      throw cause;\n    }\n  }\n  return universes;",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.7,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/mut5-logs/manual_review-v2_fp2-later-page-failure-swallowed.log",
+      "log_sha256": "b422f143f08f8d64325f36ed93891505fb79fb414c3831077aa772b970734882"
+    }
+  ],
+  "finished": "2026-10-30T02:23:02Z"
+}

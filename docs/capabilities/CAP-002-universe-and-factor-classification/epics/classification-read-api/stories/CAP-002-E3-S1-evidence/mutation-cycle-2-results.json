@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "command": "uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider tests/integration/test_reader_current_set.py tests/integration/test_reader_summary.py tests/unit/test_reader_sql_read_only.py tests/unit/test_package_data_ships_sql.py",
+  "repo_head": "1cc28d83d2b5a27f8235071938eecdf29ebf670d",
+  "tree_patch_sha256": "656a6e9068e69145fabae4fbb3e8043d18702a1926af0c8c4246a52a5f42f466",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/hold/mutants-cycle-2.json",
+  "mutants_sha256": "5a705d8392d72ac96315f6a6be1f0172a90ade68a090ade94d09c4a874ee15ca",
+  "jobs": 5,
+  "started": "2026-10-30T02:47:45Z",
+  "baselines": [
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 11.3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/baseline-w3.log",
+      "log_sha256": "bd1e292816af1fb9ffde97bed74e4ca65f081fd9cd38d08faa8849e8ac3f8d45"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 11.3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/baseline-w1.log",
+      "log_sha256": "dcbb5d12300f35827b987277802e36575fbc39358e8d9737f38ecca9c29441e1"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 11.3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/baseline-w0.log",
+      "log_sha256": "d0454ce9f1933b1319122b65d7a7700ecb7e55d7568e9fa14c7dcc94d6fd3737"
+    },
+    {
+      "worker": 4,
+      "exit_code": 0,
+      "seconds": 11.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/baseline-w4.log",
+      "log_sha256": "c235993c86c6a5b9f6aa9d84182d3165f25e7e99eea05eb0aa7d9a8914345a50"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 11.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/baseline-w2.log",
+      "log_sha256": "fc34c032c7ae08ec07d2250b728c45da12c833992c1cf6018c7e36ac212854e9"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "review:current-by-started-at",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "     ORDER BY s.ended_at DESC\n",
+      "new": "     ORDER BY s.started_at DESC\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.4,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/review_current-by-started-at.log",
+      "log_sha256": "fc34a9a52346e6a4c6b6e353d485c6188876e2dd50524998789bf6367c8973a9"
+    },
+    {
+      "id": "review:factors-any-set",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "         WHERE f.set_id = c.set_id) AS factors,",
+      "new": "         WHERE f.set_id IS NOT NULL) AS factors,",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.6,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/review_factors-any-set.log",
+      "log_sha256": "a9d255357221c44a8db7f02a6cbf8c0e9cd1f111d76b9439a2a94744caa95fa9"
+    },
+    {
+      "id": "review:later-started-is-run-started",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/reader.py",
+      "old": "        started_at=c[\"later_started_at\"],",
+      "new": "        started_at=c[\"later_run_started_at\"],",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.5,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/review_later-started-is-run-started.log",
+      "log_sha256": "af9fff36c7fbf93db880476e592891c31ee4c985d7f228462459adec0d479b90"
+    },
+    {
+      "id": "review:later-started-sql-is-current",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "       l.started_at     AS later_started_at,",
+      "new": "       c.started_at     AS later_started_at,",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.4,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/review_later-started-sql-is-current.log",
+      "log_sha256": "afae4d7043f87aa88409b81cf15b86bac13455419f1fd2d339ab4d9136fc5bcb"
+    },
+    {
+      "id": "review:later-after-current-end",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/current_set.sql",
+      "old": "COALESCE((SELECT started_at FROM current), '-infinity')",
+      "new": "COALESCE((SELECT ended_at FROM current), '-infinity')",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.5,
+      "worker": 4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/mut2/new-logs/review_later-after-current-end.log",
+      "log_sha256": "92f8a0f614bbc5c9fa6d8a69f7a41dfc9b0042a5f12080589594e3b1b6052d04"
+    }
+  ],
+  "finished": "2026-10-30T02:48:04Z"
+}

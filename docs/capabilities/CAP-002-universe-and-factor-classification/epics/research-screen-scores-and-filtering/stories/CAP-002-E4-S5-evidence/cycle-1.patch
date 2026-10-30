@@ -1,0 +1,483 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log
+new file mode 100644
+index 0000000..04bfef1
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/screens/research/use-research-query.test.tsx > useResearchQuery (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156) > reads the query as decodeResearchQuery reads the location search
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/use-research-query.test.tsx (8 tests) 15ms
++
++ Test Files  1 passed (1)
++      Tests  8 passed (8)
++   Start at  00:21:18
++   Duration  664ms (transform 28ms, setup 51ms, collect 69ms, tests 15ms, environment 241ms, prepare 133ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..8939b8b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-1.json
+@@ -0,0 +1,55 @@
++{
++ "schema": 1,
++ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "manual:cycle-1:equal-write-navigates",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-research-query.ts",
++   "old": "      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {\n        return;\n      }\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-1:unknown-keys-dropped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-research-query.ts",
++   "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
++   "new": "setSearchParams(() => applyResearchQuery(new URLSearchParams(), next));"
++  },
++  {
++   "id": "manual:cycle-1:replace-not-push",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-research-query.ts",
++   "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
++   "new": "setSearchParams((previous) => applyResearchQuery(previous, next), { replace: true });"
++  },
++  {
++   "id": "manual:cycle-1:clear-drops-sort",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-research-query.ts",
++   "old": "setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort })",
++   "new": "setQuery({ ...DEFAULT_RESEARCH_QUERY })"
++  },
++  {
++   "id": "manual:cycle-1:query-not-memoised",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-research-query.ts",
++   "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
++   "new": "const query = decodeResearchQuery(new URLSearchParams(search));"
++  },
++  {
++   "id": "manual:cycle-1:query-ignores-search",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/use-research-query.ts",
++   "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
++   "new": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams()), [search]);"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..75e1dcc
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,120 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/use-research-query.test.tsx",
++  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++  "tree_patch_sha256": "c4c0f6dd44f8bc755e5f41c5aa8f64354bf488c9de6c0204023c9e4a43124942",
++  "mutants_file": "/tmp/claude-501/s5/mutants-1.json",
++  "mutants_sha256": "f8da630b62c1f533214534b1f3c6e21f2f2ca81c447e326e2ebbfb1cd88dbf1a",
++  "jobs": 3,
++  "started": "2026-10-29T05:22:16Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 1.4,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w1.log",
++      "log_sha256": "b07449c510066311aa975ce17a611a2a686d697d178d9029fd191d7900a741fe"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w2.log",
++      "log_sha256": "4f217d9ccb5193f209e4a7d329cbf2cafe5c285a26e1d34d1be4a907fd8ee7f0"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w0.log",
++      "log_sha256": "e4ffb36d34e0b46cbd876eb6acbb57bf275b5d12fa83467c13db6d888628e560"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "manual:cycle-1:equal-write-navigates",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-research-query.ts",
++      "old": "      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {\n        return;\n      }\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 0.9,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_equal-write-navigates.log",
++      "log_sha256": "1aa2956fd5110fffadb1e94c6ecadc23866c1d6aadabd83fa2da48f1165afd44"
++    },
++    {
++      "id": "manual:cycle-1:unknown-keys-dropped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-research-query.ts",
++      "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
++      "new": "setSearchParams(() => applyResearchQuery(new URLSearchParams(), next));",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 0.9,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_unknown-keys-dropped.log",
++      "log_sha256": "1afdb8037fc01b843a955b2b63467c316d9979c124551e25e4a4d8bc84e06aeb"
++    },
++    {
++      "id": "manual:cycle-1:replace-not-push",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-research-query.ts",
++      "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
++      "new": "setSearchParams((previous) => applyResearchQuery(previous, next), { replace: true });",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 0.9,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_replace-not-push.log",
++      "log_sha256": "e1d4b6eedb1d940e29a03caada49546e62af8b9e6100d6656cf084bdd57946c5"
++    },
++    {
++      "id": "manual:cycle-1:clear-drops-sort",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-research-query.ts",
++      "old": "setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort })",
++      "new": "setQuery({ ...DEFAULT_RESEARCH_QUERY })",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 0.9,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_clear-drops-sort.log",
++      "log_sha256": "8648e62714a49bbc1306f6c8ad7ccbcb8c0827c3fa644aef2a3788ef9d8f3ac3"
++    },
++    {
++      "id": "manual:cycle-1:query-not-memoised",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-research-query.ts",
++      "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
++      "new": "const query = decodeResearchQuery(new URLSearchParams(search));",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 0.9,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_query-not-memoised.log",
++      "log_sha256": "cebe07740253e7fa3ef9f3ea5f6371fc89bf01fdb965f529e7a289c57637465e"
++    },
++    {
++      "id": "manual:cycle-1:query-ignores-search",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/use-research-query.ts",
++      "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
++      "new": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams()), [search]);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 0.9,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_query-ignores-search.log",
++      "log_sha256": "9f0245987e0e886b4a403a9b08f9ca1cfdbd1829f47c2a62bd64d08a8b834eb1"
++    }
++  ],
++  "finished": "2026-10-29T05:22:20Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log
+new file mode 100644
+index 0000000..134853f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/research/use-research-query.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/research/use-research-query.test.tsx [ src/screens/research/use-research-query.test.tsx ]
++Error: Failed to resolve import "./use-research-query" from "web/src/screens/research/use-research-query.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/use-research-query.test.tsx:12:33
++  9  |    decodeResearchQuery
++  10 |  } from "../../api/research-query";
++  11 |  import { useResearchQuery } from "./use-research-query";
++     |                                    ^
++  12 |  function useHarness() {
++  13 |    const location = useLocation();
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  00:20:07
++   Duration  678ms (transform 21ms, setup 64ms, collect 0ms, tests 0ms, environment 264ms, prepare 35ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md
+index adfaaf8..f9b4932 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md
+@@ -10,7 +10,7 @@ component: FactorFlow-v2
+ type: feature
+ priority: P1
+ estimate: 5
+-status: planning
++status: in-progress
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-17
+diff --git a/web/src/screens/research/use-research-query.test.tsx b/web/src/screens/research/use-research-query.test.tsx
+new file mode 100644
+index 0000000..ddc61e9
+--- /dev/null
++++ b/web/src/screens/research/use-research-query.test.tsx
+@@ -0,0 +1,161 @@
++import { act, renderHook } from "@testing-library/react";
++import type { ReactNode } from "react";
++import { useRef } from "react";
++import { MemoryRouter, useLocation, useNavigate, useNavigationType } from "react-router-dom";
++import { describe, expect, it } from "vitest";
++import {
++  DEFAULT_RESEARCH_QUERY,
++  type ResearchQuery,
++  applyResearchQuery,
++  decodeResearchQuery,
++} from "../../api/research-query";
++import { useResearchQuery } from "./use-research-query";
++
++/**
++ * The hook under test beside the router state a host observes: the search
++ * string, how many distinct locations have been visited, how the last one was
++ * reached and a way back (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156).
++ */
++function useHarness() {
++  const location = useLocation();
++  const navigate = useNavigate();
++  const navigationType = useNavigationType();
++  const research = useResearchQuery();
++  const keys = useRef<string[]>([]);
++  if (keys.current[keys.current.length - 1] !== location.key) {
++    keys.current.push(location.key);
++  }
++  return {
++    ...research,
++    search: location.search.replace(/^\?/, ""),
++    navigations: keys.current.length - 1,
++    navigationType,
++    back: () => navigate(-1),
++  };
++}
++
++function renderAt(search: string) {
++  const wrapper = ({ children }: { children: ReactNode }) => (
++    <MemoryRouter initialEntries={[`/research${search}`]}>{children}</MemoryRouter>
++  );
++  return renderHook(useHarness, { wrapper });
++}
++
++const VALUE_80: ResearchQuery = {
++  ...DEFAULT_RESEARCH_QUERY,
++  sentences: { value: { measure: "percentile", direction: "atLeast", value: "80" } },
++};
++
++describe("useResearchQuery (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156)", () => {
++  it("reads the query as decodeResearchQuery reads the location search", () => {
++    const search =
++      "?scope=u1&value.measure=percentile&value.direction=atLeast&value.value=80&hide_incomplete=true&symbol=aa&sort=symbol&order=desc&tab=history";
++    const { result } = renderAt(search);
++
++    expect(result.current.query).toEqual(decodeResearchQuery(new URLSearchParams(search)));
++    expect(result.current.query.symbol).toBe("AA");
++    expect(result.current.query.scope).toBe("u1");
++  });
++
++  it("setQuery writes applyResearchQuery over the current params: unknown keys survive, defaults are not written", () => {
++    const { result } = renderAt("?tab=history&sort=symbol");
++
++    act(() => result.current.setQuery({ ...result.current.query, hideIncomplete: true }));
++
++    const expected = applyResearchQuery(new URLSearchParams("tab=history&sort=symbol"), {
++      ...DEFAULT_RESEARCH_QUERY,
++      hideIncomplete: true,
++      sort: { key: "symbol", order: "asc" },
++    }).toString();
++    expect(result.current.search).toBe(expected);
++    expect(result.current.search).toBe("tab=history&hide_incomplete=true&sort=symbol");
++    expect(result.current.search).not.toContain("scope=");
++    expect(result.current.search).not.toContain("order=");
++  });
++
++  it("setQuery causes exactly one navigation, a push, so back restores the earlier URL", () => {
++    const { result } = renderAt("?sort=symbol");
++    expect(result.current.navigations).toBe(0);
++
++    act(() => result.current.setQuery({ ...result.current.query, symbol: "AA" }));
++
++    expect(result.current.navigations).toBe(1);
++    expect(result.current.navigationType).toBe("PUSH");
++    expect(result.current.search).toBe("symbol=AA&sort=symbol");
++
++    act(() => result.current.back());
++
++    expect(result.current.search).toBe("sort=symbol");
++    expect(result.current.query.symbol).toBeNull();
++  });
++
++  it("setQuery of an equal query causes no navigation", () => {
++    const { result } = renderAt("?value.measure=percentile&value.direction=atLeast&value.value=80");
++    const before = result.current.query;
++
++    act(() => result.current.setQuery({ ...VALUE_80 }));
++
++    expect(result.current.navigations).toBe(0);
++    expect(result.current.query).toBe(before);
++  });
++
++  it("clear writes the defaults and keeps sort and order", () => {
++    const { result } = renderAt(
++      "?scope=u1&value.measure=percentile&value.direction=atLeast&value.value=80&hide_incomplete=true&symbol=AA&sort=value_percentile&order=desc&tab=history",
++    );
++
++    act(() => result.current.clear());
++
++    expect(result.current.search).toBe("tab=history&sort=value_percentile&order=desc");
++    expect(result.current.query).toEqual({
++      ...DEFAULT_RESEARCH_QUERY,
++      sort: { key: "value_percentile", order: "desc" },
++    });
++    expect(result.current.navigations).toBe(1);
++  });
++
++  it("clear with no sort writes the empty query", () => {
++    const { result } = renderAt("?symbol=AA");
++
++    act(() => result.current.clear());
++
++    expect(result.current.search).toBe("");
++    expect(result.current.query).toEqual(DEFAULT_RESEARCH_QUERY);
++  });
++
++  it("two setQuery calls in one tick are two pushes, each a full rewrite of the owned keys", () => {
++    const { result } = renderAt("?tab=history");
++
++    act(() => {
++      const current = result.current.query;
++      result.current.setQuery({ ...current, symbol: "AA" });
++      result.current.setQuery({ ...current, symbol: "AA", hideIncomplete: true });
++    });
++
++    expect(result.current.search).toBe("tab=history&hide_incomplete=true&symbol=AA");
++
++    // react-router's functional setSearchParams hands the second write the
++    // render snapshot, not the first write's URL; applyResearchQuery rewrites
++    // every owned key from `next`, so a full query lands whole either way.
++    // React renders the two pushes once, so the history entries, not the
++    // renders, show that each write was its own push.
++    act(() => result.current.back());
++    expect(result.current.search).toBe("tab=history&symbol=AA");
++
++    act(() => result.current.back());
++    expect(result.current.search).toBe("tab=history");
++  });
++
++  it("keeps the query identity across re-renders while the search is unchanged", () => {
++    const { result, rerender } = renderAt("?symbol=AA");
++    const first = result.current.query;
++
++    rerender();
++
++    expect(result.current.query).toBe(first);
++
++    act(() => result.current.setQuery({ ...result.current.query, hideIncomplete: true }));
++
++    expect(result.current.query).not.toBe(first);
++  });
++});
+diff --git a/web/src/screens/research/use-research-query.ts b/web/src/screens/research/use-research-query.ts
+new file mode 100644
+index 0000000..12e9e08
+--- /dev/null
++++ b/web/src/screens/research/use-research-query.ts
+@@ -0,0 +1,51 @@
++import { useCallback, useMemo } from "react";
++import { useSearchParams } from "react-router-dom";
++import {
++  DEFAULT_RESEARCH_QUERY,
++  type ResearchQuery,
++  applyResearchQuery,
++  decodeResearchQuery,
++} from "../../api/research-query";
++
++/** What a host reads and writes: the query, one write, and the reset Clear filters performs. */
++export interface ResearchQueryBinding {
++  query: ResearchQuery;
++  setQuery(next: ResearchQuery): void;
++  clear(): void;
++}
++
++/**
++ * The React binding between the URL and S2's `ResearchQuery` (DAC-E4-3;
++ * DEC-0156). The URL is the only state: `query` is `decodeResearchQuery` of
++ * the location search, and `setQuery` writes `applyResearchQuery` over the
++ * current params as a push, so unknown keys survive, no default is written
++ * and back navigation restores the earlier filter. A write that leaves the
++ * search unchanged navigates nowhere.
++ *
++ * The host that issues the list request (CAP-002-E4-S9 on Research,
++ * CAP-002-E1-S8 on universe detail) must key it on `query`, whose identity is
++ * stable while the search string is unchanged: one write, one URL, one request
++ * (DAC-E4-S5-2). The Filters pane never fetches the list.
++ */
++export function useResearchQuery(): ResearchQueryBinding {
++  const [searchParams, setSearchParams] = useSearchParams();
++  const search = searchParams.toString();
++  const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);
++
++  const setQuery = useCallback(
++    (next: ResearchQuery): void => {
++      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {
++        return;
++      }
++      setSearchParams((previous) => applyResearchQuery(previous, next));
++    },
++    [search, setSearchParams],
++  );
++
++  const clear = useCallback(
++    (): void => setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort }),
++    [query.sort, setQuery],
++  );
++
++  return { query, setQuery, clear };
++}
