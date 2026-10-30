@@ -1,0 +1,70 @@
+# TDD evidence for CAP-002-E3-S1 - Reader foundation: current set, later attempt and summary.
+# One cycle: the plan writes every test first (Phase 2, T002-T012), then the two statements and the module (Phase 3,
+# T013-T016), so there is a single RED and a single GREEN. The driver commits once per stage: commit_hash is stage.
+# Decisions: none recorded by this stage. Open Gap 1 (which set is later while none is complete) stays PROVISIONAL as
+# the plan records it, pinned by T011.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged cycle-1.patch (the
+# staged diff the fingerprint hashes): APPROVED and drift_detected false. Their non-blocking notes (the RuntimeError
+# guard in summary() could be an assert; the read-only test's import spelling; LaterSet's docstring follows Open Gap 1)
+# asked for no change.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017]
+    description: >
+      src/factorflow/classification/reader.py (LaterSet, FactorSummary, CurrentSet, StocksCurrent, Summary,
+      read_set_blocks, current_set, summary; FACTORS and MIN_PEER_SET_SIZE re-exported from constants.py),
+      sql/current_set.sql (design 2.4 with the elided select list closed per T013) and sql/summary.sql (design 2.4
+      verbatim). Tests: tests/integration/reader_seed.py (seeding helpers), test_reader_current_set.py (TC-COMP-170,
+      171, 181, the T009 edge cases, the T011 PROVISIONAL pin, and a frozen-blocks check), test_reader_summary.py
+      (TC-COMP-103, 104, 178 and the T010 shape cases) and tests/unit/test_reader_sql_read_only.py (T012). The first
+      mutation run left two non-equivalent survivors (summary.sql reading every set's inputs; ranked derived from the
+      qualified count); the tests were strengthened (the building set's leaked stock is now all present, and
+      TC-COMP-178 stores momentum 33 qualified yet unranked) and the rerun killed both. A one-row assertion and the
+      frozen-blocks test were added before that rerun to kill LIMIT 2 and frozen=False mutants.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/red-cycle-1.log
+    red_log_sha256: 80f3765f79ce968c1862c30a629d5ac5f7e77df02611c1cf9de869590c84e371
+    red_evidence: >
+      Observed with the four test files written and no reader.py or SQL files (HEAD 7688c92): all three new test
+      modules failed at collection with ModuleNotFoundError: No module named 'factorflow.classification.reader'
+      (3 errors, no tests ran).
+    green_evidence: >
+      The three new test files plus tests/unit/test_package_data_ships_sql.py (T017) against a real PostgreSQL 16
+      container: 36 passed (green-cycle-1.log). ruff check, ruff format --check and mypy src clean. The full suite
+      is recorded in the stage report.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/green-cycle-1.log
+        sha256: abb40b30b64267951612c37cb159501df60b427a6fb93eff58ce28692a23166c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ca3dee0374e39b5944fc582bfe51614a258902169891f8320c9868a446be0d9d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: ec1ae00a0f25658b03d255af7d4fee1e33bfaaac4044a78201c11a392bbc3232
+      generated: 41
+      killed: 36
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.878
+      survivors:
+        - id: src/factorflow/classification/reader.py:111:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:111:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/sql/current_set.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/current_set.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/current_set.sql:3:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
