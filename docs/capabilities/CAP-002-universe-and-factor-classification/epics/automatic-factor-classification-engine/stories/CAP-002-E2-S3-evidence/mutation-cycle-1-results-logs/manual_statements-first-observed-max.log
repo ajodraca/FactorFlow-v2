@@ -1,0 +1,49 @@
+.......................................F
+=================================== FAILURES ===================================
+______ test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55132 user=test database=test_9e0b788c78444dc18acccd4e5dff6fce) at 0x108a1ce30>, stock=1, set_id=UUID('c1912210-1542-4b0e-ba51-d0a9199d57cb'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a19f40>
+
+    def test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        observed = [end + timedelta(days=15) for end in ends]
+        observed[5] = date(2026, 10, 16)  # a prior-window row re-acquired last sets known_on
+        filed = [end + timedelta(days=20) for end in ends]  # after the first observation
+        for k, end in enumerate(ends):
+            add_statement(
+                env.conn,
+                env.stock,
+                end,
+                "income_statement",
+                {TEST_KEYS["revenue"]: Decimal(REVENUE[k])},
+                observed_on=observed[k],
+                provider_filing_date=filed[k],
+            )
+    
+        build(env, monkeypatch)
+    
+        row = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]
+        assert row["status"] == "present"
+        assert row["value"] == REVENUE_GROWTH
+        assert row["as_of"] == P1
+        assert row["known_on"] == date(2026, 10, 16)
+        assert row["restated_possible"] is False
+>       assert row["detail"] == {
+            "periods": [
+                period("income_statement", ends[k], observed[k], filed[k], False) for k in range(8)
+            ]
+        }
+E       AssertionError: assert {'periods': [...', ...}, ...]} == {'periods': [...', ...}, ...]}
+E         
+E         Differing items:
+E         {'periods': [{'backfilled': False, 'observed_on': '2026-10-15', 'statement_type': 'income_statement', 'fiscal_period_e...True, 'observed_on': '2026-10-16', 'statement_type': 'income_statement', 'fiscal_period_end': '2025-06-30', ...}, ...]} != {'periods': [{'statement_type': 'income_statement', 'fiscal_period_end': '2026-09-30', 'observed_on': '2026-10-15', 'p...ent', 'fiscal_period_end': '2025-06-30', 'observed_on': '2026-10-16', 'provider_filing_date': '2025-07-20', ...}, ...]}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:173: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 39 passed in 2.22s

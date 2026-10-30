@@ -1,0 +1,349 @@
+# RED, cycle-2 (review v1 rework): the cycle-2 test changes, run against production carrying
+# one cycle-2 mutant at a time (mutants-cycle-2.json: review v1's eight behaviour-changing
+# survivors, IR-001 to IR-004).
+# Clone: f1d660782f95741cea9465663c798db1136cc1fa (production unchanged since e67482f), outside repos/.
+# Reproduction: each mutant first survives the unchanged story tests at f1d6607.
+# RED: the same clone plus the cycle-2 test diff (test_engine_inputs_fundamentals.py,
+# test_engine_currency.py), one mutant at a time, running the ten changed tests; GREEN: unmutated.
+
+## Reproduction 1: manual:reviewer-value-known-on-present-only survives the unchanged story tests
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 8.39s
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/rework2/red-clone
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/rework2/red-clone
+Installed 43 packages in 49ms
+exit=0
+
+## Reproduction 2: manual:reviewer-value-as-of-present-or-outdated survives the unchanged story tests
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 9.37s
+exit=0
+
+## Reproduction 3: manual:reviewer-growth-known-on-present-only survives the unchanged story tests
+ src/factorflow/classification/sql/growth_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 9.45s
+exit=0
+
+## Reproduction 4: manual:reviewer-value-found-window-only survives the unchanged story tests
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 9.24s
+exit=0
+
+## Reproduction 5: manual:reviewer-value-absent-periods-found-dropped survives the unchanged story tests
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 9.27s
+exit=0
+
+## Reproduction 6: manual:reviewer-growth-absent-periods-found-dropped survives the unchanged story tests
+ src/factorflow/classification/sql/growth_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 8.64s
+exit=0
+
+## Reproduction 7: manual:reviewer-growth-data-type-prices survives the unchanged story tests
+ src/factorflow/classification/sql/growth_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 8.30s
+exit=0
+
+## Reproduction 8: manual:reviewer-value-bar-recorded-asc survives the unchanged story tests
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the five story test files>
+........................................................................ [ 67%]
+..................................                                       [100%]
+106 passed in 8.35s
+exit=0
+
+## Cycle-2 test diff applied
+ tests/integration/test_engine_currency.py          |  11 ++
+ .../integration/test_engine_inputs_fundamentals.py | 130 ++++++++++++++++++---
+ 2 files changed, 125 insertions(+), 16 deletions(-)
+
+## RED 1: manual:reviewer-value-known-on-present-only
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+....FF......FF                                                           [100%]
+=================================== FAILURES ===================================
+___ test_non_positive_shares_make_every_value_input_not_computable[shares0] ____
+tests/integration/test_engine_inputs_fundamentals.py:647: in test_non_positive_shares_make_every_value_input_not_computable
+    assert rows[name]["known_on"] == max(P1 + timedelta(days=15), L), name
+E   AssertionError: book_to_price
+E   assert None == datetime.date(2026, 10, 16)
+E    +  where datetime.date(2026, 10, 16) = max((datetime.date(2026, 9, 30) + datetime.timedelta(days=15)), datetime.date(2026, 10, 16))
+E    +    where datetime.timedelta(days=15) = timedelta(days=15)
+___ test_non_positive_shares_make_every_value_input_not_computable[shares1] ____
+tests/integration/test_engine_inputs_fundamentals.py:647: in test_non_positive_shares_make_every_value_input_not_computable
+    assert rows[name]["known_on"] == max(P1 + timedelta(days=15), L), name
+E   AssertionError: book_to_price
+E   assert None == datetime.date(2026, 10, 16)
+E    +  where datetime.date(2026, 10, 16) = max((datetime.date(2026, 9, 30) + datetime.timedelta(days=15)), datetime.date(2026, 10, 16))
+E    +    where datetime.timedelta(days=15) = timedelta(days=15)
+______________ test_fundamentals_outdated_at_six_months_and_a_day ______________
+tests/integration/test_engine_currency.py:113: in test_fundamentals_outdated_at_six_months_and_a_day
+    assert rows[name]["known_on"] == known_on[name], name
+E   AssertionError: book_to_price
+E   assert None == datetime.date(2026, 10, 16)
+_____ test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth ______
+tests/integration/test_engine_currency.py:186: in test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth
+    assert (rows[name]["as_of"], rows[name]["known_on"]) == (date(2026, 9, 30), known_on)
+E   assert (datetime.dat... 9, 30), None) == (datetime.dat...2026, 10, 15))
+E     
+E     At index 1 diff: None != datetime.date(2026, 10, 15)
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares0]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares1]
+FAILED tests/integration/test_engine_currency.py::test_fundamentals_outdated_at_six_months_and_a_day
+FAILED tests/integration/test_engine_currency.py::test_stale_latest_bar_makes_value_inputs_outdated_and_leaves_growth
+4 failed, 10 passed in 3.24s
+exit=1
+
+## RED 2: manual:reviewer-value-as-of-present-or-outdated
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+....FF........                                                           [100%]
+=================================== FAILURES ===================================
+___ test_non_positive_shares_make_every_value_input_not_computable[shares0] ____
+tests/integration/test_engine_inputs_fundamentals.py:646: in test_non_positive_shares_make_every_value_input_not_computable
+    assert rows[name]["as_of"] == P1, name
+E   AssertionError: book_to_price
+E   assert None == datetime.date(2026, 9, 30)
+___ test_non_positive_shares_make_every_value_input_not_computable[shares1] ____
+tests/integration/test_engine_inputs_fundamentals.py:646: in test_non_positive_shares_make_every_value_input_not_computable
+    assert rows[name]["as_of"] == P1, name
+E   AssertionError: book_to_price
+E   assert None == datetime.date(2026, 9, 30)
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares0]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_shares_make_every_value_input_not_computable[shares1]
+2 failed, 12 passed in 3.26s
+exit=1
+
+## RED 3: manual:reviewer-growth-known-on-present-only
+ src/factorflow/classification/sql/growth_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+FFFF........F.                                                           [100%]
+=================================== FAILURES ===================================
+_ test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior0-base0] _
+tests/integration/test_engine_inputs_fundamentals.py:621: in test_non_positive_prior_year_base_makes_growth_not_computable
+    assert rows[name]["known_on"] == P1 + timedelta(days=15)
+E   assert None == (datetime.date(2026, 9, 30) + datetime.timedelta(days=15))
+E    +  where datetime.timedelta(days=15) = timedelta(days=15)
+_ test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior1-base1] _
+tests/integration/test_engine_inputs_fundamentals.py:621: in test_non_positive_prior_year_base_makes_growth_not_computable
+    assert rows[name]["known_on"] == P1 + timedelta(days=15)
+E   assert None == (datetime.date(2026, 9, 30) + datetime.timedelta(days=15))
+E    +  where datetime.timedelta(days=15) = timedelta(days=15)
+_ test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior2-base2] _
+tests/integration/test_engine_inputs_fundamentals.py:621: in test_non_positive_prior_year_base_makes_growth_not_computable
+    assert rows[name]["known_on"] == P1 + timedelta(days=15)
+E   assert None == (datetime.date(2026, 9, 30) + datetime.timedelta(days=15))
+E    +  where datetime.timedelta(days=15) = timedelta(days=15)
+_ test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior3-base3] _
+tests/integration/test_engine_inputs_fundamentals.py:621: in test_non_positive_prior_year_base_makes_growth_not_computable
+    assert rows[name]["known_on"] == P1 + timedelta(days=15)
+E   assert None == (datetime.date(2026, 9, 30) + datetime.timedelta(days=15))
+E    +  where datetime.timedelta(days=15) = timedelta(days=15)
+______________ test_fundamentals_outdated_at_six_months_and_a_day ______________
+tests/integration/test_engine_currency.py:113: in test_fundamentals_outdated_at_six_months_and_a_day
+    assert rows[name]["known_on"] == known_on[name], name
+E   AssertionError: revenue_growth
+E   assert None == datetime.date(2026, 5, 1)
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior0-base0]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[revenue-prior1-base1]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior2-base2]
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_non_positive_prior_year_base_makes_growth_not_computable[diluted_eps-prior3-base3]
+FAILED tests/integration/test_engine_currency.py::test_fundamentals_outdated_at_six_months_and_a_day
+5 failed, 9 passed in 3.30s
+exit=1
+
+## RED 4: manual:reviewer-value-found-window-only
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+......FFF.F...                                                           [100%]
+=================================== FAILURES ===================================
+_________ test_quarter_absent_from_the_trailing_window_forms_no_window _________
+tests/integration/test_engine_inputs_fundamentals.py:305: in test_quarter_absent_from_the_trailing_window_forms_no_window
+    assert rows["earnings_yield"]["detail"]["periods_found"] == periods_found(
+E   AssertionError: assert [{'statement_...-03-30'}, ...] == [{'statement_...-06-30'}, ...]
+E     
+E     At index 0 diff: {'statement_type': 'income_statement', 'fiscal_period_end': '2026-09-30'} != {'statement_type': 'balance_sheet', 'fiscal_period_end': '2026-09-30'}
+E     Right contains 8 more items, first extra item: {'statement_type': 'balance_sheet', 'fiscal_period_end': '2024-12-30'}
+E     Use -v to get more diff
+_________________ test_three_quarters_form_no_trailing_window __________________
+tests/integration/test_engine_inputs_fundamentals.py:343: in test_three_quarters_form_no_trailing_window
+    assert rows[name]["detail"] == {
+E   AssertionError: earnings_yield
+E   assert {'cause': 'pe...2026-03-30'}]} == {'cause': 'pe...2026-03-30'}]}
+E     
+E     Omitting 1 identical items, use -vv to show
+E     Differing items:
+E     {'periods_found': [{'statement_type': 'income_statement', 'fiscal_period_end': '2026-09-30'}, {'statement_type': 'inco...ement', 'fiscal_period_end': '2026-06-30'}, {'statement_type': 'income_statement', 'fiscal_period_end': '2026-03-30'}]} != {'periods_found': [{'statement_type': 'balance_sheet', 'fiscal_period_end': '2026-09-30'}, {'statement_type': 'balance...ement', 'fiscal_period_end': '2026-06-30'}, {'statement_type': 'income_statement', 'fiscal_period_end': '2026-03-30'}]}
+E     Use -v to get more diff
+_________ test_absent_item_in_newest_balance_sheet_does_not_fall_back __________
+tests/integration/test_engine_inputs_fundamentals.py:986: in test_absent_item_in_newest_balance_sheet_does_not_fall_back
+    assert rows["book_to_price"]["detail"] == {
+E   AssertionError: assert {'cause': 'li...ds_found': []} == {'cause': 'li...06-30'}, ...]}
+E     
+E     Omitting 2 identical items, use -vv to show
+E     Differing items:
+E     {'periods_found': []} != {'periods_found': [{'statement_type': 'balance_sheet', 'fiscal_period_end': '2026-09-30'}, {'statement_type': 'balance...eet', 'fiscal_period_end': '2025-09-30'}, {'statement_type': 'balance_sheet', 'fiscal_period_end': '2025-06-30'}, ...]}
+E     Use -v to get more diff
+__________________ test_absent_line_item_and_stale_is_missing __________________
+tests/integration/test_engine_inputs_fundamentals.py:1163: in test_absent_line_item_and_stale_is_missing
+    assert rows["earnings_yield"]["detail"] == {
+E   AssertionError: assert {'cause': 'li...12-31'}, ...]} == {'cause': 'li...12-31'}, ...]}
+E     
+E     Omitting 2 identical items, use -vv to show
+E     Differing items:
+E     {'periods_found': [{'statement_type': 'income_statement', 'fiscal_period_end': '2026-03-31'}, {'statement_type': 'inco...', 'fiscal_period_end': '2025-03-31'}, {'statement_type': 'income_statement', 'fiscal_period_end': '2024-12-31'}, ...]} != {'periods_found': [{'statement_type': 'balance_sheet', 'fiscal_period_end': '2026-03-31'}, {'statement_type': 'balance...eet', 'fiscal_period_end': '2025-03-31'}, {'statement_type': 'balance_sheet', 'fiscal_period_end': '2024-12-31'}, ...]}
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_quarter_absent_from_the_trailing_window_forms_no_window
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_three_quarters_form_no_trailing_window
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_item_in_newest_balance_sheet_does_not_fall_back
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_line_item_and_stale_is_missing
+4 failed, 10 passed in 3.28s
+exit=1
+
+## RED 5: manual:reviewer-value-absent-periods-found-dropped
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+........F.F...                                                           [100%]
+=================================== FAILURES ===================================
+_________ test_absent_item_in_newest_balance_sheet_does_not_fall_back __________
+tests/integration/test_engine_inputs_fundamentals.py:986: in test_absent_item_in_newest_balance_sheet_does_not_fall_back
+    assert rows["book_to_price"]["detail"] == {
+E   AssertionError: assert {'cause': 'li...book_equity']} == {'cause': 'li...06-30'}, ...]}
+E     
+E     Omitting 2 identical items, use -vv to show
+E     Right contains 1 more item:
+E     {'periods_found': [{'fiscal_period_end': '2026-09-30',
+E                         'statement_type': 'balance_sheet'},
+E                        {'fiscal_period_end': '2026-06-30',
+E                         'statement_type': 'balance_sheet'},...
+E     
+E     ...Full output truncated (13 lines hidden), use '-vv' to show
+__________________ test_absent_line_item_and_stale_is_missing __________________
+tests/integration/test_engine_inputs_fundamentals.py:1163: in test_absent_line_item_and_stale_is_missing
+    assert rows["earnings_yield"]["detail"] == {
+E   AssertionError: assert {'cause': 'li...'net_income']} == {'cause': 'li...12-31'}, ...]}
+E     
+E     Omitting 2 identical items, use -vv to show
+E     Right contains 1 more item:
+E     {'periods_found': [{'fiscal_period_end': '2026-03-31',
+E                         'statement_type': 'balance_sheet'},
+E                        {'fiscal_period_end': '2025-12-31',
+E                         'statement_type': 'balance_sheet'},...
+E     
+E     ...Full output truncated (29 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_item_in_newest_balance_sheet_does_not_fall_back
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_line_item_and_stale_is_missing
+2 failed, 12 passed in 3.26s
+exit=1
+
+## RED 6: manual:reviewer-growth-absent-periods-found-dropped
+ src/factorflow/classification/sql/growth_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+..........F...                                                           [100%]
+=================================== FAILURES ===================================
+__________________ test_absent_line_item_and_stale_is_missing __________________
+tests/integration/test_engine_inputs_fundamentals.py:1161: in test_absent_line_item_and_stale_is_missing
+    assert growth["periods_found"] == periods_found(("income_statement", ends))
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'periods_found'
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_absent_line_item_and_stale_is_missing
+1 failed, 13 passed in 3.26s
+exit=1
+
+## RED 7: manual:reviewer-growth-data-type-prices
+ src/factorflow/classification/sql/growth_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+...........F..                                                           [100%]
+=================================== FAILURES ===================================
+_________ test_missing_input_carries_the_last_fundamentals_acquisition _________
+tests/integration/test_engine_inputs_fundamentals.py:1242: in test_missing_input_carries_the_last_fundamentals_acquisition
+    assert (acquisition["data_type"], acquisition["outcome"]) == ("fundamentals", "not_found")
+E   AssertionError: assert ('prices', 'written') == ('fundamentals', 'not_found')
+E     
+E     At index 0 diff: 'prices' != 'fundamentals'
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_input_carries_the_last_fundamentals_acquisition
+1 failed, 13 passed in 3.31s
+exit=1
+
+## RED 8: manual:reviewer-value-bar-recorded-asc
+ src/factorflow/classification/sql/value_inputs.sql | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider --tb=short -rf <the ten changed tests>
+.........F....                                                           [100%]
+=================================== FAILURES ===================================
+________ test_equal_bar_observation_is_decided_by_the_later_recorded_at ________
+tests/integration/test_engine_inputs_fundamentals.py:904: in test_equal_bar_observation_is_decided_by_the_later_recorded_at
+    assert row["value"] == ratio(Decimal(500), Decimal(1200)), stock
+E   AssertionError: 1
+E   assert Decimal('0.6250000000') == Decimal('0.4166666667')
+E    +  where Decimal('0.4166666667') = ratio(Decimal('500'), Decimal('1200'))
+E    +    where Decimal('500') = Decimal(500)
+E    +    and   Decimal('1200') = Decimal(1200)
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_equal_bar_observation_is_decided_by_the_later_recorded_at
+1 failed, 13 passed in 3.23s
+exit=1
+
+## GREEN: unmutated
+$ uv run --all-extras --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider <the ten changed tests>
+..............                                                           [100%]
+14 passed in 3.15s
+exit=0
+
+## Summary
+manual:reviewer-value-known-on-present-only: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-value-as-of-present-or-outdated: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-growth-known-on-present-only: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-value-found-window-only: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-value-absent-periods-found-dropped: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-growth-absent-periods-found-dropped: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-growth-data-type-prices: survives unchanged tests=True, fails reworked tests=True
+manual:reviewer-value-bar-recorded-asc: survives unchanged tests=True, fails reworked tests=True
+unmutated reworked tests pass=True

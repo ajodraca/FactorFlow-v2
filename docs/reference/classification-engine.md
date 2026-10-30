@@ -2,15 +2,20 @@
 
 `src/factorflow/classification/engine.py` is the factor engine's build
 transaction (CAP-002-E2-S2; `component-design-factor-engine.md` sections 2.1
-to 2.4). With it come `constants.py`, `line_items.py` and three statements in
+to 2.4). With it come `constants.py`, `line_items.py` and seven statements in
 `classification/sql/`: `set_context.sql`, `complete_set.sql` and
-`fail_set.sql`. `build` either commits a whole classification set or records
+`fail_set.sql` for the transaction, and `statements.sql`, `value_inputs.sql`,
+`growth_inputs.sql` and `insert_inputs.sql` for the fundamentals stage
+(CAP-002-E2-S3). `build` either commits a whole classification set or records
 the set `failed` with its reason, so no reader ever sees half a set.
 
-No factor is computed yet. The stage list is empty, so a successful build
-completes a set with no factor rows. Only the
-[classification scheduler](classification-scheduler.md) calls `build`, and no
-running process starts it yet.
+One stage is registered. It derives the value and growth inputs of every
+active instrument and writes them to `factor_input` (see
+[Fundamental inputs](#fundamental-inputs)). No momentum input, peer set or
+classification is computed yet, so a successful build writes no
+`classification_set_factor` or `factor_classification` row. Only the
+[classification scheduler](classification-scheduler.md) calls `build`, and
+no running process starts it yet.
 
 ## `build`
 
@@ -111,13 +116,147 @@ every later statement.
 
 A stage is `Callable[[psycopg.Connection, BuildContext], None]`. It runs
 inside the build transaction and writes through the connection it is given.
-`_STAGES` is empty: this story registers no stage. The docstring under
-`_STAGES` records the order later stages must be registered in (DEC-0121,
-amending DEC-0112). Tests replace the list with `monkeypatch`.
+`_STAGES` holds one stage, `_fundamental_inputs_stage`, appended by the last
+statement of the module. The docstring under `_STAGES` records the order later
+stages must be registered in (DEC-0121, amending DEC-0112). Tests replace the
+list with `monkeypatch`.
+
+## Fundamental inputs
+
+`_fundamental_inputs_stage` derives five inputs for every instrument in
+`active_ids` (CAP-002-E2-S3; DEC-0115): `book_to_price`, `earnings_yield` and
+`fcf_yield` for the `value` factor, and `revenue_growth` and `eps_growth` for
+`growth`. It binds the set's dates and active roster,
+`FUNDAMENTALS_STALE_AFTER_MONTHS` and the [line items](#line-items), then runs
+four statements on one cursor:
+
+1. `statements.sql` creates the temporary table `stmt`.
+2. `value_inputs.sql` creates the temporary table `inputs` holding the value
+   inputs.
+3. `growth_inputs.sql` inserts the growth inputs into `inputs`.
+4. `insert_inputs.sql` appends the `value` and `growth` rows of `inputs` to
+   `factor_input`.
+
+Both temporary tables are `ON COMMIT DROP`. Only the last statement writes to
+the store. Below, `D` is the set's `classification_date` and `L` its
+`latest_trading_day`.
+
+### Statement windows
+
+`stmt` holds one row per active instrument, statement type
+(`balance_sheet`, `income_statement` or `cash_flow_statement`) and quarterly
+`fiscal_period_end` on or before `D`. The row is that period's latest
+observation, by `observed_on` and then `recorded_at`, and earlier observations
+are left as they are. Rows with `fiscal_period = 'FY'` are excluded before the
+latest observation is chosen, so an annual row never displaces a quarter that
+shares its period end. Each row carries:
+
+- `backfilled`: the row's `provider_filing_date` is earlier than the first
+  `observed_on` of any fundamental row held for the instrument (DEC-0056). A
+  null filing date gives `false`.
+- `period_rank`: 1 for the newest period end of its statement type (P1), 2
+  for the next (P2), and so on.
+- `ttm_slot`: 1 to 4 on P1 to P4 when the trailing window is formed, else
+  null.
+- `prior_slot`: 1 to 4 on P5 to P8 when the prior-year window is formed, else
+  null.
+
+The windows follow DEC-0221, which replaces the 12-month span rule in design
+section 2.4. Two adjacent period ends are consecutive when the older is at
+most 4 months before the newer. The trailing window is formed when P1 to P4
+are consecutive, and the prior-year window when all of P1 to P8 are. Too few
+periods, or a gap of more than 4 months inside the window, leaves it unformed.
+Each statement type is windowed on its own.
+
+### Value and growth inputs
+
+Each line item is read from a row's `payload` under its payload key and
+multiplied by its sign. A value is used only when it is a JSON number or a
+JSON string holding a plain decimal (`^-?[0-9]+(\.[0-9]+)?$`), checked before
+the cast. Anything else, including an absent key or JSON `null`, reads as
+absent rather than failing the set (DEC-0116 (4)).
+
+| Input | Value | Rows read |
+|---|---|---|
+| `book_to_price` | `book_equity` / market capitalisation | The newest balance sheet |
+| `earnings_yield` | Trailing sum of `net_income` / market capitalisation | The newest balance sheet and the trailing window's income statements |
+| `fcf_yield` | (trailing sum of `operating_cash_flow` minus trailing sum of `capital_expenditure`) / market capitalisation | The newest balance sheet and the trailing window's cash flow statements |
+| `revenue_growth` | Trailing sum of `revenue` / prior-year sum, minus 1 | The trailing and prior-year windows' income statements |
+| `eps_growth` | Trailing sum of `diluted_eps` / prior-year sum, minus 1 | The trailing and prior-year windows' income statements |
+
+The newest balance sheet is the one at P1 and needs no window. Market
+capitalisation is the close of the instrument's latest bar times
+`shares_outstanding` from the newest balance sheet (DEC-0055 (6)). The latest
+bar is the one with the latest `session_date`, then the latest `observed_on`,
+then the latest `recorded_at` (DEC-0055 (5), DEC-0117 (1)). Growth inputs read
+no bar.
+
+### Status
+
+Every input gets one status, decided in this order: `missing`, then
+`outdated`, then `not_computable`, else `present` (DEC-0116 (1)). The causes
+of `missing` are also tested in the order listed, and the first that applies
+is named.
+
+| Status | When | `detail.cause` |
+|---|---|---|
+| `missing` | A line item the input needs has no payload key yet | `line_item_mapping_unresolved` |
+| `missing` | The instrument has no quarterly balance sheet (value inputs), or a window the input needs is not formed | `periods_missing` |
+| `missing` | A needed line item is absent from a row read | `line_item_absent` |
+| `missing` | Value inputs only: the instrument has no bar (DEC-0116 (2)) | `price_missing` |
+| `outdated` | `as_of` is earlier than `D` minus `FUNDAMENTALS_STALE_AFTER_MONTHS` months, or, for a value input, the latest bar's `session_date` is earlier than `L` (AC-13) | `outdated` |
+| `not_computable` | Value inputs: market capitalisation is zero or less | `market_capitalisation_not_positive` |
+| `not_computable` | Growth inputs: the prior-year sum is zero or less (DEC-0055 (2)) | `prior_year_base_not_positive` |
+| `present` | Otherwise | none |
+
+A latest period end exactly 6 months before `D` is still current.
+
+### Dates
+
+- `value` is set only on a `present` input. `as_of` and `known_on` are set on
+  every input that is not `missing`, and null on a `missing` one
+  (DEC-0116 (5)).
+- `as_of` is P1 of the income statements for a growth input. For a value
+  input it is the earliest of the newest period ends it read, so
+  `earnings_yield` takes the earlier of the newest balance sheet and the
+  newest income statement (DEC-0116 (3)). The fundamentals staleness test uses
+  the same date.
+- `known_on` is the latest `observed_on` of every statement row the input
+  read, and of its bar for a value input (DEC-0055 (7)).
+- `restated_possible` is always `false` from this stage. The `backfilled`
+  flags are kept in `detail.periods` (DEC-0056, DEC-0122).
+
+### `detail`
+
+| Status | Keys |
+|---|---|
+| `present`, value input | `periods`, `balance_sheet_period_end`, `shares_outstanding`, `close`, `bar_date`, `bar_observed_on`, `market_capitalisation` |
+| `present`, growth input | `periods` |
+| `outdated` | The `present` keys, plus `cause` and `outdated`. `outdated.fundamentals` holds `latest_period_end` and `stale_before`, and, for a value input, `outdated.prices` holds `bar_date` and `latest_trading_day`. Only the rules that applied appear |
+| `not_computable` | The `present` keys plus `cause`. A growth input also has `prior_year_base` |
+| `missing` | `cause`. `line_items` names the unresolved or absent items for those two causes. `periods_found` is present for `periods_missing` and `line_item_absent` |
+
+`periods` lists each statement row the input read, with its `statement_type`,
+`fiscal_period_end`, `observed_on`, `provider_filing_date` and `backfilled`.
+`periods_found` lists every quarterly period in `stmt` of the statement types
+the input reads, as `statement_type` and `fiscal_period_end`, and is `[]` when
+there is none. Both are ordered newest first within each statement type.
+
+### Writing to `factor_input`
+
+`insert_inputs.sql` appends the rows of `inputs` whose factor is in its
+`factors` parameter, `['value', 'growth']` for this stage. A `missing` row's
+`detail` gains `last_acquisition` (`data_type`, `outcome`, `acquired_at`),
+taken from the instrument's `acquisition_state` row for the data type it
+lacks: `prices` for `price_missing`, `fundamentals` for every other cause
+(AC-12). When the instrument has no such row, `detail` is written as derived.
+
+`factor_input.value` is `numeric(30, 10)`. A present value of magnitude 1e20
+or more does not fit, and the insert fails the build.
 
 ## Statements
 
-All three are loaded once, at import, from `classification/sql/`. They ship as
+All seven are loaded once, at import, from `classification/sql/`. They ship as
 package data (`classification/sql/*.sql` under
 `[tool.setuptools.package-data]` in `pyproject.toml`). Every value is bound as
 a `%(name)s` parameter.
@@ -127,11 +266,17 @@ a `%(name)s` parameter.
 | `set_context.sql` | One row: the set's id, run and classification date, the latest trading day, and the active and retired rosters. No row for an unknown set |
 | `complete_set.sql` | `building` to `complete`, with `ended_at = now()`, `latest_trading_day` and `active_instruments`. Guarded by `set_id` and `state = 'building'` |
 | `fail_set.sql` | `building` to `failed`, with `ended_at = now()` and `failure_reason`. Guarded by `set_id` and `state = 'building'` |
+| `statements.sql` | Creates the temporary table `stmt`: the latest observation of each quarterly statement period on or before the classification date, with `backfilled`, `period_rank`, `ttm_slot` and `prior_slot`. Writes no stored table |
+| `value_inputs.sql` | Creates the temporary table `inputs` holding the three value inputs of every active instrument. Writes no stored table |
+| `growth_inputs.sql` | Inserts the two growth inputs of every active instrument into `inputs`. Writes no stored table |
+| `insert_inputs.sql` | Appends the rows of `inputs` for the factors in `factors` to `factor_input`, adding `last_acquisition` to a `missing` row's `detail` |
 
 ## Constants
 
 `constants.py` holds the numbers and names classification is built on. Each
-value cites its source in the code. `engine.py` reads none of them yet.
+value cites its source in the code. `engine.py` reads only
+`FUNDAMENTALS_STALE_AFTER_MONTHS`, which the fundamentals stage binds as
+`stale_months`.
 
 | Name | Value | Source |
 |---|---|---|
@@ -170,7 +315,15 @@ guessed.
   Today that is all seven.
 - `UNRESOLVED_CAUSE` (`"line_item_mapping_unresolved"`) is defined beside
   them as the cause of an input left missing by an unresolved line item
-  (DAC-E2-S2-5). No code writes it yet.
+  (DAC-E2-S2-5). `value_inputs.sql` and `growth_inputs.sql` write it as
+  `detail.cause`.
+- `_line_item_parameters()` in `engine.py` binds the seven items for the
+  fundamentals stage as parallel arrays of names, statement types, payload
+  keys and signs, with `unresolved()` and `UNRESOLVED_CAUSE`. It reads
+  `LINE_ITEMS` when called, not at import. A `REQUIRES_INPUT` key is bound as
+  `None`, so the sentinel never reaches SQL. With every key unresolved today,
+  every value and growth input is `missing` with this cause, and the build
+  still completes.
 - `tests/unit/test_line_items_resolved.py` (TC-COMP-059) asserts
   `unresolved() == []` under a strict `xfail` (DEC-0113). While any key is
   unresolved, the suite reports it as an expected failure (`xfailed`). Once

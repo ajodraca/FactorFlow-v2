@@ -1,0 +1,37 @@
+........................................................................ [ 67%]
+................................F
+=================================== FAILURES ===================================
+______ test_mixed_statement_input_is_dated_by_its_earliest_latest_period _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55664 user=test database=test_7f14dc08483a4c7e9b16982a187b74f...af40290>, stock=1, set_id=UUID('d5c27e47-0547-491d-ab3c-09d901e4d833'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10af43110>
+
+    def test_mixed_statement_input_is_dated_by_its_earliest_latest_period(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (3): as_of and the staleness test use the earliest of the latest period
+        ends an input reads."""
+        _statements(env, "balance_sheet", date(2026, 9, 30))
+        _statements(env, "income_statement", date(2026, 3, 31))
+        _statements(env, "cash_flow_statement", date(2026, 6, 30))
+    
+        rows = build(env, monkeypatch)
+    
+        assert (rows["book_to_price"]["status"], rows["book_to_price"]["as_of"]) == (
+            "present",
+            date(2026, 9, 30),
+        )
+>       assert (rows["fcf_yield"]["status"], rows["fcf_yield"]["as_of"]) == (
+            "present",
+            date(2026, 6, 30),
+        )
+E       AssertionError: assert ('present', d...(2026, 9, 30)) == ('present', d...(2026, 6, 30))
+E         
+E         At index 1 diff: datetime.date(2026, 9, 30) != datetime.date(2026, 6, 30)
+E         Use -v to get more diff
+
+tests/integration/test_engine_currency.py:268: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_currency.py::test_mixed_statement_input_is_dated_by_its_earliest_latest_period
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 104 passed in 11.38s

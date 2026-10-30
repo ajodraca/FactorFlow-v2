@@ -1,0 +1,34 @@
+........................................................................ [ 67%]
+...................F
+=================================== FAILURES ===================================
+____________ test_missing_price_carries_the_last_prices_acquisition ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56081 user=test database=test_c8a66a54314747ecafef5b8c3c4ec1c9) at 0x108acb320>, stock=1, set_id=UUID('b89f91df-68ab-4b30-a66c-108319fa91a7'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108acb950>
+
+    def test_missing_price_carries_the_last_prices_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, DEC-0116 (2): no bar at all is missing, sourced to prices."""
+        barless = add_instrument(env.conn, "NOBAR")
+        add_quarters(env.conn, barless, P1, 8, standard())
+        _acquisition(env, barless, "prices", "failed")
+        _acquisition(env, barless, "fundamentals", "written")
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, barless)
+        for name in VALUE:
+            assert rows[name]["status"] == "missing", name
+            assert rows[name]["detail"]["cause"] == "price_missing"
+>           assert rows[name]["detail"]["last_acquisition"]["data_type"] == "prices"
+E           AssertionError: assert 'fundamentals' == 'prices'
+E             
+E             - prices
+E             + fundamentals
+
+tests/integration/test_engine_inputs_fundamentals.py:1166: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_missing_price_carries_the_last_prices_acquisition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 91 passed in 9.80s

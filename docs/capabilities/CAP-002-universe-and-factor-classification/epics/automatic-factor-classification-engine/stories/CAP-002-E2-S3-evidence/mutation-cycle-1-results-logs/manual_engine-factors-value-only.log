@@ -1,0 +1,36 @@
+.......................................F
+=================================== FAILURES ===================================
+______ test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56622 user=test database=test_8a44dfce0b6947259b06a58528f73409) at 0x10cd1de50>, stock=1, set_id=UUID('e52eb02a-2434-4eba-abc1-f039d47fde30'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd1c380>
+
+    def test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ends = [months_before(P1, 3 * k) for k in range(8)]
+        observed = [end + timedelta(days=15) for end in ends]
+        observed[5] = date(2026, 10, 16)  # a prior-window row re-acquired last sets known_on
+        filed = [end + timedelta(days=20) for end in ends]  # after the first observation
+        for k, end in enumerate(ends):
+            add_statement(
+                env.conn,
+                env.stock,
+                end,
+                "income_statement",
+                {TEST_KEYS["revenue"]: Decimal(REVENUE[k])},
+                observed_on=observed[k],
+                provider_filing_date=filed[k],
+            )
+    
+        build(env, monkeypatch)
+    
+>       row = inputs_for(env.conn, env.set_id, env.stock)["revenue_growth"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'revenue_growth'
+
+tests/integration/test_engine_inputs_fundamentals.py:167: KeyError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_revenue_growth_is_four_quarter_sum_over_prior_four_minus_one
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 39 passed in 2.32s

@@ -1,0 +1,44 @@
+.....................................................F
+=================================== FAILURES ===================================
+____________________ test_annual_rows_enter_no_trailing_sum ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54990 user=test database=test_500f9ae80c6049cbb9dd219d2eaf8510) at 0x10c5d7920>, stock=1, set_id=UUID('7d93465a-cff3-4d96-a98f-ed5a5bd65185'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c5d5910>
+
+    def test_annual_rows_enter_no_trailing_sum(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        ends = add_quarters(env.conn, env.stock, P1, 8, standard())
+        big = {
+            TEST_KEYS["revenue"]: Decimal(100000),
+            TEST_KEYS["net_income"]: Decimal(100000),
+            TEST_KEYS["diluted_eps"]: Decimal(1000),
+        }
+        # One shares the newest quarter's period end and is observed later; one has its own
+        # date inside the trailing window and one inside the prior window.
+        for end in (P1, date(2026, 8, 15), months_before(ends[5], 1)):
+            add_statement(
+                env.conn,
+                env.stock,
+                end,
+                "income_statement",
+                big,
+                fiscal_period="FY",
+                observed_on=D,
+            )
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert (rows["revenue_growth"]["status"], rows["revenue_growth"]["value"]) == (
+            "present",
+            REVENUE_GROWTH,
+        )
+E       AssertionError: assert ('present', D....9962614027')) == ('present', D....2837837838'))
+E         
+E         At index 1 diff: Decimal('0.9962614027') != Decimal('0.2837837838')
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:448: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_annual_rows_enter_no_trailing_sum
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 53 passed in 4.20s

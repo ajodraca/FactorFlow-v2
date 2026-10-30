@@ -1,0 +1,38 @@
+............................................F
+=================================== FAILURES ===================================
+_________ test_quarter_absent_from_the_trailing_window_forms_no_window _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54581 user=test database=test_fd81acfbfda74f0a8f98682fd12cce12) at 0x109376f30>, stock=1, set_id=UUID('e0e32b41-42ce-46f8-837c-cdf5e599e061'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1093757c0>
+
+    def test_quarter_absent_from_the_trailing_window_forms_no_window(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S3-2, DEC-0221: with the third quarter absent the second and third periods
+        held are six months apart, so the trailing window is not formed. A missing value input
+        lists what exists of every type it reads (design 2.4, AC-12), in the stage's order:
+        statement type, then newest first."""
+        found = _income_with_gap(env, gap=2)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+        for name in (*GROWTH, "earnings_yield"):
+            assert rows[name]["status"] == "missing", name
+            assert rows[name]["detail"]["cause"] == "periods_missing"
+        assert ends_of(rows["revenue_growth"]["detail"]["periods_found"]) == [str(e) for e in found]
+        balance_sheets = [months_before(P1, 3 * k) for k in range(8)]
+>       assert rows["earnings_yield"]["detail"]["periods_found"] == periods_found(
+            ("balance_sheet", balance_sheets), ("income_statement", found)
+        )
+E       AssertionError: assert [{'statement_...-03-30'}, ...] == [{'statement_...-06-30'}, ...]
+E         
+E         At index 0 diff: {'statement_type': 'income_statement', 'fiscal_period_end': '2026-09-30'} != {'statement_type': 'balance_sheet', 'fiscal_period_end': '2026-09-30'}
+E         Right contains 8 more items, first extra item: {'statement_type': 'balance_sheet', 'fiscal_period_end': '2024-12-30'}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:305: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_quarter_absent_from_the_trailing_window_forms_no_window
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 44 passed in 2.97s

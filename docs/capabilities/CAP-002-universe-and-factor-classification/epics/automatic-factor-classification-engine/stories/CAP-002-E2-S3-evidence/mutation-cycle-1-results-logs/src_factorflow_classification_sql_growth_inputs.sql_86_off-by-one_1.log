@@ -1,0 +1,29 @@
+........................................................................ [ 67%]
+........................F
+=================================== FAILURES ===================================
+_______________ test_fundamentals_present_at_exactly_six_months ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=62491 user=test database=test_8ea49934f07e4467a160a11b0c3014e...d114f80>, stock=1, set_id=UUID('6b0c9e60-b2d0-45f0-b1be-18b1232c1211'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d117aa0>
+
+    def test_fundamentals_present_at_exactly_six_months(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        latest = date(2026, 4, 17)
+        add_quarters(env.conn, env.stock, latest, 8, quarters())
+    
+        rows = build(env, monkeypatch)
+    
+        for name in (*VALUE, *GROWTH):
+>           assert rows[name]["status"] == "present", name
+E           AssertionError: revenue_growth
+E           assert 'outdated' == 'present'
+E             
+E             - present
+E             + outdated
+
+tests/integration/test_engine_currency.py:124: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_currency.py::test_fundamentals_present_at_exactly_six_months
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 96 passed in 10.53s

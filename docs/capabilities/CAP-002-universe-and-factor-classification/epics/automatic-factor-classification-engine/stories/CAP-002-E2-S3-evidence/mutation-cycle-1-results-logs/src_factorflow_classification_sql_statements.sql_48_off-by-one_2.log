@@ -1,0 +1,31 @@
+.................................................F
+=================================== FAILURES ===================================
+________ test_fifty_two_week_filer_compares_with_the_year_ago_quarters _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49942 user=test database=test_03a2e2ecd1b84b65b3124009b104bd14) at 0x10c45aed0>, stock=1, set_id=UUID('2adfd2f9-4e50-422c-ae52-44a909494a8a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c459c10>
+
+    def test_fifty_two_week_filer_compares_with_the_year_ago_quarters(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0221: a 52-week filer's year-ago quarter ends later than P1 minus 12 months and
+        is still the first quarter of the prior window; P1 to P8 are the eight newest."""
+        _quarters_at(env, FIFTY_TWO_WEEK)
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert (rows["revenue_growth"]["status"], rows["revenue_growth"]["value"]) == (
+            "present",
+            REVENUE_GROWTH,
+        )
+E       AssertionError: assert ('missing', None) == ('present', D....2837837838'))
+E         
+E         At index 0 diff: 'missing' != 'present'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:375: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_fifty_two_week_filer_compares_with_the_year_ago_quarters
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 49 passed in 3.81s

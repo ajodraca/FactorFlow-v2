@@ -1,0 +1,32 @@
+........................................................................ [ 67%]
+........F
+=================================== FAILURES ===================================
+____________ test_quarter_ending_on_the_classification_date_is_used ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=64986 user=test database=test_5e9dc4a1401d4975a7a52376ec4f710f) at 0x10852e450>, stock=1, set_id=UUID('efe58764-5399-41d4-865a-1fbe4fde7b5c'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10852e8a0>
+
+    def test_quarter_ending_on_the_classification_date_is_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 3: a period ending on the classification date is on or before it."""
+        add_quarters(env.conn, env.stock, D, 8, standard())
+    
+        build(env, monkeypatch)
+    
+        rows = inputs_for(env.conn, env.set_id, env.stock)
+>       assert {rows[name]["as_of"] for name in (*VALUE, *GROWTH)} == {D}
+E       assert {None, dateti...(2026, 7, 17)} == {datetime.date(2026, 10, 17)}
+E         
+E         Extra items in the left set:
+E         None
+E         datetime.date(2026, 7, 17)
+E         Extra items in the right set:
+E         datetime.date(2026, 10, 17)
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:891: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_quarter_ending_on_the_classification_date_is_used
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 80 passed in 8.16s

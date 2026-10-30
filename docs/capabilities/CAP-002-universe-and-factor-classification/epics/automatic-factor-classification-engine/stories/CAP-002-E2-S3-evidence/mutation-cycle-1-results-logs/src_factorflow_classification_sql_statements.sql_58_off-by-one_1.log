@@ -1,0 +1,37 @@
+........................................................................ [ 67%]
+...........F
+=================================== FAILURES ===================================
+____________ test_statement_windows_assign_trailing_and_prior_slots ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49995 user=test database=test_fcb7658b3d9346ab925c363d97259fba) at 0x10a8c30b0>, stock=1, set_id=UUID('cec25050-c0f3-4c89-911a-797769b5b6d9'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a8c3620>
+
+    def test_statement_windows_assign_trailing_and_prior_slots(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (1), DEC-0221: ranks newest first, the four newest fill the trailing
+        window and the next four, ranks 5 to 8, the prior one."""
+        ends = add_quarters(env.conn, env.stock, P1, 9, standard() + standard(1))
+        captured: list[tuple[Any, ...]] = []
+        install_test_line_items(monkeypatch)
+        monkeypatch.setattr(
+            engine, "_STAGES", [engine._fundamental_inputs_stage, _capture_stmt(captured)]
+        )
+    
+        assert engine.build(env.conn, env.set_id, 60).state == "complete"
+    
+        income = [row for row in captured if row[1] == "income_statement"]
+>       assert [(row[2], row[3], row[4], row[5]) for row in income] == [
+            (end, k + 1, k + 1 if k < 4 else None, k - 3 if 4 <= k < 8 else None)
+            for k, end in enumerate(ends)
+        ]
+E       assert [(datetime.da...None, 1), ...] == [(datetime.da...None, 2), ...]
+E         
+E         At index 4 diff: (datetime.date(2025, 9, 30), 5, None, 0) != (datetime.date(2025, 9, 30), 5, None, 1)
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:964: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_statement_windows_assign_trailing_and_prior_slots
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 83 passed in 9.76s
