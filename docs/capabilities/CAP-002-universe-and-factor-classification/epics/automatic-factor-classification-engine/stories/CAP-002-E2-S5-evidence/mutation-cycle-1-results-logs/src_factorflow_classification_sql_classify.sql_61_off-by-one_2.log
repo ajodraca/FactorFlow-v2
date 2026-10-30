@@ -1,0 +1,24 @@
+...............................F
+=================================== FAILURES ===================================
+___ test_every_input_without_dispersion_scores_zero_without_dividing_by_zero ___
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58149 user=test database=test_25351cb0b03b49edb30b64748a908...0x10b567d40>, run_id=UUID('0f3061dc-6190-4085-9db5-e19c66fc29e4'), set_id=UUID('0f1d7631-294a-436f-8f5a-10658428480b'))
+
+    def test_every_input_without_dispersion_scores_zero_without_dividing_by_zero(
+        store: Store,
+    ) -> None:
+        """(d) Both inputs are constant: every z-score, composite and score is 0, and the tied
+        stocks all take percentile 0."""
+        results = classify(store, "growth", growth([2, 2, 2, 2, 2], [9, 9, 9, 9, 9]))
+    
+>       assert results == literal(*[("0", "0")] * 5)
+E       AssertionError: assert [(Decimal('1....('0.000000'))] == [(Decimal('0'...Decimal('0'))]
+E         
+E         At index 0 diff: (Decimal('1.000000'), Decimal('0.000000')) != (Decimal('0'), Decimal('0'))
+E         Use -v to get more diff
+
+tests/unit/test_composite_arithmetic.py:182: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_every_input_without_dispersion_scores_zero_without_dividing_by_zero
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 31 passed in 2.19s

@@ -1,0 +1,2171 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..580f959
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutants-cycle-1.json
+@@ -0,0 +1,601 @@
++{
++  "schema": 1,
++  "repo_head": "7646ab7aa5aa9fbe04bdc7279f8c2fe22155f184",
++  "range": "HEAD..worktree",
++  "mutants": [
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:1:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 1,
++      "original": "-- One factor's classification rows for the build's set (CAP-002-E2-S5; factor-engine design",
++      "mutated": "-- One factor's classification rows for the build's set (CAP-3-E2-S5; factor-engine design"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:3:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 3,
++      "original": "-- this set for the active roster passed in (DEC-0119). The score is DEC-0053: each input's",
++      "mutated": "-- this set for the active roster passed in (DEC-120). The score is DEC-0053: each input's"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:3:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 3,
++      "original": "-- this set for the active roster passed in (DEC-0119). The score is DEC-0053: each input's",
++      "mutated": "-- this set for the active roster passed in (DEC-0119). The score is DEC-54: each input's"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:5:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 5,
++      "original": "-- stock's z-scores, that composite re-standardised the same way, and percent_rank() x 100;",
++      "mutated": "-- stock's z-scores, that composite re-standardised the same way, and percent_rank() x 101;"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:6:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 6,
++      "original": "-- zero dispersion at either step contributes 0 instead of dividing by zero (DAC-E2-3).",
++      "mutated": "-- zero dispersion at either step contributes 1 instead of dividing by zero (DAC-E2-3)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:6:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 6,
++      "original": "-- zero dispersion at either step contributes 0 instead of dividing by zero (DAC-E2-3).",
++      "mutated": "-- zero dispersion at either step contributes 0 instead of dividing by zero (DAC-E2-4)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:8:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 8,
++      "original": "--   1. classified, for the peer set, when the factor is ranked (AC-9);",
++      "mutated": "--   1. classified, for the peer set, when the factor is ranked (AC-10);"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:11:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 11,
++      "original": "--      (bound in input_labels, parallel to input_names) and the cause (AC-12, DEC-0120);",
++      "mutated": "--      (bound in input_labels, parallel to input_names) and the cause (AC-13, DEC-0120);"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:11:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 11,
++      "original": "--      (bound in input_labels, parallel to input_names) and the cause (AC-12, DEC-0120);",
++      "mutated": "--      (bound in input_labels, parallel to input_names) and the cause (AC-12, DEC-121);"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:13:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 13,
++      "original": "--      how many qualified (AC-14, DAC-E2-7);",
++      "mutated": "--      how many qualified (AC-15, DAC-E2-7);"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:13:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 13,
++      "original": "--      how many qualified (AC-14, DAC-E2-7);",
++      "mutated": "--      how many qualified (AC-14, DAC-E2-8);"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:14:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 14,
++      "original": "--   4. not_classified, for every retired stock: retired (AC-15, DAC-E2-8).",
++      "mutated": "--   4. not_classified, for every retired stock: retired (AC-16, DAC-E2-8)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:14:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 14,
++      "original": "--   4. not_classified, for every retired stock: retired (AC-15, DAC-E2-8).",
++      "mutated": "--   4. not_classified, for every retired stock: retired (AC-15, DAC-E2-9)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:48:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 48,
++      "original": "           CASE WHEN stddev_samp(value) OVER w = 0 THEN 0",
++      "mutated": "           CASE WHEN stddev_samp(value) OVER w = 1 THEN 0"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:48:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 48,
++      "original": "           CASE WHEN stddev_samp(value) OVER w = 0 THEN 0",
++      "mutated": "           CASE WHEN stddev_samp(value) OVER w = 0 THEN 1"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:61:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 61,
++      "original": "           CASE WHEN stddev_samp(c) OVER () = 0 THEN 0",
++      "mutated": "           CASE WHEN stddev_samp(c) OVER () = 1 THEN 0"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:61:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 61,
++      "original": "           CASE WHEN stddev_samp(c) OVER () = 0 THEN 0",
++      "mutated": "           CASE WHEN stddev_samp(c) OVER () = 0 THEN 1"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:67:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 67,
++      "original": "    -- Ranked on the unrounded score; the columns keep 6 decimal places.",
++      "mutated": "    -- Ranked on the unrounded score; the columns keep 7 decimal places."
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:68:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 68,
++      "original": "    SELECT instrument_id, score, 100 * percent_rank() OVER (ORDER BY score) AS percentile",
++      "mutated": "    SELECT instrument_id, score, 101 * percent_rank() OVER (ORDER BY score) AS percentile"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:87:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 87,
++      "original": "-- restated_possible is the constant false in every row set: CAP-002-E2-S6 carries the",
++      "mutated": "-- restated_possible is the constant true in every row set: CAP-002-E2-S6 carries the"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:87:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 87,
++      "original": "-- restated_possible is the constant false in every row set: CAP-002-E2-S6 carries the",
++      "mutated": "-- restated_possible is the constant false in every row set: CAP-3-E2-S6 carries the"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:88:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 88,
++      "original": "-- restatement mark onto the classification in this statement (DEC-0121).",
++      "mutated": "-- restatement mark onto the classification in this statement (DEC-122)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:90:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 90,
++      "original": "       r.score, r.percentile, NULL, NULL, NULL, false",
++      "mutated": "       r.score, r.percentile, NULL, NULL, NULL, true"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:102:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 102,
++      "original": "       false",
++      "mutated": "       true"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:111:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 111,
++      "original": "       false",
++      "mutated": "       true"
++    },
++    {
++      "id": "src/factorflow/classification/sql/classify.sql:120:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 120,
++      "original": "       false",
++      "mutated": "       true"
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:1:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 1,
++      "original": "-- Each factor's peer-set size for the build's set (CAP-002-E2-S5; factor-engine design 2.5).",
++      "mutated": "-- Each factor's peer-set size for the build's set (CAP-3-E2-S5; factor-engine design 2.5)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:4:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 4,
++      "original": "-- as a missing one (DAC-E2-2, DEC-0119). Every factor gets a row, even with no qualifying",
++      "mutated": "-- as a missing one (DAC-E2-3, DEC-0119). Every factor gets a row, even with no qualifying"
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:4:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 4,
++      "original": "-- as a missing one (DAC-E2-2, DEC-0119). Every factor gets a row, even with no qualifying",
++      "mutated": "-- as a missing one (DAC-E2-2, DEC-120). Every factor gets a row, even with no qualifying"
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:5:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 5,
++      "original": "-- stock, and is ranked only at the floor (AC-14, DAC-E2-7).",
++      "mutated": "-- stock, and is ranked only at the floor (AC-15, DAC-E2-7)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:5:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 5,
++      "original": "-- stock, and is ranked only at the floor (AC-14, DAC-E2-7).",
++      "mutated": "-- stock, and is ranked only at the floor (AC-14, DAC-E2-8)."
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:10:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 10,
++      "original": "       count(q.instrument_id) >= %(min_peer_set_size)s",
++      "mutated": "       count(q.instrument_id) > %(min_peer_set_size)s"
++    },
++    {
++      "id": "src/factorflow/classification/sql/peer_sets.sql:21:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 21,
++      "original": "       ) q ON true",
++      "mutated": "       ) q ON false"
++    },
++    {
++      "id": "manual:peer-status-not-missing",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 17,
++      "old": "AND fi.status = 'present'",
++      "new": "AND fi.status <> 'missing'"
++    },
++    {
++      "id": "manual:peer-any-present-row",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 20,
++      "old": "HAVING count(*) = f.n_inputs",
++      "new": "HAVING count(*) >= 1"
++    },
++    {
++      "id": "manual:peer-no-set-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 15,
++      "old": "WHERE fi.set_id = %(set_id)s::uuid",
++      "new": "WHERE true"
++    },
++    {
++      "id": "manual:peer-no-roster-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/peer_sets.sql",
++      "line": 18,
++      "old": "AND fi.instrument_id = ANY (%(active_ids)s::bigint[])",
++      "new": ""
++    },
++    {
++      "id": "manual:pf-no-set-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 17,
++      "old": "FROM classification_set_factor\n     WHERE set_id = %(set_id)s::uuid",
++      "new": "FROM classification_set_factor\n     WHERE true"
++    },
++    {
++      "id": "manual:pf-no-factor-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 19,
++      "old": "       AND factor = %(factor)s::text\n),",
++      "new": "       AND true\n),"
++    },
++    {
++      "id": "manual:peer-ids-no-status-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 35,
++      "old": "       AND fi.status = 'present'\n",
++      "new": ""
++    },
++    {
++      "id": "manual:peer-ids-any-present-row",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 37,
++      "old": "HAVING count(*) = cardinality(%(input_names)s::text[])",
++      "new": "HAVING count(*) >= 1"
++    },
++    {
++      "id": "manual:peer-ids-no-set-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 32,
++      "old": "JOIN active a USING (instrument_id)\n     WHERE fi.set_id = %(set_id)s::uuid",
++      "new": "JOIN active a USING (instrument_id)\n     WHERE true"
++    },
++    {
++      "id": "manual:peer-values-no-set-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 42,
++      "old": "JOIN peer_ids p USING (instrument_id)\n     WHERE fi.set_id = %(set_id)s::uuid",
++      "new": "JOIN peer_ids p USING (instrument_id)\n     WHERE true"
++    },
++    {
++      "id": "manual:gap-no-set-filter",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 77,
++      "old": "ON fi.set_id = %(set_id)s::uuid",
++      "new": "ON true"
++    },
++    {
++      "id": "manual:input-z-population-sd",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 49,
++      "old": "/ stddev_samp(value) OVER w",
++      "new": "/ stddev_pop(value) OVER w"
++    },
++    {
++      "id": "manual:input-z-uncentred",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 49,
++      "old": "ELSE (value - avg(value) OVER w) /",
++      "new": "ELSE value /"
++    },
++    {
++      "id": "manual:score-population-sd",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 62,
++      "old": "/ stddev_samp(c) OVER ()",
++      "new": "/ stddev_pop(c) OVER ()"
++    },
++    {
++      "id": "manual:composite-max-not-mean",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 55,
++      "old": "SELECT instrument_id, avg(z) AS c",
++      "new": "SELECT instrument_id, max(z) AS c"
++    },
++    {
++      "id": "manual:percentile-cume-dist",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 68,
++      "old": "percent_rank() OVER (ORDER BY score)",
++      "new": "cume_dist() OVER (ORDER BY score)"
++    },
++    {
++      "id": "manual:percentile-descending",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 68,
++      "old": "OVER (ORDER BY score)",
++      "new": "OVER (ORDER BY score DESC)"
++    },
++    {
++      "id": "manual:gap-absent-not-missing",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 73,
++      "old": "a.instrument_id, i.input_name, i.label, coalesce(fi.status, 'missing') AS status",
++      "new": "a.instrument_id, i.input_name, i.label, fi.status AS status"
++    },
++    {
++      "id": "manual:gap-absent-not-a-gap",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 81,
++      "old": "WHERE coalesce(fi.status, 'missing') <> 'present'",
++      "new": "WHERE fi.status <> 'present'"
++    },
++    {
++      "id": "manual:gap-last-not-first",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 82,
++      "old": "ORDER BY a.instrument_id, i.input_order",
++      "new": "ORDER BY a.instrument_id, i.input_order DESC"
++    },
++    {
++      "id": "manual:gap-label-is-name",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 98,
++      "old": "concat(g.label, ' ',",
++      "new": "concat(g.input_name, ' ',"
++    },
++    {
++      "id": "manual:gap-words-underscore",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 100,
++      "old": "THEN 'not computable'",
++      "new": "THEN 'not_computable'"
++    },
++    {
++      "id": "manual:gap-code-always-missing",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 96,
++      "old": "concat('input_', g.status)",
++      "new": "concat('input_', 'missing')"
++    },
++    {
++      "id": "manual:unranked-count-is-roster",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 110,
++      "old": "concat(pf.qualified_count, ' of '",
++      "new": "concat(cardinality(%(active_ids)s::bigint[]), ' of '"
++    },
++    {
++      "id": "manual:unranked-branch-when-ranked",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 113,
++      "old": "WHERE NOT pf.ranked",
++      "new": "WHERE pf.ranked"
++    },
++    {
++      "id": "manual:classified-branch-always",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 91,
++      "old": "  FROM ranked_scores r, pf\n WHERE pf.ranked",
++      "new": "  FROM ranked_scores r, pf\n WHERE true"
++    },
++    {
++      "id": "manual:retired-branch-empty",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/classify.sql",
++      "line": 121,
++      "old": "AS gone (instrument_id)",
++      "new": "AS gone (instrument_id) WHERE false"
++    },
++    {
++      "id": "manual:stage-floor-literal-peer-sets",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/engine.py",
++      "line": 170,
++      "old": "for f in constants.FACTORS],\n                \"min_peer_set_size\": constants.MIN_PEER_SET_SIZE,",
++      "new": "for f in constants.FACTORS],\n                \"min_peer_set_size\": 30,"
++    },
++    {
++      "id": "manual:stage-floor-literal-classify",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/engine.py",
++      "line": 183,
++      "old": "for name in names],\n                    \"min_peer_set_size\": constants.MIN_PEER_SET_SIZE,",
++      "new": "for name in names],\n                    \"min_peer_set_size\": 30,"
++    },
++    {
++      "id": "manual:stage-input-counts-three",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/engine.py",
++      "line": 170,
++      "old": "[len(constants.INPUT_NAMES[f]) for f in constants.FACTORS]",
++      "new": "[3 for f in constants.FACTORS]"
++    },
++    {
++      "id": "manual:stage-labels-are-names",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/engine.py",
++      "line": 183,
++      "old": "[constants.INPUT_LABELS[name] for name in names]",
++      "new": "list(names)"
++    },
++    {
++      "id": "manual:stage-retired-not-passed",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/engine.py",
++      "line": 186,
++      "old": "\"retired_ids\": list(ctx.retired_ids)",
++      "new": "\"retired_ids\": []"
++    },
++    {
++      "id": "manual:stage-not-registered",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/engine.py",
++      "line": 192,
++      "old": "\n_STAGES.append(_classification_stage)\n",
++      "new": "\n"
++    }
++  ]
++}
+diff --git a/src/factorflow/classification/constants.py b/src/factorflow/classification/constants.py
+index 560123c..0516680 100644
+--- a/src/factorflow/classification/constants.py
++++ b/src/factorflow/classification/constants.py
+@@ -18,3 +18,15 @@ INPUT_NAMES: Final[dict[str, tuple[str, ...]]] = {
+     "growth": ("revenue_growth", "eps_growth"),
+     "momentum": ("return_3m", "return_6m", "return_12m"),
+ }
++
++# Source: factor-engine section 10, reader design 2.6, UX brief section 2 item 9 (DEC-0120).
++INPUT_LABELS: Final[dict[str, str]] = {
++    "book_to_price": "book-to-price",
++    "earnings_yield": "earnings yield",
++    "fcf_yield": "free-cash-flow yield",
++    "revenue_growth": "revenue growth",
++    "eps_growth": "earnings-per-share growth",
++    "return_3m": "3-month total return",
++    "return_6m": "6-month total return",
++    "return_12m": "12-month total return",
++}
+diff --git a/src/factorflow/classification/engine.py b/src/factorflow/classification/engine.py
+index 8ca22c4..c3435eb 100644
+--- a/src/factorflow/classification/engine.py
++++ b/src/factorflow/classification/engine.py
+@@ -21,12 +21,16 @@ from uuid import UUID
+ 
+ import psycopg
+ 
++from factorflow.classification import constants
++
+ log = logging.getLogger(__name__)
+ 
+ _SQL_DIR = Path(__file__).parent / "sql"
+ _SET_CONTEXT_SQL: Final = (_SQL_DIR / "set_context.sql").read_text()
+ _COMPLETE_SET_SQL: Final = (_SQL_DIR / "complete_set.sql").read_text()
+ _FAIL_SET_SQL: Final = (_SQL_DIR / "fail_set.sql").read_text()
++_PEER_SETS_SQL: Final = (_SQL_DIR / "peer_sets.sql").read_text()
++_CLASSIFY_SQL: Final = (_SQL_DIR / "classify.sql").read_text()
+ _QUALIFIED_COUNTS_SQL: Final = (
+     "SELECT factor, qualified_count FROM classification_set_factor WHERE set_id = %(set_id)s"
+ )
+@@ -149,3 +153,41 @@ def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> Bui
+         active_instruments=len(context.active_ids),
+         qualified_counts=qualified_counts,
+     )
++
++
++def _classification_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
++    """Write the set's peer-set sizes, then each factor's classification rows (design 2.5).
++
++    Both statements read this set's ``factor_input`` rows for ``ctx.active_ids`` (DEC-0119).
++    The constants are read at call time, so a test may patch the peer-set floor.
++    """
++    with conn.cursor() as cur:
++        cur.execute(
++            _PEER_SETS_SQL,
++            {
++                "set_id": ctx.set_id,
++                "factors": list(constants.FACTORS),
++                "input_counts": [len(constants.INPUT_NAMES[f]) for f in constants.FACTORS],
++                "min_peer_set_size": constants.MIN_PEER_SET_SIZE,
++                "active_ids": list(ctx.active_ids),
++            },
++        )
++        for factor in constants.FACTORS:
++            names = constants.INPUT_NAMES[factor]
++            cur.execute(
++                _CLASSIFY_SQL,
++                {
++                    "set_id": ctx.set_id,
++                    "factor": factor,
++                    "input_names": list(names),
++                    "input_labels": [constants.INPUT_LABELS[name] for name in names],
++                    "min_peer_set_size": constants.MIN_PEER_SET_SIZE,
++                    "active_ids": list(ctx.active_ids),
++                    "retired_ids": list(ctx.retired_ids),
++                },
++            )
++
++
++# Stages that produce inputs are registered above this line; this stays the module's last
++# statement (DEC-0121).
++_STAGES.append(_classification_stage)
+diff --git a/src/factorflow/classification/sql/classify.sql b/src/factorflow/classification/sql/classify.sql
+new file mode 100644
+index 0000000..cccbad5
+--- /dev/null
++++ b/src/factorflow/classification/sql/classify.sql
+@@ -0,0 +1,121 @@
++-- One factor's classification rows for the build's set (CAP-002-E2-S5; factor-engine design
++-- 2.5). Runs once per factor after peer_sets.sql and reads the committed factor_input rows of
++-- this set for the active roster passed in (DEC-0119). The score is DEC-0053: each input's
++-- z-score over the peer set with the sample standard deviation, the equal-weight mean of a
++-- stock's z-scores, that composite re-standardised the same way, and percent_rank() x 100;
++-- zero dispersion at either step contributes 0 instead of dividing by zero (DAC-E2-3).
++-- Four row sets are written:
++--   1. classified, for the peer set, when the factor is ranked (AC-9);
++--   2. not_classified, for every other active stock, when it is ranked: the first input in the
++--      factor's order that is not present, an absent row counting as missing, with its label
++--      (bound in input_labels, parallel to input_names) and the cause (AC-12, DEC-0120);
++--   3. not_classified, for every active stock, when it is not ranked: not_enough_stocks and
++--      how many qualified (AC-14, DAC-E2-7);
++--   4. not_classified, for every retired stock: retired (AC-15, DAC-E2-8).
++WITH pf AS (
++    SELECT ranked, qualified_count
++      FROM classification_set_factor
++     WHERE set_id = %(set_id)s::uuid
++       AND factor = %(factor)s::text
++),
++inp AS (
++    SELECT n.input_name, n.label, n.input_order
++      FROM unnest(%(input_names)s::text[], %(input_labels)s::text[]) WITH ORDINALITY
++           AS n (input_name, label, input_order)
++),
++active AS (
++    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id
++),
++peer_ids AS (
++    SELECT fi.instrument_id
++      FROM factor_input fi
++      JOIN active a USING (instrument_id)
++     WHERE fi.set_id = %(set_id)s::uuid
++       AND fi.factor = %(factor)s::text
++       AND fi.status = 'present'
++     GROUP BY fi.instrument_id
++    HAVING count(*) = cardinality(%(input_names)s::text[])
++),
++peer AS (
++    SELECT fi.instrument_id, fi.input_name, fi.value
++      FROM factor_input fi
++      JOIN peer_ids p USING (instrument_id)
++     WHERE fi.set_id = %(set_id)s::uuid
++       AND fi.factor = %(factor)s::text
++),
++z AS (
++    SELECT instrument_id,
++           CASE WHEN stddev_samp(value) OVER w = 0 THEN 0
++                ELSE (value - avg(value) OVER w) / stddev_samp(value) OVER w
++           END AS z
++      FROM peer
++    WINDOW w AS (PARTITION BY input_name)
++),
++composite AS (
++    SELECT instrument_id, avg(z) AS c
++      FROM z
++     GROUP BY instrument_id
++),
++scored AS (
++    SELECT instrument_id,
++           CASE WHEN stddev_samp(c) OVER () = 0 THEN 0
++                ELSE (c - avg(c) OVER ()) / stddev_samp(c) OVER ()
++           END AS score
++      FROM composite
++),
++ranked_scores AS (
++    -- Ranked on the unrounded score; the columns keep 6 decimal places.
++    SELECT instrument_id, score, 100 * percent_rank() OVER (ORDER BY score) AS percentile
++      FROM scored
++),
++first_gap AS (
++    SELECT DISTINCT ON (a.instrument_id)
++           a.instrument_id, i.input_name, i.label, coalesce(fi.status, 'missing') AS status
++      FROM active a
++     CROSS JOIN inp i
++      LEFT JOIN factor_input fi
++        ON fi.set_id = %(set_id)s::uuid
++       AND fi.factor = %(factor)s::text
++       AND fi.instrument_id = a.instrument_id
++       AND fi.input_name = i.input_name
++     WHERE coalesce(fi.status, 'missing') <> 'present'
++     ORDER BY a.instrument_id, i.input_order
++)
++INSERT INTO factor_classification
++       (set_id, instrument_id, factor, status, score, percentile,
++        reason_code, reason_input, reason_detail, restated_possible)
++-- restated_possible is the constant false in every row set: CAP-002-E2-S6 carries the
++-- restatement mark onto the classification in this statement (DEC-0121).
++SELECT %(set_id)s::uuid, r.instrument_id, %(factor)s::text, 'classified',
++       r.score, r.percentile, NULL, NULL, NULL, false
++  FROM ranked_scores r, pf
++ WHERE pf.ranked
++UNION ALL
++SELECT %(set_id)s::uuid, g.instrument_id, %(factor)s::text, 'not_classified',
++       NULL, NULL,
++       concat('input_', g.status),
++       g.input_name,
++       concat(g.label, ' ', CASE g.status WHEN 'missing' THEN 'missing'
++                                          WHEN 'outdated' THEN 'outdated'
++                                          WHEN 'not_computable' THEN 'not computable'
++                                          END),
++       false
++  FROM first_gap g, pf
++ WHERE pf.ranked
++UNION ALL
++SELECT %(set_id)s::uuid, a.instrument_id, %(factor)s::text, 'not_classified',
++       NULL, NULL,
++       'not_enough_stocks',
++       NULL,
++       concat(pf.qualified_count, ' of ', %(min_peer_set_size)s::int, ' stocks qualified'),
++       false
++  FROM active a, pf
++ WHERE NOT pf.ranked
++UNION ALL
++SELECT %(set_id)s::uuid, gone.instrument_id, %(factor)s::text, 'not_classified',
++       NULL, NULL,
++       'retired',
++       NULL,
++       NULL,
++       false
++  FROM unnest(%(retired_ids)s::bigint[]) AS gone (instrument_id)
+diff --git a/src/factorflow/classification/sql/peer_sets.sql b/src/factorflow/classification/sql/peer_sets.sql
+new file mode 100644
+index 0000000..e653d00
+--- /dev/null
++++ b/src/factorflow/classification/sql/peer_sets.sql
+@@ -0,0 +1,22 @@
++-- Each factor's peer-set size for the build's set (CAP-002-E2-S5; factor-engine design 2.5).
++-- A stock qualifies on a factor when it is on the active roster and its present factor_input
++-- rows for the factor number the factor's inputs, so an absent row disqualifies it as surely
++-- as a missing one (DAC-E2-2, DEC-0119). Every factor gets a row, even with no qualifying
++-- stock, and is ranked only at the floor (AC-14, DAC-E2-7).
++INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked)
++SELECT %(set_id)s::uuid,
++       f.factor,
++       count(q.instrument_id),
++       count(q.instrument_id) >= %(min_peer_set_size)s
++  FROM unnest(%(factors)s::text[], %(input_counts)s::int[]) AS f (factor, n_inputs)
++  LEFT JOIN LATERAL (
++        SELECT fi.instrument_id
++          FROM factor_input fi
++         WHERE fi.set_id = %(set_id)s::uuid
++           AND fi.factor = f.factor
++           AND fi.status = 'present'
++           AND fi.instrument_id = ANY (%(active_ids)s::bigint[])
++         GROUP BY fi.instrument_id
++        HAVING count(*) = f.n_inputs
++       ) q ON true
++ GROUP BY f.factor
+diff --git a/tests/integration/engine_classify_support.py b/tests/integration/engine_classify_support.py
+new file mode 100644
+index 0000000..b2236e4
+--- /dev/null
++++ b/tests/integration/engine_classify_support.py
+@@ -0,0 +1,303 @@
++"""Helpers for the classification stage's database tests (CAP-002-E2-S5).
++
++A plain module beside ``engine_support.py``, which CAP-002-E2-S2 owns: it is imported here and
++never edited (T002). The committing helpers commit, so a second connection sees their rows;
++the ``insert_*`` variants take a cursor and leave the transaction to the caller, for the
++property tests that roll every example back. ``reference_scores`` is a pure-Python oracle of
++DEC-0053, written independently of the SQL it checks.
++"""
++
++import decimal
++from collections.abc import Collection, Mapping, Sequence
++from datetime import date
++from decimal import Decimal
++from typing import Any
++from uuid import UUID
++
++import psycopg
++import pytest
++from psycopg.rows import dict_row
++
++from factorflow.classification import constants, engine
++from tests.integration.engine_support import add_bar, add_building_set, add_instrument, add_run
++
++INPUTS_BY_FACTOR = constants.INPUT_NAMES
++CLASSIFICATION_DATE = date(2026, 10, 3)
++SESSION_DATE = date(2026, 10, 2)
++SCORE_PLACES = Decimal("0.000001")  # score and percentile are stored to 6 decimal places
++_VALUE_PLACES = Decimal("1E-10")  # factor_input.value is numeric(30, 10)
++
++_INSERT_INPUT = (
++    "INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, "
++    "as_of, known_on, detail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, '{}'::jsonb)"
++)
++
++Row = tuple[UUID, int, str, str, str, Decimal | None, date, date]
++
++
++def _default_value(instrument_id: int, position: int) -> Decimal:
++    return (Decimal(position + 1) + Decimal(instrument_id) / 1000).quantize(_VALUE_PLACES)
++
++
++def _input_rows(
++    set_id: UUID,
++    instrument_id: int,
++    factor: str,
++    statuses: Mapping[str, str],
++    values: Mapping[str, Decimal],
++    omit: Collection[str],
++) -> list[Row]:
++    rows: list[Row] = []
++    for position, name in enumerate(INPUTS_BY_FACTOR[factor]):
++        if name in omit:
++            continue
++        status = statuses.get(name, "present")
++        value = values.get(name, _default_value(instrument_id, position))
++        rows.append(
++            (
++                set_id,
++                instrument_id,
++                factor,
++                name,
++                status,
++                value if status == "present" else None,  # the CHECK and DEC-0116 (5)
++                SESSION_DATE,
++                SESSION_DATE,
++            )
++        )
++    return rows
++
++
++def add_factor_inputs(
++    conn: psycopg.Connection,
++    set_id: UUID,
++    instrument_id: int,
++    factor: str,
++    statuses: Mapping[str, str] | None = None,
++    values: Mapping[str, Decimal] | None = None,
++    omit: Collection[str] = (),
++) -> None:
++    """One ``factor_input`` row per input of the factor, every one ``present`` unless
++    ``statuses`` says otherwise; ``omit`` names inputs that get no row at all."""
++    rows = _input_rows(set_id, instrument_id, factor, statuses or {}, values or {}, omit)
++    with conn.cursor() as cur:
++        cur.executemany(_INSERT_INPUT, rows)
++    conn.commit()
++
++
++def roster_value(i: int, k: int, n: int) -> Decimal:
++    """Input ``k`` (of the eight, in ``FACTORS`` order) of roster stock ``i`` of ``n``: no two
++    inputs are perfectly correlated and no two stocks share a value."""
++    return (Decimal((i * (k + 3)) % n) / n + Decimal(i) / (10 * n * n)).quantize(_VALUE_PLACES)
++
++
++def add_roster_inputs(conn: psycopg.Connection, set_id: UUID, active_ids: Sequence[int]) -> None:
++    """``present`` rows on all eight inputs for each stock, valued by ``roster_value``."""
++    n = len(active_ids)
++    rows: list[Row] = []
++    for i, instrument_id in enumerate(active_ids):
++        k = 0
++        for factor in constants.FACTORS:
++            values: dict[str, Decimal] = {}
++            for name in INPUTS_BY_FACTOR[factor]:
++                values[name] = roster_value(i, k, n)
++                k += 1
++            rows += _input_rows(set_id, instrument_id, factor, {}, values, ())
++    with conn.cursor() as cur:
++        cur.executemany(_INSERT_INPUT, rows)
++    conn.commit()
++
++
++def add_full_roster(
++    conn: psycopg.Connection, set_id: UUID, n_active: int, n_retired: int = 0, prefix: str = "S"
++) -> tuple[list[int], list[int]]:
++    """``n_active`` active stocks with a bar on ``SESSION_DATE`` (so ``latest_trading_day`` is
++    defined) and every input ``present``, and ``n_retired`` retired stocks with no input."""
++    active = [add_instrument(conn, f"{prefix}{i:03d}") for i in range(n_active)]
++    for instrument_id in active:
++        add_bar(conn, instrument_id, SESSION_DATE)
++    retired = [add_instrument(conn, f"{prefix}R{i:02d}", "retired") for i in range(n_retired)]
++    add_roster_inputs(conn, set_id, active)
++    return active, retired
++
++
++def add_active_stock(conn: psycopg.Connection, symbol: str) -> int:
++    """An active stock with a bar on ``SESSION_DATE`` and no input yet."""
++    instrument_id = add_instrument(conn, symbol)
++    add_bar(conn, instrument_id, SESSION_DATE)
++    return instrument_id
++
++
++def add_terminal_run_and_set(conn: psycopg.Connection) -> tuple[UUID, UUID]:
++    """A succeeded run and its ``building`` set: ``(run_id, set_id)``."""
++    run_id = add_run(conn)
++    return run_id, add_building_set(conn, run_id, CLASSIFICATION_DATE)
++
++
++def run_classification_build(
++    conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
++) -> engine.BuildResult:
++    """``engine.build`` with only the classification stage, so no input stage runs."""
++    monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
++    return engine.build(conn, set_id, 60)
++
++
++def classifications_for(
++    conn: psycopg.Connection, set_id: UUID
++) -> dict[tuple[int, str], dict[str, Any]]:
++    with conn.cursor(row_factory=dict_row) as cur:
++        cur.execute(
++            "SELECT instrument_id, factor, status, score, percentile, reason_code, reason_input, "
++            "reason_detail, restated_possible FROM factor_classification WHERE set_id = %s",
++            (set_id,),
++        )
++        rows = cur.fetchall()
++    conn.commit()
++    return {(row["instrument_id"], row["factor"]): row for row in rows}
++
++
++def factor_counts_for(conn: psycopg.Connection, set_id: UUID) -> dict[str, tuple[int, bool]]:
++    rows = conn.execute(
++        "SELECT factor, qualified_count, ranked FROM classification_set_factor WHERE set_id = %s",
++        (set_id,),
++    ).fetchall()
++    conn.commit()
++    return {factor: (count, ranked) for factor, count, ranked in rows}
++
++
++def input_values(
++    conn: psycopg.Connection, set_id: UUID, factor: str, instrument_ids: Collection[int]
++) -> dict[int, list[Decimal]]:
++    """The stored values of the factor's inputs per stock, in ``INPUT_NAMES`` order: the
++    oracle's input, read back so it sees exactly what the statements read."""
++    rows = conn.execute(
++        "SELECT instrument_id, input_name, value FROM factor_input "
++        "WHERE set_id = %s AND factor = %s AND instrument_id = ANY(%s)",
++        (set_id, factor, list(instrument_ids)),
++    ).fetchall()
++    conn.commit()
++    by_stock: dict[int, dict[str, Decimal]] = {}
++    for instrument_id, name, value in rows:
++        by_stock.setdefault(instrument_id, {})[name] = value
++    return {
++        instrument_id: [values[name] for name in INPUTS_BY_FACTOR[factor]]
++        for instrument_id, values in by_stock.items()
++    }
++
++
++def scores_of(
++    rows: Mapping[tuple[int, str], Mapping[str, Any]], factor: str
++) -> dict[int, tuple[Decimal, Decimal]]:
++    """``(score, percentile)`` of each ``classified`` row of the factor."""
++    return {
++        instrument_id: (row["score"], row["percentile"])
++        for (instrument_id, row_factor), row in rows.items()
++        if row_factor == factor and row["status"] == "classified"
++    }
++
++
++def matches_reference(
++    actual: Mapping[int, tuple[Decimal, Decimal]],
++    expected: Mapping[int, tuple[Decimal, Decimal]],
++    score_tolerance: Decimal = SCORE_PLACES,
++    percentile_tolerance: Decimal = SCORE_PLACES,
++) -> bool:
++    """The same stocks, each score and percentile within the tolerance (6 decimals)."""
++    return actual.keys() == expected.keys() and all(
++        abs(actual[i][0] - expected[i][0]) <= score_tolerance
++        and abs(actual[i][1] - expected[i][1]) <= percentile_tolerance
++        for i in expected
++    )
++
++
++# --- non-committing variants, for examples rolled back by the caller ----------------------
++
++
++def insert_instrument(cur: psycopg.Cursor[Any], symbol: str, lifecycle: str) -> int:
++    cur.execute(
++        "INSERT INTO instrument (symbol, lifecycle, retired_at) "
++        "VALUES (%s, %s, CASE WHEN %s = 'retired' THEN now() END) RETURNING instrument_id",
++        (symbol, lifecycle, lifecycle),
++    )
++    row = cur.fetchone()
++    assert row is not None
++    return int(row[0])
++
++
++def insert_factor_inputs(
++    cur: psycopg.Cursor[Any],
++    set_id: UUID,
++    instrument_id: int,
++    factor: str,
++    values: Sequence[Decimal],
++) -> None:
++    """``present`` rows for the first ``len(values)`` inputs of the factor, the k-th value
++    being input ``INPUT_NAMES[factor][k]``."""
++    names = INPUTS_BY_FACTOR[factor]
++    given = dict(zip(names[: len(values)], values, strict=True))
++    cur.executemany(
++        _INSERT_INPUT,
++        _input_rows(set_id, instrument_id, factor, {}, given, omit=names[len(values) :]),
++    )
++
++
++def make_context(
++    set_id: UUID, run_id: UUID, active_ids: Sequence[int], retired_ids: Sequence[int]
++) -> engine.BuildContext:
++    return engine.BuildContext(
++        set_id=set_id,
++        run_id=run_id,
++        classification_date=CLASSIFICATION_DATE,
++        latest_trading_day=SESSION_DATE,
++        active_ids=tuple(active_ids),
++        retired_ids=tuple(retired_ids),
++    )
++
++
++# --- the oracle ---------------------------------------------------------------------------
++
++
++def _mean(values: Sequence[Decimal]) -> Decimal:
++    return sum(values, Decimal(0)) / len(values)
++
++
++def _sample_sd(values: Sequence[Decimal]) -> Decimal:
++    mean = _mean(values)
++    return (sum(((v - mean) ** 2 for v in values), Decimal(0)) / (len(values) - 1)).sqrt()
++
++
++def _standardised(values: Sequence[Decimal]) -> list[Decimal]:
++    """z-scores with the sample mean and sample standard deviation; 0 when it is zero."""
++    mean, sd = _mean(values), _sample_sd(values)
++    return [Decimal(0) if sd == 0 else (v - mean) / sd for v in values]
++
++
++def _composite(peer: Mapping[int, Sequence[Decimal]], ids: Sequence[int]) -> list[Decimal]:
++    """Each stock's equal-weight mean of its inputs' z-scores, in ``ids`` order."""
++    columns = [_standardised(column) for column in zip(*(peer[i] for i in ids), strict=True)]
++    return [_mean([column[row] for column in columns]) for row in range(len(ids))]
++
++
++def reference_composite_dispersion(peer: Mapping[int, Sequence[Decimal]]) -> Decimal:
++    """The sample standard deviation of the oracle's composite, before re-standardising."""
++    with decimal.localcontext() as context:
++        context.prec = 40
++        return _sample_sd(_composite(peer, sorted(peer)))
++
++
++def reference_scores(peer: Mapping[int, Sequence[Decimal]]) -> dict[int, tuple[Decimal, Decimal]]:
++    """DEC-0053 at 40 significant digits: per input column the sample z-score (a zero standard
++    deviation gives 0), the equal-weight mean of a stock's z-scores, that composite
++    re-standardised the same way, and ``percent_rank`` x 100 as ``(rank - 1) / (n - 1)`` with
++    ties sharing the lowest rank. Keys are instrument ids; values are ``(score, percentile)``."""
++    with decimal.localcontext() as context:
++        context.prec = 40
++        ids = sorted(peer)
++        n = len(ids)
++        scores = _standardised(_composite(peer, ids))
++        result: dict[int, tuple[Decimal, Decimal]] = {}
++        for row, instrument_id in enumerate(ids):
++            rank = 1 + sum(1 for other in scores if other < scores[row])
++            percentile = Decimal(0) if n == 1 else Decimal(100) * (rank - 1) / (n - 1)
++            result[instrument_id] = (scores[row], percentile)
++    return result
+diff --git a/tests/integration/test_engine_peer_set.py b/tests/integration/test_engine_peer_set.py
+new file mode 100644
+index 0000000..44767df
+--- /dev/null
++++ b/tests/integration/test_engine_peer_set.py
+@@ -0,0 +1,482 @@
++"""Peer sets and the classification rows of a build (CAP-002-E2-S5).
++
++Each test builds through ``engine.build`` with only the classification stage registered, over
++``factor_input`` rows it inserts directly (DEC-0119), so no input stage runs. Satisfies AC-8,
++AC-9, AC-12, AC-14, AC-15, DAC-E2-2, DAC-E2-7, DAC-E2-8 and DAC-E2-S5-2 to DAC-E2-S5-6.
++"""
++
++from collections.abc import Iterator, Sequence
++from decimal import Decimal
++from typing import Any, NamedTuple
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import constants, engine
++from tests.integration.engine_classify_support import (
++    add_active_stock,
++    add_factor_inputs,
++    add_full_roster,
++    add_roster_inputs,
++    add_terminal_run_and_set,
++    classifications_for,
++    factor_counts_for,
++    input_values,
++    make_context,
++    matches_reference,
++    reference_scores,
++    run_classification_build,
++    scores_of,
++)
++from tests.integration.engine_support import add_instrument, migrate_through_classification
++
++pytestmark = pytest.mark.postgres
++
++FACTORS = constants.FACTORS
++Rows = dict[tuple[int, str], dict[str, Any]]
++
++
++class Store(NamedTuple):
++    conn: psycopg.Connection
++    run_id: UUID
++    set_id: UUID
++
++
++@pytest.fixture
++def store(postgres_connection_string: str) -> Iterator[Store]:
++    """A store migrated through 0006 with a succeeded run and its ``building`` set; each test
++    adds the roster it needs."""
++    conn = migrate_through_classification(postgres_connection_string)
++    try:
++        run_id, set_id = add_terminal_run_and_set(conn)
++        yield Store(conn, run_id, set_id)
++    finally:
++        conn.close()
++
++
++def reason(row: dict[str, Any]) -> tuple[Any, ...]:
++    return (
++        row["status"],
++        row["reason_code"],
++        row["reason_input"],
++        row["reason_detail"],
++        row["score"],
++        row["percentile"],
++    )
++
++
++def assert_factor_matches_reference(
++    conn: psycopg.Connection, set_id: UUID, rows: Rows, factor: str, peer: Sequence[int]
++) -> None:
++    """The factor's classified rows are exactly ``peer``, scored as the oracle scores it."""
++    expected = reference_scores(input_values(conn, set_id, factor, peer))
++    assert matches_reference(scores_of(rows, factor), expected), factor
++
++
++def add_universe(conn: psycopg.Connection, name: str, members: Sequence[int]) -> None:
++    row = conn.execute("INSERT INTO universe DEFAULT VALUES RETURNING universe_id").fetchone()
++    assert row is not None
++    conn.execute(
++        "INSERT INTO universe_event (universe_id, event_type, name) VALUES (%s, 'created', %s)",
++        (row[0], name),
++    )
++    for instrument_id in members:
++        conn.execute(
++            "INSERT INTO universe_event (universe_id, event_type, instrument_id) "
++            "VALUES (%s, 'member_added', %s)",
++            (row[0], instrument_id),
++        )
++    conn.commit()
++
++
++def input_row_count(conn: psycopg.Connection, instrument_id: int) -> int:
++    row = conn.execute(
++        "SELECT count(*) FROM factor_input WHERE instrument_id = %s", (instrument_id,)
++    ).fetchone()
++    conn.commit()
++    assert row is not None
++    return int(row[0])
++
++
++# Implements TC-COMP-067
++def test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn, set_id = store.conn, store.set_id
++    roster, _ = add_full_roster(conn, set_id, 30)
++    a = add_active_stock(conn, "A")
++    b = add_active_stock(conn, "B")
++    add_factor_inputs(conn, set_id, a, "value", statuses={"fcf_yield": "missing"})
++    add_factor_inputs(conn, set_id, b, "value", omit=("fcf_yield",))  # no third row at all
++    for stock in (a, b):
++        add_factor_inputs(conn, set_id, stock, "growth")
++        add_factor_inputs(conn, set_id, stock, "momentum")
++
++    result = run_classification_build(conn, set_id, monkeypatch)
++
++    assert result.state == "complete"
++    assert factor_counts_for(conn, set_id) == {
++        "value": (30, True),
++        "growth": (32, True),
++        "momentum": (32, True),
++    }
++    rows = classifications_for(conn, set_id)
++    for stock in (a, b):
++        assert reason(rows[(stock, "value")]) == (
++            "not_classified",
++            "input_missing",
++            "fcf_yield",
++            "free-cash-flow yield missing",
++            None,
++            None,
++        )
++        for factor in ("growth", "momentum"):
++            assert rows[(stock, factor)]["status"] == "classified"
++            assert rows[(stock, factor)]["score"] is not None
++            assert rows[(stock, factor)]["percentile"] is not None
++    # A's two present values and B's two rows move no statistic of the value peer set.
++    assert_factor_matches_reference(conn, set_id, rows, "value", roster)
++    for factor in ("growth", "momentum"):
++        assert_factor_matches_reference(conn, set_id, rows, factor, [*roster, a, b])
++
++
++# Implements TC-COMP-068
++def test_scores_are_identical_whatever_the_universe_membership(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn = store.conn
++    roster, retired = add_full_roster(conn, store.set_id, 32, n_retired=1)
++    assert conn.execute("SELECT count(*) FROM universe").fetchone() == (0,)
++    conn.commit()
++    assert run_classification_build(conn, store.set_id, monkeypatch).state == "complete"
++
++    in_none, in_one, in_three = roster[0], roster[1], roster[2]
++    add_universe(conn, "First", [in_one, in_three])
++    add_universe(conn, "Second", [in_three])
++    add_universe(conn, "Third", [in_three])
++    add_universe(conn, "Retired holdings", retired)
++    memberships: dict[int, int] = dict(
++        conn.execute(
++            "SELECT instrument_id, count(DISTINCT universe_id) FROM universe_event "
++            "WHERE event_type = 'member_added' GROUP BY instrument_id"
++        ).fetchall()
++    )
++    conn.commit()
++    assert memberships == {in_one: 1, in_three: 3, retired[0]: 1}  # in_none is in none
++
++    _, second_set = add_terminal_run_and_set(conn)
++    add_roster_inputs(conn, second_set, roster)  # the same values as the first set
++    assert run_classification_build(conn, second_set, monkeypatch).state == "complete"
++
++    def outcome(set_id: UUID) -> dict[tuple[int, str], tuple[Any, ...]]:
++        return {
++            key: (r["status"], r["score"], r["percentile"], r["reason_code"], r["reason_input"])
++            for key, r in classifications_for(conn, set_id).items()
++        }
++
++    before, after = outcome(store.set_id), outcome(second_set)
++    assert len(before) == 3 * 33
++    assert after == before
++    for stock in (in_none, in_one, in_three):
++        for factor in FACTORS:
++            assert before[(stock, factor)][0] == "classified"
++            assert after[(stock, factor)] == before[(stock, factor)]
++
++
++# Implements TC-COMP-107
++@pytest.mark.parametrize("qualifying", [29, 30])
++def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
++    store: Store, monkeypatch: pytest.MonkeyPatch, qualifying: int
++) -> None:
++    conn, set_id = store.conn, store.set_id
++    roster, _ = add_full_roster(conn, set_id, qualifying)
++    outdated = []
++    for i in range(35 - qualifying):
++        stock = add_active_stock(conn, f"OUT{i}")
++        add_factor_inputs(conn, set_id, stock, "value", statuses={"fcf_yield": "outdated"})
++        add_factor_inputs(conn, set_id, stock, "growth")
++        add_factor_inputs(conn, set_id, stock, "momentum")
++        outdated.append(stock)
++
++    result = run_classification_build(conn, set_id, monkeypatch)
++
++    assert result.state == "complete"
++    assert result.qualified_counts == {"value": qualifying, "growth": 35, "momentum": 35}
++    counts = factor_counts_for(conn, set_id)
++    assert counts["growth"] == (35, True)
++    assert counts["momentum"] == (35, True)
++    rows = classifications_for(conn, set_id)
++    value_rows = {stock: row for (stock, factor), row in rows.items() if factor == "value"}
++    assert len(value_rows) == 35
++    if qualifying < constants.MIN_PEER_SET_SIZE:
++        assert counts["value"] == (29, False)
++        for row in value_rows.values():  # the six outdated stocks too: the unranked reason wins
++            assert reason(row) == (
++                "not_classified",
++                "not_enough_stocks",
++                None,
++                "29 of 30 stocks qualified",
++                None,
++                None,
++            )
++    else:
++        assert counts["value"] == (30, True)
++        assert sorted(s for s, r in value_rows.items() if r["status"] == "classified") == roster
++        for stock in outdated:
++            assert reason(value_rows[stock]) == (
++                "not_classified",
++                "input_outdated",
++                "fcf_yield",
++                "free-cash-flow yield outdated",
++                None,
++                None,
++            )
++        assert_factor_matches_reference(conn, set_id, rows, "value", roster)
++    for factor in ("growth", "momentum"):
++        assert_factor_matches_reference(conn, set_id, rows, factor, [*roster, *outdated])
++
++
++# Implements TC-COMP-111
++def test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn, set_id = store.conn, store.set_id
++    roster, (r1, r2) = add_full_roster(conn, set_id, 31, n_retired=2)
++    for factor in FACTORS:  # R2's present rows prove the exclusion does not rest on absence
++        add_factor_inputs(conn, set_id, r2, factor)
++    assert (input_row_count(conn, r1), input_row_count(conn, r2)) == (0, 8)
++
++    result = run_classification_build(conn, set_id, monkeypatch)
++
++    assert result.state == "complete"
++    assert factor_counts_for(conn, set_id) == {factor: (31, True) for factor in FACTORS}
++    rows = classifications_for(conn, set_id)
++    for factor in FACTORS:
++        assert_factor_matches_reference(conn, set_id, rows, factor, roster)
++    for stock in (r1, r2):
++        assert {f: reason(r) for (i, f), r in rows.items() if i == stock} == {
++            factor: ("not_classified", "retired", None, None, None, None) for factor in FACTORS
++        }
++    # The stage writes no factor_input row.
++    assert (input_row_count(conn, r1), input_row_count(conn, r2)) == (0, 8)
++
++
++# Implements TC-COMP-095
++def test_a_not_computable_input_is_named_as_the_reason(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn, set_id = store.conn, store.set_id
++    roster, _ = add_full_roster(conn, set_id, 30)
++    p = add_active_stock(conn, "P")
++    add_factor_inputs(conn, set_id, p, "value")
++    add_factor_inputs(conn, set_id, p, "growth", statuses={"eps_growth": "not_computable"})
++    add_factor_inputs(conn, set_id, p, "momentum")
++
++    assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
++
++    assert factor_counts_for(conn, set_id) == {
++        "value": (31, True),
++        "growth": (30, True),
++        "momentum": (31, True),
++    }
++    rows = classifications_for(conn, set_id)
++    assert reason(rows[(p, "growth")]) == (
++        "not_classified",
++        "input_not_computable",
++        "eps_growth",
++        "earnings-per-share growth not computable",
++        None,
++        None,
++    )
++    assert rows[(p, "value")]["status"] == "classified"
++    assert rows[(p, "momentum")]["status"] == "classified"
++    assert_factor_matches_reference(conn, set_id, rows, "growth", roster)
++
++
++def test_classified_rows_carry_the_reference_scores_over_the_full_percentile_range(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-9: every classified row has a score and a percentile in 0 to 100, the lowest 0 and
++    the highest 100, equal to the oracle's to 6 decimals, and no reason."""
++    conn, set_id = store.conn, store.set_id
++    roster, _ = add_full_roster(conn, set_id, 31)
++
++    assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
++
++    rows = classifications_for(conn, set_id)
++    assert len(rows) == 3 * 31
++    for factor in FACTORS:
++        assert_factor_matches_reference(conn, set_id, rows, factor, roster)
++        percentiles = [r["percentile"] for (_, f), r in rows.items() if f == factor]
++        assert all(0 <= p <= 100 for p in percentiles)
++        assert (min(percentiles), max(percentiles)) == (0, 100)
++    for row in rows.values():
++        assert row["status"] == "classified"
++        assert (row["reason_code"], row["reason_input"], row["reason_detail"]) == (None,) * 3
++
++
++def test_the_reason_is_the_first_input_not_present_in_factor_order(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-12, DEC-0120: an input with no row counts as missing and is named, and the reason
++    is the first input that is not present in the factor's input order, not the most severe."""
++    conn, set_id = store.conn, store.set_id
++    add_full_roster(conn, set_id, 30)
++    absent = add_active_stock(conn, "ABSENT")
++    add_factor_inputs(conn, set_id, absent, "value", omit=("earnings_yield",))
++    computable = add_active_stock(conn, "NOTCOMP")
++    add_factor_inputs(
++        conn,
++        set_id,
++        computable,
++        "value",
++        statuses={"earnings_yield": "not_computable", "fcf_yield": "missing"},
++    )
++    stale = add_active_stock(conn, "STALE")
++    add_factor_inputs(
++        conn, set_id, stale, "value", statuses={"book_to_price": "outdated", "fcf_yield": "missing"}
++    )
++
++    assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
++
++    rows = classifications_for(conn, set_id)
++    assert factor_counts_for(conn, set_id)["value"] == (30, True)
++    assert reason(rows[(absent, "value")]) == (
++        "not_classified",
++        "input_missing",
++        "earnings_yield",
++        "earnings yield missing",
++        None,
++        None,
++    )
++    assert reason(rows[(computable, "value")]) == (
++        "not_classified",
++        "input_not_computable",
++        "earnings_yield",
++        "earnings yield not computable",
++        None,
++        None,
++    )
++    assert reason(rows[(stale, "value")]) == (
++        "not_classified",
++        "input_outdated",
++        "book_to_price",
++        "book-to-price outdated",
++        None,
++        None,
++    )
++
++
++def test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0119: both statements read only the build's own set of ``factor_input`` rows."""
++    conn, first_set = store.conn, store.set_id
++    roster = [add_active_stock(conn, f"S{i:03d}") for i in range(31)]
++    for i, stock in enumerate(roster):  # very different values, reversed in order
++        for factor in FACTORS:
++            names = constants.INPUT_NAMES[factor]
++            values = {name: Decimal(10_000 * (31 - i) + k) for k, name in enumerate(names)}
++            statuses = {"fcf_yield": "outdated"} if factor == "value" and i == 0 else {}
++            add_factor_inputs(conn, first_set, stock, factor, statuses=statuses, values=values)
++    assert run_classification_build(conn, first_set, monkeypatch).state == "complete"
++
++    _, second_set = add_terminal_run_and_set(conn)
++    add_roster_inputs(conn, second_set, roster[:30])
++    add_factor_inputs(conn, second_set, roster[30], "value", statuses={"fcf_yield": "missing"})
++    add_factor_inputs(conn, second_set, roster[30], "growth")
++    add_factor_inputs(conn, second_set, roster[30], "momentum")
++    result = run_classification_build(conn, second_set, monkeypatch)
++
++    assert result.state == "complete"
++    assert factor_counts_for(conn, second_set) == {
++        "value": (30, True),
++        "growth": (31, True),
++        "momentum": (31, True),
++    }
++    rows = classifications_for(conn, second_set)
++    assert len(rows) == 3 * 31
++    assert rows[(roster[0], "value")]["status"] == "classified"  # outdated only in the first set
++    assert rows[(roster[30], "value")]["reason_code"] == "input_missing"
++    assert_factor_matches_reference(conn, second_set, rows, "value", roster[:30])
++    for factor in ("growth", "momentum"):
++        assert_factor_matches_reference(conn, second_set, rows, factor, roster)
++
++
++def test_a_stock_outside_the_active_roster_is_ignored(store: Store) -> None:
++    """DEC-0119: the peer set is the roster passed in ``active_ids``, even for a stock whose
++    lifecycle is active and whose inputs are all present."""
++    conn, set_id = store.conn, store.set_id
++    roster, _ = add_full_roster(conn, set_id, 31)
++    inside, outsider = roster[:30], roster[30]
++
++    engine._classification_stage(conn, make_context(set_id, store.run_id, inside, ()))
++    rows = classifications_for(conn, set_id)
++
++    assert factor_counts_for(conn, set_id) == {factor: (30, True) for factor in FACTORS}
++    assert len(rows) == 3 * 30
++    assert all(stock != outsider for stock, _ in rows)
++    for factor in FACTORS:
++        assert_factor_matches_reference(conn, set_id, rows, factor, inside)
++
++
++def test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-14, AC-15, DEC-0121: every active and retired instrument has exactly one row per
++    factor and no other instrument has any; no row is marked restated (CAP-002-E2-S6's mark);
++    a factor no stock qualifies on still has its count, unranked, with '0 of 30'."""
++    conn, set_id = store.conn, store.set_id
++    active = [add_active_stock(conn, f"M{i:03d}") for i in range(31)]
++    for stock in active[:30]:
++        add_factor_inputs(conn, set_id, stock, "value")
++    add_factor_inputs(conn, set_id, active[30], "value", statuses={"fcf_yield": "missing"})
++    for stock in active:
++        add_factor_inputs(conn, set_id, stock, "growth")  # no momentum row for anyone
++    retired = [add_instrument(conn, f"OLD{i}", "retired") for i in range(2)]
++
++    result = run_classification_build(conn, set_id, monkeypatch)
++
++    assert result.state == "complete"
++    assert result.qualified_counts == {"value": 30, "growth": 31, "momentum": 0}
++    assert factor_counts_for(conn, set_id) == {
++        "value": (30, True),
++        "growth": (31, True),
++        "momentum": (0, False),
++    }
++    rows = classifications_for(conn, set_id)
++    assert sorted(rows) == sorted((s, f) for s in [*active, *retired] for f in FACTORS)
++    assert {(r["status"], r["reason_code"]) for r in rows.values()} == {
++        ("classified", None),
++        ("not_classified", "input_missing"),
++        ("not_classified", "not_enough_stocks"),
++        ("not_classified", "retired"),
++    }
++    assert all(row["restated_possible"] is False for row in rows.values())
++    for stock in active:
++        assert reason(rows[(stock, "momentum")]) == (
++            "not_classified",
++            "not_enough_stocks",
++            None,
++            "0 of 30 stocks qualified",
++            None,
++            None,
++        )
++
++
++def test_the_unranked_reason_states_the_floor_in_force(
++    store: Store, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DEC-0120: the floor in ``reason_detail`` is ``constants.MIN_PEER_SET_SIZE``, read when
++    the stage runs, as is the floor ``ranked`` is judged against (AC-14)."""
++    conn, set_id = store.conn, store.set_id
++    add_full_roster(conn, set_id, 31)
++    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 32)
++
++    assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
++
++    assert factor_counts_for(conn, set_id) == {factor: (31, False) for factor in FACTORS}
++    rows = classifications_for(conn, set_id)
++    assert len(rows) == 3 * 31
++    assert {row["reason_detail"] for row in rows.values()} == {"31 of 32 stocks qualified"}
+diff --git a/tests/unit/test_classification_stage_order.py b/tests/unit/test_classification_stage_order.py
+new file mode 100644
+index 0000000..fe4a899
+--- /dev/null
++++ b/tests/unit/test_classification_stage_order.py
+@@ -0,0 +1,47 @@
++"""The classification stage runs after every input stage (CAP-002-E2-S5). No database.
++
++Design 2.2 and 2.6 order a build as inputs, peer sets, classification. The classification
++stage registers last, and a stage producing inputs is inserted above it (DEC-0121). Until
++CAP-002-E2-S3 and CAP-002-E2-S4 land no input stage exists and the order check holds
++vacuously; afterwards it is strict. Traces to DAC-E2-2.
++"""
++
++from collections.abc import Callable, Sequence
++
++from factorflow.classification import engine
++
++INPUT_STAGES = ("_fundamental_inputs_stage", "_momentum_inputs_stage")
++
++
++def input_stages_after_classification(stages: Sequence[Callable[..., object]]) -> list[str]:
++    names = [getattr(stage, "__name__", "") for stage in stages]
++    position = names.index("_classification_stage")
++    return [name for name in names[position + 1 :] if name in INPUT_STAGES]
++
++
++def test_the_rule_detects_an_input_stage_after_classification() -> None:
++    """DEC-0121: the order check can fail."""
++
++    def _classification_stage() -> None: ...
++
++    def _momentum_inputs_stage() -> None: ...
++
++    def _other_stage() -> None: ...
++
++    late = [_classification_stage, _other_stage, _momentum_inputs_stage]
++    assert input_stages_after_classification(late) == ["_momentum_inputs_stage"]
++    assert input_stages_after_classification([_momentum_inputs_stage, _classification_stage]) == []
++
++
++def test_the_classification_stage_is_registered() -> None:
++    """DEC-0121: ``build`` runs the classification stage."""
++    assert engine._classification_stage in engine._STAGES
++
++
++def test_no_input_stage_is_registered_after_the_classification_stage() -> None:
++    """DEC-0121, DAC-E2-2: inputs are written before peer sets are formed from them."""
++    late = input_stages_after_classification(engine._STAGES)
++    assert late == [], (
++        f"{late} run after _classification_stage: register an input stage above "
++        "`_STAGES.append(_classification_stage)` in engine.py, never after it (DEC-0121)"
++    )
+diff --git a/tests/unit/test_classify_sql_static.py b/tests/unit/test_classify_sql_static.py
+new file mode 100644
+index 0000000..5f6368a
+--- /dev/null
++++ b/tests/unit/test_classify_sql_static.py
+@@ -0,0 +1,186 @@
++"""The classification statements' static contract (CAP-002-E2-S5). No database.
++
++``peer_sets.sql`` and ``classify.sql`` read ``factor_input`` and never a universe table or the
++``inputs`` temporary table (DEC-0119; the "no universe table is read" half of DAC-E2-S5-5),
++take only the stage's named parameters, and do their arithmetic with PostgreSQL window
++functions, with no numeric library anywhere in the package (DEC-0052). The input labels have
++one table, ``constants.INPUT_LABELS``, which reaches ``classify.sql`` as a bound array
++(DEC-0120, DEC-0130; STD-UI-1). Traces to AC-8, DEC-0052, DEC-0119 and DEC-0120.
++"""
++
++import ast
++import re
++from pathlib import Path
++
++import pytest
++
++from factorflow.classification import constants
++
++PACKAGE = Path(constants.__file__).parent
++SQL_DIR = PACKAGE / "sql"
++STATEMENTS = ("peer_sets.sql", "classify.sql")
++STAGE_PARAMETERS = {
++    "set_id",
++    "factor",
++    "factors",
++    "input_names",
++    "input_labels",
++    "input_counts",
++    "min_peer_set_size",
++    "active_ids",
++    "retired_ids",
++}
++NUMERIC_LIBRARIES = {"numpy", "scipy", "pandas", "statistics"}
++LABELS = {
++    "book_to_price": "book-to-price",
++    "earnings_yield": "earnings yield",
++    "fcf_yield": "free-cash-flow yield",
++    "revenue_growth": "revenue growth",
++    "eps_growth": "earnings-per-share growth",
++    "return_3m": "3-month total return",
++    "return_6m": "6-month total return",
++    "return_12m": "12-month total return",
++}
++
++
++def statement(name: str) -> str:
++    return (SQL_DIR / name).read_text()
++
++
++def numeric_imports(source: str) -> list[str]:
++    found: list[str] = []
++    for node in ast.walk(ast.parse(source)):
++        if isinstance(node, ast.Import):
++            found += [a.name for a in node.names if a.name.split(".")[0] in NUMERIC_LIBRARIES]
++        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
++            if node.module.split(".")[0] in NUMERIC_LIBRARIES:
++                found.append(node.module)
++    return found
++
++
++def names_inputs_table(text: str) -> bool:
++    return re.search(r"\b(?:FROM|JOIN)\s+inputs\b", text, re.IGNORECASE) is not None
++
++
++def written_tables(text: str) -> set[str]:
++    pattern = r"\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+(\w+)"
++    return {table.lower() for table in re.findall(pattern, text, re.IGNORECASE)}
++
++
++def parameters(text: str) -> set[str]:
++    return set(re.findall(r"%\((\w+)\)s", text))
++
++
++# --- the rules can fail -----------------------------------------------------------------
++
++
++@pytest.mark.parametrize(
++    "source",
++    [
++        "import numpy",
++        "import numpy as np",
++        "import scipy.stats",
++        "from pandas.core import frame",
++        "from statistics import stdev",
++    ],
++)
++def test_numeric_import_is_detected(source: str) -> None:
++    """DEC-0052: the numeric-library check can fail."""
++    assert numeric_imports(source)
++
++
++def test_other_imports_are_allowed() -> None:
++    """DEC-0052: the check does not flag other imports."""
++    assert not numeric_imports("import decimal\nfrom . import statistics_like\nimport math")
++
++
++@pytest.mark.parametrize("text", ["SELECT 1 FROM inputs i", "x JOIN inputs USING (a)"])
++def test_inputs_table_is_detected(text: str) -> None:
++    """DEC-0119: the ``inputs`` check can fail."""
++    assert names_inputs_table(text)
++
++
++def test_factor_input_and_a_cte_named_inp_are_not_the_inputs_table() -> None:
++    """DEC-0119: ``factor_input`` and a CTE named ``inp`` are not the ``inputs`` table."""
++    assert not names_inputs_table("SELECT 1 FROM factor_input fi CROSS JOIN inp i")
++
++
++def test_written_tables_are_found() -> None:
++    """DEC-0119: the written-table check sees INSERT, UPDATE and DELETE targets."""
++    text = "INSERT INTO a (x) SELECT 1; update B SET x = 1; DELETE FROM c"
++    assert written_tables(text) == {"a", "b", "c"}
++
++
++# --- the statements obey them -----------------------------------------------------------
++
++
++@pytest.mark.parametrize("name", STATEMENTS)
++def test_statement_exists(name: str) -> None:
++    """DEC-0121: the stage's two statements ship in ``classification/sql``."""
++    assert (SQL_DIR / name).is_file()
++    assert statement(name).strip()
++
++
++@pytest.mark.parametrize("name", STATEMENTS)
++def test_statement_never_names_a_universe_table(name: str) -> None:
++    """AC-8, DAC-E2-S5-5: no universe table is read, so membership cannot move a score."""
++    assert "universe" not in statement(name).lower()
++
++
++@pytest.mark.parametrize("name", STATEMENTS)
++def test_statement_reads_factor_input_and_not_the_inputs_table(name: str) -> None:
++    """DEC-0119: the statements read ``factor_input``, never the ``inputs`` temporary table."""
++    text = statement(name)
++    assert re.search(r"\b(?:FROM|JOIN)\s+factor_input\b", text, re.IGNORECASE)
++    assert not names_inputs_table(text)
++
++
++@pytest.mark.parametrize("name", STATEMENTS)
++def test_statement_takes_only_the_stage_parameters(name: str) -> None:
++    """DEC-0119, DEC-0120: only the stage's ``%(name)s`` parameters, never interpolation."""
++    text = statement(name)
++    assert parameters(text) <= STAGE_PARAMETERS
++    assert re.search(r"%(?!\(\w+\)s)", text) is None
++
++
++def test_classify_does_its_arithmetic_with_window_functions() -> None:
++    """DEC-0052, DEC-0053: PostgreSQL window functions do the arithmetic."""
++    text = statement("classify.sql")
++    for function in ("stddev_samp", "percent_rank", "avg"):
++        assert re.search(rf"\b{function}\s*\(", text), function
++
++
++def test_each_statement_writes_only_its_own_table() -> None:
++    """DEC-0119: each statement inserts into its one table and changes no other."""
++    assert written_tables(statement("peer_sets.sql")) == {"classification_set_factor"}
++    assert written_tables(statement("classify.sql")) == {"factor_classification"}
++
++
++def test_no_classification_module_imports_a_numeric_library() -> None:
++    """DEC-0052: no numeric library anywhere in the package."""
++    modules = sorted(PACKAGE.rglob("*.py"))
++    assert modules
++    assert {p.name: numeric_imports(p.read_text()) for p in modules} == {
++        p.name: [] for p in modules
++    }
++
++
++def test_input_labels_cover_exactly_the_input_names() -> None:
++    """DEC-0130: one label per input name, and no other key."""
++    names = {name for names in constants.INPUT_NAMES.values() for name in names}
++    assert set(constants.INPUT_LABELS) == names
++
++
++def test_input_labels_are_the_product_vocabulary() -> None:
++    """DEC-0120, DEC-0130, STD-UI-1: product vocabulary, never a payload key."""
++    assert constants.INPUT_LABELS == LABELS
++    for name, label in constants.INPUT_LABELS.items():
++        assert label != name
++        assert "_" not in label
++
++
++def test_classify_holds_no_label_text() -> None:
++    """DEC-0120: the labels have one table; ``classify.sql`` receives them bound."""
++    text = statement("classify.sql")
++    assert [label for label in LABELS.values() if label in text] == []
++    assert "replace(" not in text.lower()
+diff --git a/tests/unit/test_composite_arithmetic.py b/tests/unit/test_composite_arithmetic.py
+new file mode 100644
+index 0000000..b9c46ab
+--- /dev/null
++++ b/tests/unit/test_composite_arithmetic.py
+@@ -0,0 +1,278 @@
++"""The composite arithmetic of DEC-0053, run through the real statements (CAP-002-E2-S5).
++
++The arithmetic exists only as SQL, so these tests run ``peer_sets.sql`` and ``classify.sql``
++through ``engine._classification_stage`` on PostgreSQL and compare the rows with literal values
++and with ``reference_scores``, a pure-Python oracle. Every case runs in a transaction rolled
++back at its end, with the peer-set floor patched to 3 so hand-built peer sets stay small (the
++floor of 30 is TC-COMP-107's). Traces to DAC-E2-S5-1, DAC-E2-3 and AC-9.
++"""
++
++import uuid
++from collections.abc import Iterator, Sequence
++from decimal import Decimal
++from typing import NamedTuple
++from unittest.mock import patch
++from uuid import UUID
++
++import psycopg
++import pytest
++from hypothesis import assume, given, settings
++from hypothesis import strategies as st
++from psycopg import sql
++
++from factorflow.classification import constants, engine
++from tests.integration.engine_classify_support import (
++    SCORE_PLACES,
++    add_terminal_run_and_set,
++    insert_factor_inputs,
++    insert_instrument,
++    make_context,
++    reference_composite_dispersion,
++    reference_scores,
++)
++from tests.integration.engine_support import migrate_through_classification
++
++pytestmark = pytest.mark.postgres
++
++Result = tuple[Decimal, Decimal]
++
++
++class Store(NamedTuple):
++    conn: psycopg.Connection
++    run_id: UUID
++    set_id: UUID
++
++
++@pytest.fixture(scope="module")
++def store(_postgres_admin_connection_string: str) -> Iterator[Store]:
++    """One database for the module, holding a succeeded run and its ``building`` set; the
++    cases add their stocks inside transactions they roll back."""
++    name = f"test_{uuid.uuid4().hex}"
++    admin = psycopg.connect(_postgres_admin_connection_string, autocommit=True)
++    try:
++        admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
++        base_url = _postgres_admin_connection_string.rsplit("/", 1)[0]
++        conn = migrate_through_classification(f"{base_url}/{name}")
++        try:
++            run_id, set_id = add_terminal_run_and_set(conn)
++            yield Store(conn, run_id, set_id)
++        finally:
++            conn.close()
++    finally:
++        try:
++            admin.execute(
++                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
++                "WHERE datname = %s AND pid <> pg_backend_pid()",
++                (name,),
++            )
++            admin.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(name)))
++        finally:
++            admin.close()
++
++
++def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
++    """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
++    transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
++    conn = store.conn
++    results: list[Result] = []
++    with conn.transaction():
++        with conn.cursor() as cur:
++            ids = []
++            for position, values in enumerate(stocks):
++                instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
++                insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
++                ids.append(instrument_id)
++            with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
++                engine._classification_stage(
++                    conn, make_context(store.set_id, store.run_id, ids, ())
++                )
++            cur.execute(
++                "SELECT instrument_id, status, score, percentile FROM factor_classification "
++                "WHERE set_id = %s AND factor = %s",
++                (store.set_id, factor),
++            )
++            found = {row[0]: row[1:] for row in cur.fetchall()}
++        assert sorted(found) == sorted(ids)
++        assert {status for status, _, _ in found.values()} == {"classified"}
++        results = [(found[i][1], found[i][2]) for i in ids]
++        raise psycopg.Rollback
++    return results
++
++
++def growth(first: Sequence[int], second: Sequence[int]) -> list[list[Decimal]]:
++    """Stocks on ``growth``, the factor with two inputs: ``revenue_growth``, then
++    ``eps_growth`` (``constants.INPUT_NAMES``)."""
++    return [[Decimal(a), Decimal(b)] for a, b in zip(first, second, strict=True)]
++
++
++def literal(*pairs: tuple[str, str]) -> list[Result]:
++    return [(Decimal(score), Decimal(percentile)) for score, percentile in pairs]
++
++
++def test_cases_name_the_growth_inputs_in_order() -> None:
++    """DAC-E2-S5-1: the hand-built cases give ``revenue_growth`` first, ``eps_growth`` second."""
++    assert constants.INPUT_NAMES["growth"] == ("revenue_growth", "eps_growth")
++
++
++# Implements TC-COMP-069
++def test_common_z_scores_are_already_standardised(store: Store) -> None:
++    """(a) Both inputs have the same z-scores, (v - 3) / sqrt(2.5) with the sample standard
++    deviation, so the composite equals them and re-standardising leaves it unchanged."""
++    results = classify(store, "growth", growth([1, 2, 3, 4, 5], [10, 20, 30, 40, 50]))
++
++    assert results == literal(
++        ("-1.264911", "0"),
++        ("-0.632456", "25"),
++        ("0", "50"),
++        ("0.632456", "75"),
++        ("1.264911", "100"),
++    )
++
++
++# Implements TC-COMP-069
++def test_uncorrelated_inputs_are_re_standardised(store: Store) -> None:
++    """(b) Deviations x1 = (-2, -1, 0, 1, 2) and x2 = (1, -2, 0, 2, -1) from the mean 3 are
++    uncorrelated (sum x1 * x2 = 0). The composite (x1 + x2) / (2 sqrt(2.5)) has sample
++    standard deviation sqrt(2) / 2, not 1, so re-standardising rescales it to
++    (x1 + x2) / sqrt(5)."""
++    first, second = [1, 2, 3, 4, 5], [4, 1, 3, 5, 2]
++    x1, x2 = [v - 3 for v in first], [v - 3 for v in second]
++    assert sum(a * b for a, b in zip(x1, x2, strict=True)) == 0
++    sums = [a + b for a, b in zip(x1, x2, strict=True)]  # -1, -3, 0, 3, 1
++    composite = [Decimal(s) / (2 * Decimal("2.5").sqrt()) for s in sums]
++    composite_sd = (sum((c * c for c in composite), Decimal(0)) / 4).sqrt()
++    assert abs(composite_sd - Decimal(2).sqrt() / 2) < Decimal("1e-20")
++    scores = [(Decimal(s) / Decimal(5).sqrt()).quantize(SCORE_PLACES) for s in sums]
++    percentiles = [Decimal(p) for p in (25, 0, 50, 100, 75)]
++
++    results = classify(store, "growth", growth(first, second))
++
++    assert results == list(zip(scores, percentiles, strict=True))
++    assert scores == [Decimal(s) for s in ("-0.447214", "-1.341641", "0", "1.341641", "0.447214")]
++    oracle = reference_scores(dict(enumerate(growth(first, second))))
++    assert all(
++        abs(results[i][0] - oracle[i][0]) <= SCORE_PLACES and results[i][1] == oracle[i][1]
++        for i in range(5)
++    )
++
++
++# Implements TC-COMP-069
++def test_a_zero_dispersion_input_contributes_zero(store: Store) -> None:
++    """(c) ``eps_growth`` is 7 for every stock: its z-score is 0, so the composite is half
++    the other input's z-score, and re-standardising returns that z-score."""
++    results = classify(store, "growth", growth([1, 2, 3, 4, 5], [7, 7, 7, 7, 7]))
++
++    assert results == literal(
++        ("-1.264911", "0"),
++        ("-0.632456", "25"),
++        ("0", "50"),
++        ("0.632456", "75"),
++        ("1.264911", "100"),
++    )
++
++
++# Implements TC-COMP-069
++def test_every_input_without_dispersion_scores_zero_without_dividing_by_zero(
++    store: Store,
++) -> None:
++    """(d) Both inputs are constant: every z-score, composite and score is 0, and the tied
++    stocks all take percentile 0."""
++    results = classify(store, "growth", growth([2, 2, 2, 2, 2], [9, 9, 9, 9, 9]))
++
++    assert results == literal(*[("0", "0")] * 5)
++
++
++# Implements TC-COMP-069
++def test_opposite_inputs_cancel_to_a_constant_composite(store: Store) -> None:
++    """(e) ``eps_growth`` is minus ``revenue_growth``: the z-scores cancel exactly, the
++    composite is 0 for every stock and its zero dispersion gives score 0."""
++    a = [1, 2, 4, 8, 16]
++
++    results = classify(store, "growth", growth(a, [-v for v in a]))
++
++    assert results == literal(*[("0", "0")] * 5)
++
++
++# --- properties over random peer sets -----------------------------------------------------
++
++VALUES = st.decimals(
++    min_value=-1000, max_value=1000, places=4, allow_nan=False, allow_infinity=False
++)
++
++
++@st.composite
++def peer_sets(draw: st.DrawFn) -> tuple[str, list[list[Decimal]]]:
++    """A factor and 3 to 12 stocks, each with one value per input of the factor; every input
++    column holds distinct values."""
++    factor = draw(st.sampled_from(constants.FACTORS))
++    n = draw(st.integers(min_value=3, max_value=12))
++    columns = [
++        draw(st.lists(VALUES, min_size=n, max_size=n, unique=True))
++        for _ in constants.INPUT_NAMES[factor]
++    ]
++    return factor, [list(row) for row in zip(*columns, strict=True)]
++
++
++def close(left: Sequence[Result], right: Sequence[Result]) -> bool:
++    return len(left) == len(right) and all(
++        abs(a[0] - b[0]) <= Decimal("2e-6") and abs(a[1] - b[1]) <= Decimal("1e-5")
++        for a, b in zip(left, right, strict=True)
++    )
++
++
++# Implements TC-COMP-069
++@settings(deadline=None, max_examples=40)
++@given(case=peer_sets(), data=st.data())
++def test_properties_hold_over_random_peer_sets(
++    store: Store, case: tuple[str, list[list[Decimal]]], data: st.DataObject
++) -> None:
++    factor, stocks = case
++    n = len(stocks)
++    # Distinct values do not rule out inputs whose z-scores cancel, as A and -2A + 1 do. Their
++    # composite is constant, numeric rounding leaves it a spread near 1e-17, and
++    # re-standardising turns that into noise. That is the plan's open gap, left to the owner,
++    # so the examples avoid it rather than assert on it (T013). Hand-built cases (d) and (e)
++    # cover the exactly constant composite.
++    assume(reference_composite_dispersion(dict(enumerate(stocks))) >= Decimal("1e-9"))
++    with store.conn.transaction():
++        results = classify(store, factor, stocks)
++
++        oracle = reference_scores(dict(enumerate(stocks)))
++        assert close(results, [oracle[i] for i in range(n)])
++
++        scores = [score for score, _ in results]
++        mean = sum(scores, Decimal(0)) / n
++        sd = (sum(((s - mean) ** 2 for s in scores), Decimal(0)) / (n - 1)).sqrt()
++        assert abs(mean) <= Decimal("1e-5")
++        assert abs(sd - 1) <= Decimal("1e-5")
++
++        ordered = sorted(results)
++        assert all(0 <= percentile <= 100 for _, percentile in results)
++        assert all(low[1] <= high[1] for low, high in zip(ordered, ordered[1:], strict=False))
++        assert ordered[0][1] == 0
++        top = max(score for score, _ in oracle.values())
++        if sum(1 for score, _ in oracle.values() if score == top) == 1:
++            assert ordered[-1][1] == 100  # tied top scores share the lowest rank
++
++        # Adding a constant to one input changes no score, nor does multiplying it by a
++        # positive constant. Only scores: two stocks whose composites tie exactly (one's
++        # inputs are the other's, swapped between two inputs holding the same values) can
++        # differ by a rounding error once one input is moved, and percent_rank orders them.
++        k = data.draw(st.integers(min_value=0, max_value=len(stocks[0]) - 1), label="input")
++        shift = data.draw(st.decimals(min_value=-100, max_value=100, places=4), label="shift")
++        scale = data.draw(st.decimals(min_value="0.01", max_value=100, places=2), label="scale")
++        for moved in (
++            [[v + shift if j == k else v for j, v in enumerate(s)] for s in stocks],
++            [[v * scale if j == k else v for j, v in enumerate(s)] for s in stocks],
++        ):
++            moved_scores = [score for score, _ in classify(store, factor, moved)]
++            assert all(
++                abs(after - before) <= Decimal("2e-6")
++                for after, before in zip(moved_scores, scores, strict=True)
++            )
++
++        # Permuting the stocks permutes the results and changes no value.
++        order = data.draw(st.permutations(range(n)), label="order")
++        permuted = classify(store, factor, [stocks[i] for i in order])
++        assert close(permuted, [results[i] for i in order])
++        raise psycopg.Rollback

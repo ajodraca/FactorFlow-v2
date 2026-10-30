@@ -1,0 +1,38 @@
+....................................F
+=================================== FAILURES ===================================
+__________ test_a_factor_ranks_only_from_thirty_qualifying_stocks[29] __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58631 user=test database=test_25bf6c6818794c80bd8a64209681f...0x109a5fd10>, run_id=UUID('5a109be1-b4ae-4fc9-88e2-35468eca30c9'), set_id=UUID('d3e7706a-e71e-4d85-8a26-1ad7c41afc51'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109a5d1c0>
+qualifying = 29
+
+    @pytest.mark.parametrize("qualifying", [29, 30])
+    def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
+        store: Store, monkeypatch: pytest.MonkeyPatch, qualifying: int
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, qualifying)
+        outdated = []
+        for i in range(35 - qualifying):
+            stock = add_active_stock(conn, f"OUT{i}")
+            add_factor_inputs(conn, set_id, stock, "value", statuses={"fcf_yield": "outdated"})
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+            outdated.append(stock)
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete"
+>       assert result.qualified_counts == {"value": qualifying, "growth": 35, "momentum": 35}
+E       AssertionError: assert {'growth': 35..., 'value': 35} == {'value': 29,...momentum': 35}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'value': 35} != {'value': 29}
+E         Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:205: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_a_factor_ranks_only_from_thirty_qualifying_stocks[29]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 36 passed in 4.67s

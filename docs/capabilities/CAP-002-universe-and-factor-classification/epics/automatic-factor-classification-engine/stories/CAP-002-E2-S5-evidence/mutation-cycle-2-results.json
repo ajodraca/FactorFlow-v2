@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "command": "uv run --all-extras --offline python -B -m pytest -m \"postgres or not postgres\" -x -q -p no:cacheprovider tests/unit/test_classify_sql_static.py tests/unit/test_classification_stage_order.py tests/unit/test_composite_arithmetic.py tests/integration/test_engine_peer_set.py tests/unit/test_engine_sql_safety.py tests/unit/test_classification_constants.py tests/unit/test_classification_sql_ships.py",
+  "repo_head": "92453929e4ba48a23d92fbeb0f9c345490870da5",
+  "tree_patch_sha256": "079cedb03add90152ad5f25c91ca076fd171c45ef9e8759482994972d517de26",
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutants-cycle-2.json",
+  "mutants_sha256": "b10f02cd392850fd09ed67904f050f456ec59a311835de057d7b83ee98df3f9d",
+  "jobs": 4,
+  "started": "2026-10-28T23:58:22Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 12.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
+      "log_sha256": "12bb7590a93aef31bd56e07ae071acf82d81fdc5930bc39a49f955d261d075f7"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 12.7,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
+      "log_sha256": "d8beb1c1a0432eaa0aaa909132e5d2fbbd79196a1c5de250b95ca07c191b48ad"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 12.8,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
+      "log_sha256": "9d3a13a2c8efd156193815e361a057d131cf15ba45b3535d948e41d3aeb72fa7"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 12.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
+      "log_sha256": "6345177909cdcae69bc90a5dd5a93d6d5b48dba07be0f490a34b1c70354f6f13"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:rv:percentile-on-rounded-score",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 68,
+      "old": "percent_rank() OVER (ORDER BY score)",
+      "new": "percent_rank() OVER (ORDER BY round(score, 6))",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/manual_rv_percentile-on-rounded-score.log",
+      "log_sha256": "60d810a9c9d07479df04433e3aa84dfc0a00599d0902acc0a29e3cf044caaebd"
+    },
+    {
+      "id": "manual:rv:gap-order-by-name",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 82,
+      "old": "ORDER BY a.instrument_id, i.input_order",
+      "new": "ORDER BY a.instrument_id, i.input_name",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 9.4,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/manual_rv_gap-order-by-name.log",
+      "log_sha256": "6dc729a73e2e1c602c75775f5a9499a3f4a5dd69abdc13d8780b10bfcaad404b"
+    },
+    {
+      "id": "manual:rv:gap-order-by-label",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 82,
+      "old": "ORDER BY a.instrument_id, i.input_order",
+      "new": "ORDER BY a.instrument_id, i.label",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 9.4,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/manual_rv_gap-order-by-label.log",
+      "log_sha256": "b7bfddc04f174738fe94b452bdb8126e56f7955cd1f803fe75ba7a6b02eabe40"
+    },
+    {
+      "id": "manual:rv:gap-unordered",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 82,
+      "old": "ORDER BY a.instrument_id, i.input_order",
+      "new": "ORDER BY a.instrument_id",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 9.4,
+      "worker": 3,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results-logs/manual_rv_gap-unordered.log",
+      "log_sha256": "6526e08caa5d5476a7b07f1d648839d94538eada76588f61eaccec4832a5b20c"
+    }
+  ],
+  "finished": "2026-10-28T23:58:45Z"
+}

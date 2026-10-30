@@ -1,0 +1,34 @@
+.............................F
+=================================== FAILURES ===================================
+_________________ test_uncorrelated_inputs_are_re_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58855 user=test database=test_4160eddb203e4b849b31d0ac9f915...0x10b03ffb0>, run_id=UUID('75a4cb78-0f36-47b0-b525-30488ad40430'), set_id=UUID('90afb4bc-0791-44a9-a25a-7cfae919ccaa'))
+
+    def test_uncorrelated_inputs_are_re_standardised(store: Store) -> None:
+        """(b) Deviations x1 = (-2, -1, 0, 1, 2) and x2 = (1, -2, 0, 2, -1) from the mean 3 are
+        uncorrelated (sum x1 * x2 = 0). The composite (x1 + x2) / (2 sqrt(2.5)) has sample
+        standard deviation sqrt(2) / 2, not 1, so re-standardising rescales it to
+        (x1 + x2) / sqrt(5)."""
+        first, second = [1, 2, 3, 4, 5], [4, 1, 3, 5, 2]
+        x1, x2 = [v - 3 for v in first], [v - 3 for v in second]
+        assert sum(a * b for a, b in zip(x1, x2, strict=True)) == 0
+        sums = [a + b for a, b in zip(x1, x2, strict=True)]  # -1, -3, 0, 3, 1
+        composite = [Decimal(s) / (2 * Decimal("2.5").sqrt()) for s in sums]
+        composite_sd = (sum((c * c for c in composite), Decimal(0)) / 4).sqrt()
+        assert abs(composite_sd - Decimal(2).sqrt() / 2) < Decimal("1e-20")
+        scores = [(Decimal(s) / Decimal(5).sqrt()).quantize(SCORE_PLACES) for s in sums]
+        percentiles = [Decimal(p) for p in (25, 0, 50, 100, 75)]
+    
+        results = classify(store, "growth", growth(first, second))
+    
+>       assert results == list(zip(scores, percentiles, strict=True))
+E       AssertionError: assert [(Decimal('0....'75.000000'))] == [(Decimal('-0...ecimal('75'))]
+E         
+E         At index 0 diff: (Decimal('0.153393'), Decimal('50.000000')) != (Decimal('-0.447214'), Decimal('25'))
+E         Use -v to get more diff
+
+tests/unit/test_composite_arithmetic.py:150: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_uncorrelated_inputs_are_re_standardised
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 29 passed in 2.11s

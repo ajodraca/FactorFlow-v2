@@ -1,0 +1,50 @@
+..........................................F
+=================================== FAILURES ===================================
+________ test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set _________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58753 user=test database=test_ac69c3e206154fb1a53ccd14d6ebc...0x108f57d10>, run_id=UUID('947f4dc5-11a5-4d60-829a-d7207e644698'), set_id=UUID('1d9cced8-1a4e-4a3e-a33c-3c4d4efe8ba1'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108f57b90>
+
+    def test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0119: both statements read only the build's own set of ``factor_input`` rows."""
+        conn, first_set = store.conn, store.set_id
+        roster = [add_active_stock(conn, f"S{i:03d}") for i in range(31)]
+        for i, stock in enumerate(roster):  # very different values, reversed in order
+            for factor in FACTORS:
+                names = constants.INPUT_NAMES[factor]
+                values = {name: Decimal(10_000 * (31 - i) + k) for k, name in enumerate(names)}
+                statuses = {"fcf_yield": "outdated"} if factor == "value" and i == 0 else {}
+                add_factor_inputs(conn, first_set, stock, factor, statuses=statuses, values=values)
+        assert run_classification_build(conn, first_set, monkeypatch).state == "complete"
+    
+        _, second_set = add_terminal_run_and_set(conn)
+        add_roster_inputs(conn, second_set, roster[:30])
+        add_factor_inputs(conn, second_set, roster[30], "value", statuses={"fcf_yield": "missing"})
+        add_factor_inputs(conn, second_set, roster[30], "growth")
+        add_factor_inputs(conn, second_set, roster[30], "momentum")
+        result = run_classification_build(conn, second_set, monkeypatch)
+    
+>       assert result.state == "complete"
+E       AssertionError: assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_peer_set.py:392: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:133 classification build failed: UniqueViolation: duplicate key value violates unique constraint "factor_classification_pkey"
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/src/factorflow/classification/engine.py", line 115, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/src/factorflow/classification/engine.py", line 177, in _classification_stage
+    cur.execute(
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "factor_classification_pkey"
+DETAIL:  Key (set_id, instrument_id, factor)=(eb8221fb-92cf-461b-b5bc-bee72d5da775, 1, value) already exists.
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 42 passed in 5.41s
