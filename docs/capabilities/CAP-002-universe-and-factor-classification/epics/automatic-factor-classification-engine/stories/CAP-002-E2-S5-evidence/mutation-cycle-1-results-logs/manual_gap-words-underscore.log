@@ -1,0 +1,43 @@
+.......................................F
+=================================== FAILURES ===================================
+______________ test_a_not_computable_input_is_named_as_the_reason ______________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58932 user=test database=test_5130b90a8bbc44dd939313787fd03...0x10cf8aa50>, run_id=UUID('f47f1147-e4e6-4dad-8fb6-ad4bb00808bc'), set_id=UUID('076c3dc4-e82d-4ce0-bcde-5fc52dd4c035'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf88620>
+
+    def test_a_not_computable_input_is_named_as_the_reason(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 30)
+        p = add_active_stock(conn, "P")
+        add_factor_inputs(conn, set_id, p, "value")
+        add_factor_inputs(conn, set_id, p, "growth", statuses={"eps_growth": "not_computable"})
+        add_factor_inputs(conn, set_id, p, "momentum")
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        assert factor_counts_for(conn, set_id) == {
+            "value": (31, True),
+            "growth": (30, True),
+            "momentum": (31, True),
+        }
+        rows = classifications_for(conn, set_id)
+>       assert reason(rows[(p, "growth")]) == (
+            "not_classified",
+            "input_not_computable",
+            "eps_growth",
+            "earnings-per-share growth not computable",
+            None,
+            None,
+        )
+E       AssertionError: assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E         
+E         At index 3 diff: 'earnings-per-share growth not_computable' != 'earnings-per-share growth not computable'
+E         Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:284: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_a_not_computable_input_is_named_as_the_reason
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 39 passed in 5.15s

@@ -1,0 +1,292 @@
+# TDD evidence for CAP-002-E2-S5 - Peer sets, composite score and percentile classification.
+# cycle-1 is the whole implementation: peer_sets.sql, classify.sql and _classification_stage only work together
+# (classify.sql reads the classification_set_factor rows peer_sets.sql writes), and every new test failed for that one
+# missing stage.
+# Decisions applied: DEC-0052 (no numeric library), DEC-0053 (composite), DEC-0119 (read factor_input),
+# DEC-0120 (reason_detail and INPUT_LABELS), DEC-0121 (registration order, restated_possible false), DEC-0130 (labels).
+# Reviews: independent code-review and spec-drift subagents judged the staged diff. The first round approved with no
+# drift and non-blocking notes; the notes on the tests were taken (see green_evidence), and the changed patch was
+# re-fingerprinted, re-mutated and re-reviewed twice (APPROVED, no drift each time); the last review judged the final patch.
+# Owner: the plan's open gap "near-constant composite caused by numeric rounding" was observed; see open_gap below.
+# It is settled by owner decision DEC-0228 (review v1 IR-003): no tolerance in classify.sql; the property test's
+# filter on composite spreads below 1e-9 stands.
+# cycle-2 is the rework of implementation review v1 (IR-001, IR-002): tests only, no production change.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019]
+    description: >
+      Production: peer_sets.sql (one INSERT into classification_set_factor per build: the qualified count of each
+      factor, a stock qualifying when its present factor_input rows number the factor's inputs, and ranked at
+      constants.MIN_PEER_SET_SIZE); classify.sql (one INSERT into factor_classification per factor: DEC-0053 by
+      window functions over the peer set, and not_classified rows for stocks outside it, for every stock of an
+      unranked factor and for retired stocks, reason_detail from the bound input_labels); _classification_stage
+      registered as the last statement of engine.py; constants.INPUT_LABELS. Tests: TC-COMP-067, 068, 095, 107, 111
+      and the T010 cases in tests/integration/test_engine_peer_set.py; TC-COMP-069 (hand-built cases a to e and
+      hypothesis properties) in tests/unit/test_composite_arithmetic.py; T011 in
+      tests/unit/test_classify_sql_static.py; T012 in tests/unit/test_classification_stage_order.py; helpers and the
+      pure-Python DEC-0053 oracle in tests/integration/engine_classify_support.py.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/red-cycle-1-classification.log
+    red_log_sha256: 17fe932d1560dc0a36f8c6123953b6f399bd95ab885c28cc831b9be42229bfce
+    red_evidence: >
+      Run on a clone of origin/main 7646ab7 (no production change) holding the five test files exactly as staged in
+      cycle-1.patch (their sha256 are in the log header): 33 failed, 13 passed. Every failure is the missing
+      production: engine._classification_stage absent (19 AttributeError, and ValueError from the order check),
+      peer_sets.sql and classify.sql absent (9 FileNotFoundError, 2 is_file), constants.INPUT_LABELS absent (2). The
+      13 that passed are the detectors' self-tests, the no-numeric-import check (already true), the input-order
+      precondition and the order rule's self-test. An earlier RED of a draft of the same tests (32 failed, 13
+      passed) was superseded by this one.
+    green_evidence: >
+      The five story test files: 46 passed; test_properties_hold_over_random_peer_sets passed under 40 explicit
+      hypothesis seeds on the final tests. Before hand-off: uv run pytest 1513 passed, 1 xfailed (full-suite log
+      under logs); -m 'not postgres' 1055 passed, 1 xfailed; -m postgres 458 passed; npm run test 352 passed; npm
+      run test:e2e 18 passed; uv build ships classification/sql/peer_sets.sql and classify.sql. ruff check, ruff
+      format --check and mypy src clean. Review notes taken on the tests: the property test skips examples whose
+      oracle composite dispersion is below 1e-9 (the open gap below), shift and scale run separately, the mean-0 and
+      sd-1 property runs on every example, two strict-mypy nits, and AC or DEC docstrings on every additional test.
+      A strengthening test, test_the_unranked_reason_states_the_floor_in_force, was added before the mutation run so
+      that a floor hard-coded in the stage's classify.sql call cannot survive. Deviation: the top score's percentile
+      is asserted 100 only when that score is unique, because percent_rank gives tied rows the lowest rank (T013's
+      wording says 'when at least two scores differ').
+    open_gap: >
+      Plan Open Gap 'near-constant composite caused by numeric rounding' is real, and distinct values do not avoid
+      it. Inputs whose z-scores cancel mathematically (A and -2A + 1, or three value inputs with r = -1/2 and the
+      third minus their sum) give a composite whose numeric spread is near 1e-17 after PostgreSQL's numeric
+      division; stddev_samp of it is not exactly 0, so classify.sql re-standardises the noise into scores of about
+      +-1 with spread percentiles instead of 0. The code reviewer reproduced it in 43 of 60 random trials of
+      eps_growth = c - k * revenue_growth over 7 stocks; seed 25 of the first property-test probe found a related
+      effect (an exact tie broken by rescaling one input). No production tolerance was added, as the plan instructs.
+      The property test now skips examples whose oracle composite dispersion is below 1e-9 so that it does not
+      generate the case; hand-built cases (d) and (e) pin the exactly constant composite. Owner question: should
+      classify.sql treat a composite spread below some tolerance as zero dispersion, and if so which tolerance
+      (factor-engine 2.5, DEC-0053)? Answered by the owner in DEC-0228 (2026-10-28, review v1 IR-003): no
+      tolerance; classify.sql re-standardises exactly as DEC-0053 states and adds no spread threshold or constant,
+      an exactly constant composite (spread 0) still scores 0, and the property test's skip of generated examples
+      whose composite spread is below 1e-9 stands, since it excludes only the exact-cancellation case.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/full-suite-cycle-1.log
+        sha256: 806ed58ab9f67fb4f53b7593f5d81c6756adc07db061f5354034426f533175d4
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/t019-explain-cycle-1.log
+        sha256: 84f91e73394b376c4e54f3d95d7abdf4572bc7f052078ad1f6fa9c8fd6883c2e
+    t019: >
+      EXPLAIN (ANALYZE, BUFFERS) over 3000 active instruments with all eight inputs present (24,000 factor_input
+      rows) plus an earlier complete set's 24,000 rows: peer_sets.sql 9 to 11 ms and one classify.sql call (value)
+      about 50 ms, far under 10 seconds. With statistics as the inserts left them both use factor_input_pkey; after
+      ANALYZE, with set_id matching half the table, the planner sequentially scans factor_input, reading the earlier
+      set's rows too (48,000 rows per scan). A signal for CAP-002-E2-S7's volume test; not a gate here.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: cf03ebcca9e7feda7b9a2f9deb97d6e2d72dd07cae67261c7a703dbd56cc6bae
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: c64f4d2e8ab8ba0853cdd241ae2bb31f81c057995f9edef4b93e4b6bdb3f3afc
+      generated: 66
+      killed: 41
+      survived: 25
+      stillborn: 0
+      timeout: 0
+      score: 0.621
+      survivors:
+        - id: src/factorflow/classification/sql/classify.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:3:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:6:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:6:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:8:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:11:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:11:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:13:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:13:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:14:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:14:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:48:off-by-one:2
+          disposition: equivalent
+          reason: >
+            a zero-dispersion input then contributes 1 instead of 0 to every peer stock, which adds the same
+            constant (1 divided by the factor's input count) to every composite; re-standardising subtracts the
+            composite's mean, so every stored score and percentile is identical in exact arithmetic. The input
+            z-scores are internal to classify.sql: DEC-0053 and factor-engine 2.5 fix the stored score and
+            percentile, which no constant added to one input's z-scores can move. Hand-built cases (c) and (d) pass
+            on both
+        - id: src/factorflow/classification/sql/classify.sql:67:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:87:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:87:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/classify.sql:88:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/peer_sets.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/peer_sets.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/peer_sets.sql:4:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/peer_sets.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: src/factorflow/classification/sql/peer_sets.sql:5:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), which
+            PostgreSQL discards; no test or safety rule reads that text
+        - id: manual:input-z-population-sd
+          disposition: equivalent
+          reason: >
+            within one factor every input column has the same n, because a peer stock has every input present, so
+            stddev_pop scales every z-score by the same factor sqrt(n / (n - 1)); the composite is scaled by it and
+            re-standardising removes it, so scores and percentiles are identical in exact arithmetic. The sample
+            standard deviation DEC-0053 requires is pinned where it is observable, at the re-standardisation
+            (manual:score-population-sd is killed by hand-built case (a)), and stddev_samp by
+            test_classify_does_its_arithmetic_with_window_functions
+        - id: manual:input-z-uncentred
+          disposition: equivalent
+          reason: >
+            dropping the input mean shifts every stock's composite by the same constant, the mean over the inputs of
+            mean / sd, and re-standardising subtracts the composite's mean, so scores and percentiles are identical
+            in exact arithmetic; the input z-scores are internal to classify.sql
+
+  - id: cycle-2
+    tasks: [T009, T010]
+    description: >
+      Review rework for implementation review v1. Tests only; no production file changes. IR-001 (HIGH): TC-COMP-069
+      gains hand-built case (f), test_scores_tied_after_rounding_keep_the_percentiles_of_the_unrounded_scores, in
+      tests/unit/test_composite_arithmetic.py. On growth over five stocks, revenue_growth [1, 2, 3, 3.0000001, 5] and
+      eps_growth [10, 20, 30, 30, 50], the third and fourth stocks' unrounded scores differ by about 3.4e-8 (asserted
+      on reference_scores). Both store 0.134840 and keep percentiles 50 and 75, the ranking of the unrounded score
+      that T015, design 2.5 and the plan's Other Notes require. The literal scores and percentiles are written in the
+      test. IR-002 (HIGH): T010(d) gains test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical in
+      tests/integration/test_engine_peer_set.py. It has five stocks with at least two inputs not present, on growth
+      (revenue_growth, eps_growth) and momentum (return_3m, return_6m, return_12m). For both factors, INPUT_NAMES order
+      differs from the alphabetical order of the names and of the labels. Each case asserts the reason_code,
+      reason_input and reason_detail of the first input not present in INPUT_NAMES order: an absent row counted as
+      missing, all three momentum inputs outdated as a stale latest bar leaves them (design 2.4), and a later, more
+      severe status that does not win. IR-003 (MEDIUM) is settled by owner decision DEC-0228 with no code change:
+      classify.sql adds no spread tolerance, and the property test's filter on composite spreads below 1e-9 stands.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/red-cycle-2-rework.log
+    red_log_sha256: c6161506faceb7021bb0c6dc769ceb980fa24cd9f70768bc1cad54f76f41586c
+    red_evidence: >
+      The four non-equivalent survivors of review v1 (mutants-cycle-2.json, the reviewer's ids and edits) were first
+      reproduced as survivors of the cycle-1 tests: the seven focused files with the two cycle-2 tests deselected,
+      83 passed under each mutant (4 of 4 survived). Then the two cycle-2 tests were run under one mutant at a time.
+      rv:percentile-on-rounded-score fails case (f): the fourth stock gets (0.134840, 50) where 75 is expected.
+      rv:gap-order-by-name, rv:gap-order-by-label and rv:gap-unordered fail the first-gap test on its first growth
+      case: input_missing eps_growth where input_outdated revenue_growth is expected. Each run: 1 failed, 1 passed.
+      Unmutated, both pass (2 passed, four workers). The unordered mutant leaves the choice to the plan. On
+      PostgreSQL 16 the planner sorts the gap rows by (instrument_id, input_name) for a merge join with
+      factor_input's primary key, so the mutant names the alphabetically first input. A probe printing all five
+      cases' reason_input under it, run three times, found every case wrong each time. No test can make the order of
+      an unordered DISTINCT ON deterministic. The kill is observed on this plan, not guaranteed on every plan.
+    green_evidence: >
+      The seven focused files, as the review ran them: 85 passed in each of the four mutation baselines
+      (mutation-cycle-2-results.json). On 9245392 plus the staged cycle-2 tree, the full Python suite gave
+      1515 passed, 1 xfailed (full-suite-cycle-2.log under logs). ruff check, ruff format --check and mypy src are
+      clean, and strict mypy is also clean over the two changed test files. The tech-stack validation ran before
+      hand-off; its counts are in the completion summary. The code review (APPROVED) and the spec-drift review (no drift)
+      judged cycle-2.patch and asked for no change. Their non-blocking notes are recorded here:
+      case (f) extends T009's hand-built cases (a) to (e), as IR-001's remediation asks;
+      the unordered mutant's kill depends on the plan (see red_evidence);
+      and design 2.4 makes the value inputs outdated as well as the momentum inputs when the latest bar is stale.
+      The test leaves the value inputs present, because each factor classifies from its own rows (DEC-0119).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/full-suite-cycle-2.log
+        sha256: d7dc3bfd92bd3b0a4d9bb87ec0d14aa42a0202240d957acdc1b582aeef33c001
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c9ea64c39f92594ca320bf36ff5f5124cc951b1625e9ae93d3b50c4303a36dfa
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 233d59b8bd9fab2ee343f570d9e8668027dec4a70e7fdd689589a4ad1a727d40
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,65 @@
+.....................................F
+=================================== FAILURES ===================================
+__________ test_a_factor_ranks_only_from_thirty_qualifying_stocks[30] __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58933 user=test database=test_ca6fd66067204781be93b10724803...0x10b5ccef0>, run_id=UUID('cead3ac8-e377-4e65-9f4a-162e93d346ea'), set_id=UUID('4e3e2403-6ca4-4e12-9d57-66ead08bff02'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b5cc800>
+qualifying = 30
+
+    @pytest.mark.parametrize("qualifying", [29, 30])
+    def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
+        store: Store, monkeypatch: pytest.MonkeyPatch, qualifying: int
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, qualifying)
+        outdated = []
+        for i in range(35 - qualifying):
+            stock = add_active_stock(conn, f"OUT{i}")
+            add_factor_inputs(conn, set_id, stock, "value", statuses={"fcf_yield": "outdated"})
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+            outdated.append(stock)
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete"
+        assert result.qualified_counts == {"value": qualifying, "growth": 35, "momentum": 35}
+        counts = factor_counts_for(conn, set_id)
+        assert counts["growth"] == (35, True)
+        assert counts["momentum"] == (35, True)
+        rows = classifications_for(conn, set_id)
+        value_rows = {stock: row for (stock, factor), row in rows.items() if factor == "value"}
+        assert len(value_rows) == 35
+        if qualifying < constants.MIN_PEER_SET_SIZE:
+            assert counts["value"] == (29, False)
+            for row in value_rows.values():  # the six outdated stocks too: the unranked reason wins
+                assert reason(row) == (
+                    "not_classified",
+                    "not_enough_stocks",
+                    None,
+                    "29 of 30 stocks qualified",
+                    None,
+                    None,
+                )
+        else:
+            assert counts["value"] == (30, True)
+            assert sorted(s for s, r in value_rows.items() if r["status"] == "classified") == roster
+            for stock in outdated:
+>               assert reason(value_rows[stock]) == (
+                    "not_classified",
+                    "input_outdated",
+                    "fcf_yield",
+                    "free-cash-flow yield outdated",
+                    None,
+                    None,
+                )
+E               AssertionError: assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E                 
+E                 At index 1 diff: 'input_missing' != 'input_outdated'
+E                 Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:227: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_a_factor_ranks_only_from_thirty_qualifying_stocks[30]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 37 passed in 4.75s

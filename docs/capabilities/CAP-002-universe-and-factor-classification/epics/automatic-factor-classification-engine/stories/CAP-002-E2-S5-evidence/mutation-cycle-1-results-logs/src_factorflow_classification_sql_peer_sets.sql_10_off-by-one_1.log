@@ -1,0 +1,70 @@
+.................................F
+=================================== FAILURES ===================================
+__________________ test_properties_hold_over_random_peer_sets __________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58592 user=test database=test_fee9ee5689bc44988c93b48a7fa31...0x10984bf50>, run_id=UUID('c70d9724-ac8b-401a-b4cf-c32a497d654e'), set_id=UUID('c62bafa1-7e10-477c-bcd9-5a6b10bd3a88'))
+
+    @settings(deadline=None, max_examples=40)
+>   @given(case=peer_sets(), data=st.data())
+                   ^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_composite_arithmetic.py:238: in test_properties_hold_over_random_peer_sets
+    results = classify(store, factor, stocks)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58592 user=test database=test_fee9ee5689bc44988c93b48a7fa31...0x10984bf50>, run_id=UUID('c70d9724-ac8b-401a-b4cf-c32a497d654e'), set_id=UUID('c62bafa1-7e10-477c-bcd9-5a6b10bd3a88'))
+factor = 'growth'
+stocks = [[Decimal('0.0000'), Decimal('0.0000')], [Decimal('0.0001'), Decimal('0.0001')], [Decimal('-0.0001'), Decimal('-0.0001')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+                    engine._classification_stage(
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+                cur.execute(
+                    "SELECT instrument_id, status, score, percentile FROM factor_classification "
+                    "WHERE set_id = %s AND factor = %s",
+                    (store.set_id, factor),
+                )
+                found = {row[0]: row[1:] for row in cur.fetchall()}
+            assert sorted(found) == sorted(ids)
+>           assert {status for status, _, _ in found.values()} == {"classified"}
+E           AssertionError: assert {'not_classified'} == {'classified'}
+E             
+E             Extra items in the left set:
+E             'not_classified'
+E             Extra items in the right set:
+E             'classified'
+E             Use -v to get more diff
+E           Failing test case: test_properties_hold_over_random_peer_sets(
+E               store=Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58592 user=test database=test_fee9ee5689bc44988c93b48a7fa312f6) at 0x10984bf50>, run_id=UUID('c70d9724-ac8b-401a-b4cf-c32a497d654e'), set_id=UUID('c62bafa1-7e10-477c-bcd9-5a6b10bd3a88')),
+E               case=('growth',
+E                [[int_to_decimal(0), int_to_decimal(0)],
+E                 [int_to_decimal(1), int_to_decimal(1)],
+E                 [int_to_decimal(-1), int_to_decimal(-1)]]),
+E               data=data(...),
+E           )
+E           Explanation:
+E               These lines were always and only run by failing test cases:
+E                   /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/.venv/lib/python3.12/site-packages/psycopg/transaction.py:151
+E                   /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9ei9o802/w1/.venv/lib/python3.12/site-packages/psycopg/transaction.py:167
+
+tests/unit/test_composite_arithmetic.py:96: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_properties_hold_over_random_peer_sets
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 33 passed in 4.52s

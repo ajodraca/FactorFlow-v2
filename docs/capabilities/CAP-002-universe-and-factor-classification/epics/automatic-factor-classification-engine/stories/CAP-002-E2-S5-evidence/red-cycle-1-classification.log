@@ -1,0 +1,1106 @@
+# RED, CAP-002-E2-S5 cycle-1: a clone of 7646ab7aa5aa9fbe04bdc7279f8c2fe22155f184 (origin/main, no production change) plus the five test files exactly as staged in cycle-1.patch (git show :<path>)
+# 2026-10-28T22:55:19Z
+?? tests/integration/engine_classify_support.py
+?? tests/integration/test_engine_peer_set.py
+?? tests/unit/test_classification_stage_order.py
+?? tests/unit/test_classify_sql_static.py
+?? tests/unit/test_composite_arithmetic.py
+# sha256 536de7a2222b5fa0b191f00ab111623b631ab6e2757db265dcd3848090453b3c tests/integration/engine_classify_support.py
+# sha256 748ccc0aa38d600357e72f8ce19510c329fb634e0cd9db3e715d895300b4eaa4 tests/integration/test_engine_peer_set.py
+# sha256 98c6b5551ec5ca72cb43b06fd528658841f71972408d0d8ea3f35044cc6be4a4 tests/unit/test_classify_sql_static.py
+# sha256 c8953db48e1da573a37501343be8195d62c9c627181e406da66b79fa7e733d96 tests/unit/test_classification_stage_order.py
+# sha256 d6cff962155652f4861e6253037419f3be917bd69c754df68f493df2e429ddc9 tests/unit/test_composite_arithmetic.py
+
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone
+      Built factorflow @ file:///private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone
+Installed 43 packages in 47ms
+..........FFFFFFFFFF.FFF.FF.FFFFFFFFFFFFFFFFFF                           [100%]
+=================================== FAILURES ===================================
+_____________________ test_statement_exists[peer_sets.sql] _____________________
+
+name = 'peer_sets.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_exists(name: str) -> None:
+        """DEC-0121: the stage's two statements ship in ``classification/sql``."""
+>       assert (SQL_DIR / name).is_file()
+E       AssertionError: assert False
+E        +  where False = is_file()
+E        +    where is_file = (PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql') / 'peer_sets.sql').is_file
+
+tests/unit/test_classify_sql_static.py:120: AssertionError
+_____________________ test_statement_exists[classify.sql] ______________________
+
+name = 'classify.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_exists(name: str) -> None:
+        """DEC-0121: the stage's two statements ship in ``classification/sql``."""
+>       assert (SQL_DIR / name).is_file()
+E       AssertionError: assert False
+E        +  where False = is_file()
+E        +    where is_file = (PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql') / 'classify.sql').is_file
+
+tests/unit/test_classify_sql_static.py:120: AssertionError
+__________ test_statement_never_names_a_universe_table[peer_sets.sql] __________
+
+name = 'peer_sets.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_never_names_a_universe_table(name: str) -> None:
+        """AC-8, DAC-E2-S5-5: no universe table is read, so membership cannot move a score."""
+>       assert "universe" not in statement(name).lower()
+                                 ^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...line-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+__________ test_statement_never_names_a_universe_table[classify.sql] ___________
+
+name = 'classify.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_never_names_a_universe_table(name: str) -> None:
+        """AC-8, DAC-E2-S5-5: no universe table is read, so membership cannot move a score."""
+>       assert "universe" not in statement(name).lower()
+                                 ^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...eline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+__ test_statement_reads_factor_input_and_not_the_inputs_table[peer_sets.sql] ___
+
+name = 'peer_sets.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_reads_factor_input_and_not_the_inputs_table(name: str) -> None:
+        """DEC-0119: the statements read ``factor_input``, never the ``inputs`` temporary table."""
+>       text = statement(name)
+               ^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...line-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+___ test_statement_reads_factor_input_and_not_the_inputs_table[classify.sql] ___
+
+name = 'classify.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_reads_factor_input_and_not_the_inputs_table(name: str) -> None:
+        """DEC-0119: the statements read ``factor_input``, never the ``inputs`` temporary table."""
+>       text = statement(name)
+               ^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...eline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+________ test_statement_takes_only_the_stage_parameters[peer_sets.sql] _________
+
+name = 'peer_sets.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_takes_only_the_stage_parameters(name: str) -> None:
+        """DEC-0119, DEC-0120: only the stage's ``%(name)s`` parameters, never interpolation."""
+>       text = statement(name)
+               ^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...line-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_________ test_statement_takes_only_the_stage_parameters[classify.sql] _________
+
+name = 'classify.sql'
+
+    @pytest.mark.parametrize("name", STATEMENTS)
+    def test_statement_takes_only_the_stage_parameters(name: str) -> None:
+        """DEC-0119, DEC-0120: only the stage's ``%(name)s`` parameters, never interpolation."""
+>       text = statement(name)
+               ^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...eline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+___________ test_classify_does_its_arithmetic_with_window_functions ____________
+
+    def test_classify_does_its_arithmetic_with_window_functions() -> None:
+        """DEC-0052, DEC-0053: PostgreSQL window functions do the arithmetic."""
+>       text = statement("classify.sql")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...eline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+________________ test_each_statement_writes_only_its_own_table _________________
+
+    def test_each_statement_writes_only_its_own_table() -> None:
+        """DEC-0119: each statement inserts into its one table and changes no other."""
+>       assert written_tables(statement("peer_sets.sql")) == {"classification_set_factor"}
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...line-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/peer_sets.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_______________ test_input_labels_cover_exactly_the_input_names ________________
+
+    def test_input_labels_cover_exactly_the_input_names() -> None:
+        """DEC-0130: one label per input name, and no other key."""
+        names = {name for names in constants.INPUT_NAMES.values() for name in names}
+>       assert set(constants.INPUT_LABELS) == names
+                   ^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.constants' has no attribute 'INPUT_LABELS'. Did you mean: 'INPUT_NAMES'?
+
+tests/unit/test_classify_sql_static.py:171: AttributeError
+_________________ test_input_labels_are_the_product_vocabulary _________________
+
+    def test_input_labels_are_the_product_vocabulary() -> None:
+        """DEC-0120, DEC-0130, STD-UI-1: product vocabulary, never a payload key."""
+>       assert constants.INPUT_LABELS == LABELS
+               ^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.constants' has no attribute 'INPUT_LABELS'. Did you mean: 'INPUT_NAMES'?
+
+tests/unit/test_classify_sql_static.py:176: AttributeError
+______________________ test_classify_holds_no_label_text _______________________
+
+    def test_classify_holds_no_label_text() -> None:
+        """DEC-0120: the labels have one table; ``classify.sql`` receives them bound."""
+>       text = statement("classify.sql")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_classify_sql_static.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_classify_sql_static.py:47: in statement
+    return (SQL_DIR / name).read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2...eline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/red-clone/src/factorflow/classification/sql/classify.sql'
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_________________ test_the_classification_stage_is_registered __________________
+
+    def test_the_classification_stage_is_registered() -> None:
+        """DEC-0121: ``build`` runs the classification stage."""
+>       assert engine._classification_stage in engine._STAGES
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/unit/test_classification_stage_order.py:38: AttributeError
+_______ test_no_input_stage_is_registered_after_the_classification_stage _______
+
+    def test_no_input_stage_is_registered_after_the_classification_stage() -> None:
+        """DEC-0121, DAC-E2-2: inputs are written before peer sets are formed from them."""
+>       late = input_stages_after_classification(engine._STAGES)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_classification_stage_order.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stages = []
+
+    def input_stages_after_classification(stages: Sequence[Callable[..., object]]) -> list[str]:
+        names = [getattr(stage, "__name__", "") for stage in stages]
+>       position = names.index("_classification_stage")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: '_classification_stage' is not in list
+
+tests/unit/test_classification_stage_order.py:18: ValueError
+________________ test_common_z_scores_are_already_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+
+    def test_common_z_scores_are_already_standardised(store: Store) -> None:
+        """(a) Both inputs have the same z-scores, (v - 3) / sqrt(2.5) with the sample standard
+        deviation, so the composite equals them and re-standardising leaves it unchanged."""
+>       results = classify(store, "growth", growth([1, 2, 3, 4, 5], [10, 20, 30, 40, 50]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+factor = 'growth'
+stocks = [[Decimal('1'), Decimal('10')], [Decimal('2'), Decimal('20')], [Decimal('3'), Decimal('30')], [Decimal('4'), Decimal('40')], [Decimal('5'), Decimal('50')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+>                   engine._classification_stage(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+E                   AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/unit/test_composite_arithmetic.py:86: AttributeError
+_________________ test_uncorrelated_inputs_are_re_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+
+    def test_uncorrelated_inputs_are_re_standardised(store: Store) -> None:
+        """(b) Deviations x1 = (-2, -1, 0, 1, 2) and x2 = (1, -2, 0, 2, -1) from the mean 3 are
+        uncorrelated (sum x1 * x2 = 0). The composite (x1 + x2) / (2 sqrt(2.5)) has sample
+        standard deviation sqrt(2) / 2, not 1, so re-standardising rescales it to
+        (x1 + x2) / sqrt(5)."""
+        first, second = [1, 2, 3, 4, 5], [4, 1, 3, 5, 2]
+        x1, x2 = [v - 3 for v in first], [v - 3 for v in second]
+        assert sum(a * b for a, b in zip(x1, x2, strict=True)) == 0
+        sums = [a + b for a, b in zip(x1, x2, strict=True)]  # -1, -3, 0, 3, 1
+        composite = [Decimal(s) / (2 * Decimal("2.5").sqrt()) for s in sums]
+        composite_sd = (sum((c * c for c in composite), Decimal(0)) / 4).sqrt()
+        assert abs(composite_sd - Decimal(2).sqrt() / 2) < Decimal("1e-20")
+        scores = [(Decimal(s) / Decimal(5).sqrt()).quantize(SCORE_PLACES) for s in sums]
+        percentiles = [Decimal(p) for p in (25, 0, 50, 100, 75)]
+    
+>       results = classify(store, "growth", growth(first, second))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+factor = 'growth'
+stocks = [[Decimal('1'), Decimal('4')], [Decimal('2'), Decimal('1')], [Decimal('3'), Decimal('3')], [Decimal('4'), Decimal('5')], [Decimal('5'), Decimal('2')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+>                   engine._classification_stage(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+E                   AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/unit/test_composite_arithmetic.py:86: AttributeError
+________________ test_a_zero_dispersion_input_contributes_zero _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+
+    def test_a_zero_dispersion_input_contributes_zero(store: Store) -> None:
+        """(c) ``eps_growth`` is 7 for every stock: its z-score is 0, so the composite is half
+        the other input's z-score, and re-standardising returns that z-score."""
+>       results = classify(store, "growth", growth([1, 2, 3, 4, 5], [7, 7, 7, 7, 7]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+factor = 'growth'
+stocks = [[Decimal('1'), Decimal('7')], [Decimal('2'), Decimal('7')], [Decimal('3'), Decimal('7')], [Decimal('4'), Decimal('7')], [Decimal('5'), Decimal('7')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+>                   engine._classification_stage(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+E                   AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/unit/test_composite_arithmetic.py:86: AttributeError
+___ test_every_input_without_dispersion_scores_zero_without_dividing_by_zero ___
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+
+    def test_every_input_without_dispersion_scores_zero_without_dividing_by_zero(
+        store: Store,
+    ) -> None:
+        """(d) Both inputs are constant: every z-score, composite and score is 0, and the tied
+        stocks all take percentile 0."""
+>       results = classify(store, "growth", growth([2, 2, 2, 2, 2], [9, 9, 9, 9, 9]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+factor = 'growth'
+stocks = [[Decimal('2'), Decimal('9')], [Decimal('2'), Decimal('9')], [Decimal('2'), Decimal('9')], [Decimal('2'), Decimal('9')], [Decimal('2'), Decimal('9')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+>                   engine._classification_stage(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+E                   AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/unit/test_composite_arithmetic.py:86: AttributeError
+_____________ test_opposite_inputs_cancel_to_a_constant_composite ______________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+
+    def test_opposite_inputs_cancel_to_a_constant_composite(store: Store) -> None:
+        """(e) ``eps_growth`` is minus ``revenue_growth``: the z-scores cancel exactly, the
+        composite is 0 for every stock and its zero dispersion gives score 0."""
+        a = [1, 2, 4, 8, 16]
+    
+>       results = classify(store, "growth", growth(a, [-v for v in a]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:191: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+factor = 'growth'
+stocks = [[Decimal('1'), Decimal('-1')], [Decimal('2'), Decimal('-2')], [Decimal('4'), Decimal('-4')], [Decimal('8'), Decimal('-8')], [Decimal('16'), Decimal('-16')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+>                   engine._classification_stage(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+E                   AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/unit/test_composite_arithmetic.py:86: AttributeError
+__________________ test_properties_hold_over_random_peer_sets __________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+
+    @settings(deadline=None, max_examples=40)
+>   @given(case=peer_sets(), data=st.data())
+                   ^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_composite_arithmetic.py:238: in test_properties_hold_over_random_peer_sets
+    results = classify(store, factor, stocks)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf71...0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7'))
+factor = 'growth'
+stocks = [[Decimal('0.0000'), Decimal('0.0000')], [Decimal('-0.0001'), Decimal('-0.0001')], [Decimal('0.0001'), Decimal('0.0001')]]
+
+    def classify(store: Store, factor: str, stocks: Sequence[Sequence[Decimal]]) -> list[Result]:
+        """Classify ``stocks``, each the factor's input values in ``INPUT_NAMES`` order, in a
+        transaction rolled back at its end; each stock's ``(score, percentile)`` in order."""
+        conn = store.conn
+        results: list[Result] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                ids = []
+                for position, values in enumerate(stocks):
+                    instrument_id = insert_instrument(cur, f"H{position:03d}", "active")
+                    insert_factor_inputs(cur, store.set_id, instrument_id, factor, values)
+                    ids.append(instrument_id)
+                with patch.object(constants, "MIN_PEER_SET_SIZE", 3):
+>                   engine._classification_stage(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        conn, make_context(store.set_id, store.run_id, ids, ())
+                    )
+E                   AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+E                   Failing test case: test_properties_hold_over_random_peer_sets(
+E                       store=Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_db507e01b3c54c32ab9fa6d0baf711e1) at 0x10d48f680>, run_id=UUID('6699d978-85aa-4e89-b1cb-de2a8dd986ab'), set_id=UUID('76f20962-0c30-496e-86ad-5451f55bcdc7')),
+E                       case=('growth',
+E                        [[int_to_decimal(0), int_to_decimal(0)],
+E                         [int_to_decimal(-1), int_to_decimal(-1)],
+E                         [int_to_decimal(1), int_to_decimal(1)]]),  # or any other generated value
+E                       data=data(...),
+E                   )
+
+tests/unit/test_composite_arithmetic.py:86: AttributeError
+___ test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_4571b22201d24b819cf9e35ed194a...0x1161ea4e0>, run_id=UUID('c13c4b6b-f73c-4539-b202-dd12be74a216'), set_id=UUID('61b9d2d5-4daa-42ec-8803-ffa484e8bc93'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1161eb8c0>
+
+    def test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 30)
+        a = add_active_stock(conn, "A")
+        b = add_active_stock(conn, "B")
+        add_factor_inputs(conn, set_id, a, "value", statuses={"fcf_yield": "missing"})
+        add_factor_inputs(conn, set_id, b, "value", omit=("fcf_yield",))  # no third row at all
+        for stock in (a, b):
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+    
+>       result = run_classification_build(conn, set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_4571b22201d24b819cf9e35ed194ac93) at 0x1161ea4e0>
+set_id = UUID('61b9d2d5-4daa-42ec-8803-ffa484e8bc93')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1161eb8c0>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+__________ test_scores_are_identical_whatever_the_universe_membership __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_9c42fabf9f9d44448e31f20b3efd1...0x116450140>, run_id=UUID('7b2b0861-c376-4c69-b363-62733ae9a4ac'), set_id=UUID('9f034fdf-0438-4cc8-a8dd-25996dccb0d5'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116451d90>
+
+    def test_scores_are_identical_whatever_the_universe_membership(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = store.conn
+        roster, retired = add_full_roster(conn, store.set_id, 32, n_retired=1)
+        assert conn.execute("SELECT count(*) FROM universe").fetchone() == (0,)
+        conn.commit()
+>       assert run_classification_build(conn, store.set_id, monkeypatch).state == "complete"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_9c42fabf9f9d44448e31f20b3efd13d2) at 0x116450140>
+set_id = UUID('9f034fdf-0438-4cc8-a8dd-25996dccb0d5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116451d90>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+__________ test_a_factor_ranks_only_from_thirty_qualifying_stocks[29] __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_7aa948fa8b374a2ebf0832aba2bc0...0x1164f5820>, run_id=UUID('1e178e2f-3c64-4d9a-ab36-8d93c0da9baf'), set_id=UUID('f4d9daea-6373-426f-b0e7-7edb51b3c364'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1164f4560>
+qualifying = 29
+
+    @pytest.mark.parametrize("qualifying", [29, 30])
+    def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
+        store: Store, monkeypatch: pytest.MonkeyPatch, qualifying: int
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, qualifying)
+        outdated = []
+        for i in range(35 - qualifying):
+            stock = add_active_stock(conn, f"OUT{i}")
+            add_factor_inputs(conn, set_id, stock, "value", statuses={"fcf_yield": "outdated"})
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+            outdated.append(stock)
+    
+>       result = run_classification_build(conn, set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_7aa948fa8b374a2ebf0832aba2bc0bb3) at 0x1164f5820>
+set_id = UUID('f4d9daea-6373-426f-b0e7-7edb51b3c364')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1164f4560>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+__________ test_a_factor_ranks_only_from_thirty_qualifying_stocks[30] __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_d7446da9f87c4ddfbd5361c8d76ad...0x116590590>, run_id=UUID('334a9fc7-1741-41a3-afe4-c8b1081c3dbd'), set_id=UUID('407eb2a4-4095-4da4-97ca-aca89eafcb6e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116592a50>
+qualifying = 30
+
+    @pytest.mark.parametrize("qualifying", [29, 30])
+    def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
+        store: Store, monkeypatch: pytest.MonkeyPatch, qualifying: int
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, qualifying)
+        outdated = []
+        for i in range(35 - qualifying):
+            stock = add_active_stock(conn, f"OUT{i}")
+            add_factor_inputs(conn, set_id, stock, "value", statuses={"fcf_yield": "outdated"})
+            add_factor_inputs(conn, set_id, stock, "growth")
+            add_factor_inputs(conn, set_id, stock, "momentum")
+            outdated.append(stock)
+    
+>       result = run_classification_build(conn, set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_d7446da9f87c4ddfbd5361c8d76ad13d) at 0x116590590>
+set_id = UUID('407eb2a4-4095-4da4-97ca-aca89eafcb6e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116592a50>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+___ test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_e951b2bb4e454f9cae3c8923726da...0x1165ece90>, run_id=UUID('2f1ce45c-1d9f-474b-aa8a-516b160e3ada'), set_id=UUID('edc57bee-9da7-4724-ae2e-c447fc4d963f'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1165ee1e0>
+
+    def test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, (r1, r2) = add_full_roster(conn, set_id, 31, n_retired=2)
+        for factor in FACTORS:  # R2's present rows prove the exclusion does not rest on absence
+            add_factor_inputs(conn, set_id, r2, factor)
+        assert (input_row_count(conn, r1), input_row_count(conn, r2)) == (0, 8)
+    
+>       result = run_classification_build(conn, set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_e951b2bb4e454f9cae3c8923726da297) at 0x1165ece90>
+set_id = UUID('edc57bee-9da7-4724-ae2e-c447fc4d963f')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1165ee1e0>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+______________ test_a_not_computable_input_is_named_as_the_reason ______________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_75ad7d8b1add488cb86a81c758d64...0x11668fd40>, run_id=UUID('ebdec10d-a690-45ba-89ef-dd6238ab3d71'), set_id=UUID('c6719606-fe5c-41f8-8fe3-d30b4e9c68eb'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116747110>
+
+    def test_a_not_computable_input_is_named_as_the_reason(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 30)
+        p = add_active_stock(conn, "P")
+        add_factor_inputs(conn, set_id, p, "value")
+        add_factor_inputs(conn, set_id, p, "growth", statuses={"eps_growth": "not_computable"})
+        add_factor_inputs(conn, set_id, p, "momentum")
+    
+>       assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_75ad7d8b1add488cb86a81c758d64d06) at 0x11668fd40>
+set_id = UUID('c6719606-fe5c-41f8-8fe3-d30b4e9c68eb')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116747110>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+_ test_classified_rows_carry_the_reference_scores_over_the_full_percentile_range _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_e898c31a7ec04435a5743689061e3...0x1164f4920>, run_id=UUID('c2c28c5c-b88b-40ba-a565-cb4dd3467b37'), set_id=UUID('ac603c9a-0b71-4f0b-98cf-37e5e6f17b38'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1164f6240>
+
+    def test_classified_rows_carry_the_reference_scores_over_the_full_percentile_range(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-9: every classified row has a score and a percentile in 0 to 100, the lowest 0 and
+        the highest 100, equal to the oracle's to 6 decimals, and no reason."""
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 31)
+    
+>       assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_e898c31a7ec04435a5743689061e35a9) at 0x1164f4920>
+set_id = UUID('ac603c9a-0b71-4f0b-98cf-37e5e6f17b38')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1164f6240>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+________ test_the_reason_is_the_first_input_not_present_in_factor_order ________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_24a1ba312eda4215a58075f43a48f...0x116452690>, run_id=UUID('5d1dc3b1-3d2f-472e-a593-4e76e166b5ff'), set_id=UUID('18f02f4d-4f64-46ac-9d9e-fc118e15802c'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116450710>
+
+    def test_the_reason_is_the_first_input_not_present_in_factor_order(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12, DEC-0120: an input with no row counts as missing and is named, and the reason
+        is the first input that is not present in the factor's input order, not the most severe."""
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 30)
+        absent = add_active_stock(conn, "ABSENT")
+        add_factor_inputs(conn, set_id, absent, "value", omit=("earnings_yield",))
+        computable = add_active_stock(conn, "NOTCOMP")
+        add_factor_inputs(
+            conn,
+            set_id,
+            computable,
+            "value",
+            statuses={"earnings_yield": "not_computable", "fcf_yield": "missing"},
+        )
+        stale = add_active_stock(conn, "STALE")
+        add_factor_inputs(
+            conn, set_id, stale, "value", statuses={"book_to_price": "outdated", "fcf_yield": "missing"}
+        )
+    
+>       assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:341: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_24a1ba312eda4215a58075f43a48fd35) at 0x116452690>
+set_id = UUID('18f02f4d-4f64-46ac-9d9e-fc118e15802c')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116450710>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+________ test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set _________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_bb319eb953974afaa35a139eed9e3...0x1161eb1a0>, run_id=UUID('baf598a3-7baa-4c12-b9bd-46b2de934dc1'), set_id=UUID('b491a59f-4f10-4db5-aafd-97041d9efe4e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1163a7560>
+
+    def test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0119: both statements read only the build's own set of ``factor_input`` rows."""
+        conn, first_set = store.conn, store.set_id
+        roster = [add_active_stock(conn, f"S{i:03d}") for i in range(31)]
+        for i, stock in enumerate(roster):  # very different values, reversed in order
+            for factor in FACTORS:
+                names = constants.INPUT_NAMES[factor]
+                values = {name: Decimal(10_000 * (31 - i) + k) for k, name in enumerate(names)}
+                statuses = {"fcf_yield": "outdated"} if factor == "value" and i == 0 else {}
+                add_factor_inputs(conn, first_set, stock, factor, statuses=statuses, values=values)
+>       assert run_classification_build(conn, first_set, monkeypatch).state == "complete"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:383: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_bb319eb953974afaa35a139eed9e3a87) at 0x1161eb1a0>
+set_id = UUID('b491a59f-4f10-4db5-aafd-97041d9efe4e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1163a7560>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+______________ test_a_stock_outside_the_active_roster_is_ignored _______________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_1fb3d6d672f0478d9e0160bd87272...0x11668e2d0>, run_id=UUID('33122bc1-63f5-4e6c-8010-070673f10f33'), set_id=UUID('437e1058-b35b-47f4-9900-00aa3ec16637'))
+
+    def test_a_stock_outside_the_active_roster_is_ignored(store: Store) -> None:
+        """DEC-0119: the peer set is the roster passed in ``active_ids``, even for a stock whose
+        lifecycle is active and whose inputs are all present."""
+        conn, set_id = store.conn, store.set_id
+        roster, _ = add_full_roster(conn, set_id, 31)
+        inside, outsider = roster[:30], roster[30]
+    
+>       engine._classification_stage(conn, make_context(set_id, store.run_id, inside, ()))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/test_engine_peer_set.py:414: AttributeError
+_ test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_6eaf348110554061a0ce095a24612...0x1167a2030>, run_id=UUID('ab2fbb4e-e2b5-4059-ab9c-9e1052951e78'), set_id=UUID('f6020358-b035-4c25-9ece-41f3c9af4c9e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1167a2720>
+
+    def test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-14, AC-15, DEC-0121: every active and retired instrument has exactly one row per
+        factor and no other instrument has any; no row is marked restated (CAP-002-E2-S6's mark);
+        a factor no stock qualifies on still has its count, unranked, with '0 of 30'."""
+        conn, set_id = store.conn, store.set_id
+        active = [add_active_stock(conn, f"M{i:03d}") for i in range(31)]
+        for stock in active[:30]:
+            add_factor_inputs(conn, set_id, stock, "value")
+        add_factor_inputs(conn, set_id, active[30], "value", statuses={"fcf_yield": "missing"})
+        for stock in active:
+            add_factor_inputs(conn, set_id, stock, "growth")  # no momentum row for anyone
+        retired = [add_instrument(conn, f"OLD{i}", "retired") for i in range(2)]
+    
+>       result = run_classification_build(conn, set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:439: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_6eaf348110554061a0ce095a24612ec8) at 0x1167a2030>
+set_id = UUID('f6020358-b035-4c25-9ece-41f3c9af4c9e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1167a2720>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+______________ test_the_unranked_reason_states_the_floor_in_force ______________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_e97d223a88124ecfab8833d150312...0x116840ce0>, run_id=UUID('601637c2-b5e3-42ab-9d5a-f6aeb24901f8'), set_id=UUID('36a44a44-362a-4261-b4f7-24b98caf47dd'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116842d50>
+
+    def test_the_unranked_reason_states_the_floor_in_force(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0120: the floor in ``reason_detail`` is ``constants.MIN_PEER_SET_SIZE``, read when
+        the stage runs, as is the floor ``ranked`` is judged against (AC-14)."""
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 31)
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 32)
+    
+>       assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_peer_set.py:477: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59135 user=test database=test_e97d223a88124ecfab8833d1503120b2) at 0x116840ce0>
+set_id = UUID('36a44a44-362a-4261-b4f7-24b98caf47dd')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x116842d50>
+
+    def run_classification_build(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> engine.BuildResult:
+        """``engine.build`` with only the classification stage, so no input stage runs."""
+>       monkeypatch.setattr(engine, "_STAGES", [engine._classification_stage])
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_classification_stage'
+
+tests/integration/engine_classify_support.py:141: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classify_sql_static.py::test_statement_exists[peer_sets.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_exists[classify.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_never_names_a_universe_table[peer_sets.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_never_names_a_universe_table[classify.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_reads_factor_input_and_not_the_inputs_table[peer_sets.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_reads_factor_input_and_not_the_inputs_table[classify.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_takes_only_the_stage_parameters[peer_sets.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_statement_takes_only_the_stage_parameters[classify.sql]
+FAILED tests/unit/test_classify_sql_static.py::test_classify_does_its_arithmetic_with_window_functions
+FAILED tests/unit/test_classify_sql_static.py::test_each_statement_writes_only_its_own_table
+FAILED tests/unit/test_classify_sql_static.py::test_input_labels_cover_exactly_the_input_names
+FAILED tests/unit/test_classify_sql_static.py::test_input_labels_are_the_product_vocabulary
+FAILED tests/unit/test_classify_sql_static.py::test_classify_holds_no_label_text
+FAILED tests/unit/test_classification_stage_order.py::test_the_classification_stage_is_registered
+FAILED tests/unit/test_classification_stage_order.py::test_no_input_stage_is_registered_after_the_classification_stage
+FAILED tests/unit/test_composite_arithmetic.py::test_common_z_scores_are_already_standardised
+FAILED tests/unit/test_composite_arithmetic.py::test_uncorrelated_inputs_are_re_standardised
+FAILED tests/unit/test_composite_arithmetic.py::test_a_zero_dispersion_input_contributes_zero
+FAILED tests/unit/test_composite_arithmetic.py::test_every_input_without_dispersion_scores_zero_without_dividing_by_zero
+FAILED tests/unit/test_composite_arithmetic.py::test_opposite_inputs_cancel_to_a_constant_composite
+FAILED tests/unit/test_composite_arithmetic.py::test_properties_hold_over_random_peer_sets
+FAILED tests/integration/test_engine_peer_set.py::test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set
+FAILED tests/integration/test_engine_peer_set.py::test_scores_are_identical_whatever_the_universe_membership
+FAILED tests/integration/test_engine_peer_set.py::test_a_factor_ranks_only_from_thirty_qualifying_stocks[29]
+FAILED tests/integration/test_engine_peer_set.py::test_a_factor_ranks_only_from_thirty_qualifying_stocks[30]
+FAILED tests/integration/test_engine_peer_set.py::test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor
+FAILED tests/integration/test_engine_peer_set.py::test_a_not_computable_input_is_named_as_the_reason
+FAILED tests/integration/test_engine_peer_set.py::test_classified_rows_carry_the_reference_scores_over_the_full_percentile_range
+FAILED tests/integration/test_engine_peer_set.py::test_the_reason_is_the_first_input_not_present_in_factor_order
+FAILED tests/integration/test_engine_peer_set.py::test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set
+FAILED tests/integration/test_engine_peer_set.py::test_a_stock_outside_the_active_roster_is_ignored
+FAILED tests/integration/test_engine_peer_set.py::test_every_instrument_gets_one_unmarked_row_per_factor_and_every_factor_a_count
+FAILED tests/integration/test_engine_peer_set.py::test_the_unranked_reason_states_the_floor_in_force
+33 failed, 13 passed in 5.80s
