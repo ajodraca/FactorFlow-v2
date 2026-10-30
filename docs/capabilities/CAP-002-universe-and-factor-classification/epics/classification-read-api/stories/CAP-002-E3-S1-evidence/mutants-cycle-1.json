@@ -1,0 +1,359 @@
+{
+ "schema": 1,
+ "repo_head": "7688c924c554920816b60fd6af60fc81f1164174",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/reader.py:52:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 52,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:66:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 66,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:73:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 73,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:89:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 89,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:95:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 95,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:111:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 111,
+   "original": "    columns = dict(zip(names, row, strict=True))",
+   "mutated": "    columns = dict(zip(names, row))"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:111:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 111,
+   "original": "    columns = dict(zip(names, row, strict=True))",
+   "mutated": "    columns = dict(zip(names, row, strict=False))"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:112:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 112,
+   "original": "    later = _row_to_later(columns) if columns[\"later_set_id\"] is not None else None",
+   "mutated": "    later = _row_to_later(columns) if columns[\"later_set_id\"] is None else None"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:114:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 114,
+   "original": "        _row_to_current(columns, not_current=later is not None)",
+   "mutated": "        _row_to_current(columns, not_current=later is None)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:115:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 115,
+   "original": "        if columns[\"set_id\"] is not None",
+   "mutated": "        if columns[\"set_id\"] is None"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:123:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 123,
+   "original": "    return read_set_blocks(conn)[0]",
+   "mutated": "    return read_set_blocks(conn)[1]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:130:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 130,
+   "original": "        return Summary(set=None, never_classified=True, later=later, stocks_current=None)",
+   "mutated": "        return Summary(set=None, later=later, stocks_current=None)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:130:drop-defaulted-argument:2",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 130,
+   "original": "        return Summary(set=None, never_classified=True, later=later, stocks_current=None)",
+   "mutated": "        return Summary(set=None, never_classified=True, later=later)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:130:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 130,
+   "original": "        return Summary(set=None, never_classified=True, later=later, stocks_current=None)",
+   "mutated": "        return Summary(set=None, never_classified=False, later=later, stocks_current=None)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:137:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 137,
+   "original": "        current_count=int(row[0]), followed_count=current.active_instruments",
+   "mutated": "        current_count=int(row[1]), followed_count=current.active_instruments"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:139:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 139,
+   "original": "    return Summary(set=current, never_classified=False, later=later, stocks_current=stocks_current)",
+   "mutated": "    return Summary(set=current, later=later, stocks_current=stocks_current)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:139:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 139,
+   "original": "    return Summary(set=current, never_classified=False, later=later, stocks_current=stocks_current)",
+   "mutated": "    return Summary(set=current, never_classified=True, later=later, stocks_current=stocks_current)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:2:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 2,
+   "original": "-- current: the latest complete set (constraint 11). later: the most recent set started after it,",
+   "mutated": "-- current: the latest complete set (constraint 12). later: the most recent set started after it,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:3:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 3,
+   "original": "-- or the most recent set while none is complete (DEC-0082; task plan Open Gap 1). One row, or",
+   "mutated": "-- or the most recent set while none is complete (DEC-83; task plan Open Gap 1). One row, or"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:3:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 3,
+   "original": "-- or the most recent set while none is complete (DEC-0082; task plan Open Gap 1). One row, or",
+   "mutated": "-- or the most recent set while none is complete (DEC-0082; task plan Open Gap 2). One row, or"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:10:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 10,
+   "original": "     LIMIT 1",
+   "mutated": "     LIMIT 2"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:16:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 16,
+   "original": "     WHERE s.started_at > COALESCE((SELECT started_at FROM current), '-infinity')",
+   "mutated": "     WHERE s.started_at >= COALESCE((SELECT started_at FROM current), '-infinity')"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:18:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 18,
+   "original": "     LIMIT 1",
+   "mutated": "     LIMIT 2"
+  },
+  {
+   "id": "src/factorflow/classification/sql/current_set.sql:41:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "line": 41,
+   "original": "  FROM current c FULL JOIN later l ON true;",
+   "mutated": "  FROM current c FULL JOIN later l ON false;"
+  },
+  {
+   "id": "manual:stale-includes-not-computable",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/summary.sql",
+   "old": "bool_or(fi.status IN ('missing', 'outdated'))",
+   "new": "bool_or(fi.status IN ('missing', 'outdated', 'not_computable'))"
+  },
+  {
+   "id": "manual:stale-drops-outdated",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/summary.sql",
+   "old": "bool_or(fi.status IN ('missing', 'outdated'))",
+   "new": "bool_or(fi.status IN ('missing'))"
+  },
+  {
+   "id": "manual:stale-drops-missing",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/summary.sql",
+   "old": "bool_or(fi.status IN ('missing', 'outdated'))",
+   "new": "bool_or(fi.status IN ('outdated'))"
+  },
+  {
+   "id": "manual:current-count-unfiltered",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/summary.sql",
+   "old": "count(*) FILTER (WHERE NOT stale) AS current_count",
+   "new": "count(*) AS current_count"
+  },
+  {
+   "id": "manual:summary-any-set",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/summary.sql",
+   "old": "     WHERE fi.set_id = %(set_id)s\n",
+   "new": "     WHERE fi.set_id IS NOT NULL OR fi.set_id = %(set_id)s\n"
+  },
+  {
+   "id": "manual:current-earliest-complete",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "     ORDER BY s.ended_at DESC\n",
+   "new": "     ORDER BY s.ended_at ASC\n"
+  },
+  {
+   "id": "manual:current-any-ended-state",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "     WHERE s.state = 'complete'\n",
+   "new": "     WHERE s.ended_at IS NOT NULL\n"
+  },
+  {
+   "id": "manual:later-earliest",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "     ORDER BY s.started_at DESC\n",
+   "new": "     ORDER BY s.started_at ASC\n"
+  },
+  {
+   "id": "manual:later-not-after-current",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "COALESCE((SELECT started_at FROM current), '-infinity')",
+   "new": "'-infinity'"
+  },
+  {
+   "id": "manual:current-run-started-is-set-started",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "SELECT s.*, r.state AS run_outcome, r.started_at AS run_started_at",
+   "new": "SELECT s.*, r.state AS run_outcome, s.started_at AS run_started_at"
+  },
+  {
+   "id": "manual:later-run-started-is-set-started",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "    SELECT s.set_id, s.state, s.run_id, r.started_at AS run_started_at,",
+   "new": "    SELECT s.set_id, s.state, s.run_id, s.started_at AS run_started_at,"
+  },
+  {
+   "id": "manual:later-ended-is-started",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "       l.ended_at       AS later_ended_at,",
+   "new": "       l.started_at     AS later_ended_at,"
+  },
+  {
+   "id": "manual:ended-is-started",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/current_set.sql",
+   "old": "       c.ended_at,\n",
+   "new": "       c.started_at AS ended_at,\n"
+  },
+  {
+   "id": "manual:factor-ranked-from-count",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "ranked=bool(stored[f][\"ranked\"]),",
+   "new": "ranked=bool(stored[f][\"qualified_count\"] >= MIN_PEER_SET_SIZE),"
+  },
+  {
+   "id": "manual:followed-is-scored-roster",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "current_count=int(row[0]), followed_count=current.active_instruments",
+   "new": "current_count=int(row[0]), followed_count=int(row[1])"
+  },
+  {
+   "id": "manual:min-peer-from-count",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "min_peer_set_size=MIN_PEER_SET_SIZE,",
+   "new": "min_peer_set_size=int(stored[f][\"qualified_count\"]),"
+  },
+  {
+   "id": "manual:later-reason-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "failure_reason=c[\"later_failure_reason\"],",
+   "new": "failure_reason=None,"
+  }
+ ]
+}

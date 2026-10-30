@@ -1,0 +1,133 @@
+# TDD evidence for CAP-002-E3-S1 - Reader foundation: current set, later attempt and summary.
+# One cycle: the plan writes every test first (Phase 2, T002-T012), then the two statements and the module (Phase 3,
+# T013-T016), so there is a single RED and a single GREEN. The driver commits once per stage: commit_hash is stage.
+# Decisions: none recorded by this stage. Open Gap 1 (which set is later while none is complete) stays PROVISIONAL as
+# the plan records it, pinned by T011.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged cycle-1.patch (the
+# staged diff the fingerprint hashes): APPROVED and drift_detected false. Their non-blocking notes (the RuntimeError
+# guard in summary() could be an assert; the read-only test's import spelling; LaterSet's docstring follows Open Gap 1)
+# asked for no change.
+# cycle-2 is the rework of implementation review v1 (IR-001, IR-002, IR-003): tests only, no production change.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017]
+    description: >
+      src/factorflow/classification/reader.py (LaterSet, FactorSummary, CurrentSet, StocksCurrent, Summary,
+      read_set_blocks, current_set, summary; FACTORS and MIN_PEER_SET_SIZE re-exported from constants.py),
+      sql/current_set.sql (design 2.4 with the elided select list closed per T013) and sql/summary.sql (design 2.4
+      verbatim). Tests: tests/integration/reader_seed.py (seeding helpers), test_reader_current_set.py (TC-COMP-170,
+      171, 181, the T009 edge cases, the T011 PROVISIONAL pin, and a frozen-blocks check), test_reader_summary.py
+      (TC-COMP-103, 104, 178 and the T010 shape cases) and tests/unit/test_reader_sql_read_only.py (T012). The first
+      mutation run left two non-equivalent survivors (summary.sql reading every set's inputs; ranked derived from the
+      qualified count); the tests were strengthened (the building set's leaked stock is now all present, and
+      TC-COMP-178 stores momentum 33 qualified yet unranked) and the rerun killed both. A one-row assertion and the
+      frozen-blocks test were added before that rerun to kill LIMIT 2 and frozen=False mutants.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/red-cycle-1.log
+    red_log_sha256: 80f3765f79ce968c1862c30a629d5ac5f7e77df02611c1cf9de869590c84e371
+    red_evidence: >
+      Observed with the four test files written and no reader.py or SQL files (HEAD 7688c92): all three new test
+      modules failed at collection with ModuleNotFoundError: No module named 'factorflow.classification.reader'
+      (3 errors, no tests ran).
+    green_evidence: >
+      The three new test files plus tests/unit/test_package_data_ships_sql.py (T017) against a real PostgreSQL 16
+      container: 36 passed (green-cycle-1.log). ruff check, ruff format --check and mypy src clean. The full suite
+      is recorded in the stage report.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/green-cycle-1.log
+        sha256: abb40b30b64267951612c37cb159501df60b427a6fb93eff58ce28692a23166c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ca3dee0374e39b5944fc582bfe51614a258902169891f8320c9868a446be0d9d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: ec1ae00a0f25658b03d255af7d4fee1e33bfaaac4044a78201c11a392bbc3232
+      generated: 41
+      killed: 36
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.878
+      survivors:
+        - id: src/factorflow/classification/reader.py:111:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:111:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/sql/current_set.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/current_set.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/current_set.sql:3:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+
+  - id: cycle-2
+    tasks: [T003, T004, T009]
+    description: >
+      Review rework for implementation review v1. Tests only; no production file changes, as the report's Follow-Up
+      directs. All in tests/integration/test_reader_current_set.py. IR-001 (HIGH): TC-COMP-170 asserts
+      later.started_at equal to the building set's own start (run start + 1h, distinct from the run's start and the
+      current set's start); TC-COMP-171 asserts it in both the building and failed cases (set start T0 + 1h, run
+      start T0, no current set). IR-002 (HIGH): TC-COMP-170's building set now carries its own factor rows
+      (3/False, 4/False, 50/True) and the test asserts the complete set's factors exactly through read_set_blocks
+      and summary; the new T009 case below asserts them too while another complete set holds different rows, and
+      inserts that other set first, the reverse of TC-COMP-170, so a factors subquery merging every set's rows
+      fails one of the two tests whichever duplicate key jsonb_object_agg keeps. IR-003 (HIGH): two T009 cases,
+      test_current_is_chosen_by_ended_at_where_started_at_orders_otherwise (A starts first and ends last, B inside
+      A's window; A is current through current_set and summary) and test_set_started_while_current_was_building_is_later
+      (a building set started after the current set's started_at but before its ended_at is later, not_current
+      true). The first leaves later and not_current unasserted: a complete set started after the current one cannot
+      exist by construction (design 2.4), and the docstring says so.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/red-cycle-2-rework.log
+    red_log_sha256: 13963cb00951d8e7985b5d1e3e9daae33520d0a422d5f71edf473d521b394732
+    red_evidence: >
+      The five non-equivalent survivors of review v1 (mutants-cycle-2.json: the reviewer's ids and old/new text) were
+      first reproduced as survivors of the cycle-1 tests, with HEAD's test_reader_current_set.py restored in each
+      clone: 36 passed under each mutant (5 of 5 survived). Then the cycle-2 tests ran under one mutant at a time:
+      review:current-by-started-at fails the ended_at case (1 failed); review:factors-any-set fails TC-COMP-170
+      (1 failed); review:later-after-current-end fails the started-while-building case (1 failed);
+      review:later-started-is-run-started and review:later-started-sql-is-current each fail TC-COMP-170, both
+      TC-COMP-171 cases and the started-while-building case (4 failed). Unmutated, 38 passed in each of five
+      baselines. The factors-any-set kill relies on PostgreSQL reading a small fresh table in insertion order and
+      jsonb keeping the last duplicate key; the two tests' opposite insertion orders cover either outcome.
+    green_evidence: >
+      The four focused files, as the review ran them: 38 passed in each of the five mutation baselines
+      (mutation-cycle-2-results.json). On 1cc28d8 plus the staged cycle-2 tree, the full Python suite gave
+      1640 passed, 1 xfailed (full-suite-cycle-2.log under logs). ruff check, ruff format --check and mypy src are
+      clean, and strict mypy is clean over the changed test file. Reviews: an independent code-review session and an
+      independent spec-drift session (fresh claude -p sessions with read-only tools) judged cycle-2.patch:
+      APPROVED, drift_detected false. A first pass over an earlier draft asked for a docstring note that the
+      reversed-key state cannot occur by construction; that note and the reversed insertion order were added and the
+      final patch re-reviewed. Non-blocking notes recorded here: the factors-any-set kill depends on scan order (see
+      red_evidence); the new started-while-building case checks read_set_blocks but not summary, which the other
+      tests already prove agree.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/full-suite-cycle-2.log
+        sha256: 97ddd21d4519916f245b497d61675c699b7396e9e337ba80fc0cc25031d22020
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 36dbf56a41edee6c8bb54c35168a4921708c72f2aeef72c141dbe9205bd841b2
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 6e36ea2c9a1834598fe1c14f2b9bc987e219f38afaec2b0a4fc85936cd988960
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

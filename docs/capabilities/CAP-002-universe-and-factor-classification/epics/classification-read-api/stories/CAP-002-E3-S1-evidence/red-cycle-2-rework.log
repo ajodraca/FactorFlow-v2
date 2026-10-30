@@ -1,0 +1,57 @@
+# RED, CAP-002-E3-S1 cycle-2 (review v1 rework: IR-001, IR-002, IR-003). Tests only; no production file changes.
+# Tree: 1cc28d83d2b5a27f8235071938eecdf29ebf670d plus the staged cycle-2 test diff (cycle-2.patch).
+# Mutants: mutants-cycle-2.json, the five non-equivalent survivors of implementation review v1 (ids, old/new as the reviewer wrote them), applied one at a time by scripts/mutation-run.py.
+# Step 1 ran 2026-10-30T02:44Z; step 2 ran 2026-10-30T02:48Z.
+# sha256 14b6f3f4b451877cb47ba74f53dcf7df400f27f09e35dc75d7cfaf273e73eb20 tests/integration/test_reader_current_set.py (as staged)
+
+## Step 1: cycle-1 tests (HEAD's test_reader_current_set.py restored in each clone by the command) under each mutant: all five survive
+results sha256 987d5b90cc7f0a75acf49af96bebf0ff1ea3c1bef4f11155f1eeccd8d1bbf3e0
+survived review:current-by-started-at exit 0
+survived review:factors-any-set exit 0
+survived review:later-started-is-run-started exit 0
+survived review:later-started-sql-is-current exit 0
+survived review:later-after-current-end exit 0
+review_current-by-started-at.log: 36 passed in 5.72s
+review_factors-any-set.log: 36 passed in 5.80s
+review_later-after-current-end.log: 36 passed in 5.60s
+review_later-started-is-run-started.log: 36 passed in 5.66s
+review_later-started-sql-is-current.log: 36 passed in 5.80s
+
+## Step 2: cycle-2 tests under each mutant: all five killed (mutation-cycle-2-results.json)
+baseline-w0.log: 38 passed in 8.34s
+baseline-w1.log: 38 passed in 8.39s
+baseline-w2.log: 38 passed in 8.51s
+baseline-w3.log: 38 passed in 8.32s
+baseline-w4.log: 38 passed in 8.53s
+--- review_current-by-started-at.log
+E           AssertionError: assert UUID('ab473f90-90f7-4857-b802-bdce6ee98fc2') == UUID('c51fa71b-95e2-49f2-b7f2-1bc7e85ba89f')
+FAILED tests/integration/test_reader_current_set.py::test_current_is_chosen_by_ended_at_where_started_at_orders_otherwise
+1 failed, 37 passed in 6.30s
+--- review_factors-any-set.log
+E           AssertionError: assert {'value': Fac..._set_size=30)} == {'value': Fac..._set_size=30)}
+FAILED tests/integration/test_reader_current_set.py::test_complete_set_with_newer_building_set_is_served_with_later
+1 failed, 37 passed in 6.52s
+--- review_later-after-current-end.log
+E       AssertionError: assert False is True
+FAILED tests/integration/test_reader_current_set.py::test_set_started_while_current_was_building_is_later
+1 failed, 37 passed in 6.36s
+--- review_later-started-is-run-started.log
+E           AssertionError: assert datetime.datetime(2026, 10, 15, 22, 30, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == datetime.datetime(2026, 10, 15, 23, 30, tzinfo=datetime.timezone.utc)
+E           AssertionError: assert datetime.datetime(2026, 10, 14, 22, 30, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == (datetime.datetime(2026, 10, 14, 22, 30, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=3600))
+E           AssertionError: assert datetime.datetime(2026, 10, 14, 22, 30, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == (datetime.datetime(2026, 10, 14, 22, 30, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=3600))
+E       AssertionError: assert datetime.datetime(2026, 10, 14, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == datetime.datetime(2026, 10, 14, 23, 30, tzinfo=datetime.timezone.utc)
+FAILED tests/integration/test_reader_current_set.py::test_complete_set_with_newer_building_set_is_served_with_later
+FAILED tests/integration/test_reader_current_set.py::test_first_set_building_or_failed_is_never_classified_with_later[building]
+FAILED tests/integration/test_reader_current_set.py::test_first_set_building_or_failed_is_never_classified_with_later[failed]
+FAILED tests/integration/test_reader_current_set.py::test_set_started_while_current_was_building_is_later
+4 failed, 34 passed in 6.45s
+--- review_later-started-sql-is-current.log
+E           AssertionError: assert datetime.datetime(2026, 10, 14, 22, 30, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == datetime.datetime(2026, 10, 15, 23, 30, tzinfo=datetime.timezone.utc)
+E           AssertionError: assert None == (datetime.datetime(2026, 10, 14, 22, 30, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=3600))
+E           AssertionError: assert None == (datetime.datetime(2026, 10, 14, 22, 30, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=3600))
+E       AssertionError: assert datetime.datetime(2026, 10, 14, 22, 30, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == datetime.datetime(2026, 10, 14, 23, 30, tzinfo=datetime.timezone.utc)
+FAILED tests/integration/test_reader_current_set.py::test_complete_set_with_newer_building_set_is_served_with_later
+FAILED tests/integration/test_reader_current_set.py::test_first_set_building_or_failed_is_never_classified_with_later[building]
+FAILED tests/integration/test_reader_current_set.py::test_first_set_building_or_failed_is_never_classified_with_later[failed]
+FAILED tests/integration/test_reader_current_set.py::test_set_started_while_current_was_building_is_later
+4 failed, 34 passed in 6.30s

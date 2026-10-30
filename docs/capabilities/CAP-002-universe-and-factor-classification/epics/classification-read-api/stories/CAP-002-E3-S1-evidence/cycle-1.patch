@@ -1,0 +1,1204 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/green-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/green-cycle-1.log
+new file mode 100644
+index 0000000..d7f42f7
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/green-cycle-1.log
+@@ -0,0 +1,13 @@
++============================= test session starts ==============================
++platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
++rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2
++configfile: pyproject.toml
++plugins: anyio-4.15.1, hypothesis-6.168.0
++collected 36 items
++
++tests/integration/test_reader_current_set.py ............                [ 33%]
++tests/integration/test_reader_summary.py ...........                     [ 63%]
++tests/unit/test_reader_sql_read_only.py ...                              [ 72%]
++tests/unit/test_package_data_ships_sql.py ..........                     [100%]
++
++============================== 36 passed in 5.64s ==============================
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/red-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/red-cycle-1.log
+new file mode 100644
+index 0000000..cd8bc7f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-evidence/red-cycle-1.log
+@@ -0,0 +1,44 @@
++============================= test session starts ==============================
++platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
++rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2
++configfile: pyproject.toml
++plugins: anyio-4.15.1, hypothesis-6.168.0
++collected 0 items / 3 errors
++
++==================================== ERRORS ====================================
++________ ERROR collecting tests/integration/test_reader_current_set.py _________
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_reader_current_set.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/integration/test_reader_current_set.py:17: in <module>
++    from factorflow.classification import reader
++E   ImportError: cannot import name 'reader' from 'factorflow.classification' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/__init__.py)
++__________ ERROR collecting tests/integration/test_reader_summary.py ___________
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_reader_summary.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/integration/test_reader_summary.py:17: in <module>
++    from factorflow.classification import reader
++E   ImportError: cannot import name 'reader' from 'factorflow.classification' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/__init__.py)
++___________ ERROR collecting tests/unit/test_reader_sql_read_only.py ___________
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_sql_read_only.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/unit/test_reader_sql_read_only.py:13: in <module>
++    import factorflow.classification.reader as reader
++E   ModuleNotFoundError: No module named 'factorflow.classification.reader'
++=========================== short test summary info ============================
++ERROR tests/integration/test_reader_current_set.py
++ERROR tests/integration/test_reader_summary.py
++ERROR tests/unit/test_reader_sql_read_only.py
++!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
++============================== 3 errors in 0.53s ===============================
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-tasks.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-tasks.md
+index 73ee898..1e0047c 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-tasks.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1-tasks.md
+@@ -80,8 +80,8 @@ Notes and Open Gap 6).
+ 
+ **Purpose**: Confirm what this story imports exists, and give the reader tests a way to seed sets directly (design section 7: fixtures insert into `research-store` so the reader is tested independently of the engine).
+ 
+-- [ ] T001 Confirm the producers exist before any code is written, and STOP and report if one is missing rather than creating it here: `src/factorflow/classification/__init__.py` and `src/factorflow/classification/constants.py` exporting `MIN_PEER_SET_SIZE` (30) and `FACTORS` (both created by CAP-002-E2-S2); `src/factorflow/db/migrations/0006_classifications.sql` (CAP-002-E2-S1); `tests/unit/test_package_data_ships_sql.py` with `classification/sql/*.sql` in `[tool.setuptools.package-data]` (CAP-002-E1-S1 creates the guard, CAP-002-E2-S1 adds the glob; DEC-0088). Nothing is edited by this task.
+-- [ ] T002 Create the seeding helpers `tests/integration/reader_seed.py` (a plain helper module, the pattern of `tests/unit/design_sql.py`; later E3 reader stories import it). Functions take a `psycopg.Connection` and use bound parameters only: `insert_instrument(conn, symbol, lifecycle="active") -> int`; `insert_run(conn, state="succeeded", started_at=...) -> UUID` (a terminal state needs `ended_at`, per `acquisition_run_terminal_has_end`; `started_at` is explicit so `run_started_at` assertions are deterministic); `insert_set(conn, run_id, state, *, started_at, ended_at=None, classification_date=..., latest_trading_day=None, active_instruments=None, failure_reason=None, factors=None) -> UUID` (writes the `classification_set` row and its three `classification_set_factor` rows with the given `qualified_count`/`ranked`; honours `classification_set_terminal_has_end`, `classification_set_failed_has_reason`, `classification_set_complete_is_sized` and the single-`building` unique index); `insert_input(conn, set_id, instrument_id, factor, input_name, status, ...)` (a `present` row needs `value`, `as_of` and `known_on`; `detail` is `'{}'::jsonb`). Tests use the existing `migrated_run_schema_connection` fixture in `tests/conftest.py`, which applies every migration `discover` finds and so includes `0005` and `0006` once they exist. Add no fixture to `tests/conftest.py`.
++- [x] T001 Confirm the producers exist before any code is written, and STOP and report if one is missing rather than creating it here: `src/factorflow/classification/__init__.py` and `src/factorflow/classification/constants.py` exporting `MIN_PEER_SET_SIZE` (30) and `FACTORS` (both created by CAP-002-E2-S2); `src/factorflow/db/migrations/0006_classifications.sql` (CAP-002-E2-S1); `tests/unit/test_package_data_ships_sql.py` with `classification/sql/*.sql` in `[tool.setuptools.package-data]` (CAP-002-E1-S1 creates the guard, CAP-002-E2-S1 adds the glob; DEC-0088). Nothing is edited by this task.
++- [x] T002 Create the seeding helpers `tests/integration/reader_seed.py` (a plain helper module, the pattern of `tests/unit/design_sql.py`; later E3 reader stories import it). Functions take a `psycopg.Connection` and use bound parameters only: `insert_instrument(conn, symbol, lifecycle="active") -> int`; `insert_run(conn, state="succeeded", started_at=...) -> UUID` (a terminal state needs `ended_at`, per `acquisition_run_terminal_has_end`; `started_at` is explicit so `run_started_at` assertions are deterministic); `insert_set(conn, run_id, state, *, started_at, ended_at=None, classification_date=..., latest_trading_day=None, active_instruments=None, failure_reason=None, factors=None) -> UUID` (writes the `classification_set` row and its three `classification_set_factor` rows with the given `qualified_count`/`ranked`; honours `classification_set_terminal_has_end`, `classification_set_failed_has_reason`, `classification_set_complete_is_sized` and the single-`building` unique index); `insert_input(conn, set_id, instrument_id, factor, input_name, status, ...)` (a `present` row needs `value`, `as_of` and `known_on`; `detail` is `'{}'::jsonb`). Tests use the existing `migrated_run_schema_connection` fixture in `tests/conftest.py`, which applies every migration `discover` finds and so includes `0005` and `0006` once they exist. Add no fixture to `tests/conftest.py`.
+ 
+ **Checkpoint**: Producers confirmed present; a test can seed instruments, runs, sets, factor rows and inputs in a migrated database.
+ 
+@@ -95,19 +95,19 @@ Notes and Open Gap 6).
+ 
+ Marker: every test below is `@pytest.mark.postgres`. Each carries a `# Implements TC-COMP-nnn` comment and a docstring naming its DAC.
+ 
+-- [ ] T003 Implement TC-COMP-170 (current_set returns complete set with newer building set as later) in `tests/integration/test_reader_current_set.py`. Seed run A and a `complete` set (older), run B and a `building` set with `started_at` later than the complete set's. Assert through `reader.read_set_blocks(conn)` and through `reader.summary(conn)` (both must agree): `set.set_id` is the complete one, `later.set_id` the building one with `later.state == "building"`, `later.run_id`, `later.run_started_at` equal to run B's `started_at`, `later.ended_at is None`, `later.failure_reason is None`, `set.not_current is True`, `never_classified is False`; and `reader.current_set(conn)` returns the complete set with `not_current is True` (Implements TC-COMP-170; DAC-E3-S1-1, DAC-E3-1; AC-20, AC-21).
+-- [ ] T004 Implement TC-COMP-171 (first set building or failed gives never_classified with later) in `tests/integration/test_reader_current_set.py`. Two cases, each in its own fresh database: only a `building` first set; only a `failed` first set with `failure_reason="boom"`. In both: `reader.current_set(conn) is None`, `read_set_blocks` gives `set is None`, `never_classified is True`, `later` carries that set's `set_id`, `state`, `run_id`, `run_started_at`, and for the failed one `later.failure_reason == "boom"` and a non-null `ended_at` (Implements TC-COMP-171; DAC-E3-S1-2, DAC-E3-11; AC-20, AC-22).
+-- [ ] T005 Implement TC-COMP-181 (no set at all gives never_classified in the same shape) in `tests/integration/test_reader_current_set.py`. Empty database: `reader.current_set(conn) is None`; `read_set_blocks(conn)` gives `set is None`, `later is None`, `never_classified is True`; the returned object is the same type and field names as in T003 and T004 (compare `dataclasses.fields`), so the shape does not change by state (Implements TC-COMP-181; DAC-E3-S1-3; AC-22).
+-- [ ] T006 Implement TC-COMP-103 (summary currency counts missing/outdated, not not_computable) in `tests/integration/test_reader_summary.py`. Seed a `complete` set with `active_instruments=4` and four active stocks, each with its eight `factor_input` rows: stock 1 all `present`; stock 2 one `missing` input; stock 3 one `outdated` input; stock 4 one `not_computable` input and the rest `present`. Assert `summary(conn).stocks_current.current_count == 2` (stocks 1 and 4) and `followed_count == 4`. Add the converse: a stock with both `not_computable` and `missing` is not current (Implements TC-COMP-103; DAC-E3-S1-4, DAC-E3-10; AC-13).
+-- [ ] T007 Implement TC-COMP-104 (summary returns counts only from indexed rows) in `tests/integration/test_reader_summary.py`. Seed a complete set with 60 stocks of inputs. (a) Counts only: execute `reader.SUMMARY_SQL` with the set id and assert exactly one row of two integer columns (`current_count`, `scored_roster`), and assert `dataclasses.fields(reader.Summary)` names are exactly `set`, `never_classified`, `later`, `stocks_current` and `StocksCurrent` holds only integers, so no stock rows can travel. (b) Indexed: inside a transaction run `SET LOCAL enable_seqscan = off`, then `EXPLAIN` the `SUMMARY_SQL` (bound `set_id`) and `CURRENT_SET_SQL`; assert the plan text names no `Seq Scan on factor_input`, no `Seq Scan on classification_set` and no `Seq Scan on classification_set_factor`, so each statement can be served from the `factor_input` primary key's `set_id` prefix, `idx_classification_set_complete_recent`, `idx_classification_set_started` and the `classification_set_factor` primary key (Implements TC-COMP-104; DAC-E3-S1-5; AC-13). The technique is recorded in Notes, Open Gaps.
+-- [ ] T008 Implement TC-COMP-178 (reader returns stored values and recomputes nothing) in `tests/integration/test_reader_summary.py`. Seed a `complete` set whose stored values are deliberately not derivable from the rows beneath it: `active_instruments=7` with inputs for only 3 stocks; `classification_set_factor.qualified_count=41, ranked=True` for one factor and `qualified_count=3, ranked=False` for another, with no `factor_classification` rows at all; an `ended_at` and `latest_trading_day` set to distinct known values; run `state="partial"`. Assert `summary(conn)` returns exactly those stored values: `set.active_instruments == 7`, `stocks_current.followed_count == 7`, `set.factors["value"].qualified_count == 41` and `.ranked is True`, the unranked factor `3`/`False`, `set.ended_at`, `set.latest_trading_day`, `set.classification_date`, `set.run_outcome == "partial"`, `set.run_started_at` equal to the seeded run's `started_at`, and `min_peer_set_size == 30` on every factor. A reader that recounted from `factor_classification` or `factor_input` would return 0 or 3 (Implements TC-COMP-178; DAC-E3-S1-6; AC-21; STD-UI-15).
++- [x] T003 Implement TC-COMP-170 (current_set returns complete set with newer building set as later) in `tests/integration/test_reader_current_set.py`. Seed run A and a `complete` set (older), run B and a `building` set with `started_at` later than the complete set's. Assert through `reader.read_set_blocks(conn)` and through `reader.summary(conn)` (both must agree): `set.set_id` is the complete one, `later.set_id` the building one with `later.state == "building"`, `later.run_id`, `later.run_started_at` equal to run B's `started_at`, `later.ended_at is None`, `later.failure_reason is None`, `set.not_current is True`, `never_classified is False`; and `reader.current_set(conn)` returns the complete set with `not_current is True` (Implements TC-COMP-170; DAC-E3-S1-1, DAC-E3-1; AC-20, AC-21).
++- [x] T004 Implement TC-COMP-171 (first set building or failed gives never_classified with later) in `tests/integration/test_reader_current_set.py`. Two cases, each in its own fresh database: only a `building` first set; only a `failed` first set with `failure_reason="boom"`. In both: `reader.current_set(conn) is None`, `read_set_blocks` gives `set is None`, `never_classified is True`, `later` carries that set's `set_id`, `state`, `run_id`, `run_started_at`, and for the failed one `later.failure_reason == "boom"` and a non-null `ended_at` (Implements TC-COMP-171; DAC-E3-S1-2, DAC-E3-11; AC-20, AC-22).
++- [x] T005 Implement TC-COMP-181 (no set at all gives never_classified in the same shape) in `tests/integration/test_reader_current_set.py`. Empty database: `reader.current_set(conn) is None`; `read_set_blocks(conn)` gives `set is None`, `later is None`, `never_classified is True`; the returned object is the same type and field names as in T003 and T004 (compare `dataclasses.fields`), so the shape does not change by state (Implements TC-COMP-181; DAC-E3-S1-3; AC-22).
++- [x] T006 Implement TC-COMP-103 (summary currency counts missing/outdated, not not_computable) in `tests/integration/test_reader_summary.py`. Seed a `complete` set with `active_instruments=4` and four active stocks, each with its eight `factor_input` rows: stock 1 all `present`; stock 2 one `missing` input; stock 3 one `outdated` input; stock 4 one `not_computable` input and the rest `present`. Assert `summary(conn).stocks_current.current_count == 2` (stocks 1 and 4) and `followed_count == 4`. Add the converse: a stock with both `not_computable` and `missing` is not current (Implements TC-COMP-103; DAC-E3-S1-4, DAC-E3-10; AC-13).
++- [x] T007 Implement TC-COMP-104 (summary returns counts only from indexed rows) in `tests/integration/test_reader_summary.py`. Seed a complete set with 60 stocks of inputs. (a) Counts only: execute `reader.SUMMARY_SQL` with the set id and assert exactly one row of two integer columns (`current_count`, `scored_roster`), and assert `dataclasses.fields(reader.Summary)` names are exactly `set`, `never_classified`, `later`, `stocks_current` and `StocksCurrent` holds only integers, so no stock rows can travel. (b) Indexed: inside a transaction run `SET LOCAL enable_seqscan = off`, then `EXPLAIN` the `SUMMARY_SQL` (bound `set_id`) and `CURRENT_SET_SQL`; assert the plan text names no `Seq Scan on factor_input`, no `Seq Scan on classification_set` and no `Seq Scan on classification_set_factor`, so each statement can be served from the `factor_input` primary key's `set_id` prefix, `idx_classification_set_complete_recent`, `idx_classification_set_started` and the `classification_set_factor` primary key (Implements TC-COMP-104; DAC-E3-S1-5; AC-13). The technique is recorded in Notes, Open Gaps.
++- [x] T008 Implement TC-COMP-178 (reader returns stored values and recomputes nothing) in `tests/integration/test_reader_summary.py`. Seed a `complete` set whose stored values are deliberately not derivable from the rows beneath it: `active_instruments=7` with inputs for only 3 stocks; `classification_set_factor.qualified_count=41, ranked=True` for one factor and `qualified_count=3, ranked=False` for another, with no `factor_classification` rows at all; an `ended_at` and `latest_trading_day` set to distinct known values; run `state="partial"`. Assert `summary(conn)` returns exactly those stored values: `set.active_instruments == 7`, `stocks_current.followed_count == 7`, `set.factors["value"].qualified_count == 41` and `.ranked is True`, the unranked factor `3`/`False`, `set.ended_at`, `set.latest_trading_day`, `set.classification_date`, `set.run_outcome == "partial"`, `set.run_started_at` equal to the seeded run's `started_at`, and `min_peer_set_size == 30` on every factor. A reader that recounted from `factor_classification` or `factor_input` would return 0 or 3 (Implements TC-COMP-178; DAC-E3-S1-6; AC-21; STD-UI-15).
+ 
+ ### Additional Unit Tests
+ 
+-- [ ] T009 Current-set edge cases in `tests/integration/test_reader_current_set.py` (design section 7 rows "Current is latest complete", "Not current after failure", "Run outcome, ended_at, run_started_at and counts"; AC-20, AC-21, DAC-E3-1): with two `complete` sets the one with the later `ended_at` is current and `later` is None, `not_current` False; a `complete` set with a newer `failed` set gives `later.state == "failed"` with `failure_reason` and the complete set still served; a `complete` set alone gives `later is None` and `not_current is False`; a `building` set older than the current complete set (not newer) is not `later`; `CurrentSet` carries `classification_date`, `run_id`, `run_started_at`, `run_outcome` ("succeeded" and "partial"), `started_at`, `ended_at`, `latest_trading_day`, `active_instruments`, and `factors` has the three keys in `FACTORS` order with `min_peer_set_size == 30`.
+-- [ ] T010 Summary shape in `tests/integration/test_reader_summary.py` (design section 7 rows "Summary current count" and "Summary carries no rows and the set state"; AC-13, AC-22, DAC-E3-11): no set at all gives `Summary(set=None, never_classified=True, later=None, stocks_current=None)`; only a `building` first set gives `set=None`, `never_classified=True`, `stocks_current=None` and `later` carrying the set; a complete set with a newer building set gives `set` and `later` together with `stocks_current` computed from the complete set's rows; `followed_count == active_instruments` and, in a consistent set, equals the `scored_roster` column of `SUMMARY_SQL`; a factor below 30 qualified (`ranked=False`) changes no stock's currency; a complete set with zero `factor_input` rows gives `current_count == 0` and no error.
+-- [ ] T011 PROVISIONAL behaviour pin in `tests/integration/test_reader_current_set.py` (Open Gap 1; DAC-E3-1, AC-20): with no `complete` set and two earlier-then-later non-complete sets (first `failed`, second `building`), `later` is the more recently started one (`building`). A comment cites "PROVISIONAL, awaiting owner confirmation (2026-10-17), Open Gap 1 of CAP-002-E3-S1-tasks" so a later change is deliberate. With exactly one set (every mapped TC) the choice is unobservable.
+-- [ ] T012 [P] Read-only guard in `tests/unit/test_reader_sql_read_only.py` (DAC-E3-S1-6, constraint "Read-only"): `current_set.sql` and `summary.sql` each contain one statement beginning `WITH` or `SELECT` and no `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `CREATE`, `ALTER` or `DROP` keyword (word-boundary, comments stripped); both are located through `Path(factorflow.classification.reader.__file__).parent / "sql"`, the same directory the module reads at import. No database is needed, so this test is not `postgres`-marked.
++- [x] T009 Current-set edge cases in `tests/integration/test_reader_current_set.py` (design section 7 rows "Current is latest complete", "Not current after failure", "Run outcome, ended_at, run_started_at and counts"; AC-20, AC-21, DAC-E3-1): with two `complete` sets the one with the later `ended_at` is current and `later` is None, `not_current` False; a `complete` set with a newer `failed` set gives `later.state == "failed"` with `failure_reason` and the complete set still served; a `complete` set alone gives `later is None` and `not_current is False`; a `building` set older than the current complete set (not newer) is not `later`; `CurrentSet` carries `classification_date`, `run_id`, `run_started_at`, `run_outcome` ("succeeded" and "partial"), `started_at`, `ended_at`, `latest_trading_day`, `active_instruments`, and `factors` has the three keys in `FACTORS` order with `min_peer_set_size == 30`.
++- [x] T010 Summary shape in `tests/integration/test_reader_summary.py` (design section 7 rows "Summary current count" and "Summary carries no rows and the set state"; AC-13, AC-22, DAC-E3-11): no set at all gives `Summary(set=None, never_classified=True, later=None, stocks_current=None)`; only a `building` first set gives `set=None`, `never_classified=True`, `stocks_current=None` and `later` carrying the set; a complete set with a newer building set gives `set` and `later` together with `stocks_current` computed from the complete set's rows; `followed_count == active_instruments` and, in a consistent set, equals the `scored_roster` column of `SUMMARY_SQL`; a factor below 30 qualified (`ranked=False`) changes no stock's currency; a complete set with zero `factor_input` rows gives `current_count == 0` and no error.
++- [x] T011 PROVISIONAL behaviour pin in `tests/integration/test_reader_current_set.py` (Open Gap 1; DAC-E3-1, AC-20): with no `complete` set and two earlier-then-later non-complete sets (first `failed`, second `building`), `later` is the more recently started one (`building`). A comment cites "PROVISIONAL, awaiting owner confirmation (2026-10-17), Open Gap 1 of CAP-002-E3-S1-tasks" so a later change is deliberate. With exactly one set (every mapped TC) the choice is unobservable.
++- [x] T012 [P] Read-only guard in `tests/unit/test_reader_sql_read_only.py` (DAC-E3-S1-6, constraint "Read-only"): `current_set.sql` and `summary.sql` each contain one statement beginning `WITH` or `SELECT` and no `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `CREATE`, `ALTER` or `DROP` keyword (word-boundary, comments stripped); both are located through `Path(factorflow.classification.reader.__file__).parent / "sql"`, the same directory the module reads at import. No database is needed, so this test is not `postgres`-marked.
+ 
+ **Checkpoint**: All tests written and failing (no production code yet).
+ 
+@@ -117,10 +117,10 @@ Marker: every test below is `@pytest.mark.postgres`. Each carries a `# Implement
+ 
+ **Purpose**: Make the tests pass with the two statements, the block types and the two public reads.
+ 
+-- [ ] T013 Create `src/factorflow/classification/sql/current_set.sql` from the design section 2.4 statement (`current` and `later` CTEs, `FULL JOIN ... ON true`), closing the elided `SELECT ...` list (Open Gap 2): `current` columns `set_id`, `classification_date`, `run_id`, `run_started_at` (`acquisition_run.started_at`), `run_outcome` (`acquisition_run.state`), `state`, `started_at`, `ended_at`, `latest_trading_day`, `active_instruments`, plus `factors` as `(SELECT jsonb_object_agg(f.factor, jsonb_build_object('qualified_count', f.qualified_count, 'ranked', f.ranked)) FROM classification_set_factor f WHERE f.set_id = c.set_id)`; `later` columns prefixed `later_` (`set_id`, `state`, `run_id`, `run_started_at`, `started_at`, `ended_at`, `failure_reason`). Keep the `ORDER BY s.ended_at DESC LIMIT 1` over `state = 'complete'` and `s.started_at > COALESCE((SELECT started_at FROM current), '-infinity')` with `ORDER BY s.started_at DESC LIMIT 1` exactly as designed; do not add a state filter to `later` (a newer `complete` set cannot exist by construction, design 2.4). No parameters, no `%` characters. If PostgreSQL rejects `current` as a CTE name, rename it consistently inside the file; the name is not part of any interface. (depends on T001)
+-- [ ] T014 [P] Create `src/factorflow/classification/sql/summary.sql` verbatim from the design section 2.4 (`current_count`, `scored_roster`; parameter `%(set_id)s`). (depends on T001)
+-- [ ] T015 Create `src/factorflow/classification/reader.py` with the module docstring (cites `component-design-classification-reader.md` sections 2.1, 2.3, 2.4, 7 and AC-13, AC-20 to AC-22), `_SQL_DIR = Path(__file__).parent / "sql"` and `CURRENT_SET_SQL`/`SUMMARY_SQL` loaded with `read_text()` at import (the pattern of `src/factorflow/coverage/gaps.py`); `from factorflow.classification.constants import FACTORS, MIN_PEER_SET_SIZE` (re-exported, so `reader.FACTORS` exists as the design shows; do not redefine either); the frozen dataclasses `LaterSet`, `FactorSummary`, `CurrentSet`, `StocksCurrent`, `Summary` with the exact fields and types of design section 2.3; `read_set_blocks(conn) -> tuple[CurrentSet | None, LaterSet | None]` (Open Gap 3) that runs `CURRENT_SET_SQL` once with a plain cursor, maps tuple columns by name through the cursor description (the module-local `_row_to_*` pattern of `runs/queries.py`), returns `(None, None)` for zero rows, builds `CurrentSet` only when the current columns are non-null with `not_current = later is not None`, `factors` as `{f: FactorSummary(qualified_count, ranked, MIN_PEER_SET_SIZE) for f in FACTORS}`, and `LaterSet` only when its columns are non-null; and `current_set(conn) -> CurrentSet | None` returning the first element. Do not define `Thresholds`, `ListFilters`, `ClassificationPage`, `SORT_ALLOWLIST`, the cursor or exception types, and do not import `factorflow.api.bounds` or `factorflow.api.classification_bounds`: those belong to CAP-002-E3-S2 and later and importing them here would add an unrecorded dependency. No `commit`, no write. (depends on T013, T001)
+-- [ ] T016 Add `summary(conn) -> Summary` to `src/factorflow/classification/reader.py`: call `read_set_blocks`; with no current set return `Summary(set=None, never_classified=True, later=later, stocks_current=None)`; otherwise execute `SUMMARY_SQL` with `{"set_id": set.set_id}`, read `current_count` from the single row and set `StocksCurrent(current_count, followed_count=set.active_instruments)` (the stored column, not `scored_roster`, per design 2.4), returning `Summary(set=set, never_classified=False, later=later, stocks_current=...)`. (depends on T014, T015)
++- [x] T013 Create `src/factorflow/classification/sql/current_set.sql` from the design section 2.4 statement (`current` and `later` CTEs, `FULL JOIN ... ON true`), closing the elided `SELECT ...` list (Open Gap 2): `current` columns `set_id`, `classification_date`, `run_id`, `run_started_at` (`acquisition_run.started_at`), `run_outcome` (`acquisition_run.state`), `state`, `started_at`, `ended_at`, `latest_trading_day`, `active_instruments`, plus `factors` as `(SELECT jsonb_object_agg(f.factor, jsonb_build_object('qualified_count', f.qualified_count, 'ranked', f.ranked)) FROM classification_set_factor f WHERE f.set_id = c.set_id)`; `later` columns prefixed `later_` (`set_id`, `state`, `run_id`, `run_started_at`, `started_at`, `ended_at`, `failure_reason`). Keep the `ORDER BY s.ended_at DESC LIMIT 1` over `state = 'complete'` and `s.started_at > COALESCE((SELECT started_at FROM current), '-infinity')` with `ORDER BY s.started_at DESC LIMIT 1` exactly as designed; do not add a state filter to `later` (a newer `complete` set cannot exist by construction, design 2.4). No parameters, no `%` characters. If PostgreSQL rejects `current` as a CTE name, rename it consistently inside the file; the name is not part of any interface. (depends on T001)
++- [x] T014 [P] Create `src/factorflow/classification/sql/summary.sql` verbatim from the design section 2.4 (`current_count`, `scored_roster`; parameter `%(set_id)s`). (depends on T001)
++- [x] T015 Create `src/factorflow/classification/reader.py` with the module docstring (cites `component-design-classification-reader.md` sections 2.1, 2.3, 2.4, 7 and AC-13, AC-20 to AC-22), `_SQL_DIR = Path(__file__).parent / "sql"` and `CURRENT_SET_SQL`/`SUMMARY_SQL` loaded with `read_text()` at import (the pattern of `src/factorflow/coverage/gaps.py`); `from factorflow.classification.constants import FACTORS, MIN_PEER_SET_SIZE` (re-exported, so `reader.FACTORS` exists as the design shows; do not redefine either); the frozen dataclasses `LaterSet`, `FactorSummary`, `CurrentSet`, `StocksCurrent`, `Summary` with the exact fields and types of design section 2.3; `read_set_blocks(conn) -> tuple[CurrentSet | None, LaterSet | None]` (Open Gap 3) that runs `CURRENT_SET_SQL` once with a plain cursor, maps tuple columns by name through the cursor description (the module-local `_row_to_*` pattern of `runs/queries.py`), returns `(None, None)` for zero rows, builds `CurrentSet` only when the current columns are non-null with `not_current = later is not None`, `factors` as `{f: FactorSummary(qualified_count, ranked, MIN_PEER_SET_SIZE) for f in FACTORS}`, and `LaterSet` only when its columns are non-null; and `current_set(conn) -> CurrentSet | None` returning the first element. Do not define `Thresholds`, `ListFilters`, `ClassificationPage`, `SORT_ALLOWLIST`, the cursor or exception types, and do not import `factorflow.api.bounds` or `factorflow.api.classification_bounds`: those belong to CAP-002-E3-S2 and later and importing them here would add an unrecorded dependency. No `commit`, no write. (depends on T013, T001)
++- [x] T016 Add `summary(conn) -> Summary` to `src/factorflow/classification/reader.py`: call `read_set_blocks`; with no current set return `Summary(set=None, never_classified=True, later=later, stocks_current=None)`; otherwise execute `SUMMARY_SQL` with `{"set_id": set.set_id}`, read `current_count` from the single row and set `StocksCurrent(current_count, followed_count=set.active_instruments)` (the stored column, not `scored_roster`, per design 2.4), returning `Summary(set=set, never_classified=False, later=later, stocks_current=...)`. (depends on T014, T015)
+ 
+ **Checkpoint**: T003 to T012 pass; `uv run mypy src` is clean for the new module.
+ 
+@@ -130,7 +130,7 @@ Marker: every test below is `@pytest.mark.postgres`. Each carries a `# Implement
+ 
+ **Purpose**: Confirm the new statements ship in the release image's package data.
+ 
+-- [ ] T017 Run `uv run pytest tests/unit/test_package_data_ships_sql.py` (the guard CAP-002-E1-S1 created and CAP-002-E2-S1 extended). It must pass with `classification/sql/current_set.sql` and `summary.sql` present, proving a non-editable install carries them (DEC-0088). If it fails, do not edit `pyproject.toml` here: the glob is CAP-002-E2-S1's deliverable; record the failure in the review hand-off. Nothing is mounted or wired in this story: `list_classifications` (CAP-002-E3-S2) and the routes (CAP-002-E3-S5) consume `read_set_blocks` and `summary` later. (depends on T013, T014)
++- [x] T017 Run `uv run pytest tests/unit/test_package_data_ships_sql.py` (the guard CAP-002-E1-S1 created and CAP-002-E2-S1 extended). It must pass with `classification/sql/current_set.sql` and `summary.sql` present, proving a non-editable install carries them (DEC-0088). If it fails, do not edit `pyproject.toml` here: the glob is CAP-002-E2-S1's deliverable; record the failure in the review hand-off. Nothing is mounted or wired in this story: `list_classifications` (CAP-002-E3-S2) and the routes (CAP-002-E3-S5) consume `read_set_blocks` and `summary` later. (depends on T013, T014)
+ 
+ **Checkpoint**: The two SQL files are covered by the package-data guard.
+ 
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1.md
+index fca4086..9b4daf8 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S1.md
+@@ -10,7 +10,7 @@ component: FactorFlow-v2
+ type: feature
+ priority: P1
+ estimate: 5
+-status: planning
++status: in-progress
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-17
+diff --git a/src/factorflow/classification/reader.py b/src/factorflow/classification/reader.py
+new file mode 100644
+index 0000000..04fc5da
+--- /dev/null
++++ b/src/factorflow/classification/reader.py
+@@ -0,0 +1,176 @@
++"""The classification read side: the current set, the later attempt and the summary.
++
++Implements ``component-design-classification-reader.md`` sections 2.1 (placement), 2.3
++(interface), 2.4 (current set, currency and the summary) and 7 (testing) for CAP-002-E3-S1.
++
++- The current set is the latest set in state ``complete``; ``later`` is the most recent set
++  started after it, or the most recent set while none is complete; ``not_current`` is true
++  exactly when ``later`` is not None (AC-20, AC-21; DAC-E3-1; DAC-E3-S1-1, DAC-E3-S1-2).
++- Before any set is complete the reads carry ``never_classified`` with ``set`` None, in the same
++  shape as every other state (AC-22; DAC-E3-11; DAC-E3-S1-3).
++- A stock is current when none of its ``factor_input`` rows in the current set is ``missing`` or
++  ``outdated``; ``not_computable`` does not count against currency. The summary carries counts
++  only, never a stock row (AC-13; DAC-E3-10; DAC-E3-S1-4, DAC-E3-S1-5).
++- Every value returned is a stored row; nothing is recomputed here (STD-UI-15; DAC-E3-S1-6).
++
++``read_set_blocks`` is the one definition of the ``set`` and ``later`` blocks that the summary,
++the list read and the API reuse (task plan Open Gap 3; SA-DUP-001). Statements are ``.sql`` files
++under ``sql/``, loaded at import and executed with bound parameters only. The reader takes the
++caller's connection, writes nothing and never commits; database errors propagate (OPS-ERR-001).
++"""
++
++from dataclasses import dataclass
++from datetime import date, datetime
++from pathlib import Path
++from typing import Any, Final
++from uuid import UUID
++
++import psycopg
++
++from factorflow.classification.constants import FACTORS, MIN_PEER_SET_SIZE
++
++__all__ = [
++    "CURRENT_SET_SQL",
++    "FACTORS",
++    "MIN_PEER_SET_SIZE",
++    "SUMMARY_SQL",
++    "CurrentSet",
++    "FactorSummary",
++    "LaterSet",
++    "StocksCurrent",
++    "Summary",
++    "current_set",
++    "read_set_blocks",
++    "summary",
++]
++
++_SQL_DIR = Path(__file__).parent / "sql"
++CURRENT_SET_SQL: Final = (_SQL_DIR / "current_set.sql").read_text()
++SUMMARY_SQL: Final = (_SQL_DIR / "summary.sql").read_text()
++
++
++@dataclass(frozen=True)
++class LaterSet:
++    """The most recent set newer than the current one, or the most recent while none is complete;
++    one shape on the list and the summary (DEC-0082)."""
++
++    set_id: UUID
++    state: str  # building | failed
++    run_id: UUID
++    run_started_at: datetime  # acquisition_run.started_at (DEC-0083)
++    started_at: datetime
++    ended_at: datetime | None
++    failure_reason: str | None
++
++
++@dataclass(frozen=True)
++class FactorSummary:
++    qualified_count: int
++    ranked: bool
++    min_peer_set_size: int  # 30, AC-14
++
++
++@dataclass(frozen=True)
++class CurrentSet:
++    set_id: UUID
++    classification_date: date
++    run_id: UUID
++    run_started_at: datetime  # acquisition_run.started_at (DEC-0083)
++    run_outcome: str  # succeeded | partial, from acquisition_run.state
++    state: str  # complete
++    started_at: datetime
++    ended_at: datetime  # the as-of line's "Scores from {date} {time}"
++    latest_trading_day: date
++    active_instruments: int  # followed_count
++    factors: dict[str, FactorSummary]
++    not_current: bool  # true exactly when `later` is not None (DEC-0082)
++
++
++@dataclass(frozen=True)
++class StocksCurrent:
++    current_count: int  # stocks with no factor_input row missing or outdated (AC-12, AC-13)
++    followed_count: int  # the set's active_instruments
++
++
++@dataclass(frozen=True)
++class Summary:
++    set: CurrentSet | None  # the latest complete set, or None
++    never_classified: bool  # true exactly when set is None
++    later: LaterSet | None  # the newer building or failed set, or the latest while none is complete
++    stocks_current: StocksCurrent | None
++
++
++def read_set_blocks(conn: psycopg.Connection) -> tuple[CurrentSet | None, LaterSet | None]:
++    """The ``set`` and ``later`` blocks every classification read carries, from one statement."""
++    with conn.cursor() as cur:
++        cur.execute(CURRENT_SET_SQL)
++        row = cur.fetchone()
++        names = [column.name for column in cur.description] if cur.description else []
++    if row is None:
++        return None, None
++    columns = dict(zip(names, row, strict=True))
++    later = _row_to_later(columns) if columns["later_set_id"] is not None else None
++    current = (
++        _row_to_current(columns, not_current=later is not None)
++        if columns["set_id"] is not None
++        else None
++    )
++    return current, later
++
++
++def current_set(conn: psycopg.Connection) -> CurrentSet | None:
++    """The latest complete set, or None before any set is complete (AC-22)."""
++    return read_set_blocks(conn)[0]
++
++
++def summary(conn: psycopg.Connection) -> Summary:
++    """The current set with its ``later``, plus the current-stock count; no stock rows."""
++    current, later = read_set_blocks(conn)
++    if current is None:
++        return Summary(set=None, never_classified=True, later=later, stocks_current=None)
++    with conn.cursor() as cur:
++        cur.execute(SUMMARY_SQL, {"set_id": current.set_id})
++        row = cur.fetchone()
++    if row is None:  # an ungrouped aggregate always returns one row
++        raise RuntimeError("summary.sql returned no row")
++    stocks_current = StocksCurrent(
++        current_count=int(row[0]), followed_count=current.active_instruments
++    )
++    return Summary(set=current, never_classified=False, later=later, stocks_current=stocks_current)
++
++
++def _row_to_later(c: dict[str, Any]) -> LaterSet:
++    return LaterSet(
++        set_id=c["later_set_id"],
++        state=str(c["later_state"]),
++        run_id=c["later_run_id"],
++        run_started_at=c["later_run_started_at"],
++        started_at=c["later_started_at"],
++        ended_at=c["later_ended_at"],
++        failure_reason=c["later_failure_reason"],
++    )
++
++
++def _row_to_current(c: dict[str, Any], *, not_current: bool) -> CurrentSet:
++    stored = c["factors"]
++    return CurrentSet(
++        set_id=c["set_id"],
++        classification_date=c["classification_date"],
++        run_id=c["run_id"],
++        run_started_at=c["run_started_at"],
++        run_outcome=str(c["run_outcome"]),
++        state=str(c["state"]),
++        started_at=c["started_at"],
++        ended_at=c["ended_at"],
++        latest_trading_day=c["latest_trading_day"],
++        active_instruments=int(c["active_instruments"]),
++        factors={
++            f: FactorSummary(
++                qualified_count=int(stored[f]["qualified_count"]),
++                ranked=bool(stored[f]["ranked"]),
++                min_peer_set_size=MIN_PEER_SET_SIZE,
++            )
++            for f in FACTORS
++        },
++        not_current=not_current,
++    )
+diff --git a/src/factorflow/classification/sql/current_set.sql b/src/factorflow/classification/sql/current_set.sql
+new file mode 100644
+index 0000000..951c6d0
+--- /dev/null
++++ b/src/factorflow/classification/sql/current_set.sql
+@@ -0,0 +1,41 @@
++-- The current set and the later attempt: component-design-classification-reader.md section 2.4.
++-- current: the latest complete set (constraint 11). later: the most recent set started after it,
++-- or the most recent set while none is complete (DEC-0082; task plan Open Gap 1). One row, or
++-- none when no set exists; the current columns are null when no set is complete.
++WITH current AS (
++    SELECT s.*, r.state AS run_outcome, r.started_at AS run_started_at
++      FROM classification_set s JOIN acquisition_run r USING (run_id)
++     WHERE s.state = 'complete'
++     ORDER BY s.ended_at DESC
++     LIMIT 1
++),
++later AS (
++    SELECT s.set_id, s.state, s.run_id, r.started_at AS run_started_at,
++           s.started_at, s.ended_at, s.failure_reason
++      FROM classification_set s JOIN acquisition_run r USING (run_id)
++     WHERE s.started_at > COALESCE((SELECT started_at FROM current), '-infinity')
++     ORDER BY s.started_at DESC
++     LIMIT 1
++)
++SELECT c.set_id,
++       c.classification_date,
++       c.run_id,
++       c.run_started_at,
++       c.run_outcome,
++       c.state,
++       c.started_at,
++       c.ended_at,
++       c.latest_trading_day,
++       c.active_instruments,
++       (SELECT jsonb_object_agg(f.factor, jsonb_build_object(
++                   'qualified_count', f.qualified_count, 'ranked', f.ranked))
++          FROM classification_set_factor f
++         WHERE f.set_id = c.set_id) AS factors,
++       l.set_id         AS later_set_id,
++       l.state          AS later_state,
++       l.run_id         AS later_run_id,
++       l.run_started_at AS later_run_started_at,
++       l.started_at     AS later_started_at,
++       l.ended_at       AS later_ended_at,
++       l.failure_reason AS later_failure_reason
++  FROM current c FULL JOIN later l ON true;
+diff --git a/src/factorflow/classification/sql/summary.sql b/src/factorflow/classification/sql/summary.sql
+new file mode 100644
+index 0000000..a709390
+--- /dev/null
++++ b/src/factorflow/classification/sql/summary.sql
+@@ -0,0 +1,10 @@
++-- src/factorflow/classification/sql/summary.sql (run with the current set_id)
++SELECT count(*) FILTER (WHERE NOT stale) AS current_count,
++       count(*)                           AS scored_roster
++  FROM (
++    SELECT fi.instrument_id,
++           bool_or(fi.status IN ('missing', 'outdated')) AS stale
++      FROM factor_input fi
++     WHERE fi.set_id = %(set_id)s
++     GROUP BY fi.instrument_id
++  ) per_stock;
+diff --git a/tests/integration/reader_seed.py b/tests/integration/reader_seed.py
+new file mode 100644
+index 0000000..705e222
+--- /dev/null
++++ b/tests/integration/reader_seed.py
+@@ -0,0 +1,128 @@
++"""Seed classification sets directly for the reader's database tests (CAP-002-E3-S1).
++
++A plain module rather than ``conftest.py``: ``tests/conftest.py`` is a delivered file.
++The reader is tested independently of the engine (``component-design-classification-reader.md``
++section 7), so these helpers write ``research-store`` rows straight into the tables, with
++bound parameters only, and commit so the reader's statements see them. Later E3 reader
++stories import and extend this module.
++"""
++
++from datetime import date, datetime
++from typing import Any
++from uuid import UUID
++
++import psycopg
++from psycopg.types.json import Jsonb
++
++from factorflow.classification.constants import FACTORS, INPUT_NAMES
++
++
++def insert_instrument(conn: psycopg.Connection, symbol: str, lifecycle: str = "active") -> int:
++    row = conn.execute(
++        "INSERT INTO instrument (symbol, lifecycle, retired_at) "
++        "VALUES (%s, %s, CASE WHEN %s = 'retired' THEN now() END) RETURNING instrument_id",
++        (symbol, lifecycle, lifecycle),
++    ).fetchone()
++    conn.commit()
++    assert row is not None
++    return int(row[0])
++
++
++def insert_run(conn: psycopg.Connection, state: str = "succeeded", *, started_at: datetime) -> UUID:
++    """An acquisition run; a terminal state gets an ``ended_at`` (terminal_has_end)."""
++    row = conn.execute(
++        "INSERT INTO acquisition_run (state, history_depth_years, started_at, ended_at) "
++        "VALUES (%s, 5, %s, CASE WHEN %s IN ('succeeded', 'partial', 'failed', 'cancelled', "
++        "'abandoned') THEN %s::timestamptz END) RETURNING run_id",
++        (state, started_at, state, started_at),
++    ).fetchone()
++    conn.commit()
++    assert row is not None
++    return row[0]  # type: ignore[no-any-return]
++
++
++def insert_set(
++    conn: psycopg.Connection,
++    run_id: UUID,
++    state: str,
++    *,
++    started_at: datetime,
++    ended_at: datetime | None = None,
++    classification_date: date = date(2026, 10, 15),
++    latest_trading_day: date | None = None,
++    active_instruments: int | None = None,
++    failure_reason: str | None = None,
++    factors: dict[str, tuple[int, bool]] | None = None,
++) -> UUID:
++    """A ``classification_set`` row and its three ``classification_set_factor`` rows.
++
++    ``factors`` maps a factor to ``(qualified_count, ranked)``; a factor it omits gets
++    ``(0, False)``. The caller supplies the values the set's CHECK constraints require.
++    """
++    row = conn.execute(
++        "INSERT INTO classification_set (run_id, state, classification_date, latest_trading_day, "
++        "active_instruments, started_at, ended_at, failure_reason) "
++        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING set_id",
++        (
++            run_id,
++            state,
++            classification_date,
++            latest_trading_day,
++            active_instruments,
++            started_at,
++            ended_at,
++            failure_reason,
++        ),
++    ).fetchone()
++    assert row is not None
++    set_id: UUID = row[0]
++    given = factors or {}
++    for factor in FACTORS:
++        qualified_count, ranked = given.get(factor, (0, False))
++        conn.execute(
++            "INSERT INTO classification_set_factor (set_id, factor, qualified_count, ranked) "
++            "VALUES (%s, %s, %s, %s)",
++            (set_id, factor, qualified_count, ranked),
++        )
++    conn.commit()
++    return set_id
++
++
++def insert_input(
++    conn: psycopg.Connection,
++    set_id: UUID,
++    instrument_id: int,
++    factor: str,
++    input_name: str,
++    status: str,
++    *,
++    value: Any = None,
++    as_of: date | None = None,
++    known_on: date | None = None,
++) -> None:
++    """One ``factor_input`` row; a ``present`` one defaults its value and dates."""
++    if status == "present":
++        value = 1 if value is None else value
++        as_of = date(2026, 9, 30) if as_of is None else as_of
++        known_on = date(2026, 10, 1) if known_on is None else known_on
++    conn.execute(
++        "INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, "
++        "as_of, known_on, detail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
++        (set_id, instrument_id, factor, input_name, status, value, as_of, known_on, Jsonb({})),
++    )
++    conn.commit()
++
++
++def insert_stock_inputs(
++    conn: psycopg.Connection,
++    set_id: UUID,
++    instrument_id: int,
++    statuses: dict[str, str] | None = None,
++) -> None:
++    """The stock's eight ``factor_input`` rows, ``present`` unless ``statuses`` names the input."""
++    given = statuses or {}
++    for factor in FACTORS:
++        for input_name in INPUT_NAMES[factor]:
++            insert_input(
++                conn, set_id, instrument_id, factor, input_name, given.get(input_name, "present")
++            )
+diff --git a/tests/integration/test_reader_current_set.py b/tests/integration/test_reader_current_set.py
+new file mode 100644
+index 0000000..9186f8e
+--- /dev/null
++++ b/tests/integration/test_reader_current_set.py
+@@ -0,0 +1,324 @@
++"""The current set and the `later` attempt (CAP-002-E3-S1).
++
++Proves `component-design-classification-reader.md` sections 2.3, 2.4 and the section 7
++rows *Current is latest complete*, *Not current while building*, *Not current after
++failure*, *Never classified* and *Run outcome, ended_at, run_started_at and counts*,
++against a real PostgreSQL store seeded directly (DAC-E3-S1-1 to DAC-E3-S1-3, DAC-E3-1,
++DAC-E3-11; AC-20, AC-21, AC-22).
++"""
++
++import dataclasses
++from datetime import UTC, date, datetime, timedelta
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import reader
++from tests.integration.reader_seed import insert_run, insert_set
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 14, 22, 30, tzinfo=UTC)
++
++
++def _complete(
++    conn: psycopg.Connection,
++    started_at: datetime,
++    *,
++    run_state: str = "succeeded",
++    active_instruments: int = 40,
++) -> tuple[UUID, UUID]:
++    run_id = insert_run(conn, run_state, started_at=started_at - timedelta(hours=1))
++    set_id = insert_set(
++        conn,
++        run_id,
++        "complete",
++        started_at=started_at,
++        ended_at=started_at + timedelta(minutes=5),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=active_instruments,
++        factors={"value": (35, True), "growth": (31, True), "momentum": (12, False)},
++    )
++    return run_id, set_id
++
++
++# Implements TC-COMP-170
++def test_complete_set_with_newer_building_set_is_served_with_later(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-1, DAC-E3-1: the complete set is `set`, the building one `later`, not current."""
++    conn = migrated_run_schema_connection
++    _, complete_id = _complete(conn, T0)
++    run_b_started = T0 + timedelta(days=1)
++    run_b = insert_run(conn, "succeeded", started_at=run_b_started)
++    building_id = insert_set(conn, run_b, "building", started_at=run_b_started + timedelta(hours=1))
++
++    current, later = reader.read_set_blocks(conn)
++    summary = reader.summary(conn)
++
++    for set_block, later_block, never in (
++        (current, later, current is None),
++        (summary.set, summary.later, summary.never_classified),
++    ):
++        assert set_block is not None
++        assert set_block.set_id == complete_id
++        assert set_block.not_current is True
++        assert never is False
++        assert later_block is not None
++        assert later_block.set_id == building_id
++        assert later_block.state == "building"
++        assert later_block.run_id == run_b
++        assert later_block.run_started_at == run_b_started
++        assert later_block.ended_at is None
++        assert later_block.failure_reason is None
++    assert summary.set == current
++    assert summary.later == later
++
++    served = reader.current_set(conn)
++    assert served is not None
++    assert served.set_id == complete_id
++    assert served.not_current is True
++
++
++# Implements TC-COMP-171
++@pytest.mark.parametrize("state", ["building", "failed"])
++def test_first_set_building_or_failed_is_never_classified_with_later(
++    migrated_run_schema_connection: psycopg.Connection, state: str
++) -> None:
++    """DAC-E3-S1-2, DAC-E3-11: no complete set, so `set` is None and the first set is `later`."""
++    conn = migrated_run_schema_connection
++    run_started = T0
++    run_id = insert_run(conn, "succeeded", started_at=run_started)
++    failed = state == "failed"
++    set_id = insert_set(
++        conn,
++        run_id,
++        state,
++        started_at=T0 + timedelta(hours=1),
++        ended_at=T0 + timedelta(hours=2) if failed else None,
++        failure_reason="boom" if failed else None,
++    )
++
++    assert reader.current_set(conn) is None
++    current, later = reader.read_set_blocks(conn)
++    summary = reader.summary(conn)
++
++    assert current is None
++    assert summary.set is None
++    assert summary.never_classified is True
++    for block in (later, summary.later):
++        assert block is not None
++        assert block.set_id == set_id
++        assert block.state == state
++        assert block.run_id == run_id
++        assert block.run_started_at == run_started
++        if failed:
++            assert block.failure_reason == "boom"
++            assert block.ended_at == T0 + timedelta(hours=2)
++        else:
++            assert block.failure_reason is None
++            assert block.ended_at is None
++
++
++# Implements TC-COMP-181
++def test_no_set_at_all_is_never_classified_in_the_same_shape(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-3, AC-22: with no set, `set` and `later` are None and the shape is unchanged."""
++    conn = migrated_run_schema_connection
++
++    assert reader.current_set(conn) is None
++    assert reader.read_set_blocks(conn) == (None, None)
++    summary = reader.summary(conn)
++    assert summary.set is None
++    assert summary.later is None
++    assert summary.never_classified is True
++
++    # The same type and field names in every state (TC-COMP-170, TC-COMP-171 above).
++    assert type(summary) is reader.Summary
++    assert [f.name for f in dataclasses.fields(summary)] == [
++        "set",
++        "never_classified",
++        "later",
++        "stocks_current",
++    ]
++    _complete(conn, T0)
++    populated = reader.summary(conn)
++    assert type(populated) is reader.Summary
++    assert [f.name for f in dataclasses.fields(populated)] == [
++        f.name for f in dataclasses.fields(summary)
++    ]
++
++
++def test_latest_complete_set_by_ended_at_is_current(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """Constraint 11, DAC-E3-1: of two complete sets the later `ended_at` is current."""
++    conn = migrated_run_schema_connection
++    _complete(conn, T0)
++    _, newer = _complete(conn, T0 + timedelta(days=1))
++
++    current, later = reader.read_set_blocks(conn)
++
++    assert current is not None
++    assert current.set_id == newer
++    assert later is None
++    assert current.not_current is False
++
++
++def test_newer_failed_set_is_later_and_previous_set_still_served(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-20, DAC-E3-1: a newer failed set is `later` with its reason; the complete set stays."""
++    conn = migrated_run_schema_connection
++    _, complete_id = _complete(conn, T0)
++    run_id = insert_run(conn, "succeeded", started_at=T0 + timedelta(days=1))
++    failed_id = insert_set(
++        conn,
++        run_id,
++        "failed",
++        started_at=T0 + timedelta(days=1, hours=1),
++        ended_at=T0 + timedelta(days=1, hours=2),
++        failure_reason="peer set query failed",
++    )
++
++    current, later = reader.read_set_blocks(conn)
++
++    assert current is not None
++    assert current.set_id == complete_id
++    assert current.not_current is True
++    assert later is not None
++    assert later.set_id == failed_id
++    assert later.state == "failed"
++    assert later.failure_reason == "peer set query failed"
++
++
++def test_complete_set_alone_has_no_later(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-20, DAC-E3-1: with no newer set, `later` is None and `not_current` is false."""
++    conn = migrated_run_schema_connection
++    _complete(conn, T0)
++
++    current, later = reader.read_set_blocks(conn)
++
++    assert current is not None
++    assert later is None
++    assert current.not_current is False
++
++
++def test_building_set_older_than_current_is_not_later(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-1: `later` is only a set started after the current one."""
++    conn = migrated_run_schema_connection
++    run_id = insert_run(conn, "succeeded", started_at=T0 - timedelta(days=2))
++    insert_set(conn, run_id, "building", started_at=T0 - timedelta(days=1))
++    _, complete_id = _complete(conn, T0)
++
++    current, later = reader.read_set_blocks(conn)
++
++    assert current is not None
++    assert current.set_id == complete_id
++    assert later is None
++    assert current.not_current is False
++
++
++@pytest.mark.parametrize("run_state", ["succeeded", "partial"])
++def test_current_set_carries_run_and_set_fields(
++    migrated_run_schema_connection: psycopg.Connection, run_state: str
++) -> None:
++    """AC-21, DAC-E3-1: the run's outcome and start, the set's dates, size and factor counts."""
++    conn = migrated_run_schema_connection
++    run_started = T0 - timedelta(hours=1)
++    run_id = insert_run(conn, run_state, started_at=run_started)
++    set_id = insert_set(
++        conn,
++        run_id,
++        "complete",
++        started_at=T0,
++        ended_at=T0 + timedelta(minutes=7),
++        classification_date=date(2026, 10, 14),
++        latest_trading_day=date(2026, 10, 13),
++        active_instruments=42,
++        factors={"value": (35, True), "growth": (31, True), "momentum": (12, False)},
++    )
++
++    current = reader.current_set(conn)
++
++    assert current is not None
++    assert current.set_id == set_id
++    assert current.classification_date == date(2026, 10, 14)
++    assert current.run_id == run_id
++    assert current.run_started_at == run_started
++    assert current.run_outcome == run_state
++    assert current.state == "complete"
++    assert current.started_at == T0
++    assert current.ended_at == T0 + timedelta(minutes=7)
++    assert current.latest_trading_day == date(2026, 10, 13)
++    assert current.active_instruments == 42
++    assert list(current.factors) == list(reader.FACTORS) == ["value", "growth", "momentum"]
++    assert current.factors["value"] == reader.FactorSummary(35, True, 30)
++    assert current.factors["growth"] == reader.FactorSummary(31, True, 30)
++    assert current.factors["momentum"] == reader.FactorSummary(12, False, 30)
++    assert all(f.min_peer_set_size == 30 for f in current.factors.values())
++
++
++def test_most_recent_non_complete_set_is_later_while_none_is_complete(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-1, AC-20: with no complete set and two attempts, `later` is the most recent.
++
++    PROVISIONAL, awaiting owner confirmation (2026-10-17), Open Gap 1 of CAP-002-E3-S1-tasks:
++    the design's statement orders `later` by `started_at DESC`; a change to "the earliest set"
++    must be deliberate and fail this test.
++    """
++    conn = migrated_run_schema_connection
++    first_run = insert_run(conn, "succeeded", started_at=T0)
++    insert_set(
++        conn,
++        first_run,
++        "failed",
++        started_at=T0 + timedelta(hours=1),
++        ended_at=T0 + timedelta(hours=2),
++        failure_reason="boom",
++    )
++    second_run = insert_run(conn, "succeeded", started_at=T0 + timedelta(days=1))
++    retry_id = insert_set(conn, second_run, "building", started_at=T0 + timedelta(days=1, hours=1))
++
++    current, later = reader.read_set_blocks(conn)
++
++    assert current is None
++    assert later is not None
++    assert later.set_id == retry_id
++    assert later.state == "building"
++    # One row however many sets there are: `later` is one set, not the first of several.
++    with conn.cursor() as cur:
++        cur.execute(reader.CURRENT_SET_SQL)
++        assert len(cur.fetchall()) == 1
++
++
++def test_returned_blocks_are_immutable(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """Design 2.3: the blocks are frozen, so a consumer cannot alter a stored value."""
++    conn = migrated_run_schema_connection
++    _complete(conn, T0)
++    run_id = insert_run(conn, "succeeded", started_at=T0 + timedelta(days=1))
++    insert_set(conn, run_id, "building", started_at=T0 + timedelta(days=1, hours=1))
++
++    summary = reader.summary(conn)
++    assert summary.set is not None
++    assert summary.later is not None
++    assert summary.stocks_current is not None
++    blocks: list[tuple[object, str]] = [
++        (summary, "never_classified"),
++        (summary.set, "not_current"),
++        (summary.set.factors["value"], "ranked"),
++        (summary.later, "state"),
++        (summary.stocks_current, "current_count"),
++    ]
++    for block, name in blocks:
++        with pytest.raises(dataclasses.FrozenInstanceError):
++            setattr(block, name, None)
+diff --git a/tests/integration/test_reader_summary.py b/tests/integration/test_reader_summary.py
+new file mode 100644
+index 0000000..e02b869
+--- /dev/null
++++ b/tests/integration/test_reader_summary.py
+@@ -0,0 +1,291 @@
++"""The summary: per-factor counts and the current-stock count (CAP-002-E3-S1).
++
++Proves `component-design-classification-reader.md` section 2.4 and the section 7 rows
++*Summary current count* and *Summary carries no rows and the set state* against a real
++PostgreSQL store seeded directly (DAC-E3-S1-4 to DAC-E3-S1-6, DAC-E3-10, DAC-E3-11;
++AC-13, AC-21, AC-22; STD-UI-15).
++"""
++
++import dataclasses
++import re
++from datetime import UTC, date, datetime, timedelta
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import reader
++from tests.integration.reader_seed import (
++    insert_instrument,
++    insert_run,
++    insert_set,
++    insert_stock_inputs,
++)
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 14, 22, 30, tzinfo=UTC)
++
++
++def _complete_set(
++    conn: psycopg.Connection,
++    active_instruments: int,
++    *,
++    started_at: datetime = T0,
++    factors: dict[str, tuple[int, bool]] | None = None,
++) -> UUID:
++    run_id = insert_run(conn, "succeeded", started_at=started_at - timedelta(hours=1))
++    return insert_set(
++        conn,
++        run_id,
++        "complete",
++        started_at=started_at,
++        ended_at=started_at + timedelta(minutes=5),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=active_instruments,
++        factors=factors or {"value": (35, True), "growth": (35, True), "momentum": (35, True)},
++    )
++
++
++def _stocks(
++    conn: psycopg.Connection, set_id: UUID, statuses: list[dict[str, str]], prefix: str = "S"
++) -> None:
++    for n, given in enumerate(statuses):
++        instrument_id = insert_instrument(conn, f"{prefix}{n}")
++        insert_stock_inputs(conn, set_id, instrument_id, given)
++
++
++# Implements TC-COMP-103
++def test_missing_or_outdated_input_makes_a_stock_not_current(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-4, DAC-E3-10: `missing`/`outdated` count against currency, `not_computable` not."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn, 4)
++    _stocks(
++        conn,
++        set_id,
++        [
++            {},
++            {"eps_growth": "missing"},
++            {"return_6m": "outdated"},
++            {"fcf_yield": "not_computable"},
++        ],
++    )
++
++    stocks_current = reader.summary(conn).stocks_current
++
++    assert stocks_current == reader.StocksCurrent(current_count=2, followed_count=4)
++
++
++# Implements TC-COMP-103
++def test_not_computable_does_not_rescue_a_missing_input(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-4: a stock with both `not_computable` and `missing` is not current."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn, 2)
++    _stocks(conn, set_id, [{"fcf_yield": "not_computable", "eps_growth": "missing"}, {}])
++
++    stocks_current = reader.summary(conn).stocks_current
++
++    assert stocks_current is not None
++    assert stocks_current.current_count == 1
++
++
++# Implements TC-COMP-104
++def test_summary_statement_returns_counts_only(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-5: one row of two integers, and no field that could carry a stock row."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn, 60)
++    _stocks(conn, set_id, [{} for _ in range(59)] + [{"return_3m": "missing"}])
++
++    with conn.cursor() as cur:
++        cur.execute(reader.SUMMARY_SQL, {"set_id": set_id})
++        assert cur.description is not None
++        assert [c.name for c in cur.description] == ["current_count", "scored_roster"]
++        rows = cur.fetchall()
++    assert rows == [(59, 60)]
++    assert all(type(v) is int for v in rows[0])
++
++    assert [f.name for f in dataclasses.fields(reader.Summary)] == [
++        "set",
++        "never_classified",
++        "later",
++        "stocks_current",
++    ]
++    assert {f.name: f.type for f in dataclasses.fields(reader.StocksCurrent)} == {
++        "current_count": int,
++        "followed_count": int,
++    }
++
++
++def _plan(cur: psycopg.Cursor, statement: str, params: dict[str, UUID] | None = None) -> str:
++    cur.execute(f"EXPLAIN {statement}", params)
++    return "\n".join(str(row[0]) for row in cur.fetchall())
++
++
++# Implements TC-COMP-104
++def test_summary_and_current_set_are_served_from_indexes(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-5: with sequential scans disabled no plan scans a set or input table whole.
++
++    Proves an index path exists (Open Gap 4 of the task plan); the planner's choice at 3000
++    stocks is the volume test's (CAP-002-E3-S4, TC-COMP-153).
++    """
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn, 60)
++    _stocks(conn, set_id, [{} for _ in range(60)])
++
++    with conn.transaction(), conn.cursor() as cur:
++        cur.execute("SET LOCAL enable_seqscan = off")
++        plans = [
++            _plan(cur, reader.SUMMARY_SQL, {"set_id": set_id}),
++            _plan(cur, reader.CURRENT_SET_SQL),
++        ]
++
++    for plan in plans:
++        for table in ("factor_input", "classification_set", "classification_set_factor"):
++            assert not re.search(rf"Seq Scan on {table}\b", plan), plan
++
++
++# Implements TC-COMP-178
++def test_reader_returns_stored_values_and_recomputes_nothing(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S1-6, AC-21, STD-UI-15: every value is the stored one, not derived from rows.
++
++    The set's counts are deliberately inconsistent with the rows beneath it: 7 active
++    instruments with inputs for 3 stocks, 41 qualified with no `factor_classification` row,
++    33 qualified yet unranked. A reader that recounted would return 3 or 0, or rank momentum.
++    """
++    conn = migrated_run_schema_connection
++    run_started = T0 - timedelta(hours=3)
++    run_id = insert_run(conn, "partial", started_at=run_started)
++    ended_at = T0 + timedelta(minutes=13, seconds=7)
++    set_id = insert_set(
++        conn,
++        run_id,
++        "complete",
++        started_at=T0,
++        ended_at=ended_at,
++        classification_date=date(2026, 10, 9),
++        latest_trading_day=date(2026, 10, 8),
++        active_instruments=7,
++        factors={"value": (41, True), "growth": (3, False), "momentum": (33, False)},
++    )
++    _stocks(conn, set_id, [{}, {}, {}])
++
++    summary = reader.summary(conn)
++
++    current = summary.set
++    assert current is not None
++    assert current.active_instruments == 7
++    assert summary.stocks_current == reader.StocksCurrent(current_count=3, followed_count=7)
++    assert current.factors["value"].qualified_count == 41
++    assert current.factors["value"].ranked is True
++    assert current.factors["growth"].qualified_count == 3
++    assert current.factors["growth"].ranked is False
++    assert current.factors["momentum"].qualified_count == 33
++    assert current.factors["momentum"].ranked is False  # stored, not 33 >= 30
++    assert current.ended_at == ended_at
++    assert current.latest_trading_day == date(2026, 10, 8)
++    assert current.classification_date == date(2026, 10, 9)
++    assert current.run_outcome == "partial"
++    assert current.run_started_at == run_started
++    assert all(f.min_peer_set_size == 30 for f in current.factors.values())
++
++
++def test_summary_with_no_set_at_all(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-22, DAC-E3-11: never classified, no later, no stock counts."""
++    assert reader.summary(migrated_run_schema_connection) == reader.Summary(
++        set=None, never_classified=True, later=None, stocks_current=None
++    )
++
++
++def test_summary_with_only_a_building_first_set(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-20, AC-22, DAC-E3-11: the building first set is `later`; nothing is counted."""
++    conn = migrated_run_schema_connection
++    run_id = insert_run(conn, "succeeded", started_at=T0)
++    set_id = insert_set(conn, run_id, "building", started_at=T0 + timedelta(hours=1))
++
++    summary = reader.summary(conn)
++
++    assert summary.set is None
++    assert summary.never_classified is True
++    assert summary.stocks_current is None
++    assert summary.later is not None
++    assert summary.later.set_id == set_id
++
++
++def test_summary_counts_the_complete_set_while_a_newer_set_builds(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-13, AC-20, DAC-E3-11: `set` and `later` together; the count is the complete set's."""
++    conn = migrated_run_schema_connection
++    complete_id = _complete_set(conn, 3)
++    _stocks(conn, complete_id, [{}, {}, {"book_to_price": "missing"}])
++    run_id = insert_run(conn, "succeeded", started_at=T0 + timedelta(days=1))
++    building_id = insert_set(conn, run_id, "building", started_at=T0 + timedelta(days=1, hours=1))
++    # Rows written so far by the building set must not leak into the complete set's count.
++    instrument_id = insert_instrument(conn, "NEW")
++    insert_stock_inputs(conn, building_id, instrument_id)
++
++    summary = reader.summary(conn)
++
++    assert summary.set is not None
++    assert summary.set.set_id == complete_id
++    assert summary.never_classified is False
++    assert summary.later is not None
++    assert summary.later.set_id == building_id
++    assert summary.stocks_current == reader.StocksCurrent(current_count=2, followed_count=3)
++
++
++def test_followed_count_is_active_instruments_and_matches_scored_roster(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-10, design 2.4: in a consistent set the stored size equals the scored roster."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn, 5)
++    _stocks(conn, set_id, [{}, {}, {}, {"eps_growth": "missing"}, {}])
++
++    summary = reader.summary(conn)
++    with conn.cursor() as cur:
++        cur.execute(reader.SUMMARY_SQL, {"set_id": set_id})
++        row = cur.fetchone()
++
++    assert summary.set is not None
++    assert summary.stocks_current is not None
++    assert summary.stocks_current.followed_count == summary.set.active_instruments == 5
++    assert row is not None
++    assert row[1] == summary.stocks_current.followed_count
++
++
++def test_an_unranked_factor_changes_no_stocks_currency(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-14, DAC-E3-10: a factor below 30 qualified touches no input row, so no currency."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(
++        conn, 2, factors={"value": (2, False), "growth": (2, False), "momentum": (2, False)}
++    )
++    _stocks(conn, set_id, [{}, {}])
++
++    assert reader.summary(conn).stocks_current == reader.StocksCurrent(2, 2)
++
++
++def test_complete_set_with_no_inputs_counts_zero_current(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-10: a complete set with no `factor_input` rows gives 0 current and no error."""
++    conn = migrated_run_schema_connection
++    _complete_set(conn, 4)
++
++    assert reader.summary(conn).stocks_current == reader.StocksCurrent(0, 4)
+diff --git a/tests/unit/test_reader_sql_read_only.py b/tests/unit/test_reader_sql_read_only.py
+new file mode 100644
+index 0000000..8c97978
+--- /dev/null
++++ b/tests/unit/test_reader_sql_read_only.py
+@@ -0,0 +1,41 @@
++"""The reader's statements only read (CAP-002-E3-S1).
++
++DAC-E3-S1-6 and the reader design's read-only constraint: nothing the reader returns is
++written or recomputed by it. The files are located beside the module, the directory it
++reads at import, so the guard checks what ships.
++"""
++
++import re
++from pathlib import Path
++
++import pytest
++
++import factorflow.classification.reader as reader
++
++SQL_DIR = Path(reader.__file__).parent / "sql"
++WRITE_KEYWORDS = ("INSERT", "UPDATE", "DELETE", "TRUNCATE", "CREATE", "ALTER", "DROP")
++
++
++def _strip_comments(text: str) -> str:
++    text = re.sub(r"/\*.*?\*/", " ", text, flags=re.DOTALL)
++    return re.sub(r"--[^\n]*", " ", text)
++
++
++@pytest.mark.parametrize("name", ["current_set.sql", "summary.sql"])
++def test_reader_statement_is_one_read_only_query(name: str) -> None:
++    """DAC-E3-S1-6: one statement starting WITH or SELECT and no write keyword."""
++    body = _strip_comments((SQL_DIR / name).read_text(encoding="utf-8")).strip()
++
++    statements = [part for part in body.split(";") if part.strip()]
++    assert len(statements) == 1, statements
++    assert re.match(r"(WITH|SELECT)\b", body, flags=re.IGNORECASE), body
++    for keyword in WRITE_KEYWORDS:
++        assert not re.search(rf"\b{keyword}\b", body, flags=re.IGNORECASE), keyword
++
++
++def test_comment_stripping_does_not_hide_a_write() -> None:
++    """The guard's own helper keeps code outside comments."""
++    text = "-- DELETE in a comment\nSELECT 1; /* DROP */ DELETE FROM x"
++    stripped = _strip_comments(text)
++    assert "DROP" not in stripped
++    assert re.search(r"\bDELETE\b", stripped)
