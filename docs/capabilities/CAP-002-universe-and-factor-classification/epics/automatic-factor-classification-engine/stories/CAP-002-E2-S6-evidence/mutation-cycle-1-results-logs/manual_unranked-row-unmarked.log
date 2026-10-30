@@ -1,0 +1,37 @@
+..........F
+=================================== FAILURES ===================================
+_________ test_unranked_rows_carry_the_mark_and_retired_rows_never_do __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55918 user=test database=test_58385f452d004d7ab5f2b2c55e670cf8) at 0x10a865880>, set_id=UUID('8ec58009-e0a7-499c-8ab8-d28103879ca1'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a865eb0>
+
+    def test_unranked_rows_carry_the_mark_and_retired_rows_never_do(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: with the floor at 5 no factor ranks over four stocks, and each stock's
+        not_enough_stocks rows carry its own inputs' mark; a retired stock's rows are false
+        although its statements are backfilled."""
+        conn, set_id = store
+        stocks = build_fixture(conn)
+        retired = add_instrument(conn, "OLD", "retired")
+        add_fundamentals(
+            conn, retired, latest_period_end=P1, first_observed_on=FIRST, filed_before_first=all_rows()
+        )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch, floor=5).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        for symbol, stock in stocks.items():
+            for factor in FACTORS:
+                row = rows[(stock, factor)]
+                assert (row["status"], row["reason_code"]) == ("not_classified", "not_enough_stocks")
+>               assert row["restated_possible"] is (symbol == "A" and factor != "momentum")
+E               AssertionError: assert False is (('A' == 'A'
+E                 
+E                   A and 'value' != 'momentum'))
+
+tests/integration/test_engine_restatement.py:557: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_unranked_rows_carry_the_mark_and_retired_rows_never_do
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 10 passed in 4.71s

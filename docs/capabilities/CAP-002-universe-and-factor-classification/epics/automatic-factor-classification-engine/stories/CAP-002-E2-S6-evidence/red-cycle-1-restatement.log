@@ -1,0 +1,641 @@
+# RED for CAP-002-E2-S6 cycle-1, on a clone of HEAD d643a52 with no production change,
+# holding the three test files exactly as staged in cycle-1.patch.
+# git status --porcelain of the clone:
+#   ?? tests/integration/engine_restatement_support.py
+#   ?? tests/integration/test_engine_restatement.py
+#   ?? tests/unit/test_restatement_sql_static.py
+# sha256 of the test files run (equal to the staged blobs):
+#   9c73ddef354f2b0869bfd00afbd378068b1bee09942f6a95cf7c43a282937eb7  tests/integration/engine_restatement_support.py
+#   b1b8f358b0083d7a16b0ea9f715bc47fc381299b9288fc5c003679692211ad3b  tests/integration/test_engine_restatement.py
+#   8c4bf1d9f15074c5fe9e4fa0ae94f3529f1c48a56a342d3e27bb006c60b17fb4  tests/unit/test_restatement_sql_static.py
+# production files differing from HEAD: 0
+# command: uv run --all-extras --offline python -B -m pytest -v -p no:cacheprovider tests/integration/test_engine_restatement.py tests/unit/test_restatement_sql_static.py
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/redclone/.venv/bin/python3
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/redclone
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 26 items
+
+tests/integration/test_engine_restatement.py::test_statement_filed_before_first_observation_marks_its_inputs_and_classifications FAILED [  3%]
+tests/integration/test_engine_restatement.py::test_momentum_classification_is_never_marked FAILED [  7%]
+tests/integration/test_engine_restatement.py::test_a_later_set_leaves_the_earlier_sets_mark_unchanged FAILED [ 11%]
+tests/integration/test_engine_restatement.py::test_only_the_rows_an_input_reads_mark_it FAILED [ 15%]
+tests/integration/test_engine_restatement.py::test_one_backfilled_row_marks_only_the_inputs_that_read_it FAILED [ 19%]
+tests/integration/test_engine_restatement.py::test_filing_date_boundary_and_null_filing_date FAILED [ 23%]
+tests/integration/test_engine_restatement.py::test_a_not_classified_row_for_a_missing_input_carries_the_mark FAILED [ 26%]
+tests/integration/test_engine_restatement.py::test_a_factor_whose_inputs_are_all_missing_is_not_marked FAILED [ 30%]
+tests/integration/test_engine_restatement.py::test_outdated_inputs_and_their_not_classified_rows_carry_the_mark FAILED [ 34%]
+tests/integration/test_engine_restatement.py::test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark FAILED [ 38%]
+tests/integration/test_engine_restatement.py::test_unranked_rows_carry_the_mark_and_retired_rows_never_do FAILED [ 42%]
+tests/integration/test_engine_restatement.py::test_the_mark_changes_no_score_or_reason FAILED [ 46%]
+tests/integration/test_engine_restatement.py::test_a_marked_momentum_input_alone_marks_nothing PASSED [ 50%]
+tests/unit/test_restatement_sql_static.py::test_the_split_ignores_separators_inside_parentheses_and_literals PASSED [ 53%]
+tests/unit/test_restatement_sql_static.py::test_a_constant_false_row_set_is_found PASSED [ 57%]
+tests/unit/test_restatement_sql_static.py::test_a_guard_with_another_factor_is_found PASSED [ 61%]
+tests/unit/test_restatement_sql_static.py::test_input_marks_are_bool_or_over_the_backfilled_flag[value_inputs.sql] FAILED [ 65%]
+tests/unit/test_restatement_sql_static.py::test_input_marks_are_bool_or_over_the_backfilled_flag[growth_inputs.sql] FAILED [ 69%]
+tests/unit/test_restatement_sql_static.py::test_no_input_row_writes_a_constant_mark[value_inputs.sql] FAILED [ 73%]
+tests/unit/test_restatement_sql_static.py::test_no_input_row_writes_a_constant_mark[growth_inputs.sql] FAILED [ 76%]
+tests/unit/test_restatement_sql_static.py::test_classify_reads_the_mark_from_factor_input_with_bool_or FAILED [ 80%]
+tests/unit/test_restatement_sql_static.py::test_classify_guard_names_only_value_and_growth FAILED [ 84%]
+tests/unit/test_restatement_sql_static.py::test_only_the_retired_row_set_writes_a_constant_false FAILED [ 88%]
+tests/unit/test_restatement_sql_static.py::test_no_new_parameter[classify.sql] PASSED [ 92%]
+tests/unit/test_restatement_sql_static.py::test_no_new_parameter[growth_inputs.sql] PASSED [ 96%]
+tests/unit/test_restatement_sql_static.py::test_no_new_parameter[value_inputs.sql] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_statement_filed_before_first_observation_marks_its_inputs_and_classifications _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_d0194490a86547b6aa91fa904885821d) at 0x10b2c6240>, set_id=UUID('08def9e2-5125-4ba7-a4b4-cdf55cc00731'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b2c66f0>
+
+    def test_statement_filed_before_first_observation_marks_its_inputs_and_classifications(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store
+        stocks = build_fixture(conn)
+    
+        result = run_two_stage_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = classifications_for(conn, set_id)
+        a = stocks["A"]
+>       assert input_flags(conn, set_id, a) == expect(*FUNDAMENTAL_INPUTS)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Differing items:
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         {'fcf_yield': False} != {'fcf_yield': True}
+E         {'eps_growth': False} != {'eps_growth': True}
+E         {'book_to_price': False} != {'book_to_price': True}
+E         {'earnings_yield': False} != {'earnings_yield': True}...
+E         
+E         ...Full output truncated (24 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:159: AssertionError
+_________________ test_momentum_classification_is_never_marked _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_56cd7bdfadac45169832e89ba2323d04) at 0x10b3378f0>, set_id=UUID('06cc6c77-6aae-42dd-9929-86f28018d53f'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b337f50>
+
+    def test_momentum_classification_is_never_marked(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store
+        stocks = {symbol: add_instrument(conn, symbol) for symbol in SYMBOLS}
+        for symbol, stock in stocks.items():
+            add_bar_for(conn, stock, L)
+            marked = symbol == "A"
+            add_marked_inputs(conn, set_id, stock, "value", restated=marked)
+            add_marked_inputs(conn, set_id, stock, "growth", restated=marked)
+            # A's momentum rows say true too, a state no momentum stage writes, so only the
+            # factor guard in classify.sql can keep its classification unmarked.
+            add_momentum_inputs(conn, set_id, stock, restated=marked)
+        # E is marked on value and growth and has no momentum row, so its momentum row is the
+        # not-classified one of a ranked factor.
+        e = add_instrument(conn, "E")
+        add_bar_for(conn, e, L)
+        add_marked_inputs(conn, set_id, e, "value", restated=True)
+        add_marked_inputs(conn, set_id, e, "growth", restated=True)
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", MIN_FLOOR)
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = classifications_for(conn, set_id)
+        a = stocks["A"]
+        for factor in ("value", "growth"):
+>           assert (rows[(a, factor)]["status"], rows[(a, factor)]["restated_possible"]) == (
+                "classified",
+                True,
+            )
+E           AssertionError: assert ('classified', False) == ('classified', True)
+E             
+E             At index 1 diff: False != True
+E             
+E             Full diff:
+E               (
+E                   'classified',
+E             -     True,
+E             +     False,
+E               )
+
+tests/integration/test_engine_restatement.py:207: AssertionError
+___________ test_a_later_set_leaves_the_earlier_sets_mark_unchanged ____________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_59f847100b91461c8ab73f568aeaf3ea) at 0x10b341e50>, set_id=UUID('7ce13a75-2a7b-46bc-8e83-a45f7fb369e1'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b341c70>
+
+    def test_a_later_set_leaves_the_earlier_sets_mark_unchanged(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_1 = store
+        stocks = build_fixture(conn)
+        assert run_two_stage_build(conn, set_1, monkeypatch).state == "complete"
+        a = stocks["A"]
+        flags_1 = classification_flags(conn, set_1)
+>       assert (flags_1[(a, "value")], flags_1[(a, "growth")]) == (True, True)
+E       AssertionError: assert (False, False) == (True, True)
+E         
+E         At index 0 diff: False != True
+E         
+E         Full diff:
+E           (
+E         -     True,
+E         -     True,...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:243: AssertionError
+__________________ test_only_the_rows_an_input_reads_mark_it ___________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_9ebd2607366a41f38f7cb1c0f8f4a6d5) at 0x10b3436e0>, set_id=UUID('7ca6047a-05c7-4af4-80f7-37d0ceaa7b41'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b343410>
+
+    def test_only_the_rows_an_input_reads_mark_it(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-23, DEC-0122: a backfilled ninth quarter outside both windows marks nothing; the
+        same kind of row inside a window marks exactly the inputs that read it."""
+        conn, set_id = store
+        stocks = build_fixture(
+            conn,
+            {
+                "B": {("income_statement", 7)},  # the oldest prior-year quarter
+                "C": {("income_statement", 3)},  # the oldest trailing quarter
+            },
+            extra_old=("A",),
+        )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        flags = classification_flags(conn, set_id)
+        a, b, c, d = (stocks[s] for s in SYMBOLS)
+        assert input_flags(conn, set_id, a) == expect()
+>       assert input_flags(conn, set_id, b) == expect(*GROWTH)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'eps_growth': False} != {'eps_growth': True}
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         
+E         Full diff:...
+E         
+E         ...Full output truncated (13 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:298: AssertionError
+__________ test_one_backfilled_row_marks_only_the_inputs_that_read_it __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_1c38bf629c2f430f9022e14d4371bf29) at 0x10b343b60>, set_id=UUID('9c2f1e3f-2932-41b1-bf39-1160d7ca05a1'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b341dc0>
+
+    def test_one_backfilled_row_marks_only_the_inputs_that_read_it(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-23, DEC-0122: only A's newest cash-flow quarter is backfilled; fcf_yield reads it
+        and the other inputs do not, and any marked input marks the factor."""
+        conn, set_id = store
+        stocks = build_fixture(conn, {"A": {("cash_flow_statement", 0)}})
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+>       assert input_flags(conn, set_id, a) == expect("fcf_yield")
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...': False, ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'fcf_yield': False} != {'fcf_yield': True}
+E         
+E         Full diff:
+E           {...
+E         
+E         ...Full output truncated (9 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:325: AssertionError
+________________ test_filing_date_boundary_and_null_filing_date ________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_47f59f360f194fe2a35e3bd55fd37a96) at 0x10b3404a0>, set_id=UUID('c0a16b1d-5dfa-48cb-a23e-eecaecf7af3a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b342750>
+
+    def test_filing_date_boundary_and_null_filing_date(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0056: filed on the first observed_on is not backfilled, one day earlier is, and a
+        null filing date is not."""
+        conn, set_id = store
+        # A's rows are all filed on FIRST itself.
+        stocks = build_fixture(conn, {"C": {("balance_sheet", 0)}})
+        a, b, c = stocks["A"], stocks["B"], stocks["C"]
+        reobserve(conn, b, "balance_sheet", 0, FIRST - timedelta(days=1))
+        reobserve(conn, c, "balance_sheet", 0, None)  # C's backfilled row, re-filed as null
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        assert input_flags(conn, set_id, a) == expect()
+>       assert input_flags(conn, set_id, b) == expect(*VALUE)  # every value input reads it
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...': False, ...}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'fcf_yield': False} != {'fcf_yield': True}
+E         {'earnings_yield': False} != {'earnings_yield': True}
+E         {'book_to_price': False} != {'book_to_price': True}
+E         ...
+E         
+E         ...Full output truncated (17 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:350: AssertionError
+________ test_a_not_classified_row_for_a_missing_input_carries_the_mark ________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_dffb7572a6a14c90aacb9003b4709eed) at 0x10b343d10>, set_id=UUID('91dfd293-209f-4416-9501-02b6f12335f6'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b342c60>
+
+    def test_a_not_classified_row_for_a_missing_input_carries_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A holds no cash-flow statement, so fcf_yield is missing and lists no period;
+        A's value row is not classified for it and still carries its other inputs' mark."""
+        conn, set_id = store
+        stocks = build_fixture(conn, statement_types={"A": ("balance_sheet", "income_statement")})
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        rows = classifications_for(conn, set_id)
+        value = rows[(a, "value")]
+        assert (value["status"], value["reason_code"], value["reason_input"]) == (
+            "not_classified",
+            "input_missing",
+            "fcf_yield",
+        )
+>       assert value["restated_possible"] is True
+E       assert False is True
+
+tests/integration/test_engine_restatement.py:394: AssertionError
+___________ test_a_factor_whose_inputs_are_all_missing_is_not_marked ___________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_487a1db532be48c190c86d3b9d539e53) at 0x10b340f20>, set_id=UUID('29740e38-bd90-46fd-84c5-539fdf9eac0f'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b342360>
+
+    def test_a_factor_whose_inputs_are_all_missing_is_not_marked(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A holds six quarters, all backfilled, so its prior-year window is not formed
+        and both growth inputs are missing although they read A's trailing quarters; they list
+        no period, so neither they nor A's growth row are marked, while A's value is."""
+        conn, set_id = store
+        stocks = {symbol: add_instrument(conn, symbol) for symbol in SYMBOLS}
+        for symbol, stock in stocks.items():
+            add_bar_for(conn, stock, L)
+            add_fundamentals(
+                conn,
+                stock,
+                latest_period_end=P1,
+                first_observed_on=FIRST,
+                filed_before_first=all_rows(6) if symbol == "A" else frozenset(),
+                quarters=6 if symbol == "A" else 8,
+            )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        rows = classifications_for(conn, set_id)
+        growth = rows[(a, "growth")]
+        assert (growth["status"], growth["reason_code"], growth["reason_input"]) == (
+            "not_classified",
+            "input_missing",
+            "revenue_growth",
+        )
+        assert growth["restated_possible"] is False
+        assert {inputs_for(conn, set_id, a)[name]["status"] for name in GROWTH} == {"missing"}
+>       assert input_flags(conn, set_id, a) == expect(*VALUE)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...': False, ...}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'fcf_yield': False} != {'fcf_yield': True}
+E         {'earnings_yield': False} != {'earnings_yield': True}
+E         {'book_to_price': False} != {'book_to_price': True}
+E         ...
+E         
+E         ...Full output truncated (17 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:439: AssertionError
+______ test_outdated_inputs_and_their_not_classified_rows_carry_the_mark _______
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_46b7b38e14d741e18e2ace7ae3e3533c) at 0x10b490770>, set_id=UUID('31985452-0ebb-4666-85e0-359cdb3b8dbf'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b492b40>
+
+    def test_outdated_inputs_and_their_not_classified_rows_carry_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A's newest quarter ended more than six months before the classification
+        date, so its five inputs are outdated; they list their periods, every one backfilled,
+        so they are marked, and so are A's input_outdated value and growth rows."""
+        conn, set_id = store
+        stocks = {symbol: add_instrument(conn, symbol) for symbol in SYMBOLS}
+        for symbol, stock in stocks.items():
+            add_bar_for(conn, stock, L)
+            add_fundamentals(
+                conn,
+                stock,
+                latest_period_end=date(2026, 3, 31) if symbol == "A" else P1,
+                first_observed_on=FIRST,
+                filed_before_first=all_rows() if symbol == "A" else frozenset(),
+            )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        assert {row["status"] for row in inputs_for(conn, set_id, a).values()} == {"outdated"}
+>       assert input_flags(conn, set_id, a) == expect(*FUNDAMENTAL_INPUTS)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Differing items:
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         {'fcf_yield': False} != {'fcf_yield': True}
+E         {'eps_growth': False} != {'eps_growth': True}
+E         {'book_to_price': False} != {'book_to_price': True}
+E         {'earnings_yield': False} != {'earnings_yield': True}...
+E         
+E         ...Full output truncated (24 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:469: AssertionError
+___ test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_51a62463520b44538f7a69c7325b12c6) at 0x10b491a30>, set_id=UUID('77f23588-7040-4b14-bd52-745769b59036'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b4936b0>
+
+    def test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A's shares outstanding are negative, so its market capitalisation is not
+        positive and its three value inputs are not computable, and its prior-year revenue
+        sums below zero, so revenue_growth is not computable too. Each lists its periods, and
+        exactly those that list one of A's backfilled income statements are marked, as are
+        A's input_not_computable value and growth rows."""
+        conn, set_id = store
+        stocks = build_fixture(conn, {}, statement_types={"A": ("cash_flow_statement",)})
+        a = stocks["A"]
+        for k, end in enumerate(PERIOD_ENDS):
+            balance_sheet = statement_payload(a, "balance_sheet", k)
+            balance_sheet[TEST_KEYS["shares_outstanding"]] = Decimal(-100)
+            income = statement_payload(a, "income_statement", k)
+            if k >= 4:  # the prior-year window
+                income[TEST_KEYS["revenue"]] = Decimal(-100)
+            for statement_type, payload, filed in (
+                ("balance_sheet", balance_sheet, FIRST),  # not backfilled
+                ("income_statement", income, FIRST - BACKFILL_LEAD),  # backfilled
+            ):
+                add_statement(
+                    conn,
+                    a,
+                    end,
+                    statement_type,
+                    payload,
+                    observed_on=FIRST,
+                    provider_filing_date=filed,
+                )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        statuses = {name: row["status"] for name, row in inputs_for(conn, set_id, a).items()}
+        assert statuses == {
+            "book_to_price": "not_computable",
+            "earnings_yield": "not_computable",
+            "fcf_yield": "not_computable",
+            "revenue_growth": "not_computable",
+            "eps_growth": "present",
+        }
+>       assert input_flags(conn, set_id, a) == expect("earnings_yield", *GROWTH)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'eps_growth': False} != {'eps_growth': True}
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         {'earnings_yield': False} != {'earnings_yield': True}
+E         ...
+E         
+E         ...Full output truncated (17 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:524: AssertionError
+_________ test_unranked_rows_carry_the_mark_and_retired_rows_never_do __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_5cc37892d7464f7898989bac3a1611e4) at 0x10b342240>, set_id=UUID('4da87c3a-02c8-43a4-83d4-c0008af996c8'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b341340>
+
+    def test_unranked_rows_carry_the_mark_and_retired_rows_never_do(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: with the floor at 5 no factor ranks over four stocks, and each stock's
+        not_enough_stocks rows carry its own inputs' mark; a retired stock's rows are false
+        although its statements are backfilled."""
+        conn, set_id = store
+        stocks = build_fixture(conn)
+        retired = add_instrument(conn, "OLD", "retired")
+        add_fundamentals(
+            conn, retired, latest_period_end=P1, first_observed_on=FIRST, filed_before_first=all_rows()
+        )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch, floor=5).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        for symbol, stock in stocks.items():
+            for factor in FACTORS:
+                row = rows[(stock, factor)]
+                assert (row["status"], row["reason_code"]) == ("not_classified", "not_enough_stocks")
+>               assert row["restated_possible"] is (symbol == "A" and factor != "momentum")
+E               AssertionError: assert False is (('A' == 'A'
+E                 
+E                   A and 'value' != 'momentum'))
+
+tests/integration/test_engine_restatement.py:557: AssertionError
+___________________ test_the_mark_changes_no_score_or_reason ___________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=52342 user=test database=test_f467d075aa854eda8fc689f845836a9e) at 0x10b341880>, set_id=UUID('f38cc283-b0b0-4211-b08f-c14b9673838b'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b341610>
+
+    def test_the_mark_changes_no_score_or_reason(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
+        """AC-23, DEC-0056: the same population built with A's rows backfilled and again with
+        them re-observed with no filing date classifies identically; only the mark differs."""
+        conn, set_1 = store
+        stocks = build_fixture(conn)
+        assert run_two_stage_build(conn, set_1, monkeypatch).state == "complete"
+        a = stocks["A"]
+        for statement_type, quarter_index in sorted(all_rows()):
+            reobserve(conn, a, statement_type, quarter_index, None)
+        set_2 = add_building_set(conn, add_run(conn), D)
+    
+        assert run_two_stage_build(conn, set_2, monkeypatch).state == "complete"
+    
+        def classified(set_id: UUID) -> dict[tuple[int, str], tuple[object, ...]]:
+            return {
+                key: (
+                    row["status"],
+                    row["score"],
+                    row["percentile"],
+                    row["reason_code"],
+                    row["reason_input"],
+                    row["reason_detail"],
+                )
+                for key, row in classifications_for(conn, set_id).items()
+            }
+    
+        assert classified(set_2) == classified(set_1)
+>       assert {key for key, flag in classification_flags(conn, set_1).items() if flag} == {
+            (a, "value"),
+            (a, "growth"),
+        }
+E       AssertionError: assert set() == {(1, 'growth'), (1, 'value')}
+E         
+E         Extra items in the right set:
+E         (1, 'growth')
+E         (1, 'value')
+E         
+E         Full diff:
+E         + set()...
+E         
+E         ...Full output truncated (10 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_restatement.py:590: AssertionError
+___ test_input_marks_are_bool_or_over_the_backfilled_flag[value_inputs.sql] ____
+
+name = 'value_inputs.sql'
+
+    @pytest.mark.parametrize("name", ["value_inputs.sql", "growth_inputs.sql"])
+    def test_input_marks_are_bool_or_over_the_backfilled_flag(name: str) -> None:
+        """DEC-0056, DEC-0122: an input is marked when any statement row it lists is backfilled."""
+>       assert re.search(r"\bbool_or\s*\(\s*(?:\w+\.)?backfilled\s*\)", code(statement(name)))
+E       assert None
+E        +  where None = <function search at 0x103c0ca40>('\\bbool_or\\s*\\(\\s*(?:\\w+\\.)?backfilled\\s*\\)', "\n\n\n\nCREATE TEMP TABLE inputs ON COMMIT DROP AS\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    \n    \n    SELECT m.name, m.statement_type, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_statement_types)s::text[],\n                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[])\n           AS m (name, statement_type, payload_key, sign)\n),\nneeded (input_name, line_items, window_type) AS (\n    \n    \n    VALUES ('book_to_price', ARRAY['book_equity', 'shares_outstanding'], NULL::text),\n           ('earnings_yield', ARRAY['net_income', 'shares_outstanding'], 'income_statement'),\n           ('fcf_yield', ARRAY['operating_cash_flow', 'capital_expenditure',\n                               'shares_outstanding'], 'cash_flow_statement')\n),\nused AS (\n    \n    \n    SELECT r.instrument_id, n.input_name, s.statement_type, s.fiscal_period_end,\n           s.observed_on, s.period_rank, s.payload,\n           jsonb_build_object('statement_type', s.statement_type,\n                              'fiscal_period_end', s.fiscal_period_end,\n                              'observed_o...EN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_strip_nulls(jsonb_build_object(\n                    'fundamentals', CASE WHEN s.fundamentals_outdated\n                                         THEN jsonb_build_object('latest_period_end', s.as_of,\n                                                                 'stale_before', s.stale_before)\n                                    END,\n                    'prices', CASE WHEN s.prices_outdated\n                                   THEN jsonb_build_object('bar_date', s.bar_date,\n                                                           'latest_trading_day',\n                                                           %(latest_trading_day)s::date)\n                              END)))\n            WHEN 'not_computable' THEN jsonb_set(\n                s.base, ARRAY['cause'], to_jsonb('market_capitalisation_not_positive'::text))\n            ELSE s.base\n       END AS detail,\n       CASE WHEN s.missing_cause = 'price_missing' THEN 'prices' ELSE 'fundamentals' END\n           AS missing_data_type\n  FROM statused s\n")
+E        +    where <function search at 0x103c0ca40> = re.search
+E        +    and   "\n\n\n\nCREATE TEMP TABLE inputs ON COMMIT DROP AS\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    \n    \n    SELECT m.name, m.statement_type, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_statement_types)s::text[],\n                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[])\n           AS m (name, statement_type, payload_key, sign)\n),\nneeded (input_name, line_items, window_type) AS (\n    \n    \n    VALUES ('book_to_price', ARRAY['book_equity', 'shares_outstanding'], NULL::text),\n           ('earnings_yield', ARRAY['net_income', 'shares_outstanding'], 'income_statement'),\n           ('fcf_yield', ARRAY['operating_cash_flow', 'capital_expenditure',\n                               'shares_outstanding'], 'cash_flow_statement')\n),\nused AS (\n    \n    \n    SELECT r.instrument_id, n.input_name, s.statement_type, s.fiscal_period_end,\n           s.observed_on, s.period_rank, s.payload,\n           jsonb_build_object('statement_type', s.statement_type,\n                              'fiscal_period_end', s.fiscal_period_end,\n                              'observed_o...EN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_strip_nulls(jsonb_build_object(\n                    'fundamentals', CASE WHEN s.fundamentals_outdated\n                                         THEN jsonb_build_object('latest_period_end', s.as_of,\n                                                                 'stale_before', s.stale_before)\n                                    END,\n                    'prices', CASE WHEN s.prices_outdated\n                                   THEN jsonb_build_object('bar_date', s.bar_date,\n                                                           'latest_trading_day',\n                                                           %(latest_trading_day)s::date)\n                              END)))\n            WHEN 'not_computable' THEN jsonb_set(\n                s.base, ARRAY['cause'], to_jsonb('market_capitalisation_not_positive'::text))\n            ELSE s.base\n       END AS detail,\n       CASE WHEN s.missing_cause = 'price_missing' THEN 'prices' ELSE 'fundamentals' END\n           AS missing_data_type\n  FROM statused s\n" = code("-- book_to_price, earnings_yield and fcf_yield for every active instrument (factor-engine\n-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,\n-- which growth_inputs.sql and CAP-002-E2-S4's momentum_inputs.sql insert into (DEC-0115).\n-- Reads only. CAP-002-E2-S3.\nCREATE TEMP TABLE inputs ON COMMIT DROP AS\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    -- The seven line items with their bound payload keys and signs. A NULL key is one the\n    -- owner has not supplied yet (line_items.REQUIRES_INPUT).\n    SELECT m.name, m.statement_type, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_statement_types)s::text[],\n                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[])\n           AS m (name, statement_type, payload_key, sign)\n),\nneeded (input_name, line_items, window_type) AS (\n    -- The line items each input reads and the statement type of its trailing window.\n    -- Market capitalisation needs shares outstanding for every input.\n    VALUES ('book_to_price', ARRAY['book_equity', 'shares_outstanding'], NULL::text),\n     ...EN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_strip_nulls(jsonb_build_object(\n                    'fundamentals', CASE WHEN s.fundamentals_outdated\n                                         THEN jsonb_build_object('latest_period_end', s.as_of,\n                                                                 'stale_before', s.stale_before)\n                                    END,\n                    'prices', CASE WHEN s.prices_outdated\n                                   THEN jsonb_build_object('bar_date', s.bar_date,\n                                                           'latest_trading_day',\n                                                           %(latest_trading_day)s::date)\n                              END)))\n            WHEN 'not_computable' THEN jsonb_set(\n                s.base, ARRAY['cause'], to_jsonb('market_capitalisation_not_positive'::text))\n            ELSE s.base\n       END AS detail,\n       CASE WHEN s.missing_cause = 'price_missing' THEN 'prices' ELSE 'fundamentals' END\n           AS missing_data_type\n  FROM statused s\n")
+E        +      where "-- book_to_price, earnings_yield and fcf_yield for every active instrument (factor-engine\n-- design 2.4; DEC-0055 (1), (5), (6), (7); DEC-0116). Creates the temporary table inputs,\n-- which growth_inputs.sql and CAP-002-E2-S4's momentum_inputs.sql insert into (DEC-0115).\n-- Reads only. CAP-002-E2-S3.\nCREATE TEMP TABLE inputs ON COMMIT DROP AS\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    -- The seven line items with their bound payload keys and signs. A NULL key is one the\n    -- owner has not supplied yet (line_items.REQUIRES_INPUT).\n    SELECT m.name, m.statement_type, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_statement_types)s::text[],\n                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[])\n           AS m (name, statement_type, payload_key, sign)\n),\nneeded (input_name, line_items, window_type) AS (\n    -- The line items each input reads and the statement type of its trailing window.\n    -- Market capitalisation needs shares outstanding for every input.\n    VALUES ('book_to_price', ARRAY['book_equity', 'shares_outstanding'], NULL::text),\n     ...EN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_strip_nulls(jsonb_build_object(\n                    'fundamentals', CASE WHEN s.fundamentals_outdated\n                                         THEN jsonb_build_object('latest_period_end', s.as_of,\n                                                                 'stale_before', s.stale_before)\n                                    END,\n                    'prices', CASE WHEN s.prices_outdated\n                                   THEN jsonb_build_object('bar_date', s.bar_date,\n                                                           'latest_trading_day',\n                                                           %(latest_trading_day)s::date)\n                              END)))\n            WHEN 'not_computable' THEN jsonb_set(\n                s.base, ARRAY['cause'], to_jsonb('market_capitalisation_not_positive'::text))\n            ELSE s.base\n       END AS detail,\n       CASE WHEN s.missing_cause = 'price_missing' THEN 'prices' ELSE 'fundamentals' END\n           AS missing_data_type\n  FROM statused s\n" = statement('value_inputs.sql')
+
+tests/unit/test_restatement_sql_static.py:167: AssertionError
+___ test_input_marks_are_bool_or_over_the_backfilled_flag[growth_inputs.sql] ___
+
+name = 'growth_inputs.sql'
+
+    @pytest.mark.parametrize("name", ["value_inputs.sql", "growth_inputs.sql"])
+    def test_input_marks_are_bool_or_over_the_backfilled_flag(name: str) -> None:
+        """DEC-0056, DEC-0122: an input is marked when any statement row it lists is backfilled."""
+>       assert re.search(r"\bbool_or\s*\(\s*(?:\w+\.)?backfilled\s*\)", code(statement(name)))
+E       assert None
+E        +  where None = <function search at 0x103c0ca40>('\\bbool_or\\s*\\(\\s*(?:\\w+\\.)?backfilled\\s*\\)', "\n\n\n\nINSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, known_on,\n                    restated_possible, detail, missing_data_type)\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    \n    \n    SELECT m.name, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_keys)s::text[],\n                  %(line_item_signs)s::integer[])\n           AS m (name, payload_key, sign)\n),\nneeded (input_name, line_item) AS (\n    VALUES ('revenue_growth', 'revenue'), ('eps_growth', 'diluted_eps')\n),\nused AS (\n    \n    \n    SELECT r.instrument_id, n.input_name, s.fiscal_period_end, s.observed_on,\n           s.ttm_slot IS NOT NULL AS in_ttm,\n           jsonb_build_object('statement_type', s.statement_type,\n                              'fiscal_period_end', s.fiscal_period_end,\n                              'observed_on', s.observed_on,\n                              'provider_filing_date', s.provider_filing_date,\n                              'backfilled', s.backfilled) AS period,\n           CASE WHEN jsonb_typeof(s.payload -> m.payload_key) IN ('number', 'string')\n       ...lved_cause)s::text,\n                                                            'line_item_absent')\n                                   THEN jsonb_build_array(s.line_item)\n                              END,\n                'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')\n                                      THEN coalesce(s.periods_found, jsonb_build_array())\n                                 END))\n            WHEN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_build_object('fundamentals',\n                                   jsonb_build_object('latest_period_end', s.as_of,\n                                                      'stale_before', s.stale_before)))\n            WHEN 'not_computable' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('prior_year_base_not_positive'::text)),\n                ARRAY['prior_year_base'], to_jsonb(s.prior_sum))\n            ELSE s.base\n       END,\n       'fundamentals'::text\n  FROM statused s\n")
+E        +    where <function search at 0x103c0ca40> = re.search
+E        +    and   "\n\n\n\nINSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, known_on,\n                    restated_possible, detail, missing_data_type)\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    \n    \n    SELECT m.name, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_keys)s::text[],\n                  %(line_item_signs)s::integer[])\n           AS m (name, payload_key, sign)\n),\nneeded (input_name, line_item) AS (\n    VALUES ('revenue_growth', 'revenue'), ('eps_growth', 'diluted_eps')\n),\nused AS (\n    \n    \n    SELECT r.instrument_id, n.input_name, s.fiscal_period_end, s.observed_on,\n           s.ttm_slot IS NOT NULL AS in_ttm,\n           jsonb_build_object('statement_type', s.statement_type,\n                              'fiscal_period_end', s.fiscal_period_end,\n                              'observed_on', s.observed_on,\n                              'provider_filing_date', s.provider_filing_date,\n                              'backfilled', s.backfilled) AS period,\n           CASE WHEN jsonb_typeof(s.payload -> m.payload_key) IN ('number', 'string')\n       ...lved_cause)s::text,\n                                                            'line_item_absent')\n                                   THEN jsonb_build_array(s.line_item)\n                              END,\n                'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')\n                                      THEN coalesce(s.periods_found, jsonb_build_array())\n                                 END))\n            WHEN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_build_object('fundamentals',\n                                   jsonb_build_object('latest_period_end', s.as_of,\n                                                      'stale_before', s.stale_before)))\n            WHEN 'not_computable' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('prior_year_base_not_positive'::text)),\n                ARRAY['prior_year_base'], to_jsonb(s.prior_sum))\n            ELSE s.base\n       END,\n       'fundamentals'::text\n  FROM statused s\n" = code("-- revenue_growth and eps_growth for every active instrument: the trailing four quarters\n-- over the four quarters a year earlier, minus one (factor-engine design 2.4;\n-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql\n-- creates (DEC-0115). Depends on no price. Reads only. CAP-002-E2-S3.\nINSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, known_on,\n                    restated_possible, detail, missing_data_type)\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    -- The seven line items with their bound payload keys and signs. A NULL key is one the\n    -- owner has not supplied yet (line_items.REQUIRES_INPUT).\n    SELECT m.name, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_keys)s::text[],\n                  %(line_item_signs)s::integer[])\n           AS m (name, payload_key, sign)\n),\nneeded (input_name, line_item) AS (\n    VALUES ('revenue_growth', 'revenue'), ('eps_growth', 'diluted_eps')\n),\nused AS (\n    -- The eight quarterly income statements of the trailing and prior-year windows, each\n    -- line item read t...lved_cause)s::text,\n                                                            'line_item_absent')\n                                   THEN jsonb_build_array(s.line_item)\n                              END,\n                'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')\n                                      THEN coalesce(s.periods_found, jsonb_build_array())\n                                 END))\n            WHEN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_build_object('fundamentals',\n                                   jsonb_build_object('latest_period_end', s.as_of,\n                                                      'stale_before', s.stale_before)))\n            WHEN 'not_computable' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('prior_year_base_not_positive'::text)),\n                ARRAY['prior_year_base'], to_jsonb(s.prior_sum))\n            ELSE s.base\n       END,\n       'fundamentals'::text\n  FROM statused s\n")
+E        +      where "-- revenue_growth and eps_growth for every active instrument: the trailing four quarters\n-- over the four quarters a year earlier, minus one (factor-engine design 2.4;\n-- DEC-0055 (1), (2), (7); DEC-0116). Inserts into the temporary table value_inputs.sql\n-- creates (DEC-0115). Depends on no price. Reads only. CAP-002-E2-S3.\nINSERT INTO inputs (instrument_id, factor, input_name, status, value, as_of, known_on,\n                    restated_possible, detail, missing_data_type)\nWITH roster AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\nline_item AS (\n    -- The seven line items with their bound payload keys and signs. A NULL key is one the\n    -- owner has not supplied yet (line_items.REQUIRES_INPUT).\n    SELECT m.name, m.payload_key, m.sign\n      FROM unnest(%(line_item_names)s::text[], %(line_item_keys)s::text[],\n                  %(line_item_signs)s::integer[])\n           AS m (name, payload_key, sign)\n),\nneeded (input_name, line_item) AS (\n    VALUES ('revenue_growth', 'revenue'), ('eps_growth', 'diluted_eps')\n),\nused AS (\n    -- The eight quarterly income statements of the trailing and prior-year windows, each\n    -- line item read t...lved_cause)s::text,\n                                                            'line_item_absent')\n                                   THEN jsonb_build_array(s.line_item)\n                              END,\n                'periods_found', CASE WHEN s.missing_cause IN ('periods_missing',\n                                                               'line_item_absent')\n                                      THEN coalesce(s.periods_found, jsonb_build_array())\n                                 END))\n            WHEN 'outdated' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('outdated'::text)),\n                ARRAY['outdated'],\n                jsonb_build_object('fundamentals',\n                                   jsonb_build_object('latest_period_end', s.as_of,\n                                                      'stale_before', s.stale_before)))\n            WHEN 'not_computable' THEN jsonb_set(\n                jsonb_set(s.base, ARRAY['cause'], to_jsonb('prior_year_base_not_positive'::text)),\n                ARRAY['prior_year_base'], to_jsonb(s.prior_sum))\n            ELSE s.base\n       END,\n       'fundamentals'::text\n  FROM statused s\n" = statement('growth_inputs.sql')
+
+tests/unit/test_restatement_sql_static.py:167: AssertionError
+__________ test_no_input_row_writes_a_constant_mark[value_inputs.sql] __________
+
+name = 'value_inputs.sql'
+
+    @pytest.mark.parametrize("name", ["value_inputs.sql", "growth_inputs.sql"])
+    def test_no_input_row_writes_a_constant_mark(name: str) -> None:
+        """AC-23: the constant false CAP-002-E2-S3 wrote until this story is gone."""
+        expressions = restated_expressions(name)
+        assert expressions
+>       assert [e for e in expressions if is_constant_false(e)] == []
+E       AssertionError: assert ['false'] == []
+E         
+E         Left contains one more item: 'false'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'false',
+E         + ]
+
+tests/unit/test_restatement_sql_static.py:175: AssertionError
+_________ test_no_input_row_writes_a_constant_mark[growth_inputs.sql] __________
+
+name = 'growth_inputs.sql'
+
+    @pytest.mark.parametrize("name", ["value_inputs.sql", "growth_inputs.sql"])
+    def test_no_input_row_writes_a_constant_mark(name: str) -> None:
+        """AC-23: the constant false CAP-002-E2-S3 wrote until this story is gone."""
+        expressions = restated_expressions(name)
+        assert expressions
+>       assert [e for e in expressions if is_constant_false(e)] == []
+E       AssertionError: assert ['false'] == []
+E         
+E         Left contains one more item: 'false'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'false',
+E         + ]
+
+tests/unit/test_restatement_sql_static.py:175: AssertionError
+_________ test_classify_reads_the_mark_from_factor_input_with_bool_or __________
+
+    def test_classify_reads_the_mark_from_factor_input_with_bool_or() -> None:
+        """DEC-0119, DEC-0122: the classification's mark is any of its committed inputs' marks."""
+        text = code(statement("classify.sql"))
+>       assert re.search(r"\bbool_or\s*\(\s*(?:\w+\.)?restated_possible\s*\)", text)
+E       assert None
+E        +  where None = <function search at 0x103c0ca40>('\\bbool_or\\s*\\(\\s*(?:\\w+\\.)?restated_possible\\s*\\)', "\n\n\n\n\n\n\n\n\n\n\n\n\n\nWITH pf AS (\n    SELECT ranked, qualified_count\n      FROM classification_set_factor\n     WHERE set_id = %(set_id)s::uuid\n       AND factor = %(factor)s::text\n),\ninp AS (\n    SELECT n.input_name, n.label, n.input_order\n      FROM unnest(%(input_names)s::text[], %(input_labels)s::text[]) WITH ORDINALITY\n           AS n (input_name, label, input_order)\n),\nactive AS (\n    SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id\n),\npeer_ids AS (\n    SELECT fi.instrument_id\n      FROM factor_input fi\n      JOIN active a USING (instrument_id)\n     WHERE fi.set_id = %(set_id)s::uuid\n       AND fi.factor = %(factor)s::text\n       AND fi.status = 'present'\n     GROUP BY fi.instrument_id\n    HAVING count(*) = cardinality(%(input_names)s::text[])\n),\npeer AS (\n    SELECT fi.instrument_id, fi.input_name, fi.value\n      FROM factor_input fi\n      JOIN peer_ids p USING (instrument_id)\n     WHERE fi.set_id = %(set_id)s::uuid\n       AND fi.factor = %(factor)s::text\n),\nz AS (\n    SELECT instrument_id,\n           CASE WHEN stddev_samp(value) OVER w = 0 THEN 0\n                ELSE (value - avg(value) OVER w) / stddev_samp(value) OVER w\n...strument_id, %(factor)s::text, 'classified',\n       r.score, r.percentile, NULL, NULL, NULL, false\n  FROM ranked_scores r, pf\n WHERE pf.ranked\nUNION ALL\nSELECT %(set_id)s::uuid, g.instrument_id, %(factor)s::text, 'not_classified',\n       NULL, NULL,\n       concat('input_', g.status),\n       g.input_name,\n       concat(g.label, ' ', CASE g.status WHEN 'missing' THEN 'missing'\n                                          WHEN 'outdated' THEN 'outdated'\n                                          WHEN 'not_computable' THEN 'not computable'\n                                          END),\n       false\n  FROM first_gap g, pf\n WHERE pf.ranked\nUNION ALL\nSELECT %(set_id)s::uuid, a.instrument_id, %(factor)s::text, 'not_classified',\n       NULL, NULL,\n       'not_enough_stocks',\n       NULL,\n       concat(pf.qualified_count, ' of ', %(min_peer_set_size)s::int, ' stocks qualified'),\n       false\n  FROM active a, pf\n WHERE NOT pf.ranked\nUNION ALL\nSELECT %(set_id)s::uuid, gone.instrument_id, %(factor)s::text, 'not_classified',\n       NULL, NULL,\n       'retired',\n       NULL,\n       NULL,\n       false\n  FROM unnest(%(retired_ids)s::bigint[]) AS gone (instrument_id)\n")
+E        +    where <function search at 0x103c0ca40> = re.search
+
+tests/unit/test_restatement_sql_static.py:181: AssertionError
+_______________ test_classify_guard_names_only_value_and_growth ________________
+
+    def test_classify_guard_names_only_value_and_growth() -> None:
+        """DAC-E2-S6-2, DEC-0122: one factor guard, naming value and growth, never momentum."""
+        text = code(statement("classify.sql"))
+        guards = GUARD.findall(text)
+>       assert len(guards) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_restatement_sql_static.py:191: AssertionError
+____________ test_only_the_retired_row_set_writes_a_constant_false _____________
+
+    def test_only_the_retired_row_set_writes_a_constant_false() -> None:
+        """DEC-0122: the three active-stock row sets carry the mark; retired rows are false."""
+        expressions = restated_expressions("classify.sql")
+        assert len(expressions) == 4
+>       assert [is_constant_false(e) for e in expressions] == [False, False, False, True]
+E       AssertionError: assert [True, True, True, True] == [False, False, False, True]
+E         
+E         At index 0 diff: True != False
+E         
+E         Full diff:
+E           [
+E         -     False,
+E         -     False,...
+E         
+E         ...Full output truncated (6 lines hidden), use '-vv' to show
+
+tests/unit/test_restatement_sql_static.py:202: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_statement_filed_before_first_observation_marks_its_inputs_and_classifications
+FAILED tests/integration/test_engine_restatement.py::test_momentum_classification_is_never_marked
+FAILED tests/integration/test_engine_restatement.py::test_a_later_set_leaves_the_earlier_sets_mark_unchanged
+FAILED tests/integration/test_engine_restatement.py::test_only_the_rows_an_input_reads_mark_it
+FAILED tests/integration/test_engine_restatement.py::test_one_backfilled_row_marks_only_the_inputs_that_read_it
+FAILED tests/integration/test_engine_restatement.py::test_filing_date_boundary_and_null_filing_date
+FAILED tests/integration/test_engine_restatement.py::test_a_not_classified_row_for_a_missing_input_carries_the_mark
+FAILED tests/integration/test_engine_restatement.py::test_a_factor_whose_inputs_are_all_missing_is_not_marked
+FAILED tests/integration/test_engine_restatement.py::test_outdated_inputs_and_their_not_classified_rows_carry_the_mark
+FAILED tests/integration/test_engine_restatement.py::test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark
+FAILED tests/integration/test_engine_restatement.py::test_unranked_rows_carry_the_mark_and_retired_rows_never_do
+FAILED tests/integration/test_engine_restatement.py::test_the_mark_changes_no_score_or_reason
+FAILED tests/unit/test_restatement_sql_static.py::test_input_marks_are_bool_or_over_the_backfilled_flag[value_inputs.sql]
+FAILED tests/unit/test_restatement_sql_static.py::test_input_marks_are_bool_or_over_the_backfilled_flag[growth_inputs.sql]
+FAILED tests/unit/test_restatement_sql_static.py::test_no_input_row_writes_a_constant_mark[value_inputs.sql]
+FAILED tests/unit/test_restatement_sql_static.py::test_no_input_row_writes_a_constant_mark[growth_inputs.sql]
+FAILED tests/unit/test_restatement_sql_static.py::test_classify_reads_the_mark_from_factor_input_with_bool_or
+FAILED tests/unit/test_restatement_sql_static.py::test_classify_guard_names_only_value_and_growth
+FAILED tests/unit/test_restatement_sql_static.py::test_only_the_retired_row_set_writes_a_constant_false
+========================= 19 failed, 7 passed in 9.71s =========================
+# exit: 1

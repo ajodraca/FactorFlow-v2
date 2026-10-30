@@ -1,0 +1,44 @@
+.......F
+=================================== FAILURES ===================================
+___________ test_a_factor_whose_inputs_are_all_missing_is_not_marked ___________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55642 user=test database=test_ebf4b0bd4c0b4300a7b384f3f8e06bcb) at 0x108abc0e0>, set_id=UUID('becfbae7-1088-45a2-85d4-95dfb2ba0b40'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108abe270>
+
+    def test_a_factor_whose_inputs_are_all_missing_is_not_marked(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A holds six quarters, all backfilled, so its prior-year window is not formed
+        and both growth inputs are missing although they read A's trailing quarters; they list
+        no period, so neither they nor A's growth row are marked, while A's value is."""
+        conn, set_id = store
+        stocks = {symbol: add_instrument(conn, symbol) for symbol in SYMBOLS}
+        for symbol, stock in stocks.items():
+            add_bar_for(conn, stock, L)
+            add_fundamentals(
+                conn,
+                stock,
+                latest_period_end=P1,
+                first_observed_on=FIRST,
+                filed_before_first=all_rows(6) if symbol == "A" else frozenset(),
+                quarters=6 if symbol == "A" else 8,
+            )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        rows = classifications_for(conn, set_id)
+        growth = rows[(a, "growth")]
+        assert (growth["status"], growth["reason_code"], growth["reason_input"]) == (
+            "not_classified",
+            "input_missing",
+            "revenue_growth",
+        )
+>       assert growth["restated_possible"] is False
+E       assert True is False
+
+tests/integration/test_engine_restatement.py:437: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_a_factor_whose_inputs_are_all_missing_is_not_marked
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 7 passed in 4.00s

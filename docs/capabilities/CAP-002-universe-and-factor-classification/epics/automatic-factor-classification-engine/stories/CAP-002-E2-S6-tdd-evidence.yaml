@@ -1,0 +1,191 @@
+# TDD evidence for CAP-002-E2-S6 - Possibly-restated mark for value and growth classifications.
+# One cycle: the three SQL edits only work together for the end-to-end tests (TC-COMP-186, 188),
+# as the plan's Parallel Opportunities note says, and the new tests failed on one missing
+# behaviour, the constant false that CAP-002-E2-S3 and CAP-002-E2-S5 wrote until this story.
+# Decisions applied: DEC-0056 (backfill rule), DEC-0119 (classify.sql reads factor_input),
+# DEC-0122 (which rows mark an input; which classification rows carry the mark).
+# Reviews: the first code review asked for a test of an outdated and a not_computable input that
+# lists a backfilled row (BLOCKING); the spec-drift review found no drift. The tests were added, the
+# catalogue gained the mutants the reviewer named, the RED, the mutation run and the fingerprint were
+# redone on the final tests, and both reviews then judged the final patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014]
+    decisions: [DEC-0056, DEC-0119, DEC-0122]
+    description: >
+      Production: value_inputs.sql and growth_inputs.sql replace the constant false with
+      bool_or(backfilled) over the rows of used, the CTE that also builds detail.periods (periods
+      and windows aggregate both), written only when the status is not missing, since a missing
+      input's detail lists no period (DEC-0122: "exactly the statement rows listed in its detail
+      periods"). classify.sql gains the CTE marks: bool_or(factor_input.restated_possible) per
+      active stock over this set's rows of this factor, behind one factor guard
+      %(factor)s::text IN ('value', 'growth'), LEFT JOINed onto the classified, input-reason
+      not_classified and not_enough_stocks row sets with coalesce(m.restated, false); the retired
+      row set keeps the constant false. No parameter, Python module or migration changes (T012).
+      Tests: TC-COMP-186, 187 and 188 and the T007 cases in
+      tests/integration/test_engine_restatement.py, with helpers in
+      tests/integration/engine_restatement_support.py; T008 in tests/unit/test_restatement_sql_static.py.
+    deviations: >
+      (1) T011 writes the guard into each of the three row sets; it is written once, inside marks,
+      so a momentum build's marks is empty and every momentum row gets coalesce(NULL, false). Same
+      result, one guard to pin. (2) T011's instrument_id = ANY(%(active_ids)s) is written as
+      JOIN active, the unnest of that same parameter, as peer_ids does. (3) Helpers beyond T002's
+      list: run_two_stage_build takes floor (T007 (d) needs 5), add_fundamentals takes
+      statement_types (T007 (d) needs a stock without cash-flow statements), add_marked_inputs
+      generalises add_momentum_inputs for T005's value and growth rows, input_snapshot holds T006's
+      set-1 factor_input rows. (4) T005 adds a fifth stock E, marked on value and growth with no
+      momentum row, so the not_classified momentum row of a ranked factor is checked too. (5) Tests
+      beyond T007's list, added after GREEN to kill mutants or on review: all inputs of a factor
+      missing (growth guard), outdated inputs, and not_computable value and growth inputs (review
+      finding 1). (6) The mutants file is staged in the reviewed patch, as for CAP-002-E2-S5.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/red-cycle-1-restatement.log
+    red_log_sha256: bf12497926c9d5403cead15ad6ed7d57068708469e8307aec4b66902aa7473f0
+    red_evidence: >
+      Run on a clone of HEAD d643a52 (no production change) holding the three test files exactly as
+      staged in cycle-1.patch (their sha256 are in the log header): 19 failed, 7 passed, every
+      failure an assertion on restated_possible (14 AssertionError, 5 bare assert), none an error.
+      The 7 that passed are the detectors' three self-tests, the three no-new-parameter checks
+      (already true) and test_a_marked_momentum_input_alone_marks_nothing, whose expected result
+      (nothing marked) the constant false already gave; it kills manual:marks-no-factor-guard and
+      manual:marks-no-factor-filter. An earlier RED of a draft of these tests (16 failed, 7 passed)
+      was superseded by this one.
+    green_evidence: >
+      The two story test files: 26 passed. The delivered S2, S3 and S5 tests, unedited
+      (test_engine_inputs_fundamentals, test_engine_peer_set, test_composite_arithmetic,
+      test_classify_sql_static, test_engine_sql_safety, test_classification_sql_ships,
+      test_research_sql_is_append_only, test_engine_transaction, test_classification_stage_order):
+      192 passed before the review round; the focused suite of the mutation command passed in all
+      four baselines. On d643a52 plus the staged tree of cycle-1.patch, uv run pytest gave 1638
+      passed, 1 xfailed (full-suite-cycle-1.log under logs). ruff check, ruff format --check and mypy
+      src are clean; strict mypy is clean over the three new test files (its one error is the
+      pre-existing engine_inputs_support.py:194, outside this story). Tests added after GREEN, before
+      the final mutation run: E in TC-COMP-187 (kills manual:gap-row-inner-join and the gap row's
+      coalesce default), the all-missing growth case (kills manual:growth-missing-guard-dropped),
+      and, on code review finding 1, the outdated and not_computable cases (kill the five
+      present-only and not-computable-unmarked mutants). Review notes taken: T007 (a) also checks
+      A's momentum row, and the splitter self-test cites DEC-0122. The final code review (APPROVED)
+      and spec-drift review (no drift) judged cycle-1.patch as recorded in diff_sha256.
+      Their non-blocking notes: the roster join in marks is redundant (kept for DEC-0119 and T011;
+      disposition below); the set-1 flag assertion in TC-COMP-188 repeats the snapshot check; a
+      missing input is false even when it read a backfilled row, the DEC-0122 reading worth stating
+      when factor-engine design 2.4 is next revised.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/full-suite-cycle-1.log
+        sha256: b309be73217c983207cfd7cd340ce05aef59daecc0b576da3377d783f0c48147
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f902bf5ea1b48c3cb369f6263fd72c523c57f413bd40c01f1864bfcb3317208a
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/mutation-cycle-1-results.json
+      results_sha256: e3127504977e2b00612803f7611ed06b8b68c0eb8ed161d61825f72f485fd94d
+      generated: 48
+      killed: 32
+      survived: 16
+      stillborn: 0
+      timeout: 0
+      score: 0.667
+      survivors:
+        - id: src/factorflow/classification/sql/classify.sql:86:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/classify.sql:86:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/classify.sql:87:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/classify.sql:87:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/classify.sql:99:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/classify.sql:100:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/classify.sql:100:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and #
+            comments), which PostgreSQL discards; no test or safety rule reads that text, and the
+            static test strips -- comments before it matches
+        - id: manual:marks-no-roster-join
+          disposition: equivalent
+          reason: >
+            the join restricts marks to the active roster, but marks is only ever LEFT JOINed from
+            row sets whose stocks are already active (ranked_scores through peer_ids, first_gap and
+            active all come from the unnest of active_ids), and bool_or under GROUP BY is unchanged
+            by a duplicate id, so no stored row can differ; the join is kept because DEC-0119 and
+            T011 restrict the statement's reads to the roster, as peer_ids does

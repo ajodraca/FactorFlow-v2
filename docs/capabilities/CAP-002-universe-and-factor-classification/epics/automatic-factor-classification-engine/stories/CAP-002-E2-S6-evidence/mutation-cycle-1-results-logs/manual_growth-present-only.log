@@ -1,0 +1,43 @@
+........F
+=================================== FAILURES ===================================
+______ test_outdated_inputs_and_their_not_classified_rows_carry_the_mark _______
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=56097 user=test database=test_395ec29a1dad4c28a4749a2d056a2594) at 0x108fe6b10>, set_id=UUID('a740b08c-7a5c-40c1-adbc-b7fdbfff0679'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108fe7980>
+
+    def test_outdated_inputs_and_their_not_classified_rows_carry_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A's newest quarter ended more than six months before the classification
+        date, so its five inputs are outdated; they list their periods, every one backfilled,
+        so they are marked, and so are A's input_outdated value and growth rows."""
+        conn, set_id = store
+        stocks = {symbol: add_instrument(conn, symbol) for symbol in SYMBOLS}
+        for symbol, stock in stocks.items():
+            add_bar_for(conn, stock, L)
+            add_fundamentals(
+                conn,
+                stock,
+                latest_period_end=date(2026, 3, 31) if symbol == "A" else P1,
+                first_observed_on=FIRST,
+                filed_before_first=all_rows() if symbol == "A" else frozenset(),
+            )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        assert {row["status"] for row in inputs_for(conn, set_id, a).values()} == {"outdated"}
+>       assert input_flags(conn, set_id, a) == expect(*FUNDAMENTAL_INPUTS)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'eps_growth': False} != {'eps_growth': True}
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:469: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_outdated_inputs_and_their_not_classified_rows_carry_the_mark
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 8 passed in 4.14s
