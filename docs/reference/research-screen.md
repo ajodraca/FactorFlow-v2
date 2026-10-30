@@ -5,12 +5,21 @@
 the screens will share (CAP-002-E4-S2):
 
 - `format.ts`, the one place a CAP-002 number or date becomes text;
-- `copy.ts`, every owner-facing string of the CAP-002 screens.
+- `copy.ts`, every owner-facing string of the CAP-002 screens;
 
-No route or screen imports either yet. The factor cell and the *Possibly
-restated* mark in `web/src/components/patterns/` do (CAP-002-E4-S3); see
-[`component-patterns.md`](component-patterns.md). The URL query model the
-screens read lives in `web/src/api/research-query.ts`; see
+and the Filters pane with its two parts (CAP-002-E4-S5):
+
+- `use-research-query.ts`, the hook binding the URL to a `ResearchQuery`
+  ([URL binding](#url-binding-use-research-queryts));
+- `threshold-sentence.tsx`, one factor's threshold sentence
+  ([Threshold sentence](#threshold-sentence-threshold-sentencetsx));
+- `filters-pane.tsx`, the pane itself
+  ([Filters pane](#filters-pane-filters-panetsx)).
+
+No route or screen mounts any of them yet. The factor cell and the *Possibly
+restated* mark in `web/src/components/patterns/` import the two pure modules
+(CAP-002-E4-S3); see [`component-patterns.md`](component-patterns.md). The URL
+query model the screens read lives in `web/src/api/research-query.ts`; see
 [`web-api.md`](web-api.md#research-url-codec-research-queryts).
 
 ## Display formatting (`format.ts`)
@@ -66,7 +75,8 @@ section 14.
 | `ERROR_SENTENCES` | one sentence template per `ErrorCode` (STD-UI-19) |
 | `failureSentence(failure)` | the statement of a failed call |
 | `FACTOR_LABELS`, `REGIONS` | factor names, and the Research panes' section labels |
-| `FILTERS`, `describeQuery(query)`, `savedFromFilter(date, query)` | the Filters pane, and a `ResearchQuery` in words |
+| `FILTERS`, `describeQuery(query)`, `savedFromFilter(date, query)` | the Filters pane, and a `ResearchQuery` in words. Three `FILTERS` entries no design contains carry a doc comment saying so: `valueThresholdFor(factor)`, the growth and momentum rows' value-blank name (DEC-0157); `unavailableUniverse`, the *Look in* option for a scope the loaded list lacks (DEC-0158); `loadingUniverses`, the same option while the list loads (DEC-0237, provisional) |
+| `thresholdFieldError(factor, measure)` | the threshold field's error on blur, *Could not set the {factor} threshold: {rule}.*, where `rule` is *a percentile is a number from 0 to 100* or *a standardised score is a finite number* (DEC-0157, provisional). A standalone string: not `failureSentence` output and no `OPERATION_LABELS` entry |
 | `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs |
@@ -135,3 +145,126 @@ implementation review v2.
 The sentence never reads the envelope's `message` or the error's `name`. A
 `ClassificationApiError` can therefore be passed as is: its `operation`,
 `resource`, `code` and `symbols` are the fields read.
+
+## URL binding (`use-research-query.ts`)
+
+`useResearchQuery()` is the React binding between the URL and the codec's
+`ResearchQuery` (DAC-E4-3; DEC-0156). The URL is the only state. It returns a
+`ResearchQueryBinding`:
+
+| Member | Behaviour |
+|--------|-----------|
+| `query` | `decodeResearchQuery` of the location search, memoised on the search string, so its identity is stable while the URL is unchanged |
+| `setQuery(next)` | writes `applyResearchQuery` over the current params as a push: unknown keys survive, no default is written, and back navigation restores the earlier filter. A write that leaves the search string unchanged navigates nowhere |
+| `clear()` | `setQuery` of `DEFAULT_RESEARCH_QUERY` with the current `sort` kept |
+
+Every write is a full query built from `query`. Two writes in one tick do not
+compose: react-router's functional `setSearchParams` hands each updater the
+render's params, not the previous write's result, so a second write in the
+same tick must carry the whole query it wants.
+
+The hook never fetches. The host that issues the list request (CAP-002-E4-S9
+on Research, CAP-002-E1-S8 on universe detail) keys it on `query`: one write,
+one URL, one request (DAC-E4-S5-2). It runs inside a router; its tests
+(`use-research-query.test.tsx`) render under `MemoryRouter`.
+
+## Threshold sentence (`threshold-sentence.tsx`)
+
+`ThresholdSentence({ factor, value?, onCommit })` is one factor's *[measure]
+[direction] [value]* sentence (blueprint 4.7; UX design 1.1 item 3;
+classification-ui 2.5): a hidden swatch filled with the factor's
+`--factor-{factor}` token, the factor's label from `FACTOR_LABELS`, then one
+`<p>` holding three blanks. `value` is the factor's current
+`ThresholdSentence` from the URL, `undefined` for no threshold. `onCommit`
+is called once per change with the new sentence, or `null` to drop the
+factor's threshold.
+
+The three blanks and their accessible names (DAC-E4-S5-4; DEC-0157):
+
+| Blank | Control | Name | Options or placeholder |
+|-------|---------|------|------------------------|
+| measure | `select` | `FILTERS.measureFor(factor)`, *Measure for value* | *percentile* (default), *standardised score* |
+| direction | `select` | `FILTERS.directionFor(factor)`, *Direction for value* | *at least* (default), *at most* |
+| value | `text` input, `inputMode="decimal"`, `w-8` (DEC-0236, provisional) | *Value threshold* on the value row (`FILTERS.thresholdFor`), *Value threshold for growth* and *for momentum* otherwise (`FILTERS.valueThresholdFor`) | placeholder *any* |
+
+Commit and validation:
+
+- The selects commit on change; the value commits on blur or Enter. A blank
+  value with a committed sentence commits `null`; a blank value with none
+  commits nothing. A commit equal to `value` is not re-sent.
+- `validateThresholdValue(factor, measure, raw)` (exported) returns the
+  field error for `raw` under `measure`, or `null` when it is valid or blank.
+  Validity is the codec's own verdict: the value is valid exactly when
+  `decodeResearchQuery` would keep a sentence carrying it, so the pane and the
+  URL cannot drift (DEC-0157; see
+  [`web-api.md`](web-api.md#research-url-codec-research-queryts) for the
+  rule). The wording is `thresholdFieldError(factor, measure)`.
+- An invalid value is a field error before any request, and nothing is
+  written (DAC-E4-S5-1): a `role="alert"` paragraph in `--destructive`, the
+  input `aria-invalid` and `aria-describedby` it. Typing clears the error as
+  soon as the draft is valid; blur alone never raises one on a valid draft.
+- The draft re-syncs from `value`, so back navigation resets it. A host that
+  must reset a row whose `value` is already `undefined` remounts it (the pane
+  does this on Clear filters).
+- Nothing in the row is ever `disabled`: rows stay usable while a request is
+  in flight.
+
+Tests: `threshold-sentence.test.tsx` (TC-COMP-134, TC-COMP-137).
+
+## Filters pane (`filters-pane.tsx`)
+
+`FiltersPane({ showLookIn = true, activeInstruments = null, children })` is
+the Research screen's Filters pane (UX design 1.1; classification-ui 2.5;
+DEC-0156). It is itself the `section` labelled `REGIONS.filters`, so a host
+mounts it unwrapped. It is controlled by the URL through `useResearchQuery`:
+every change is one `setQuery`, hence one URL write and one list request by
+the host (DAC-E4-S5-2, DAC-E4-3). It never fetches the list and never reads
+an error's `message`.
+
+| Prop | Meaning |
+|------|---------|
+| `showLookIn` | `false` on universe detail: no *Look in*, and `scope` is neither read as a filter nor written |
+| `activeInstruments` | the followed-stock count for the *All followed stocks · {n}* option; `null` while unknown, when the option reads *All followed stocks* |
+| `children` | rendered above **Clear filters**: universe detail's *Members as of* slot |
+
+Its parts, in order, each a `py-3` block separated by a divider:
+
+- **Find a stock.** A text input whose draft commits on blur or Enter; Escape
+  clears it and commits the empty value. The symbol rule is the codec's: a raw
+  value is accepted exactly when `decodeResearchQuery` keeps it as `symbol`,
+  and it is written upper-cased. A rejected value shows
+  `UNIVERSES.invalidSymbol(raw)` as a `role="alert"` field error and writes
+  nothing. The draft re-syncs from the URL's `symbol`.
+- **Look in** (when `showLookIn`). A `select` named `FILTERS.lookInName` of its
+  current option, *Look in: All followed stocks*. On mount the pane lists
+  every active universe, page after page of `listUniverses({ lifecycle:
+  "active", cursor })` until `nextCursor` is `null` (DEC-0235); the list is
+  shown only once whole, and a failure on any page fails the whole list with
+  no partial options. A failure renders `failureSentence` of the
+  `ClassificationApiError`, or of `{ operation: "list-universes", resource:
+  "universe", code: null }` for any other cause, as an alert the select is
+  described by. A URL `scope` the options lack keeps its own selected option,
+  labelled by what is known of the list:
+
+  | List state | Option label |
+  |------------|--------------|
+  | loaded, scope absent | `FILTERS.unavailableUniverse`, *Unavailable universe* (DEC-0158) |
+  | still loading | `FILTERS.loadingUniverses`, *Loading universes…* (DEC-0237, provisional) |
+  | failed | `OPERATION_LABELS["list-universes"]`, *Could not load your universes* (DEC-0237, provisional) |
+
+- **Threshold sentences.** One `ThresholdSentence` per factor (value, growth,
+  momentum), then `FILTERS.percentileHelper`. A commit replaces or deletes
+  that factor's entry in `query.sentences`.
+- **Hide stocks with an incomplete score.** A checkbox bound to
+  `query.hideIncomplete`, described by `FILTERS.hideIncompleteHelper`; its
+  label row is at least `--control-min-target` tall.
+- `children`.
+- **Clear filters.** Shown only while a filter is active: a sentence, a
+  symbol, hide-incomplete, or (with *Look in*) a scope. Sort alone shows no
+  button. It writes `DEFAULT_RESEARCH_QUERY` with the current `sort` kept and,
+  without *Look in*, the current `scope` kept; clears the *Find a stock* draft
+  and error; remounts the three threshold rows, dropping any uncommitted
+  draft or error; and moves focus to *Find a stock* (DAC-E4-S5-3; DEC-0157).
+
+Tests: `filters-pane.test.tsx` (TC-COMP-135, TC-COMP-136), driven through a
+probe host that issues one `toListParams` request per `query` change.
