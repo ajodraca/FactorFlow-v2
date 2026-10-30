@@ -482,6 +482,8 @@ describe("copy.ts completeness and keying", () => {
     ).toBe(
       "Score update failed 18:03 CDT: the download ended. Showing scores produced 17:46 CDT from the download started 2026-10-15 17:30 CDT. The next complete download will try again.",
     );
+    // DEC-0232: the clause a failed set with no recorded reason takes in failedBody.
+    expect(copy.SCORE_SET.noReasonRecorded).toBe("no reason was recorded");
     expect(copy.EVIDENCE.noEarlierScores("AAPL").startsWith("No earlier scores for")).toBe(true);
     expect(copy.EVIDENCE.noEarlierScores("AAPL")).toBe("No earlier scores for AAPL.");
     expect(copy.CELL.notFollowedSince("2026-10-01")).toBe(

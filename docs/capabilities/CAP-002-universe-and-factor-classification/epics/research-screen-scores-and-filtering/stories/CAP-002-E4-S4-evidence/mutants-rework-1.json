@@ -1,0 +1,688 @@
+{
+ "schema": 1,
+ "repo_head": "00c22fd3c3c71d60f5d93f72e0b7023a5a9cdad3",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/as-of-line.tsx:68:off-by-one:1",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "line": 68,
+   "original": "      {scores.slice(0, scores.length - produced.length)}",
+   "mutated": "      {scores.slice(1, scores.length - produced.length)}"
+  },
+  {
+   "id": "web/src/components/patterns/as-of-line.tsx:71:off-by-one:1",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "line": 71,
+   "original": "      {clause.slice(0, clause.length - started.length)}",
+   "mutated": "      {clause.slice(1, clause.length - started.length)}"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:57:negate-boolean:1",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 57,
+   "original": "  return latestRun !== null && isNonTerminalRunState(latestRun.state);",
+   "mutated": "  return latestRun !== null || isNonTerminalRunState(latestRun.state);"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:77:negate-boolean:1",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 77,
+   "original": "    if (!active) {",
+   "mutated": "    if (active) {"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:98:negate-boolean:1",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 98,
+   "original": "  const [readWhileDownloading, setReadWhileDownloading] = useState(false);",
+   "mutated": "  const [readWhileDownloading, setReadWhileDownloading] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:159:negate-boolean:1",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 159,
+   "original": "    !pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "mutated": "    !pollFailed || (summary?.later?.state === \"building\" || downloading || readWhileDownloading);"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:159:negate-boolean:2",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 159,
+   "original": "    !pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "mutated": "    !pollFailed && (summary?.later?.state === \"building\" && downloading || readWhileDownloading);"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:159:negate-boolean:3",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 159,
+   "original": "    !pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "mutated": "    !pollFailed && (summary?.later?.state === \"building\" || downloading && readWhileDownloading);"
+  },
+  {
+   "id": "web/src/screens/research/use-score-set-poll.ts:159:negate-boolean:4",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "line": 159,
+   "original": "    !pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "mutated": "    pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);"
+  },
+  {
+   "id": "manual:rework-1:review:ended-at-null-no-fallback",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "formatTimestamp(later.endedAt ?? later.startedAt)",
+   "new": "formatTimestamp(later.endedAt ?? \"\")"
+  },
+  {
+   "id": "manual:rework-1:review:ended-at-null-names-set-end",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "formatTimestamp(later.endedAt ?? later.startedAt)",
+   "new": "formatTimestamp(later.endedAt ?? set.endedAt)"
+  },
+  {
+   "id": "manual:rework-1:review:skeleton-height-collapsed",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "className={`${LINE_HEIGHT} w-full animate-pulse rounded bg-secondary`}",
+   "new": "className=\"min-h-1 w-full animate-pulse rounded bg-secondary\""
+  },
+  {
+   "id": "manual:rework-1:review:checked-span-not-numeric",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "          <span className=\"font-numeric\">",
+   "new": "          <span>"
+  },
+  {
+   "id": "manual:rework-1:line-height-not-on-line",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "<p data-testid=\"as-of-line\" className={`${LINE_HEIGHT} text-xs text-muted-foreground`}>",
+   "new": "<p data-testid=\"as-of-line\" className=\"text-xs text-muted-foreground\">"
+  },
+  {
+   "id": "manual:rework-1:line-height-value-changed-on-both",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "const LINE_HEIGHT = \"min-h-7\";",
+   "new": "const LINE_HEIGHT = \"min-h-1\";"
+  },
+  {
+   "id": "manual:rework-1:announcement-glued",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "      {announcement ? (\n        <>\n          {\" \"}\n          <span>{announcement}</span>",
+   "new": "      {announcement ? (\n        <>\n          <span>{announcement}</span>"
+  },
+  {
+   "id": "manual:rework-1:updating-without-tooltip",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "<StatusBadge tier=\"active\" title={buildingSince}>",
+   "new": "<StatusBadge tier=\"active\">"
+  },
+  {
+   "id": "manual:rework-1:updating-tooltip-names-run-start",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "const buildingSince = later?.state === \"building\" ? formatTimestamp(later.startedAt) : null;",
+   "new": "const buildingSince = later?.state === \"building\" ? formatTimestamp(later.runStartedAt) : null;"
+  },
+  {
+   "id": "manual:rework-1:produced-time-not-numeric",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "<span className=\"font-numeric\">{produced}</span>",
+   "new": "<span>{produced}</span>"
+  },
+  {
+   "id": "manual:rework-1:badge-drops-host-class",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/status-badge.tsx",
+   "old": "className={[BADGE, className, TIER_CLASSES[tier]].filter(Boolean).join(\" \")}",
+   "new": "className={[BADGE, TIER_CLASSES[tier]].join(\" \")}"
+  },
+  {
+   "id": "manual:rework-1:badge-always-good-tier-classes",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/status-badge.tsx",
+   "old": "className={[BADGE, className, TIER_CLASSES[tier]].filter(Boolean).join(\" \")}",
+   "new": "className={[BADGE, className, TIER_CLASSES.good].filter(Boolean).join(\" \")}"
+  },
+  {
+   "id": "manual:rework-1:badge-variant-fixed",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/status-badge.tsx",
+   "old": "data-variant={`status-${tier}`}",
+   "new": "data-variant=\"status-good\""
+  },
+  {
+   "id": "manual:rework-1:badge-critical-shape-circle",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/status-badge.tsx",
+   "old": "critical: <rect x=\"1.5\" y=\"1.5\" width=\"9\" height=\"9\" fill=\"currentColor\" />,",
+   "new": "critical: <circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"currentColor\" />,"
+  },
+  {
+   "id": "manual:rework-1:badge-no-tooltip",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/status-badge.tsx",
+   "old": "      title={title}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:rework-1:hook-captures-at-completion",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "setReadWhileDownloading(issuedWhileDownloading);",
+   "new": "setReadWhileDownloading(downloadingRef.current);"
+  },
+  {
+   "id": "manual:rework-1:hook-never-owes-read",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "setReadWhileDownloading(issuedWhileDownloading);",
+   "new": "setReadWhileDownloading(false);"
+  },
+  {
+   "id": "manual:rework-1:hook-always-owes-read",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "setReadWhileDownloading(issuedWhileDownloading);",
+   "new": "setReadWhileDownloading(true);"
+  },
+  {
+   "id": "manual:rework-1:hook-ignores-owed-read",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "!pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "new": "!pollFailed && (summary?.later?.state === \"building\" || downloading);"
+  },
+  {
+   "id": "manual:rework-1:hook-ignores-download",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "!pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "new": "!pollFailed && (summary?.later?.state === \"building\" || readWhileDownloading);"
+  },
+  {
+   "id": "manual:rework-1:hook-ignores-building",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "!pollFailed && (summary?.later?.state === \"building\" || downloading || readWhileDownloading);",
+   "new": "!pollFailed && (downloading || readWhileDownloading);"
+  },
+  {
+   "id": "manual:rework-1:hook-terminal-counts-as-running",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "return latestRun !== null && isNonTerminalRunState(latestRun.state);",
+   "new": "return latestRun !== null;"
+  },
+  {
+   "id": "manual:rework-1:hook-latest-ref-stale",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "  useEffect(() => {\n    ref.current = value;\n  }, [value]);",
+   "new": "  useEffect(() => {}, [value]);"
+  },
+  {
+   "id": "manual:rework-1:hook-timer-never-cleared",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    return () => {\n      clearInterval(timer);\n    };\n  }, [active, tick]);",
+   "new": "    return undefined;\n  }, [active, tick]);"
+  },
+  {
+   "id": "manual:rework-1:hook-announcement-swaps-times",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "SCORE_SET.scoresUpdatedTo(formatTimestamp(set.endedAt), formatTimestamp(set.runStartedAt))",
+   "new": "SCORE_SET.scoresUpdatedTo(formatTimestamp(set.runStartedAt), formatTimestamp(set.endedAt))"
+  },
+  {
+   "id": "coder-manual:cycle-1:branch-swap",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "if (later.state === \"building\") {",
+   "new": "if (later.state === \"failed\") {"
+  },
+  {
+   "id": "coder-manual:cycle-1:ended-at-fallback-always",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "formatTimestamp(later.endedAt ?? later.startedAt)",
+   "new": "formatTimestamp(later.startedAt)"
+  },
+  {
+   "id": "coder-manual:cycle-1:reason-stringified",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "later.failureReason ?? SCORE_SET.noReasonRecorded",
+   "new": "String(later.failureReason)"
+  },
+  {
+   "id": "coder-manual:cycle-1:building-negated",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "const building = later.state === \"building\";",
+   "new": "const building = later.state !== \"building\";"
+  },
+  {
+   "id": "coder-manual:cycle-1:set-guard-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "if (set === null || later === null) {",
+   "new": "if (later === null) {"
+  },
+  {
+   "id": "coder-manual:cycle-1:words-not-paragraph",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "<p>{bannerBody(set, later)}</p>",
+   "new": "<div>{bannerBody(set, later)}</div>"
+  },
+  {
+   "id": "coder-manual:cycle-1:building-args-swapped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "return SCORE_SET.buildingBody(produced, downloadStarted);",
+   "new": "return SCORE_SET.buildingBody(downloadStarted, produced);"
+  },
+  {
+   "id": "coder-manual:cycle-1:failed-args-swapped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "return SCORE_SET.failedBody(failedAt, reason, produced, downloadStarted);",
+   "new": "return SCORE_SET.failedBody(failedAt, reason, downloadStarted, produced);"
+  },
+  {
+   "id": "coder-manual:cycle-1:warning-word-swapped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "{SCORE_SET.notReflecting}",
+   "new": "{SCORE_SET.scoreUpdateFailed}"
+  },
+  {
+   "id": "coder-manual:cycle-1:card-variant-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "data-variant=\"default\"",
+   "new": "data-variant=\"banner\""
+  },
+  {
+   "id": "coder-manual:cycle-1:badge-not-first",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "<p>{bannerBody(set, later)}</p>\n    </div>",
+   "new": "<p>{bannerBody(set, later)}</p>\n      <span aria-hidden=\"true\" />\n    </div>"
+  },
+  {
+   "id": "coder-manual:cycle-1:no-reason-wording",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "noReasonRecorded: \"no reason was recorded\",",
+   "new": "noReasonRecorded: \"null\","
+  },
+  {
+   "id": "coder-manual:cycle-2:building-is-failed",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "const building = later?.state === \"building\";",
+   "new": "const building = later?.state === \"failed\";"
+  },
+  {
+   "id": "coder-manual:cycle-2:checked-without-seconds",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "formatTimestamp(checkedAt, { seconds: true })",
+   "new": "formatTimestamp(checkedAt)"
+  },
+  {
+   "id": "coder-manual:cycle-2:checked-shown-when-not-building",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{building && checkedAt !== null ? (",
+   "new": "{checkedAt !== null ? ("
+  },
+  {
+   "id": "coder-manual:cycle-2:atomic-default",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "aria-atomic=\"false\"",
+   "new": "aria-atomic=\"true\""
+  },
+  {
+   "id": "coder-manual:cycle-2:assertive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "aria-live=\"polite\"",
+   "new": "aria-live=\"assertive\""
+  },
+  {
+   "id": "coder-manual:cycle-2:sorted-by-negated",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{sortLabel === undefined ? null :",
+   "new": "{sortLabel !== undefined ? null :"
+  },
+  {
+   "id": "coder-manual:cycle-2:link-to-set-id",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "to={SHELL_ROUTES.download(set.runId)}",
+   "new": "to={SHELL_ROUTES.download(set.setId)}"
+  },
+  {
+   "id": "coder-manual:cycle-2:link-unlabelled",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "aria-label={SCORE_SET.openDownload(started)}",
+   "new": "aria-label={started}"
+  },
+  {
+   "id": "coder-manual:cycle-2:skeleton-never",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "return loading ? (",
+   "new": "return !loading ? ("
+  },
+  {
+   "id": "coder-manual:cycle-2:skeleton-not-hidden",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "data-testid=\"as-of-line-skeleton\"\n        aria-hidden=\"true\"",
+   "new": "data-testid=\"as-of-line-skeleton\""
+  },
+  {
+   "id": "coder-manual:cycle-2:succeeded-is-warning",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "succeeded: { tier: \"good\", word: SCORE_SET.complete },",
+   "new": "succeeded: { tier: \"warning\", word: SCORE_SET.complete },"
+  },
+  {
+   "id": "coder-manual:cycle-2:partial-word-complete",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "partial: { tier: \"warning\", word: SCORE_SET.partial },",
+   "new": "partial: { tier: \"warning\", word: SCORE_SET.complete },"
+  },
+  {
+   "id": "coder-manual:cycle-2:break-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "          <br />\n          {SCORE_SET.couldNotCheck}",
+   "new": "          {SCORE_SET.couldNotCheck}"
+  },
+  {
+   "id": "coder-manual:cycle-2:earlier-sets-always",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{onOpenEarlierSets ? (",
+   "new": "{onOpenEarlierSets !== null ? ("
+  },
+  {
+   "id": "coder-manual:cycle-2:earlier-sets-not-ghost",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "data-variant=\"ghost\"",
+   "new": "data-variant=\"default\""
+  },
+  {
+   "id": "coder-manual:cycle-2:try-again-always",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{pollFailed ? (\n        <>\n          {\" \"}\n          <button",
+   "new": "{!pollFailed ? (\n        <>\n          {\" \"}\n          <button"
+  },
+  {
+   "id": "coder-manual:cycle-2:try-again-no-handler",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "onClick={onTryAgain}",
+   "new": "onClick={undefined}"
+  },
+  {
+   "id": "coder-manual:cycle-2:link-not-numeric",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "className=\"font-numeric underline\"",
+   "new": "className=\"underline\""
+  },
+  {
+   "id": "coder-manual:cycle-3:fires-on-first-read",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
+   "new": "if (next.set !== null && previous !== setId) {"
+  },
+  {
+   "id": "coder-manual:cycle-3:fires-on-every-set",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
+   "new": "if (next.set !== null && previous !== undefined) {"
+  },
+  {
+   "id": "coder-manual:cycle-3:fires-on-null-set",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "if (next.set !== null && previous !== undefined && previous !== setId) {",
+   "new": "if (previous !== undefined && previous !== setId) {"
+  },
+  {
+   "id": "coder-manual:cycle-3:last-set-not-remembered",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    lastSetIdRef.current = setId;\n",
+   "new": "    lastSetIdRef.current = previous;\n"
+  },
+  {
+   "id": "coder-manual:cycle-3:set-id-undefined-when-null",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "const setId = next.set?.setId ?? null;",
+   "new": "const setId = next.set?.setId;"
+  },
+  {
+   "id": "coder-manual:cycle-3:checked-at-not-iso",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "setCheckedAt(new Date().toISOString());",
+   "new": "setCheckedAt(String(new Date()));"
+  },
+  {
+   "id": "coder-manual:cycle-3:checked-at-on-failure",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "      if (mountedRef.current) {\n        setPollFailed(true);\n      }",
+   "new": "      if (mountedRef.current) {\n        setPollFailed(true);\n        setCheckedAt(new Date().toISOString());\n      }"
+  },
+  {
+   "id": "coder-manual:cycle-3:poll-failed-never-cleared",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    setPollFailed(false);\n",
+   "new": "    \n"
+  },
+  {
+   "id": "coder-manual:cycle-3:failure-not-recorded",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "        setPollFailed(true);\n",
+   "new": "        setPollFailed(false);\n"
+  },
+  {
+   "id": "coder-manual:cycle-3:overlap-allowed",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    if (inFlightRef.current) {\n      return;\n    }\n",
+   "new": "    if (inFlightRef.current) {\n      inFlightRef.current = false;\n    }\n"
+  },
+  {
+   "id": "coder-manual:cycle-3:in-flight-never-released",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    } finally {\n      inFlightRef.current = false;\n    }",
+   "new": "    } finally {\n      inFlightRef.current = inFlightRef.current;\n    }"
+  },
+  {
+   "id": "coder-manual:cycle-3:state-after-unmount",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    if (!mountedRef.current) {\n      return;\n    }\n    const previous = lastSetIdRef.current;",
+   "new": "    const previous = lastSetIdRef.current;"
+  },
+  {
+   "id": "coder-manual:cycle-3:failure-falls-through",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "      return;\n    } finally {",
+   "new": "    } finally {"
+  },
+  {
+   "id": "coder-manual:cycle-3:mounted-never-cleared",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    return () => {\n      mountedRef.current = false;\n    };",
+   "new": "    return () => {\n      mountedRef.current = true;\n    };"
+  },
+  {
+   "id": "coder-manual:cycle-3:building-is-failed",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "summary?.later?.state === \"building\"",
+   "new": "summary?.later?.state === \"failed\""
+  },
+  {
+   "id": "coder-manual:cycle-3:terminal-polls",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "isNonTerminalRunState(latestRun.state)",
+   "new": "!isNonTerminalRunState(latestRun.state)"
+  },
+  {
+   "id": "coder-manual:cycle-3:cadence-nine-seconds",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "export const POLL_INTERVAL_MS = 10_000;",
+   "new": "export const POLL_INTERVAL_MS = 9_000;"
+  },
+  {
+   "id": "coder-manual:cycle-3:interval-never-cleared",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    return () => {\n      clearInterval(timer);\n    };",
+   "new": "    return () => undefined;"
+  },
+  {
+   "id": "coder-manual:cycle-3:try-again-inert",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "tryAgain: read,",
+   "new": "tryAgain: async () => undefined,"
+  },
+  {
+   "id": "coder-manual:cycle-3:no-mount-read",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-score-set-poll.ts",
+   "old": "    mountedRef.current = true;\n    void read();\n",
+   "new": "    mountedRef.current = true;\n"
+  }
+ ]
+}

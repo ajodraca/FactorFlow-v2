@@ -1,0 +1,235 @@
+{
+ "schema": 1,
+ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/as-of-line.tsx:90:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "line": 90,
+   "original": "  const words = clause.slice(0, clause.length - started.length);",
+   "mutated": "  const words = clause.slice(1, clause.length - started.length);"
+  },
+  {
+   "id": "web/src/components/patterns/as-of-line.tsx:167:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "line": 167,
+   "original": "  loading = false,",
+   "mutated": "  loading = true,"
+  },
+  {
+   "id": "web/src/components/patterns/as-of-line.tsx:184:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "line": 184,
+   "original": "      {building && checkedAt !== null ? (",
+   "mutated": "      {building || checkedAt !== null ? ("
+  },
+  {
+   "id": "web/src/components/patterns/as-of-line.tsx:188:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "line": 188,
+   "original": "            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: true }))}",
+   "mutated": "            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: false }))}"
+  },
+  {
+   "id": "manual:cycle-2:building-is-failed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "const building = later?.state === \"building\";",
+   "new": "const building = later?.state === \"failed\";"
+  },
+  {
+   "id": "manual:cycle-2:checked-without-seconds",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "formatTimestamp(checkedAt, { seconds: true })",
+   "new": "formatTimestamp(checkedAt)"
+  },
+  {
+   "id": "manual:cycle-2:checked-shown-when-not-building",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{building && checkedAt !== null ? (",
+   "new": "{checkedAt !== null ? ("
+  },
+  {
+   "id": "manual:cycle-2:atomic-default",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "aria-atomic=\"false\"",
+   "new": "aria-atomic=\"true\""
+  },
+  {
+   "id": "manual:cycle-2:assertive",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "aria-live=\"polite\"",
+   "new": "aria-live=\"assertive\""
+  },
+  {
+   "id": "manual:cycle-2:sorted-by-negated",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{sortLabel === undefined ? null :",
+   "new": "{sortLabel !== undefined ? null :"
+  },
+  {
+   "id": "manual:cycle-2:times-swapped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{SCORE_SET.scoresFrom(formatTimestamp(set.endedAt))}",
+   "new": "{SCORE_SET.scoresFrom(formatTimestamp(set.runStartedAt))}"
+  },
+  {
+   "id": "manual:cycle-2:link-to-set-id",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "to={SHELL_ROUTES.download(set.runId)}",
+   "new": "to={SHELL_ROUTES.download(set.setId)}"
+  },
+  {
+   "id": "manual:cycle-2:link-unlabelled",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "aria-label={SCORE_SET.openDownload(started)}",
+   "new": "aria-label={started}"
+  },
+  {
+   "id": "manual:cycle-2:clause-time-doubled",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "const words = clause.slice(0, clause.length - started.length);",
+   "new": "const words = clause;"
+  },
+  {
+   "id": "manual:cycle-2:skeleton-never",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "return loading ? (",
+   "new": "return !loading ? ("
+  },
+  {
+   "id": "manual:cycle-2:skeleton-not-hidden",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "data-testid=\"as-of-line-skeleton\"\n        aria-hidden=\"true\"",
+   "new": "data-testid=\"as-of-line-skeleton\""
+  },
+  {
+   "id": "manual:cycle-2:succeeded-is-warning",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "succeeded: { tier: \"good\", word: SCORE_SET.complete },",
+   "new": "succeeded: { tier: \"warning\", word: SCORE_SET.complete },"
+  },
+  {
+   "id": "manual:cycle-2:partial-word-complete",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "partial: { tier: \"warning\", word: SCORE_SET.partial },",
+   "new": "partial: { tier: \"warning\", word: SCORE_SET.complete },"
+  },
+  {
+   "id": "manual:cycle-2:updating-tier-good",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "<Badge tier=\"active\">{SCORE_SET.updating}</Badge>",
+   "new": "<Badge tier=\"good\">{SCORE_SET.updating}</Badge>"
+  },
+  {
+   "id": "manual:cycle-2:break-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "          <br />\n          {SCORE_SET.couldNotCheck}",
+   "new": "          {SCORE_SET.couldNotCheck}"
+  },
+  {
+   "id": "manual:cycle-2:ringed-dot-filled",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "      <circle cx=\"6\" cy=\"6\" r=\"2\" fill=\"currentColor\" />\n    </>",
+   "new": "    </>"
+  },
+  {
+   "id": "manual:cycle-2:empty-announcement-span",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{announcement ? <span>{announcement}</span> : null}",
+   "new": "{announcement !== undefined ? <span>{announcement}</span> : null}"
+  },
+  {
+   "id": "manual:cycle-2:earlier-sets-always",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{onOpenEarlierSets ? (",
+   "new": "{onOpenEarlierSets !== null ? ("
+  },
+  {
+   "id": "manual:cycle-2:earlier-sets-not-ghost",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "data-variant=\"ghost\"",
+   "new": "data-variant=\"default\""
+  },
+  {
+   "id": "manual:cycle-2:try-again-always",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "{pollFailed ? (\n        <>\n          {\" \"}\n          <button",
+   "new": "{!pollFailed ? (\n        <>\n          {\" \"}\n          <button"
+  },
+  {
+   "id": "manual:cycle-2:try-again-no-handler",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "onClick={onTryAgain}",
+   "new": "onClick={undefined}"
+  },
+  {
+   "id": "manual:cycle-2:line-not-muted",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "className=\"text-xs text-muted-foreground\"",
+   "new": "className=\"text-xs\""
+  },
+  {
+   "id": "manual:cycle-2:link-not-numeric",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/as-of-line.tsx",
+   "old": "className=\"font-numeric underline\"",
+   "new": "className=\"underline\""
+  }
+ ]
+}

@@ -1,0 +1,355 @@
+# TDD evidence for CAP-002-E4-S4 - Not-current banner, as-of line and the score-set poll with refresh-once.
+# Three cycles, as the task plan's Other Notes lay out: (1) T001, T002, T007 then T010 (one copy.ts string) and
+# T011 (not-current-banner.tsx); (2) T003, T004, T008 then T012 (as-of-line.tsx); (3) T005, T006, T009 then T013
+# (use-score-set-poll.ts).
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is
+# its own diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch and cycle-3.patch are the diffs between
+# the index trees written after each cycle (git write-tree), so the three apply in order onto the stage parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began; the verdicts below are those reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (vitest compiles with esbuild and does not
+# type-check, so a mutant runs on its runtime behaviour); generated operators plus hand-written mutants
+# ("operator": "manual"), listed in each cycle's mutants-cycle-N.json.
+# Decisions applied: DEC-0153 (hook interface and new-set trigger), DEC-0154 (banner and line props), DEC-0155
+# (a failed poll stops polling until Try again), all owner-upheld; DEC-0232 (PROVISIONAL, agent, this run): the
+# banner's clause for a failed set that recorded no reason, and the start time named when its end time is null.
+# Rework: rework-1 is the review-rework cycle against CAP-002-E4-S4-implementation-review-v1.md (CHANGES-REQUIRED,
+# IR-001 to IR-008), staged on top of the stage commit 58fc558 and the review commit 00c22fd; its reviewed_patch is
+# HEAD..index. DEC-0233 (PROVISIONAL, agent, this run): exactly one further summary read after the shell's health
+# reports the download terminal, never an open-ended poll for the ended download's set.
+# Rework 2: rework-2 is the review-rework cycle against CAP-002-E4-S4-implementation-review-v2.md (CHANGES-REQUIRED,
+# IR-001 to IR-004), staged on the merge of origin/main into the story branch (db9b691); its reviewed_patch is HEAD..index.
+# It is test-only. It supersedes rework-1's disposition of manual:rework-1:line-height-value-changed-on-both as equivalent:
+# that claim was wrong (min-height is a floor, so a floor below the one-row line's content height leaves the skeleton
+# shorter than the line), and the token's value is now pinned. DEC-0238 (PROVISIONAL, agent, this run): DEC-0233's timing
+# guarantee corrected, both handoff exposures handed to the owner, the polling rule unchanged until the owner answers.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T007, T010, T011]
+    description: >
+      TC-COMP-174 (no banner for later null; the status-warning Not reflecting the latest download badge with
+      its triangle and the building sentence from SCORE_SET.buildingBody; no button, link or handler),
+      TC-COMP-175 (the status-critical Score update failed badge with its square and the failed sentence with
+      the recorded reason verbatim as text, never HTML; no button or link; the DEC-0232 clause for a null
+      reason) and the T007 details (nothing for set null under either later state; nothing for later null
+      whatever notCurrent says; later read and notCurrent ignored; a card with the badge first and the words
+      as a text paragraph; not a live region; muted tokens as literal classes, no polarity colour on the
+      words). Production: web/src/components/patterns/not-current-banner.tsx; copy.ts gains
+      SCORE_SET.noReasonRecorded with its anchor in copy.test.ts (T010; DEC-0232).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-1.log
+    red_log_sha256: 7eb517d221f0da5e819fa2eacec20eecbd828c0cfcfda93681717c305a3b924b
+    red_evidence: >
+      With not-current-banner.test.tsx written and no not-current-banner.tsx, the file failed to load: Failed
+      to resolve import "./not-current-banner" (no tests ran).
+    green_evidence: >
+      not-current-banner.test.tsx 15 passed and copy.test.ts 298 passed (green-cycle-1.log); tsc --noEmit,
+      biome lint and biome format clean. Reviews: code review APPROVED with four LOW notes (the FAILED fixture
+      spreads BUILDING so its endedAt precedes its startedAt; the "[onclick]" selector cannot see a React
+      handler, the role queries carry that assertion; T001/T002 each assert the badge and the sentence in one
+      test as the plan words them; formatTimestamp throws on a malformed wire string, S2's contract); spec
+      drift none, with two notes (the endedAt-null fallback of DEC-0232 has no test; the T010 addition is
+      recorded in the plan's Notes). None changes behaviour; the fixture and selector notes are follow-ups.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-1.log
+        sha256: a94fafb5a91713f41dbc5e1ee7635fc9b88efd8a989d765be82139bd9db1b525
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 76912af70ffc2cc8a288b6ce1de5500d19f345d3e4eb92034aab57e87a25e335
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: a862bdac59e7fe3cd787eb2d1ba17dcc2c988bad9b0e0ad9a8ef7a3309323fa4
+      generated: 18
+      killed: 18
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T004, T008, T012]
+    description: >
+      TC-COMP-179 (Scores from {time} · from the download started {time} in America/Chicago, the start time as
+      the react-router link to SHELL_ROUTES.download(runId) with the accessible name Open the download started
+      {time}; no #, UUID or run_id in the text; CST for a winter instant and CDT for a summer one; the sorted-by
+      clause only with sortLabel), TC-COMP-176 (Could not check for newer scores. inside the live region and Try
+      again outside it, calling onTryAgain once per click; every mark kept; nothing while polling succeeds; the
+      banner beside it stays) and the T008 details (Updating status-active ringed dot and checked {time} with
+      seconds only while building and checkedAt non-null, the tick outside the region; no Updating or checked for
+      a failed later set or once polling stopped; Complete status-good and Partial status-warning badges with a
+      shape; Earlier sets… ghost button only with a handler; exactly one live region, an output, polite,
+      aria-atomic false, present and empty when idle, holding in order the announcement, Updating, Earlier sets…
+      and after a br the failure text and nothing else; set null renders nothing; loading renders an aria-hidden
+      fixed-height skeleton with no region; text-xs text-muted-foreground, numeric link). Production:
+      web/src/components/patterns/as-of-line.tsx. Deviation from T012's wording: the live region is an `output`
+      whose status role is implicit, as the delivered status-region.tsx UnreachableState relies on, rather than
+      carrying role="status" explicitly; getByRole("status") finds it and the spec-drift review judged it not
+      drift.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-2.log
+    red_log_sha256: 2cd8fc1cc4db997d1cdff310557b55d8e328b0b559f99a32c7fd76b7d972dcf9
+    red_evidence: >
+      With as-of-line.test.tsx written and no as-of-line.tsx, the file failed to load: Failed to resolve import
+      "./as-of-line" (no tests ran).
+    green_evidence: >
+      as-of-line.test.tsx 22 passed (green-cycle-2.log); tsc --noEmit, biome lint and biome format clean. The
+      first mutation run left one survivor (checked {time} shown while not building); two assertions were added
+      (no checked time for a failed later set, none once polling has stopped) and the rerun killed all 28.
+      Reviews: code review APPROVED with one MEDIUM note (BADGE and TIER_CLASSES repeat the delivered
+      outcome-badge.tsx class map; follow-up, as the banner set the precedent) and LOW notes (the clause words
+      are sliced off the copy builder's output; an unused data-testid on the region; AsOfLine's JSX is ~35 flat
+      lines; the filled circle means Complete here and Running on the CAP-001 outcome badge, as UX design 1.2
+      prescribes; T004/T008 tests group assertions as the plan words them); spec drift none, the implicit status
+      role judged not drift, the skeleton height unverifiable against a design that fixes no value.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-2.log
+        sha256: 4c782374928e48953c8165cafd0d292bccc866a0e4b8ce8c4e43a4f5278a3930
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: cea5614fd29c9c7f0a71346582ba57141662ab0a9122ed7b5da888b15390bfcc
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: d704881745ab9cb0886a556e6f0b19ce5af9db7858de97d26eae131b76110461
+      generated: 28
+      killed: 28
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T005, T006, T009, T013]
+    description: >
+      TC-COMP-177 (set A building then set B: the announcement from SCORE_SET.scoresUpdatedTo for B's endedAt and
+      runStartedAt, onNewSet once with B's summary, nothing more over a further minute, no re-fire on B again, a
+      second separate call for set C; a read with no set after one with a set neither fires nor fails),
+      TC-COMP-184 (a never-populated store reads on mount before any timer, every 10 s while the first set
+      builds, hands the first completion to onNewSet once with the populated summary; one read and stop when the
+      first set failed and the download is terminal, the reason kept; polling an empty store while the download
+      runs and stopping once health reports it ended) and the T009 cases (a) to (h): cadence at 0, 10, 20 s and
+      not 9; stop for later null with most_recent_run null or any terminal state, continue for any non-terminal
+      state; checkedAt null, then the ISO instant of each successful read, advancing; a rejected read sets
+      pollFailed, keeps summary and checkedAt, stops the timer, tryAgain performs one read and resumes, a
+      rejected tryAgain stays failed, a rejected first read leaves summary null, the stop holds for a
+      never-populated store and Try again carries the first completion; unmount clears the timer and a late read
+      changes nothing; StrictMode double mount fires once and leaves one interval; a slow read is not overlapped;
+      health read through the mocked useHealth with no fetch of the hook's own; onNewSet read from the latest
+      render without restarting the cadence. Production: web/src/screens/research/use-score-set-poll.ts. The
+      hook imports the delivered isNonTerminalRunState predicate (web/src/screens/runs/outcome-badge.tsx) for the
+      three non-terminal states rather than listing them again.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-3.log
+    red_log_sha256: 6c29fd19b790e56444b29becb291e384bed5fb57b330a8e6462a9523bc8f86ee
+    red_evidence: >
+      With use-score-set-poll.test.ts written and no use-score-set-poll.ts, the file failed to load: Failed to
+      resolve import "./use-score-set-poll" (no tests ran).
+    green_evidence: >
+      use-score-set-poll.test.ts 28 passed (green-cycle-3.log); tsc --noEmit, biome lint and biome format clean.
+      The first mutation run left five survivors: the initial pollFailed value (now asserted false before the
+      first read resolves), the set guard on the new-set branch (now pinned by the no-set-after-a-set test), two
+      hand-written mutants that were equivalent by construction (replaced by dropping the lines they targeted,
+      both then killed) and the mountedRef initial value, disposed below. Reviews: the first code review was APPROVED with one MEDIUM note (the host callback ran inside the read's
+      try, so a throwing onNewSet would have been reported as a failed poll); the hook was reworked so only the
+      read is guarded and the continuation condition reads a latestRun alias, the mutants were regenerated and
+      rerun (40 generated, 39 killed, the same equivalent survivor), and the reworked patch cited here was
+      re-reviewed: code review APPROVED with LOW notes (an exact checkedAt literal has a small flake exposure
+      under shouldAdvanceTime; the T006 case-3 assertion tolerates 3 or 4 reads where the hook stops on the
+      rerender; the hook body with its closures exceeds 30 lines, as the delivered useHealthPolling does); spec
+      drift none, with informational notes (three effects where T013 says one; a throw from formatTimestamp or
+      the host callback now propagates instead of becoming pollFailed, within DEC-0155's 'rejected read'). Full
+      web suite 838 passed in 48 files (full-suite.log); npm run build clean and the built CSS carries
+      bg-status-warning-muted, bg-status-critical-muted, bg-status-active-muted, bg-status-good-muted,
+      text-muted-foreground and font-numeric (T015).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-3.log
+        sha256: 91d0508a59259d454ebff0cf5778502e57c5725124c59530b52087ed9c7b263f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/full-suite.log
+        sha256: 0fe51642cb91d3bb4154f62d901762f67cf7db0f036ccc2c8cf9a9bab69d96b4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8bfdfd44dfdf8f95b54b858b2ced1ee701c4e7dcd757ea572d6db6e4ddba0011
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 849218389eef6fdd442b276f2477e5ac13ad54206eb881121291ef184f48a535
+      generated: 40
+      killed: 39
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/use-score-set-poll.ts:60:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The mutant initialises mountedRef to false instead of true. The mount effect assigns
+            mountedRef.current = true synchronously after the first commit, before the mount read's promise can
+            resolve, and every reader of the ref runs after an await; so the initial value is never observed and
+            no sequence of reads, ticks or unmounts distinguishes the two.
+
+  - id: rework-1
+    tasks: [T002, T006, T007, T008, T009, T011, T012, T013]
+    description: >
+      Review rework against CAP-002-E4-S4-implementation-review-v1.md (CHANGES-REQUIRED), one cycle for its eight
+      findings. IR-001 (HIGH): the hook now keeps its 10-second cadence while its latest successful read was
+      issued before the shell's health reported the download terminal, so exactly one further read follows the
+      terminal report and that read's later block then governs (classification-ui 2.6 handoff; T006 case 3 now
+      pins 4 reads, not 3 or 4); the choice between one further read and polling until the ended download's set
+      is seen was decided from the design and recorded as DEC-0233 (PROVISIONAL, agent). New tests drive the 2.6
+      handoff for a populated and a never-populated store (building seen on the further read, polling kept, then
+      exactly one onNewSet and the stop), the read in flight at the terminal report (issued while running, so one
+      more follows), terminal health before the mount read (none owed) and a download starting after the hook
+      stopped (polling resumes). IR-002 (HIGH): a banner test renders a failed later with endedAt null and asserts
+      the sentence names formatTimestamp(later.startedAt) and not the set's end time; both reviewer survivors are
+      killed. IR-003 (HIGH): one LINE_HEIGHT class (min-h-7) sits on both the line and its skeleton, the test
+      asserts the skeleton carries the line's own min-h token and no bare h-N, and the checked {time} span is
+      asserted font-numeric; both reviewer survivors (the skeleton one restated for the new line) are killed.
+      IR-004 (MEDIUM): the announcement gets the leading space the region's other children have, and a test pins
+      the full visible line text with and without a sort clause. IR-005 (MEDIUM):
+      web/src/components/patterns/status-badge.tsx (new) carries the one badge wrapper and the four CAP-002 shapes
+      and imports the delivered TIER_CLASSES from web/src/screens/runs/outcome-badge.tsx; the banner and the line
+      render through it with their class sets and shapes unchanged (the banner's w-fit is now asserted). IR-006
+      (LOW): the Updating badge carries the building set's start time as its title tooltip and the Scores from
+      time is in the numeric face, both asserted; the banner's body stays one text paragraph as T007 pins, so its
+      times are not in the numeric face, recorded as a plan gap in the tasks file's Other Notes. IR-007 (LOW): the
+      exact checkedAt literal is replaced by a one-second bound. IR-008 (LOW, optional): downloadRunning,
+      announcementFor, useLatest and usePollTimer are extracted from the hook; the hook and the line still exceed
+      SA-FUNC-003's 30 lines, as the delivered useHealthPolling does.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-rework-1.log
+    red_log_sha256: a0669027300db2a5603285f5936854af3a47cb2d6880520384a2e102b96536f2
+    red_evidence: >
+      With the tests written against the reviewed code (58fc558 plus the review commit 00c22fd), the three
+      focused files ran 8 failed, 63 passed: case 3 and the three handoff tests saw 3 reads where 4 were owed (2
+      where 3 in the never-populated and in-flight cases); the as-of line had no min-h class, no Updating tooltip
+      and no numeric Scores from time, and its announcement ran into the text before it. The IR-002 banner test
+      passed on the reviewed code by construction: the DEC-0232 fallback was implemented and untested, and its
+      RED is the two reviewer mutants it now kills (TEST-TDD-006).
+    green_evidence: >
+      The four focused files 370 passed (green-rework-1.log, captured after the mutation step added the w-fit
+      and resume-polling assertions); tsc --noEmit, biome lint and biome format clean; full web suite 845 passed
+      in 48 files (full-suite-rework-1.log); npm run build clean and the built CSS carries min-h-7, w-fit,
+      font-numeric and the four status-*-muted grounds. Mutation: 84 mutants (9 generated over the staged lines,
+      25 hand-written for the rework, among them the review's four non-equivalent survivors, and the 50 earlier
+      hand-written mutants whose target lines still exist); the first run left three survivors, one of them real
+      (dropping the download's non-terminal state from the continuation condition, which the owed read masked
+      while a download ran): a test now mounts with terminal health, rerenders it as requested and asserts
+      polling resumes, and the rerun left only the two equivalents disposed below. Reviews: code review APPROVED
+      with LOW notes (the hook and the line still exceed SA-FUNC-003; the banner-body half of IR-006 needed a
+      record, now in the plan's Other Notes; a download that starts and ends between two 30-second health polls
+      never shows non-terminal, so a stopped hook issues no further read, a design exposure DEC-0233 does not
+      cover, surfaced for the owner; the height test pins the sharing, not the value, as IR-003 asked); spec
+      drift none, with the same banner-body note.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-rework-1.log
+        sha256: 8fe82ba192a51755868485acb7f7bf995710f6fd33fc33def32c64fd3205eab5
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/full-suite-rework-1.log
+        sha256: 154f30098cf9bb1fab6388ac67758038c0571180e92df06416eb9980083a19a5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5f2e8ef30643fe159063c4c817b913963be539c3f860107707c6300479697034
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/rework-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-rework-1-results.json
+      results_sha256: 8988b047c62bf37e7beba63e8fe6e6dd5adb564d4384755e8c34990898190a20
+      generated: 84
+      killed: 82
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.976
+      survivors:
+        - id: web/src/screens/research/use-score-set-poll.ts:98:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The mutant initialises mountedRef to false instead of true, as cycle-3's survivor did. The mount
+            effect assigns mountedRef.current = true synchronously after the first commit, before the mount
+            read's promise can resolve, and every reader of the ref runs after an await; so the initial value is
+            never observed and no sequence of reads, ticks or unmounts distinguishes the two.
+        - id: manual:rework-1:line-height-value-changed-on-both
+          disposition: equivalent
+          reason: >
+            The mutant changes LINE_HEIGHT from min-h-7 to min-h-1, which moves the line and its skeleton
+            together. The contract (UX design 1.2 Loading; DEC-0154) is that the skeleton stands at the line's
+            final height so the table beneath does not shift, which holds for any one shared value, and no
+            artifact fixes the value; IR-003 asked for the sharing to be pinned, and the test pins exactly that.
+
+  - id: rework-2
+    tasks: [T008, T012]
+    description: >
+      Review rework against CAP-002-E4-S4-implementation-review-v2.md (CHANGES-REQUIRED), one test-only cycle. IR-001
+      (HIGH): as-of-line.test.tsx pins the shared height token's value, min-h-7, on the line (the one min-h token it
+      carries) and on its skeleton, on top of the existing assertion that the two share one token; the review's two
+      survivors (min-h-1, min-h-5) are killed. IR-003 (MEDIUM, optional): a new test pins the Complete badge's shape as
+      exactly one circle with fill currentColor and no stroke, and the outcome-badge test pins text-xs on the badge; the
+      review's two late survivors are killed. IR-002 (MEDIUM): no code change; DEC-0238 corrects DEC-0233's derivation
+      and records both handoff exposures as the owner's question. IR-004 (LOW, optional): not taken, recorded in the
+      tasks file's Notes. The tasks file gains the rework note and last_reworked_review moves to the v2 report.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-rework-2.log
+    red_log_sha256: cb178128867a503142a24590afe63cd9aa5c401e542a013948413a4ffc512341
+    red_evidence: >
+      The production code already carried min-h-7, the filled circle and text-xs, so the new assertions pass on it by
+      construction; their RED is the review's survivors they kill (TEST-TDD-006), observed directly: with the three
+      reviewer mutants applied to the working tree at once (as-of-line.tsx LINE_HEIGHT min-h-7 to min-h-5;
+      status-badge.tsx good circle fill none stroke currentColor; status-badge.tsx BADGE text-xs to text-sm) and the
+      new assertions in place, as-of-line.test.tsx ran 4 failed, 20 passed (the skeleton test on expected 'min-h-5' to
+      be 'min-h-7', the two outcome-badge tests on text-xs, the filled-circle test on fill); the sources were then
+      restored and the suite ran green.
+    green_evidence: >
+      The four focused files 377 passed (green-rework-2.log); full web suite 950 passed in 50 files on the tree merged
+      with origin/main (full-suite-rework-2.log); biome lint and biome format clean (117 files); tsc --noEmit clean;
+      npm run build clean and the built CSS carries min-h-7{min-height:var(--space-7)}. Mutation: 104 hand-written
+      mutants (the review's 34, its four non-equivalent survivors among them, and the 70 earlier coder and reviewer
+      mutants whose target lines still exist, deduplicated by file and edit); no generated mutants, because no
+      production line changed; 103 killed, one equivalent survivor disposed below. Reviews: code review APPROVED with
+      two LOW notes (the skeleton's toHaveClass pin is implied by the two assertions before it, kept as the explicit
+      pin; the results file's per-mutant log paths point at a logs directory that is not persisted, as in every earlier
+      cycle); spec drift none, with notes (the equivalent survivor was disposed by review v2 itself; DEC-0238 lists the
+      classification-ui design as a cited target, not a change).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-rework-2.log
+        sha256: 1ec069facbde2686666782d684a48465b699905c3650febf5c030fa2adaead2b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/full-suite-rework-2.log
+        sha256: b61e136fe52b72416f1e4ffe3b72e431a624cb3532aff64719cd8642549101e0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c579c108780743118a7d54b86bd3f4fd2a84d4c5be3f38dfaac43ce24f097bb3
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/rework-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-rework-2-results.json
+      results_sha256: bbb7ca9d7000b6ff407a9d6d1d48a0aadf528d418dce4084513ca23687e2d887
+      generated: 104
+      killed: 103
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.99
+      survivors:
+        - id: manual:review-v2:undefined-class-kept
+          disposition: equivalent
+          reason: >
+            The mutant drops .filter(Boolean) from the badge's class list, so an absent host className is joined as
+            undefined. Array.prototype.join renders undefined as the empty string, so the rendered class attribute
+            differs only by one extra space and every class the contract names is still present; review v2 disposed
+            it the same way.

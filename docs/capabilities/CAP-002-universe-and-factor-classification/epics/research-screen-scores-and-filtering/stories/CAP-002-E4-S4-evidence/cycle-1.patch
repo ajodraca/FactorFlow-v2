@@ -1,0 +1,878 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-1.log
+new file mode 100644
+index 0000000..002008a
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-1.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/copy.test.ts (298 tests) 21ms
++ ✓ src/components/patterns/not-current-banner.test.tsx (15 tests) 26ms
++
++ Test Files  2 passed (2)
++      Tests  313 passed (313)
++   Start at  22:32:14
++   Duration  726ms (transform 73ms, setup 113ms, collect 155ms, tests 47ms, environment 519ms, prepare 239ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..15a8c19
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-1.json
+@@ -0,0 +1,152 @@
++{
++ "schema": 1,
++ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/components/patterns/not-current-banner.tsx:74:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "line": 74,
++   "original": "  if (set === null || later === null) {",
++   "mutated": "  if (set === null && later === null) {"
++  },
++  {
++   "id": "manual:cycle-1:branch-swap",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "if (later.state === \"building\") {",
++   "new": "if (later.state === \"failed\") {"
++  },
++  {
++   "id": "manual:cycle-1:ended-at-fallback-always",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "formatTimestamp(later.endedAt ?? later.startedAt)",
++   "new": "formatTimestamp(later.startedAt)"
++  },
++  {
++   "id": "manual:cycle-1:reason-stringified",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "later.failureReason ?? SCORE_SET.noReasonRecorded",
++   "new": "String(later.failureReason)"
++  },
++  {
++   "id": "manual:cycle-1:building-negated",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "const building = later.state === \"building\";",
++   "new": "const building = later.state !== \"building\";"
++  },
++  {
++   "id": "manual:cycle-1:set-guard-dropped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "if (set === null || later === null) {",
++   "new": "if (later === null) {"
++  },
++  {
++   "id": "manual:cycle-1:words-not-paragraph",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "<p>{bannerBody(set, later)}</p>",
++   "new": "<div>{bannerBody(set, later)}</div>"
++  },
++  {
++   "id": "manual:cycle-1:warning-ground-token",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "bg-status-warning-muted text-status-warning",
++   "new": "bg-status-good-muted text-status-warning"
++  },
++  {
++   "id": "manual:cycle-1:critical-ground-token",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "bg-status-critical-muted text-status-critical",
++   "new": "bg-status-serious-muted text-status-critical"
++  },
++  {
++   "id": "manual:cycle-1:building-args-swapped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "return SCORE_SET.buildingBody(produced, downloadStarted);",
++   "new": "return SCORE_SET.buildingBody(downloadStarted, produced);"
++  },
++  {
++   "id": "manual:cycle-1:failed-args-swapped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "return SCORE_SET.failedBody(failedAt, reason, produced, downloadStarted);",
++   "new": "return SCORE_SET.failedBody(failedAt, reason, downloadStarted, produced);"
++  },
++  {
++   "id": "manual:cycle-1:warning-shape-open",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "<path d=\"M6 1 11 11H1Z\" fill=\"currentColor\" />",
++   "new": "<path d=\"M6 1 11 11H1\" fill=\"currentColor\" />"
++  },
++  {
++   "id": "manual:cycle-1:critical-shape-circle",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "<rect x=\"1.5\" y=\"1.5\" width=\"9\" height=\"9\" fill=\"currentColor\" />",
++   "new": "<circle cx=\"6\" cy=\"6\" r=\"4.5\" fill=\"currentColor\" />"
++  },
++  {
++   "id": "manual:cycle-1:warning-word-swapped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "{SCORE_SET.notReflecting}",
++   "new": "{SCORE_SET.scoreUpdateFailed}"
++  },
++  {
++   "id": "manual:cycle-1:critical-variant-swapped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "data-variant=\"status-critical\"",
++   "new": "data-variant=\"status-warning\""
++  },
++  {
++   "id": "manual:cycle-1:card-variant-dropped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "data-variant=\"default\"",
++   "new": "data-variant=\"banner\""
++  },
++  {
++   "id": "manual:cycle-1:badge-not-first",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/not-current-banner.tsx",
++   "old": "<p>{bannerBody(set, later)}</p>\n    </div>",
++   "new": "<p>{bannerBody(set, later)}</p>\n      <span aria-hidden=\"true\" />\n    </div>"
++  },
++  {
++   "id": "manual:cycle-1:no-reason-wording",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/research/copy.ts",
++   "old": "noReasonRecorded: \"no reason was recorded\",",
++   "new": "noReasonRecorded: \"null\","
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..f259e2f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,310 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/components/patterns/not-current-banner.test.tsx src/screens/research/copy.test.ts",
++  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++  "tree_patch_sha256": "1b560a1199f9161028bfcb9a9a5a309d37c863dd48e4b8b28a30815527d5bc1c",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutants-1.json",
++  "mutants_sha256": "6176d65bdb1568640f65358b97851adee64164ccf9d5e08be5185dfe6df905fa",
++  "jobs": 6,
++  "started": "2026-10-29T03:33:02Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 2.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "b25fc787de478c5aa34d94b463d9851a83f25eb427d750d54210c8125845bb7d"
++    },
++    {
++      "worker": 4,
++      "exit_code": 0,
++      "seconds": 2.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/baseline-w4.log",
++      "log_sha256": "c26c678dd32d6fb471e5015ef735353d5e494f6db0859c5712fde1dd98f7947e"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 2.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "91ea47c82f9fe0005df2ba4d3ac8f722c56aa21564c4ed934356d50fa7e5c524"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 2.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "9eb8666fafa76e4f5eca77fd24e50c7ad8e7ef7f9ee3ab213357cc8ae3a955bf"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 2.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "60c3886bcb5827302bb1647ea9fd4586766d8a34d4b8ef3d7ba97610417daca4"
++    },
++    {
++      "worker": 5,
++      "exit_code": 0,
++      "seconds": 2.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/baseline-w5.log",
++      "log_sha256": "5e50c889d5a9f99c0f38f6aef4ac725cf3ed6178cce234d89b723a7cd20f8955"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/not-current-banner.tsx:74:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "line": 74,
++      "original": "  if (set === null || later === null) {",
++      "mutated": "  if (set === null && later === null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/web_src_components_patterns_not-current-banner.tsx_74_negate-boolean_1.log",
++      "log_sha256": "57523218f47f027c9b1f6c731b0deeda0b9a67491d45bb56b2ea2d717f23d3ed"
++    },
++    {
++      "id": "manual:cycle-1:branch-swap",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "if (later.state === \"building\") {",
++      "new": "if (later.state === \"failed\") {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_branch-swap.log",
++      "log_sha256": "43ac584049c5b070bcd8bb84967e2ae64480c22393e69887f61cf9782be524eb"
++    },
++    {
++      "id": "manual:cycle-1:ended-at-fallback-always",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "formatTimestamp(later.endedAt ?? later.startedAt)",
++      "new": "formatTimestamp(later.startedAt)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_ended-at-fallback-always.log",
++      "log_sha256": "edf4b1624ee180d1607e3c814e8cce3bec6cad35e8a7e1aca32915037ca12c5a"
++    },
++    {
++      "id": "manual:cycle-1:reason-stringified",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "later.failureReason ?? SCORE_SET.noReasonRecorded",
++      "new": "String(later.failureReason)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_reason-stringified.log",
++      "log_sha256": "17fb9f475a662da9b1eb9bf16b5e4d821cd548de0cca58a5818268da2c8ab133"
++    },
++    {
++      "id": "manual:cycle-1:building-negated",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "const building = later.state === \"building\";",
++      "new": "const building = later.state !== \"building\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_building-negated.log",
++      "log_sha256": "ed445a743137b3d9036cd413ff29a4e6c87b7259917bc3bbba84c0ad598ee588"
++    },
++    {
++      "id": "manual:cycle-1:set-guard-dropped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "if (set === null || later === null) {",
++      "new": "if (later === null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_set-guard-dropped.log",
++      "log_sha256": "dafed57802a3f1bce3399a7dfa6bfb29e347111e105dcd1130222863c2b7b66e"
++    },
++    {
++      "id": "manual:cycle-1:words-not-paragraph",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "<p>{bannerBody(set, later)}</p>",
++      "new": "<div>{bannerBody(set, later)}</div>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_words-not-paragraph.log",
++      "log_sha256": "d5a15ed812d2cddb9c454c83c0ed065279acd894d2f0182715e01ed6a546e953"
++    },
++    {
++      "id": "manual:cycle-1:warning-ground-token",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "bg-status-warning-muted text-status-warning",
++      "new": "bg-status-good-muted text-status-warning",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_warning-ground-token.log",
++      "log_sha256": "eab174969f98ffe0af60f5936a03b76300a6a505db8de8960da5264df6c083b5"
++    },
++    {
++      "id": "manual:cycle-1:critical-ground-token",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "bg-status-critical-muted text-status-critical",
++      "new": "bg-status-serious-muted text-status-critical",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_critical-ground-token.log",
++      "log_sha256": "447012e1b7c3f697ed7b1e96d4255ca0e5af7e1b074a169bfaf8f625dbde3fd8"
++    },
++    {
++      "id": "manual:cycle-1:building-args-swapped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "return SCORE_SET.buildingBody(produced, downloadStarted);",
++      "new": "return SCORE_SET.buildingBody(downloadStarted, produced);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_building-args-swapped.log",
++      "log_sha256": "bdc85592ce5d4525ebb0169b822fa6cedcce4f6ca35149aecfdf81737f8ff913"
++    },
++    {
++      "id": "manual:cycle-1:failed-args-swapped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "return SCORE_SET.failedBody(failedAt, reason, produced, downloadStarted);",
++      "new": "return SCORE_SET.failedBody(failedAt, reason, downloadStarted, produced);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_failed-args-swapped.log",
++      "log_sha256": "2ee92aa98120ae8155a51b34cf39337d7b7afcc3b42d1676d0af5bbf4e533de8"
++    },
++    {
++      "id": "manual:cycle-1:warning-shape-open",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "<path d=\"M6 1 11 11H1Z\" fill=\"currentColor\" />",
++      "new": "<path d=\"M6 1 11 11H1\" fill=\"currentColor\" />",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_warning-shape-open.log",
++      "log_sha256": "f67f9225dbc293f0152d0dab390c05664495d17ffc95598da3975b5030938213"
++    },
++    {
++      "id": "manual:cycle-1:critical-shape-circle",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "<rect x=\"1.5\" y=\"1.5\" width=\"9\" height=\"9\" fill=\"currentColor\" />",
++      "new": "<circle cx=\"6\" cy=\"6\" r=\"4.5\" fill=\"currentColor\" />",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_critical-shape-circle.log",
++      "log_sha256": "070554d6492a0dd697da9a2297dc4e4405f8620b103f750f2a6afce4db7af382"
++    },
++    {
++      "id": "manual:cycle-1:warning-word-swapped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "{SCORE_SET.notReflecting}",
++      "new": "{SCORE_SET.scoreUpdateFailed}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_warning-word-swapped.log",
++      "log_sha256": "2cde86701c79bed0284b37b0848dc4f8bd67ce788c04a8c43e4560b6be509609"
++    },
++    {
++      "id": "manual:cycle-1:critical-variant-swapped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "data-variant=\"status-critical\"",
++      "new": "data-variant=\"status-warning\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_critical-variant-swapped.log",
++      "log_sha256": "676ead89cc5f3004dd4aaf89073e7be430623ce1f4b4b8f9f8ddb9560ef1cbe4"
++    },
++    {
++      "id": "manual:cycle-1:card-variant-dropped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "data-variant=\"default\"",
++      "new": "data-variant=\"banner\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_card-variant-dropped.log",
++      "log_sha256": "8589a977c5dcf4b86368b98a991b8e7f9094b433d66ad58f890432b59e524854"
++    },
++    {
++      "id": "manual:cycle-1:badge-not-first",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/not-current-banner.tsx",
++      "old": "<p>{bannerBody(set, later)}</p>\n    </div>",
++      "new": "<p>{bannerBody(set, later)}</p>\n      <span aria-hidden=\"true\" />\n    </div>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_badge-not-first.log",
++      "log_sha256": "6d33ea0781351fc57db65056d834665ada686cf8cb2c4b7f2b52cd9e71d77b3d"
++    },
++    {
++      "id": "manual:cycle-1:no-reason-wording",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/copy.ts",
++      "old": "noReasonRecorded: \"no reason was recorded\",",
++      "new": "noReasonRecorded: \"null\",",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-1-results-logs/manual_cycle-1_no-reason-wording.log",
++      "log_sha256": "feeb9a426fa762e3e03793f81b13339c7f7f1d38f22b7968abdbbe41a7b30cd5"
++    }
++  ],
++  "finished": "2026-10-29T03:33:09Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-1.log
+new file mode 100644
+index 0000000..6cbdcca
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-1.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/patterns/not-current-banner.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/not-current-banner.test.tsx [ src/components/patterns/not-current-banner.test.tsx ]
++Error: Failed to resolve import "./not-current-banner" from "web/src/components/patterns/not-current-banner.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/not-current-banner.test.tsx:6:33
++  4  |  import { SCORE_SET } from "../../screens/research/copy";
++  5  |  import { formatTimestamp } from "../../screens/research/format";
++  6  |  import { NotCurrentBanner } from "./not-current-banner";
++     |                                    ^
++  7  |  const RUN_ID = "0b2d4a6e-8c1f-4e3a-9b7d-2f6e8a0c4d1b";
++  8  |  const SET = {
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  22:31:23
++   Duration  609ms (transform 16ms, setup 52ms, collect 0ms, tests 0ms, environment 261ms, prepare 149ms)
++
+diff --git a/web/src/components/patterns/not-current-banner.test.tsx b/web/src/components/patterns/not-current-banner.test.tsx
+new file mode 100644
+index 0000000..04fced1
+--- /dev/null
++++ b/web/src/components/patterns/not-current-banner.test.tsx
+@@ -0,0 +1,201 @@
++import { render, screen } from "@testing-library/react";
++import { describe, expect, it } from "vitest";
++import type { CurrentSet, LaterSet } from "../../api/classification-types";
++import { SCORE_SET } from "../../screens/research/copy";
++import { formatTimestamp } from "../../screens/research/format";
++import { NotCurrentBanner } from "./not-current-banner";
++
++const RUN_ID = "0b2d4a6e-8c1f-4e3a-9b7d-2f6e8a0c4d1b";
++
++/** The current set: produced 2026-10-15 17:46 CDT from the download started 17:30 CDT. */
++const SET: CurrentSet = {
++  setId: "6f1c2b3a-4d5e-4f60-8a71-9b82c93d04e5",
++  classificationDate: "2026-10-15",
++  runId: RUN_ID,
++  runStartedAt: "2026-10-15T22:30:00Z",
++  runOutcome: "succeeded",
++  state: "complete",
++  startedAt: "2026-10-15T22:40:00Z",
++  endedAt: "2026-10-15T22:46:00Z",
++  latestTradingDay: "2026-10-15",
++  activeInstruments: 120,
++  notCurrent: true,
++};
++
++const BUILDING: LaterSet = {
++  setId: "a1b2c3d4-0000-4000-8000-000000000002",
++  state: "building",
++  startedAt: "2026-10-16T22:40:00Z",
++  endedAt: null,
++  failureReason: null,
++  runId: "1c3e5a7b-9d2f-4b6c-8e0a-3f5b7d9c1e2a",
++  runStartedAt: "2026-10-16T22:30:00Z",
++};
++
++const FAILED: LaterSet = {
++  ...BUILDING,
++  state: "failed",
++  endedAt: "2026-10-15T23:03:00Z",
++  failureReason: "Factor engine could not read prices",
++};
++
++const PRODUCED = formatTimestamp(SET.endedAt);
++const DOWNLOAD_STARTED = formatTimestamp(SET.runStartedAt);
++
++/** The badge's visible word: its text without the aria-hidden shape. */
++function badgeWord(badge: Element): string {
++  const clone = badge.cloneNode(true) as Element;
++  for (const hidden of clone.querySelectorAll("[aria-hidden='true']")) {
++    hidden.remove();
++  }
++  return (clone.textContent ?? "").trim();
++}
++
++function badge(container: HTMLElement): HTMLElement {
++  const found = container.querySelector("[data-variant^='status-']");
++  if (found === null) {
++    throw new Error("no badge rendered");
++  }
++  return found as HTMLElement;
++}
++
++describe("TC-COMP-174: banner absent when later is null, warning banner when building (DAC-E4-S4-1)", () => {
++  // Implements TC-COMP-174
++  it("renders nothing with a current set and later null", () => {
++    const { container } = render(<NotCurrentBanner set={SET} later={null} />);
++    expect(container).toBeEmptyDOMElement();
++    expect(container.querySelector("[role]")).toBeNull();
++    expect(container.querySelector("[data-variant]")).toBeNull();
++  });
++
++  // Implements TC-COMP-174
++  it("renders one status-warning badge and the building sentence while a later set builds", () => {
++    const { container } = render(<NotCurrentBanner set={SET} later={BUILDING} />);
++    const badges = container.querySelectorAll("[data-variant^='status-']");
++    expect(badges).toHaveLength(1);
++    const warning = badges[0] as HTMLElement;
++    expect(warning).toHaveAttribute("data-variant", "status-warning");
++    expect(badgeWord(warning)).toBe(SCORE_SET.notReflecting);
++    expect(badgeWord(warning)).toBe("Not reflecting the latest download");
++    const triangle = warning.querySelector("svg[aria-hidden='true'] path");
++    expect(triangle).not.toBeNull();
++    expect(triangle?.getAttribute("d")).toMatch(/Z$/);
++
++    expect(container).toHaveTextContent(SCORE_SET.buildingBody(PRODUCED, DOWNLOAD_STARTED));
++    expect(container).toHaveTextContent("2026-10-15 17:46 CDT");
++    expect(container).toHaveTextContent("2026-10-15 17:30 CDT");
++    expect(container).toHaveTextContent("replaces this one when complete");
++  });
++
++  // Implements TC-COMP-174
++  it("carries no button, link or handler", () => {
++    const { container } = render(<NotCurrentBanner set={SET} later={BUILDING} />);
++    expect(screen.queryByRole("button")).toBeNull();
++    expect(screen.queryByRole("link")).toBeNull();
++    expect(container.querySelector("a, button, [onclick]")).toBeNull();
++  });
++});
++
++describe("TC-COMP-175: a failed attempt shows the recorded reason and nothing to retry (DAC-E4-S4-2)", () => {
++  // Implements TC-COMP-175
++  it("renders one status-critical badge and the failed sentence with the reason verbatim", () => {
++    const { container } = render(<NotCurrentBanner set={SET} later={FAILED} />);
++    const badges = container.querySelectorAll("[data-variant^='status-']");
++    expect(badges).toHaveLength(1);
++    const critical = badges[0] as HTMLElement;
++    expect(critical).toHaveAttribute("data-variant", "status-critical");
++    expect(badgeWord(critical)).toBe(SCORE_SET.scoreUpdateFailed);
++    expect(badgeWord(critical)).toBe("Score update failed");
++    expect(critical.querySelector("svg[aria-hidden='true'] rect")).not.toBeNull();
++
++    expect(container).toHaveTextContent(
++      "Score update failed 2026-10-15 18:03 CDT: Factor engine could not read prices. Showing scores produced 2026-10-15 17:46 CDT from the download started 2026-10-15 17:30 CDT. The next complete download will try again.",
++    );
++  });
++
++  // Implements TC-COMP-175
++  it("renders the reason as text, never as HTML", () => {
++    const { container } = render(
++      <NotCurrentBanner set={SET} later={{ ...FAILED, failureReason: "<b>x</b> broke" }} />,
++    );
++    expect(container.querySelector("b")).toBeNull();
++    expect(container).toHaveTextContent("<b>x</b> broke");
++  });
++
++  // Implements TC-COMP-175
++  it("offers no button or link: the scheduler does not retry a failed set (STD-UI-2)", () => {
++    render(<NotCurrentBanner set={SET} later={FAILED} />);
++    expect(screen.queryByRole("button")).toBeNull();
++    expect(screen.queryByRole("link")).toBeNull();
++    expect(screen.queryByRole("table")).toBeNull();
++  });
++
++  // Implements TC-COMP-175
++  it("uses the catalogue's clause for a failed set that recorded no reason, never null or undefined", () => {
++    const { container } = render(
++      <NotCurrentBanner set={SET} later={{ ...FAILED, failureReason: null }} />,
++    );
++    expect(container).toHaveTextContent(
++      `Score update failed 2026-10-15 18:03 CDT: ${SCORE_SET.noReasonRecorded}.`,
++    );
++    expect(container).not.toHaveTextContent(/null|undefined/);
++  });
++});
++
++describe("banner details: reads set and later only, a card with the badge first, no live region (AC-20, DAC-E4-2, DAC-E4-4)", () => {
++  it.each([
++    ["building", BUILDING],
++    ["failed", FAILED],
++  ])("renders nothing for a never-scored summary with later %s", (_state, later) => {
++    const { container } = render(<NotCurrentBanner set={null} later={later} />);
++    expect(container).toBeEmptyDOMElement();
++  });
++
++  it("renders nothing for a current set with later null and notCurrent false", () => {
++    const { container } = render(
++      <NotCurrentBanner set={{ ...SET, notCurrent: false }} later={null} />,
++    );
++    expect(container).toBeEmptyDOMElement();
++  });
++
++  it("reads later, never notCurrent: a building later renders the banner whatever notCurrent says", () => {
++    const { container } = render(
++      <NotCurrentBanner set={{ ...SET, notCurrent: false }} later={BUILDING} />,
++    );
++    expect(badge(container)).toHaveAttribute("data-variant", "status-warning");
++  });
++
++  it("is a card whose first child is the badge, followed by the words as text", () => {
++    const { container } = render(<NotCurrentBanner set={SET} later={BUILDING} />);
++    const card = container.firstElementChild as HTMLElement;
++    expect(card).toHaveAttribute("data-variant", "default");
++    expect(card).toHaveClass("bg-card");
++    expect(card.firstElementChild).toBe(badge(container));
++    const words = card.lastElementChild as HTMLElement;
++    expect(words.tagName).toBe("P");
++    expect(words).toHaveTextContent(SCORE_SET.buildingBody(PRODUCED, DOWNLOAD_STARTED));
++    expect(words.querySelector("*")).toBeNull();
++  });
++
++  it("is not a live region: the as-of line owns announcing", () => {
++    const { container } = render(<NotCurrentBanner set={SET} later={FAILED} />);
++    expect(
++      container.querySelector("[aria-live], [role='status'], [role='alert'], output"),
++    ).toBeNull();
++  });
++
++  it.each([
++    ["building", BUILDING, "bg-status-warning-muted", "text-status-warning"],
++    ["failed", FAILED, "bg-status-critical-muted", "text-status-critical"],
++  ])(
++    "colours the %s badge with its muted token and leaves the words uncoloured",
++    (_state, later, ground, ink) => {
++      const { container } = render(<NotCurrentBanner set={SET} later={later} />);
++      const mark = badge(container);
++      expect(mark).toHaveClass(ground);
++      expect(mark).toHaveClass(ink);
++      const words = container.querySelector("p") as HTMLElement;
++      expect(words.className).not.toMatch(/status-/);
++    },
++  );
++});
+diff --git a/web/src/components/patterns/not-current-banner.tsx b/web/src/components/patterns/not-current-banner.tsx
+new file mode 100644
+index 0000000..8a99c4a
+--- /dev/null
++++ b/web/src/components/patterns/not-current-banner.tsx
+@@ -0,0 +1,104 @@
++import type { JSX } from "react";
++import type { CurrentSet, LaterSet } from "../../api/classification-types";
++import { SCORE_SET } from "../../screens/research/copy";
++import { formatTimestamp } from "../../screens/research/format";
++
++/**
++ * The not-current banner every scored CAP-002 surface shows above its scores
++ * while a later set builds or after an attempt failed (UX design 1.2;
++ * classification-ui 2.6; AC-20; DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-2).
++ *
++ * It reads `set` and `later` only, never `notCurrent`, so the list and the
++ * summary reads' shared shape is its one source (DEC-0082). It renders
++ * nothing when either is null: with no current set the host's never-populated
++ * body renders the first set's state from the same `later` block (DAC-E4-2,
++ * CAP-002-E4-S9), and with no later set the as-of line stands alone. It is not
++ * a live region; the as-of line announces (DEC-0154). It carries no control:
++ * the scheduler does not retry a failed set, so nothing is offered to retry
++ * (STD-UI-2).
++ */
++
++const BADGE = "inline-flex w-fit items-center gap-1 rounded px-2 py-1 text-xs";
++
++function Shape({ children }: { children: JSX.Element }): JSX.Element {
++  return (
++    <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
++      {children}
++    </svg>
++  );
++}
++
++/** A warning triangle: the badge shape of the warning tier (STD-UI-8). */
++function WarningShape(): JSX.Element {
++  return (
++    <Shape>
++      <path d="M6 1 11 11H1Z" fill="currentColor" />
++    </Shape>
++  );
++}
++
++/** A square: the badge shape of the critical tier (UX design 1.2, Accessibility). */
++function CriticalShape(): JSX.Element {
++  return (
++    <Shape>
++      <rect x="1.5" y="1.5" width="9" height="9" fill="currentColor" />
++    </Shape>
++  );
++}
++
++/** The sentence under the badge, from the shipped catalogue (CAP-002-E4-S2). */
++function bannerBody(set: CurrentSet, later: LaterSet): string {
++  const produced = formatTimestamp(set.endedAt);
++  const downloadStarted = formatTimestamp(set.runStartedAt);
++  if (later.state === "building") {
++    return SCORE_SET.buildingBody(produced, downloadStarted);
++  }
++  // A failed set always records its end time and reason; the fallbacks cover
++  // the nullable wire types only (DEC-0232).
++  const failedAt = formatTimestamp(later.endedAt ?? later.startedAt);
++  const reason = later.failureReason ?? SCORE_SET.noReasonRecorded;
++  return SCORE_SET.failedBody(failedAt, reason, produced, downloadStarted);
++}
++
++export interface NotCurrentBannerProps {
++  set: CurrentSet | null;
++  later: LaterSet | null;
++}
++
++/**
++ * A `card` holding the `status-warning` *Not reflecting the latest download*
++ * or `status-critical` *Score update failed* badge and one or two sentences
++ * (DAC-E4-S4-1, DAC-E4-S4-2); `null` when there is nothing to mark.
++ */
++export function NotCurrentBanner({ set, later }: NotCurrentBannerProps): JSX.Element | null {
++  if (set === null || later === null) {
++    return null;
++  }
++  const building = later.state === "building";
++  return (
++    <div
++      data-testid="not-current-banner"
++      data-variant="default"
++      className="flex flex-col gap-2 rounded border border-border bg-card p-4 text-base text-card-foreground"
++    >
++      {building ? (
++        <span
++          data-variant="status-warning"
++          className={`${BADGE} bg-status-warning-muted text-status-warning`}
++        >
++          <WarningShape />
++          {SCORE_SET.notReflecting}
++        </span>
++      ) : (
++        <span
++          data-variant="status-critical"
++          className={`${BADGE} bg-status-critical-muted text-status-critical`}
++        >
++          <CriticalShape />
++          {SCORE_SET.scoreUpdateFailed}
++        </span>
++      )}
++      <p>{bannerBody(set, later)}</p>
++    </div>
++  );
++}
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 47ce2ab..dc63d38 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -476,6 +476,8 @@ describe("copy.ts completeness and keying", () => {
+     ).toBe(
+       "Score update failed 18:03 CDT: the download ended. Showing scores produced 17:46 CDT from the download started 2026-10-15 17:30 CDT. The next complete download will try again.",
+     );
++    // DEC-0232: the clause a failed set with no recorded reason takes in failedBody.
++    expect(copy.SCORE_SET.noReasonRecorded).toBe("no reason was recorded");
+     expect(copy.EVIDENCE.noEarlierScores("AAPL").startsWith("No earlier scores for")).toBe(true);
+     expect(copy.EVIDENCE.noEarlierScores("AAPL")).toBe("No earlier scores for AAPL.");
+     expect(copy.CELL.notFollowedSince("2026-10-01")).toBe(
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index feca828..b324f3c 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -388,6 +388,13 @@ export const SCORE_SET = {
+     `Showing scores produced ${produced} from the download started ${downloadStarted}. A newer set is being produced and replaces this one when complete.`,
+   failedBody: (failed: string, reason: string, produced: string, downloadStarted: string): string =>
+     `Score update failed ${failed}: ${reason}. Showing scores produced ${produced} from the download started ${downloadStarted}. The next complete download will try again.`,
++  /**
++   * The reason clause of `failedBody` when a failed set recorded none. No
++   * design states it: `LaterSet.failureReason` is nullable, and the scheduler
++   * always records a reason, so the clause is defensive (CAP-002-E4-S4 T002,
++   * CAP-002-E4-S2 Open Gap 6; DEC-0232, PROVISIONAL).
++   */
++  noReasonRecorded: "no reason was recorded",
+   scoresUpdatedTo: (scoresAt: string, downloadStarted: string): string =>
+     `Scores updated to ${scoresAt} from the download started ${downloadStarted}`,
+   scoresUpdatedToast: (scoresAt: string): string => `Scores updated to ${scoresAt}`,
