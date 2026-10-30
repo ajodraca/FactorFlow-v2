@@ -1,0 +1,195 @@
+{
+ "schema": 1,
+ "repo_head": "7646ab7aa5aa9fbe04bdc7279f8c2fe22155f184",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/scheduler.py:107:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 107,
+   "original": "    while True:",
+   "mutated": "    while False:"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:110:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 110,
+   "original": "            if claimed is not None:",
+   "mutated": "            if claimed is None:"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:123:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 123,
+   "original": "        if stop_event is not None and stop_event.is_set():",
+   "mutated": "        if stop_event is None and stop_event.is_set():"
+  },
+  {
+   "id": "src/factorflow/classification/scheduler.py:126:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/scheduler.py",
+   "line": 126,
+   "original": "        if stop_event is not None and stop_event.is_set():",
+   "mutated": "        if stop_event is None and stop_event.is_set():"
+  },
+  {
+   "id": "manual:no-continue-after-build",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "                continue  # look again at once: another run may be waiting\n",
+   "new": ""
+  },
+  {
+   "id": "manual:claim-on-loop",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "claimed = await dispatch(claim_next_set, pool)",
+   "new": "claimed = claim_next_set(pool)"
+  },
+  {
+   "id": "manual:build-on-loop",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "result = await dispatch(\n                    build_claimed_set, pool, claimed.set_id, settings.build_timeout_seconds\n                )",
+   "new": "result = build_claimed_set(pool, claimed.set_id, settings.build_timeout_seconds)"
+  },
+  {
+   "id": "manual:reclaim-on-loop",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "    await dispatch(reclaim_interrupted_sets, pool)  # DEC-0067, once",
+   "new": "    reclaim_interrupted_sets(pool)  # DEC-0067, once"
+  },
+  {
+   "id": "manual:no-reclaim",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "    await dispatch(reclaim_interrupted_sets, pool)  # DEC-0067, once",
+   "new": "    pass"
+  },
+  {
+   "id": "manual:reclaim-every-iteration",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "        try:\n            claimed = await dispatch(claim_next_set, pool)",
+   "new": "        try:\n            await dispatch(reclaim_interrupted_sets, pool)\n            claimed = await dispatch(claim_next_set, pool)"
+  },
+  {
+   "id": "manual:build-gets-poll-interval",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "claimed.set_id, settings.build_timeout_seconds",
+   "new": "claimed.set_id, settings.poll_interval_seconds"
+  },
+  {
+   "id": "manual:wait-gets-build-timeout",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "await wait(settings.poll_interval_seconds)",
+   "new": "await wait(settings.build_timeout_seconds)"
+  },
+  {
+   "id": "manual:catch-base-exception",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "        except Exception:\n            log.exception",
+   "new": "        except BaseException:\n            log.exception"
+  },
+  {
+   "id": "manual:error-without-traceback",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "log.exception(\"classification scheduler iteration failed\")",
+   "new": "log.error(\"classification scheduler iteration failed\")"
+  },
+  {
+   "id": "manual:swallow-silently",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "log.exception(\"classification scheduler iteration failed\")",
+   "new": "pass"
+  },
+  {
+   "id": "manual:no-stop-check-before-wait",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "            log.exception(\"classification scheduler iteration failed\")\n        if stop_event is not None and stop_event.is_set():\n            break\n",
+   "new": "            log.exception(\"classification scheduler iteration failed\")\n"
+  },
+  {
+   "id": "manual:no-stop-check-after-wait",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "        await wait(settings.poll_interval_seconds)\n        if stop_event is not None and stop_event.is_set():\n            break\n",
+   "new": "        await wait(settings.poll_interval_seconds)\n"
+  },
+  {
+   "id": "manual:warn-every-iteration",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "    for name in line_items.unresolved():\n        log.warning(\"line item %s has no payload key; its inputs will be missing\", name)\n\n    while True:\n        try:\n",
+   "new": "    while True:\n        for name in line_items.unresolved():\n            log.warning(\"line item %s has no payload key; its inputs will be missing\", name)\n        try:\n"
+  },
+  {
+   "id": "manual:warn-at-info",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "log.warning(\"line item",
+   "new": "log.info(\"line item"
+  },
+  {
+   "id": "manual:outcome-at-debug",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "                log.info(\n",
+   "new": "                log.debug(\n"
+  },
+  {
+   "id": "manual:default-dispatch-on-loop",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "dispatch = dispatch_fn or asyncio.to_thread",
+   "new": "dispatch = dispatch_fn or (lambda fn, *args: asyncio.sleep(0, fn(*args)))"
+  },
+  {
+   "id": "manual:build-without-checkout",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "    with pool.connection() as conn:\n        return engine.build(conn, set_id, timeout_seconds)",
+   "new": "    return engine.build(pool.connection(), set_id, timeout_seconds)"
+  },
+  {
+   "id": "manual:build-timeout-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/scheduler.py",
+   "old": "return engine.build(conn, set_id, timeout_seconds)",
+   "new": "return engine.build(conn, set_id, 300.0)"
+  }
+ ]
+}

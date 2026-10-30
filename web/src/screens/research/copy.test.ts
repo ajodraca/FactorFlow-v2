@@ -66,6 +66,11 @@ const CALLS: Record<string, unknown[][]> = {
     [3, "Tech", 0],
     [3, "Tech", 2],
   ],
+  "CELL.incompleteGeneric": [
+    ["input_missing", "value"],
+    ["input_outdated", "growth"],
+    ["input_not_computable", "momentum"],
+  ],
 };
 
 function callsFor(at: string): unknown[][] {
@@ -422,6 +427,7 @@ describe("copy.ts completeness and keying", () => {
     "Incomplete",
     "Not enough to rank",
     "Not followed",
+    "Not followed. Earlier scores stand.",
     "Possibly restated",
     "Outdated",
     "Couldn't be computed",
@@ -503,6 +509,16 @@ describe("copy.ts completeness and keying", () => {
       ),
     ).toBe(
       "Incomplete: revenue for the quarter ending 2025-06-27 is missing, so growth can't be compared fairly. It isn't guessed.",
+    );
+    // CAP-002-E4-S3 T009 (DEC-0151): the cell's title from reasonDetail, and the generic clause by code.
+    expect(copy.CELL.incompleteDetail("operating cash flow missing", "value")).toBe(
+      "Incomplete: operating cash flow missing, so value can't be compared fairly. It isn't guessed.",
+    );
+    expect(copy.CELL.incompleteGeneric("input_outdated", "growth")).toBe(
+      "Incomplete: an input is outdated, so growth can't be compared fairly. It isn't guessed.",
+    );
+    expect(copy.CELL.incompleteGeneric("input_not_computable", "momentum")).toBe(
+      "Incomplete: an input couldn't be computed, so momentum can't be compared fairly. It isn't guessed.",
     );
     expect(copy.SELECTION.inUniverses(["Tech", "Dividend growers"])).toBe(
       "In Tech and Dividend growers",

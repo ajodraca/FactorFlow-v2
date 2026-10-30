@@ -1,0 +1,119 @@
+.......F........................F.............                           [100%]
+=================================== FAILURES ===================================
+_____ test_each_unresolved_line_item_is_warned_once_before_the_first_claim _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109635d30>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x1096354f0>
+
+    def test_each_unresolved_line_item_is_warned_once_before_the_first_claim(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """AC-10 (design section 7, "Unresolved line items are warned"): one warning per
+        unresolved line item, before the first claim, never repeated on later iterations."""
+        warnings_at_first_claim: list[int] = []
+    
+        def claim(pool: Any) -> None:
+            if not warnings_at_first_claim:
+                warnings_at_first_claim.append(len(_scheduler_records(caplog, logging.WARNING)))
+            return None
+    
+        _Fakes(monkeypatch, claim=claim)
+        monkeypatch.setattr(line_items, "unresolved", lambda: ["net_income", "revenue"])
+        waiter = _RecordingWaiter(stop_after=2)
+    
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), waiter, _RecordingDispatcher())
+    
+        messages = [r.getMessage() for r in _scheduler_records(caplog, logging.WARNING)]
+>       assert messages == [
+            "line item net_income has no payload key; its inputs will be missing",
+            "line item revenue has no payload key; its inputs will be missing",
+        ]
+E       AssertionError: assert [] == ['line item n...l be missing']
+E         
+E         Right contains 2 more items, first extra item: 'line item net_income has no payload key; its inputs will be missing'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:378: AssertionError
+________ test_short_build_timeout_reaches_the_engine_and_fails_the_set _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-4' at 0x109556cf0>, <psycopg.Connection [IDLE] (host=localhost port=59561 user=test database=test_b58d477babfe415b81776660e535c7b1) at 0x1095ab770>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1095ab7a0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x1095ab710>
+
+    def test_short_build_timeout_reaches_the_engine_and_fails_the_set(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """DAC-E2-S9-4, AC-11, AC-20: a 50 ms build_timeout_seconds crosses the loop, a real
+        thread and a real pool to the engine, which cancels a five-second stage and records the
+        set failed with a timeout reason and no classification rows."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_id = add_run(conn, "succeeded", T0)
+    
+        def sleeping_stage(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            stage_conn.execute("SELECT pg_sleep(5)")
+    
+        monkeypatch.setattr(engine, "_STAGES", [sleeping_stage])
+        # model_construct skips the ge=1 bound and the poll-below-timeout validator on purpose:
+        # a 50 ms timeout is the only way to make a unit-sized store "too short", and
+        # CAP-002-E2-S8 already proves the validators. The poll interval is longer than the
+        # stage's sleep, so a build handed the poll interval instead would also outlast it.
+        settings = ClassificationSettings.model_construct(
+            poll_interval_seconds=10.0, build_timeout_seconds=0.05
+        )
+    
+        started = time.monotonic()
+        with caplog.at_level(logging.INFO, logger="factorflow.classification.scheduler"):
+            _run_loop_until_first_wait(pool, settings)
+        elapsed = time.monotonic() - started
+    
+        rows = [row for row in set_rows(conn) if row[1] == run_id]
+        assert len(rows) == 1
+        set_id, _, state, reason = rows[0]
+        assert state == "failed"
+        assert reason.startswith("QueryCanceled")
+        assert "timeout" in reason
+        assert count_classification_rows(conn, set_id) == {
+            "classification_set_factor": 0,
+            "factor_input": 0,
+            "factor_classification": 0,
+        }
+        conn.rollback()
+        infos = [
+            r.getMessage()
+            for r in caplog.records
+            if r.name == "factorflow.classification.scheduler" and r.levelno == logging.INFO
+        ]
+>       assert infos == [f"classification set {set_id} for run {run_id} ended failed"]
+E       AssertionError: assert ['line item b...missing', ...] == ['classificat...ended failed']
+E         
+E         At index 0 diff: 'line item book_equity has no payload key; its inputs will be missing' != 'classification set 0c37a3d8-adba-4745-94b9-1acf877e0ec5 for run e77e7abb-83c7-4954-98fe-5816782090cc ended failed'
+E         Left contains 7 more items, first extra item: 'line item shares_outstanding has no payload key; its inputs will be missing'
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:206: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item book_equity has no payload key; its inputs will be missing
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item shares_outstanding has no payload key; its inputs will be missing
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item diluted_eps has no payload key; its inputs will be missing
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item operating_cash_flow has no payload key; its inputs will be missing
+INFO     factorflow.classification.scheduler:scheduler.py:105 line item capital_expenditure has no payload key; its inputs will be missing
+ERROR    factorflow.classification.engine:engine.py:129 classification build failed: QueryCanceled: canceling statement due to statement timeout
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w3/src/factorflow/classification/engine.py", line 111, in build
+    stage(conn, context)
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w3/tests/integration/test_scheduler_restart.py", line 173, in sleeping_stage
+    stage_conn.execute("SELECT pg_sleep(5)")
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/psycopg/connection.py", line 300, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.QueryCanceled: canceling statement due to statement timeout
+INFO     factorflow.classification.scheduler:scheduler.py:114 classification set 0c37a3d8-adba-4745-94b9-1acf877e0ec5 for run e77e7abb-83c7-4954-98fe-5816782090cc ended failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_each_unresolved_line_item_is_warned_once_before_the_first_claim
+FAILED tests/integration/test_scheduler_restart.py::test_short_build_timeout_reaches_the_engine_and_fails_the_set
+2 failed, 44 passed in 4.32s

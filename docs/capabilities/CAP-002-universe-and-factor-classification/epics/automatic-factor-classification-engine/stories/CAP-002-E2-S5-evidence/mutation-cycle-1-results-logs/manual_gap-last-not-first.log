@@ -1,0 +1,59 @@
+.........................................F
+=================================== FAILURES ===================================
+________ test_the_reason_is_the_first_input_not_present_in_factor_order ________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58913 user=test database=test_dea83318abd140bd902be9f7ff07f...0x10d422c30>, run_id=UUID('4e801f04-507a-4aeb-8769-74be79d711df'), set_id=UUID('3f689e0b-01ae-4b2b-acdc-8fc1b70ed6a9'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d423020>
+
+    def test_the_reason_is_the_first_input_not_present_in_factor_order(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12, DEC-0120: an input with no row counts as missing and is named, and the reason
+        is the first input that is not present in the factor's input order, not the most severe."""
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 30)
+        absent = add_active_stock(conn, "ABSENT")
+        add_factor_inputs(conn, set_id, absent, "value", omit=("earnings_yield",))
+        computable = add_active_stock(conn, "NOTCOMP")
+        add_factor_inputs(
+            conn,
+            set_id,
+            computable,
+            "value",
+            statuses={"earnings_yield": "not_computable", "fcf_yield": "missing"},
+        )
+        stale = add_active_stock(conn, "STALE")
+        add_factor_inputs(
+            conn, set_id, stale, "value", statuses={"book_to_price": "outdated", "fcf_yield": "missing"}
+        )
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        assert factor_counts_for(conn, set_id)["value"] == (30, True)
+        assert reason(rows[(absent, "value")]) == (
+            "not_classified",
+            "input_missing",
+            "earnings_yield",
+            "earnings yield missing",
+            None,
+            None,
+        )
+>       assert reason(rows[(computable, "value")]) == (
+            "not_classified",
+            "input_not_computable",
+            "earnings_yield",
+            "earnings yield not computable",
+            None,
+            None,
+        )
+E       AssertionError: assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E         
+E         At index 1 diff: 'input_missing' != 'input_not_computable'
+E         Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:353: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_the_reason_is_the_first_input_not_present_in_factor_order
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 41 passed in 5.53s

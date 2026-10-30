@@ -1,0 +1,18 @@
+# After T012, before T013: S8's asyncio guard is the one falsified assertion
+............................F..................                          [100%]
+=================================== FAILURES ===================================
+________________ test_scheduler_module_does_not_import_asyncio _________________
+
+    def test_scheduler_module_does_not_import_asyncio() -> None:
+        source = (PACKAGE / "scheduler.py").read_text()
+>       assert not re.search(r"^\s*(import asyncio|from asyncio)", source, re.M)
+E       assert not <re.Match object; span=(158, 173), match='\nimport asyncio'>
+E        +  where <re.Match object; span=(158, 173), match='\nimport asyncio'> = <function search at 0x1068f9a80>('^\\s*(import asyncio|from asyncio)', '"""Classification scheduler, data side: claim a qualifying run and reclaim interrupted builds.\n\nThe asyncio loop an... wait(settings.poll_interval_seconds)\n        if stop_event is not None and stop_event.is_set():\n            break\n', re.MULTILINE)
+E        +    where <function search at 0x1068f9a80> = re.search
+E        +    and   re.MULTILINE = re.M
+
+tests/unit/test_classification_scheduler_sql.py:59: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_sql.py::test_scheduler_module_does_not_import_asyncio
+1 failed, 46 passed in 3.76s
+# exit: 1

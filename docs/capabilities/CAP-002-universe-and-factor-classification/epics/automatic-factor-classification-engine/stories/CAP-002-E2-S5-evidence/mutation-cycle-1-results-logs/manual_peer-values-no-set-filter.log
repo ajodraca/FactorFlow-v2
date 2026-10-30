@@ -1,0 +1,64 @@
+..........................................F
+=================================== FAILURES ===================================
+________ test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set _________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58743 user=test database=test_8c2536d1a7c74b408324387ea4956...0x10d721040>, run_id=UUID('8be365d2-3cae-4cd5-b213-77358f08faec'), set_id=UUID('3f0614a8-e9e9-4bcd-8ba5-e26390b1cae9'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d721f10>
+
+    def test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0119: both statements read only the build's own set of ``factor_input`` rows."""
+        conn, first_set = store.conn, store.set_id
+        roster = [add_active_stock(conn, f"S{i:03d}") for i in range(31)]
+        for i, stock in enumerate(roster):  # very different values, reversed in order
+            for factor in FACTORS:
+                names = constants.INPUT_NAMES[factor]
+                values = {name: Decimal(10_000 * (31 - i) + k) for k, name in enumerate(names)}
+                statuses = {"fcf_yield": "outdated"} if factor == "value" and i == 0 else {}
+                add_factor_inputs(conn, first_set, stock, factor, statuses=statuses, values=values)
+        assert run_classification_build(conn, first_set, monkeypatch).state == "complete"
+    
+        _, second_set = add_terminal_run_and_set(conn)
+        add_roster_inputs(conn, second_set, roster[:30])
+        add_factor_inputs(conn, second_set, roster[30], "value", statuses={"fcf_yield": "missing"})
+        add_factor_inputs(conn, second_set, roster[30], "growth")
+        add_factor_inputs(conn, second_set, roster[30], "momentum")
+        result = run_classification_build(conn, second_set, monkeypatch)
+    
+        assert result.state == "complete"
+        assert factor_counts_for(conn, second_set) == {
+            "value": (30, True),
+            "growth": (31, True),
+            "momentum": (31, True),
+        }
+        rows = classifications_for(conn, second_set)
+        assert len(rows) == 3 * 31
+        assert rows[(roster[0], "value")]["status"] == "classified"  # outdated only in the first set
+        assert rows[(roster[30], "value")]["reason_code"] == "input_missing"
+>       assert_factor_matches_reference(conn, second_set, rows, "value", roster[:30])
+
+tests/integration/test_engine_peer_set.py:402: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58743 user=test database=test_8c2536d1a7c74b408324387ea49562bc) at 0x10d721040>
+set_id = UUID('9a10d99a-e8bb-4ed1-a7f8-e9bbd0325e41')
+rows = {(30, 'value'): {'instrument_id': 30, 'factor': 'value', 'status': 'classified', 'score': Decimal('-1.678597'), ...}, ...7, 'value'): {'instrument_id': 27, 'factor': 'value', 'status': 'classified', 'score': Decimal('-1.326022'), ...}, ...}
+factor = 'value', peer = [1, 2, 3, 4, 5, 6, ...]
+
+    def assert_factor_matches_reference(
+        conn: psycopg.Connection, set_id: UUID, rows: Rows, factor: str, peer: Sequence[int]
+    ) -> None:
+        """The factor's classified rows are exactly ``peer``, scored as the oracle scores it."""
+        expected = reference_scores(input_values(conn, set_id, factor, peer))
+>       assert matches_reference(scores_of(rows, factor), expected), factor
+E       AssertionError: value
+E       assert False
+E        +  where False = matches_reference({30: (Decimal('-1.678597'), Decimal('0.000000')), 29: (Decimal('-1.561072'), Decimal('3.448276')), 28: (Decimal('-1.443547'), Decimal('6.896552')), 27: (Decimal('-1.326022'), Decimal('10.344828')), ...}, {1: (Decimal('-2.500149846588650471608170589385888694575'), Decimal('0')), 2: (Decimal('-1.751418598616309021609616658...4: (Decimal('-0.2539561026738758533420481157777129455587'), Decimal('34.48275862068965517241379310344827586207')), ...})
+E        +    where {30: (Decimal('-1.678597'), Decimal('0.000000')), 29: (Decimal('-1.561072'), Decimal('3.448276')), 28: (Decimal('-1.443547'), Decimal('6.896552')), 27: (Decimal('-1.326022'), Decimal('10.344828')), ...} = scores_of({(30, 'value'): {'instrument_id': 30, 'factor': 'value', 'status': 'classified', 'score': Decimal('-1.678597'), ...}, ...7, 'value'): {'instrument_id': 27, 'factor': 'value', 'status': 'classified', 'score': Decimal('-1.326022'), ...}, ...}, 'value')
+
+tests/integration/test_engine_peer_set.py:74: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_an_earlier_sets_inputs_enter_no_statistic_of_a_later_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 42 passed in 5.55s

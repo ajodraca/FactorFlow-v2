@@ -1,0 +1,51 @@
+............................F
+=================================== FAILURES ===================================
+________________ test_common_z_scores_are_already_standardised _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58703 user=test database=test_ba910a8501d04746990495f4a41ce...0x10d783f80>, run_id=UUID('7f75c5f7-9ba4-48ce-b3bf-3e7d6013f790'), set_id=UUID('ce9b9555-679c-41e5-a6eb-29b8c32e516c'))
+
+    def test_common_z_scores_are_already_standardised(store: Store) -> None:
+        """(a) Both inputs have the same z-scores, (v - 3) / sqrt(2.5) with the sample standard
+        deviation, so the composite equals them and re-standardising leaves it unchanged."""
+>       results = classify(store, "growth", growth([1, 2, 3, 4, 5], [10, 20, 30, 40, 50]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_composite_arithmetic.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_composite_arithmetic.py:86: in classify
+    engine._classification_stage(
+src/factorflow/classification/engine.py:177: in _classification_stage
+    cur.execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [IDLE] (host=localhost port=58703 user=test database=test_ba910a8501d04746990495f4a41ce31c) at 0x10d91b650>
+query = "-- One factor's classification rows for the build's set (CAP-002-E2-S5; factor-engine design\n-- 2.5). Runs once per ...etired',\n       NULL,\n       NULL,\n       false\n  FROM unnest(%(retired_ids)s::bigint[]) AS gone (instrument_id)\n"
+params = {'set_id': UUID('ce9b9555-679c-41e5-a6eb-29b8c32e516c'), 'factor': 'value', 'input_names': ['book_to_price', 'earnings_yield', 'fcf_yield'], 'input_labels': ['book-to-price', 'earnings yield', 'free-cash-flow yield'], ...}
+prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "factor_classification_pkey"
+E           DETAIL:  Key (set_id, instrument_id, factor)=(ce9b9555-679c-41e5-a6eb-29b8c32e516c, 1, value) already exists.
+
+.venv/lib/python3.12/site-packages/psycopg/cursor.py:117: UniqueViolation
+=========================== short test summary info ============================
+FAILED tests/unit/test_composite_arithmetic.py::test_common_z_scores_are_already_standardised
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 28 passed in 2.19s

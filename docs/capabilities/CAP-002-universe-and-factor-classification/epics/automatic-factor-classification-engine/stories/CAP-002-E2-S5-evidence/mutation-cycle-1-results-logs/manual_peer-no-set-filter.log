@@ -1,0 +1,59 @@
+...................................F
+=================================== FAILURES ===================================
+__________ test_scores_are_identical_whatever_the_universe_membership __________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=58660 user=test database=test_51966620b3e3420d901fa0c502d83...0x10d964b90>, run_id=UUID('4a302031-b1d4-46e0-82d4-2ba5e30a5f12'), set_id=UUID('83a25d00-e548-46b1-b5e5-30f9bd71c68a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d966150>
+
+    def test_scores_are_identical_whatever_the_universe_membership(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = store.conn
+        roster, retired = add_full_roster(conn, store.set_id, 32, n_retired=1)
+        assert conn.execute("SELECT count(*) FROM universe").fetchone() == (0,)
+        conn.commit()
+        assert run_classification_build(conn, store.set_id, monkeypatch).state == "complete"
+    
+        in_none, in_one, in_three = roster[0], roster[1], roster[2]
+        add_universe(conn, "First", [in_one, in_three])
+        add_universe(conn, "Second", [in_three])
+        add_universe(conn, "Third", [in_three])
+        add_universe(conn, "Retired holdings", retired)
+        memberships: dict[int, int] = dict(
+            conn.execute(
+                "SELECT instrument_id, count(DISTINCT universe_id) FROM universe_event "
+                "WHERE event_type = 'member_added' GROUP BY instrument_id"
+            ).fetchall()
+        )
+        conn.commit()
+        assert memberships == {in_one: 1, in_three: 3, retired[0]: 1}  # in_none is in none
+    
+        _, second_set = add_terminal_run_and_set(conn)
+        add_roster_inputs(conn, second_set, roster)  # the same values as the first set
+        assert run_classification_build(conn, second_set, monkeypatch).state == "complete"
+    
+        def outcome(set_id: UUID) -> dict[tuple[int, str], tuple[Any, ...]]:
+            return {
+                key: (r["status"], r["score"], r["percentile"], r["reason_code"], r["reason_input"])
+                for key, r in classifications_for(conn, set_id).items()
+            }
+    
+        before, after = outcome(store.set_id), outcome(second_set)
+        assert len(before) == 3 * 33
+>       assert after == before
+E       AssertionError: assert {(1, 'value')...', None), ...} == {(1, 'value')...e, None), ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {(23, 'growth'): ('not_classified', None, None, 'not_enough_stocks', None)} != {(23, 'growth'): ('classified', Decimal('-0.035232'), Decimal('48.387097'), None, None)}
+E         {(12, 'growth'): ('not_classified', None, None, 'not_enough_stocks', None)} != {(12, 'growth'): ('classified', Decimal('-1.154099'), Decimal('16.129032'), None, None)}
+E         {(14, 'momentum'): ('not_classified', None, None, 'not_enough_stocks', None)} != {(14, 'momentum'): ('classified', Decimal('-0.639164'), Decimal('25.806452'), None, None)}
+E         {(3, 'moment...
+E         
+E         ...Full output truncated (94 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_peer_set.py:180: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_scores_are_identical_whatever_the_universe_membership
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 35 passed in 4.16s

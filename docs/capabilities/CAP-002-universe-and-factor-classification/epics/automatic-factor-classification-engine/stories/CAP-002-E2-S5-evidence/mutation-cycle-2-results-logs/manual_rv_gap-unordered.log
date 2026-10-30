@@ -1,0 +1,56 @@
+...........................................F
+=================================== FAILURES ===================================
+___ test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=56009 user=test database=test_a3db1f9b5dc7424192a9d563a7173...0x10b26fb00>, run_id=UUID('8009fe77-0d03-4543-ad92-8b4519c0e69c'), set_id=UUID('2bd9e84a-3a11-480e-9522-710222855318'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b26c710>
+
+    def test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-12, DEC-0120, design 2.5: on ``growth`` and ``momentum`` the input order differs
+        from the alphabetical order of both names and labels (``eps_growth`` and ``return_12m``
+        sort first), and the reason still names the first input that is not present in
+        ``INPUT_NAMES`` order."""
+        assert constants.INPUT_NAMES["growth"] == ("revenue_growth", "eps_growth")
+        assert constants.INPUT_NAMES["momentum"] == ("return_3m", "return_6m", "return_12m")
+        conn, set_id = store.conn, store.set_id
+        add_full_roster(conn, set_id, 30)
+        stocks = []
+        for position, (gap_factor, statuses, omit, *_) in enumerate(FIRST_GAP_CASES):
+            stock = add_active_stock(conn, f"GAP{position}")
+            for factor in FACTORS:
+                if factor == gap_factor:
+                    add_factor_inputs(conn, set_id, stock, factor, statuses=statuses, omit=omit)
+                else:
+                    add_factor_inputs(conn, set_id, stock, factor)
+            stocks.append(stock)
+    
+        assert run_classification_build(conn, set_id, monkeypatch).state == "complete"
+    
+        rows = classifications_for(conn, set_id)
+        assert factor_counts_for(conn, set_id) == {
+            "value": (35, True),
+            "growth": (33, True),  # the three momentum cases have every growth input
+            "momentum": (32, True),  # the two growth cases have every momentum input
+        }
+        for stock, (factor, _, _, code, name, detail) in zip(stocks, FIRST_GAP_CASES, strict=True):
+>           assert reason(rows[(stock, factor)]) == (
+                "not_classified",
+                code,
+                name,
+                detail,
+                None,
+                None,
+            ), (factor, name)
+E           AssertionError: ('growth', 'revenue_growth')
+E           assert ('not_classif...', None, None) == ('not_classif...', None, None)
+E             
+E             At index 1 diff: 'input_missing' != 'input_outdated'
+E             Use -v to get more diff
+
+tests/integration/test_engine_peer_set.py:446: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_peer_set.py::test_the_first_gap_follows_the_input_order_where_it_is_not_alphabetical
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 43 passed in 8.29s

@@ -332,6 +332,24 @@ export function savedFromFilter(date: string, query: ResearchQuery): string {
   return `Saved from a filter on ${date}: ${groups.join("; ")}`;
 }
 
+/** The status phrase per input reason code (classification-ui 2.5), the subject of `incompleteReason`. */
+const INCOMPLETE_STATUS = {
+  input_missing: "is missing",
+  input_outdated: "is outdated",
+  input_not_computable: "couldn't be computed",
+} as const;
+
+/** The three `ReasonCode` values an Incomplete cell can carry (classification-ui 2.5). */
+export type IncompleteReasonCode = keyof typeof INCOMPLETE_STATUS;
+
+/** The S03 §8 shape every Incomplete reason sentence takes (UX 1.1; DEC-0151). */
+function incompleteSentence(cause: string, factor: string): string {
+  return `Incomplete: ${cause}, so ${factor} can't be compared fairly. It isn't guessed.`;
+}
+
+/** The subject of the generic Incomplete sentence when the engine named no input (DEC-0151). */
+const GENERIC_INPUT = "an input";
+
 /** The factor cell and column states (UX 1.1; classification-ui 2.5). */
 export const CELL = {
   selectRow: (symbol: string): string => `Select ${symbol}`,
@@ -341,17 +359,32 @@ export const CELL = {
    * is missing, so growth can't be compared fairly. It isn't guessed.*
    */
   incompleteReason: (input: string, status: string, factor: string): string =>
-    `Incomplete: ${input} ${status}, so ${factor} can't be compared fairly. It isn't guessed.`,
+    incompleteSentence(`${input} ${status}`, factor),
   /** The status phrase per input reason code, for `incompleteReason`. */
-  incompleteStatus: {
-    input_missing: "is missing",
-    input_outdated: "is outdated",
-    input_not_computable: "couldn't be computed",
-  },
+  incompleteStatus: INCOMPLETE_STATUS,
+  /**
+   * The Incomplete badge's `title` in the factor cell, from the engine's
+   * owner-facing `reasonDetail` and the factor (classification-ui 2.5; UX 1.1;
+   * CAP-002-E4-S3 Open Gap 2, DEC-0151): *Incomplete: operating cash flow
+   * missing, so value can't be compared fairly. It isn't guessed.*
+   */
+  incompleteDetail: (detail: string, factor: string): string => incompleteSentence(detail, factor),
+  /**
+   * The same `title` when the engine sent no `reasonDetail`: the clause the
+   * reason code selects, naming the factor (classification-ui 2.5; DEC-0151).
+   */
+  incompleteGeneric: (code: IncompleteReasonCode, factor: string): string =>
+    incompleteSentence(`${GENERIC_INPUT} ${INCOMPLETE_STATUS[code]}`, factor),
   notEnoughToRank: "Not enough to rank",
   qualified: (count: number, needed: number): string => `${count} qualified, ${needed} needed`,
   notFollowed: "Not followed",
   notFollowedSince: (date: string): string => `Not followed since ${date}. Earlier scores stand.`,
+  /**
+   * The Not followed badge's `title` when no read carries the date a stock
+   * stopped being followed, which is every current read (classification-ui
+   * 2.5; CAP-002-E4-S3 Open Gap 3, DEC-0152).
+   */
+  notFollowedNoDate: "Not followed. Earlier scores stand.",
   possiblyRestated: "Possibly restated",
   restatedExplanation:
     "Possibly restated: the financials behind this score were downloaded for a period that had already been reported before FactorFlow began following this stock, so they may reflect later restatements.",

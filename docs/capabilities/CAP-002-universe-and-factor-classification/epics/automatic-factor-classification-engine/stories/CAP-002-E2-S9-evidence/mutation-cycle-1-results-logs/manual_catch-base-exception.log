@@ -1,0 +1,64 @@
+....F.........................................                           [100%]
+=================================== FAILURES ===================================
+____ test_cancellation_raised_by_the_dispatcher_propagates_out_of_the_loop _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d1c75c0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10d1c74d0>
+
+    def test_cancellation_raised_by_the_dispatcher_propagates_out_of_the_loop(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """AC-10: shutdown cancels the task, and ``CancelledError`` is a ``BaseException``,
+        so the iteration handler neither swallows nor logs it."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        waiter = _RecordingWaiter(stop_after=1)
+    
+        async def cancelling_dispatch(fn: Callable[..., Any], /, *args: Any) -> Any:
+            if fn is fakes.claim:
+                raise asyncio.CancelledError
+            return fn(*args)
+    
+        async def main() -> None:
+            with pytest.raises(asyncio.CancelledError):
+                await scheduler.run_classification_loop(
+                    MagicMock(name="pool"),
+                    _settings(),
+                    wait_fn=waiter.wait,
+                    dispatch_fn=cancelling_dispatch,
+                    stop_event=waiter.stop,
+                )
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+>           asyncio.run(main())
+
+tests/unit/test_classification_scheduler_loop.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def main() -> None:
+>       with pytest.raises(asyncio.CancelledError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE CancelledError
+
+tests/unit/test_classification_scheduler_loop.py:295: Failed
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w0/src/factorflow/classification/scheduler.py", line 109, in run_classification_loop
+    claimed = await dispatch(claim_next_set, pool)  # None, or (set_id, run_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-pgt6lheh/w0/tests/unit/test_classification_scheduler_loop.py", line 291, in cancelling_dispatch
+    raise asyncio.CancelledError
+asyncio.exceptions.CancelledError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_cancellation_raised_by_the_dispatcher_propagates_out_of_the_loop
+1 failed, 45 passed in 4.26s

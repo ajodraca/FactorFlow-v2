@@ -1,0 +1,42 @@
+........F........................................                        [100%]
+=================================== FAILURES ===================================
+_______________ test_raising_reclaim_propagates_before_any_claim _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d1e1250>
+
+    def test_raising_reclaim_propagates_before_any_claim(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-12, DAC-E2-S9-3: the start-up reclaim sits outside the iteration handler
+        (design 2.4), so when it raises the exception ends the loop and no claim is ever
+        attempted, and nothing is waited for (plan, Open Gaps: no retry is added)."""
+        unreachable = OSError("db unreachable")
+        _Fakes(monkeypatch, claim=_scripted())
+    
+        def raising_reclaim(pool: Any) -> list[Any]:
+            raise unreachable
+    
+        monkeypatch.setattr(scheduler, "reclaim_interrupted_sets", raising_reclaim)
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+>       with pytest.raises(OSError) as raised:
+             ^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OSError
+
+tests/unit/test_classification_scheduler_loop.py:391: Failed
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:106 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w1/src/factorflow/classification/scheduler.py", line 104, in run_classification_loop
+    await dispatch(reclaim_interrupted_sets, pool)  # DEC-0067, once
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w1/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w1/tests/unit/test_classification_scheduler_loop.py", line 385, in raising_reclaim
+    raise unreachable
+OSError: db unreachable
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_reclaim_propagates_before_any_claim
+1 failed, 48 passed in 4.00s
