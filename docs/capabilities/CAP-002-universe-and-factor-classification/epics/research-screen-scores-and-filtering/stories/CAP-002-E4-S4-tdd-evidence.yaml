@@ -17,6 +17,12 @@
 # IR-001 to IR-008), staged on top of the stage commit 58fc558 and the review commit 00c22fd; its reviewed_patch is
 # HEAD..index. DEC-0233 (PROVISIONAL, agent, this run): exactly one further summary read after the shell's health
 # reports the download terminal, never an open-ended poll for the ended download's set.
+# Rework 2: rework-2 is the review-rework cycle against CAP-002-E4-S4-implementation-review-v2.md (CHANGES-REQUIRED,
+# IR-001 to IR-004), staged on the merge of origin/main into the story branch (db9b691); its reviewed_patch is HEAD..index.
+# It is test-only. It supersedes rework-1's disposition of manual:rework-1:line-height-value-changed-on-both as equivalent:
+# that claim was wrong (min-height is a floor, so a floor below the one-row line's content height leaves the skeleton
+# shorter than the line), and the token's value is now pinned. DEC-0238 (PROVISIONAL, agent, this run): DEC-0233's timing
+# guarantee corrected, both handoff exposures handed to the owner, the polling rule unchanged until the owner answers.
 
 cycles:
   - id: cycle-1
@@ -284,3 +290,66 @@ cycles:
             together. The contract (UX design 1.2 Loading; DEC-0154) is that the skeleton stands at the line's
             final height so the table beneath does not shift, which holds for any one shared value, and no
             artifact fixes the value; IR-003 asked for the sharing to be pinned, and the test pins exactly that.
+
+  - id: rework-2
+    tasks: [T008, T012]
+    description: >
+      Review rework against CAP-002-E4-S4-implementation-review-v2.md (CHANGES-REQUIRED), one test-only cycle. IR-001
+      (HIGH): as-of-line.test.tsx pins the shared height token's value, min-h-7, on the line (the one min-h token it
+      carries) and on its skeleton, on top of the existing assertion that the two share one token; the review's two
+      survivors (min-h-1, min-h-5) are killed. IR-003 (MEDIUM, optional): a new test pins the Complete badge's shape as
+      exactly one circle with fill currentColor and no stroke, and the outcome-badge test pins text-xs on the badge; the
+      review's two late survivors are killed. IR-002 (MEDIUM): no code change; DEC-0238 corrects DEC-0233's derivation
+      and records both handoff exposures as the owner's question. IR-004 (LOW, optional): not taken, recorded in the
+      tasks file's Notes. The tasks file gains the rework note and last_reworked_review moves to the v2 report.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-rework-2.log
+    red_log_sha256: cb178128867a503142a24590afe63cd9aa5c401e542a013948413a4ffc512341
+    red_evidence: >
+      The production code already carried min-h-7, the filled circle and text-xs, so the new assertions pass on it by
+      construction; their RED is the review's survivors they kill (TEST-TDD-006), observed directly: with the three
+      reviewer mutants applied to the working tree at once (as-of-line.tsx LINE_HEIGHT min-h-7 to min-h-5;
+      status-badge.tsx good circle fill none stroke currentColor; status-badge.tsx BADGE text-xs to text-sm) and the
+      new assertions in place, as-of-line.test.tsx ran 4 failed, 20 passed (the skeleton test on expected 'min-h-5' to
+      be 'min-h-7', the two outcome-badge tests on text-xs, the filled-circle test on fill); the sources were then
+      restored and the suite ran green.
+    green_evidence: >
+      The four focused files 377 passed (green-rework-2.log); full web suite 950 passed in 50 files on the tree merged
+      with origin/main (full-suite-rework-2.log); biome lint and biome format clean (117 files); tsc --noEmit clean;
+      npm run build clean and the built CSS carries min-h-7{min-height:var(--space-7)}. Mutation: 104 hand-written
+      mutants (the review's 34, its four non-equivalent survivors among them, and the 70 earlier coder and reviewer
+      mutants whose target lines still exist, deduplicated by file and edit); no generated mutants, because no
+      production line changed; 103 killed, one equivalent survivor disposed below. Reviews: code review APPROVED with
+      two LOW notes (the skeleton's toHaveClass pin is implied by the two assertions before it, kept as the explicit
+      pin; the results file's per-mutant log paths point at a logs directory that is not persisted, as in every earlier
+      cycle); spec drift none, with notes (the equivalent survivor was disposed by review v2 itself; DEC-0238 lists the
+      classification-ui design as a cited target, not a change).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-rework-2.log
+        sha256: 1ec069facbde2686666782d684a48465b699905c3650febf5c030fa2adaead2b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/full-suite-rework-2.log
+        sha256: b61e136fe52b72416f1e4ffe3b72e431a624cb3532aff64719cd8642549101e0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c579c108780743118a7d54b86bd3f4fd2a84d4c5be3f38dfaac43ce24f097bb3
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/rework-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-rework-2-results.json
+      results_sha256: bbb7ca9d7000b6ff407a9d6d1d48a0aadf528d418dce4084513ca23687e2d887
+      generated: 104
+      killed: 103
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.99
+      survivors:
+        - id: manual:review-v2:undefined-class-kept
+          disposition: equivalent
+          reason: >
+            The mutant drops .filter(Boolean) from the badge's class list, so an absent host className is joined as
+            undefined. Array.prototype.join renders undefined as the empty string, so the rendered class attribute
+            differs only by one extra space and every class the contract names is still present; review v2 disposed
+            it the same way.

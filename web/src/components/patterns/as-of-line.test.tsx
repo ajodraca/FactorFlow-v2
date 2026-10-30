@@ -47,6 +47,13 @@ const FAILED: LaterSet = {
 
 const CHECKED_AT = "2026-10-15T22:52:10.000Z";
 
+/**
+ * The one `min-h-*` token the line and its skeleton share (UX design 1.2, Loading; DEC-0154).
+ * `--space-7` clears the one-row line's content height, so the skeleton stands at the line's
+ * final height; a smaller floor leaves the skeleton shorter than the line it stands in for.
+ */
+const LINE_HEIGHT = "min-h-7";
+
 const BASE: AsOfLineProps = {
   set: SET,
   later: null,
@@ -254,9 +261,24 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
       expect((outcome as HTMLElement).querySelector("svg[aria-hidden='true']")).not.toBeNull();
       expect(outcome).toHaveClass(ground);
       expect(outcome).toHaveClass(ink);
+      // Badges stay in the line's extra-small text size (UX design 1.2, Page Layout).
+      expect(outcome).toHaveClass("text-xs");
       expect(badges(container)).toHaveLength(1);
     },
   );
+
+  it("draws the Complete badge's shape as one filled circle, not the active tier's ring", () => {
+    // UX design 1.2, Accessibility: "good filled circle" against the "active ringed dot", so the
+    // tiers stay distinct in greyscale (STD-UI-8; implementation review v2 IR-003).
+    const { container } = renderLine();
+    const good = badgeByVariant(container, "status-good") as HTMLElement;
+    const shapes = good.querySelectorAll("svg[aria-hidden='true'] > *");
+    expect(shapes).toHaveLength(1);
+    const circle = shapes[0];
+    expect(circle.tagName.toLowerCase()).toBe("circle");
+    expect(circle).toHaveAttribute("fill", "currentColor");
+    expect(circle).not.toHaveAttribute("stroke");
+  });
 
   it("renders the Earlier sets… ghost button only when a handler is given, calling it once per click", async () => {
     const onOpenEarlierSets = vi.fn();
@@ -358,6 +380,11 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
     expect(skeleton).toHaveAttribute("aria-hidden", "true");
     // One class fixes both heights, so the table beneath does not shift (UX design 1.2, Loading).
     expect(heightToken(skeleton)).toBe(lineHeight);
+    // The shared value is pinned too: `min-height` is a floor, and a floor below the one-row
+    // line's content height (min-h-5 or less) leaves the line taller than its skeleton
+    // (implementation review v2 IR-001).
+    expect(lineHeight).toBe(LINE_HEIGHT);
+    expect(skeleton).toHaveClass(LINE_HEIGHT);
     expect(skeleton.className).not.toMatch(/(^|\s)h-\d/);
     expect(container.textContent).toBe("");
     expect(screen.queryByRole("status")).toBeNull();
