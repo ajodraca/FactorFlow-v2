@@ -713,6 +713,30 @@ describe("FiltersPane behaviour", () => {
     expect(listCalls()[0]?.[0]).toEqual({ hideIncomplete: true });
   });
 
+  it("(j) a failure on a later page fails the whole list: no partial Look in, and a URL scope reads the failure's label (DEC-0235, DEC-0237)", async () => {
+    vi.mocked(client.listUniverses)
+      .mockResolvedValueOnce({ ...UNIVERSES, activeCount: 3, nextCursor: "c1" })
+      .mockRejectedValueOnce(new Error("fetch failed"));
+    renderPane("?scope=u1");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe(
+      "Could not load your universes: FactorFlow hit an unexpected problem. Try again.",
+    );
+    expect(vi.mocked(client.listUniverses).mock.calls).toEqual([
+      [{ lifecycle: "active" }],
+      [{ lifecycle: "active", cursor: "c1" }],
+    ]);
+    expect(
+      within(lookIn())
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["All followed stocks", "Could not load your universes"]);
+    expect(screen.queryByRole("option", { name: "Tech" })).not.toBeInTheDocument();
+    expect(lookIn()).toHaveValue("u1");
+    expect(lookIn()).toHaveAccessibleName("Look in: Could not load your universes");
+  });
+
   it("(j) a failed universe list with a coded reason reads that code's sentence", async () => {
     vi.mocked(client.listUniverses).mockRejectedValue(
       new client.ClassificationApiError("The envelope message", "req-2", {

@@ -8,7 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
 updated: 2026-10-29
-last_reworked_review: CAP-002-E4-S5-implementation-review-v1.md
+last_reworked_review: CAP-002-E4-S5-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -205,3 +205,10 @@ Working directory is the repository root `repos/factorflow-v2/FactorFlow-v2`. Th
 - **T002/T010 (IR-006).** The value field is `w-8` (`--space-8`), the spacing token nearest the design's 56 px, not the literal `w-14` (DEC-0236, PROVISIONAL; STD-UI-29).
 - **T011 (IR-008).** A URL scope reads *Loading universes…* while the list loads and the list operation's label after it fails; *Unavailable universe* applies only once the loaded list lacks it (DEC-0237, PROVISIONAL).
 - **T010 (IR-002), T011 (IR-001, IR-007), T010 (IR-010).** Enter commits the threshold value as blur does (DEC-0157); **Clear filters** remounts the threshold rows so a row with no committed sentence drops its draft and error; the checkbox is a `--space-4` box in a `--control-min-target` row; `validateThresholdValue` takes the factor.
+
+### Rework notes (implementation review v2, 2026-10-29)
+
+- **T006 (IR-001).** A new (j) case fails a universes page after the first: the first page resolves with `next_cursor`, the second rejects, and the test pins the failure alert, no partial *Look in* (the page-1 universe is absent), and a URL scope reading the failed-list label (DEC-0235, DEC-0237). The review's surviving mutant `manual:review-v2:fp2-later-page-failure-swallowed` is killed (cycle-5). No production change.
+- **T002/T013 (IR-002).** The negative `w-14` assertion is removed; the positive `w-8` assertion stands alone, and the built CSS carries no `.w-14` rule (STD-UI-29).
+- **T014 (IR-003).** Not taken, as the review allows: regenerating `cycle-3.patch` would re-open that cycle's reviews; `cycle-4.patch` and `cycle-5.patch` do not repeat the self-embed.
+- **Merge with `origin/main` (7688c92).** CAP-002-E4-S3 added `CELL` entries to `copy.ts` and E2-S9 touched no file of this story; `use-research-query.ts`, `threshold-sentence.tsx` and `filters-pane.tsx` are unaffected and the full suite (995 tests, 50 files) passes on the merged tree.

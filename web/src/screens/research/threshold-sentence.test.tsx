@@ -234,7 +234,6 @@ describe("TC-COMP-137: threshold sentences have accessible names reading as sent
     expect(field).toHaveAttribute("placeholder", "any");
     // DEC-0236: the design's 56 px is the nearest spacing token (--space-8), never a literal (STD-UI-29).
     expect(field).toHaveClass("w-8");
-    expect(field).not.toHaveClass("w-14");
   });
 
   it.each<[FactorName, string]>([

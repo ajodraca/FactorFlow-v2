@@ -258,3 +258,60 @@ cycles:
             the rows and the value itself is never rendered, compared or written, so the two differ on no input;
             the non-equivalent neighbours (no bump: fp-clear-no-threshold-reset; key without the generation:
             fp-reset-key-ignored) are both killed.
+
+  # Review-rework cycle against CAP-002-E4-S5-implementation-review-v2.md (CHANGES-REQUIRED). Tests only: no
+  # production file changes, so the cycle's mutation run is the review's own surviving mutant, now killed. The driver
+  # owns the commit; recorded against the staged tree on usr/alvaro-de-jodra/CAP-002-E4-S5 after the merge with
+  # origin/main (7688c92: CAP-002-E4-S3's copy.ts CELL additions and E2-S9, none touching this story's files beyond
+  # additive copy.ts entries). No new decision was needed.
+  - id: cycle-5
+    tasks: [T002, T006, T013, T014]
+    description: >
+      Rework of implementation review v2 (CAP-002-E4-S5-implementation-review-v2.md). IR-001 (tests, HIGH): a new
+      T006 (j) case in filters-pane.test.tsx resolves the first universes page with nextCursor "c1" and rejects the
+      second, then asserts the list's failure sentence in the alert, both page requests (the second carrying the
+      cursor), Look in offering only All followed stocks and the failed-list label (the page-1 universe Tech absent,
+      so no partial list), and the URL scope u1 keeping its value with the accessible name Look in: Could not load
+      your universes (DEC-0235 whole-list failure; DEC-0237 label, not Unavailable universe). IR-002 (tests, LOW):
+      the negative w-14 assertion in threshold-sentence.test.tsx is removed, the positive w-8 assertion standing
+      alone, so the built CSS no longer carries a .w-14 size literal (STD-UI-29). IR-003 (LOW, optional): not taken;
+      regenerating cycle-3.patch would re-open that cycle's reviews, as the review itself allows. Production:
+      unchanged (filters-pane.tsx, threshold-sentence.tsx, use-research-query.ts, copy.ts byte-identical to HEAD).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-5.log
+    red_log_sha256: 53a92694d5675bb7dbb1d9dce68446a3f55a4b301a10faede7529bcfff5ed2d2
+    red_evidence: >
+      The RED is the review's surviving mutant, as the review prescribes: with
+      manual:review-v2:fp2-later-page-failure-swallowed applied to filters-pane.tsx (a catch that keeps the pages
+      already read and hides a later page's failure) and the new test written, the four focused suites ran 1 failed,
+      421 passed (red-cycle-5.log); the one failure is the new (j) later-page case, which finds no alert. The mutant
+      was then reverted; production is unchanged.
+    green_evidence: >
+      Focused suites 422 passed in 4 files (green-cycle-5.log); full web suite 995 passed in 50 files
+      (full-suite-cycle-5.log; the count grew with the merged E4-S3 and E2-S9 suites); npm run format (check), npm run
+      lint, npx tsc --noEmit and npm run build clean; the built CSS defines --factor-value, --factor-growth and
+      --factor-momentum (light and dark), maps w-8, w-4 and h-4 to --space-8 and --space-4, and has no .w-14 rule.
+      Independent code review APPROVED with no findings; spec drift: none (the test pins what DEC-0235 and DEC-0237
+      decide and the plan's Rework notes already adopt).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-5.log
+        sha256: 4864d1ce503a82e8bf2254abd81d4597e89f58245d55f421b9da88d4879ad9a0
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/full-suite-cycle-5.log
+        sha256: a699e3d25454dbc8ea4482bc99383249a63cafa07ccf0229cfd800c42133cf41
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8d1ea4af173d0310c7c4a4d7d7b3e6fbc1f322dd6f5abfea9455a6ee2294af6c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-5-results.json
+      results_sha256: eabae1aee33bbd3fddbc90aae081d243629f6449618edd00584e27510261cd19
+      generated: 1
+      killed: 1
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
