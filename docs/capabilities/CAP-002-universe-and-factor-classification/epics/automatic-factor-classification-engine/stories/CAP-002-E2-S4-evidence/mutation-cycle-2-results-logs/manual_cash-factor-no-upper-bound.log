@@ -1,0 +1,59 @@
+.......................F
+=================================== FAILURES ===================================
+___________ test_a_dividends_split_factors_stop_at_e[split-after-e] ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55942 user=test database=test_1acb3f108c934cd9959481536addcc8...8b56d20>, stock=1, set_id=UUID('0e70dfe5-f6de-49af-9da6-961723a1fc6a'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108b55790>
+split_on = datetime.date(2026, 9, 21), e_close = 99, expected = Decimal('0.111')
+factor = Decimal('1')
+
+    @pytest.mark.parametrize(
+        ("split_on", "e_close", "expected", "factor"),
+        [
+            # On E: inside the window, so it scales the prior close (to 50) and the cash (to 0.5).
+            (E, 55, ret(55, 45, Decimal("1.01")), Decimal("0.5")),
+            # After E: outside every window, so it scales neither.
+            (date(2026, 9, 21), 99, ret(99, 90, Decimal("1.01")), Decimal(1)),
+        ],
+        ids=["split-on-e", "split-after-e"],
+    )
+    def test_a_dividends_split_factors_stop_at_e(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        split_on: date,
+        e_close: int,
+        expected: Decimal,
+        factor: Decimal,
+    ) -> None:
+        """Design 2.4, DEC-0118 (2): a dividend's prior close and cash amount are scaled by the
+        splits after them and on or before E, never by one after E."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, E: e_close, date(2026, 9, 22): 50, L: 50},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1)
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+>           assert_close(rows[name]["value"], expected)
+
+tests/integration/test_engine_inputs_momentum.py:727: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.1055000000'), expected = Decimal('0.111')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.1055000000'), Decimal('0.111'))
+E       assert Decimal('0.0055000000') <= Decimal('1E-8')
+E        +  where Decimal('0.0055000000') = abs((Decimal('0.1055000000') - Decimal('0.111')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividends_split_factors_stop_at_e[split-after-e]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 23 passed in 5.62s

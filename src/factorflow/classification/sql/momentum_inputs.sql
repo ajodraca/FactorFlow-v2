@@ -236,7 +236,9 @@ SELECT s.instrument_id,
             THEN (s.e_close / s.s_adjusted_close) * s.dividend_factor - 1
        END AS value,
        s.e_session AS as_of,
-       s.known_on,
+       -- A missing input has no known_on, whatever its cause (DEC-0242). A present or outdated
+       -- one applies every split and dividend in its window, so known_on follows DEC-0118 (1).
+       CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,
        -- The constant false: momentum is never marked (DAC-E2-S6-2, CAP-002-E2-S6).
        false AS restated_possible,
        CASE WHEN s.boundary = 'E'
@@ -262,5 +264,10 @@ SELECT s.instrument_id,
                                'latest_trading_day', %(latest_trading_day)s::date)))
             ELSE s.base
        END AS detail,
-       'prices'::text AS missing_data_type
+       -- The data type whose last acquisition a missing input's detail names (design 2.3 step
+       -- 5): corporate_actions when the cause is an unusable payload, else prices (DEC-0243).
+       -- A window lacking a boundary joins no action, so it is never unusable.
+       CASE WHEN s.unusable AND NOT s.price_not_positive THEN 'corporate_actions'
+            ELSE 'prices'
+       END AS missing_data_type
   FROM statused s

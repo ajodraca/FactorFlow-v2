@@ -1,0 +1,38 @@
+......F
+=================================== FAILURES ===================================
+_ test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-strings] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55695 user=test database=test_faf98cf724f24a4a819d246b046ebc6...904da90>, stock=1, set_id=UUID('c422e03d-20a1-4f3d-93ed-fbdb6f9e36f6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109050200>
+split = {'split_from': '1', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        "split",
+        [SPLIT_2_FOR_1, {"split_from": 1, "split_to": 2}],
+        ids=["json-strings", "json-numbers"],
+    )
+    def test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged(
+        env: Env, monkeypatch: pytest.MonkeyPatch, split: dict[str, Any]
+    ) -> None:
+        twin = add_instrument(env.conn, "TWIN")
+        split_on = date(2026, 7, 1)
+        pre: dict[date, Decimal | int] = {S12: 80, S6: 90, S3: 100, date(2026, 6, 30): 100}
+        post: dict[date, Decimal | int] = {split_on: 50, E: 55, L: 56}
+        add_close_series(env.conn, env.stock, pre | post)
+        add_close_series(env.conn, twin, {d: Decimal(c) / 2 for d, c in pre.items()} | post)
+        add_corporate_action(env.conn, env.stock, "split", split_on, split)
+    
+        rows = build(env, monkeypatch)
+        twin_rows = momentum(env.conn, env.set_id, twin)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+>           assert rows[name]["value"] == twin_rows[name]["value"], name
+E           AssertionError: return_3m
+E           assert Decimal('-0.4500000000') == Decimal('0.1000000000')
+
+tests/integration/test_engine_inputs_momentum.py:326: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-strings]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 6 passed in 3.02s

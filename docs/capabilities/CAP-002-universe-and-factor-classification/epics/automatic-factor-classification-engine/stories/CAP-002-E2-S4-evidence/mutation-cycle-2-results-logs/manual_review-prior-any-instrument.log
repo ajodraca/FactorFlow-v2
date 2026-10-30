@@ -1,0 +1,75 @@
+.................F
+=================================== FAILURES ===================================
+_ test_each_stock_is_adjusted_by_its_own_corporate_actions_and_prior_sessions __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52976 user=test database=test_625cf4b0f016436f9ed2c1be5af31af...b6f6fc0>, stock=1, set_id=UUID('e8e25c7e-97ce-4a6a-92a8-ab35ad08ff76'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b6f6f00>
+
+    def test_each_stock_is_adjusted_by_its_own_corporate_actions_and_prior_sessions(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (3), (4), DEC-0118 (3), design 2.4: two stocks over the same sessions are each
+        adjusted by their own splits and dividends only, and each dividend's prior session is its
+        own stock's latest bar before the ex-date, although the other stock holds a later bar
+        before that date (review v1 IR-001)."""
+        other = add_instrument(env.conn, "BBB")
+        # AAA: a dividend of 1 on 08-03 over its prior session 07-30. BBB's 2-for-1 split and its
+        # bar on 07-31 lie between them; AAA's bar on 08-13 lies between BBB's prior session and
+        # BBB's ex-date.
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                S12: 90,
+                S6: 90,
+                S3: 90,
+                date(2026, 7, 30): 100,
+                date(2026, 8, 3): 98,
+                date(2026, 8, 13): 50,
+                E: 99,
+                L: 99,
+            },
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+        add_close_series(
+            env.conn,
+            other,
+            {
+                S12: 160,
+                S6: 160,
+                S3: 160,
+                date(2026, 7, 30): 200,
+                date(2026, 7, 31): 80,
+                date(2026, 8, 12): 100,
+                date(2026, 8, 14): 98,
+                E: 110,
+                L: 110,
+            },
+        )
+        add_corporate_action(env.conn, other, "split", date(2026, 7, 31), SPLIT_2_FOR_1)
+        add_corporate_action(env.conn, other, "dividend", date(2026, 8, 14), {"cash_amount": "2"})
+    
+        rows = build(env, monkeypatch)
+        other_rows = momentum(env.conn, env.set_id, other)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+>           assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01")))
+
+tests/integration/test_engine_inputs_momentum.py:572: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.1137500000'), expected = Decimal('0.111')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.1137500000'), Decimal('0.111'))
+E       assert Decimal('0.0027500000') <= Decimal('1E-8')
+E        +  where Decimal('0.0027500000') = abs((Decimal('0.1137500000') - Decimal('0.111')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_each_stock_is_adjusted_by_its_own_corporate_actions_and_prior_sessions
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 17 passed in 4.52s

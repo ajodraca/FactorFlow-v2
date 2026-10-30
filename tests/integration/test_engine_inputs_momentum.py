@@ -141,6 +141,8 @@ def test_a_missing_12_month_price_makes_only_return_12m_missing(
     assert rows["return_12m"]["status"] == "missing"
     assert rows["return_12m"]["value"] is None
     assert rows["return_12m"]["as_of"] == E
+    # DEC-0242: a missing input has no known_on, although its E bar was read.
+    assert rows["return_12m"]["known_on"] is None
     assert rows["return_12m"]["detail"] == {
         "boundary": "S_12",
         "on_or_before": str(S12),
@@ -518,6 +520,90 @@ def test_two_dividends_compound_against_their_own_prior_closes(
         assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01"), Decimal("1.02")))
 
 
+def test_each_stock_is_adjusted_by_its_own_corporate_actions_and_prior_sessions(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0055 (3), (4), DEC-0118 (3), design 2.4: two stocks over the same sessions are each
+    adjusted by their own splits and dividends only, and each dividend's prior session is its
+    own stock's latest bar before the ex-date, although the other stock holds a later bar
+    before that date (review v1 IR-001)."""
+    other = add_instrument(env.conn, "BBB")
+    # AAA: a dividend of 1 on 08-03 over its prior session 07-30. BBB's 2-for-1 split and its
+    # bar on 07-31 lie between them; AAA's bar on 08-13 lies between BBB's prior session and
+    # BBB's ex-date.
+    add_close_series(
+        env.conn,
+        env.stock,
+        {
+            S12: 90,
+            S6: 90,
+            S3: 90,
+            date(2026, 7, 30): 100,
+            date(2026, 8, 3): 98,
+            date(2026, 8, 13): 50,
+            E: 99,
+            L: 99,
+        },
+    )
+    add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    add_close_series(
+        env.conn,
+        other,
+        {
+            S12: 160,
+            S6: 160,
+            S3: 160,
+            date(2026, 7, 30): 200,
+            date(2026, 7, 31): 80,
+            date(2026, 8, 12): 100,
+            date(2026, 8, 14): 98,
+            E: 110,
+            L: 110,
+        },
+    )
+    add_corporate_action(env.conn, other, "split", date(2026, 7, 31), SPLIT_2_FOR_1)
+    add_corporate_action(env.conn, other, "dividend", date(2026, 8, 14), {"cash_amount": "2"})
+
+    rows = build(env, monkeypatch)
+    other_rows = momentum(env.conn, env.set_id, other)
+
+    for name in MOMENTUM:
+        assert rows[name]["status"] == "present", name
+        assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01")))
+        assert rows[name]["detail"]["splits"] == [], name
+        assert rows[name]["detail"]["dividends"] == [
+            {
+                "effective_on": "2026-08-03",
+                "cash_amount": 1,
+                "observed_on": "2026-08-03",
+                "split_factor": 1,
+                "prior_session": bar(date(2026, 7, 30), 100),
+                "prior_adjusted_close": 100,
+            }
+        ], name
+        # BBB adjusted: S close 160 halved to 80, prior close 100, so the factor is 1 + 2 / 100.
+        assert other_rows[name]["status"] == "present", name
+        assert_close(other_rows[name]["value"], ret(110, 80, Decimal("1.02")))
+        assert other_rows[name]["detail"]["splits"] == [
+            {
+                "effective_on": "2026-07-31",
+                "split_from": 1,
+                "split_to": 2,
+                "observed_on": "2026-07-31",
+            }
+        ], name
+        assert other_rows[name]["detail"]["dividends"] == [
+            {
+                "effective_on": "2026-08-14",
+                "cash_amount": 2,
+                "observed_on": "2026-08-14",
+                "split_factor": 1,
+                "prior_session": bar(date(2026, 8, 12), 100),
+                "prior_adjusted_close": 100,
+            }
+        ], name
+
+
 def test_a_dividend_outside_the_window_is_not_applied(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -644,6 +730,47 @@ def test_a_dividends_split_factors_stop_at_e(
         assert_close(dividend["prior_adjusted_close"], 100 * factor)
 
 
+def test_a_dividends_split_factors_are_the_product_of_every_later_split(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Design 2.4, DEC-0118 (2): a dividend followed by several splits has its prior close
+    scaled by the product of every split after its prior session, and its cash amount by the
+    product of every split strictly after its ex-date, each on or before E (review v1 IR-003)."""
+    ex_date = date(2026, 8, 3)
+    add_close_series(
+        env.conn,
+        env.stock,
+        {
+            S12: 1200,
+            S6: 1200,
+            S3: 1200,
+            date(2026, 7, 31): 1200,
+            ex_date: 600,
+            date(2026, 8, 20): 200,
+            date(2026, 9, 1): 100,
+            E: 110,
+            L: 110,
+        },
+    )
+    add_corporate_action(env.conn, env.stock, "dividend", ex_date, {"cash_amount": "6"})
+    add_corporate_action(env.conn, env.stock, "split", ex_date, SPLIT_2_FOR_1)
+    add_corporate_action(
+        env.conn, env.stock, "split", date(2026, 8, 20), {"split_from": "1", "split_to": "3"}
+    )
+    add_corporate_action(env.conn, env.stock, "split", date(2026, 9, 1), SPLIT_2_FOR_1)
+
+    rows = build(env, monkeypatch)
+
+    # Prior close 1200 x 1/2 x 1/3 x 1/2 = 100 and cash 6 x 1/3 x 1/2 = 1, so the factor is
+    # 1 + 1 / 100; S close 1200 / 12 = 100.
+    for name in MOMENTUM:
+        assert rows[name]["status"] == "present", name
+        assert_close(rows[name]["value"], ret(110, 100, Decimal("1.01")))
+        (dividend,) = rows[name]["detail"]["dividends"]
+        assert_close(dividend["split_factor"], Decimal(1) / 6)
+        assert_close(dividend["prior_adjusted_close"], Decimal(100))
+
+
 def test_a_split_on_the_prior_session_does_not_scale_that_close(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -733,6 +860,34 @@ def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
     # DEC-0118 (1): the split before S_3 lies inside the longer windows, so it is used there.
     assert rows["return_6m"]["known_on"] == date(2026, 10, 15)
     assert rows["return_12m"]["known_on"] == date(2026, 10, 15)
+
+
+@pytest.mark.parametrize("latest", ["earlier prior bar", "later prior bar"])
+def test_known_on_covers_the_prior_session_of_every_dividend_in_the_window(
+    env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+) -> None:
+    """DEC-0118 (1), DAC-E2-S4-4: with two dividends in the window, known_on covers each
+    dividend's prior-session bar, so whichever of them was observed last dates the input
+    (review v1 IR-002)."""
+    earlier_prior, later_prior = date(2026, 7, 14), date(2026, 8, 13)
+    observed = {"earlier prior bar": earlier_prior, "later prior bar": later_prior}
+    observed[latest] = date(2026, 10, 5)
+    add_close_series(
+        env.conn,
+        env.stock,
+        {S12: 90, S6: 90, S3: 90, date(2026, 7, 15): 99, date(2026, 8, 14): 49, E: 99, L: 99},
+    )
+    add_bar_observed(env.conn, env.stock, earlier_prior, 100, observed["earlier prior bar"])
+    add_bar_observed(env.conn, env.stock, later_prior, 50, observed["later prior bar"])
+    add_corporate_action(env.conn, env.stock, "dividend", date(2026, 7, 15), {"cash_amount": "1"})
+    add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 14), {"cash_amount": "1"})
+
+    rows = build(env, monkeypatch)
+
+    for name in MOMENTUM:
+        assert rows[name]["status"] == "present", name
+        assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01"), Decimal("1.02")))
+        assert rows[name]["known_on"] == date(2026, 10, 5), name
 
 
 # --- T008: price currency (TC-COMP-102) -------------------------------------------------------
@@ -923,6 +1078,44 @@ def test_a_missing_momentum_input_carries_the_last_prices_acquisition(
     assert "last_acquisition" not in rows["return_6m"]["detail"]
 
 
+ACQUIRED_AT = datetime(2026, 10, 16, 21, tzinfo=UTC)
+
+
+def record_acquisitions(env: Env) -> None:
+    """The stock under test's last prices and corporate_actions outcomes, each distinct."""
+    for data_type, outcome in (("prices", "not_found"), ("corporate_actions", "failed")):
+        env.conn.execute(
+            "INSERT INTO acquisition_state (instrument_id, data_type, last_acquired_at, "
+            "last_run_id, last_outcome) VALUES (%s, %s, %s, gen_random_uuid(), %s)",
+            (env.stock, data_type, ACQUIRED_AT, outcome),
+        )
+    env.conn.commit()
+
+
+def test_an_unusable_payload_names_the_corporate_actions_acquisition(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0243, design 2.3 step 5, AC-12: an input missing because a split or dividend in its
+    window is unusable names the last corporate_actions outcome, not the prices one; the
+    input whose window does not hold the action is present and names none."""
+    record_acquisitions(env)
+    add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+    add_corporate_action(
+        env.conn, env.stock, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+    )
+
+    rows = build(env, monkeypatch)
+
+    assert rows["return_3m"]["status"] == "present"
+    assert "last_acquisition" not in rows["return_3m"]["detail"]
+    for name in ("return_6m", "return_12m"):
+        detail = rows[name]["detail"]
+        assert detail["cause"] == "corporate_action_payload_unusable", name
+        assert detail["last_acquisition"]["data_type"] == "corporate_actions", name
+        assert detail["last_acquisition"]["outcome"] == "failed", name
+        assert datetime.fromisoformat(detail["last_acquisition"]["acquired_at"]) == ACQUIRED_AT
+
+
 def test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -1024,6 +1217,7 @@ def test_a_revised_dividend_is_applied_once_with_the_later_amount(
         ("dividend", {"cash_amount": "-100"}),
         ("dividend", {"cash_amount": "abc"}),
         ("dividend", {"cash_amount": "1e0"}),
+        ("dividend", {"cash_amount": "+1"}),
         ("dividend", {"cash_amount": True}),
         ("dividend", {"cash_amount": {"value": "1"}}),
         ("dividend", {}),
@@ -1039,6 +1233,7 @@ def test_a_revised_dividend_is_applied_once_with_the_later_amount(
         "cash-negative",
         "cash-not-numeric",
         "cash-exponent",
+        "cash-plus-sign",
         "cash-boolean",
         "cash-object",
         "cash-absent",
@@ -1048,22 +1243,27 @@ def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
     env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
 ) -> None:
     """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
-    contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
-    the action the decision was read from. The other window is unaffected."""
+    contains it missing, naming it and not the usable dividend beside it, and never fails the
+    set; a sign-prefixed string is not a plain decimal. DEC-0242: a missing input has no
+    known_on. The 3-month window holds only the usable dividend and is unaffected."""
     effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
-    add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+    add_close_series(
+        env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90, date(2026, 7, 31): 100}
+    )
     add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    # A usable dividend in every window (review v1 IR-004).
+    add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
 
     rows = build(env, monkeypatch)
 
     assert rows["return_3m"]["status"] == "present"
-    assert_close(rows["return_3m"]["value"], ret(120, 100))
+    assert_close(rows["return_3m"]["value"], ret(120, 100, Decimal("1.01")))
     for name in ("return_6m", "return_12m"):
         row = rows[name]
         assert row["status"] == "missing", name
         assert row["value"] is None
         assert row["as_of"] == E
-        assert row["known_on"] == observed_on
+        assert row["known_on"] is None
         start = START[name]
         assert row["detail"] == {
             "cause": "corporate_action_payload_unusable",
@@ -1106,8 +1306,9 @@ def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
 ) -> None:
     """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
     the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
-    naming it, and never fails the set; a bar no window uses, such as the prior session of a
-    dividend before S_12 or a bar between the boundaries, changes nothing."""
+    naming it, with no known_on (DEC-0242), and never fails the set; a bar no window uses,
+    such as the prior session of a dividend before S_12 or a bar between the boundaries,
+    changes nothing."""
     prior = date(2026, 7, 31)
     add_close_series(
         env.conn,
@@ -1129,6 +1330,7 @@ def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
         assert row["status"] == "missing", name
         assert row["value"] is None
         assert row["as_of"] == E
+        assert row["known_on"] is None
         start = START[name]
         e_close, s_close = bars.get(E, 120), bars.get(start, STANDARD[start])
         prior_close = bars.get(prior, 100)
@@ -1165,6 +1367,38 @@ def test_a_positive_close_below_one_is_read(env: Env, monkeypatch: pytest.Monkey
     for name in MOMENTUM:
         assert rows[name]["status"] == "present", name
         assert_close(rows[name]["value"], ret(Decimal("0.6"), half, Decimal("1.01")))
+
+
+def test_an_unusable_dividend_over_a_non_positive_prior_close_is_missing_for_the_close(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0241 (1), (2), DEC-0243: the prior session of any dividend in the window counts,
+    usable or not, and a non-positive close ranks before an unusable payload, so the inputs
+    name the close and the prices acquisition (review v1 IR-004)."""
+    record_acquisitions(env)
+    prior = date(2026, 7, 31)
+    add_close_series(env.conn, env.stock, STANDARD | {prior: 0})
+    add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "abc"})
+
+    rows = build(env, monkeypatch)
+
+    for name in MOMENTUM:
+        row = rows[name]
+        assert row["status"] == "missing", name
+        assert row["value"] is None
+        assert row["as_of"] == E
+        assert row["known_on"] is None
+        detail = dict(row["detail"])
+        last = detail.pop("last_acquisition")
+        assert (last["data_type"], last["outcome"]) == ("prices", "not_found"), name
+        start = START[name]
+        assert detail == {
+            "cause": "price_not_positive",
+            "window_months": WINDOW[name],
+            "E": bar(E, 120),
+            "S": bar(start, STANDARD[start]),
+            "dividends": [{"effective_on": "2026-08-03", "prior_session": bar(prior, 0)}],
+        }, name
 
 
 def test_missing_ranks_before_outdated_whatever_the_cause(

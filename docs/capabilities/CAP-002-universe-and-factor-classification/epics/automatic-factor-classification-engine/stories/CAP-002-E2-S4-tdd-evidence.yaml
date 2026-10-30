@@ -6,6 +6,9 @@
 # the whole set); the rework stayed in cycle-1 with its own observed RED and is decided as DEC-0241 (provisional,
 # agent). The re-review APPROVED the reworked patch and a later test-only delta; spec drift was false on every patch.
 # Decisions applied: DEC-0052, DEC-0055, DEC-0111, DEC-0115, DEC-0116, DEC-0117, DEC-0118, DEC-0121, DEC-0241.
+# cycle-2 reworks implementation review v1 (IR-001 to IR-006; IR-007 is carried to the design's next revision) and
+# applies two owner decisions that supersede plan T010's wording: DEC-0242 (known_on null on every missing momentum
+# input) and DEC-0243 (missing_data_type corporate_actions for an unusable corporate-action payload).
 
 cycles:
   - id: cycle-1
@@ -459,6 +462,125 @@ cycles:
             which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
             reads that text
         - id: src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+  - id: cycle-2
+    tasks: [T005, T006, T007, T009, T010]
+    decisions: [DEC-0055, DEC-0116, DEC-0117, DEC-0118, DEC-0241, DEC-0242, DEC-0243]
+    description: >
+      Review rework of CAP-002-E2-S4-implementation-review-v1 (CHANGES-REQUIRED). Production changes only for the two
+      owner decisions; every other finding is test-only. DEC-0242 (IR-005) supersedes T010's known_on for missing
+      rows: momentum_inputs.sql writes known_on only when status is not missing (CASE WHEN s.status <> 'missing'),
+      so a missing input has known_on null whatever its cause, as_of stays E and the cause and rows read stay in
+      detail; present and outdated inputs keep DEC-0118 (1), every split and dividend in their window being applied.
+      DEC-0243 (IR-006) supersedes T010's missing_data_type = 'prices' for one cause: an input missing for
+      corporate_action_payload_unusable names corporate_actions (CASE WHEN s.unusable AND NOT s.price_not_positive),
+      so insert_inputs.sql enriches it with the last corporate_actions outcome; a missing boundary and DEC-0241's
+      price_not_positive keep prices. T010 records both supersessions in its note. Tests in
+      tests/integration/test_engine_inputs_momentum.py: IR-001, a second stock with its own split, dividend and a bar
+      between the other stock's prior session and ex-date (DEC-0055 (3), (4), DEC-0118 (3)); IR-002, known_on over
+      two dividends' prior sessions, each observed last in turn (DEC-0118 (1)); IR-003, a dividend followed by three
+      splits, one on its ex-date, so its prior close and cash amount are scaled by different products (design 2.4,
+      DEC-0118 (2)); IR-004, a usable dividend beside every unusable payload case, a "+1" cash amount case, and an
+      unusable dividend over a zero prior close (DEC-0117 (2), (3), DEC-0241 (1), (2)); DEC-0242, known_on null on
+      the missing S_12, price_not_positive and unusable-payload rows; DEC-0243, the corporate_actions outcome on an
+      unusable-payload row and the prices outcome on a price_not_positive row whose dividend is also unusable. No
+      assertion was weakened except the unusable-payload test's known_on, from the action's observed_on to null, as
+      DEC-0242 requires. engine.py and every other file are unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-2.log
+    red_log_sha256: f78756e76b5e676299e0bfc3abfa62f0c10173bae76908572f2b787ecb616d3f
+    red_evidence: >
+      red-cycle-2.log, written by red-cycle-2.py, runs test_engine_inputs_momentum.py in scratch copies of the
+      component, never the working tree, each imported first through PYTHONPATH (the log header holds the sha256 of
+      HEAD's and the cycle's SQL and test files). A: HEAD 234563d's src and tests with each of review v1's 8
+      non-equivalent survivors applied pass 67 of 67, so all 8 survive the cycle-1 tests. B1: HEAD's src under the
+      cycle's tests, 22 failed and 52 passed; every failure is a DEC-0242 or DEC-0243 assertion (known_on null on
+      the missing S_12, price_not_positive and unusable-payload rows; the corporate_actions outcome), the behaviour
+      RED. B2: the cycle's src with each survivor applied fails only the test written for it:
+      review-split-set-any-instrument and review-prior-any-instrument the two-stock isolation test (IR-001),
+      review-known-on-prior-min both parameters of the two-dividend known_on test (IR-002), review-close-factor-max
+      and review-cash-factor-max the product-of-later-splits test (IR-003), review-unusable-bool-and all 14
+      unusable-payload cases (IR-004 a), review-cash-regex-allows-plus the cash-plus-sign case (IR-004 b) and
+      review-non-positive-ignores-unusable the unusable dividend over a zero prior close (IR-004 c). C: the cycle's
+      src and tests unmutated pass 74 of 74.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-2.py
+        sha256: 56064898f487b0b741efc9bc4ded844b38553abb87c3405366223c2d49328fa2
+    green_evidence: >
+      Focused suite (test_engine_inputs_momentum.py, test_engine_sql_safety.py, test_classification_stage_order.py,
+      test_classification_sql_ships.py): 111 passed; the four mutation baselines pass. The full validation on the
+      final tree is recorded in the stage report.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    code_review: >
+      One fresh independent code-review subagent judged cycle-2.patch: APPROVED, no blocking finding. It confirmed
+      both CASEs against DEC-0242, DEC-0243 and design 2.3 step 5 for every status and cause, and the truth of the
+      SQL comments, and killed 13 mutants of its own, each by the test written for it. Non-blocking: the file header
+      does not list DEC-0242 or DEC-0243 (the inline comments cite them); the IR-003 test separates the two factors
+      with a split on the ex-date rather than on a day strictly between the prior session and the ex-date (both
+      mutants are still killed); record_acquisitions repeats the insert of the prices-acquisition test.
+    spec_drift:
+      drift_detected: false
+      notes: >
+        One fresh independent spec-drift subagent: no drift. Every behaviour the new tests assert is specified
+        (DEC-0055 (3), (4), DEC-0116 (4), DEC-0117 (2), (3), DEC-0118 (1)-(3), DEC-0241 (1), (2), DEC-0242,
+        DEC-0243, design 2.3 step 5 and 2.4). Authorized but worth noting: design 2.4 and DEC-0055 (7) still word
+        known_on without DEC-0242's exception for missing rows; T009 (c) and DEC-0241 (1) still say every momentum
+        input names prices, which DEC-0243 supersedes for the unusable-payload cause; DEC-0241, DEC-0242 and
+        DEC-0243 are open, owner_reviewed false.
+    diff_sha256: bc903feadbf335eaf9ed76be06a3f810c028a178ef69e096898cfc78fa013d51
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: 171dcfd2a13696ed56e18e71cb12fee7bdf6fb3cc781976898a24a45742a1cc5
+      generated: 82
+      killed: 77
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.939
+      manual_mutants: >
+        mutants-cycle-2.json: the 5 catalogue mutants generate --against HEAD derives from the cycle's changed
+        production lines (all in -- comments), 70 hand-written mutants re-tagged cycle-2 from review v1's run (its 13
+        review-* mutants, the 8 v1 survivors among them, and 57 of the coder's 58 cycle-1 mutants;
+        missing-data-type-fundamentals no longer applies, its line being replaced), and 7 new rework-* mutants on the
+        two changed expressions: known_on unguarded, known_on for present only, known_on always null,
+        missing_data_type always prices, corporate_actions without the price_not_positive guard, corporate_actions
+        without the unusable test, and fundamentals in place of corporate_actions. All 77 hand-written mutants are
+        killed. The run used review v1's focused command over four clones, from a scratch directory; the results
+        file, its logs (mutation-cycle-2-results-logs) and the mutants file are copied beside this evidence, so the
+        paths recorded inside the results name the scratch run.
+      survivors:
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:239:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:268:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:268:off-by-one:2
           disposition: equivalent
           reason: >
             the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),

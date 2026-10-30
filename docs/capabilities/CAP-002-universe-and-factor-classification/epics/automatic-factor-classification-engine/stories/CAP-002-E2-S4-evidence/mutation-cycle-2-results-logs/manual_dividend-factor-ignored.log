@@ -1,0 +1,50 @@
+.............F
+=================================== FAILURES ===================================
+________________ test_plain_decimal_strings_with_zeros_are_read ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56051 user=test database=test_f2d215e827924072910f02d9941fd05...954d610>, stock=1, set_id=UUID('21c46285-8331-4578-8412-d39ec6689139'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10954e690>
+
+    def test_plain_decimal_strings_with_zeros_are_read(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (2): a JSON string holding a plain decimal is read whatever its digits, with a
+        zero or a digit above 1 in the integer or the fractional part (10.250 for 20.50 is a
+        2-for-1 split)."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 100, S6: 100, S3: 100, date(2026, 7, 1): 50, date(2026, 7, 31): 50, E: 55, L: 55},
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 7, 1),
+            {"split_from": "10.250", "split_to": "20.50"},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "0.50"})
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+>           assert_close(rows[name]["value"], ret(55, 50, Decimal("1.01")))
+
+tests/integration/test_engine_inputs_momentum.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.1000000000'), expected = Decimal('0.111')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.1000000000'), Decimal('0.111'))
+E       assert Decimal('0.0110000000') <= Decimal('1E-8')
+E        +  where Decimal('0.0110000000') = abs((Decimal('0.1000000000') - Decimal('0.111')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_plain_decimal_strings_with_zeros_are_read
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 passed in 4.00s
