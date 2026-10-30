@@ -1,0 +1,152 @@
+{
+ "schema": 1,
+ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/not-current-banner.tsx:74:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "line": 74,
+   "original": "  if (set === null || later === null) {",
+   "mutated": "  if (set === null && later === null) {"
+  },
+  {
+   "id": "manual:cycle-1:branch-swap",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "if (later.state === \"building\") {",
+   "new": "if (later.state === \"failed\") {"
+  },
+  {
+   "id": "manual:cycle-1:ended-at-fallback-always",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "formatTimestamp(later.endedAt ?? later.startedAt)",
+   "new": "formatTimestamp(later.startedAt)"
+  },
+  {
+   "id": "manual:cycle-1:reason-stringified",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "later.failureReason ?? SCORE_SET.noReasonRecorded",
+   "new": "String(later.failureReason)"
+  },
+  {
+   "id": "manual:cycle-1:building-negated",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "const building = later.state === \"building\";",
+   "new": "const building = later.state !== \"building\";"
+  },
+  {
+   "id": "manual:cycle-1:set-guard-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "if (set === null || later === null) {",
+   "new": "if (later === null) {"
+  },
+  {
+   "id": "manual:cycle-1:words-not-paragraph",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "<p>{bannerBody(set, later)}</p>",
+   "new": "<div>{bannerBody(set, later)}</div>"
+  },
+  {
+   "id": "manual:cycle-1:warning-ground-token",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "bg-status-warning-muted text-status-warning",
+   "new": "bg-status-good-muted text-status-warning"
+  },
+  {
+   "id": "manual:cycle-1:critical-ground-token",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "bg-status-critical-muted text-status-critical",
+   "new": "bg-status-serious-muted text-status-critical"
+  },
+  {
+   "id": "manual:cycle-1:building-args-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "return SCORE_SET.buildingBody(produced, downloadStarted);",
+   "new": "return SCORE_SET.buildingBody(downloadStarted, produced);"
+  },
+  {
+   "id": "manual:cycle-1:failed-args-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "return SCORE_SET.failedBody(failedAt, reason, produced, downloadStarted);",
+   "new": "return SCORE_SET.failedBody(failedAt, reason, downloadStarted, produced);"
+  },
+  {
+   "id": "manual:cycle-1:warning-shape-open",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "<path d=\"M6 1 11 11H1Z\" fill=\"currentColor\" />",
+   "new": "<path d=\"M6 1 11 11H1\" fill=\"currentColor\" />"
+  },
+  {
+   "id": "manual:cycle-1:critical-shape-circle",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "<rect x=\"1.5\" y=\"1.5\" width=\"9\" height=\"9\" fill=\"currentColor\" />",
+   "new": "<circle cx=\"6\" cy=\"6\" r=\"4.5\" fill=\"currentColor\" />"
+  },
+  {
+   "id": "manual:cycle-1:warning-word-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "{SCORE_SET.notReflecting}",
+   "new": "{SCORE_SET.scoreUpdateFailed}"
+  },
+  {
+   "id": "manual:cycle-1:critical-variant-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "data-variant=\"status-critical\"",
+   "new": "data-variant=\"status-warning\""
+  },
+  {
+   "id": "manual:cycle-1:card-variant-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "data-variant=\"default\"",
+   "new": "data-variant=\"banner\""
+  },
+  {
+   "id": "manual:cycle-1:badge-not-first",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/not-current-banner.tsx",
+   "old": "<p>{bannerBody(set, later)}</p>\n    </div>",
+   "new": "<p>{bannerBody(set, later)}</p>\n      <span aria-hidden=\"true\" />\n    </div>"
+  },
+  {
+   "id": "manual:cycle-1:no-reason-wording",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "noReasonRecorded: \"no reason was recorded\",",
+   "new": "noReasonRecorded: \"null\","
+  }
+ ]
+}

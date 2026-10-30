@@ -1,0 +1,1329 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-2.log
+new file mode 100644
+index 0000000..32e3537
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/green-cycle-2.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (22 tests) 97ms
++
++ Test Files  1 passed (1)
++      Tests  22 passed (22)
++   Start at  22:42:29
++   Duration  503ms (transform 42ms, setup 28ms, collect 76ms, tests 97ms, environment 132ms, prepare 33ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-2.json
+new file mode 100644
+index 0000000..0c08772
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutants-cycle-2.json
+@@ -0,0 +1,235 @@
++{
++ "schema": 1,
++ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/components/patterns/as-of-line.tsx:90:off-by-one:1",
++   "cycle": "cycle-2",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "line": 90,
++   "original": "  const words = clause.slice(0, clause.length - started.length);",
++   "mutated": "  const words = clause.slice(1, clause.length - started.length);"
++  },
++  {
++   "id": "web/src/components/patterns/as-of-line.tsx:167:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "line": 167,
++   "original": "  loading = false,",
++   "mutated": "  loading = true,"
++  },
++  {
++   "id": "web/src/components/patterns/as-of-line.tsx:184:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "line": 184,
++   "original": "      {building && checkedAt !== null ? (",
++   "mutated": "      {building || checkedAt !== null ? ("
++  },
++  {
++   "id": "web/src/components/patterns/as-of-line.tsx:188:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "line": 188,
++   "original": "            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: true }))}",
++   "mutated": "            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: false }))}"
++  },
++  {
++   "id": "manual:cycle-2:building-is-failed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "const building = later?.state === \"building\";",
++   "new": "const building = later?.state === \"failed\";"
++  },
++  {
++   "id": "manual:cycle-2:checked-without-seconds",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "formatTimestamp(checkedAt, { seconds: true })",
++   "new": "formatTimestamp(checkedAt)"
++  },
++  {
++   "id": "manual:cycle-2:checked-shown-when-not-building",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "{building && checkedAt !== null ? (",
++   "new": "{checkedAt !== null ? ("
++  },
++  {
++   "id": "manual:cycle-2:atomic-default",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "aria-atomic=\"false\"",
++   "new": "aria-atomic=\"true\""
++  },
++  {
++   "id": "manual:cycle-2:assertive",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "aria-live=\"polite\"",
++   "new": "aria-live=\"assertive\""
++  },
++  {
++   "id": "manual:cycle-2:sorted-by-negated",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "{sortLabel === undefined ? null :",
++   "new": "{sortLabel !== undefined ? null :"
++  },
++  {
++   "id": "manual:cycle-2:times-swapped",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "{SCORE_SET.scoresFrom(formatTimestamp(set.endedAt))}",
++   "new": "{SCORE_SET.scoresFrom(formatTimestamp(set.runStartedAt))}"
++  },
++  {
++   "id": "manual:cycle-2:link-to-set-id",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "to={SHELL_ROUTES.download(set.runId)}",
++   "new": "to={SHELL_ROUTES.download(set.setId)}"
++  },
++  {
++   "id": "manual:cycle-2:link-unlabelled",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "aria-label={SCORE_SET.openDownload(started)}",
++   "new": "aria-label={started}"
++  },
++  {
++   "id": "manual:cycle-2:clause-time-doubled",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "const words = clause.slice(0, clause.length - started.length);",
++   "new": "const words = clause;"
++  },
++  {
++   "id": "manual:cycle-2:skeleton-never",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "return loading ? (",
++   "new": "return !loading ? ("
++  },
++  {
++   "id": "manual:cycle-2:skeleton-not-hidden",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "data-testid=\"as-of-line-skeleton\"\n        aria-hidden=\"true\"",
++   "new": "data-testid=\"as-of-line-skeleton\""
++  },
++  {
++   "id": "manual:cycle-2:succeeded-is-warning",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "succeeded: { tier: \"good\", word: SCORE_SET.complete },",
++   "new": "succeeded: { tier: \"warning\", word: SCORE_SET.complete },"
++  },
++  {
++   "id": "manual:cycle-2:partial-word-complete",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "partial: { tier: \"warning\", word: SCORE_SET.partial },",
++   "new": "partial: { tier: \"warning\", word: SCORE_SET.complete },"
++  },
++  {
++   "id": "manual:cycle-2:updating-tier-good",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "<Badge tier=\"active\">{SCORE_SET.updating}</Badge>",
++   "new": "<Badge tier=\"good\">{SCORE_SET.updating}</Badge>"
++  },
++  {
++   "id": "manual:cycle-2:break-dropped",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "          <br />\n          {SCORE_SET.couldNotCheck}",
++   "new": "          {SCORE_SET.couldNotCheck}"
++  },
++  {
++   "id": "manual:cycle-2:ringed-dot-filled",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "      <circle cx=\"6\" cy=\"6\" r=\"2\" fill=\"currentColor\" />\n    </>",
++   "new": "    </>"
++  },
++  {
++   "id": "manual:cycle-2:empty-announcement-span",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "{announcement ? <span>{announcement}</span> : null}",
++   "new": "{announcement !== undefined ? <span>{announcement}</span> : null}"
++  },
++  {
++   "id": "manual:cycle-2:earlier-sets-always",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "{onOpenEarlierSets ? (",
++   "new": "{onOpenEarlierSets !== null ? ("
++  },
++  {
++   "id": "manual:cycle-2:earlier-sets-not-ghost",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "data-variant=\"ghost\"",
++   "new": "data-variant=\"default\""
++  },
++  {
++   "id": "manual:cycle-2:try-again-always",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "{pollFailed ? (\n        <>\n          {\" \"}\n          <button",
++   "new": "{!pollFailed ? (\n        <>\n          {\" \"}\n          <button"
++  },
++  {
++   "id": "manual:cycle-2:try-again-no-handler",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "onClick={onTryAgain}",
++   "new": "onClick={undefined}"
++  },
++  {
++   "id": "manual:cycle-2:line-not-muted",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "className=\"text-xs text-muted-foreground\"",
++   "new": "className=\"text-xs\""
++  },
++  {
++   "id": "manual:cycle-2:link-not-numeric",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/as-of-line.tsx",
++   "old": "className=\"font-numeric underline\"",
++   "new": "className=\"underline\""
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..7cc8c1c
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,453 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/components/patterns/as-of-line.test.tsx",
++  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++  "tree_patch_sha256": "43bf1f16246467b67b539f08b49fa0022c7d524d7c5e1543e469c59b59146a8d",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutants-2.json",
++  "mutants_sha256": "1ee610c1240a61c50f2b0fcad51232b4ec486521d6a7fe7386a73f54b96270c0",
++  "jobs": 6,
++  "started": "2026-10-29T03:42:31Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/baseline-w3.log",
++      "log_sha256": "f1383b9de526c9e165c9462b6e56ed98968a7645e634187af8cfeb3a4d723056"
++    },
++    {
++      "worker": 4,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/baseline-w4.log",
++      "log_sha256": "2d8e6f682b2106550d1614eb9654ee0a6e0ffa8f586cba1ec3a365ceb0933e77"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "07dd93a0d75fd4230ac0dd2e1d451c319f26409d2e44346361a08977df098cb3"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 1.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "7a9d3fc9a3cf4f167f77af9bc11e848be0b3a770bbc47a4b0ee83e1468d49c56"
++    },
++    {
++      "worker": 5,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/baseline-w5.log",
++      "log_sha256": "c3f21f39fe9d74e741e6266435a39e25fd8a164d439e0979f5f8e172b2c6763e"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 1.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "edd6b3259b6c542aca24ff67c10fd4f38f8ce9a19ae24163ea5f7f991a351e54"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:90:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 90,
++      "original": "  const words = clause.slice(0, clause.length - started.length);",
++      "mutated": "  const words = clause.slice(1, clause.length - started.length);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_90_off-by-one_1.log",
++      "log_sha256": "16c6193830ba3c1953652fe9eb630b420266310d1986a98afd0d489613ed8503"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:167:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 167,
++      "original": "  loading = false,",
++      "mutated": "  loading = true,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_167_negate-boolean_1.log",
++      "log_sha256": "7d75f69b7c8d449d5a72441a47fae1491a206e1c29ab73ae9c864586eb573a25"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:184:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 184,
++      "original": "      {building && checkedAt !== null ? (",
++      "mutated": "      {building || checkedAt !== null ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_184_negate-boolean_1.log",
++      "log_sha256": "8cfe96a97a344f1ce243e10ce01be464026a476d2b9e6ac6e958e114ea269acf"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:188:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 188,
++      "original": "            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: true }))}",
++      "mutated": "            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: false }))}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_188_negate-boolean_1.log",
++      "log_sha256": "4bfdc2d0304ea40a5af2e821a554ce901fe629fde7f3e1d7a57bd5736a27dd18"
++    },
++    {
++      "id": "manual:cycle-2:building-is-failed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "const building = later?.state === \"building\";",
++      "new": "const building = later?.state === \"failed\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_building-is-failed.log",
++      "log_sha256": "927321dd29d651b776f4e184d8418e51614246e579aaaf1d126c1b56c92c7b40"
++    },
++    {
++      "id": "manual:cycle-2:checked-without-seconds",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "formatTimestamp(checkedAt, { seconds: true })",
++      "new": "formatTimestamp(checkedAt)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_checked-without-seconds.log",
++      "log_sha256": "233e09b90ba7b78ff6ba0aa397ca12b7a003bd513ccbdbf2262718ab93feb3c4"
++    },
++    {
++      "id": "manual:cycle-2:checked-shown-when-not-building",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{building && checkedAt !== null ? (",
++      "new": "{checkedAt !== null ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_checked-shown-when-not-building.log",
++      "log_sha256": "5b88fae4f7550d167303f5ff1b288ebdfe5bcf3e02557a4d0dd971aee47968eb"
++    },
++    {
++      "id": "manual:cycle-2:atomic-default",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "aria-atomic=\"false\"",
++      "new": "aria-atomic=\"true\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_atomic-default.log",
++      "log_sha256": "c9bdd219c8bfb0952229df4dbb3f0645b72dafdd6e8b744667be1a7be4f6edb6"
++    },
++    {
++      "id": "manual:cycle-2:assertive",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "aria-live=\"polite\"",
++      "new": "aria-live=\"assertive\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_assertive.log",
++      "log_sha256": "23af60e77b3a0b9cff4c711781784141e33facfc65516a424a96100c6c667587"
++    },
++    {
++      "id": "manual:cycle-2:sorted-by-negated",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{sortLabel === undefined ? null :",
++      "new": "{sortLabel !== undefined ? null :",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_sorted-by-negated.log",
++      "log_sha256": "d1af208e28396ff4632d0e835a9b3ebf736cd2d1b65fa181d06a5bdac9920d33"
++    },
++    {
++      "id": "manual:cycle-2:times-swapped",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{SCORE_SET.scoresFrom(formatTimestamp(set.endedAt))}",
++      "new": "{SCORE_SET.scoresFrom(formatTimestamp(set.runStartedAt))}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_times-swapped.log",
++      "log_sha256": "9a8c0ebc2d9d925b1a2d17a1181ed2d040c53c88a299ba042d2d55bd6a43b25a"
++    },
++    {
++      "id": "manual:cycle-2:link-to-set-id",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "to={SHELL_ROUTES.download(set.runId)}",
++      "new": "to={SHELL_ROUTES.download(set.setId)}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_link-to-set-id.log",
++      "log_sha256": "12ca0de842aaa8c0e45a2ecac0679588e761bc993233b9280736bce29ea1c728"
++    },
++    {
++      "id": "manual:cycle-2:link-unlabelled",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "aria-label={SCORE_SET.openDownload(started)}",
++      "new": "aria-label={started}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_link-unlabelled.log",
++      "log_sha256": "1b46f9e143786994446384e25c81d2bd8224733043a7253eff7fcfc702c64294"
++    },
++    {
++      "id": "manual:cycle-2:clause-time-doubled",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "const words = clause.slice(0, clause.length - started.length);",
++      "new": "const words = clause;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_clause-time-doubled.log",
++      "log_sha256": "70ca0919da6f49257ffff83c3c796d581e5c37fe41ba1ca047e7ed5c5dbcf3a5"
++    },
++    {
++      "id": "manual:cycle-2:skeleton-never",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "return loading ? (",
++      "new": "return !loading ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_skeleton-never.log",
++      "log_sha256": "1e5b7d993b242eaca47d0119d641e97f7d6bc789b5e3d4b166b18bab7db7bf84"
++    },
++    {
++      "id": "manual:cycle-2:skeleton-not-hidden",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "data-testid=\"as-of-line-skeleton\"\n        aria-hidden=\"true\"",
++      "new": "data-testid=\"as-of-line-skeleton\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_skeleton-not-hidden.log",
++      "log_sha256": "4424361e1d922081554dd50931bac3d01baabb9bc76655d2c9b0de17e28d71a4"
++    },
++    {
++      "id": "manual:cycle-2:succeeded-is-warning",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "succeeded: { tier: \"good\", word: SCORE_SET.complete },",
++      "new": "succeeded: { tier: \"warning\", word: SCORE_SET.complete },",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_succeeded-is-warning.log",
++      "log_sha256": "fcd6fcc080c6bb201f997eba48aa654a7cde3d9b808b7eb942f5765de458e9a4"
++    },
++    {
++      "id": "manual:cycle-2:partial-word-complete",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "partial: { tier: \"warning\", word: SCORE_SET.partial },",
++      "new": "partial: { tier: \"warning\", word: SCORE_SET.complete },",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_partial-word-complete.log",
++      "log_sha256": "58f90aeb4666de429f1036613252d4ac90279d18421812f611d0325cc58a2fcd"
++    },
++    {
++      "id": "manual:cycle-2:updating-tier-good",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "<Badge tier=\"active\">{SCORE_SET.updating}</Badge>",
++      "new": "<Badge tier=\"good\">{SCORE_SET.updating}</Badge>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_updating-tier-good.log",
++      "log_sha256": "95c13bb3ea8a7d32fa3e745b4db1d8a1c14f4fe1434cb4178b4e32da9d783d55"
++    },
++    {
++      "id": "manual:cycle-2:break-dropped",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "          <br />\n          {SCORE_SET.couldNotCheck}",
++      "new": "          {SCORE_SET.couldNotCheck}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_break-dropped.log",
++      "log_sha256": "711db6e3be6f5b3aa03575d3e4764c987c2462ae90e40072d5c70f0394003bf4"
++    },
++    {
++      "id": "manual:cycle-2:ringed-dot-filled",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "      <circle cx=\"6\" cy=\"6\" r=\"2\" fill=\"currentColor\" />\n    </>",
++      "new": "    </>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_ringed-dot-filled.log",
++      "log_sha256": "175b4ab984aa51f140a0fe79d31419be54314a037dea55707fc30bf401581ac6"
++    },
++    {
++      "id": "manual:cycle-2:empty-announcement-span",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{announcement ? <span>{announcement}</span> : null}",
++      "new": "{announcement !== undefined ? <span>{announcement}</span> : null}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_empty-announcement-span.log",
++      "log_sha256": "f7e03b4ecfe151db24b0374dbae3801870249ec88b6672cbd0a21cbb03c2fd30"
++    },
++    {
++      "id": "manual:cycle-2:earlier-sets-always",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{onOpenEarlierSets ? (",
++      "new": "{onOpenEarlierSets !== null ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_earlier-sets-always.log",
++      "log_sha256": "1744b8ee6b95a80faa2cac2bd2c20f2f519f09452441d812764c26d94e7b3e70"
++    },
++    {
++      "id": "manual:cycle-2:earlier-sets-not-ghost",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "data-variant=\"ghost\"",
++      "new": "data-variant=\"default\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_earlier-sets-not-ghost.log",
++      "log_sha256": "2f64e08c75bdbd2cc0e93ea7eccb809c508a9445cf838899b666c783c638fe04"
++    },
++    {
++      "id": "manual:cycle-2:try-again-always",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{pollFailed ? (\n        <>\n          {\" \"}\n          <button",
++      "new": "{!pollFailed ? (\n        <>\n          {\" \"}\n          <button",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_try-again-always.log",
++      "log_sha256": "cf8e071aa72253aaab41ba5e7559ac2e5a9637d061f9783ef0e19f68ff797105"
++    },
++    {
++      "id": "manual:cycle-2:try-again-no-handler",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "onClick={onTryAgain}",
++      "new": "onClick={undefined}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_try-again-no-handler.log",
++      "log_sha256": "136234db995b574a352bb55175c13d8af721379d11c363fd684c2e072600c7b1"
++    },
++    {
++      "id": "manual:cycle-2:line-not-muted",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "className=\"text-xs text-muted-foreground\"",
++      "new": "className=\"text-xs\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_line-not-muted.log",
++      "log_sha256": "2536abc8f61f64f3229cabdc113686ee2e80ae105816f9959007aed309744e07"
++    },
++    {
++      "id": "manual:cycle-2:link-not-numeric",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "className=\"font-numeric underline\"",
++      "new": "className=\"underline\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s4/mutation-cycle-2-results-logs/manual_cycle-2_link-not-numeric.log",
++      "log_sha256": "0ef515bfda0186022bda0ce25167167b21f7005c56a614831d7b7ec2ecc0711c"
++    }
++  ],
++  "finished": "2026-10-29T03:42:39Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-2.log
+new file mode 100644
+index 0000000..fa05957
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S4-evidence/red-cycle-2.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/patterns/as-of-line.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx [ src/components/patterns/as-of-line.test.tsx ]
++Error: Failed to resolve import "./as-of-line" from "web/src/components/patterns/as-of-line.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.test.tsx:8:45
++  5  |  import { describe, expect, it, vi } from "vitest";
++  6  |  import { SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
++  7  |  import { AsOfLine } from "./as-of-line";
++     |                            ^
++  8  |  import { NotCurrentBanner } from "./not-current-banner";
++  9  |  const RUN_ID = "0b2d4a6e-8c1f-4e3a-9b7d-2f6e8a0c4d1b";
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  22:39:01
++   Duration  694ms (transform 18ms, setup 82ms, collect 0ms, tests 0ms, environment 256ms, prepare 34ms)
++
+diff --git a/web/src/components/patterns/as-of-line.test.tsx b/web/src/components/patterns/as-of-line.test.tsx
+new file mode 100644
+index 0000000..fbc5dcb
+--- /dev/null
++++ b/web/src/components/patterns/as-of-line.test.tsx
+@@ -0,0 +1,346 @@
++import { render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import type { JSX } from "react";
++import { MemoryRouter } from "react-router-dom";
++import { describe, expect, it, vi } from "vitest";
++import type { CurrentSet, LaterSet } from "../../api/classification-types";
++import { SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
++import { AsOfLine, type AsOfLineProps } from "./as-of-line";
++import { NotCurrentBanner } from "./not-current-banner";
++
++const RUN_ID = "0b2d4a6e-8c1f-4e3a-9b7d-2f6e8a0c4d1b";
++const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-/;
++
++/** The current set: produced 2026-10-15 17:46 CDT from the download started 17:30 CDT. */
++const SET: CurrentSet = {
++  setId: "6f1c2b3a-4d5e-4f60-8a71-9b82c93d04e5",
++  classificationDate: "2026-10-15",
++  runId: RUN_ID,
++  runStartedAt: "2026-10-15T22:30:00Z",
++  runOutcome: "succeeded",
++  state: "complete",
++  startedAt: "2026-10-15T22:40:00Z",
++  endedAt: "2026-10-15T22:46:00Z",
++  latestTradingDay: "2026-10-15",
++  activeInstruments: 120,
++  notCurrent: false,
++};
++
++const BUILDING: LaterSet = {
++  setId: "a1b2c3d4-0000-4000-8000-000000000002",
++  state: "building",
++  startedAt: "2026-10-16T22:40:00Z",
++  endedAt: null,
++  failureReason: null,
++  runId: "1c3e5a7b-9d2f-4b6c-8e0a-3f5b7d9c1e2a",
++  runStartedAt: "2026-10-16T22:30:00Z",
++};
++
++const FAILED: LaterSet = {
++  ...BUILDING,
++  state: "failed",
++  startedAt: "2026-10-15T22:50:00Z",
++  endedAt: "2026-10-15T23:03:00Z",
++  failureReason: "Factor engine could not read prices",
++};
++
++const CHECKED_AT = "2026-10-15T22:52:10.000Z";
++
++const BASE: AsOfLineProps = {
++  set: SET,
++  later: null,
++  checkedAt: null,
++  pollFailed: false,
++  onTryAgain: () => undefined,
++};
++
++function renderLine(props: Partial<AsOfLineProps> = {}, extra?: JSX.Element) {
++  return render(
++    <MemoryRouter>
++      {extra}
++      <AsOfLine {...BASE} {...props} />
++    </MemoryRouter>,
++  );
++}
++
++/** Visible text with every aria-hidden shape removed. */
++function visibleText(element: Element): string {
++  const clone = element.cloneNode(true) as Element;
++  for (const hidden of clone.querySelectorAll("[aria-hidden='true']")) {
++    hidden.remove();
++  }
++  return (clone.textContent ?? "").replace(/\s+/g, " ").trim();
++}
++
++function badges(container: HTMLElement): HTMLElement[] {
++  return Array.from(container.querySelectorAll<HTMLElement>("[data-variant^='status-']"));
++}
++
++function badgeByVariant(container: HTMLElement, variant: string): HTMLElement | null {
++  return badges(container).find((b) => b.dataset.variant === variant) ?? null;
++}
++
++describe("TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3)", () => {
++  // Implements TC-COMP-179
++  it("reads Scores from {time} · from the download started {time}, with the start time as the link", () => {
++    const { container } = renderLine();
++    expect(container).toHaveTextContent(
++      "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT",
++    );
++    const link = screen.getByRole("link");
++    expect(link).toHaveTextContent("2026-10-15 17:30 CDT");
++    expect(link).toHaveAccessibleName("Open the download started 2026-10-15 17:30 CDT");
++    expect(link).toHaveAccessibleName(SCORE_SET.openDownload("2026-10-15 17:30 CDT"));
++    expect(link).toHaveAttribute("href", SHELL_ROUTES.download(RUN_ID));
++    expect(link).toHaveAttribute("href", `/runs/${RUN_ID}`);
++  });
++
++  // Implements TC-COMP-179
++  it("prints no number, UUID or run_id anywhere in the line", () => {
++    const { container } = renderLine({
++      sortLabel: "value",
++      later: BUILDING,
++      checkedAt: CHECKED_AT,
++    });
++    const text = container.textContent ?? "";
++    expect(text).not.toContain("#");
++    expect(text).not.toMatch(UUID);
++    expect(text).not.toContain("run_id");
++    expect(screen.getByRole("link").textContent).not.toMatch(UUID);
++  });
++
++  // Implements TC-COMP-179
++  it("renders CST for a winter instant and CDT for a summer one, never the machine zone", () => {
++    const { container, unmount } = renderLine({
++      set: { ...SET, endedAt: "2026-01-15T23:00:00Z", runStartedAt: "2026-01-15T22:30:00Z" },
++    });
++    expect(container).toHaveTextContent("Scores from 2026-01-15 17:00 CST");
++    expect(screen.getByRole("link")).toHaveTextContent("2026-01-15 16:30 CST");
++    expect(container.textContent).not.toMatch(/\bCDT\b/);
++    unmount();
++
++    const summer = renderLine();
++    expect(summer.container).toHaveTextContent("Scores from 2026-10-15 17:46 CDT");
++    expect(summer.container.textContent).not.toMatch(/\bCST\b/);
++  });
++
++  // Implements TC-COMP-179
++  it("ends with · sorted by {label} when a sort label is given, and omits the clause otherwise", () => {
++    const sorted = renderLine({ sortLabel: "value" });
++    expect(visibleText(sorted.container)).toMatch(/· sorted by value$/);
++    sorted.unmount();
++
++    const unsorted = renderLine();
++    expect(unsorted.container.textContent).not.toContain("sorted by");
++  });
++});
++
++describe("TC-COMP-176: a failed poll keeps every mark and offers Try again (DAC-E4-S4-4)", () => {
++  // Implements TC-COMP-176
++  it("renders Could not check for newer scores. inside the live region and Try again outside it", async () => {
++    const onTryAgain = vi.fn();
++    const { container } = renderLine({
++      later: BUILDING,
++      checkedAt: CHECKED_AT,
++      pollFailed: true,
++      onTryAgain,
++    });
++    const status = screen.getByRole("status");
++    expect(within(status).getByText(SCORE_SET.couldNotCheck)).toBeInTheDocument();
++    expect(within(status).getByText("Could not check for newer scores.")).toBeInTheDocument();
++    const tryAgain = screen.getByRole("button", { name: "Try again" });
++    expect(within(status).queryByRole("button", { name: "Try again" })).toBeNull();
++    expect(tryAgain).toBeInTheDocument();
++
++    const user = userEvent.setup();
++    await user.click(tryAgain);
++    expect(onTryAgain).toHaveBeenCalledTimes(1);
++    await user.click(tryAgain);
++    expect(onTryAgain).toHaveBeenCalledTimes(2);
++
++    // Every mark survives the failure.
++    expect(container).toHaveTextContent("Scores from 2026-10-15 17:46 CDT");
++    expect(badgeByVariant(container, "status-active")).not.toBeNull();
++    expect(badgeByVariant(container, "status-good")).not.toBeNull();
++    expect(container).toHaveTextContent("checked 2026-10-15 17:52:10 CDT");
++  });
++
++  // Implements TC-COMP-176
++  it("renders neither the text nor the button while polling succeeds", () => {
++    const { container } = renderLine({ later: BUILDING, checkedAt: CHECKED_AT });
++    expect(container.textContent).not.toContain("Could not check");
++    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
++  });
++
++  // Implements TC-COMP-176
++  it("leaves the banner beside it in place when the poll fails", () => {
++    const { container } = renderLine(
++      { later: BUILDING, checkedAt: CHECKED_AT, pollFailed: true },
++      <NotCurrentBanner set={SET} later={BUILDING} />,
++    );
++    expect(container).toHaveTextContent("Not reflecting the latest download");
++    expect(container).toHaveTextContent("replaces this one when complete");
++    expect(container).toHaveTextContent("Could not check for newer scores.");
++  });
++});
++
++describe("as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3)", () => {
++  it("shows no Updating badge and no checked time with later null and checkedAt null", () => {
++    const { container } = renderLine();
++    expect(badgeByVariant(container, "status-active")).toBeNull();
++    expect(container.textContent).not.toContain("Updating");
++    expect(container.textContent).not.toContain("checked");
++  });
++
++  it("adds the status-active Updating badge with its ringed-dot shape and checked {time} with seconds while building", () => {
++    const { container } = renderLine({ later: BUILDING, checkedAt: CHECKED_AT });
++    const updating = badgeByVariant(container, "status-active");
++    expect(updating).not.toBeNull();
++    expect(visibleText(updating as HTMLElement)).toBe(SCORE_SET.updating);
++    expect(visibleText(updating as HTMLElement)).toBe("Updating");
++    expect(
++      (updating as HTMLElement).querySelectorAll("svg[aria-hidden='true'] circle"),
++    ).toHaveLength(2);
++    expect(updating).toHaveClass("bg-status-active-muted");
++    expect(updating).toHaveClass("text-status-active");
++    expect(container).toHaveTextContent(SCORE_SET.checked("2026-10-15 17:52:10 CDT"));
++    expect(container).toHaveTextContent("checked 2026-10-15 17:52:10 CDT");
++    // The 10-second tick is not announced.
++    expect(screen.getByRole("status").textContent).not.toContain("checked");
++  });
++
++  it("renders Updating without a checked time while building before the first read", () => {
++    const { container } = renderLine({ later: BUILDING, checkedAt: null });
++    expect(badgeByVariant(container, "status-active")).not.toBeNull();
++    expect(container.textContent).not.toContain("checked");
++  });
++
++  it("adds no Updating badge and no checked time for a failed later set", () => {
++    const { container } = renderLine({ later: FAILED, checkedAt: CHECKED_AT });
++    expect(badgeByVariant(container, "status-active")).toBeNull();
++    expect(container.textContent).not.toContain("Updating");
++    expect(container.textContent).not.toContain("checked");
++  });
++
++  it("shows no checked time once polling has stopped, however recent the last read", () => {
++    const { container } = renderLine({ later: null, checkedAt: CHECKED_AT });
++    expect(container.textContent).not.toContain("checked");
++  });
++
++  it.each([
++    ["succeeded", "status-good", "Complete", "bg-status-good-muted", "text-status-good"],
++    ["partial", "status-warning", "Partial", "bg-status-warning-muted", "text-status-warning"],
++  ] as const)(
++    "renders the %s download as a %s badge reading %s with a shape",
++    (runOutcome, variant, word, ground, ink) => {
++      const { container } = renderLine({ set: { ...SET, runOutcome } });
++      const outcome = badgeByVariant(container, variant);
++      expect(outcome).not.toBeNull();
++      expect(visibleText(outcome as HTMLElement)).toBe(word);
++      expect((outcome as HTMLElement).querySelector("svg[aria-hidden='true']")).not.toBeNull();
++      expect(outcome).toHaveClass(ground);
++      expect(outcome).toHaveClass(ink);
++      expect(badges(container)).toHaveLength(1);
++    },
++  );
++
++  it("renders the Earlier sets… ghost button only when a handler is given, calling it once per click", async () => {
++    const onOpenEarlierSets = vi.fn();
++    const { unmount } = renderLine({ onOpenEarlierSets });
++    const button = screen.getByRole("button", { name: "Earlier sets…" });
++    expect(button).toHaveAttribute("data-variant", "ghost");
++    expect(button).toHaveAttribute("type", "button");
++    const user = userEvent.setup();
++    await user.click(button);
++    expect(onOpenEarlierSets).toHaveBeenCalledTimes(1);
++    unmount();
++
++    renderLine();
++    expect(screen.queryByRole("button", { name: "Earlier sets…" })).toBeNull();
++  });
++
++  it("has exactly one live region: an output, polite and not atomic, present even when empty", () => {
++    const { container } = renderLine();
++    const regions = container.querySelectorAll("[aria-live], [role='status'], output");
++    expect(regions).toHaveLength(1);
++    const status = screen.getByRole("status");
++    expect(status.tagName).toBe("OUTPUT");
++    expect(status).toHaveAttribute("aria-live", "polite");
++    expect(status).toHaveAttribute("aria-atomic", "false");
++    expect(status).toBeEmptyDOMElement();
++  });
++
++  it("holds the announcement, Updating, Earlier sets… and the failure text, and nothing else", () => {
++    const announcement = SCORE_SET.scoresUpdatedTo("2026-10-16 17:48 CDT", "2026-10-16 17:30 CDT");
++    const { container } = renderLine({
++      later: BUILDING,
++      checkedAt: CHECKED_AT,
++      pollFailed: true,
++      announcement,
++      sortLabel: "value",
++      onOpenEarlierSets: () => undefined,
++    });
++    const status = screen.getByRole("status");
++    expect(within(status).getByText(announcement)).toBeInTheDocument();
++    expect(within(status).getByText("Updating")).toBeInTheDocument();
++    expect(within(status).getByRole("button", { name: "Earlier sets…" })).toBeInTheDocument();
++    expect(within(status).getByText("Could not check for newer scores.")).toBeInTheDocument();
++
++    expect(status.textContent).not.toContain("Scores from");
++    expect(within(status).queryByRole("link")).toBeNull();
++    expect(within(status).queryByText("Complete")).toBeNull();
++    expect(status.querySelector("[data-variant='status-good']")).toBeNull();
++    expect(status.textContent).not.toContain("sorted by");
++    expect(status.textContent).not.toContain("checked");
++    expect(within(status).queryByRole("button", { name: "Try again" })).toBeNull();
++
++    // In order: announcement, Updating, Earlier sets…, a break, the failure text.
++    expect(visibleText(status)).toBe(
++      `${announcement} Updating Earlier sets… Could not check for newer scores.`,
++    );
++    expect(status.querySelector("br")).not.toBeNull();
++
++    // Outside the region, in order: the sentence with the link, the outcome, sorted by, checked.
++    const outside = visibleText(container).replace(visibleText(status), "").trim();
++    expect(outside).toMatch(
++      /^Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value checked 2026-10-15 17:52:10 CDT/,
++    );
++    expect(outside).toMatch(/Try again$/);
++  });
++
++  it("reads Updating then the failure text when nothing else is in the region", () => {
++    renderLine({ later: BUILDING, pollFailed: true });
++    const status = screen.getByRole("status");
++    expect(visibleText(status)).toBe("Updating Could not check for newer scores.");
++  });
++
++  it("renders nothing when set is null and not loading: the never-populated state has no line", () => {
++    const { container } = renderLine({ set: null });
++    expect(container).toBeEmptyDOMElement();
++    expect(screen.queryByRole("status")).toBeNull();
++  });
++
++  it("renders a fixed-height skeleton and no live region while loading with no set", () => {
++    const { container } = renderLine({ set: null, loading: true });
++    const skeleton = screen.getByTestId("as-of-line-skeleton");
++    expect(skeleton).toHaveAttribute("aria-hidden", "true");
++    expect(skeleton.className).toMatch(/\bh-\d\b/);
++    expect(container.textContent).toBe("");
++    expect(screen.queryByRole("status")).toBeNull();
++    expect(screen.queryByRole("link")).toBeNull();
++  });
++
++  it("ignores loading once a set is given", () => {
++    renderLine({ loading: true });
++    expect(screen.queryByTestId("as-of-line-skeleton")).toBeNull();
++    expect(screen.getByRole("link")).toBeInTheDocument();
++  });
++
++  it("is a muted extra-small line and the link is numeric", () => {
++    renderLine();
++    const line = screen.getByTestId("as-of-line");
++    expect(line).toHaveClass("text-xs");
++    expect(line).toHaveClass("text-muted-foreground");
++    expect(screen.getByRole("link")).toHaveClass("font-numeric");
++  });
++});
+diff --git a/web/src/components/patterns/as-of-line.tsx b/web/src/components/patterns/as-of-line.tsx
+new file mode 100644
+index 0000000..53c306f
+--- /dev/null
++++ b/web/src/components/patterns/as-of-line.tsx
+@@ -0,0 +1,212 @@
++import type { JSX } from "react";
++import { Link } from "react-router-dom";
++import type { CurrentSet, LaterSet, RunOutcome } from "../../api/classification-types";
++import { RESULTS, SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
++import { formatTimestamp } from "../../screens/research/format";
++
++/**
++ * The as-of line under a scored surface's title (UX design 1.2; classification-ui
++ * 2.6; AC-21; DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3, DAC-E4-S4-4): *Scores from
++ * {time} · from the download started {time}*, the start time linked to the
++ * download's detail and never a number or UUID (DEC-0083), the download's
++ * outcome badge, the optional *sorted by* clause, *Updating* with *checked
++ * {time}* while a later set builds (STD-UI-25), **Earlier sets…** when the host
++ * supplies the dialog (DEC-0154) and, after a failed poll, *Could not check for
++ * newer scores.* with **Try again** (DEC-0155).
++ *
++ * The line holds exactly one polite live region, an `output`, which carries
++ * only what should be announced: the completion announcement, *Updating*, the
++ * never-changing **Earlier sets…** button and the failed-poll sentence
++ * (STD-UI-24). The 10-second *checked* tick, the link, the outcome badge and
++ * **Try again** sit outside it. `aria-atomic` is set to `false` explicitly:
++ * `role="status"` is atomic by default, and an atomic region would re-read the
++ * retained announcement whenever *Updating* or the failure text toggles
++ * (CAP-002-E4-S4 Open Gap 6).
++ */
++
++export interface AsOfLineProps {
++  set: CurrentSet | null;
++  later: LaterSet | null;
++  /** The ISO-8601 instant of the last successful poll read, `null` before the first (DEC-0153). */
++  checkedAt: string | null;
++  pollFailed: boolean;
++  onTryAgain: () => void;
++  announcement?: string | null;
++  /** Omitted on compare and evidence, which have no sort. */
++  sortLabel?: string;
++  /** The set-history dialog is CAP-002-E4-S9's; without a handler the button is absent. */
++  onOpenEarlierSets?: () => void;
++  /** With `set` null, renders the line's skeleton at its final height (UX design 1.2, Loading). */
++  loading?: boolean;
++}
++
++type Tier = "good" | "warning" | "active";
++
++const BADGE = "inline-flex items-center gap-1 rounded px-2 py-1 text-xs";
++
++const TIER_CLASSES: Record<Tier, string> = {
++  good: "bg-status-good-muted text-status-good",
++  warning: "bg-status-warning-muted text-status-warning",
++  active: "bg-status-active-muted text-status-active",
++};
++
++/**
++ * One shape per tier so the badges stay distinct in greyscale (STD-UI-8; UX
++ * design 1.2, Accessibility): good a filled circle, warning a triangle, active
++ * a ringed dot.
++ */
++const TIER_SHAPES: Record<Tier, JSX.Element> = {
++  good: <circle cx="6" cy="6" r="5" fill="currentColor" />,
++  warning: <path d="M6 1 11 11H1Z" fill="currentColor" />,
++  active: (
++    <>
++      <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
++      <circle cx="6" cy="6" r="2" fill="currentColor" />
++    </>
++  ),
++};
++
++function Badge({ tier, children }: { tier: Tier; children: string }): JSX.Element {
++  return (
++    <span data-variant={`status-${tier}`} className={`${BADGE} ${TIER_CLASSES[tier]}`}>
++      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
++        {TIER_SHAPES[tier]}
++      </svg>
++      {children}
++    </span>
++  );
++}
++
++const OUTCOME: Record<RunOutcome, { tier: Tier; word: string }> = {
++  succeeded: { tier: "good", word: SCORE_SET.complete },
++  partial: { tier: "warning", word: SCORE_SET.partial },
++};
++
++/** *Scores from {time} · from the download started {time}*, the start time linked to the run. */
++function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
++  const started = formatTimestamp(set.runStartedAt);
++  const clause = SCORE_SET.fromTheDownloadStarted(started);
++  // The clause's words precede its time, which is the link.
++  const words = clause.slice(0, clause.length - started.length);
++  return (
++    <>
++      {SCORE_SET.scoresFrom(formatTimestamp(set.endedAt))}
++      {SCORE_SET.separator}
++      {words}
++      <Link
++        to={SHELL_ROUTES.download(set.runId)}
++        aria-label={SCORE_SET.openDownload(started)}
++        className="font-numeric underline"
++      >
++        {started}
++      </Link>
++    </>
++  );
++}
++
++function LiveRegion({
++  announcement,
++  building,
++  pollFailed,
++  onOpenEarlierSets,
++}: {
++  announcement: string | null;
++  building: boolean;
++  pollFailed: boolean;
++  onOpenEarlierSets?: () => void;
++}): JSX.Element {
++  return (
++    // An `output` carries `role="status"` implicitly, as the delivered
++    // unreachable state relies on; the explicit polite and non-atomic
++    // attributes are what this region needs beyond the default.
++    <output aria-live="polite" aria-atomic="false" data-testid="as-of-line-status">
++      {announcement ? <span>{announcement}</span> : null}
++      {building ? (
++        <>
++          {" "}
++          <Badge tier="active">{SCORE_SET.updating}</Badge>
++        </>
++      ) : null}
++      {onOpenEarlierSets ? (
++        <>
++          {" "}
++          <button
++            type="button"
++            data-variant="ghost"
++            onClick={onOpenEarlierSets}
++            className="rounded px-2 py-1 text-xs underline"
++          >
++            {SCORE_SET.earlierSetsAction}
++          </button>
++        </>
++      ) : null}
++      {pollFailed ? (
++        <>
++          {" "}
++          <br />
++          {SCORE_SET.couldNotCheck}
++        </>
++      ) : null}
++    </output>
++  );
++}
++
++/**
++ * The line, or `null` with no set (the never-populated body has no line), or
++ * its skeleton while the first read is pending (DEC-0154).
++ */
++export function AsOfLine({
++  set,
++  later,
++  checkedAt,
++  pollFailed,
++  onTryAgain,
++  announcement = null,
++  sortLabel,
++  onOpenEarlierSets,
++  loading = false,
++}: AsOfLineProps): JSX.Element | null {
++  if (set === null) {
++    return loading ? (
++      <div
++        data-testid="as-of-line-skeleton"
++        aria-hidden="true"
++        className="h-7 w-full animate-pulse rounded bg-secondary"
++      />
++    ) : null;
++  }
++  const building = later?.state === "building";
++  const outcome = OUTCOME[set.runOutcome];
++  return (
++    <p data-testid="as-of-line" className="text-xs text-muted-foreground">
++      <SetSentence set={set} /> <Badge tier={outcome.tier}>{outcome.word}</Badge>
++      {sortLabel === undefined ? null : `${SCORE_SET.separator}${SCORE_SET.sortedBy(sortLabel)}`}
++      {building && checkedAt !== null ? (
++        <>
++          {" "}
++          <span className="font-numeric">
++            {SCORE_SET.checked(formatTimestamp(checkedAt, { seconds: true }))}
++          </span>
++        </>
++      ) : null}
++      <LiveRegion
++        announcement={announcement}
++        building={building}
++        pollFailed={pollFailed}
++        onOpenEarlierSets={onOpenEarlierSets}
++      />
++      {pollFailed ? (
++        <>
++          {" "}
++          <button
++            type="button"
++            onClick={onTryAgain}
++            className="rounded border border-border px-2 py-1 text-xs"
++          >
++            {RESULTS.tryAgain}
++          </button>
++        </>
++      ) : null}
++    </p>
++  );
++}
