@@ -1,0 +1,139 @@
+diff --git a/tests/integration/test_reader_current_set.py b/tests/integration/test_reader_current_set.py
+index 9186f8e..2a629b5 100644
+--- a/tests/integration/test_reader_current_set.py
++++ b/tests/integration/test_reader_current_set.py
+@@ -52,7 +52,15 @@ def test_complete_set_with_newer_building_set_is_served_with_later(
+     _, complete_id = _complete(conn, T0)
+     run_b_started = T0 + timedelta(days=1)
+     run_b = insert_run(conn, "succeeded", started_at=run_b_started)
+-    building_id = insert_set(conn, run_b, "building", started_at=run_b_started + timedelta(hours=1))
++    building_started = run_b_started + timedelta(hours=1)
++    # The building set has factor rows of its own, unlike the complete set's (IR-002).
++    building_id = insert_set(
++        conn,
++        run_b,
++        "building",
++        started_at=building_started,
++        factors={"value": (3, False), "growth": (4, False), "momentum": (50, True)},
++    )
+ 
+     current, later = reader.read_set_blocks(conn)
+     summary = reader.summary(conn)
+@@ -64,12 +72,19 @@ def test_complete_set_with_newer_building_set_is_served_with_later(
+         assert set_block is not None
+         assert set_block.set_id == complete_id
+         assert set_block.not_current is True
++        assert set_block.factors == {
++            "value": reader.FactorSummary(35, True, 30),
++            "growth": reader.FactorSummary(31, True, 30),
++            "momentum": reader.FactorSummary(12, False, 30),
++        }
+         assert never is False
+         assert later_block is not None
+         assert later_block.set_id == building_id
+         assert later_block.state == "building"
+         assert later_block.run_id == run_b
+         assert later_block.run_started_at == run_b_started
++        # The set's own start: not the run's, nor the current set's (IR-001).
++        assert later_block.started_at == building_started
+         assert later_block.ended_at is None
+         assert later_block.failure_reason is None
+     assert summary.set == current
+@@ -113,6 +128,8 @@ def test_first_set_building_or_failed_is_never_classified_with_later(
+         assert block.state == state
+         assert block.run_id == run_id
+         assert block.run_started_at == run_started
++        # The set's own start, distinct from the run's; there is no current set (IR-001).
++        assert block.started_at == T0 + timedelta(hours=1)
+         if failed:
+             assert block.failure_reason == "boom"
+             assert block.ended_at == T0 + timedelta(hours=2)
+@@ -225,6 +242,88 @@ def test_building_set_older_than_current_is_not_later(
+     assert current.not_current is False
+ 
+ 
++def test_current_is_chosen_by_ended_at_where_started_at_orders_otherwise(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """Design 2.4, DAC-E3-1: the current set is the latest by `ended_at`, not by `started_at`.
++
++    Set A starts first and ends last; set B starts and ends inside A's window. A is current,
++    with its own factor rows although B has different ones (IR-003, IR-002). B is inserted
++    first, the reverse of TC-COMP-170's order, so a `factors` subquery that merges every set's
++    rows fails one of the two tests whichever duplicate key it keeps. A complete set started
++    after the current one cannot exist by construction (design 2.4), so `later` and
++    `not_current` are deliberately not asserted here.
++    """
++    conn = migrated_run_schema_connection
++    run_b = insert_run(conn, "succeeded", started_at=T0)
++    insert_set(
++        conn,
++        run_b,
++        "complete",
++        started_at=T0 + timedelta(hours=1),
++        ended_at=T0 + timedelta(hours=2),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=40,
++        factors={"value": (20, False), "growth": (44, True), "momentum": (36, True)},
++    )
++    run_a = insert_run(conn, "succeeded", started_at=T0 - timedelta(hours=1))
++    set_a = insert_set(
++        conn,
++        run_a,
++        "complete",
++        started_at=T0,
++        ended_at=T0 + timedelta(hours=3),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=40,
++        factors={"value": (35, True), "growth": (31, True), "momentum": (12, False)},
++    )
++
++    current = reader.current_set(conn)
++    summary = reader.summary(conn)
++
++    for block in (current, summary.set):
++        assert block is not None
++        assert block.set_id == set_a
++        assert block.run_id == run_a
++        assert block.ended_at == T0 + timedelta(hours=3)
++        assert block.factors == {
++            "value": reader.FactorSummary(35, True, 30),
++            "growth": reader.FactorSummary(31, True, 30),
++            "momentum": reader.FactorSummary(12, False, 30),
++        }
++
++
++def test_set_started_while_current_was_building_is_later(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """Design 2.4, DEC-0082, DAC-E3-1: `later` is a set started after the current set's
++    `started_at`, even one started before the current set's `ended_at` (IR-003)."""
++    conn = migrated_run_schema_connection
++    run_c = insert_run(conn, "succeeded", started_at=T0 - timedelta(hours=1))
++    complete_id = insert_set(
++        conn,
++        run_c,
++        "complete",
++        started_at=T0,
++        ended_at=T0 + timedelta(hours=3),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=40,
++    )
++    run_l = insert_run(conn, "succeeded", started_at=T0 + timedelta(minutes=30))
++    later_started = T0 + timedelta(hours=1)
++    building_id = insert_set(conn, run_l, "building", started_at=later_started)
++
++    current, later = reader.read_set_blocks(conn)
++
++    assert current is not None
++    assert current.set_id == complete_id
++    assert current.not_current is True
++    assert later is not None
++    assert later.set_id == building_id
++    assert later.state == "building"
++    assert later.started_at == later_started
++
++
+ @pytest.mark.parametrize("run_state", ["succeeded", "partial"])
+ def test_current_set_carries_run_and_set_fields(
+     migrated_run_schema_connection: psycopg.Connection, run_state: str
