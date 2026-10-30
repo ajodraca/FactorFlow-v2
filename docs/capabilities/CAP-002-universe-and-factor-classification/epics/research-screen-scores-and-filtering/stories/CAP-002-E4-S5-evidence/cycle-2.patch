@@ -1,0 +1,1916 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-1.patch b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-1.patch
+new file mode 100644
+index 0000000..09dea0b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/cycle-1.patch
+@@ -0,0 +1,483 @@
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log
++new file mode 100644
++index 0000000..04bfef1
++--- /dev/null
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-1.log
++@@ -0,0 +1,14 @@
+++
+++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
+++
+++stderr | src/screens/research/use-research-query.test.tsx > useResearchQuery (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156) > reads the query as decodeResearchQuery reads the location search
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/research/use-research-query.test.tsx (8 tests) 15ms
+++
+++ Test Files  1 passed (1)
+++      Tests  8 passed (8)
+++   Start at  00:21:18
+++   Duration  664ms (transform 28ms, setup 51ms, collect 69ms, tests 15ms, environment 241ms, prepare 133ms)
+++
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-1.json
++new file mode 100644
++index 0000000..8939b8b
++--- /dev/null
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-1.json
++@@ -0,0 +1,55 @@
+++{
+++ "schema": 1,
+++ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+++ "range": "HEAD..worktree",
+++ "mutants": [
+++  {
+++   "id": "manual:cycle-1:equal-write-navigates",
+++   "cycle": "cycle-1",
+++   "operator": "manual",
+++   "file": "web/src/screens/research/use-research-query.ts",
+++   "old": "      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {\n        return;\n      }\n",
+++   "new": ""
+++  },
+++  {
+++   "id": "manual:cycle-1:unknown-keys-dropped",
+++   "cycle": "cycle-1",
+++   "operator": "manual",
+++   "file": "web/src/screens/research/use-research-query.ts",
+++   "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+++   "new": "setSearchParams(() => applyResearchQuery(new URLSearchParams(), next));"
+++  },
+++  {
+++   "id": "manual:cycle-1:replace-not-push",
+++   "cycle": "cycle-1",
+++   "operator": "manual",
+++   "file": "web/src/screens/research/use-research-query.ts",
+++   "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+++   "new": "setSearchParams((previous) => applyResearchQuery(previous, next), { replace: true });"
+++  },
+++  {
+++   "id": "manual:cycle-1:clear-drops-sort",
+++   "cycle": "cycle-1",
+++   "operator": "manual",
+++   "file": "web/src/screens/research/use-research-query.ts",
+++   "old": "setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort })",
+++   "new": "setQuery({ ...DEFAULT_RESEARCH_QUERY })"
+++  },
+++  {
+++   "id": "manual:cycle-1:query-not-memoised",
+++   "cycle": "cycle-1",
+++   "operator": "manual",
+++   "file": "web/src/screens/research/use-research-query.ts",
+++   "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+++   "new": "const query = decodeResearchQuery(new URLSearchParams(search));"
+++  },
+++  {
+++   "id": "manual:cycle-1:query-ignores-search",
+++   "cycle": "cycle-1",
+++   "operator": "manual",
+++   "file": "web/src/screens/research/use-research-query.ts",
+++   "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+++   "new": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams()), [search]);"
+++  }
+++ ]
+++}
++\ No newline at end of file
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json
++new file mode 100644
++index 0000000..75e1dcc
++--- /dev/null
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-1-results.json
++@@ -0,0 +1,120 @@
+++{
+++  "schema": 1,
+++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/use-research-query.test.tsx",
+++  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+++  "tree_patch_sha256": "c4c0f6dd44f8bc755e5f41c5aa8f64354bf488c9de6c0204023c9e4a43124942",
+++  "mutants_file": "/tmp/claude-501/s5/mutants-1.json",
+++  "mutants_sha256": "f8da630b62c1f533214534b1f3c6e21f2f2ca81c447e326e2ebbfb1cd88dbf1a",
+++  "jobs": 3,
+++  "started": "2026-10-29T05:22:16Z",
+++  "baselines": [
+++    {
+++      "worker": 1,
+++      "exit_code": 0,
+++      "seconds": 1.4,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w1.log",
+++      "log_sha256": "b07449c510066311aa975ce17a611a2a686d697d178d9029fd191d7900a741fe"
+++    },
+++    {
+++      "worker": 2,
+++      "exit_code": 0,
+++      "seconds": 1.5,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w2.log",
+++      "log_sha256": "4f217d9ccb5193f209e4a7d329cbf2cafe5c285a26e1d34d1be4a907fd8ee7f0"
+++    },
+++    {
+++      "worker": 0,
+++      "exit_code": 0,
+++      "seconds": 1.5,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/baseline-w0.log",
+++      "log_sha256": "e4ffb36d34e0b46cbd876eb6acbb57bf275b5d12fa83467c13db6d888628e560"
+++    }
+++  ],
+++  "mutants": [
+++    {
+++      "id": "manual:cycle-1:equal-write-navigates",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "web/src/screens/research/use-research-query.ts",
+++      "old": "      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {\n        return;\n      }\n",
+++      "new": "",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 0.9,
+++      "worker": 0,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_equal-write-navigates.log",
+++      "log_sha256": "1aa2956fd5110fffadb1e94c6ecadc23866c1d6aadabd83fa2da48f1165afd44"
+++    },
+++    {
+++      "id": "manual:cycle-1:unknown-keys-dropped",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "web/src/screens/research/use-research-query.ts",
+++      "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+++      "new": "setSearchParams(() => applyResearchQuery(new URLSearchParams(), next));",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 0.9,
+++      "worker": 1,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_unknown-keys-dropped.log",
+++      "log_sha256": "1afdb8037fc01b843a955b2b63467c316d9979c124551e25e4a4d8bc84e06aeb"
+++    },
+++    {
+++      "id": "manual:cycle-1:replace-not-push",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "web/src/screens/research/use-research-query.ts",
+++      "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+++      "new": "setSearchParams((previous) => applyResearchQuery(previous, next), { replace: true });",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 0.9,
+++      "worker": 2,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_replace-not-push.log",
+++      "log_sha256": "e1d4b6eedb1d940e29a03caada49546e62af8b9e6100d6656cf084bdd57946c5"
+++    },
+++    {
+++      "id": "manual:cycle-1:clear-drops-sort",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "web/src/screens/research/use-research-query.ts",
+++      "old": "setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort })",
+++      "new": "setQuery({ ...DEFAULT_RESEARCH_QUERY })",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 0.9,
+++      "worker": 0,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_clear-drops-sort.log",
+++      "log_sha256": "8648e62714a49bbc1306f6c8ad7ccbcb8c0827c3fa644aef2a3788ef9d8f3ac3"
+++    },
+++    {
+++      "id": "manual:cycle-1:query-not-memoised",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "web/src/screens/research/use-research-query.ts",
+++      "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+++      "new": "const query = decodeResearchQuery(new URLSearchParams(search));",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 0.9,
+++      "worker": 1,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_query-not-memoised.log",
+++      "log_sha256": "cebe07740253e7fa3ef9f3ea5f6371fc89bf01fdb965f529e7a289c57637465e"
+++    },
+++    {
+++      "id": "manual:cycle-1:query-ignores-search",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "web/src/screens/research/use-research-query.ts",
+++      "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+++      "new": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams()), [search]);",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 0.9,
+++      "worker": 2,
+++      "log": "/tmp/claude-501/s5/mutation-cycle-1-logs/manual_cycle-1_query-ignores-search.log",
+++      "log_sha256": "9f0245987e0e886b4a403a9b08f9ca1cfdbd1829f47c2a62bd64d08a8b834eb1"
+++    }
+++  ],
+++  "finished": "2026-10-29T05:22:20Z"
+++}
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log
++new file mode 100644
++index 0000000..134853f
++--- /dev/null
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-1.log
++@@ -0,0 +1,32 @@
+++
+++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
+++
+++ ❯ src/screens/research/use-research-query.test.tsx (0 test)
+++
+++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/research/use-research-query.test.tsx [ src/screens/research/use-research-query.test.tsx ]
+++Error: Failed to resolve import "./use-research-query" from "web/src/screens/research/use-research-query.test.tsx". Does the file exist?
+++  Plugin: vite:import-analysis
+++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/use-research-query.test.tsx:12:33
+++  9  |    decodeResearchQuery
+++  10 |  } from "../../api/research-query";
+++  11 |  import { useResearchQuery } from "./use-research-query";
+++     |                                    ^
+++  12 |  function useHarness() {
+++  13 |    const location = useLocation();
+++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed (1)
+++      Tests  no tests
+++   Start at  00:20:07
+++   Duration  678ms (transform 21ms, setup 64ms, collect 0ms, tests 0ms, environment 264ms, prepare 35ms)
+++
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md
++index adfaaf8..f9b4932 100644
++--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5.md
++@@ -10,7 +10,7 @@ component: FactorFlow-v2
++ type: feature
++ priority: P1
++ estimate: 5
++-status: planning
+++status: in-progress
++ owner: Alvaro de Jodra
++ owner_github: ajodraca
++ created: 2026-10-17
++diff --git a/web/src/screens/research/use-research-query.test.tsx b/web/src/screens/research/use-research-query.test.tsx
++new file mode 100644
++index 0000000..ddc61e9
++--- /dev/null
+++++ b/web/src/screens/research/use-research-query.test.tsx
++@@ -0,0 +1,161 @@
+++import { act, renderHook } from "@testing-library/react";
+++import type { ReactNode } from "react";
+++import { useRef } from "react";
+++import { MemoryRouter, useLocation, useNavigate, useNavigationType } from "react-router-dom";
+++import { describe, expect, it } from "vitest";
+++import {
+++  DEFAULT_RESEARCH_QUERY,
+++  type ResearchQuery,
+++  applyResearchQuery,
+++  decodeResearchQuery,
+++} from "../../api/research-query";
+++import { useResearchQuery } from "./use-research-query";
+++
+++/**
+++ * The hook under test beside the router state a host observes: the search
+++ * string, how many distinct locations have been visited, how the last one was
+++ * reached and a way back (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156).
+++ */
+++function useHarness() {
+++  const location = useLocation();
+++  const navigate = useNavigate();
+++  const navigationType = useNavigationType();
+++  const research = useResearchQuery();
+++  const keys = useRef<string[]>([]);
+++  if (keys.current[keys.current.length - 1] !== location.key) {
+++    keys.current.push(location.key);
+++  }
+++  return {
+++    ...research,
+++    search: location.search.replace(/^\?/, ""),
+++    navigations: keys.current.length - 1,
+++    navigationType,
+++    back: () => navigate(-1),
+++  };
+++}
+++
+++function renderAt(search: string) {
+++  const wrapper = ({ children }: { children: ReactNode }) => (
+++    <MemoryRouter initialEntries={[`/research${search}`]}>{children}</MemoryRouter>
+++  );
+++  return renderHook(useHarness, { wrapper });
+++}
+++
+++const VALUE_80: ResearchQuery = {
+++  ...DEFAULT_RESEARCH_QUERY,
+++  sentences: { value: { measure: "percentile", direction: "atLeast", value: "80" } },
+++};
+++
+++describe("useResearchQuery (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156)", () => {
+++  it("reads the query as decodeResearchQuery reads the location search", () => {
+++    const search =
+++      "?scope=u1&value.measure=percentile&value.direction=atLeast&value.value=80&hide_incomplete=true&symbol=aa&sort=symbol&order=desc&tab=history";
+++    const { result } = renderAt(search);
+++
+++    expect(result.current.query).toEqual(decodeResearchQuery(new URLSearchParams(search)));
+++    expect(result.current.query.symbol).toBe("AA");
+++    expect(result.current.query.scope).toBe("u1");
+++  });
+++
+++  it("setQuery writes applyResearchQuery over the current params: unknown keys survive, defaults are not written", () => {
+++    const { result } = renderAt("?tab=history&sort=symbol");
+++
+++    act(() => result.current.setQuery({ ...result.current.query, hideIncomplete: true }));
+++
+++    const expected = applyResearchQuery(new URLSearchParams("tab=history&sort=symbol"), {
+++      ...DEFAULT_RESEARCH_QUERY,
+++      hideIncomplete: true,
+++      sort: { key: "symbol", order: "asc" },
+++    }).toString();
+++    expect(result.current.search).toBe(expected);
+++    expect(result.current.search).toBe("tab=history&hide_incomplete=true&sort=symbol");
+++    expect(result.current.search).not.toContain("scope=");
+++    expect(result.current.search).not.toContain("order=");
+++  });
+++
+++  it("setQuery causes exactly one navigation, a push, so back restores the earlier URL", () => {
+++    const { result } = renderAt("?sort=symbol");
+++    expect(result.current.navigations).toBe(0);
+++
+++    act(() => result.current.setQuery({ ...result.current.query, symbol: "AA" }));
+++
+++    expect(result.current.navigations).toBe(1);
+++    expect(result.current.navigationType).toBe("PUSH");
+++    expect(result.current.search).toBe("symbol=AA&sort=symbol");
+++
+++    act(() => result.current.back());
+++
+++    expect(result.current.search).toBe("sort=symbol");
+++    expect(result.current.query.symbol).toBeNull();
+++  });
+++
+++  it("setQuery of an equal query causes no navigation", () => {
+++    const { result } = renderAt("?value.measure=percentile&value.direction=atLeast&value.value=80");
+++    const before = result.current.query;
+++
+++    act(() => result.current.setQuery({ ...VALUE_80 }));
+++
+++    expect(result.current.navigations).toBe(0);
+++    expect(result.current.query).toBe(before);
+++  });
+++
+++  it("clear writes the defaults and keeps sort and order", () => {
+++    const { result } = renderAt(
+++      "?scope=u1&value.measure=percentile&value.direction=atLeast&value.value=80&hide_incomplete=true&symbol=AA&sort=value_percentile&order=desc&tab=history",
+++    );
+++
+++    act(() => result.current.clear());
+++
+++    expect(result.current.search).toBe("tab=history&sort=value_percentile&order=desc");
+++    expect(result.current.query).toEqual({
+++      ...DEFAULT_RESEARCH_QUERY,
+++      sort: { key: "value_percentile", order: "desc" },
+++    });
+++    expect(result.current.navigations).toBe(1);
+++  });
+++
+++  it("clear with no sort writes the empty query", () => {
+++    const { result } = renderAt("?symbol=AA");
+++
+++    act(() => result.current.clear());
+++
+++    expect(result.current.search).toBe("");
+++    expect(result.current.query).toEqual(DEFAULT_RESEARCH_QUERY);
+++  });
+++
+++  it("two setQuery calls in one tick are two pushes, each a full rewrite of the owned keys", () => {
+++    const { result } = renderAt("?tab=history");
+++
+++    act(() => {
+++      const current = result.current.query;
+++      result.current.setQuery({ ...current, symbol: "AA" });
+++      result.current.setQuery({ ...current, symbol: "AA", hideIncomplete: true });
+++    });
+++
+++    expect(result.current.search).toBe("tab=history&hide_incomplete=true&symbol=AA");
+++
+++    // react-router's functional setSearchParams hands the second write the
+++    // render snapshot, not the first write's URL; applyResearchQuery rewrites
+++    // every owned key from `next`, so a full query lands whole either way.
+++    // React renders the two pushes once, so the history entries, not the
+++    // renders, show that each write was its own push.
+++    act(() => result.current.back());
+++    expect(result.current.search).toBe("tab=history&symbol=AA");
+++
+++    act(() => result.current.back());
+++    expect(result.current.search).toBe("tab=history");
+++  });
+++
+++  it("keeps the query identity across re-renders while the search is unchanged", () => {
+++    const { result, rerender } = renderAt("?symbol=AA");
+++    const first = result.current.query;
+++
+++    rerender();
+++
+++    expect(result.current.query).toBe(first);
+++
+++    act(() => result.current.setQuery({ ...result.current.query, hideIncomplete: true }));
+++
+++    expect(result.current.query).not.toBe(first);
+++  });
+++});
++diff --git a/web/src/screens/research/use-research-query.ts b/web/src/screens/research/use-research-query.ts
++new file mode 100644
++index 0000000..12e9e08
++--- /dev/null
+++++ b/web/src/screens/research/use-research-query.ts
++@@ -0,0 +1,51 @@
+++import { useCallback, useMemo } from "react";
+++import { useSearchParams } from "react-router-dom";
+++import {
+++  DEFAULT_RESEARCH_QUERY,
+++  type ResearchQuery,
+++  applyResearchQuery,
+++  decodeResearchQuery,
+++} from "../../api/research-query";
+++
+++/** What a host reads and writes: the query, one write, and the reset Clear filters performs. */
+++export interface ResearchQueryBinding {
+++  query: ResearchQuery;
+++  setQuery(next: ResearchQuery): void;
+++  clear(): void;
+++}
+++
+++/**
+++ * The React binding between the URL and S2's `ResearchQuery` (DAC-E4-3;
+++ * DEC-0156). The URL is the only state: `query` is `decodeResearchQuery` of
+++ * the location search, and `setQuery` writes `applyResearchQuery` over the
+++ * current params as a push, so unknown keys survive, no default is written
+++ * and back navigation restores the earlier filter. A write that leaves the
+++ * search unchanged navigates nowhere.
+++ *
+++ * The host that issues the list request (CAP-002-E4-S9 on Research,
+++ * CAP-002-E1-S8 on universe detail) must key it on `query`, whose identity is
+++ * stable while the search string is unchanged: one write, one URL, one request
+++ * (DAC-E4-S5-2). The Filters pane never fetches the list.
+++ */
+++export function useResearchQuery(): ResearchQueryBinding {
+++  const [searchParams, setSearchParams] = useSearchParams();
+++  const search = searchParams.toString();
+++  const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);
+++
+++  const setQuery = useCallback(
+++    (next: ResearchQuery): void => {
+++      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {
+++        return;
+++      }
+++      setSearchParams((previous) => applyResearchQuery(previous, next));
+++    },
+++    [search, setSearchParams],
+++  );
+++
+++  const clear = useCallback(
+++    (): void => setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort }),
+++    [query.sort, setQuery],
+++  );
+++
+++  return { query, setQuery, clear };
+++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-2.log
+new file mode 100644
+index 0000000..43f845b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/green-cycle-2.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/copy.test.ts (302 tests) 21ms
++ ✓ src/screens/research/threshold-sentence.test.tsx (57 tests) 716ms
++
++ Test Files  2 passed (2)
++      Tests  359 passed (359)
++   Start at  00:33:24
++   Duration  1.12s (transform 68ms, setup 60ms, collect 120ms, tests 737ms, environment 289ms, prepare 90ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-2.json
+new file mode 100644
+index 0000000..9235e47
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutants-cycle-2.json
+@@ -0,0 +1,218 @@
++{
++ "schema": 1,
++ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:46:drop-field-copy:1",
++   "cycle": "cycle-2",
++   "operator": "drop-field-copy",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 46,
++   "original": "    : { measure: value.measure, direction: value.direction, raw: value.value };",
++   "mutated": "    : { measure: nil, direction: value.direction, raw: value.value };"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:46:drop-field-copy:2",
++   "cycle": "cycle-2",
++   "operator": "drop-field-copy",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 46,
++   "original": "    : { measure: value.measure, direction: value.direction, raw: value.value };",
++   "mutated": "    : { measure: value.measure, direction: nil, raw: value.value };"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 51,
++   "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++   "mutated": "    a !== undefined || a.measure === b.measure && a.direction === b.direction && a.value === b.value"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:2",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 51,
++   "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++   "mutated": "    a !== undefined && a.measure === b.measure || a.direction === b.direction && a.value === b.value"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:3",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 51,
++   "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++   "mutated": "    a !== undefined && a.measure === b.measure && a.direction === b.direction || a.value === b.value"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 87,
++   "original": "      measure !== undefined && direction !== undefined && raw !== undefined",
++   "mutated": "      measure !== undefined || direction !== undefined && raw !== undefined"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:2",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 87,
++   "original": "      measure !== undefined && direction !== undefined && raw !== undefined",
++   "mutated": "      measure !== undefined && direction !== undefined || raw !== undefined"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:108:drop-field-copy:1",
++   "cycle": "cycle-2",
++   "operator": "drop-field-copy",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 108,
++   "original": "      measure: next.measure,",
++   "mutated": "      measure: nil,"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:109:drop-field-copy:1",
++   "cycle": "cycle-2",
++   "operator": "drop-field-copy",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 109,
++   "original": "      direction: next.direction,",
++   "mutated": "      direction: nil,"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:112:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 112,
++   "original": "    if (!sameSentence(value, sentence)) {",
++   "mutated": "    if (sameSentence(value, sentence)) {"
++  },
++  {
++   "id": "web/src/screens/research/threshold-sentence.tsx:125:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "line": 125,
++   "original": "    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {",
++   "mutated": "    if (error !== null || validateThresholdValue(next.measure, nextRaw) === null) {"
++  },
++  {
++   "id": "manual:cycle-2:blank-after-set-guard-removed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "      if (value !== undefined) {\n        onCommit(null);\n      }\n",
++   "new": "      onCommit(null);\n"
++  },
++  {
++   "id": "manual:cycle-2:blank-is-an-error",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "  if (raw === \"\") {\n    return null;\n  }\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:value-row-name-templated",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "factor === \"value\" ? FILTERS.thresholdFor(factor) : FILTERS.valueThresholdFor(factor)",
++   "new": "FILTERS.valueThresholdFor(factor)"
++  },
++  {
++   "id": "manual:cycle-2:inputmode-removed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "          inputMode=\"decimal\"\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:error-not-cleared-on-change",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {\n      setError(null);\n    }\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:resync-keeps-error",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "    setDraft(draftOf(synced));\n    setError(null);\n",
++   "new": "    setDraft(draftOf(synced));\n"
++  },
++  {
++   "id": "manual:cycle-2:swatch-not-hidden",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "          aria-hidden=\"true\"\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:directions-swapped",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "const DIRECTIONS: readonly Direction[] = [\"atLeast\", \"atMost\"];",
++   "new": "const DIRECTIONS: readonly Direction[] = [\"atMost\", \"atLeast\"];"
++  },
++  {
++   "id": "manual:cycle-2:width-changed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "className=\"w-14 rounded border border-input p-1 text-right font-numeric\"",
++   "new": "className=\"w-16 rounded border border-input p-1 text-right font-numeric\""
++  },
++  {
++   "id": "manual:cycle-2:placeholder-removed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "          placeholder={FILTERS.valuePlaceholder}\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:describedby-removed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "          aria-describedby={error !== null ? errorId : undefined}\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:blur-removed",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "          onBlur={() => commit(draft)}\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-2:error-names-value-row",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/threshold-sentence.tsx",
++   "old": "    setError(factorProblem);",
++   "new": "    setError(problem);"
++  },
++  {
++   "id": "manual:cycle-2:copy-rules-swapped",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/screens/research/copy.ts",
++   "old": "    measure === \"percentile\"\n      ? \"a percentile is a number from 0 to 100\"\n      : \"a standardised score is a finite number\";",
++   "new": "    measure === \"percentile\"\n      ? \"a standardised score is a finite number\"\n      : \"a percentile is a number from 0 to 100\";"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..536fe1c
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,404 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/threshold-sentence.test.tsx src/screens/research/copy.test.ts",
++  "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
++  "tree_patch_sha256": "63a7a01646c3c1115996c62ffa5d9a504a94cd3d9fbe26ca093444a7405d9336",
++  "mutants_file": "/tmp/claude-501/s5/mutants-2.json",
++  "mutants_sha256": "af9d77c009db1c0ddec091e821876ffa50699037f8f695f398e7f84c402863a9",
++  "jobs": 4,
++  "started": "2026-10-29T05:32:50Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 2.0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/baseline-w2.log",
++      "log_sha256": "1a3a9d863e7c46e2bc6dfedd45c997b8bc088e9b77528f1d350c72e5231e435c"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 2.0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/baseline-w0.log",
++      "log_sha256": "1c696eca684db1bb7a5e6d26e7e94e2050c2cf0519e1d803c1f31c9ec8afa23d"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 2.0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/baseline-w1.log",
++      "log_sha256": "5ab53798961623c898b6a50bbb0c19dd62bf908ae33d0a2dd80e2bdf3fc64d6d"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 2.0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/baseline-w3.log",
++      "log_sha256": "26c9ebd5440475b3a0e0f49a273fae6caa0434c356b48fbae96159bb3f4b63f5"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:46:drop-field-copy:1",
++      "cycle": "cycle-2",
++      "operator": "drop-field-copy",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 46,
++      "original": "    : { measure: value.measure, direction: value.direction, raw: value.value };",
++      "mutated": "    : { measure: nil, direction: value.direction, raw: value.value };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_46_drop-field-copy_1.log",
++      "log_sha256": "b32836c17d5c2150227b2a6ba40bd0cd6ed08c8295817681b17a0bff2a9d58c1"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:46:drop-field-copy:2",
++      "cycle": "cycle-2",
++      "operator": "drop-field-copy",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 46,
++      "original": "    : { measure: value.measure, direction: value.direction, raw: value.value };",
++      "mutated": "    : { measure: value.measure, direction: nil, raw: value.value };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_46_drop-field-copy_2.log",
++      "log_sha256": "96b6312f1192a714a6f13941ae8cbac25eac09ebe1ada172fabe08444560b38b"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 51,
++      "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++      "mutated": "    a !== undefined || a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_51_negate-boolean_1.log",
++      "log_sha256": "a7dac86b69f872e3348c2d96a20c17c9e8ff7ede58be7bc103a5ee52dbd30645"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:2",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 51,
++      "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++      "mutated": "    a !== undefined && a.measure === b.measure || a.direction === b.direction && a.value === b.value",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_51_negate-boolean_2.log",
++      "log_sha256": "b611d79220513e3fddf0eebe487017b45b4ad059fbae18d5323fbf48121cf70f"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:51:negate-boolean:3",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 51,
++      "original": "    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value",
++      "mutated": "    a !== undefined && a.measure === b.measure && a.direction === b.direction || a.value === b.value",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_51_negate-boolean_3.log",
++      "log_sha256": "9852999423183d2cd4afb695f4253f86802ab014f76e12fc6b38d568e60dd061"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 87,
++      "original": "      measure !== undefined && direction !== undefined && raw !== undefined",
++      "mutated": "      measure !== undefined || direction !== undefined && raw !== undefined",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_87_negate-boolean_1.log",
++      "log_sha256": "125e267e5b11ea9bed8d28514453b03110accd8f3c7f612de163a51d82506413"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:87:negate-boolean:2",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 87,
++      "original": "      measure !== undefined && direction !== undefined && raw !== undefined",
++      "mutated": "      measure !== undefined && direction !== undefined || raw !== undefined",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.7,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_87_negate-boolean_2.log",
++      "log_sha256": "26e60d034a9a960c250407911bbf864be0404c582c842ffee7398e69bacb92ee"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:108:drop-field-copy:1",
++      "cycle": "cycle-2",
++      "operator": "drop-field-copy",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 108,
++      "original": "      measure: next.measure,",
++      "mutated": "      measure: nil,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_108_drop-field-copy_1.log",
++      "log_sha256": "a2c19db9e09359af1fbab8ac00e2fde1e6ce4b2987f16690ff2e74cf57918972"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:109:drop-field-copy:1",
++      "cycle": "cycle-2",
++      "operator": "drop-field-copy",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 109,
++      "original": "      direction: next.direction,",
++      "mutated": "      direction: nil,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_109_drop-field-copy_1.log",
++      "log_sha256": "7bfe276544b70a0adc71f258ce433bffc00b2a077b0bf56d1a64a461cb0922fc"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:112:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 112,
++      "original": "    if (!sameSentence(value, sentence)) {",
++      "mutated": "    if (sameSentence(value, sentence)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_112_negate-boolean_1.log",
++      "log_sha256": "2fe06f7ab881e6fcf496c2e9ceef85eba4dc5e3a5b2e2e57ea923e203bb90214"
++    },
++    {
++      "id": "web/src/screens/research/threshold-sentence.tsx:125:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "line": 125,
++      "original": "    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {",
++      "mutated": "    if (error !== null || validateThresholdValue(next.measure, nextRaw) === null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/web_src_screens_research_threshold-sentence.tsx_125_negate-boolean_1.log",
++      "log_sha256": "e83f0ace59cd1a388e532d3f0abf41fba06a85386c52794f41a6f08c66e14bda"
++    },
++    {
++      "id": "manual:cycle-2:blank-after-set-guard-removed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "      if (value !== undefined) {\n        onCommit(null);\n      }\n",
++      "new": "      onCommit(null);\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_blank-after-set-guard-removed.log",
++      "log_sha256": "bf52a86654ccb4be66a4ad4f653e5bef6689b91d66a3f3e7ec04c829251a2135"
++    },
++    {
++      "id": "manual:cycle-2:blank-is-an-error",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "  if (raw === \"\") {\n    return null;\n  }\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_blank-is-an-error.log",
++      "log_sha256": "49b528ea62182b7ea200f74723911d6d18035044ad8597e7e876d79c525c1fd8"
++    },
++    {
++      "id": "manual:cycle-2:value-row-name-templated",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "factor === \"value\" ? FILTERS.thresholdFor(factor) : FILTERS.valueThresholdFor(factor)",
++      "new": "FILTERS.valueThresholdFor(factor)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_value-row-name-templated.log",
++      "log_sha256": "3a67d3dfc51d5afceae289c54d494e063faf0ec3a5d6cba7047f1bd5cd802624"
++    },
++    {
++      "id": "manual:cycle-2:inputmode-removed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "          inputMode=\"decimal\"\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_inputmode-removed.log",
++      "log_sha256": "ef62f67a1758f4f183bd497d9b51949f2b559dfb5d3f72d8ae1333c210e8c06e"
++    },
++    {
++      "id": "manual:cycle-2:error-not-cleared-on-change",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {\n      setError(null);\n    }\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_error-not-cleared-on-change.log",
++      "log_sha256": "935ae541e60946630cd10a1de1bf81c85981a3692b75959f58be17bb6441f700"
++    },
++    {
++      "id": "manual:cycle-2:resync-keeps-error",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "    setDraft(draftOf(synced));\n    setError(null);\n",
++      "new": "    setDraft(draftOf(synced));\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_resync-keeps-error.log",
++      "log_sha256": "b5904758943ea98ae4f95b1efcbc9984ea7723ed41d53f5757c06eb0b73ca38d"
++    },
++    {
++      "id": "manual:cycle-2:swatch-not-hidden",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "          aria-hidden=\"true\"\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_swatch-not-hidden.log",
++      "log_sha256": "f6f75ac442aa414609122538bdd3b1c818455ecbac39e20e67d469719b616257"
++    },
++    {
++      "id": "manual:cycle-2:directions-swapped",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "const DIRECTIONS: readonly Direction[] = [\"atLeast\", \"atMost\"];",
++      "new": "const DIRECTIONS: readonly Direction[] = [\"atMost\", \"atLeast\"];",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_directions-swapped.log",
++      "log_sha256": "ee9d1a12f62c553c70920721377053825047e1118b8600f1bb5b2480a3e713c2"
++    },
++    {
++      "id": "manual:cycle-2:width-changed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "className=\"w-14 rounded border border-input p-1 text-right font-numeric\"",
++      "new": "className=\"w-16 rounded border border-input p-1 text-right font-numeric\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_width-changed.log",
++      "log_sha256": "95cb7eda3842850a09ea4da5ded73c12c053f31400431ab7d7da254c4162b749"
++    },
++    {
++      "id": "manual:cycle-2:placeholder-removed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "          placeholder={FILTERS.valuePlaceholder}\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_placeholder-removed.log",
++      "log_sha256": "a6ab5f1207385fabee33af22ece68537a115a1828a278295870d88b4bb49b067"
++    },
++    {
++      "id": "manual:cycle-2:describedby-removed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "          aria-describedby={error !== null ? errorId : undefined}\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_describedby-removed.log",
++      "log_sha256": "63ecf579d15acdc0ff20d83179224025c05575693a4f7e87724153156002e47a"
++    },
++    {
++      "id": "manual:cycle-2:blur-removed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "          onBlur={() => commit(draft)}\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_blur-removed.log",
++      "log_sha256": "a2215a87c43e6af0c29d272442e100da6cbef82e7b9faa09a88df7e07e0fe0c2"
++    },
++    {
++      "id": "manual:cycle-2:error-names-value-row",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/threshold-sentence.tsx",
++      "old": "    setError(factorProblem);",
++      "new": "    setError(problem);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_error-names-value-row.log",
++      "log_sha256": "de3761007799f3ee1b8d9537aee7ac5e25a1efe4a7514bd91d888e367d8b0852"
++    },
++    {
++      "id": "manual:cycle-2:copy-rules-swapped",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/screens/research/copy.ts",
++      "old": "    measure === \"percentile\"\n      ? \"a percentile is a number from 0 to 100\"\n      : \"a standardised score is a finite number\";",
++      "new": "    measure === \"percentile\"\n      ? \"a standardised score is a finite number\"\n      : \"a percentile is a number from 0 to 100\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/tmp/claude-501/s5/mutation-cycle-2-logs/manual_cycle-2_copy-rules-swapped.log",
++      "log_sha256": "bdd24586d773ec5a9cc71e1719d393d239bb4e16cc45b17b6308a6e4dea85395"
++    }
++  ],
++  "finished": "2026-10-29T05:33:03Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-2.log
+new file mode 100644
+index 0000000..a1b5a84
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S5-evidence/red-cycle-2.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/research/threshold-sentence.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/research/threshold-sentence.test.tsx [ src/screens/research/threshold-sentence.test.tsx ]
++Error: Failed to resolve import "./threshold-sentence" from "web/src/screens/research/threshold-sentence.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/threshold-sentence.test.tsx:10:58
++  6  |    decodeResearchQuery
++  7  |  } from "../../api/research-query";
++  8  |  import { ThresholdSentence, validateThresholdValue } from "./threshold-sentence";
++     |                                                             ^
++  9  |  const PERCENTILE_ERROR = "Could not set the value threshold: a percentile is a number from 0 to 100.";
++  10 |  const SCORE_ERROR = "Could not set the value threshold: a standardised score is a finite number.";
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  00:28:50
++   Duration  662ms (transform 17ms, setup 50ms, collect 0ms, tests 0ms, environment 255ms, prepare 32ms)
++
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 47ce2ab..1a7f8ff 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -53,6 +53,10 @@ const CALLS: Record<string, unknown[][]> = {
+     ],
+   ],
+   describeQuery: [[SAMPLE_QUERY]],
++  thresholdFieldError: [
++    ["value", "percentile"],
++    ["growth", "standardisedScore"],
++  ],
+   savedFromFilter: [["2026-10-15", SAMPLE_QUERY]],
+   "SELECTION.inUniverses": [[["Tech", "Dividend growers"]]],
+   "SELECTION.inputsLine": [
+@@ -433,6 +437,7 @@ describe("copy.ts completeness and keying", () => {
+     "Open Data health",
+     "Earlier sets…",
+     "Find a stock",
++    "Unavailable universe",
+     "A score is shown only when every input is present and current. This checks presence and currency, not whether the provider's values are correct.",
+     "No stocks match these filters, so there is nothing to save.",
+     "Could not save these stocks as a universe: the scores changed while you were reviewing them. Review the new result, then save again.",
+@@ -442,6 +447,14 @@ describe("copy.ts completeness and keying", () => {
+ 
+   it("(d) renders the templated design messages for the design's example arguments", () => {
+     expect(copy.CELL.qualified(12, 30)).toBe("12 qualified, 30 needed");
++    expect(copy.FILTERS.valueThresholdFor("growth")).toBe("Value threshold for growth");
++    expect(copy.FILTERS.valueThresholdFor("momentum")).toBe("Value threshold for momentum");
++    expect(copy.thresholdFieldError("value", "percentile")).toBe(
++      "Could not set the value threshold: a percentile is a number from 0 to 100.",
++    );
++    expect(copy.thresholdFieldError("momentum", "standardisedScore")).toBe(
++      "Could not set the momentum threshold: a standardised score is a finite number.",
++    );
+     expect(copy.DIALOGS.saved(14, "Tech")).toBe("Saved 14 stocks as Tech");
+     expect(copy.DIALOGS.added(3, "Tech", 0)).toBe("Added 3 stocks to Tech");
+     expect(copy.DIALOGS.added(3, "Tech", 1)).toBe(
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index feca828..7977408 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -19,7 +19,7 @@ import type {
+   ClassificationResource,
+   FactorName,
+ } from "../../api/classification-types";
+-import type { ResearchQuery } from "../../api/research-query";
++import type { Measure, ResearchQuery } from "../../api/research-query";
+ 
+ const FACTORS: readonly FactorName[] = ["value", "growth", "momentum"];
+ 
+@@ -245,14 +245,41 @@ export const FILTERS = {
+   directionFor: (factor: string): string => `Direction for ${factor}`,
+   thresholdFor: (factor: string): string =>
+     `${factor.charAt(0).toUpperCase()}${factor.slice(1)} threshold`,
++  /**
++   * The growth and momentum rows' value blank, so the three textboxes have
++   * distinct names; the value row keeps the design's verbatim *Value
++   * threshold* (DEC-0157; CAP-002-E4-S5 Open Gap 2). No design contains it.
++   */
++  valueThresholdFor: (factor: string): string => `Value threshold for ${factor}`,
+   valuePlaceholder: "any",
+   percentileHelper:
+     'Percentile 70 means "scores better than 70% of the stocks scored on this factor".',
+   hideIncomplete: "Hide stocks with an incomplete score",
+   hideIncompleteHelper: "They're shown by default so nothing disappears silently.",
+   clearFilters: "Clear filters",
++  /**
++   * The *Look in* option for a URL scope that names no active universe, so the
++   * control never shows a filter the request does not use (DEC-0158;
++   * CAP-002-E4-S5 Open Gap 3). No design contains it.
++   */
++  unavailableUniverse: "Unavailable universe",
+ } as const;
+ 
++/**
++ * The threshold field's error on blur: the design's *Could not {verb phrase}:
++ * {reason}.* refusal with the factor's threshold as the resource and the
++ * measure's validity rule as the reason (DEC-0157, PROVISIONAL; CAP-002-E4-S5
++ * Open Gap 4). A standalone string: not `failureSentence` output and no entry
++ * of `OPERATION_LABELS`, which is typed over the API's operations.
++ */
++export function thresholdFieldError(factor: FactorName, measure: Measure): string {
++  const rule =
++    measure === "percentile"
++      ? "a percentile is a number from 0 to 100"
++      : "a standardised score is a finite number";
++  return `Could not set the ${factor} threshold: ${rule}.`;
++}
++
+ /** One threshold sentence in words: *value percentile at least 80*. */
+ function sentenceClause(factor: FactorName, query: ResearchQuery): string | null {
+   const sentence = query.sentences[factor];
+diff --git a/web/src/screens/research/threshold-sentence.test.tsx b/web/src/screens/research/threshold-sentence.test.tsx
+new file mode 100644
+index 0000000..768f893
+--- /dev/null
++++ b/web/src/screens/research/threshold-sentence.test.tsx
+@@ -0,0 +1,436 @@
++import { render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { describe, expect, it, vi } from "vitest";
++import type { FactorName } from "../../api/classification-types";
++import {
++  type Measure,
++  type ThresholdSentence as Sentence,
++  decodeResearchQuery,
++} from "../../api/research-query";
++import { ThresholdSentence, validateThresholdValue } from "./threshold-sentence";
++
++const PERCENTILE_ERROR =
++  "Could not set the value threshold: a percentile is a number from 0 to 100.";
++const SCORE_ERROR = "Could not set the value threshold: a standardised score is a finite number.";
++
++function renderValueRow(value?: Sentence) {
++  const onCommit = vi.fn();
++  const view = render(<ThresholdSentence factor="value" value={value} onCommit={onCommit} />);
++  return {
++    onCommit,
++    view,
++    field: screen.getByRole("textbox", { name: "Value threshold" }),
++    measure: screen.getByRole("combobox", { name: "Measure for value" }),
++    direction: screen.getByRole("combobox", { name: "Direction for value" }),
++  };
++}
++
++function expectFieldError(field: HTMLElement, text: string): void {
++  const alert = screen.getByRole("alert");
++  expect(alert).toHaveTextContent(text);
++  expect(alert.textContent).toBe(text);
++  expect(field).toHaveAttribute("aria-invalid", "true");
++  expect(field.getAttribute("aria-describedby")?.split(" ")).toContain(alert.id);
++}
++
++// Implements TC-COMP-134 (DAC-E4-S5-1): the field validates on blur, before any request.
++describe("TC-COMP-134: threshold field validates percentile and non-finite scores on blur", () => {
++  it.each(["101", "-1", "abc", "1e3", "100.5"])(
++    "(a) percentile %j is a field error on blur and commits nothing",
++    async (raw) => {
++      const user = userEvent.setup();
++      const { field, onCommit } = renderValueRow();
++
++      await user.type(field, raw);
++      await user.tab();
++
++      expectFieldError(field, PERCENTILE_ERROR);
++      expect(onCommit.mock.calls.length).toBe(0);
++    },
++  );
++
++  it.each(["NaN", "Infinity", "-Infinity", "abc"])(
++    "(b) standardised score %j is a field error on blur and commits nothing",
++    async (raw) => {
++      const user = userEvent.setup();
++      const { field, measure, onCommit } = renderValueRow();
++
++      await user.selectOptions(measure, "standardisedScore");
++      await user.type(field, raw);
++      await user.tab();
++
++      expectFieldError(field, SCORE_ERROR);
++      expect(onCommit.mock.calls.length).toBe(0);
++    },
++  );
++
++  it.each(["0", "100", "70", "87.5"])(
++    "(c) percentile %j commits exactly once on blur",
++    async (raw) => {
++      const user = userEvent.setup();
++      const { field, onCommit } = renderValueRow();
++
++      await user.type(field, raw);
++      await user.tab();
++
++      expect(onCommit.mock.calls).toEqual([
++        [{ measure: "percentile", direction: "atLeast", value: raw }],
++      ]);
++      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++      expect(field).not.toHaveAttribute("aria-invalid");
++    },
++  );
++
++  it.each(["-0.45", "+1.27", "0"])(
++    "(c) standardised score %j commits exactly once on blur",
++    async (raw) => {
++      const user = userEvent.setup();
++      const { field, measure, onCommit } = renderValueRow();
++
++      await user.selectOptions(measure, "standardisedScore");
++      await user.type(field, raw);
++      await user.tab();
++
++      expect(onCommit.mock.calls).toEqual([
++        [{ measure: "standardisedScore", direction: "atLeast", value: raw }],
++      ]);
++      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++    },
++  );
++
++  it("(d) a blank value after a committed one commits null with no field error", async () => {
++    const user = userEvent.setup();
++    const { field, onCommit } = renderValueRow({
++      measure: "percentile",
++      direction: "atLeast",
++      value: "70",
++    });
++    expect(field).toHaveValue("70");
++
++    await user.clear(field);
++    await user.tab();
++
++    expect(onCommit.mock.calls).toEqual([[null]]);
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("names the row's own factor in the error, not the value row's", async () => {
++    const user = userEvent.setup();
++    const onCommit = vi.fn();
++    render(<ThresholdSentence factor="growth" onCommit={onCommit} />);
++    const field = screen.getByRole("textbox", { name: "Value threshold for growth" });
++
++    await user.type(field, "101");
++    await user.tab();
++
++    expectFieldError(
++      field,
++      "Could not set the growth threshold: a percentile is a number from 0 to 100.",
++    );
++    expect(onCommit.mock.calls.length).toBe(0);
++  });
++
++  it("(d) a field that was always blank commits nothing on blur", async () => {
++    const user = userEvent.setup();
++    const { field, onCommit } = renderValueRow();
++
++    await user.click(field);
++    await user.tab();
++
++    expect(onCommit.mock.calls.length).toBe(0);
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++});
++
++// Implements TC-COMP-137 (DAC-E4-S5-4): each sentence reads as its blanks (DEC-0157).
++describe("TC-COMP-137: threshold sentences have accessible names reading as sentences", () => {
++  it("names the value row's three blanks as the design writes them", () => {
++    renderValueRow();
++
++    expect(screen.getByRole("combobox", { name: "Measure for value" })).toBeInTheDocument();
++    expect(screen.getByRole("combobox", { name: "Direction for value" })).toBeInTheDocument();
++    expect(screen.getByRole("textbox", { name: "Value threshold" })).toBeInTheDocument();
++  });
++
++  it.each<FactorName>(["growth", "momentum"])(
++    "names the %s row's blanks with the factor, so the three textboxes are distinct",
++    (factor) => {
++      render(<ThresholdSentence factor={factor} onCommit={vi.fn()} />);
++
++      expect(screen.getByRole("combobox", { name: `Measure for ${factor}` })).toBeInTheDocument();
++      expect(screen.getByRole("combobox", { name: `Direction for ${factor}` })).toBeInTheDocument();
++      expect(
++        screen.getByRole("textbox", { name: `Value threshold for ${factor}` }),
++      ).toBeInTheDocument();
++    },
++  );
++
++  it("lists the measures and directions in order and offers 'any' as the value placeholder", () => {
++    const { measure, direction, field } = renderValueRow();
++
++    expect(
++      within(measure)
++        .getAllByRole("option")
++        .map((option) => option.textContent),
++    ).toEqual(["percentile", "standardised score"]);
++    expect(
++      within(direction)
++        .getAllByRole("option")
++        .map((option) => option.textContent),
++    ).toEqual(["at least", "at most"]);
++    expect(field).toHaveAttribute("placeholder", "any");
++    expect(field).toHaveClass("w-14");
++  });
++
++  it.each<[FactorName, string]>([
++    ["value", "Value"],
++    ["growth", "Growth"],
++    ["momentum", "Momentum"],
++  ])(
++    "reads the %s row as a <p>: hidden swatch, %j, then the three blanks in order",
++    (factor, name) => {
++      const { container } = render(<ThresholdSentence factor={factor} onCommit={vi.fn()} />);
++
++      const sentence = container.querySelectorAll("p");
++      expect(sentence).toHaveLength(1);
++      const row = sentence[0] as HTMLElement;
++      const swatch = row.querySelector("[aria-hidden='true']");
++      expect(swatch).not.toBeNull();
++      expect(row.textContent?.startsWith(name)).toBe(true);
++      const controls = Array.from(row.querySelectorAll("select, input"));
++      expect(controls.map((control) => control.getAttribute("aria-label"))).toEqual([
++        `Measure for ${factor}`,
++        `Direction for ${factor}`,
++        factor === "value" ? "Value threshold" : `Value threshold for ${factor}`,
++      ]);
++    },
++  );
++});
++
++// T005: sentence behaviour (AC-16, DAC-E4-S5-1, DAC-E4-S5-4; DEC-0157).
++describe("ThresholdSentence behaviour", () => {
++  const TABLE: [Measure, string, boolean][] = [
++    ["percentile", "0", true],
++    ["percentile", "100", true],
++    ["percentile", "100.0", true],
++    ["percentile", "-1", false],
++    ["percentile", "101", false],
++    ["percentile", "abc", false],
++    ["percentile", "", false],
++    ["percentile", "1e3", false],
++    ["standardisedScore", "-0.45", true],
++    ["standardisedScore", "+1.27", true],
++    ["standardisedScore", "0", true],
++    ["standardisedScore", "abc", false],
++    ["standardisedScore", "NaN", false],
++    ["standardisedScore", "Infinity", false],
++    ["standardisedScore", "1e3", false],
++    ["standardisedScore", "", false],
++  ];
++
++  it.each(TABLE)("(a) agrees with the codec: %s %j kept=%s", (measure, raw, kept) => {
++    const params = new URLSearchParams();
++    params.set("value.measure", measure);
++    params.set("value.direction", "atLeast");
++    params.set("value.value", raw);
++    const codecKeeps = decodeResearchQuery(params).sentences.value !== undefined;
++    const sentenceKeeps = raw !== "" && validateThresholdValue(measure, raw) === null;
++
++    expect(codecKeeps).toBe(kept);
++    expect(sentenceKeeps).toBe(codecKeeps);
++  });
++
++  it("(a) a blank value is not an error: it means no threshold", () => {
++    expect(validateThresholdValue("percentile", "")).toBeNull();
++    expect(validateThresholdValue("standardisedScore", "")).toBeNull();
++  });
++
++  it("(a) an invalid value's error names the factor and the measure's rule", () => {
++    expect(validateThresholdValue("percentile", "101")).toBe(PERCENTILE_ERROR);
++    expect(validateThresholdValue("standardisedScore", "NaN")).toBe(SCORE_ERROR);
++  });
++
++  it("(b) the field is a text input in decimal mode, not a number input", () => {
++    const { field } = renderValueRow();
++
++    expect(field).toHaveAttribute("type", "text");
++    expect(field).toHaveAttribute("inputmode", "decimal");
++  });
++
++  it("(c) changing the direction with a valid value commits the sentence once", async () => {
++    const user = userEvent.setup();
++    const { direction, onCommit } = renderValueRow({
++      measure: "percentile",
++      direction: "atLeast",
++      value: "70",
++    });
++
++    await user.selectOptions(direction, "atMost");
++
++    expect(onCommit.mock.calls).toEqual([
++      [{ measure: "percentile", direction: "atMost", value: "70" }],
++    ]);
++  });
++
++  it("(c) changing the measure with a valid value commits the sentence once", async () => {
++    const user = userEvent.setup();
++    const { measure, onCommit } = renderValueRow({
++      measure: "percentile",
++      direction: "atLeast",
++      value: "70",
++    });
++
++    await user.selectOptions(measure, "standardisedScore");
++
++    expect(onCommit.mock.calls).toEqual([
++      [{ measure: "standardisedScore", direction: "atLeast", value: "70" }],
++    ]);
++  });
++
++  it("(c) changing a select with a blank value commits nothing", async () => {
++    const user = userEvent.setup();
++    const { measure, direction, onCommit } = renderValueRow();
++
++    await user.selectOptions(measure, "standardisedScore");
++    await user.selectOptions(direction, "atMost");
++
++    expect(onCommit.mock.calls.length).toBe(0);
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("(c) a measure change that invalidates the value is a field error and commits nothing", async () => {
++    const user = userEvent.setup();
++    const { measure, field, onCommit } = renderValueRow({
++      measure: "standardisedScore",
++      direction: "atLeast",
++      value: "150",
++    });
++
++    await user.selectOptions(measure, "percentile");
++
++    expectFieldError(field, PERCENTILE_ERROR);
++    expect(onCommit.mock.calls.length).toBe(0);
++    expect(field).toHaveValue("150");
++  });
++
++  it("(d) neither commits nor reports while typing, only on blur", async () => {
++    const user = userEvent.setup();
++    const { field, onCommit } = renderValueRow();
++
++    await user.type(field, "101");
++
++    expect(onCommit.mock.calls.length).toBe(0);
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++
++    await user.tab();
++
++    expect(screen.getByRole("alert")).toBeInTheDocument();
++  });
++
++  it("(e) a shown error clears as soon as the field becomes valid", async () => {
++    const user = userEvent.setup();
++    const { field } = renderValueRow();
++    await user.type(field, "101");
++    await user.tab();
++    expect(screen.getByRole("alert")).toBeInTheDocument();
++
++    await user.clear(field);
++    await user.type(field, "50");
++
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++    expect(field).not.toHaveAttribute("aria-invalid");
++  });
++
++  it("(e) a shown error stays while the field is still invalid", async () => {
++    const user = userEvent.setup();
++    const { field } = renderValueRow();
++    await user.type(field, "101");
++    await user.tab();
++    expect(screen.getByRole("alert")).toBeInTheDocument();
++
++    await user.type(field, "1");
++
++    expect(field).toHaveValue("1011");
++    expect(screen.getByRole("alert")).toBeInTheDocument();
++    expect(field).toHaveAttribute("aria-invalid", "true");
++  });
++
++  it("(e) a shown error clears when the field becomes blank", async () => {
++    const user = userEvent.setup();
++    const { field } = renderValueRow();
++    await user.type(field, "101");
++    await user.tab();
++    expect(screen.getByRole("alert")).toBeInTheDocument();
++
++    await user.clear(field);
++
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("(f) re-syncs the draft when the value prop changes to undefined", async () => {
++    const user = userEvent.setup();
++    const onCommit = vi.fn();
++    const { rerender } = render(
++      <ThresholdSentence
++        factor="value"
++        value={{ measure: "standardisedScore", direction: "atMost", value: "1.5" }}
++        onCommit={onCommit}
++      />,
++    );
++    const field = screen.getByRole("textbox", { name: "Value threshold" });
++    expect(field).toHaveValue("1.5");
++    await user.clear(field);
++    await user.type(field, "abc");
++    await user.tab();
++    expect(screen.getByRole("alert")).toBeInTheDocument();
++
++    rerender(<ThresholdSentence factor="value" value={undefined} onCommit={onCommit} />);
++
++    expect(field).toHaveValue("");
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++    expect(screen.getByRole("combobox", { name: "Measure for value" })).toHaveValue("percentile");
++    expect(screen.getByRole("combobox", { name: "Direction for value" })).toHaveValue("atLeast");
++  });
++
++  it("(f) re-syncs the draft when the value prop changes to another sentence", () => {
++    const onCommit = vi.fn();
++    const { rerender } = render(<ThresholdSentence factor="value" onCommit={onCommit} />);
++
++    rerender(
++      <ThresholdSentence
++        factor="value"
++        value={{ measure: "standardisedScore", direction: "atMost", value: "-0.5" }}
++        onCommit={onCommit}
++      />,
++    );
++
++    expect(screen.getByRole("textbox", { name: "Value threshold" })).toHaveValue("-0.5");
++    expect(screen.getByRole("combobox", { name: "Measure for value" })).toHaveValue(
++      "standardisedScore",
++    );
++    expect(screen.getByRole("combobox", { name: "Direction for value" })).toHaveValue("atMost");
++  });
++
++  it("(g) no control is ever disabled: rows stay usable while a request is in flight", () => {
++    const { field, measure, direction } = renderValueRow();
++
++    for (const control of [field, measure, direction]) {
++      expect(control).not.toBeDisabled();
++      expect(control).not.toHaveAttribute("aria-disabled");
++    }
++  });
++
++  it("commits only when the sentence differs from the current value", async () => {
++    const user = userEvent.setup();
++    const { field, onCommit } = renderValueRow({
++      measure: "percentile",
++      direction: "atLeast",
++      value: "70",
++    });
++
++    await user.click(field);
++    await user.tab();
++
++    expect(onCommit.mock.calls.length).toBe(0);
++  });
++});
+diff --git a/web/src/screens/research/threshold-sentence.tsx b/web/src/screens/research/threshold-sentence.tsx
+new file mode 100644
+index 0000000..71b44ff
+--- /dev/null
++++ b/web/src/screens/research/threshold-sentence.tsx
+@@ -0,0 +1,196 @@
++import { type JSX, useEffect, useId, useState } from "react";
++import type { FactorName } from "../../api/classification-types";
++import {
++  type Direction,
++  type Measure,
++  type ThresholdSentence as Sentence,
++  decodeResearchQuery,
++} from "../../api/research-query";
++import { FACTOR_LABELS, FILTERS, thresholdFieldError } from "./copy";
++
++const DEFAULT_MEASURE: Measure = "percentile";
++const DEFAULT_DIRECTION: Direction = "atLeast";
++const MEASURES: readonly Measure[] = ["percentile", "standardisedScore"];
++const DIRECTIONS: readonly Direction[] = ["atLeast", "atMost"];
++
++/**
++ * The field error for `raw` under `measure`, or `null` when the value is valid
++ * or blank (blank means no threshold on that measure; DAC-E4-S5-1). Validity
++ * is the S2 codec's own verdict: the value is valid exactly when
++ * `decodeResearchQuery` would keep a sentence carrying it, so the pane and the
++ * URL cannot drift (DEC-0157). The wording is `copy.ts`'s.
++ */
++export function validateThresholdValue(measure: Measure, raw: string): string | null {
++  if (raw === "") {
++    return null;
++  }
++  const params = new URLSearchParams({
++    "value.measure": measure,
++    "value.direction": DEFAULT_DIRECTION,
++    "value.value": raw,
++  });
++  return decodeResearchQuery(params).sentences.value === undefined
++    ? thresholdFieldError("value", measure)
++    : null;
++}
++
++interface Draft {
++  measure: Measure;
++  direction: Direction;
++  raw: string;
++}
++
++function draftOf(value: Sentence | undefined): Draft {
++  return value === undefined
++    ? { measure: DEFAULT_MEASURE, direction: DEFAULT_DIRECTION, raw: "" }
++    : { measure: value.measure, direction: value.direction, raw: value.value };
++}
++
++function sameSentence(a: Sentence | undefined, b: Sentence): boolean {
++  return (
++    a !== undefined && a.measure === b.measure && a.direction === b.direction && a.value === b.value
++  );
++}
++
++export interface ThresholdSentenceProps {
++  factor: FactorName;
++  /** The factor's current sentence from the URL; `undefined` is no threshold. */
++  value?: Sentence;
++  /** One call per change: the new sentence, or `null` to drop the factor's threshold. */
++  onCommit(next: Sentence | null): void;
++}
++
++/**
++ * One factor's *[measure] [direction] [value]* sentence (blueprint 4.7;
++ * UX design 1.1 item 3; classification-ui 2.5): the swatch and name, then a
++ * `<p>` holding the three blanks whose accessible names read as the sentence
++ * (DAC-E4-S5-4; DEC-0157). The selects commit on change and the value on
++ * blur; an invalid value is a field error before any request and nothing is
++ * written (DAC-E4-S5-1). The draft re-syncs from `value`, so Clear filters and
++ * back navigation reset it. Nothing here is ever `disabled`: rows stay usable
++ * while a request is in flight.
++ */
++export function ThresholdSentence({
++  factor,
++  value,
++  onCommit,
++}: ThresholdSentenceProps): JSX.Element {
++  const [draft, setDraft] = useState<Draft>(() => draftOf(value));
++  const [error, setError] = useState<string | null>(null);
++  const errorId = useId();
++  const measure = value?.measure;
++  const direction = value?.direction;
++  const raw = value?.value;
++
++  useEffect(() => {
++    const synced =
++      measure !== undefined && direction !== undefined && raw !== undefined
++        ? { measure, direction, value: raw }
++        : undefined;
++    setDraft(draftOf(synced));
++    setError(null);
++  }, [measure, direction, raw]);
++
++  function commit(next: Draft): void {
++    const problem = validateThresholdValue(next.measure, next.raw);
++    const factorProblem = problem === null ? null : thresholdFieldError(factor, next.measure);
++    setError(factorProblem);
++    if (factorProblem !== null) {
++      return;
++    }
++    if (next.raw === "") {
++      if (value !== undefined) {
++        onCommit(null);
++      }
++      return;
++    }
++    const sentence: Sentence = {
++      measure: next.measure,
++      direction: next.direction,
++      value: next.raw,
++    };
++    if (!sameSentence(value, sentence)) {
++      onCommit(sentence);
++    }
++  }
++
++  function changeSelect(next: Draft): void {
++    setDraft(next);
++    commit(next);
++  }
++
++  function changeValue(nextRaw: string): void {
++    const next = { ...draft, raw: nextRaw };
++    setDraft(next);
++    if (error !== null && validateThresholdValue(next.measure, nextRaw) === null) {
++      setError(null);
++    }
++  }
++
++  const thresholdName =
++    factor === "value" ? FILTERS.thresholdFor(factor) : FILTERS.valueThresholdFor(factor);
++  const selectClass = "rounded border border-input bg-background px-2 py-1";
++
++  return (
++    <div className="flex flex-col gap-1">
++      <p className="flex flex-wrap items-center gap-2">
++        <span
++          aria-hidden="true"
++          className="inline-block h-3 w-3 rounded"
++          style={{ backgroundColor: `hsl(var(--factor-${factor}))` }}
++        />
++        <span>{FACTOR_LABELS[factor]}</span>
++        <select
++          data-variant="inline"
++          aria-label={FILTERS.measureFor(factor)}
++          value={draft.measure}
++          onChange={(event) => changeSelect({ ...draft, measure: event.target.value as Measure })}
++          className={selectClass}
++        >
++          {MEASURES.map((option) => (
++            <option key={option} value={option}>
++              {FILTERS.measures[option]}
++            </option>
++          ))}
++        </select>
++        <select
++          data-variant="inline"
++          aria-label={FILTERS.directionFor(factor)}
++          value={draft.direction}
++          onChange={(event) =>
++            changeSelect({ ...draft, direction: event.target.value as Direction })
++          }
++          className={selectClass}
++        >
++          {DIRECTIONS.map((option) => (
++            <option key={option} value={option}>
++              {FILTERS.directions[option]}
++            </option>
++          ))}
++        </select>
++        <input
++          type="text"
++          inputMode="decimal"
++          aria-label={thresholdName}
++          placeholder={FILTERS.valuePlaceholder}
++          value={draft.raw}
++          aria-invalid={error !== null ? "true" : undefined}
++          aria-describedby={error !== null ? errorId : undefined}
++          onChange={(event) => changeValue(event.target.value)}
++          onBlur={() => commit(draft)}
++          className="w-14 rounded border border-input p-1 text-right font-numeric"
++        />
++      </p>
++      {error !== null ? (
++        <p
++          id={errorId}
++          role="alert"
++          className="text-sm"
++          style={{ color: "hsl(var(--destructive))" }}
++        >
++          {error}
++        </p>
++      ) : null}
++    </div>
++  );
++}

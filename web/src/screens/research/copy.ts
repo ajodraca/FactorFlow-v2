@@ -19,7 +19,7 @@ import type {
   ClassificationResource,
   FactorName,
 } from "../../api/classification-types";
-import type { ResearchQuery } from "../../api/research-query";
+import type { Measure, ResearchQuery } from "../../api/research-query";
 
 const FACTORS: readonly FactorName[] = ["value", "growth", "momentum"];
 
@@ -245,13 +245,46 @@ export const FILTERS = {
   directionFor: (factor: string): string => `Direction for ${factor}`,
   thresholdFor: (factor: string): string =>
     `${factor.charAt(0).toUpperCase()}${factor.slice(1)} threshold`,
+  /**
+   * The growth and momentum rows' value blank, so the three textboxes have
+   * distinct names; the value row keeps the design's verbatim *Value
+   * threshold* (DEC-0157; CAP-002-E4-S5 Open Gap 2). No design contains it.
+   */
+  valueThresholdFor: (factor: string): string => `Value threshold for ${factor}`,
   valuePlaceholder: "any",
   percentileHelper:
     'Percentile 70 means "scores better than 70% of the stocks scored on this factor".',
   hideIncomplete: "Hide stocks with an incomplete score",
   hideIncompleteHelper: "They're shown by default so nothing disappears silently.",
   clearFilters: "Clear filters",
+  /**
+   * The *Look in* option for a URL scope that names no active universe, so the
+   * control never shows a filter the request does not use (DEC-0158;
+   * CAP-002-E4-S5 Open Gap 3). No design contains it.
+   */
+  unavailableUniverse: "Unavailable universe",
+  /**
+   * The *Look in* option for a URL scope while the universe list is still
+   * loading, in the interface's loading idiom (DEC-0237, PROVISIONAL). Once
+   * the list has failed the option reuses `OPERATION_LABELS["list-universes"]`.
+   */
+  loadingUniverses: "Loading universes…",
 } as const;
+
+/**
+ * The threshold field's error on blur: the design's *Could not {verb phrase}:
+ * {reason}.* refusal with the factor's threshold as the resource and the
+ * measure's validity rule as the reason (DEC-0157, PROVISIONAL; CAP-002-E4-S5
+ * Open Gap 4). A standalone string: not `failureSentence` output and no entry
+ * of `OPERATION_LABELS`, which is typed over the API's operations.
+ */
+export function thresholdFieldError(factor: FactorName, measure: Measure): string {
+  const rule =
+    measure === "percentile"
+      ? "a percentile is a number from 0 to 100"
+      : "a standardised score is a finite number";
+  return `Could not set the ${factor} threshold: ${rule}.`;
+}
 
 /** One threshold sentence in words: *value percentile at least 80*. */
 function sentenceClause(factor: FactorName, query: ResearchQuery): string | null {

@@ -1,0 +1,235 @@
+{
+ "schema": 1,
+ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:48:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 48,
+   "original": "  showLookIn = true,",
+   "mutated": "  showLookIn = false,"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:66:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 66,
+   "original": "    if (!showLookIn) {",
+   "mutated": "    if (showLookIn) {"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:69:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 69,
+   "original": "    let cancelled = false;",
+   "mutated": "    let cancelled = true;"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:72:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 72,
+   "original": "        if (!cancelled) {",
+   "mutated": "        if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:77:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 77,
+   "original": "        if (!cancelled) {",
+   "mutated": "        if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:82:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 82,
+   "original": "      cancelled = true;",
+   "mutated": "      cancelled = false;"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:98:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 98,
+   "original": "    if (!symbolAccepted(raw)) {",
+   "mutated": "    if (symbolAccepted(raw)) {"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:121:drop-field-copy:1",
+   "cycle": "cycle-3",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 121,
+   "original": "      sort: query.sort,",
+   "mutated": "      sort: nil,"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:128:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 128,
+   "original": "  const scopeListed = scope === null || universes.some((universe) => universe.universeId === scope);",
+   "mutated": "  const scopeListed = scope === null && universes.some((universe) => universe.universeId === scope);"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:135:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 135,
+   "original": "    Object.keys(query.sentences).length > 0 ||",
+   "mutated": "    Object.keys(query.sentences).length >= 0 ||"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:135:off-by-one:2",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 135,
+   "original": "    Object.keys(query.sentences).length > 0 ||",
+   "mutated": "    Object.keys(query.sentences).length > 1 ||"
+  },
+  {
+   "id": "web/src/screens/research/filters-pane.tsx:138:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "line": 138,
+   "original": "    (showLookIn && scope !== null);",
+   "mutated": "    (showLookIn || scope !== null);"
+  },
+  {
+   "id": "manual:cycle-3:clear-writes-scope-without-lookin",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "      scope: showLookIn ? null : query.scope,\n",
+   "new": "      scope: null,\n"
+  },
+  {
+   "id": "manual:cycle-3:clear-keeps-scope-with-lookin",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "      scope: showLookIn ? null : query.scope,\n",
+   "new": "      scope: query.scope,\n"
+  },
+  {
+   "id": "manual:cycle-3:clear-does-not-focus",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    findStockRef.current?.focus();\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:clear-keeps-symbol-draft",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "  function clearFilters(): void {\n    setSymbolDraft(\"\");\n    setSymbolError(null);\n",
+   "new": "  function clearFilters(): void {\n"
+  },
+  {
+   "id": "manual:cycle-3:symbol-not-uppercased",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    setQuery({ ...query, symbol: raw.toUpperCase() });",
+   "new": "    setQuery({ ...query, symbol: raw });"
+  },
+  {
+   "id": "manual:cycle-3:escape-ignored",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "            } else if (event.key === \"Escape\") {\n              setSymbolDraft(\"\");\n              commitSymbol(\"\");\n            }\n",
+   "new": "            }\n"
+  },
+  {
+   "id": "manual:cycle-3:sentence-null-kept",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "      delete sentences[factor];\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:unavailable-option-missing",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "            {scopeListed ? null : <option value={scope}>{FILTERS.unavailableUniverse}</option>}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:all-followed-written-as-scope",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "                scope: event.target.value === ALL_FOLLOWED ? null : event.target.value,",
+   "new": "                scope: event.target.value,"
+  },
+  {
+   "id": "manual:cycle-3:count-ignored",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "              {activeInstruments === null\n                ? FILTERS.allFollowedStocks\n                : FILTERS.allFollowedStocksOption(activeInstruments)}",
+   "new": "              {FILTERS.allFollowedStocks}"
+  },
+  {
+   "id": "manual:cycle-3:envelope-message-shown",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "  return cause instanceof ClassificationApiError\n    ? failureSentence(cause)\n    : failureSentence({ operation: \"list-universes\", resource: \"universe\", code: null });",
+   "new": "  return cause instanceof Error ? cause.message : String(cause);"
+  },
+  {
+   "id": "manual:cycle-3:helper-not-described",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "            aria-describedby={hideIncompleteHelperId}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:universes-fetched-without-lookin",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    if (!showLookIn) {\n      return;\n    }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:hide-incomplete-not-a-filter",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    query.hideIncomplete ||\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:symbol-not-a-filter",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/filters-pane.tsx",
+   "old": "    query.symbol !== null ||\n",
+   "new": ""
+  }
+ ]
+}

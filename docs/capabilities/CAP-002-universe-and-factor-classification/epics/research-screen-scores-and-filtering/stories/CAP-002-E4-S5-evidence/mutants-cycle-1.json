@@ -1,0 +1,55 @@
+{
+ "schema": 1,
+ "repo_head": "7b4b5f5b4b1148cb810c3364e429348fab532d9e",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:cycle-1:equal-write-navigates",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-research-query.ts",
+   "old": "      if (applyResearchQuery(new URLSearchParams(search), next).toString() === search) {\n        return;\n      }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:unknown-keys-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-research-query.ts",
+   "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+   "new": "setSearchParams(() => applyResearchQuery(new URLSearchParams(), next));"
+  },
+  {
+   "id": "manual:cycle-1:replace-not-push",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-research-query.ts",
+   "old": "setSearchParams((previous) => applyResearchQuery(previous, next));",
+   "new": "setSearchParams((previous) => applyResearchQuery(previous, next), { replace: true });"
+  },
+  {
+   "id": "manual:cycle-1:clear-drops-sort",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-research-query.ts",
+   "old": "setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort })",
+   "new": "setQuery({ ...DEFAULT_RESEARCH_QUERY })"
+  },
+  {
+   "id": "manual:cycle-1:query-not-memoised",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-research-query.ts",
+   "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+   "new": "const query = decodeResearchQuery(new URLSearchParams(search));"
+  },
+  {
+   "id": "manual:cycle-1:query-ignores-search",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/use-research-query.ts",
+   "old": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams(search)), [search]);",
+   "new": "const query = useMemo(() => decodeResearchQuery(new URLSearchParams()), [search]);"
+  }
+ ]
+}
