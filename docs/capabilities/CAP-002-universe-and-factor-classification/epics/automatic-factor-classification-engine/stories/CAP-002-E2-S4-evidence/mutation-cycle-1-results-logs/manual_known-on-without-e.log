@@ -1,0 +1,36 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=58931 user=test database=test_930cd02205e345c98041d2e97935d2b...aca56d0>, stock=1, set_id=UUID('794756cc-629a-4b46-93eb-c69bcacc4196'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10aca4ce0>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["value"] is None
+        assert rows["return_12m"]["as_of"] == E
+        assert rows["return_12m"]["detail"] == {
+            "boundary": "S_12",
+            "on_or_before": str(S12),
+            "window_months": 12,
+            "E": bar(E, 120),
+        }
+        for name, expected in (("return_3m", ret(120, 100)), ("return_6m", ret(120, 80))):
+            assert rows[name]["status"] == "present", name
+            assert_close(rows[name]["value"], expected)
+            assert rows[name]["as_of"] == E
+            # DEC-0118 (1): the E and S_k bars, not the latest bar held (observed on L).
+>           assert rows[name]["known_on"] == E
+E           assert datetime.date(2026, 6, 17) == datetime.date(2026, 9, 17)
+
+tests/integration/test_engine_inputs_momentum.py:155: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.92s

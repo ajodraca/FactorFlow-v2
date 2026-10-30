@@ -1,0 +1,24 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56115 user=test database=test_80658986af954049ad90b9e4d916ec2...ac0f5c0>, stock=1, set_id=UUID('43783d09-4691-45f9-987d-614e3649676c'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ac0d5b0>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["value"] is None
+>       assert rows["return_12m"]["as_of"] == E
+E       assert datetime.date(2026, 10, 16) == datetime.date(2026, 9, 17)
+
+tests/integration/test_engine_inputs_momentum.py:143: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 4.20s

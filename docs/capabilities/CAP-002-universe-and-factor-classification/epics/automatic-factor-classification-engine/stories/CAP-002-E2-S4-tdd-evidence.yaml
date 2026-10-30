@@ -1,0 +1,466 @@
+# TDD evidence for CAP-002-E2-S4 - Momentum inputs with split and dividend adjustment.
+# One cycle, as the task plan lays it out: Phase 2 writes every test (T002-T009) and observes RED, Phase 3 makes
+# them pass (T010-T012), Phase 4 validates and samples volume (T013, T014), Phase 5 checks traceability and the SQL
+# against the design (T015, T016, T018); T017 is this file. The driver commits once per stage: commit_hash is stage.
+# Review history: the first independent code review REJECTED the cycle (a zero or negative close on a bar used failed
+# the whole set); the rework stayed in cycle-1 with its own observed RED and is decided as DEC-0241 (provisional,
+# agent). The re-review APPROVED the reworked patch and a later test-only delta; spec drift was false on every patch.
+# Decisions applied: DEC-0052, DEC-0055, DEC-0111, DEC-0115, DEC-0116, DEC-0117, DEC-0118, DEC-0121, DEC-0241.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018]
+    decisions: [DEC-0052, DEC-0055, DEC-0111, DEC-0115, DEC-0116, DEC-0117, DEC-0118, DEC-0121, DEC-0241]
+    description: >
+      The momentum stage of the factor engine. momentum_inputs.sql is one INSERT into the inputs table that
+      value_inputs.sql creates: per active stock, E is its latest bar on or before D minus MOMENTUM_LAG_MONTHS
+      and S_k its latest bar on or before E minus k months, each read at the session's latest observation
+      (observed_on, then recorded_at; DEC-0117 (1)); splits and dividends are taken at their latest observation,
+      their payload values read only from a JSON number or a JSON string holding a plain decimal and checked for
+      range (DEC-0117 (2)); S_k's close is scaled by the usable splits in (S_k, E], each dividend in the window
+      compounds the factor by 1 + cash_amount x the splits strictly after its ex-date / its prior session's
+      close x the splits after that session (DEC-0118 (2), (3)); total return = E close / adjusted S_k close x
+      dividend factor - 1. Status: missing for a missing boundary (detail.boundary E or S_k), a non-positive
+      close on a bar used (DEC-0241) or an unusable payload in the window (DEC-0117 (3)), in that order; else
+      outdated when the latest bar precedes the latest trading day; else present; never not_computable. value
+      only when present, as_of is E, known_on the latest observed_on of the E and S_k bars, the window's splits
+      and dividends and each dividend's prior session (DEC-0118 (1)), restated_possible false, missing_data_type
+      prices. engine.py gains _momentum_inputs_stage (momentum_inputs.sql, then insert_inputs.sql with factors =
+      ['momentum']), registered after the fundamentals stage and above _STAGES.append(_classification_stage),
+      which stays the module's last statement (DEC-0121, DEC-0115). Tests:
+      tests/integration/test_engine_inputs_momentum.py (TC-COMP-063, 064, 065, 066 and 102, the supporting case
+      for TC-COMP-059, every T004 to T009 case, the DEC-0241 cases and the registration check) over the helpers
+      in tests/integration/engine_momentum_support.py.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-1-final-tests.log
+    red_log_sha256: 366be93c3b2029bd8a9f20367304b6c3f1ef2f28d7c9296237b46ad800acceff
+    red_evidence: >
+      RED of the final tests (red-cycle-1-final-tests.log): a clean clone of origin/main 7688c92 with no
+      production change, holding the two new test modules byte for byte as staged in cycle-1.patch (their sha256
+      are in the log header): 67 failed, 33 passed. Every failure is AttributeError: engine has no attribute
+      _momentum_inputs_stage; the 33 that pass are the existing stage-order and SQL-safety unit tests run beside
+      the module (the clean engine.py names _momentum_inputs_stage only in the _STAGES docstring CAP-002-E2-S5
+      wrote). Earlier REDs, kept in logs: red-cycle-1.log, the first draft of the tests before any production
+      code (50 failed, 33 passed, the same AttributeError); red-cycle-1-review-rework.log, the code review's
+      rework (DEC-0241 and review findings 4 and 5) run against the momentum_inputs.sql that review judged: 7
+      failed, 59 passed, the non-positive-close cases reading present instead of missing or failing the set with
+      DivisionByZero. Tests added after GREEN to kill mutants, before the final mutation run: the registration
+      check, plain decimal strings with zeros, a dividend's split factors stopping at E, a split on the prior
+      session, re-acquired S_k and prior bars, the cash regex cases and a positive close below 1.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-1.log
+        sha256: 597bed1e6f52d1c1e7e1be82985378434d534755c37b73d3570c90c5b52510f1
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-1-review-rework.log
+        sha256: 19fe7467040ac45c2d54521ff1f892fed32948baa928f2af8b4e101c6472456f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/t014-volume-probe.log
+        sha256: 81bf2e05ed54a3c8a1d7d3a0a6828e917799622ee79708b7607d1ceb685d3354
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/t014-volume-probe.py
+        sha256: bf191521136a36d2955a79945949d3725c2c1a585aca7c8e0bcd48020b80911c
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/full-suite-cycle-1.log
+        sha256: 800d96d8cf64466318377a39ab3f79d4c28ab6c70bc5b180c0fbce4a2d48cb68
+    green_evidence: >
+      Focused suite on the final tree (test_engine_inputs_momentum.py, test_engine_sql_safety.py,
+      test_classification_stage_order.py): 100 passed. Full validation on the final tree before hand-off: uv run
+      pytest 1679 passed, 1 xfailed (CAP-002-E2-S2's strict-xfail TC-COMP-059 line-item check; full-suite-
+      cycle-1.log); -m 'not postgres' 1082 passed, 1 xfailed; -m postgres 597 passed; ruff check, ruff format
+      --check and mypy src clean; npm ci, npx tsc --noEmit, npm run build clean; npm run test 876 passed; npm
+      run test:e2e 18 passed; uv build ships classification/sql/momentum_inputs.sql. npm run lint (40 errors)
+      and npm run format (2 files) fail only on the git-ignored build/lib/factorflow/api/static bundle an
+      earlier uv build left; biome lint and format over the 110 tracked sources are clean. The T018 query (no
+      momentum factor_input row not_computable or restated_possible) runs as assert_momentum_invariants in the
+      T009 precedence, row-count, unusable-payload and non-positive-close tests (19 builds) and returns (0, 0)
+      in each; the T014 probe's 9000 rows are all present.
+    t014: >
+      t014-volume-probe.log, final SQL: 3000 active instruments, 273 bars each (819,000 rows), 12,300 corporate
+      actions. momentum_inputs.sql under EXPLAIN (ANALYZE, BUFFERS) takes 0.40 s (execution 398 ms), far under
+      30 seconds; daily_bar is read only by backward index scans of idx_daily_bar_instrument_session, never
+      sequentially; the fundamentals and momentum stages build in 0.8 s with 9000 present rows. The first SQL
+      draft, written as T010 step (1) describes it (a DISTINCT ON CTE over every bar, joined to the window
+      actions), ran over 10 minutes on the same roster and was cancelled: the planner estimated the materialised
+      CTEs at one row and chose nested loops over about 36,000 x 36,000 rows. The final SQL applies the same
+      latest-observation rule by ORDER BY session_date DESC, observed_on DESC, recorded_at DESC LIMIT 1 lookups
+      (the form value_inputs.sql uses) and sums split factors over per-stock arrays. A signal for
+      CAP-002-E2-S7's volume test, not a gate.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    code_review: >
+      Independent code-review subagent. Round one REJECTED the first patch (1f257ed0): a zero or negative close
+      on a bar used raised DivisionByZero or InvalidArgumentForLogarithm and failed the whole set, including for
+      the prior session of a dividend outside every window; non-blocking: unusable-payload rows report the
+      prices acquisition, missing rows carry known_on, two test gaps (stale stock with an unusable payload; a
+      dividend's recorded split factors with a split after E), stale evidence, payload strings over 131,072
+      digits. Rework: DEC-0241, the guard, and tests for both gaps. Round two APPROVED patch 97c758f0 with the
+      non-blocking points left for the owner. A test-only delta (a positive close below 1, for four cut-off
+      mutants) was re-reviewed: APPROVED for the final patch.
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Independent spec-drift subagent, on all three patches: no drift; DEC-0241 contradicts no artifact.
+        Deviations it listed (behaviour unchanged): one cycle rather than one per task group; the T010 CTE list
+        realised as index lookups and per-stock split arrays; the detail shape (E and S bar objects,
+        adjusted_close, splits, dividends); known_on on missing rows counts every split and dividend in the
+        window and the rows read.
+    diff_sha256: 5ae8e9eca7a8b97427376bda428c1f2ad84668b02fdf0c1774223e7a7e3848a7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 6bb7d3cc94a8587c628e08dc77d69c8525a279016395c50b9786f1d80757a220
+      generated: 170
+      killed: 113
+      survived: 57
+      stillborn: 0
+      timeout: 0
+      score: 0.665
+      manual_mutants: >
+        58 of the 170 are hand-written (operator manual) over the semantics the generic operators cannot reach:
+        the latest-observation ordering of every lookup, E and S_k targets, the roster, inner joins, action
+        types and observations, each payload regex and guard, the split and dividend arithmetic and its bounds
+        at E, known_on's terms, status precedence, dating, detail and missing_data_type, the DEC-0241 guard, and
+        the stage's registration, factors and parameters in engine.py. All 58 are killed. Every generated mutant
+        outside a SQL comment is killed but one, which is equivalent.
+      survivors:
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:5
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:6
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:7
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:8
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:9
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:10
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:11
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:2:off-by-one:12
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:5:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:8:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:8:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:17:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:17:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:17:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:17:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:36:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:36:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:51:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:51:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:63:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:63:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:81:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:81:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:105:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:105:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:108:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:108:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:132:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:133:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:144:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:144:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:152:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:161:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:161:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:161:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:161:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:169:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:169:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:202:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:205:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the coalesce default is reached only when e_close or s_close is null, which is only when E or S_k
+            has no bar; those rows are already missing through the e_session IS NULL / s_session IS NULL test
+            that precedes it in the status CASE, and their detail is the boundary branch, which precedes the
+            price_not_positive branch. Every row with both bars has a non-null expression, so status, detail and
+            every other column are identical in either form
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:209:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:209:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:209:off-by-one:3
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:209:off-by-one:4
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:211:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:211:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:234:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:234:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:240:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:2
+          disposition: equivalent
+          reason: >
+            the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
+            which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
+            reads that text

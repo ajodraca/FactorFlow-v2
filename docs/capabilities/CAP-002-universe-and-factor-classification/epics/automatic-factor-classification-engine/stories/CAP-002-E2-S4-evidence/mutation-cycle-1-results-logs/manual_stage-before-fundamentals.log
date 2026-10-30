@@ -1,0 +1,21 @@
+..................................................................F
+=================================== FAILURES ===================================
+_ test_the_momentum_stage_is_registered_once_between_fundamentals_and_classification _
+
+    def test_the_momentum_stage_is_registered_once_between_fundamentals_and_classification() -> None:
+        """DEC-0121, DEC-0115: build runs the momentum stage, after the fundamentals stage whose
+        inputs table it inserts into and before the classification stage."""
+        stages = engine._STAGES
+        assert stages.count(engine._momentum_inputs_stage) == 1
+        momentum_at = stages.index(engine._momentum_inputs_stage)
+>       assert stages.index(engine._fundamental_inputs_stage) < momentum_at
+E       assert 1 < 0
+E        +  where 1 = <built-in method index of list object at 0x10b11a080>(<function _fundamental_inputs_stage at 0x10ab7b060>)
+E        +    where <built-in method index of list object at 0x10b11a080> = [<function _momentum_inputs_stage at 0x10ab7b100>, <function _fundamental_inputs_stage at 0x10ab7b060>, <function _classification_stage at 0x10ab7b1a0>].index
+E        +    and   <function _fundamental_inputs_stage at 0x10ab7b060> = engine._fundamental_inputs_stage
+
+tests/integration/test_engine_inputs_momentum.py:1249: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_the_momentum_stage_is_registered_once_between_fundamentals_and_classification
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 66 passed in 14.79s

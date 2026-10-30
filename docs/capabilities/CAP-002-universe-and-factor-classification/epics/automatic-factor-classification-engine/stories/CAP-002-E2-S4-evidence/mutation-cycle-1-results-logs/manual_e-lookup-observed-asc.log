@@ -1,0 +1,36 @@
+......................................F
+=================================== FAILURES ===================================
+___ test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55716 user=test database=test_16e11cbc36b74d1cb594647df335282...cc71cd0>, stock=1, set_id=UUID('8a12f85c-aabb-4528-8772-7d60b7bc22ed'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cc6e480>
+
+    def test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1), design 2.4, C5: the later observation of a session is used, and the
+        earlier row stays in the store."""
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_bar_observed(env.conn, env.stock, E, 150, date(2026, 9, 20))
+    
+        rows = build(env, monkeypatch)
+    
+>       assert_close(rows["return_3m"]["value"], ret(150, 100))
+
+tests/integration/test_engine_inputs_momentum.py:936: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.2000000000'), expected = Decimal('0.5')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.2000000000'), Decimal('0.5'))
+E       assert Decimal('0.3000000000') <= Decimal('1E-8')
+E        +  where Decimal('0.3000000000') = abs((Decimal('0.2000000000') - Decimal('0.5')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 38 passed in 10.50s

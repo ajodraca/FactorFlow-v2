@@ -1,0 +1,32 @@
+........................F
+=================================== FAILURES ===================================
+___________________ test_ticker_changes_and_ipos_are_ignored ___________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56570 user=test database=test_b9a7aca68a9b4dd9932385e6bbf9ad3...cc93e90>, stock=1, set_id=UUID('5cd84abc-daa5-4fed-97f6-ae585b3d3285'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cc957c0>
+
+    def test_ticker_changes_and_ipos_are_ignored(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4), DEC-0118 (1): only splits and dividends adjust a return or count towards
+        known_on, whatever another action's payload carries; each is observed after E here."""
+        later = date(2026, 10, 10)
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_corporate_action(
+            env.conn, env.stock, "ticker_change", date(2026, 7, 15), {"cash_amount": "5"}, later
+        )
+        add_corporate_action(env.conn, env.stock, "ipo", date(2026, 7, 20), SPLIT_2_FOR_1, later)
+        add_corporate_action(
+            env.conn, env.stock, "ticker_change", date(2026, 7, 25), {"ticker": "B"}, later
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+>           assert rows[name]["known_on"] == E
+E           assert datetime.date(2026, 10, 10) == datetime.date(2026, 9, 17)
+
+tests/integration/test_engine_inputs_momentum.py:683: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_ticker_changes_and_ipos_are_ignored
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 24 passed in 8.77s

@@ -1,0 +1,155 @@
+# T014 (CAP-002-E2-S4): momentum stage over 3000 synthetic active instruments, 273 bars, 4 dividends and (every tenth) a split each; EXPLAIN (ANALYZE, BUFFERS) of momentum_inputs.sql, then one timed build of the fundamentals and momentum stages. Signal for CAP-002-E2-S7, not a gate. Probe script: t014-volume-probe.py beside this log. Final momentum_inputs.sql sha256 5b9b0c3485cc1aa251e3ac2ccc97206b43dffce78fc8ea776f4eb690f4077428 (cycle-1.patch 5ae8e9ec). 2026-10-30T03:20:34Z
+seeded in 6.4s
+daily_bar rows, corporate_action rows: (819000, 12300)
+
+===== momentum_inputs.sql (0.41s under EXPLAIN ANALYZE)
+Insert on inputs  (cost=133112.69..303744.65 rows=0 width=0) (actual time=393.976..393.991 rows=0 loops=1)
+  Buffers: shared hit=132877 read=992 written=984, local hit=12598 dirtied=1200 written=1737
+  ->  Subquery Scan on j  (cost=133112.69..303744.65 rows=900 width=209) (actual time=120.624..380.410 rows=9000 loops=1)
+        Buffers: shared hit=132877 read=992 written=984
+        CTE held
+          ->  Nested Loop Left Join  (cost=11.00..45234.99 rows=3000 width=29) (actual time=0.052..19.333 rows=3000 loops=1)
+                Buffers: shared hit=26707 read=293 written=293
+                ->  Nested Loop  (cost=4.43..13365.91 rows=3000 width=12) (actual time=0.035..10.901 rows=3000 loops=1)
+                      Buffers: shared hit=11708 read=292 written=292
+                      ->  ProjectSet  (cost=0.00..15.02 rows=3000 width=8) (actual time=0.006..0.177 rows=3000 loops=1)
+                            ->  Result  (cost=0.00..0.01 rows=1 width=0) (actual time=0.005..0.005 rows=1 loops=1)
+                      ->  Result  (cost=4.43..4.44 rows=1 width=4) (actual time=0.003..0.003 rows=1 loops=3000)
+                            Buffers: shared hit=11708 read=292 written=292
+                            InitPlan 1 (returns $1)
+                              ->  Limit  (cost=0.42..4.43 rows=1 width=4) (actual time=0.003..0.003 rows=1 loops=3000)
+                                    Buffers: shared hit=11708 read=292 written=292
+                                    ->  Index Only Scan Backward using idx_daily_bar_instrument_session on daily_bar d_2  (cost=0.42..1093.87 rows=273 width=4) (actual time=0.003..0.003 rows=1 loops=3000)
+                                          Index Cond: ((instrument_id = (unnest('{<3000 instrument ids>}'::bigint[]))) AND (session_date IS NOT NULL))
+                                          Heap Fetches: 3000
+                                          Buffers: shared hit=11708 read=292 written=292
+                ->  Limit  (cost=6.57..10.60 rows=1 width=21) (actual time=0.003..0.003 rows=1 loops=3000)
+                      Buffers: shared hit=14999 read=1 written=1
+                      ->  Incremental Sort  (cost=6.57..1021.75 rows=252 width=21) (actual time=0.003..0.003 rows=1 loops=3000)
+                            Sort Key: d_3.session_date DESC, d_3.observed_on DESC, d_3.recorded_at DESC
+                            Presorted Key: d_3.session_date
+                            Full-sort Groups: 3000  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+                            Buffers: shared hit=14999 read=1 written=1
+                            ->  Index Scan Backward using idx_daily_bar_instrument_session on daily_bar d_3  (cost=0.42..1013.45 rows=252 width=21) (actual time=0.002..0.002 rows=2 loops=3000)
+                                  Index Cond: ((instrument_id = (unnest('{<3000 instrument ids>}'::bigint[]))) AND (session_date <= '2026-09-17'::date))
+                                  Buffers: shared hit=14999 read=1 written=1
+        CTE action
+          ->  Subquery Scan on l  (cost=998.99..1846.92 rows=2941 width=238) (actual time=4.230..19.824 rows=12300 loops=1)
+                Buffers: shared hit=287
+                ->  Unique  (cost=998.99..1074.90 rows=2941 width=117) (actual time=4.190..5.803 rows=12300 loops=1)
+                      Buffers: shared hit=287
+                      ->  Sort  (cost=998.99..1017.97 rows=7591 width=117) (actual time=4.189..4.610 rows=12300 loops=1)
+                            Sort Key: c.instrument_id, c.action_type, c.effective_on, c.observed_on DESC, c.recorded_at DESC
+                            Sort Method: quicksort  Memory: 2210kB
+                            Buffers: shared hit=287
+                            ->  Seq Scan on corporate_action c  (cost=7.50..509.75 rows=7591 width=117) (actual time=0.058..1.816 rows=12300 loops=1)
+                                  Filter: ((action_type = ANY ('{split,dividend}'::text[])) AND (instrument_id = ANY ('{<3000 instrument ids>}'::bigint[])))
+                                  Buffers: shared hit=287
+        ->  GroupAggregate  (cost=86030.78..256572.74 rows=900 width=326) (actual time=120.610..348.651 rows=9000 loops=1)
+              Group Key: h.instrument_id, w.k, h.latest_session, h.e_target, (((h.e_session - make_interval(0, w.k, 0, 0, 0, 0, '0'::double precision)))::date), h.e_session, h.e_close, h.e_observed_on, d.session_date, d.close_price, d.observed_on
+              Buffers: shared hit=132877 read=992 written=984
+              ->  Incremental Sort  (cost=86030.78..251194.93 rows=73525 width=375) (actual time=120.560..236.697 rows=21600 loops=1)
+                    Sort Key: h.instrument_id, w.k, h.latest_session, h.e_target, (((h.e_session - make_interval(0, w.k, 0, 0, 0, 0, '0'::double precision)))::date), h.e_session, h.e_close, h.e_observed_on, d.session_date, d.close_price, d.observed_on
+                    Presorted Key: h.instrument_id
+                    Full-sort Groups: 600  Sort Method: quicksort  Average Memory: 33kB  Peak Memory: 33kB
+                    Buffers: shared hit=132877 read=992 written=984
+                    ->  Merge Left Join  (cost=85205.45..247138.93 rows=73525 width=375) (actual time=120.385..226.014 rows=21600 loops=1)
+                          Merge Cond: (h.instrument_id = a.instrument_id)
+                          Join Filter: ((a.effective_on > d.session_date) AND (a.effective_on <= h.e_session))
+                          Rows Removed by Join Filter: 15300
+                          Buffers: shared hit=132877 read=992 written=984
+                          ->  Sort  (cost=84644.54..84667.04 rows=9000 width=61) (actual time=92.614..93.083 rows=9000 loops=1)
+                                Sort Key: h.instrument_id
+                                Sort Method: quicksort  Memory: 1088kB
+                                Buffers: shared hit=72590 read=992 written=984
+                                ->  Nested Loop Left Join  (cost=5.25..84053.44 rows=9000 width=61) (actual time=43.043..90.826 rows=9000 loops=1)
+                                      Buffers: shared hit=72590 read=992 written=984
+                                      ->  Nested Loop  (cost=0.00..210.03 rows=9000 width=48) (actual time=43.028..63.744 rows=9000 loops=1)
+                                            Buffers: shared hit=26707 read=293 written=293
+                                            ->  Function Scan on unnest w  (cost=0.00..0.03 rows=3 width=4) (actual time=42.972..42.973 rows=3 loops=1)
+                                            ->  CTE Scan on held h  (cost=0.00..60.00 rows=3000 width=44) (actual time=0.018..6.676 rows=3000 loops=3)
+                                                  Buffers: shared hit=26707 read=293 written=293
+                                      ->  Limit  (cost=5.25..9.30 rows=1 width=21) (actual time=0.003..0.003 rows=1 loops=9000)
+                                            Buffers: shared hit=45883 read=699 written=691
+                                            ->  Incremental Sort  (cost=5.25..373.85 rows=91 width=21) (actual time=0.003..0.003 rows=1 loops=9000)
+                                                  Sort Key: d.session_date DESC, d.observed_on DESC, d.recorded_at DESC
+                                                  Presorted Key: d.session_date
+                                                  Full-sort Groups: 9000  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+                                                  Buffers: shared hit=45883 read=699 written=691
+                                                  ->  Index Scan Backward using idx_daily_bar_instrument_session on daily_bar d  (cost=0.43..370.25 rows=91 width=21) (actual time=0.002..0.002 rows=2 loops=9000)
+                                                        Index Cond: ((instrument_id = h.instrument_id) AND (session_date <= ((h.e_session - make_interval(0, w.k, 0, 0, 0, 0, '0'::double precision)))::date))
+                                                        Buffers: shared hit=45883 read=699 written=691
+                          ->  Materialize  (cost=560.90..148700.21 rows=14705 width=318) (actual time=27.714..124.749 rows=36898 loops=1)
+                                Buffers: shared hit=60287
+                                ->  Nested Loop Left Join  (cost=560.90..148663.45 rows=14705 width=318) (actual time=27.712..120.674 rows=12300 loops=1)
+                                      Buffers: shared hit=60287
+                                      ->  Merge Join  (cost=555.67..3879.00 rows=14705 width=309) (actual time=27.643..41.502 rows=12300 loops=1)
+                                            Merge Cond: (a.instrument_id = h_1.instrument_id)
+                                            Join Filter: (a.effective_on <= h_1.e_session)
+                                            Buffers: shared hit=287
+                                            ->  Sort  (cost=322.40..329.76 rows=2941 width=273) (actual time=27.355..27.993 rows=12300 loops=1)
+                                                  Sort Key: a.instrument_id
+                                                  Sort Method: quicksort  Memory: 2407kB
+                                                  Buffers: shared hit=287
+                                                  ->  Hash Left Join  (cost=86.27..152.97 rows=2941 width=273) (actual time=23.559..25.483 rows=12300 loops=1)
+                                                        Hash Cond: (a.instrument_id = a_1.instrument_id)
+                                                        Buffers: shared hit=287
+                                                        ->  CTE Scan on action a  (cost=0.00..58.82 rows=2941 width=209) (actual time=4.232..4.717 rows=12300 loops=1)
+                                                              Buffers: shared hit=287
+                                                        ->  Hash  (cost=83.77..83.77 rows=200 width=72) (actual time=19.309..19.310 rows=300 loops=1)
+                                                              Buckets: 1024  Batches: 1  Memory Usage: 38kB
+                                                              ->  HashAggregate  (cost=80.77..83.77 rows=200 width=72) (actual time=19.247..19.287 rows=300 loops=1)
+                                                                    Group Key: a_1.instrument_id
+                                                                    Batches: 1  Memory Usage: 173kB
+                                                                    ->  CTE Scan on action a_1  (cost=0.00..58.82 rows=2926 width=44) (actual time=0.152..19.094 rows=300 loops=1)
+                                                                          Filter: (log_factor IS NOT NULL)
+                                                                          Rows Removed by Filter: 12000
+                                            ->  Sort  (cost=233.26..240.76 rows=3000 width=12) (actual time=0.263..0.864 rows=12296 loops=1)
+                                                  Sort Key: h_1.instrument_id
+                                                  Sort Method: quicksort  Memory: 214kB
+                                                  ->  CTE Scan on held h_1  (cost=0.00..60.00 rows=3000 width=12) (actual time=0.002..0.131 rows=3000 loops=1)
+                                            SubPlan 6
+                                              ->  Aggregate  (cost=0.16..0.17 rows=1 width=32) (actual time=0.001..0.001 rows=1 loops=12300)
+                                                    ->  Function Scan on x_2  (cost=0.01..0.15 rows=1 width=32) (actual time=0.000..0.000 rows=0 loops=12300)
+                                                          Filter: ((effective_on > a.effective_on) AND (effective_on <= h_1.e_session))
+                                                          Rows Removed by Filter: 0
+                                      ->  Limit  (cost=5.24..9.29 rows=1 width=21) (actual time=0.003..0.003 rows=1 loops=12300)
+                                            Buffers: shared hit=60000
+                                            ->  Incremental Sort  (cost=5.24..373.85 rows=91 width=21) (actual time=0.003..0.003 rows=1 loops=12300)
+                                                  Sort Key: d_1.session_date DESC, d_1.observed_on DESC, d_1.recorded_at DESC
+                                                  Presorted Key: d_1.session_date
+                                                  Full-sort Groups: 12300  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+                                                  Buffers: shared hit=60000
+                                                  ->  Result  (cost=0.42..370.24 rows=91 width=21) (actual time=0.002..0.003 rows=2 loops=12300)
+                                                        One-Time Filter: (a.action_type = 'dividend'::text)
+                                                        Buffers: shared hit=60000
+                                                        ->  Index Scan Backward using idx_daily_bar_instrument_session on daily_bar d_1  (cost=0.42..370.24 rows=91 width=21) (actual time=0.002..0.002 rows=2 loops=12000)
+                                                              Index Cond: ((instrument_id = a.instrument_id) AND (session_date < a.effective_on))
+                                                              Buffers: shared hit=60000
+                                      SubPlan 4
+                                        ->  Aggregate  (cost=0.16..0.17 rows=1 width=32) (actual time=0.001..0.001 rows=1 loops=12000)
+                                              ->  Function Scan on x  (cost=0.01..0.15 rows=1 width=32) (actual time=0.000..0.000 rows=0 loops=12000)
+                                                    Filter: ((effective_on > a.effective_on) AND (effective_on <= h_1.e_session))
+                                                    Rows Removed by Filter: 0
+                                      SubPlan 5
+                                        ->  Aggregate  (cost=0.16..0.17 rows=1 width=32) (actual time=0.001..0.001 rows=1 loops=12000)
+                                              ->  Function Scan on x_1  (cost=0.01..0.15 rows=1 width=32) (actual time=0.000..0.000 rows=0 loops=12000)
+                                                    Filter: ((effective_on > d_1.session_date) AND (effective_on <= h_1.e_session))
+                                                    Rows Removed by Filter: 0
+                                      SubPlan 7
+                                        ->  Aggregate  (cost=0.16..0.17 rows=1 width=32) (actual time=0.001..0.001 rows=1 loops=12300)
+                                              ->  Function Scan on x_3  (cost=0.01..0.15 rows=1 width=32) (actual time=0.000..0.000 rows=0 loops=12300)
+                                                    Filter: ((effective_on > d_1.session_date) AND (effective_on <= h_1.e_session))
+                                                    Rows Removed by Filter: 0
+Planning:
+  Buffers: shared hit=28
+Planning Time: 3.913 ms
+JIT:
+  Functions: 141
+  Options: Inlining false, Optimization false, Expressions true, Deforming true
+  Timing: Generation 3.209 ms, Inlining 0.000 ms, Optimization 1.684 ms, Emission 41.383 ms, Total 46.276 ms
+Execution Time: 398.000 ms
+
+daily_bar access paths: ['Index Only Scan', 'Index Scan']
+
+build complete in 0.8s; momentum rows by status: [('return_12m', 'present', 3000), ('return_3m', 'present', 3000), ('return_6m', 'present', 3000)]
