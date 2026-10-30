@@ -362,3 +362,118 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  # Rework of implementation review v1 (CHANGES-REQUIRED: IR-001 to IR-010). One cycle: the tests that pin
+  # each finding first (red-rework-1.log: the five behaviour findings fail, the test-only findings pass on the
+  # reviewed code and are RED through the review's own surviving mutants, all carried below), then the
+  # smallest production change per finding. Reviewed by the same two independent subagents as cycles 1 to 4.
+  - id: rework-1
+    tasks: [T001, T002, T003, T004, T005, T006, T011, T012, T013, T016]
+    addresses_review: CAP-002-E4-S6-implementation-review-v1.md
+    findings: [IR-001, IR-002, IR-003, IR-004, IR-005, IR-006, IR-007, IR-008, IR-009, IR-010]
+    description: >
+      IR-001 (DAC-E4-S6-2, production): the polite region keeps its text, matchLabel(page.matchCount), and
+      renders it inside a span keyed by a serial that every first page bumps, so a sort or a refresh-once whose
+      count is unchanged still inserts a new node, which is the change a polite live region announces; the
+      TC-COMP-138 and T006 tests watch the region with a MutationObserver across a sort and a refresh whose
+      matchCount stays 2846, assert a change after the page lands and none before, and that the region is the
+      same element holding the same sentence. IR-002 (test): TC-COMP-110 sorts by growth_percentile and
+      growth_score while Growth is unranked and asserts no header carries aria-sort. IR-003 (tests): seven T006
+      lifecycle tests, one per probe L1 to L7: a later page of a superseded query landing after the new page
+      one; a later page in flight on a query change (the new rows are not busy and page on); a later-page
+      error dropped on a query change; a refreshKey bump in the same batch as a later page never sends the
+      old cursor; a superseded page one and a superseded later page that fail late; a page one landing after
+      unmount reaching no onResult. IR-004 (test): TC-COMP-139 presses ArrowDown on the last row and ArrowUp on
+      the first, then activates a sort button and asserts focus stays on the button after the rows arrive.
+      IR-005 (tests): both spacer rows aria-hidden (the tbody exposes only the stock rows as rows), the live
+      region and the incomplete-last description sr-only, and the sort arrow glyph following aria-sort through
+      the cycle (up, down, both) on the factor and Symbol buttons. IR-006 (production): nextSort for the
+      Symbol column returns the unsorted default (symbol A to Z, no sort or order) from any state other than
+      that default, and symbol descending from the default (null or an explicit symbol ascending in the URL),
+      which is DEC-0161's ascending(default), descending, ascending(default) entered at its first state from a
+      factor sort, as data-table section 4 starts every column not currently sorted at ascending; two tests pin
+      the entry from value_percentile desc and from an explicit symbol asc. IR-007 (production): on each first
+      page the table reads the symbol of the row holding focus inside its own scroll container
+      (focusedSymbolIn); when that symbol is in the new page the scroll position becomes
+      scrollTopToReveal(index, current scrollTop) instead of 0, so the row stays in the window, its element
+      persists (rows are keyed by symbol) and React's commit-time focus restoration keeps focus on it; focus
+      outside the table, on a host row with a listed symbol outside the container, or on a row the page no
+      longer holds still resets the window to 0. The reviewed probe (50 rows, scrolled to row 30, SYM0040
+      focused, refresh with the same rows) now keeps focus and scrollTop; a refresh that reorders the rows
+      around the focused one (a new score set under a factor sort) is tested with Node.prototype.insertBefore
+      and appendChild shimmed to blur a moved node as a browser does, which jsdom does not under React's move;
+      a refresh that moves the row to the top scrolls to it; a refresh that drops it resets. IR-008 (doc): the
+      ResultsTable contract comment says query is compared by identity, so a host keeps one object per URL
+      state. IR-009 (LOW, disposed with a recorded reason): DEC-0240 is amended to record that the selection
+      edge is border-l-4 because Tailwind's border-width scale and tailwind.config.js map no 3 px step, that an
+      arbitrary 3px literal would breach STD-UI-29 and the config is outside CAP-002's edit set (DEC-0084), and
+      what the owner's fix is if 3 px must hold; no code change. IR-010 (production): Space with the row itself
+      as target calls preventDefault, so a browser does not scroll the container; Space from the checkbox and
+      Enter from the row are left to their defaults, asserted through fireEvent's return value. Not reworked:
+      nothing; every finding is addressed or disposed above. Two test-hygiene notes from the cycle's code
+      review were applied before the final mutation run and fingerprint: the in-flight-page test awaits the
+      page it resolves, and the DOM shim and the host table are restored in finally blocks.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-1.log
+    red_log_sha256: ffdfd122c6be885f1245cf2594c3f01638acf609e1c1bac252909a04fd3998fb
+    red_evidence: >
+      With the rework tests written against the reviewed table (HEAD 95828f6, production unchanged),
+      results-table.test.tsx ran 86 tests: 5 failed, 81 passed. The five are the behaviour findings: the
+      unchanged-count announcement after a sort and after a refresh-once (IR-001, "expected 0 to be greater
+      than 0" mutation records), focus on SYM0040 across a refresh past the first window (IR-007), Sort by
+      symbol from a factor sort requesting the default (IR-006), and Space on the row prevented (IR-010). The
+      test-only findings (IR-002 to IR-005) pass on the reviewed code by design; their RED is the review's
+      fourteen surviving mutants, carried into this cycle's mutants file and all killed below.
+    green_evidence: >
+      results-table.test.tsx 88, copy.test.ts 319 and results-window.test.ts 17 passed, 424 in all
+      (green-rework-1.log); the full web suite 997 passed in 49 files (full-suite-rework-1.log, npm run test);
+      npm run lint, npm run format, npx tsc --noEmit and npm run build exit 0; npm run test:e2e not run (the
+      plan excludes it). Thirty-eight mutants: 11 from the operator catalogue over the rework's changed
+      lines and 27 hand-written: the review's 14 non-equivalent survivors
+      (page-error-kept-on-new-query, page-pending-kept-on-new-query, epoch-ignores-refresh,
+      later-page-then-unguarded, later-page-catch-unguarded, first-page-catch-unguarded,
+      unmount-generation-not-bumped, top-spacer-not-hidden, bottom-spacer-not-hidden, live-region-visible,
+      description-visible, sort-arrows-swapped, unranked-header-keeps-aria-sort, move-guard-dropped) and 13
+      over the rework code (the Symbol cycle reverted to descending-first and never clearing; the announcement
+      serial not bumped, the span unkeyed, the row count announced; the focused row ignored, the reveal
+      ignoring the current scroll, the DOM and the state scroll reset anyway, the symbol never read, the
+      container check dropped; Space not prevented, and prevented from the checkbox too). 36 killed, 2
+      survived, both the serial's magnitude, disposed of below as equivalent. The first run of this set left
+      the container check and a no-pending-focus mutant alive: the host-row test's fixture had replaced every
+      symbol, so the kept index was -1 under both; its page now keeps the symbols, which killed the container
+      check, and the pending-focus write was removed as redundant (React restores focus to the persisted row
+      element itself, which the reorder test demonstrates under the browser-blur shim).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-1.log
+        sha256: e5436d795d2c9b3bf24d539d24c44a0c9dddcbf7a9edb659abcea4a89527a1e9
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-1.log
+        sha256: 53bf88086de0cc68b6207dcb726d3d7a1d3c6ba41241451c35b0121902d5d4cb
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 187d3ec44bd9cc4c960ba9097f74e39346b954db1653558af239fbf268d0c9c9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-1.patch
+    commit_hash: stage
+    decisions: [DEC-0240]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-1-results.json
+      results_sha256: 88342c1e9693d5cc3b11a01d9f6112ed95c0cce9a5027d704f2bd05be4299391
+      generated: 38
+      killed: 36
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.947
+      survivors:
+        - id: web/src/screens/research/results-table.tsx:390:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The announcement serial's initial value 1 instead of 0. The serial is only ever a React key on the
+            region's span; what matters is that each first page changes it, never its magnitude, so the same
+            nodes are inserted at the same moments.
+        - id: web/src/screens/research/results-table.tsx:463:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The serial bumped by 2 instead of 1 on each first page. Identity only, as above: any bump replaces
+            the span and re-announces; the tests assert the mutation and the unchanged text, which hold.

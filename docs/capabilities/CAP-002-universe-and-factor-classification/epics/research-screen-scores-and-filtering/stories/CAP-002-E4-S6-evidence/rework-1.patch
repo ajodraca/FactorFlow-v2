@@ -1,0 +1,1652 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-1.log
+new file mode 100644
+index 0000000..b756c62
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-1.log
+@@ -0,0 +1,194 @@
++
++> factorflow-web@0.1.0 test
++> vitest run
++
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/api/research-query.test.ts (82 tests) 13ms
++ ✓ src/api/client.runs.test.ts (20 tests) 11ms
++ ✓ src/api/classification-client.test.ts (55 tests) 26ms
++ ✓ src/screens/research/copy.test.ts (319 tests) 34ms
++stderr | src/screens/runs/cancel.test.tsx > Cancel confirmation copy follows the run's state (DAC-E5-S6-5) > states the cooperative effect for a running run, as confirm, never destructive
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/run-controls.test.tsx > StartRunControl — after a 202 > calls onStarted once, then routes to the run's detail when nothing is queued
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/runs-screen.test.tsx > Runs list — outcomes render honestly (AC-9) > shows each terminal outcome as recorded, partial as a warning
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/coverage/coverage-table.test.tsx > TC-COMP-008: the gap count sits in the row, dates behind expansion (AC-8) > shows counts, fetches dates once on Enter, caches them, and never fetches for a zero
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/coverage/coverage.test.tsx > TC-COMP-007: each instrument shows presence, covered range and last acquired (AC-7) > renders the row's presence badges, range and Chicago last-acquired under the 11 headers
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/run-detail.test.tsx > Roster at 3000 instruments (DAC-E7-9) > collapses to one row per instrument and expands to four data types in fixed order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/factor-cell.test.tsx > state selection > refuses a date that is not an ISO-8601 calendar date rather than print it
++Error: Uncaught [RangeError: Not an ISO-8601 date: "30/09/2026"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: "30/09/2026"
++    at Module.formatDate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/format.ts:139:11)
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:118:78)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [RangeError: Not an ISO-8601 date: "30/09/2026"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: "30/09/2026"
++    at Module.formatDate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/format.ts:139:11)
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:118:78)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <NotFollowedBadge> component:
++
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:125:29)
++    at FactorCell (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:210:3)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ✓ src/components/patterns/factor-cell.test.tsx (90 tests) 138ms
++ ✓ src/screens/runs/run-controls.test.tsx (12 tests) 290ms
++ ✓ src/screens/runs/runs-screen.test.tsx (10 tests) 316ms
++ ✓ src/screens/research/format.test.ts (41 tests) 24ms
++ ✓ src/screens/runs/cancel.test.tsx (18 tests) 418ms
++ ✓ src/app/status-region.test.tsx (23 tests) 553ms
++stderr | src/screens/coverage/cells.test.tsx > TC-COMP-059: absent, measured zero and inapplicable render distinctly (DAC-E6-S4-1) > renders a missing value in the range and last-acquired cells of a row with no data
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/coverage.test.tsx (10 tests) 559ms
++   ✓ TC-COMP-062: never-acquired and nothing-matched read differently (DAC-E6-S4-4) > (b) a filter matching nothing has its own copy, and Reset filter refetches unfiltered 313ms
++ ✓ src/screens/coverage/cells.test.tsx (6 tests) 88ms
++stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no fifth rail item when a run detail route opens
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/results-window.test.ts (17 tests) 5ms
++stderr | src/screens/runs/run-detail.polling.test.tsx > Run detail polling (DAC-E7-S4-6) > polls every 10 000 ms while the run is requested, and stops once it is terminal
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/api/client.coverage.test.ts (8 tests) 6ms
++ ✓ src/app/routes.test.tsx (7 tests) 160ms
++ ✓ src/screens/runs/run-detail.polling.test.tsx (9 tests) 251ms
++stderr | src/screens/runs/runs-screen.polling.test.tsx > Runs screen polling (DAC-E5-S6-1) > polls every 10 000 ms while a running run is loaded, and stops once all are terminal
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/instrument-table.test.tsx (8 tests) 591ms
++   ✓ InstrumentTable > issues a server-side request when the symbol filter changes 358ms
++ ✓ src/screens/coverage/coverage-table.test.tsx (4 tests) 1001ms
++   ✓ TC-COMP-063: search and filter stay usable at volume (DAC-E6-S4-5) > filters server-side, scrolls in its own container, and replaces pages 769ms
++ ✓ src/screens/runs/runs-screen.polling.test.tsx (6 tests) 187ms
++stderr | src/screens/coverage/start-run.test.tsx > Start is blocked, not disabled > blocks with its own reason when no history depth is set (DAC-E5-S6-3)
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/bulk-add.test.tsx (4 tests) 270ms
++stderr | src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > replaces the main region with the designed state on /coverage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/start-run.test.tsx (4 tests) 151ms
++stderr | src/app/status-region.integration.test.tsx > StatusRegion — the three health response shapes, end to end (T020) > a successful response with the product answering renders the answering state
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/badges.test.tsx (5 tests) 25ms
++ ✓ src/app/status-region.integration.test.tsx (4 tests) 131ms
++ ✓ src/app/status-region.a11y.test.tsx (7 tests) 110ms
++ ✓ src/app/shell.unreachable.test.tsx (9 tests) 259ms
++ ✓ src/screens/runs/run-detail.test.tsx (36 tests) 1447ms
++   ✓ Roster at 3000 instruments (DAC-E7-9) > collapses to one row per instrument and expands to four data types in fixed order 397ms
++ ✓ src/screens/settings/history-depth-form.test.tsx (5 tests) 260ms
++ ✓ src/screens/instruments/retire-dialog.test.tsx (7 tests) 142ms
++ ✓ src/components/patterns/restated-mark.test.tsx (8 tests) 24ms
++stderr | src/app/shell.test.tsx > Shell — no principal is assumed (AC-14) > renders no element matching sign-in, account, or user-menu semantics
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/coverage/coverage.polling.test.tsx > TC-COMP-039: coverage never auto-polls and shows when it was loaded (DAC-E6-13) > fetches once over ten minutes, and again only on Refresh, keeping rows while pending
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.test.tsx (3 tests) 126ms
++ ✓ src/screens/coverage/coverage.polling.test.tsx (1 test) 114ms
++ ✓ src/screens/instruments/add-field.test.tsx (5 tests) 207ms
++stderr | src/app/shell.status-region.test.tsx > Shell — the status region is mounted on every destination (DAC-E1-13, AC-18) > renders the region inside the rail on the initial route
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/settings/credential-badge.test.tsx (3 tests) 21ms
++ ✓ src/screens/runs/outcome-badge.test.tsx (21 tests) 58ms
++ ✓ src/app/shell.tokens.test.tsx (2 tests) 15ms
++stderr | src/screens/runs/run-detail.reason.test.tsx > A reason shows its data type and request id, never a credential (DAC-E7-S4-5) > renders through the real client mapping, as text only
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/runs/run-detail.reason.test.tsx (1 test) 124ms
++ ✓ src/app/shell.status-region.test.tsx (3 tests) 231ms
++ ✓ src/screens/runs/detail/result-outcome-badge.test.tsx (9 tests) 19ms
++stderr | src/app/shell.layout.test.tsx > Shell — layout contract (UX design section 0) > renders a fixed left rail containing navigation and the status-region slot
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.layout.test.tsx (3 tests) 103ms
++ ✓ src/screens/settings/credential-status.test.tsx (4 tests) 20ms
++ ✓ src/screens/instruments/parse-bulk-symbols.test.ts (5 tests) 2ms
++ ✓ src/screens/coverage/uniform-shortfall.test.ts (4 tests) 2ms
++ ✓ src/api/render.test.tsx (1 test) 6ms
++stderr | src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/empty-states.test.tsx (2 tests) 58ms
++ ✓ src/app/shell.a11y.test.tsx (2 tests) 101ms
++ ✓ src/screens/instruments/badges.test.tsx (2 tests) 13ms
++ ✓ src/screens/instruments/start-action.test.tsx (2 tests) 35ms
++ ✓ src/app/build-output.test.tsx (2 tests) 870ms
++   ✓ Build output — lands in the API static directory (DAC-E1-S4-6) > a real build places index.html in the static directory and leaves its tracked marker intact 843ms
++ ✓ src/screens/research/results-table.test.tsx (88 tests) 3233ms
++
++ Test Files  49 passed (49)
++      Tests  997 passed (997)
++   Start at  00:02:55
++   Duration  4.14s (transform 1.54s, setup 2.27s, collect 6.03s, tests 12.85s, environment 12.97s, prepare 2.43s)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-1.log
+new file mode 100644
+index 0000000..7f2e8dc
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-1.log
+@@ -0,0 +1,12 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/results-window.test.ts (17 tests) 5ms
++ ✓ src/screens/research/copy.test.ts (319 tests) 23ms
++ ✓ src/screens/research/results-table.test.tsx (88 tests) 2000ms
++
++ Test Files  3 passed (3)
++      Tests  424 passed (424)
++   Start at  00:02:53
++   Duration  2.50s (transform 185ms, setup 92ms, collect 343ms, tests 2.03s, environment 465ms, prepare 117ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-1-results.json
+new file mode 100644
+index 0000000..80085ff
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-1-results.json
+@@ -0,0 +1,600 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/results-table.test.tsx src/screens/research/results-window.test.ts src/screens/research/copy.test.ts",
++  "repo_head": "95828f651c0af7fd07942ef3d5ff58a314b59f8c",
++  "tree_patch_sha256": "404963c2d14cb643a154c85aff649a5f3bba07b5bdc0f1c883352e7f1995d54d",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/mutants.json",
++  "mutants_sha256": "fd0ec63f0bed5db94a215acde7826a9231293da4d9ca88da730ecfee426c08ca",
++  "jobs": 6,
++  "started": "2026-10-30T05:03:30Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 4.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/baseline-w1.log",
++      "log_sha256": "3736263837f31540a1786c60f163ce57d83b0999ff4bd52b876f75e454769d7c"
++    },
++    {
++      "worker": 4,
++      "exit_code": 0,
++      "seconds": 4.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/baseline-w4.log",
++      "log_sha256": "ee90e195df0f0961b47ec871fb62d6a7f9186750fea7b5dc2ef9a12f2b83b045"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 4.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/baseline-w0.log",
++      "log_sha256": "9690bd2afdec7a93263e1f266e6f2cf95154b3a7e3048e57db1a6abb2e167dd6"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 4.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/baseline-w2.log",
++      "log_sha256": "70f7e53e58e33721b2a4cbdbe87a8d49c0b41ccb2bc86e716f5474838d71ddfc"
++    },
++    {
++      "worker": 5,
++      "exit_code": 0,
++      "seconds": 4.9,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/baseline-w5.log",
++      "log_sha256": "dc071a8ed360bbb169e9f10843f76446cc684171d9e3f086a25c61d8c0fcbde8"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 4.9,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/baseline-w3.log",
++      "log_sha256": "169442e4327dd552a0e09f9b2530c6b1d5f51165b647b9fac2ff3f65b0608937"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/research/results-table.tsx:159:negate-boolean:1",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 159,
++      "original": "  if (!row || !container?.contains(row)) {",
++      "mutated": "  if (!row && !container?.contains(row)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_159_negate-boolean_1.log",
++      "log_sha256": "2bf955f03a98ff5404240c121f70867f94f6f1580a188ede6233b42185c9cfdf"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:159:negate-boolean:2",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 159,
++      "original": "  if (!row || !container?.contains(row)) {",
++      "mutated": "  if (row || !container?.contains(row)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_159_negate-boolean_2.log",
++      "log_sha256": "14a7660b175d2f673f69e63d847015ad4cbc5f53f65b4f5305a8d1b02547185d"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:159:negate-boolean:3",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 159,
++      "original": "  if (!row || !container?.contains(row)) {",
++      "mutated": "  if (!row || container?.contains(row)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_159_negate-boolean_3.log",
++      "log_sha256": "e2f871bf3395958d8435c7655f245d2fbff7ac92d15a9e89c20fe80c2fedda46"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:198:negate-boolean:1",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 198,
++      "original": "    const atDefault = sort === null || (sort.key === \"symbol\" && sort.order === \"asc\");",
++      "mutated": "    const atDefault = sort === null || (sort.key === \"symbol\" || sort.order === \"asc\");",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_198_negate-boolean_1.log",
++      "log_sha256": "6bb1505dce2b3380c14b32cc056d0bd55e3fe11b5f026a551b4e1e8c93c3e70e"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:198:negate-boolean:2",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 198,
++      "original": "    const atDefault = sort === null || (sort.key === \"symbol\" && sort.order === \"asc\");",
++      "mutated": "    const atDefault = sort === null && (sort.key === \"symbol\" && sort.order === \"asc\");",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.5,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_198_negate-boolean_2.log",
++      "log_sha256": "d77d74667c52f8d3d3ae6daa352d412af49aaa9fffbfe05aa44a0bfd9b473c82"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:390:off-by-one:1",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 390,
++      "original": "  const [announcement, setAnnouncement] = useState<Announcement>({ text: \"\", serial: 0 });",
++      "mutated": "  const [announcement, setAnnouncement] = useState<Announcement>({ text: \"\", serial: 1 });",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 4.5,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_390_off-by-one_1.log",
++      "log_sha256": "f01afc8e38bd8ea419d911d652c37a161ad482d1503346d05c27155e2e0cee22"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:449:negate-boolean:1",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 449,
++      "original": "          kept === -1 || container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);",
++      "mutated": "          kept === -1 && container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_449_negate-boolean_1.log",
++      "log_sha256": "326e0ee6251b06c64ab0977076709ae658672b3c978bc64e38baea24d94f535d"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:449:off-by-one:1",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 449,
++      "original": "          kept === -1 || container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);",
++      "mutated": "          kept === -2 || container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_449_off-by-one_1.log",
++      "log_sha256": "52935207616cdbead9d3391c1f87baa8a02763b73e3164536674fe60cd7eac2b"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:449:off-by-one:2",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 449,
++      "original": "          kept === -1 || container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);",
++      "mutated": "          kept === -1 || container === null ? 1 : scrollTopToReveal(kept, container.scrollTop);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_449_off-by-one_2.log",
++      "log_sha256": "d6f01f9ed64c441f6d0370681646f3b57828a5b147d01b8c1c52c123368eea5a"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:463:off-by-one:1",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 463,
++      "original": "          serial: previous.serial + 1,",
++      "mutated": "          serial: previous.serial + 2,",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 4.2,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_463_off-by-one_1.log",
++      "log_sha256": "5c28642c9715c55cca22d77218b77623558134fa5e16efc0514a87cb9d8d236f"
++    },
++    {
++      "id": "web/src/screens/research/results-table.tsx:808:negate-boolean:1",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/research/results-table.tsx",
++      "line": 808,
++      "original": "    } else if (event.key === \" \" && fromRow) {",
++      "mutated": "    } else if (event.key === \" \" || fromRow) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/web_src_screens_research_results-table.tsx_808_negate-boolean_1.log",
++      "log_sha256": "159e4ee5e20b041302cc51bfae9a48ef3a1de9dcdd619cbd16d7ee9501cfe2fe"
++    },
++    {
++      "id": "manual:rework-1:page-error-kept-on-new-query",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    setFirstError(null);\n    setPageError(null);\n    setPagePending(false);",
++      "new": "    setFirstError(null);\n    setPagePending(false);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_page-error-kept-on-new-query.log",
++      "log_sha256": "42f4615ce6e912ffb3fea7802341864d40cba7817fed6535809c849cc114bb07"
++    },
++    {
++      "id": "manual:rework-1:page-pending-kept-on-new-query",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    setPageError(null);\n    setPagePending(false);\n    listClassifications",
++      "new": "    setPageError(null);\n    listClassifications",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_page-pending-kept-on-new-query.log",
++      "log_sha256": "4bc5e764e86f767cacd4aa13479c346ab96cf2c349d9eb8d882ca64d715090ea"
++    },
++    {
++      "id": "manual:rework-1:epoch-ignores-refresh",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    loaded.epoch.refreshKey === refreshKey &&\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_epoch-ignores-refresh.log",
++      "log_sha256": "e4eba9f1f85607cf78b76ad8e03211cd29ab42761b1f8efea4d3bd174b488013"
++    },
++    {
++      "id": "manual:rework-1:later-page-then-unguarded",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "        .then((page) => {\n          if (current !== generation.current) {\n            return;\n          }\n          setLoaded((previous) =>",
++      "new": "        .then((page) => {\n          setLoaded((previous) =>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_later-page-then-unguarded.log",
++      "log_sha256": "15124d63592163f38b8f5a62141e17813875dd0cdd7391bb80f3d1c62a85719b"
++    },
++    {
++      "id": "manual:rework-1:later-page-catch-unguarded",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "        .catch((error: unknown) => {\n          if (current !== generation.current) {\n            return;\n          }\n          setPagePending(false);",
++      "new": "        .catch((error: unknown) => {\n          setPagePending(false);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_later-page-catch-unguarded.log",
++      "log_sha256": "b4da6015c2b8f110ad7068561744e2c95c01a89c02494bbd1199b5ce09a21893"
++    },
++    {
++      "id": "manual:rework-1:first-page-catch-unguarded",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "      .catch((error: unknown) => {\n        if (current !== generation.current) {\n          return;\n        }\n        setFirstError(error);",
++      "new": "      .catch((error: unknown) => {\n        setFirstError(error);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_first-page-catch-unguarded.log",
++      "log_sha256": "8f0872a9adb421ea85dbc5db4eed330551b238ebcf77522e0eb6125b027de1a3"
++    },
++    {
++      "id": "manual:rework-1:unmount-generation-not-bumped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    () => () => {\n      generation.current += 1;\n",
++      "new": "    () => () => {\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.2,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_unmount-generation-not-bumped.log",
++      "log_sha256": "d979245520225c299f500524fc1b0db8f04ba400e8eb6dfa9d41dc44a03f3950"
++    },
++    {
++      "id": "manual:rework-1:top-spacer-not-hidden",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "<tr aria-hidden=\"true\" style={{ height: `${range.padTop}px` }}>",
++      "new": "<tr style={{ height: `${range.padTop}px` }}>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_top-spacer-not-hidden.log",
++      "log_sha256": "91ca7972c3ff82fb2976adfc02f74be52591b2d80ac0026b161066db03059334"
++    },
++    {
++      "id": "manual:rework-1:bottom-spacer-not-hidden",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "<tr aria-hidden=\"true\" style={{ height: `${range.padBottom}px` }}>",
++      "new": "<tr style={{ height: `${range.padBottom}px` }}>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_bottom-spacer-not-hidden.log",
++      "log_sha256": "454f5fd193357ad49001b1dbd964e6d9380989d0a826036171fdd73757f3ad39"
++    },
++    {
++      "id": "manual:rework-1:sort-arrows-swapped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "{active === \"ascending\" ? \"\u25b2\" : active === \"descending\" ? \"\u25bc\" : \"\u2195\"}",
++      "new": "{active === \"ascending\" ? \"\u25bc\" : active === \"descending\" ? \"\u25b2\" : \"\u2195\"}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_sort-arrows-swapped.log",
++      "log_sha256": "0df94a1870c40cfb6d69eadaeb209c2101be7ddcd73fa303d006a4d4a0fede74"
++    },
++    {
++      "id": "manual:rework-1:live-region-visible",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "<output aria-live=\"polite\" className=\"sr-only\">",
++      "new": "<output aria-live=\"polite\">",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_live-region-visible.log",
++      "log_sha256": "ae8fc259c5e4c796e78621f63f2af1084b90f64261348ca94d73a3f964e479ab"
++    },
++    {
++      "id": "manual:rework-1:description-visible",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "<p id={descriptionId} className=\"sr-only\">",
++      "new": "<p id={descriptionId}>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_description-visible.log",
++      "log_sha256": "fca8f77aee51caa93e7f1e3d34b6f218e67ea5aa958b5260057a8b8f7219f08f"
++    },
++    {
++      "id": "manual:rework-1:unranked-header-keeps-aria-sort",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "  const ariaSort = ranked\n    ? (ariaSortFor(sort, percentileKey, sorted) ?? ariaSortFor(sort, scoreKey, sorted))\n    : undefined;",
++      "new": "  const ariaSort = ariaSortFor(sort, percentileKey, sorted) ?? ariaSortFor(sort, scoreKey, sorted);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.2,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_unranked-header-keeps-aria-sort.log",
++      "log_sha256": "b727f9e1555d9a147da1e9907aca685db1e114211679376e4ab64bb17a9a524c"
++    },
++    {
++      "id": "manual:rework-1:move-guard-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    if (target === fromIndex) {\n      return;\n    }\n    select(loaded.stocks[target].symbol);",
++      "new": "    select(loaded.stocks[target].symbol);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_move-guard-dropped.log",
++      "log_sha256": "4fa1d34c3b449c51c165f6b386cb0274a71ca1d09250bf607563e2af6c508b25"
++    },
++    {
++      "id": "manual:rework-1:symbol-from-factor-desc",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    const atDefault = sort === null || (sort.key === \"symbol\" && sort.order === \"asc\");",
++      "new": "    const atDefault = sort === null || sort.key !== \"symbol\" || sort.order === \"asc\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_symbol-from-factor-desc.log",
++      "log_sha256": "aa4187946805ff5a9e1b84d1260400c42549d4e400f7c09cce5918721a209d3b"
++    },
++    {
++      "id": "manual:rework-1:symbol-cycle-never-clears",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    return atDefault ? { key, order: \"desc\" } : null;",
++      "new": "    return atDefault ? { key, order: \"desc\" } : { key, order: \"asc\" };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_symbol-cycle-never-clears.log",
++      "log_sha256": "5d921f037e8b693b59c95e243652ef1517f656887ea8ddfdf77a6d63d10909fd"
++    },
++    {
++      "id": "manual:rework-1:announce-serial-not-bumped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "          serial: previous.serial + 1,",
++      "new": "          serial: previous.serial,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_announce-serial-not-bumped.log",
++      "log_sha256": "0095de413db42841f96bbcced9c2e4519043995653a09ac72a3c6fe9fa7a0a5c"
++    },
++    {
++      "id": "manual:rework-1:announce-span-unkeyed",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "<span key={announcement.serial}>{announcement.text}</span>",
++      "new": "<span>{announcement.text}</span>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_announce-span-unkeyed.log",
++      "log_sha256": "05b505dce709bee2308dd62ebf79ef4f744f75f03b6e9b41d2383739c9ddf4b1"
++    },
++    {
++      "id": "manual:rework-1:announce-row-count",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "          text: matchLabelRef.current(page.matchCount),",
++      "new": "          text: matchLabelRef.current(page.stocks.length),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_announce-row-count.log",
++      "log_sha256": "e7d8631ef7d981c791afe97d01866dbdb076a7770d24e6ab269ace7dc5f23572"
++    },
++    {
++      "id": "manual:rework-1:refresh-focus-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "        const focused = focusedSymbolIn(container);",
++      "new": "        const focused = null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_refresh-focus-dropped.log",
++      "log_sha256": "8142583bf0ec329f189ff95cb3f34288defb98950c7add0cef1d03fd0519b74a"
++    },
++    {
++      "id": "manual:rework-1:kept-reveal-ignores-scroll",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "scrollTopToReveal(kept, container.scrollTop)",
++      "new": "kept * ROW_HEIGHT_PX",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_kept-reveal-ignores-scroll.log",
++      "log_sha256": "a21cda648e25d365aa32b449ceb89584e4e2e645823c766e4abcb1e7620d234b"
++    },
++    {
++      "id": "manual:rework-1:kept-dom-scroll-not-set",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "          container.scrollTop = top;",
++      "new": "          container.scrollTop = 0;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_kept-dom-scroll-not-set.log",
++      "log_sha256": "94b8c9c7533e14594fd8f1dc9b43fa2b13ffa7fb095b0add19116f583c2d7b94"
++    },
++    {
++      "id": "manual:rework-1:kept-state-scroll-reset",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "        setScrollTop(top);",
++      "new": "        setScrollTop(0);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_kept-state-scroll-reset.log",
++      "log_sha256": "f9f0d54aba67783153418c5bec16a5061f641f76f34f19da1cd702657af743ea"
++    },
++    {
++      "id": "manual:rework-1:focused-symbol-ignores-rows",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "  return row.dataset.symbol ?? null;",
++      "new": "  return null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_focused-symbol-ignores-rows.log",
++      "log_sha256": "1babae97a798a0685f319c3e43a6ffe4ff509ef52e370a3244254ee1ead10ae8"
++    },
++    {
++      "id": "manual:rework-1:focused-symbol-outside-container",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "  if (!row || !container?.contains(row)) {",
++      "new": "  if (!row) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_focused-symbol-outside-container.log",
++      "log_sha256": "7e39e59506430ad335d272926265bb4c967d8db26bc0360bb27d75877b1dab6a"
++    },
++    {
++      "id": "manual:rework-1:space-prevent-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    } else if (event.key === \" \" && fromRow) {\n      // Space on the row does nothing (DAC-E4-S6-4): not even the browser's page scroll.\n      event.preventDefault();\n    } else if (",
++      "new": "    } else if (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_space-prevent-dropped.log",
++      "log_sha256": "b3285798b314e5db977e7bfc2de84ade8eb91b76d15b546b396225a4bc00c0e4"
++    },
++    {
++      "id": "manual:rework-1:space-prevent-from-checkbox-too",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    } else if (event.key === \" \" && fromRow) {",
++      "new": "    } else if (event.key === \" \") {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-pipeline-factorflow-v2-cap-002-e4-84bf08/6c806870-c781-4087-8897-cb0f86001033/scratchpad/s6-rework/logs/manual_rework-1_space-prevent-from-checkbox-too.log",
++      "log_sha256": "3968e9e96468680fa0b8d4b46564bdb016a348eef0361cc357b1fccb8d67a53e"
++    }
++  ],
++  "finished": "2026-10-30T05:04:04Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-1.log
+new file mode 100644
+index 0000000..e49defd
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-1.log
+@@ -0,0 +1,125 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > drops a later page in flight when the query changes: the new rows are not busy and page on
++Warning: An update to ResultsTable inside a test was not wrapped in act(...).
++
++When testing, code that causes React state updates should be wrapped into act(...):
++
++act(() => {
++  /* fire events that update state */
++});
++/* assert on the output */
++
++This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
++    at ResultsTable (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.tsx:181:5)
++    at Host (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.test.tsx:141:10)
++Warning: An update to ResultsTable inside a test was not wrapped in act(...).
++
++When testing, code that causes React state updates should be wrapped into act(...):
++
++act(() => {
++  /* fire events that update state */
++});
++/* assert on the output */
++
++This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
++    at ResultsTable (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.tsx:181:5)
++    at Host (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.test.tsx:141:10)
++
++ ❯ src/screens/research/results-table.test.tsx (86 tests | 5 failed) 1867ms
++   × T006: keyset paging and the request lifecycle > announces the match count again after a refresh-once that leaves it unchanged 15ms
++     → expected 0 to be greater than 0
++   × T006: keyset paging and the request lifecycle > keeps focus on a focused row past the first window across a refresh-once that keeps it 44ms
++     → expected null not to be null
++   × TC-COMP-138: sorting is a request > starts the Symbol sort at its A to Z default when a factor sort is active 16ms
++     → expected { sort: 'symbol', order: 'desc', …(1) } to deeply equal { limit: 50 }
++   × TC-COMP-138: sorting is a request > announces the match count again after a sort that leaves it unchanged 16ms
++     → expected 0 to be greater than 0
++   × TC-COMP-139: selection and checking never interfere > prevents the browser's default for Space on the row, and leaves it to the checkbox 7ms
++     → expected true to be false // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > announces the match count again after a refresh-once that leaves it unchanged
++AssertionError: expected 0 to be greater than 0
++ ❯ src/screens/research/results-table.test.tsx:734:43
++    732|     await screen.findByText("NEW0000");
++    733|     // The text is the same sentence, and the region changed, which is…
++    734|     expect(observer.takeRecords().length).toBeGreaterThan(0);
++       |                                           ^
++    735|     observer.disconnect();
++    736|     expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > keeps focus on a focused row past the first window across a refresh-once that keeps it
++AssertionError: expected null not to be null
++ ❯ src/screens/research/results-table.test.tsx:756:34
++    754|       reload.resolve(list(generated(50)));
++    755|     });
++    756|     expect(rowOf("SYM0040")).not.toBeNull();
++       |                                  ^
++    757|     expect(document.activeElement).toBe(rowOf("SYM0040"));
++    758|     expect(selectedSymbols()).toEqual(["SYM0040"]);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-138: sorting is a request > starts the Symbol sort at its A to Z default when a factor sort is active
++AssertionError: expected { sort: 'symbol', order: 'desc', …(1) } to deeply equal { limit: 50 }
++
++- Expected
+++ Received
++
++  Object {
++    "limit": 50,
+++   "order": "desc",
+++   "sort": "symbol",
++  }
++
++ ❯ src/screens/research/results-table.test.tsx:1509:39
++    1507|     listMock.mockResolvedValueOnce(list(generated(3, "AZ"), { matchCou…
++    1508|     await user.click(sortButton(SORT.bySymbol));
++    1509|     expect(listMock.mock.calls[1][0]).toEqual({ limit: PAGE_SIZE });
++       |                                       ^
++    1510|     expect(listMock.mock.calls[1][0]).not.toHaveProperty("sort");
++    1511|     expect(listMock.mock.calls[1][0]).not.toHaveProperty("order");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-138: sorting is a request > announces the match count again after a sort that leaves it unchanged
++AssertionError: expected 0 to be greater than 0
++ ❯ src/screens/research/results-table.test.tsx:1579:43
++    1577|     expect(observer.takeRecords()).toHaveLength(0);
++    1578|     await screen.findByText("S0000");
++    1579|     expect(observer.takeRecords().length).toBeGreaterThan(0);
++       |                                           ^
++    1580|     observer.disconnect();
++    1581|     expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > prevents the browser's default for Space on the row, and leaves it to the checkbox
++AssertionError: expected true to be false // Object.is equality
++
++- Expected
+++ Received
++
++- false
+++ true
++
++ ❯ src/screens/research/results-table.test.tsx:1795:60
++    1793|     await renderRows();
++    1794|     rowOf("MSFT").focus();
++    1795|     expect(fireEvent.keyDown(rowOf("MSFT"), { key: " " })).toBe(false);
++       |                                                            ^
++    1796|     expect(hostChecked()).toBe("");
++    1797|     expect(selectedSymbols()).toEqual([]);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
++
++ Test Files  1 failed (1)
++      Tests  5 failed | 81 passed (86)
++   Start at  23:35:57
++   Duration  2.63s (transform 133ms, setup 60ms, collect 198ms, tests 1.87s, environment 244ms, prepare 140ms)
++
+diff --git a/web/src/screens/research/results-table.test.tsx b/web/src/screens/research/results-table.test.tsx
+index bb43099..cce841a 100644
+--- a/web/src/screens/research/results-table.test.tsx
++++ b/web/src/screens/research/results-table.test.tsx
+@@ -248,6 +248,16 @@ function headerText(header: HTMLElement): string {
+   }
+   return (clone.textContent ?? "").trim();
+ }
++/** The arrow a sort button draws: decoration beside its accessible name. */
++const glyphOf = (button: HTMLElement): string =>
++  button.querySelector("[aria-hidden='true']")?.textContent?.trim() ?? "";
++/** Watches the polite region for the DOM changes a screen reader announces (data-table section 5). */
++function observeRegion(region: HTMLElement): { records: MutationRecord[]; disconnect: () => void } {
++  const records: MutationRecord[] = [];
++  const observer = new MutationObserver((batch) => records.push(...batch));
++  observer.observe(region, { childList: true, characterData: true, subtree: true });
++  return { records, disconnect: () => observer.disconnect() };
++}
+ /** The header whose own text is `label`, the unranked column's qualified sentence aside. */
+ const headerOf = (label: string): HTMLElement =>
+   headerCells().find(
+@@ -319,6 +329,24 @@ describe("TC-COMP-093: 3000 rows are windowed, so the DOM does not grow with the
+     expect(stockRows().length).toBeLessThanOrEqual(MAX_RENDERED);
+   });
+ 
++  it("hides both spacer rows from assistive technology, so only stock rows are rows", async () => {
++    listMock.mockResolvedValueOnce(list(generated(3000), { matchCount: 3000 }));
++    render(<Host />);
++    await screen.findByText("SYM0000");
++    scrollToRow(1500);
++    const bodyRows = Array.from(document.querySelectorAll<HTMLElement>("tbody tr"));
++    const top = bodyRows[0];
++    const bottom = bodyRows[bodyRows.length - 1];
++    expect(top).not.toHaveAttribute("data-symbol");
++    expect(bottom).not.toHaveAttribute("data-symbol");
++    expect(top.style.height).not.toBe("0px");
++    expect(bottom.style.height).not.toBe("0px");
++    expect(top).toHaveAttribute("aria-hidden", "true");
++    expect(bottom).toHaveAttribute("aria-hidden", "true");
++    const tbody = document.querySelector("tbody") as HTMLElement;
++    expect(within(tbody).getAllByRole("row")).toHaveLength(stockRows().length);
++  });
++
+   it("creates no horizontal scrollbar: the container hides overflow-x and the table is w-full", async () => {
+     listMock.mockResolvedValueOnce(list(generated(50)));
+     render(<Host />);
+@@ -687,10 +715,331 @@ describe("T006: keyset paging and the request lifecycle", () => {
+     await screen.findByText("SYM0000");
+     const region = statusRegion();
+     expect(region).toHaveAttribute("aria-live", "polite");
++    expect(region).toHaveClass("sr-only");
+     expect(region).toHaveTextContent(RESULTS.stocksMatch(2846));
+     expect(region.textContent).not.toContain("50 ");
+   });
+ 
++  it("announces the match count again after a refresh-once that leaves it unchanged", async () => {
++    listMock.mockResolvedValueOnce(list(generated(5), { matchCount: 2846 }));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    const region = statusRegion();
++    expect(region).toHaveTextContent(RESULTS.stocksMatch(2846));
++    const observer = observeRegion(region);
++
++    listMock.mockResolvedValueOnce(list(generated(5, "NEW"), { matchCount: 2846 }));
++    rerender(<Host refreshKey={1} />);
++    await screen.findByText("NEW0000");
++    // The text is the same sentence, and the region changed, which is what a polite region announces.
++    expect(observer.records.length).toBeGreaterThan(0);
++    observer.disconnect();
++    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
++  });
++
++  it("keeps focus on a focused row past the first window across a refresh-once that keeps it", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(50)));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    scrollToRow(30);
++    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
++    expect(document.activeElement).toBe(rowOf("SYM0040"));
++
++    const reload = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(reload.promise);
++    rerender(<Host refreshKey={1} />);
++    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
++    expect(document.activeElement).toBe(rowOf("SYM0040"));
++    await act(async () => {
++      reload.resolve(list(generated(50)));
++    });
++    expect(rowOf("SYM0040")).not.toBeNull();
++    expect(document.activeElement).toBe(rowOf("SYM0040"));
++    expect(selectedSymbols()).toEqual(["SYM0040"]);
++    expect(scroller().scrollTop).toBe(30 * ROW_HEIGHT_PX);
++    expect(screen.queryByText("SYM0000")).not.toBeInTheDocument();
++  });
++
++  it("keeps focus on the focused row when a refresh-once reorders the rows around it", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(50)));
++    const { rerender } = render(
++      <Host
++        initialQuery={{
++          ...DEFAULT_RESEARCH_QUERY,
++          sort: { key: "value_percentile", order: "desc" },
++        }}
++      />,
++    );
++    await screen.findByText("SYM0000");
++    scrollToRow(30);
++    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
++    expect(document.activeElement).toBe(rowOf("SYM0040"));
++
++    // A new score set (DEC-0062) ranks the neighbours differently: the focused row moves in the DOM.
++    // A browser blurs a focused node that is moved (the DOM's removing steps run the focus fixup);
++    // jsdom does not when React moves it, so the move is shimmed to blur as a browser would.
++    const blurMoved = (node: Node): void => {
++      if (node.isConnected && node.contains(document.activeElement)) {
++        (document.activeElement as HTMLElement).blur();
++      }
++    };
++    const insertBefore = Node.prototype.insertBefore;
++    const appendChild = Node.prototype.appendChild;
++    const insertSpy = vi.spyOn(Node.prototype, "insertBefore").mockImplementation(function (
++      this: Node,
++      node,
++      reference,
++    ) {
++      blurMoved(node);
++      return insertBefore.call(this, node, reference);
++    });
++    const appendSpy = vi.spyOn(Node.prototype, "appendChild").mockImplementation(function (
++      this: Node,
++      node,
++    ) {
++      blurMoved(node);
++      return appendChild.call(this, node);
++    });
++    try {
++      const rows = generated(50);
++      [rows[36], rows[37], rows[38], rows[39], rows[40], rows[41]] = [
++        rows[41],
++        rows[40],
++        rows[39],
++        rows[38],
++        rows[37],
++        rows[36],
++      ];
++      listMock.mockResolvedValueOnce(list(rows));
++      rerender(<Host refreshKey={1} />);
++      await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
++      expect(
++        stockRows()
++          .map((row) => row.dataset.symbol)
++          .slice(16, 22),
++      ).toEqual(["SYM0041", "SYM0040", "SYM0039", "SYM0038", "SYM0037", "SYM0036"]);
++      expect(document.activeElement).toBe(rowOf("SYM0040"));
++      expect(scroller().scrollTop).toBe(30 * ROW_HEIGHT_PX);
++    } finally {
++      insertSpy.mockRestore();
++      appendSpy.mockRestore();
++    }
++  });
++
++  it("leaves a focused row of the host's own, outside the table, alone on a refresh-once", async () => {
++    listMock.mockResolvedValueOnce(list(generated(50)));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    // A host row that happens to carry a listed symbol: not the table's, so not its place to keep.
++    const outside = document.createElement("table");
++    outside.setAttribute("role", "presentation");
++    outside.innerHTML = '<tbody><tr data-symbol="SYM0030" tabindex="-1"><td>host</td></tr></tbody>';
++    document.body.append(outside);
++    const hostRow = outside.querySelector("tr") as HTMLTableRowElement;
++    try {
++      hostRow.focus();
++      expect(document.activeElement).toBe(hostRow);
++      scrollToRow(30);
++
++      // The refreshed page still lists SYM0030, yet the window starts over: the focus is not the table's.
++      listMock.mockResolvedValueOnce(list(generated(50)));
++      rerender(<Host refreshKey={1} />);
++      await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
++      expect(listMock).toHaveBeenCalledTimes(2);
++      expect(document.activeElement).toBe(hostRow);
++      expect(scroller().scrollTop).toBe(0);
++      expect(screen.getByText("SYM0000")).toBeInTheDocument();
++    } finally {
++      outside.remove();
++    }
++  });
++
++  it("scrolls a refreshed page to the focused row when the refresh moved it, and resets when it is gone", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(50)));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    scrollToRow(30);
++    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
++
++    // The refreshed page lists the focused stock first: the window follows it.
++    const moved = [stock("SYM0040"), ...generated(49, "NEW")];
++    listMock.mockResolvedValueOnce(list(moved));
++    rerender(<Host refreshKey={1} />);
++    await screen.findByText("NEW0000");
++    expect(document.activeElement).toBe(rowOf("SYM0040"));
++    expect(scroller().scrollTop).toBe(scrollTopToReveal(0, 30 * ROW_HEIGHT_PX));
++
++    // The next refresh drops it: the window starts over at the top.
++    scrollToRow(20);
++    rowOf("NEW0030").focus();
++    listMock.mockResolvedValueOnce(list(generated(50, "GONE")));
++    rerender(<Host refreshKey={2} />);
++    await screen.findByText("GONE0000");
++    expect(scroller().scrollTop).toBe(0);
++    expect(rowOf("NEW0030")).toBeNull();
++  });
++
++  it("ignores a later page of a superseded query that lands after the new page one", async () => {
++    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    const latePage = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(latePage.promise);
++    scrollToRow(40);
++    expect(listMock).toHaveBeenCalledTimes(2);
++
++    listMock.mockResolvedValueOnce(list(generated(2, "NEW")));
++    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-3" }} />);
++    await screen.findByText("NEW0000");
++    expect(stockRows()).toHaveLength(2);
++
++    await act(async () => {
++      latePage.resolve(list(generated(10, "OLD"), { matchCount: 120, nextCursor: "c2" }));
++    });
++    expect(screen.queryByText("OLD0000")).not.toBeInTheDocument();
++    expect(stockRows().map((row) => row.dataset.symbol)).toEqual(["NEW0000", "NEW0001"]);
++    scrollToRow(0);
++    expect(listMock).toHaveBeenCalledTimes(3);
++  });
++
++  it("drops a later page in flight when the query changes: the new rows are not busy and page on", async () => {
++    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    listMock.mockReturnValueOnce(deferred<ClassificationList>().promise);
++    scrollToRow(40);
++    expect(listMock).toHaveBeenCalledTimes(2);
++    expect(table()).toHaveAttribute("aria-busy", "true");
++
++    listMock.mockResolvedValueOnce(
++      list(generated(50, "NEW"), { matchCount: 90, nextCursor: "n1" }),
++    );
++    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-4" }} />);
++    await screen.findByText("NEW0000");
++    expect(table()).not.toHaveAttribute("aria-busy", "true");
++
++    listMock.mockResolvedValueOnce(list(generated(40, "NX"), { matchCount: 90, nextCursor: null }));
++    scrollToRow(40);
++    expect(listMock).toHaveBeenCalledTimes(4);
++    expect(listMock.mock.calls[3][0]).toEqual({
++      universeId: "u-4",
++      limit: PAGE_SIZE,
++      cursor: "n1",
++    });
++    await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
++    scrollToRow(60);
++    expect(screen.getByText("NX0000")).toBeInTheDocument();
++  });
++
++  it("drops a later page's error when the query changes", async () => {
++    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    listMock.mockRejectedValueOnce(apiError("internal_error"));
++    scrollToRow(40);
++    await screen.findByRole("button", { name: RESULTS.tryAgain });
++
++    listMock.mockResolvedValueOnce(list(generated(3, "NEW")));
++    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-5" }} />);
++    await screen.findByText("NEW0000");
++    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
++    expect(
++      screen.queryByText(
++        failureSentence({
++          operation: "list-classifications",
++          resource: "classification",
++          code: "internal_error",
++        }),
++      ),
++    ).not.toBeInTheDocument();
++  });
++
++  it("never sends the old cursor after a refreshKey bump, even when a page lands in the same render as the bump", async () => {
++    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 200, nextCursor: "c1" }));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++
++    const second = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(second.promise);
++    scrollToRow(40);
++    expect(listMock).toHaveBeenCalledTimes(2);
++
++    const pageOne = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(pageOne.promise);
++    await act(async () => {
++      second.resolve(list(generated(10, "PG2"), { matchCount: 200, nextCursor: "c2" }));
++      await Promise.resolve();
++      rerender(<Host refreshKey={1} />);
++    });
++    expect(listMock).toHaveBeenCalledTimes(3);
++    expect(listMock.mock.calls[2][0]).toEqual({ limit: PAGE_SIZE });
++    scrollToRow(55);
++    expect(listMock).toHaveBeenCalledTimes(3);
++    await act(async () => {
++      pageOne.resolve(list(generated(50, "RF"), { matchCount: 200, nextCursor: "r1" }));
++    });
++    expect(screen.getByText("RF0000")).toBeInTheDocument();
++    for (const call of listMock.mock.calls.slice(2)) {
++      expect(call[0]).not.toHaveProperty("cursor", "c2");
++    }
++  });
++
++  it("ignores a superseded page one that fails late", async () => {
++    listMock.mockResolvedValueOnce(list(generated(3)));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    const lateFailure = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(lateFailure.promise);
++    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-6" }} />);
++    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
++
++    listMock.mockResolvedValueOnce(list(generated(3, "NEW")));
++    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-7" }} />);
++    await screen.findByText("NEW0000");
++    await act(async () => {
++      lateFailure.reject(apiError("internal_error"));
++    });
++    expect(screen.getByText("NEW0000")).toBeInTheDocument();
++    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
++    expect(table()).not.toHaveAttribute("aria-busy", "true");
++  });
++
++  it("ignores a superseded later page that fails late", async () => {
++    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
++    const { rerender } = render(<Host />);
++    await screen.findByText("SYM0000");
++    const latePage = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(latePage.promise);
++    scrollToRow(40);
++    expect(listMock).toHaveBeenCalledTimes(2);
++
++    listMock.mockResolvedValueOnce(list(generated(3, "NEW")));
++    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-8" }} />);
++    await screen.findByText("NEW0000");
++    await act(async () => {
++      latePage.reject(apiError("internal_error"));
++    });
++    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
++    expect(table()).not.toHaveAttribute("aria-busy", "true");
++    expect(screen.getByText("NEW0000")).toBeInTheDocument();
++  });
++
++  it("hands nothing to onResult for a page one that lands after unmount", async () => {
++    const onResult = vi.fn();
++    const pending = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(pending.promise);
++    const { unmount } = render(<Host onResult={onResult} />);
++    expect(listMock).toHaveBeenCalledTimes(1);
++    unmount();
++    await act(async () => {
++      pending.resolve(list(generated(3)));
++    });
++    expect(onResult).not.toHaveBeenCalled();
++  });
++
+   it("uses the host's matchLabel when given", async () => {
+     listMock.mockResolvedValueOnce(list(generated(2), { matchCount: 7 }));
+     render(<Host matchLabel={(count) => RESULTS.membersMatch(count, 12)} />);
+@@ -994,6 +1343,24 @@ describe("TC-COMP-110: a factor below 30 qualifying stocks states the count once
+     expect(headerOf(FACTOR_LABELS.momentum)).toHaveAttribute("aria-describedby");
+   });
+ 
++  it("carries no aria-sort on the unranked column even when the query sorts by it", async () => {
++    for (const key of ["growth_percentile", "growth_score"] as const) {
++      listMock.mockResolvedValueOnce(underThirty(20, 30));
++      const { unmount } = render(
++        <Host initialQuery={{ ...DEFAULT_RESEARCH_QUERY, sort: { key, order: "asc" } }} />,
++      );
++      await screen.findByText("AAPL");
++      expect(listMock).toHaveBeenLastCalledWith(
++        expect.objectContaining({ sort: key, order: "asc" }),
++      );
++      expect(headerOf(FACTOR_LABELS.growth)).not.toHaveAttribute("aria-sort");
++      for (const header of headerCells()) {
++        expect(header).not.toHaveAttribute("aria-sort");
++      }
++      unmount();
++    }
++  });
++
+   it("never shows a percentile on an unranked factor, even when a cell arrives classified", async () => {
+     const page = underThirty(20, 30);
+     page.stocks[0].factors.growth = scored("77", "1.10");
+@@ -1067,6 +1434,7 @@ describe("TC-COMP-098: a stock incomplete on one factor reads two percentiles an
+       expect(id).toBeTruthy();
+       const description = document.getElementById(id as string) as HTMLElement;
+       expect(description).toHaveTextContent(SORT.incompleteLast);
++      expect(description).toHaveClass("sr-only");
+     }
+     expect(SORT.incompleteLast).toBe(
+       "Stocks with an incomplete score are listed last, whether sorted up or down.",
+@@ -1117,6 +1485,8 @@ describe("TC-COMP-138: sorting is a request", () => {
+       Growth: null,
+       Momentum: null,
+     });
++    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("▲");
++    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("↕");
+ 
+     listMock.mockResolvedValueOnce(list(generated(3, "ASC"), { matchCount: 2846 }));
+     await user.click(sortButton(SORT.byPercentile("value")));
+@@ -1133,6 +1503,9 @@ describe("TC-COMP-138: sorting is a request", () => {
+       Growth: null,
+       Momentum: null,
+     });
++    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("▲");
++    expect(glyphOf(sortButton(SORT.byStandardisedScore("value")))).toBe("↕");
++    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("↕");
+ 
+     listMock.mockResolvedValueOnce(list(generated(3, "DSC"), { matchCount: 2846 }));
+     await user.click(sortButton(SORT.byPercentile("value")));
+@@ -1143,6 +1516,7 @@ describe("TC-COMP-138: sorting is a request", () => {
+     });
+     await screen.findByText("DSC0000");
+     expect(headerOf(FACTOR_LABELS.value)).toHaveAttribute("aria-sort", "descending");
++    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("▼");
+ 
+     listMock.mockResolvedValueOnce(list(generated(3, "NON"), { matchCount: 2846 }));
+     await user.click(sortButton(SORT.byPercentile("value")));
+@@ -1152,6 +1526,8 @@ describe("TC-COMP-138: sorting is a request", () => {
+     await screen.findByText("NON0000");
+     expect(headerOf(FACTOR_LABELS.value)).not.toHaveAttribute("aria-sort");
+     expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
++    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("↕");
++    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("▲");
+   });
+ 
+   it("keeps the rest of the query when it sorts", async () => {
+@@ -1210,6 +1586,51 @@ describe("TC-COMP-138: sorting is a request", () => {
+     expect(listMock.mock.calls[2][0]).toEqual({ limit: PAGE_SIZE });
+     await screen.findByText("SA0000");
+     expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
++    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("▲");
++  });
++
++  it("starts the Symbol sort at its A to Z default when a factor sort is active", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(3), { matchCount: 2846 }));
++    render(
++      <Host
++        initialQuery={{
++          ...DEFAULT_RESEARCH_QUERY,
++          sort: { key: "value_percentile", order: "desc" },
++        }}
++      />,
++    );
++    await screen.findByText("SYM0000");
++    expect(headerOf(FACTOR_LABELS.value)).toHaveAttribute("aria-sort", "descending");
++
++    listMock.mockResolvedValueOnce(list(generated(3, "AZ"), { matchCount: 2846 }));
++    await user.click(sortButton(SORT.bySymbol));
++    expect(listMock.mock.calls[1][0]).toEqual({ limit: PAGE_SIZE });
++    expect(listMock.mock.calls[1][0]).not.toHaveProperty("sort");
++    expect(listMock.mock.calls[1][0]).not.toHaveProperty("order");
++    await screen.findByText("AZ0000");
++    expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
++    expect(headerOf(FACTOR_LABELS.value)).not.toHaveAttribute("aria-sort");
++
++    listMock.mockResolvedValueOnce(list(generated(3, "ZA"), { matchCount: 2846 }));
++    await user.click(sortButton(SORT.bySymbol));
++    expect(listMock.mock.calls[2][0]).toEqual({ sort: "symbol", order: "desc", limit: PAGE_SIZE });
++    await screen.findByText("ZA0000");
++    expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "descending");
++  });
++
++  it("treats an explicit symbol ascending sort in the query as the default: the next press is Z to A", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(3), { matchCount: 2846 }));
++    render(
++      <Host initialQuery={{ ...DEFAULT_RESEARCH_QUERY, sort: { key: "symbol", order: "asc" } }} />,
++    );
++    await screen.findByText("SYM0000");
++    expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
++    listMock.mockResolvedValueOnce(list(generated(3, "ZA"), { matchCount: 2846 }));
++    await user.click(sortButton(SORT.bySymbol));
++    expect(listMock.mock.calls[1][0]).toEqual({ sort: "symbol", order: "desc", limit: PAGE_SIZE });
++    await screen.findByText("ZA0000");
+   });
+ 
+   it("keeps focus on the activated button before and after the rows arrive, with the old rows busy meanwhile", async () => {
+@@ -1243,6 +1664,27 @@ describe("TC-COMP-138: sorting is a request", () => {
+     expect(statusRegion()).toHaveTextContent(RESULTS.stocksMatch(1203));
+   });
+ 
++  it("announces the match count again after a sort that leaves it unchanged", async () => {
++    const user = await renderSorted();
++    const region = statusRegion();
++    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
++    const observer = observeRegion(region);
++
++    const sorted = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(sorted.promise);
++    await user.click(sortButton(SORT.byPercentile("value")));
++    // Nothing is announced before the sorted page arrives.
++    expect(observer.records).toHaveLength(0);
++    await act(async () => {
++      sorted.resolve(list(generated(3, "S"), { matchCount: 2846 }));
++    });
++    expect(screen.getByText("S0000")).toBeInTheDocument();
++    expect(observer.records.length).toBeGreaterThan(0);
++    observer.disconnect();
++    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
++    expect(statusRegion()).toBe(region);
++  });
++
+   it("activates once on Enter and once on Space from the keyboard", async () => {
+     const user = await renderSorted();
+     const button = sortButton(SORT.byPercentile("value"));
+@@ -1426,6 +1868,40 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
+     expect(selectedSymbols()).toEqual(["MSFT"]);
+   });
+ 
++  it("leaves focus on a sort button activated after an arrow press past either end", async () => {
++    const user = await renderRows();
++    await user.click(screen.getByRole("rowheader", { name: "NVDA" }));
++    await user.keyboard("{ArrowDown}");
++    expect(selectedSymbols()).toEqual(["NVDA"]);
++    expect(document.activeElement).toBe(rowOf("NVDA"));
++    listMock.mockResolvedValueOnce(list(THREE));
++    const button = sortButton(SORT.byPercentile("value"));
++    await user.click(button);
++    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
++    await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
++    expect(document.activeElement).toBe(button);
++
++    await user.click(screen.getByRole("rowheader", { name: "AAPL" }));
++    await user.keyboard("{ArrowUp}");
++    expect(selectedSymbols()).toEqual(["AAPL"]);
++    listMock.mockResolvedValueOnce(list(THREE));
++    const symbolButton = sortButton(SORT.bySymbol);
++    await user.click(symbolButton);
++    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(3));
++    await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
++    expect(document.activeElement).toBe(symbolButton);
++  });
++
++  it("prevents the browser's default for Space on the row, and leaves it to the checkbox", async () => {
++    await renderRows();
++    rowOf("MSFT").focus();
++    expect(fireEvent.keyDown(rowOf("MSFT"), { key: " " })).toBe(false);
++    expect(hostChecked()).toBe("");
++    expect(selectedSymbols()).toEqual([]);
++    expect(fireEvent.keyDown(checkboxOf("MSFT"), { key: " " })).toBe(true);
++    expect(fireEvent.keyDown(rowOf("MSFT"), { key: "Enter" })).toBe(true);
++  });
++
+   it("gives the selected row the tab stop, else the first rendered row", async () => {
+     const user = await renderRows();
+     expect(rowOf("AAPL").tabIndex).toBe(0);
+diff --git a/web/src/screens/research/results-table.tsx b/web/src/screens/research/results-table.tsx
+index 6bb0806..4a6c033 100644
+--- a/web/src/screens/research/results-table.tsx
++++ b/web/src/screens/research/results-table.tsx
+@@ -153,6 +153,15 @@ function appendNew(existing: StockRow[], incoming: StockRow[]): StockRow[] {
+   return [...existing, ...incoming.filter((row) => !known.has(row.symbol))];
+ }
+ 
++/** The symbol of the row holding focus inside `container`, through the row or a control in it; null when focus is elsewhere. */
++function focusedSymbolIn(container: HTMLElement | null): string | null {
++  const row = document.activeElement?.closest<HTMLTableRowElement>("tr[data-symbol]");
++  if (!row || !container?.contains(row)) {
++    return null;
++  }
++  return row.dataset.symbol ?? null;
++}
++
+ function swatchStyle(factor: FactorName): CSSProperties {
+   // The identity token as an inline style: tailwind.config.js maps no
+   // `factor` colour (CAP-002-E4-S6 Open Gap 5; STD-UI-29 introduces no literal).
+@@ -180,15 +189,33 @@ function ariaSortFor(
+  * The next sort after activating `key`: ascending, descending, then the
+  * unsorted default (data-table interaction contract; DEC-0161). The Symbol
+  * column's unsorted default is its ascending order, so its cycle reads
+- * ascending (default), descending, ascending (default).
++ * ascending (default), descending, ascending (default): from a factor sort
++ * its first activation returns to that default, A to Z, as any column not
++ * currently sorted begins at ascending.
+  */
+ function nextSort(sort: ResearchQuery["sort"], key: SortKey): ResearchQuery["sort"] {
++  if (key === "symbol") {
++    const atDefault = sort === null || (sort.key === "symbol" && sort.order === "asc");
++    return atDefault ? { key, order: "desc" } : null;
++  }
+   if (sort === null || sort.key !== key) {
+-    return key === "symbol" ? { key, order: "desc" } : { key, order: "asc" };
++    return { key, order: "asc" };
+   }
+   return sort.order === "asc" ? { key, order: "desc" } : null;
+ }
+ 
++/**
++ * What the polite region holds (DAC-E4-S6-2; data-table accessibility
++ * contract). A sort or a refresh-once rarely changes the match count, and a
++ * live region announces changes only, so each first page also bumps `serial`:
++ * the sentence is re-inserted as a new node and read again even when its text
++ * is the one already shown.
++ */
++interface Announcement {
++  text: string;
++  serial: number;
++}
++
+ interface SortButtonProps {
+   name: string;
+   active: AriaSort | undefined;
+@@ -326,6 +353,9 @@ function cellFor(
+  *   nothing-found bodies, and the h1, as-of line and banner, stay the host's.
+  * - `refreshKey` reloads page one once with the same query; `extraColumns`
+  *   adds the host's columns by placement.
++ * - `query` is compared by identity: a new object reads page one again, so a
++ *   host keeps one object per URL state (decoded once per search string, not
++ *   on every render), or each `onResult` would start another read.
+  */
+ export function ResultsTable(props: ResultsTableProps): JSX.Element {
+   const {
+@@ -357,7 +387,7 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
+   const [pagePending, setPagePending] = useState(false);
+   const [firstError, setFirstError] = useState<unknown>(null);
+   const [pageError, setPageError] = useState<PageError | null>(null);
+-  const [announcement, setAnnouncement] = useState("");
++  const [announcement, setAnnouncement] = useState<Announcement>({ text: "", serial: 0 });
+   const [scrollTop, setScrollTop] = useState(0);
+   /** Bumped by Try again on a first page and by the one stale-cursor restart. */
+   const [attempt, setAttempt] = useState(0);
+@@ -408,6 +438,15 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
+         if (current !== generation.current) {
+           return;
+         }
++        // A keyboard user's place is kept: a focused row still in the page
++        // stays in the window, so its element persists (rows are keyed by
++        // symbol) and React restores focus to it after the commit; otherwise
++        // the window starts over.
++        const container = scrollRef.current;
++        const focused = focusedSymbolIn(container);
++        const kept = page.stocks.findIndex((row) => row.symbol === focused);
++        const top =
++          kept === -1 || container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);
+         setLoaded({
+           first: page,
+           stocks: page.stocks,
+@@ -415,11 +454,14 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
+           epoch: { query, refreshKey, attempt },
+         });
+         setFirstPending(false);
+-        setScrollTop(0);
+-        if (scrollRef.current !== null) {
+-          scrollRef.current.scrollTop = 0;
++        setScrollTop(top);
++        if (container !== null) {
++          container.scrollTop = top;
+         }
+-        setAnnouncement(matchLabelRef.current(page.matchCount));
++        setAnnouncement((previous) => ({
++          text: matchLabelRef.current(page.matchCount),
++          serial: previous.serial + 1,
++        }));
+         onResultRef.current(page);
+       })
+       .catch((error: unknown) => {
+@@ -632,7 +674,7 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
+   return (
+     <div className="flex flex-col gap-2">
+       <output aria-live="polite" className="sr-only">
+-        {announcement}
++        <span key={announcement.serial}>{announcement.text}</span>
+       </output>
+       {neverPopulated && firstError === null ? (
+         empty("never-populated")
+@@ -763,6 +805,9 @@ function StockTableRow({
+     const fromCheckbox = target instanceof HTMLInputElement && target.type === "checkbox";
+     if (event.key === "Enter" && fromRow) {
+       onSelect(row.symbol);
++    } else if (event.key === " " && fromRow) {
++      // Space on the row does nothing (DAC-E4-S6-4): not even the browser's page scroll.
++      event.preventDefault();
+     } else if (
+       (event.key === "ArrowDown" || event.key === "ArrowUp") &&
+       (fromRow || fromCheckbox)

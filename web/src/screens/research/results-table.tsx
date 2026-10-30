@@ -153,6 +153,15 @@ function appendNew(existing: StockRow[], incoming: StockRow[]): StockRow[] {
   return [...existing, ...incoming.filter((row) => !known.has(row.symbol))];
 }
 
+/** The symbol of the row holding focus inside `container`, through the row or a control in it; null when focus is elsewhere. */
+function focusedSymbolIn(container: HTMLElement | null): string | null {
+  const row = document.activeElement?.closest<HTMLTableRowElement>("tr[data-symbol]");
+  if (!row || !container?.contains(row)) {
+    return null;
+  }
+  return row.dataset.symbol ?? null;
+}
+
 function swatchStyle(factor: FactorName): CSSProperties {
   // The identity token as an inline style: tailwind.config.js maps no
   // `factor` colour (CAP-002-E4-S6 Open Gap 5; STD-UI-29 introduces no literal).
@@ -180,13 +189,31 @@ function ariaSortFor(
  * The next sort after activating `key`: ascending, descending, then the
  * unsorted default (data-table interaction contract; DEC-0161). The Symbol
  * column's unsorted default is its ascending order, so its cycle reads
- * ascending (default), descending, ascending (default).
+ * ascending (default), descending, ascending (default): from a factor sort
+ * its first activation returns to that default, A to Z, as any column not
+ * currently sorted begins at ascending.
  */
 function nextSort(sort: ResearchQuery["sort"], key: SortKey): ResearchQuery["sort"] {
+  if (key === "symbol") {
+    const atDefault = sort === null || (sort.key === "symbol" && sort.order === "asc");
+    return atDefault ? { key, order: "desc" } : null;
+  }
   if (sort === null || sort.key !== key) {
-    return key === "symbol" ? { key, order: "desc" } : { key, order: "asc" };
+    return { key, order: "asc" };
   }
   return sort.order === "asc" ? { key, order: "desc" } : null;
+}
+
+/**
+ * What the polite region holds (DAC-E4-S6-2; data-table accessibility
+ * contract). A sort or a refresh-once rarely changes the match count, and a
+ * live region announces changes only, so each first page also bumps `serial`:
+ * the sentence is re-inserted as a new node and read again even when its text
+ * is the one already shown.
+ */
+interface Announcement {
+  text: string;
+  serial: number;
 }
 
 interface SortButtonProps {
@@ -326,6 +353,9 @@ function cellFor(
  *   nothing-found bodies, and the h1, as-of line and banner, stay the host's.
  * - `refreshKey` reloads page one once with the same query; `extraColumns`
  *   adds the host's columns by placement.
+ * - `query` is compared by identity: a new object reads page one again, so a
+ *   host keeps one object per URL state (decoded once per search string, not
+ *   on every render), or each `onResult` would start another read.
  */
 export function ResultsTable(props: ResultsTableProps): JSX.Element {
   const {
@@ -357,7 +387,7 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
   const [pagePending, setPagePending] = useState(false);
   const [firstError, setFirstError] = useState<unknown>(null);
   const [pageError, setPageError] = useState<PageError | null>(null);
-  const [announcement, setAnnouncement] = useState("");
+  const [announcement, setAnnouncement] = useState<Announcement>({ text: "", serial: 0 });
   const [scrollTop, setScrollTop] = useState(0);
   /** Bumped by Try again on a first page and by the one stale-cursor restart. */
   const [attempt, setAttempt] = useState(0);
@@ -408,6 +438,15 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
         if (current !== generation.current) {
           return;
         }
+        // A keyboard user's place is kept: a focused row still in the page
+        // stays in the window, so its element persists (rows are keyed by
+        // symbol) and React restores focus to it after the commit; otherwise
+        // the window starts over.
+        const container = scrollRef.current;
+        const focused = focusedSymbolIn(container);
+        const kept = page.stocks.findIndex((row) => row.symbol === focused);
+        const top =
+          kept === -1 || container === null ? 0 : scrollTopToReveal(kept, container.scrollTop);
         setLoaded({
           first: page,
           stocks: page.stocks,
@@ -415,11 +454,14 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
           epoch: { query, refreshKey, attempt },
         });
         setFirstPending(false);
-        setScrollTop(0);
-        if (scrollRef.current !== null) {
-          scrollRef.current.scrollTop = 0;
+        setScrollTop(top);
+        if (container !== null) {
+          container.scrollTop = top;
         }
-        setAnnouncement(matchLabelRef.current(page.matchCount));
+        setAnnouncement((previous) => ({
+          text: matchLabelRef.current(page.matchCount),
+          serial: previous.serial + 1,
+        }));
         onResultRef.current(page);
       })
       .catch((error: unknown) => {
@@ -632,7 +674,7 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
   return (
     <div className="flex flex-col gap-2">
       <output aria-live="polite" className="sr-only">
-        {announcement}
+        <span key={announcement.serial}>{announcement.text}</span>
       </output>
       {neverPopulated && firstError === null ? (
         empty("never-populated")
@@ -763,6 +805,9 @@ function StockTableRow({
     const fromCheckbox = target instanceof HTMLInputElement && target.type === "checkbox";
     if (event.key === "Enter" && fromRow) {
       onSelect(row.symbol);
+    } else if (event.key === " " && fromRow) {
+      // Space on the row does nothing (DAC-E4-S6-4): not even the browser's page scroll.
+      event.preventDefault();
     } else if (
       (event.key === "ArrowDown" || event.key === "ArrowUp") &&
       (fromRow || fromCheckbox)

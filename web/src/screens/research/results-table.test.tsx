@@ -248,6 +248,16 @@ function headerText(header: HTMLElement): string {
   }
   return (clone.textContent ?? "").trim();
 }
+/** The arrow a sort button draws: decoration beside its accessible name. */
+const glyphOf = (button: HTMLElement): string =>
+  button.querySelector("[aria-hidden='true']")?.textContent?.trim() ?? "";
+/** Watches the polite region for the DOM changes a screen reader announces (data-table section 5). */
+function observeRegion(region: HTMLElement): { records: MutationRecord[]; disconnect: () => void } {
+  const records: MutationRecord[] = [];
+  const observer = new MutationObserver((batch) => records.push(...batch));
+  observer.observe(region, { childList: true, characterData: true, subtree: true });
+  return { records, disconnect: () => observer.disconnect() };
+}
 /** The header whose own text is `label`, the unranked column's qualified sentence aside. */
 const headerOf = (label: string): HTMLElement =>
   headerCells().find(
@@ -317,6 +327,24 @@ describe("TC-COMP-093: 3000 rows are windowed, so the DOM does not grow with the
     render(<Host />);
     await screen.findByText("SYM0000");
     expect(stockRows().length).toBeLessThanOrEqual(MAX_RENDERED);
+  });
+
+  it("hides both spacer rows from assistive technology, so only stock rows are rows", async () => {
+    listMock.mockResolvedValueOnce(list(generated(3000), { matchCount: 3000 }));
+    render(<Host />);
+    await screen.findByText("SYM0000");
+    scrollToRow(1500);
+    const bodyRows = Array.from(document.querySelectorAll<HTMLElement>("tbody tr"));
+    const top = bodyRows[0];
+    const bottom = bodyRows[bodyRows.length - 1];
+    expect(top).not.toHaveAttribute("data-symbol");
+    expect(bottom).not.toHaveAttribute("data-symbol");
+    expect(top.style.height).not.toBe("0px");
+    expect(bottom.style.height).not.toBe("0px");
+    expect(top).toHaveAttribute("aria-hidden", "true");
+    expect(bottom).toHaveAttribute("aria-hidden", "true");
+    const tbody = document.querySelector("tbody") as HTMLElement;
+    expect(within(tbody).getAllByRole("row")).toHaveLength(stockRows().length);
   });
 
   it("creates no horizontal scrollbar: the container hides overflow-x and the table is w-full", async () => {
@@ -687,8 +715,329 @@ describe("T006: keyset paging and the request lifecycle", () => {
     await screen.findByText("SYM0000");
     const region = statusRegion();
     expect(region).toHaveAttribute("aria-live", "polite");
+    expect(region).toHaveClass("sr-only");
     expect(region).toHaveTextContent(RESULTS.stocksMatch(2846));
     expect(region.textContent).not.toContain("50 ");
+  });
+
+  it("announces the match count again after a refresh-once that leaves it unchanged", async () => {
+    listMock.mockResolvedValueOnce(list(generated(5), { matchCount: 2846 }));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    const region = statusRegion();
+    expect(region).toHaveTextContent(RESULTS.stocksMatch(2846));
+    const observer = observeRegion(region);
+
+    listMock.mockResolvedValueOnce(list(generated(5, "NEW"), { matchCount: 2846 }));
+    rerender(<Host refreshKey={1} />);
+    await screen.findByText("NEW0000");
+    // The text is the same sentence, and the region changed, which is what a polite region announces.
+    expect(observer.records.length).toBeGreaterThan(0);
+    observer.disconnect();
+    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
+  });
+
+  it("keeps focus on a focused row past the first window across a refresh-once that keeps it", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(generated(50)));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    scrollToRow(30);
+    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
+    expect(document.activeElement).toBe(rowOf("SYM0040"));
+
+    const reload = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(reload.promise);
+    rerender(<Host refreshKey={1} />);
+    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
+    expect(document.activeElement).toBe(rowOf("SYM0040"));
+    await act(async () => {
+      reload.resolve(list(generated(50)));
+    });
+    expect(rowOf("SYM0040")).not.toBeNull();
+    expect(document.activeElement).toBe(rowOf("SYM0040"));
+    expect(selectedSymbols()).toEqual(["SYM0040"]);
+    expect(scroller().scrollTop).toBe(30 * ROW_HEIGHT_PX);
+    expect(screen.queryByText("SYM0000")).not.toBeInTheDocument();
+  });
+
+  it("keeps focus on the focused row when a refresh-once reorders the rows around it", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(generated(50)));
+    const { rerender } = render(
+      <Host
+        initialQuery={{
+          ...DEFAULT_RESEARCH_QUERY,
+          sort: { key: "value_percentile", order: "desc" },
+        }}
+      />,
+    );
+    await screen.findByText("SYM0000");
+    scrollToRow(30);
+    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
+    expect(document.activeElement).toBe(rowOf("SYM0040"));
+
+    // A new score set (DEC-0062) ranks the neighbours differently: the focused row moves in the DOM.
+    // A browser blurs a focused node that is moved (the DOM's removing steps run the focus fixup);
+    // jsdom does not when React moves it, so the move is shimmed to blur as a browser would.
+    const blurMoved = (node: Node): void => {
+      if (node.isConnected && node.contains(document.activeElement)) {
+        (document.activeElement as HTMLElement).blur();
+      }
+    };
+    const insertBefore = Node.prototype.insertBefore;
+    const appendChild = Node.prototype.appendChild;
+    const insertSpy = vi.spyOn(Node.prototype, "insertBefore").mockImplementation(function (
+      this: Node,
+      node,
+      reference,
+    ) {
+      blurMoved(node);
+      return insertBefore.call(this, node, reference);
+    });
+    const appendSpy = vi.spyOn(Node.prototype, "appendChild").mockImplementation(function (
+      this: Node,
+      node,
+    ) {
+      blurMoved(node);
+      return appendChild.call(this, node);
+    });
+    try {
+      const rows = generated(50);
+      [rows[36], rows[37], rows[38], rows[39], rows[40], rows[41]] = [
+        rows[41],
+        rows[40],
+        rows[39],
+        rows[38],
+        rows[37],
+        rows[36],
+      ];
+      listMock.mockResolvedValueOnce(list(rows));
+      rerender(<Host refreshKey={1} />);
+      await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
+      expect(
+        stockRows()
+          .map((row) => row.dataset.symbol)
+          .slice(16, 22),
+      ).toEqual(["SYM0041", "SYM0040", "SYM0039", "SYM0038", "SYM0037", "SYM0036"]);
+      expect(document.activeElement).toBe(rowOf("SYM0040"));
+      expect(scroller().scrollTop).toBe(30 * ROW_HEIGHT_PX);
+    } finally {
+      insertSpy.mockRestore();
+      appendSpy.mockRestore();
+    }
+  });
+
+  it("leaves a focused row of the host's own, outside the table, alone on a refresh-once", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50)));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    // A host row that happens to carry a listed symbol: not the table's, so not its place to keep.
+    const outside = document.createElement("table");
+    outside.setAttribute("role", "presentation");
+    outside.innerHTML = '<tbody><tr data-symbol="SYM0030" tabindex="-1"><td>host</td></tr></tbody>';
+    document.body.append(outside);
+    const hostRow = outside.querySelector("tr") as HTMLTableRowElement;
+    try {
+      hostRow.focus();
+      expect(document.activeElement).toBe(hostRow);
+      scrollToRow(30);
+
+      // The refreshed page still lists SYM0030, yet the window starts over: the focus is not the table's.
+      listMock.mockResolvedValueOnce(list(generated(50)));
+      rerender(<Host refreshKey={1} />);
+      await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
+      expect(listMock).toHaveBeenCalledTimes(2);
+      expect(document.activeElement).toBe(hostRow);
+      expect(scroller().scrollTop).toBe(0);
+      expect(screen.getByText("SYM0000")).toBeInTheDocument();
+    } finally {
+      outside.remove();
+    }
+  });
+
+  it("scrolls a refreshed page to the focused row when the refresh moved it, and resets when it is gone", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(generated(50)));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    scrollToRow(30);
+    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
+
+    // The refreshed page lists the focused stock first: the window follows it.
+    const moved = [stock("SYM0040"), ...generated(49, "NEW")];
+    listMock.mockResolvedValueOnce(list(moved));
+    rerender(<Host refreshKey={1} />);
+    await screen.findByText("NEW0000");
+    expect(document.activeElement).toBe(rowOf("SYM0040"));
+    expect(scroller().scrollTop).toBe(scrollTopToReveal(0, 30 * ROW_HEIGHT_PX));
+
+    // The next refresh drops it: the window starts over at the top.
+    scrollToRow(20);
+    rowOf("NEW0030").focus();
+    listMock.mockResolvedValueOnce(list(generated(50, "GONE")));
+    rerender(<Host refreshKey={2} />);
+    await screen.findByText("GONE0000");
+    expect(scroller().scrollTop).toBe(0);
+    expect(rowOf("NEW0030")).toBeNull();
+  });
+
+  it("ignores a later page of a superseded query that lands after the new page one", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    const latePage = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(latePage.promise);
+    scrollToRow(40);
+    expect(listMock).toHaveBeenCalledTimes(2);
+
+    listMock.mockResolvedValueOnce(list(generated(2, "NEW")));
+    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-3" }} />);
+    await screen.findByText("NEW0000");
+    expect(stockRows()).toHaveLength(2);
+
+    await act(async () => {
+      latePage.resolve(list(generated(10, "OLD"), { matchCount: 120, nextCursor: "c2" }));
+    });
+    expect(screen.queryByText("OLD0000")).not.toBeInTheDocument();
+    expect(stockRows().map((row) => row.dataset.symbol)).toEqual(["NEW0000", "NEW0001"]);
+    scrollToRow(0);
+    expect(listMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("drops a later page in flight when the query changes: the new rows are not busy and page on", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    listMock.mockReturnValueOnce(deferred<ClassificationList>().promise);
+    scrollToRow(40);
+    expect(listMock).toHaveBeenCalledTimes(2);
+    expect(table()).toHaveAttribute("aria-busy", "true");
+
+    listMock.mockResolvedValueOnce(
+      list(generated(50, "NEW"), { matchCount: 90, nextCursor: "n1" }),
+    );
+    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-4" }} />);
+    await screen.findByText("NEW0000");
+    expect(table()).not.toHaveAttribute("aria-busy", "true");
+
+    listMock.mockResolvedValueOnce(list(generated(40, "NX"), { matchCount: 90, nextCursor: null }));
+    scrollToRow(40);
+    expect(listMock).toHaveBeenCalledTimes(4);
+    expect(listMock.mock.calls[3][0]).toEqual({
+      universeId: "u-4",
+      limit: PAGE_SIZE,
+      cursor: "n1",
+    });
+    await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
+    scrollToRow(60);
+    expect(screen.getByText("NX0000")).toBeInTheDocument();
+  });
+
+  it("drops a later page's error when the query changes", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    listMock.mockRejectedValueOnce(apiError("internal_error"));
+    scrollToRow(40);
+    await screen.findByRole("button", { name: RESULTS.tryAgain });
+
+    listMock.mockResolvedValueOnce(list(generated(3, "NEW")));
+    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-5" }} />);
+    await screen.findByText("NEW0000");
+    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        failureSentence({
+          operation: "list-classifications",
+          resource: "classification",
+          code: "internal_error",
+        }),
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("never sends the old cursor after a refreshKey bump, even when a page lands in the same render as the bump", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 200, nextCursor: "c1" }));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+
+    const second = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(second.promise);
+    scrollToRow(40);
+    expect(listMock).toHaveBeenCalledTimes(2);
+
+    const pageOne = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(pageOne.promise);
+    await act(async () => {
+      second.resolve(list(generated(10, "PG2"), { matchCount: 200, nextCursor: "c2" }));
+      await Promise.resolve();
+      rerender(<Host refreshKey={1} />);
+    });
+    expect(listMock).toHaveBeenCalledTimes(3);
+    expect(listMock.mock.calls[2][0]).toEqual({ limit: PAGE_SIZE });
+    scrollToRow(55);
+    expect(listMock).toHaveBeenCalledTimes(3);
+    await act(async () => {
+      pageOne.resolve(list(generated(50, "RF"), { matchCount: 200, nextCursor: "r1" }));
+    });
+    expect(screen.getByText("RF0000")).toBeInTheDocument();
+    for (const call of listMock.mock.calls.slice(2)) {
+      expect(call[0]).not.toHaveProperty("cursor", "c2");
+    }
+  });
+
+  it("ignores a superseded page one that fails late", async () => {
+    listMock.mockResolvedValueOnce(list(generated(3)));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    const lateFailure = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(lateFailure.promise);
+    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-6" }} />);
+    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
+
+    listMock.mockResolvedValueOnce(list(generated(3, "NEW")));
+    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-7" }} />);
+    await screen.findByText("NEW0000");
+    await act(async () => {
+      lateFailure.reject(apiError("internal_error"));
+    });
+    expect(screen.getByText("NEW0000")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
+    expect(table()).not.toHaveAttribute("aria-busy", "true");
+  });
+
+  it("ignores a superseded later page that fails late", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    const latePage = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(latePage.promise);
+    scrollToRow(40);
+    expect(listMock).toHaveBeenCalledTimes(2);
+
+    listMock.mockResolvedValueOnce(list(generated(3, "NEW")));
+    rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, scope: "u-8" }} />);
+    await screen.findByText("NEW0000");
+    await act(async () => {
+      latePage.reject(apiError("internal_error"));
+    });
+    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
+    expect(table()).not.toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("NEW0000")).toBeInTheDocument();
+  });
+
+  it("hands nothing to onResult for a page one that lands after unmount", async () => {
+    const onResult = vi.fn();
+    const pending = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(pending.promise);
+    const { unmount } = render(<Host onResult={onResult} />);
+    expect(listMock).toHaveBeenCalledTimes(1);
+    unmount();
+    await act(async () => {
+      pending.resolve(list(generated(3)));
+    });
+    expect(onResult).not.toHaveBeenCalled();
   });
 
   it("uses the host's matchLabel when given", async () => {
@@ -994,6 +1343,24 @@ describe("TC-COMP-110: a factor below 30 qualifying stocks states the count once
     expect(headerOf(FACTOR_LABELS.momentum)).toHaveAttribute("aria-describedby");
   });
 
+  it("carries no aria-sort on the unranked column even when the query sorts by it", async () => {
+    for (const key of ["growth_percentile", "growth_score"] as const) {
+      listMock.mockResolvedValueOnce(underThirty(20, 30));
+      const { unmount } = render(
+        <Host initialQuery={{ ...DEFAULT_RESEARCH_QUERY, sort: { key, order: "asc" } }} />,
+      );
+      await screen.findByText("AAPL");
+      expect(listMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sort: key, order: "asc" }),
+      );
+      expect(headerOf(FACTOR_LABELS.growth)).not.toHaveAttribute("aria-sort");
+      for (const header of headerCells()) {
+        expect(header).not.toHaveAttribute("aria-sort");
+      }
+      unmount();
+    }
+  });
+
   it("never shows a percentile on an unranked factor, even when a cell arrives classified", async () => {
     const page = underThirty(20, 30);
     page.stocks[0].factors.growth = scored("77", "1.10");
@@ -1067,6 +1434,7 @@ describe("TC-COMP-098: a stock incomplete on one factor reads two percentiles an
       expect(id).toBeTruthy();
       const description = document.getElementById(id as string) as HTMLElement;
       expect(description).toHaveTextContent(SORT.incompleteLast);
+      expect(description).toHaveClass("sr-only");
     }
     expect(SORT.incompleteLast).toBe(
       "Stocks with an incomplete score are listed last, whether sorted up or down.",
@@ -1117,6 +1485,8 @@ describe("TC-COMP-138: sorting is a request", () => {
       Growth: null,
       Momentum: null,
     });
+    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("▲");
+    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("↕");
 
     listMock.mockResolvedValueOnce(list(generated(3, "ASC"), { matchCount: 2846 }));
     await user.click(sortButton(SORT.byPercentile("value")));
@@ -1133,6 +1503,9 @@ describe("TC-COMP-138: sorting is a request", () => {
       Growth: null,
       Momentum: null,
     });
+    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("▲");
+    expect(glyphOf(sortButton(SORT.byStandardisedScore("value")))).toBe("↕");
+    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("↕");
 
     listMock.mockResolvedValueOnce(list(generated(3, "DSC"), { matchCount: 2846 }));
     await user.click(sortButton(SORT.byPercentile("value")));
@@ -1143,6 +1516,7 @@ describe("TC-COMP-138: sorting is a request", () => {
     });
     await screen.findByText("DSC0000");
     expect(headerOf(FACTOR_LABELS.value)).toHaveAttribute("aria-sort", "descending");
+    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("▼");
 
     listMock.mockResolvedValueOnce(list(generated(3, "NON"), { matchCount: 2846 }));
     await user.click(sortButton(SORT.byPercentile("value")));
@@ -1152,6 +1526,8 @@ describe("TC-COMP-138: sorting is a request", () => {
     await screen.findByText("NON0000");
     expect(headerOf(FACTOR_LABELS.value)).not.toHaveAttribute("aria-sort");
     expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
+    expect(glyphOf(sortButton(SORT.byPercentile("value")))).toBe("↕");
+    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("▲");
   });
 
   it("keeps the rest of the query when it sorts", async () => {
@@ -1210,6 +1586,51 @@ describe("TC-COMP-138: sorting is a request", () => {
     expect(listMock.mock.calls[2][0]).toEqual({ limit: PAGE_SIZE });
     await screen.findByText("SA0000");
     expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
+    expect(glyphOf(sortButton(SORT.bySymbol))).toBe("▲");
+  });
+
+  it("starts the Symbol sort at its A to Z default when a factor sort is active", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(generated(3), { matchCount: 2846 }));
+    render(
+      <Host
+        initialQuery={{
+          ...DEFAULT_RESEARCH_QUERY,
+          sort: { key: "value_percentile", order: "desc" },
+        }}
+      />,
+    );
+    await screen.findByText("SYM0000");
+    expect(headerOf(FACTOR_LABELS.value)).toHaveAttribute("aria-sort", "descending");
+
+    listMock.mockResolvedValueOnce(list(generated(3, "AZ"), { matchCount: 2846 }));
+    await user.click(sortButton(SORT.bySymbol));
+    expect(listMock.mock.calls[1][0]).toEqual({ limit: PAGE_SIZE });
+    expect(listMock.mock.calls[1][0]).not.toHaveProperty("sort");
+    expect(listMock.mock.calls[1][0]).not.toHaveProperty("order");
+    await screen.findByText("AZ0000");
+    expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
+    expect(headerOf(FACTOR_LABELS.value)).not.toHaveAttribute("aria-sort");
+
+    listMock.mockResolvedValueOnce(list(generated(3, "ZA"), { matchCount: 2846 }));
+    await user.click(sortButton(SORT.bySymbol));
+    expect(listMock.mock.calls[2][0]).toEqual({ sort: "symbol", order: "desc", limit: PAGE_SIZE });
+    await screen.findByText("ZA0000");
+    expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "descending");
+  });
+
+  it("treats an explicit symbol ascending sort in the query as the default: the next press is Z to A", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(generated(3), { matchCount: 2846 }));
+    render(
+      <Host initialQuery={{ ...DEFAULT_RESEARCH_QUERY, sort: { key: "symbol", order: "asc" } }} />,
+    );
+    await screen.findByText("SYM0000");
+    expect(headerOf(RESULTS.columns.symbol)).toHaveAttribute("aria-sort", "ascending");
+    listMock.mockResolvedValueOnce(list(generated(3, "ZA"), { matchCount: 2846 }));
+    await user.click(sortButton(SORT.bySymbol));
+    expect(listMock.mock.calls[1][0]).toEqual({ sort: "symbol", order: "desc", limit: PAGE_SIZE });
+    await screen.findByText("ZA0000");
   });
 
   it("keeps focus on the activated button before and after the rows arrive, with the old rows busy meanwhile", async () => {
@@ -1241,6 +1662,27 @@ describe("TC-COMP-138: sorting is a request", () => {
     await user.click(sortButton(SORT.byPercentile("value")));
     await screen.findByText("S0000");
     expect(statusRegion()).toHaveTextContent(RESULTS.stocksMatch(1203));
+  });
+
+  it("announces the match count again after a sort that leaves it unchanged", async () => {
+    const user = await renderSorted();
+    const region = statusRegion();
+    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
+    const observer = observeRegion(region);
+
+    const sorted = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(sorted.promise);
+    await user.click(sortButton(SORT.byPercentile("value")));
+    // Nothing is announced before the sorted page arrives.
+    expect(observer.records).toHaveLength(0);
+    await act(async () => {
+      sorted.resolve(list(generated(3, "S"), { matchCount: 2846 }));
+    });
+    expect(screen.getByText("S0000")).toBeInTheDocument();
+    expect(observer.records.length).toBeGreaterThan(0);
+    observer.disconnect();
+    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
+    expect(statusRegion()).toBe(region);
   });
 
   it("activates once on Enter and once on Space from the keyboard", async () => {
@@ -1424,6 +1866,40 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
     await user.keyboard(" ");
     expect(hostChecked()).toBe("");
     expect(selectedSymbols()).toEqual(["MSFT"]);
+  });
+
+  it("leaves focus on a sort button activated after an arrow press past either end", async () => {
+    const user = await renderRows();
+    await user.click(screen.getByRole("rowheader", { name: "NVDA" }));
+    await user.keyboard("{ArrowDown}");
+    expect(selectedSymbols()).toEqual(["NVDA"]);
+    expect(document.activeElement).toBe(rowOf("NVDA"));
+    listMock.mockResolvedValueOnce(list(THREE));
+    const button = sortButton(SORT.byPercentile("value"));
+    await user.click(button);
+    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
+    expect(document.activeElement).toBe(button);
+
+    await user.click(screen.getByRole("rowheader", { name: "AAPL" }));
+    await user.keyboard("{ArrowUp}");
+    expect(selectedSymbols()).toEqual(["AAPL"]);
+    listMock.mockResolvedValueOnce(list(THREE));
+    const symbolButton = sortButton(SORT.bySymbol);
+    await user.click(symbolButton);
+    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(table()).not.toHaveAttribute("aria-busy", "true"));
+    expect(document.activeElement).toBe(symbolButton);
+  });
+
+  it("prevents the browser's default for Space on the row, and leaves it to the checkbox", async () => {
+    await renderRows();
+    rowOf("MSFT").focus();
+    expect(fireEvent.keyDown(rowOf("MSFT"), { key: " " })).toBe(false);
+    expect(hostChecked()).toBe("");
+    expect(selectedSymbols()).toEqual([]);
+    expect(fireEvent.keyDown(checkboxOf("MSFT"), { key: " " })).toBe(true);
+    expect(fireEvent.keyDown(rowOf("MSFT"), { key: "Enter" })).toBe(true);
   });
 
   it("gives the selected row the tab stop, else the first rendered row", async () => {
