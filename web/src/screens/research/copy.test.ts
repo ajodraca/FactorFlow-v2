@@ -67,6 +67,8 @@ const CALLS: Record<string, unknown[][]> = {
     ["input_outdated", "growth"],
     ["input_not_computable", "momentum"],
   ],
+  "SORT.byPercentile": [["value"], ["growth"], ["momentum"]],
+  "SORT.byStandardisedScore": [["value"], ["growth"], ["momentum"]],
 };
 
 function callsFor(at: string): unknown[][] {
@@ -442,6 +444,13 @@ describe("copy.ts completeness and keying", () => {
     "A score is shown only when every input is present and current. This checks presence and currency, not whether the provider's values are correct.",
     "No stocks match these filters, so there is nothing to save.",
     "Could not save these stocks as a universe: the scores changed while you were reviewing them. Review the new result, then save again.",
+    // CAP-002-E4-S6 T009 (DEC-0161, DEC-0239): the sort controls, the header description and the text columns.
+    "Sort by symbol",
+    "Sort by value percentile",
+    "Sort by growth standardised score",
+    "Stocks with an incomplete score are listed last, whether sorted up or down.",
+    "Symbol",
+    "Name",
   ])("(d) holds the design's %j verbatim", (anchor) => {
     expect(CATALOGUE).toContain(anchor);
   });
@@ -506,6 +515,11 @@ describe("copy.ts completeness and keying", () => {
     expect(copy.CELL.incompleteGeneric("input_not_computable", "momentum")).toBe(
       "Incomplete: an input couldn't be computed, so momentum can't be compared fairly. It isn't guessed.",
     );
+    // CAP-002-E4-S6 T009 (DEC-0161): one unique name per sort button, carrying its factor and key.
+    expect(copy.SORT.byPercentile("momentum")).toBe("Sort by momentum percentile");
+    expect(copy.SORT.byStandardisedScore("value")).toBe("Sort by value standardised score");
+    expect(copy.SORT.bySymbol).toBe("Sort by symbol");
+    expect(copy.RESULTS.columns).toEqual({ symbol: "Symbol", name: "Name" });
     expect(copy.SELECTION.inUniverses(["Tech", "Dividend growers"])).toBe(
       "In Tech and Dividend growers",
     );
