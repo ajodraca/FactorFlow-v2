@@ -1,0 +1,59 @@
+..FF..........................................                           [100%]
+=================================== FAILURES ===================================
+______ test_raising_claim_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b6e1100>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10b6e02f0>
+
+    def test_raising_claim_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: the failure is logged by ``log.exception``, the
+        failed iteration still waits the poll interval, and the next claim is made."""
+        boom = RuntimeError("boom")
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(boom, stop=waiter.stop))
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+>       assert len(errors) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_classification_scheduler_loop.py:246: AssertionError
+______ test_raising_build_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b71e720>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10b71e1b0>
+
+    def test_raising_build_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: a build that raises (the engine could not record
+        the failure) is logged the same way, and the loop waits and claims again."""
+        disk = OSError("disk")
+    
+        def raising_build(pool: Any, set_id: UUID, timeout_seconds: float) -> Any:
+            raise disk
+    
+        claimed = _claimed()
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed, stop=waiter.stop), build=raising_build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+>       assert len(errors) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_classification_scheduler_loop.py:273: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_claim_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_build_is_logged_with_exception_and_the_loop_continues
+2 failed, 44 passed in 4.41s

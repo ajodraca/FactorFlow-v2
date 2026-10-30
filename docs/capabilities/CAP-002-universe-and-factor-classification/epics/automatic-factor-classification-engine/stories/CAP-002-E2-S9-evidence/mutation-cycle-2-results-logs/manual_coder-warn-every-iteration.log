@@ -1,0 +1,45 @@
+.........F.......................................                        [100%]
+=================================== FAILURES ===================================
+_____ test_each_unresolved_line_item_is_warned_once_before_the_first_claim _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b0f9940>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10b0f95e0>
+
+    def test_each_unresolved_line_item_is_warned_once_before_the_first_claim(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """AC-10 (design section 7, "Unresolved line items are warned"): one warning per
+        unresolved line item, before the first claim, never repeated on later iterations."""
+        warnings_at_first_claim: list[int] = []
+    
+        def claim(pool: Any) -> None:
+            if not warnings_at_first_claim:
+                warnings_at_first_claim.append(len(_scheduler_records(caplog, logging.WARNING)))
+            return None
+    
+        _Fakes(monkeypatch, claim=claim)
+        monkeypatch.setattr(line_items, "unresolved", lambda: ["net_income", "revenue"])
+        waiter = _RecordingWaiter(stop_after=2)
+    
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), waiter, _RecordingDispatcher())
+    
+        messages = [r.getMessage() for r in _scheduler_records(caplog, logging.WARNING)]
+>       assert messages == [
+            "line item net_income has no payload key; its inputs will be missing",
+            "line item revenue has no payload key; its inputs will be missing",
+        ]
+E       AssertionError: assert ['line item n...l be missing'] == ['line item n...l be missing']
+E         
+E         Left contains 2 more items, first extra item: 'line item net_income has no payload key; its inputs will be missing'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:424: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:106 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:106 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:106 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:106 line item revenue has no payload key; its inputs will be missing
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_each_unresolved_line_item_is_warned_once_before_the_first_claim
+1 failed, 48 passed in 4.30s

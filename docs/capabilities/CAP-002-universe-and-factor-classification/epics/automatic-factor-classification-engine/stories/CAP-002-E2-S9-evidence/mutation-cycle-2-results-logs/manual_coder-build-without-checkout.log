@@ -1,0 +1,215 @@
+.................FF................FF............                        [100%]
+=================================== FAILURES ===================================
+_________ test_build_claimed_set_builds_on_one_checked_out_connection __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca5ae40>
+
+    def test_build_claimed_set_builds_on_one_checked_out_connection(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """AC-11, AC-20, DAC-E2-S9-4: one connection is checked out for the whole build, the
+        timeout reaches ``engine.build`` unchanged, and the engine's result is returned."""
+        pool, checkout, conn = _pool_with_one_connection()
+        set_id = uuid4()
+        expected = _result("complete", set_id)
+        calls: list[tuple[Any, ...]] = []
+    
+        def build(build_conn: Any, build_set_id: UUID, timeout_seconds: float) -> BuildResult:
+            calls.append((build_conn, build_set_id, timeout_seconds, checkout.__exit__.call_count))
+            return expected
+    
+        monkeypatch.setattr(scheduler.engine, "build", build)
+    
+        result = scheduler.build_claimed_set(pool, set_id, 12.5)
+    
+        assert result is expected
+        pool.connection.assert_called_once_with()
+>       assert calls == [(conn, set_id, 12.5, 0)]  # built while the connection was held
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert [(<MagicMock ...e'), 12.5, 0)] == [(<MagicMock ...e'), 12.5, 0)]
+E         
+E         At index 0 diff: (<MagicMock name='checkout' id='4507142528'>, UUID('30683f66-ec5a-4c78-bb97-369acac8cd6e'), 12.5, 0) != (<MagicMock name='conn' id='4506403232'>, UUID('30683f66-ec5a-4c78-bb97-369acac8cd6e'), 12.5, 0)
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:630: AssertionError
+_____ test_build_claimed_set_releases_the_connection_when_the_build_raises _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca2be60>
+
+    def test_build_claimed_set_releases_the_connection_when_the_build_raises(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """AC-20, DAC-E2-S9-4: an exception from ``engine.build`` propagates to the loop and
+        the connection is still returned to the pool."""
+        pool, checkout, conn = _pool_with_one_connection()
+        lost = OSError("connection lost")
+    
+        def build(build_conn: Any, build_set_id: UUID, timeout_seconds: float) -> BuildResult:
+            raise lost
+    
+        monkeypatch.setattr(scheduler.engine, "build", build)
+    
+        with pytest.raises(OSError) as raised:
+            scheduler.build_claimed_set(pool, uuid4(), 12.5)
+    
+        assert raised.value is lost
+        pool.connection.assert_called_once_with()
+>       checkout.__exit__.assert_called_once()
+
+tests/unit/test_classification_scheduler_loop.py:652: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <MagicMock name='checkout.__exit__' id='4506835552'>
+
+    def assert_called_once(self):
+        """assert that the mock was called only once.
+        """
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to have been called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected '__exit__' to have been called once. Called 0 times.
+
+/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/unittest/mock.py:928: AssertionError
+________ test_short_build_timeout_reaches_the_engine_and_fails_the_set _________
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-4' at 0x10ca34f20>, <psycopg.Connection [IDLE] (host=localhost port=61888 user=test database=test_51d7aed8fba44fbeb1c79ba56c94ef30) at 0x10ca08e30>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca08800>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10ca08230>
+
+    def test_short_build_timeout_reaches_the_engine_and_fails_the_set(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """DAC-E2-S9-4, AC-11, AC-20: a 50 ms build_timeout_seconds crosses the loop, a real
+        thread and a real pool to the engine, which cancels a five-second stage and records the
+        set failed with a timeout reason and no classification rows."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_id = add_run(conn, "succeeded", T0)
+    
+        def sleeping_stage(stage_conn: psycopg.Connection, _context: engine.BuildContext) -> None:
+            stage_conn.execute("SELECT pg_sleep(5)")
+    
+        monkeypatch.setattr(engine, "_STAGES", [sleeping_stage])
+        # model_construct skips the ge=1 bound and the poll-below-timeout validator on purpose:
+        # a 50 ms timeout is the only way to make a unit-sized store "too short", and
+        # CAP-002-E2-S8 already proves the validators. The poll interval is longer than the
+        # stage's sleep, so a build handed the poll interval instead would also outlast it.
+        settings = ClassificationSettings.model_construct(
+            poll_interval_seconds=10.0, build_timeout_seconds=0.05
+        )
+    
+        started = time.monotonic()
+        with caplog.at_level(logging.INFO, logger="factorflow.classification.scheduler"):
+            _run_loop_until_first_wait(pool, settings)
+        elapsed = time.monotonic() - started
+    
+        rows = [row for row in set_rows(conn) if row[1] == run_id]
+        assert len(rows) == 1
+        set_id, _, state, reason = rows[0]
+>       assert state == "failed"
+E       AssertionError: assert 'building' == 'failed'
+E         
+E         - failed
+E         + building
+
+tests/integration/test_scheduler_restart.py:192: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item book_equity has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item shares_outstanding has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item diluted_eps has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item operating_cash_flow has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item capital_expenditure has no payload key; its inputs will be missing
+ERROR    factorflow.classification.scheduler:scheduler.py:121 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 110, in run_classification_loop
+    result = await dispatch(
+             ^^^^^^^^^^^^^^^
+  File "/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 87, in build_claimed_set
+    return engine.build(pool.connection(), set_id, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/engine.py", line 96, in build
+    if conn.autocommit:
+       ^^^^^^^^^^^^^^^
+AttributeError: '_GeneratorContextManager' object has no attribute 'autocommit'
+___ test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run ____
+
+store = (<psycopg_pool.pool.ConnectionPool 'pool-5' at 0x10ca367e0>, <psycopg.Connection [IDLE] (host=localhost port=61888 user=test database=test_d111cdbb791f492bac525f2b428b0fd7) at 0x10ca29a00>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca29910>
+
+    def test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run(
+        store: tuple["ConnectionPool[Any]", psycopg.Connection],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-12, AC-10, AC-20, DAC-E2-4 (design acceptance criterion 10): after a restart
+        the stale building set is failed with the fixed reason before any claim, the next
+        qualifying run gets one complete set, a failed run gets none, and a second start
+        changes nothing."""
+        pool, conn = store
+        _one_active_instrument_with_a_bar(conn)
+        run_a = add_run(conn, "succeeded", T0)
+        stale = add_set(conn, run_a, "building")
+        run_b = add_run(conn, "partial", T0 + timedelta(hours=1))
+        run_c = add_run(conn, "failed", T0 + timedelta(hours=2))
+        monkeypatch.setattr(engine, "_STAGES", [])
+        settings = ClassificationSettings(poll_interval_seconds=1, build_timeout_seconds=60)
+    
+        _run_loop_until_first_wait(pool, settings)
+    
+        rows = set_rows(conn)
+        by_run: dict[Any, list[tuple[Any, ...]]] = {}
+        for set_id, run_id, state, reason in rows:
+            by_run.setdefault(run_id, []).append((set_id, state, reason))
+        assert by_run[run_a] == [(stale, "failed", INTERRUPTED_REASON)]
+>       assert [(state, reason) for _, state, reason in by_run[run_b]] == [("complete", None)]
+E       AssertionError: assert [('building', None)] == [('complete', None)]
+E         
+E         At index 0 diff: ('building', None) != ('complete', None)
+E         Use -v to get more diff
+
+tests/integration/test_scheduler_restart.py:234: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:72 classification set ed4dd0c8-5b24-40f9-8218-0a4bcd164819 for run 09dfb672-5d77-497a-86e7-5bed3ccc00a0 was interrupted; recorded failed
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item book_equity has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item shares_outstanding has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item diluted_eps has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item revenue has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item operating_cash_flow has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:104 line item capital_expenditure has no payload key; its inputs will be missing
+ERROR    factorflow.classification.scheduler:scheduler.py:121 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 110, in run_classification_loop
+    result = await dispatch(
+             ^^^^^^^^^^^^^^^
+  File "/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 87, in build_claimed_set
+    return engine.build(pool.connection(), set_id, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/engine.py", line 96, in build
+    if conn.autocommit:
+       ^^^^^^^^^^^^^^^
+AttributeError: '_GeneratorContextManager' object has no attribute 'autocommit'
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_build_claimed_set_builds_on_one_checked_out_connection
+FAILED tests/unit/test_classification_scheduler_loop.py::test_build_claimed_set_releases_the_connection_when_the_build_raises
+FAILED tests/integration/test_scheduler_restart.py::test_short_build_timeout_reaches_the_engine_and_fails_the_set
+FAILED tests/integration/test_scheduler_restart.py::test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run
+4 failed, 45 passed in 4.22s

@@ -54,9 +54,7 @@ def test_nothing_deletes_and_scheduler_source_leaves_the_append_only_tables_alon
         assert not re.search(rf"UPDATE\s+(ONLY\s+)?{table}\b", source, re.I), table
 
 
-def test_scheduler_module_does_not_import_asyncio() -> None:
-    source = (PACKAGE / "scheduler.py").read_text()
-    assert not re.search(r"^\s*(import asyncio|from asyncio)", source, re.M)
+# The loop (CAP-002-E2-S9) lives in this module, so asyncio is imported here.
 
 
 def test_interruption_reason_is_fixed_and_avoids_relabelled_interface_terms() -> None:

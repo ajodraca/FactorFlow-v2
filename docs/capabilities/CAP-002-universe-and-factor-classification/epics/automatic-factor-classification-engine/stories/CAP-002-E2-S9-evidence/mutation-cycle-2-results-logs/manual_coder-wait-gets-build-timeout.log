@@ -1,0 +1,264 @@
+FF.FF.F..F..F....................................                        [100%]
+=================================== FAILURES ===================================
+_ test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a2d490>
+
+    def test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10, AC-11: claim and build go through the dispatcher, the build
+        carries ``build_timeout_seconds``, and the only wait is the poll interval after the
+        idle claim: none between the claim, the build and the next claim."""
+        claimed = _claimed()
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed))
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+        assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+        assert dispatcher.calls[2] == (fakes.build, (pool, claimed.set_id, 300.0))
+        assert fakes.builds == [(pool, claimed.set_id, 300.0)]
+>       assert waiter.delays == [5.0]
+E       assert [300.0] == [5.0]
+E         
+E         At index 0 diff: 300.0 != 5.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:205: AssertionError
+__ test_loop_with_nothing_to_claim_waits_the_poll_interval_and_builds_nothing __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1090741a0>
+
+    def test_loop_with_nothing_to_claim_waits_the_poll_interval_and_builds_nothing(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-10: an idle first claim dispatches no build and waits the poll
+        interval once before the stop event ends the loop."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+        assert dispatcher.fns == [fakes.reclaim, fakes.claim]
+        assert fakes.builds == []
+>       assert waiter.delays == [5.0]
+E       assert [300.0] == [5.0]
+E         
+E         At index 0 diff: 300.0 != 5.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:223: AssertionError
+______ test_raising_claim_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10916aba0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10916b170>
+
+    def test_raising_claim_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: the failure is logged by ``log.exception``, the
+        failed iteration still waits the poll interval, and the next claim is made."""
+        boom = RuntimeError("boom")
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(boom, stop=waiter.stop))
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+        assert len(errors) == 1
+        assert errors[0].getMessage() == "classification scheduler iteration failed"
+        assert _traceback(errors[0]).startswith("Traceback (most recent call last):")
+        assert _traceback(errors[0]).endswith("RuntimeError: boom")
+        assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.claim]
+>       assert waiter.delays == [5.0]
+E       assert [300.0] == [5.0]
+E         
+E         At index 0 diff: 300.0 != 5.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:273: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 109, in run_classification_loop
+    claimed = await dispatch(claim_next_set, pool)  # None, or (set_id, run_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 98, in claim
+    raise outcome
+RuntimeError: boom
+______ test_raising_build_is_logged_with_exception_and_the_loop_continues ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10916a7e0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10916a6c0>
+
+    def test_raising_build_is_logged_with_exception_and_the_loop_continues(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """DAC-E2-S9-2, AC-10, OPS-ERR-001: a build that raises (the engine could not record
+        the failure) is logged the same way, and the loop waits and claims again."""
+        disk = OSError("disk")
+    
+        def raising_build(pool: Any, set_id: UUID, timeout_seconds: float) -> Any:
+            raise disk
+    
+        claimed = _claimed()
+        waiter = _RecordingWaiter(stop_after=None)
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed, stop=waiter.stop), build=raising_build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.ERROR, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+        errors = _scheduler_records(caplog, logging.ERROR)
+        assert len(errors) == 1
+        assert errors[0].getMessage() == "classification scheduler iteration failed"
+        assert _traceback(errors[0]).startswith("Traceback (most recent call last):")
+        assert _traceback(errors[0]).endswith("OSError: disk")
+        assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+>       assert waiter.delays == [5.0]
+E       assert [300.0] == [5.0]
+E         
+E         At index 0 diff: 300.0 != 5.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:300: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:122 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/src/factorflow/classification/scheduler.py", line 111, in run_classification_loop
+    result = await dispatch(
+             ^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 139, in build_claimed_set
+    return self._build_impl(pool, set_id, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/mutation-run-jbev629x/w2/tests/unit/test_classification_scheduler_loop.py", line 284, in raising_build
+    raise disk
+OSError: disk
+____________ test_reclaim_is_dispatched_once_before_the_first_claim ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109158ec0>
+
+    def test_reclaim_is_dispatched_once_before_the_first_claim(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-3, DAC-E2-12, AC-20: reclaim comes first, with the pool as its only
+        argument, and is never dispatched again across three idle iterations."""
+        fakes = _Fakes(monkeypatch, claim=_scripted())
+        pool = MagicMock(name="pool")
+        waiter = _RecordingWaiter(stop_after=3)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(pool, _settings(5.0, 300.0), waiter, dispatcher)
+    
+        assert dispatcher.calls[0] == (fakes.reclaim, (pool,))
+        assert dispatcher.fns.count(fakes.reclaim) == 1
+        assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.claim, fakes.claim]
+        assert fakes.reclaim_calls == [pool]
+>       assert waiter.delays == [5.0, 5.0, 5.0]
+E       assert [300.0, 300.0, 300.0] == [5.0, 5.0, 5.0]
+E         
+E         At index 0 diff: 300.0 != 5.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:355: AssertionError
+_____ test_each_unresolved_line_item_is_warned_once_before_the_first_claim _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109114d10>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x109114b00>
+
+    def test_each_unresolved_line_item_is_warned_once_before_the_first_claim(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """AC-10 (design section 7, "Unresolved line items are warned"): one warning per
+        unresolved line item, before the first claim, never repeated on later iterations."""
+        warnings_at_first_claim: list[int] = []
+    
+        def claim(pool: Any) -> None:
+            if not warnings_at_first_claim:
+                warnings_at_first_claim.append(len(_scheduler_records(caplog, logging.WARNING)))
+            return None
+    
+        _Fakes(monkeypatch, claim=claim)
+        monkeypatch.setattr(line_items, "unresolved", lambda: ["net_income", "revenue"])
+        waiter = _RecordingWaiter(stop_after=2)
+    
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), waiter, _RecordingDispatcher())
+    
+        messages = [r.getMessage() for r in _scheduler_records(caplog, logging.WARNING)]
+        assert messages == [
+            "line item net_income has no payload key; its inputs will be missing",
+            "line item revenue has no payload key; its inputs will be missing",
+        ]
+        assert warnings_at_first_claim == [2]
+>       assert waiter.delays == [5.0, 5.0]
+E       assert [300.0, 300.0] == [5.0, 5.0]
+E         
+E         At index 0 diff: 300.0 != 5.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:429: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item net_income has no payload key; its inputs will be missing
+WARNING  factorflow.classification.scheduler:scheduler.py:105 line item revenue has no payload key; its inputs will be missing
+___________ test_default_wait_is_asyncio_sleep_for_the_poll_interval ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10895d580>
+
+    def test_default_wait_is_asyncio_sleep_for_the_poll_interval(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-11: with ``wait_fn`` omitted, an idle iteration awaits
+        ``asyncio.sleep(poll_interval_seconds)``; the patched sleep sets the stop event, so no
+        real sleep is reached."""
+        stop = asyncio.Event()
+        slept: list[float] = []
+        real_sleep = asyncio.sleep
+    
+        async def recording_sleep(seconds: float) -> None:
+            slept.append(seconds)
+            stop.set()
+            await real_sleep(0)
+    
+        _Fakes(monkeypatch, claim=_scripted())
+        monkeypatch.setattr(asyncio, "sleep", recording_sleep)
+        dispatcher = _RecordingDispatcher()
+    
+        asyncio.run(
+            scheduler.run_classification_loop(
+                MagicMock(name="pool"),
+                _settings(poll=1.0, timeout=300.0),
+                dispatch_fn=dispatcher.dispatch,
+                stop_event=stop,
+            )
+        )
+    
+>       assert slept == [1.0]
+E       assert [300.0] == [1.0]
+E         
+E         At index 0 diff: 300.0 != 1.0
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:506: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_loop_claims_and_builds_through_the_dispatcher_and_waits_only_when_idle
+FAILED tests/unit/test_classification_scheduler_loop.py::test_loop_with_nothing_to_claim_waits_the_poll_interval_and_builds_nothing
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_claim_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_build_is_logged_with_exception_and_the_loop_continues
+FAILED tests/unit/test_classification_scheduler_loop.py::test_reclaim_is_dispatched_once_before_the_first_claim
+FAILED tests/unit/test_classification_scheduler_loop.py::test_each_unresolved_line_item_is_warned_once_before_the_first_claim
+FAILED tests/unit/test_classification_scheduler_loop.py::test_default_wait_is_asyncio_sleep_for_the_poll_interval
+7 failed, 42 passed in 4.26s

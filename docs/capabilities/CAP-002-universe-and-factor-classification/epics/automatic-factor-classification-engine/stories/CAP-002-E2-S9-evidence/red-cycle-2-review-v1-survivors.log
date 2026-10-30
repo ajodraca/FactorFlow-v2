@@ -1,0 +1,144 @@
+HEAD 267cd6774f3360f0f485d884182e37900b5ffc77
+tests (working tree):
+  tests/unit/test_classification_scheduler_loop.py::test_build_outcome_is_logged_at_info_without_raising
+  tests/unit/test_classification_scheduler_loop.py::test_raising_reclaim_propagates_before_any_claim
+  tests/unit/test_classification_scheduler_loop.py::test_stop_event_set_during_a_successful_build_claims_again_before_stopping
+
+==============================================================================
+MUTANT manual:review-outcome-state-constant applied to git archive HEAD src
+  old: "                    result.state,\n"
+  new: "                    \"failed\",\n"
+F...                                                                     [100%]
+=================================== FAILURES ===================================
+________ test_build_outcome_is_logged_at_info_without_raising[complete] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10af00d70>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x10af00950>
+state = 'complete'
+
+    @pytest.mark.parametrize("state", ["complete", "failed"])
+    def test_build_outcome_is_logged_at_info_without_raising(
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, state: str
+    ) -> None:
+        """AC-20, AC-10: the engine records the outcome itself, so the loop logs the set, the
+        run and ``result.state`` at INFO (design 2.4; design section 4, Audit), logs no error,
+        and looks again at once. Both outcomes are pinned, so a fixed state cannot pass."""
+        claimed = _claimed()
+    
+        def build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            return _result(state, set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=build)
+        dispatcher = _RecordingDispatcher()
+    
+        with caplog.at_level(logging.INFO, logger=LOGGER):
+            _run_loop(MagicMock(name="pool"), _settings(), _RecordingWaiter(), dispatcher)
+    
+        infos = [r.getMessage() for r in _scheduler_records(caplog, logging.INFO)]
+>       assert infos == [f"classification set {claimed.set_id} for run {claimed.run_id} ended {state}"]
+E       AssertionError: assert ['classificat...ended failed'] == ['classificat...ded complete']
+E         
+E         At index 0 diff: 'classification set 5cb988b6-6544-42df-b785-75c38604e02a for run c1a35a14-992c-45f7-ad46-45a85386eac3 ended failed' != 'classification set 5cb988b6-6544-42df-b785-75c38604e02a for run c1a35a14-992c-45f7-ad46-45a85386eac3 ended complete'
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:528: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     factorflow.classification.scheduler:scheduler.py:114 classification set 5cb988b6-6544-42df-b785-75c38604e02a for run c1a35a14-992c-45f7-ad46-45a85386eac3 ended failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_build_outcome_is_logged_at_info_without_raising[complete]
+1 failed, 3 passed in 0.30s
+exit code: 1
+
+==============================================================================
+MUTANT manual:review-reclaim-failure-swallowed applied to git archive HEAD src
+  old: "    await dispatch(reclaim_interrupted_sets, pool)  # DEC-0067, once\n"
+  new: "    try:\n        await dispatch(reclaim_interrupted_sets, pool)  # DEC-0067, once\n    except Exception:\n        log.exception(\"classification scheduler iteration failed\")\n"
+..F.                                                                     [100%]
+=================================== FAILURES ===================================
+_______________ test_raising_reclaim_propagates_before_any_claim _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1091152e0>
+
+    def test_raising_reclaim_propagates_before_any_claim(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-12, DAC-E2-S9-3: the start-up reclaim sits outside the iteration handler
+        (design 2.4), so when it raises the exception ends the loop and no claim is ever
+        attempted, and nothing is waited for (plan, Open Gaps: no retry is added)."""
+        unreachable = OSError("db unreachable")
+        _Fakes(monkeypatch, claim=_scripted())
+    
+        def raising_reclaim(pool: Any) -> list[Any]:
+            raise unreachable
+    
+        monkeypatch.setattr(scheduler, "reclaim_interrupted_sets", raising_reclaim)
+        waiter = _RecordingWaiter(stop_after=1)
+        dispatcher = _RecordingDispatcher()
+    
+>       with pytest.raises(OSError) as raised:
+             ^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OSError
+
+tests/unit/test_classification_scheduler_loop.py:391: Failed
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.scheduler:scheduler.py:106 classification scheduler iteration failed
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/s9-rework-v1/red-work/manual_review-reclaim-failure-swallowed/src/factorflow/classification/scheduler.py", line 104, in run_classification_loop
+    await dispatch(reclaim_interrupted_sets, pool)  # DEC-0067, once
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_classification_scheduler_loop.py", line 72, in dispatch
+    return fn(*args)
+           ^^^^^^^^^
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_classification_scheduler_loop.py", line 385, in raising_reclaim
+    raise unreachable
+OSError: db unreachable
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_raising_reclaim_propagates_before_any_claim
+1 failed, 3 passed in 0.28s
+exit code: 1
+
+==============================================================================
+MUTANT manual:review-stop-check-after-build applied to git archive HEAD src
+  old: "                continue  # look again at once: another run may be waiting\n"
+  new: "                if stop_event is not None and stop_event.is_set():\n                    break\n                continue  # look again at once: another run may be waiting\n"
+...F                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_stop_event_set_during_a_successful_build_claims_again_before_stopping __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d057770>
+
+    def test_stop_event_set_during_a_successful_build_claims_again_before_stopping(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E2-S9-1, AC-11: no stop check follows a build (design 2.4; plan T012 and Other
+        Notes, stop event, E2-F26), so a stop event set during a successful build is first
+        seen at the idle stop check: the loop claims again at once and stops before waiting."""
+        claimed = _claimed()
+        waiter = _RecordingWaiter(stop_after=1)
+    
+        def stopping_build(pool: Any, set_id: UUID, timeout_seconds: float) -> BuildResult:
+            waiter.stop.set()
+            return _result("complete", set_id)
+    
+        fakes = _Fakes(monkeypatch, claim=_scripted(claimed), build=stopping_build)
+        dispatcher = _RecordingDispatcher()
+    
+        _run_loop(MagicMock(name="pool"), _settings(5.0, 300.0), waiter, dispatcher)
+    
+>       assert dispatcher.fns == [fakes.reclaim, fakes.claim, fakes.build, fakes.claim]
+E       assert [<function _F... 0x10d2ca5c0>] == [<function _F... 0x10d2ca340>]
+E         
+E         Right contains one more item: <function _scripted.<locals>.claim at 0x10d2ca340>
+E         Use -v to get more diff
+
+tests/unit/test_classification_scheduler_loop.py:244: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_classification_scheduler_loop.py::test_stop_event_set_during_a_successful_build_claims_again_before_stopping
+1 failed, 3 passed in 0.29s
+exit code: 1
+
+==============================================================================
+CONTROL: git archive HEAD src, no mutation
+....                                                                     [100%]
+4 passed in 0.26s
+exit code: 0

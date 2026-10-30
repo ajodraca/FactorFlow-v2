@@ -18,8 +18,9 @@ factor's peer set from the set's `factor_input` rows and writes every
 instrument's classification on each factor (see
 [Classification](#classification)). No stage derives a momentum input yet, so
 `momentum` has 0 qualifying stocks and every active instrument is
-`not_classified` on it with `not_enough_stocks`. No production code calls
-`build` yet.
+`not_classified` on it with `not_enough_stocks`. Only the
+[classification scheduler](classification-scheduler.md) calls `build`, and
+no running process starts it yet.
 
 ## `build`
 
