@@ -1,0 +1,233 @@
+diff --git a/tests/integration/test_universe_filter_snapshot.py b/tests/integration/test_universe_filter_snapshot.py
+index 7050992..f5c0522 100644
+--- a/tests/integration/test_universe_filter_snapshot.py
++++ b/tests/integration/test_universe_filter_snapshot.py
+@@ -14,6 +14,8 @@ expected member list is computed by hand from the seeded rows and also checked a
+ function with itself. Bound encoding inside ``filter_provenance`` is DEC-0248.
+ """
+ 
++import threading
++import time
+ from collections.abc import Iterator
+ from dataclasses import dataclass
+ from datetime import UTC, date, datetime, timedelta
+@@ -24,6 +26,8 @@ from zoneinfo import ZoneInfo
+ 
+ import psycopg
+ import pytest
++from psycopg import errors
++from psycopg.pq import TransactionStatus
+ 
+ from factorflow.api.bounds import MAX_PAGE_SIZE
+ from factorflow.classification import reader
+@@ -650,6 +654,7 @@ def test_a_later_set_that_changes_the_matches_leaves_the_members_unchanged(
+     before = service.get_universe(conn, universe.universe_id)
+     before_events = event_rows(conn, universe.universe_id)
+     as_of_before = service.get_universe(conn, universe.universe_id, as_of=today)
++    assert as_of_before.members == before.members  # today's read is not empty
+ 
+     newer = seed_set(conn, classification_date=SET_DATE + timedelta(days=1), ended_at=NEWER)
+     changed = dict(BASE)
+@@ -734,3 +739,202 @@ def test_a_duplicate_id_from_the_filter_gives_one_member(
+     universe = save(conn, "Twice", set_id, HIGH_VALUE)
+     assert member_symbols(universe) == ["AAA", "BBB"]
+     assert count_events(conn) == before + 3  # created + two member_added
++
++
++# --- write rules shared with CAP-002-E1-S3: names, lock, rollback ----------------------
++
++
++def _refuse(*_args: object) -> None:
++    raise AssertionError("the reader was reached")
++
++
++@pytest.mark.parametrize("name", ["", "   ", "\t\n"])
++def test_an_empty_name_is_refused_before_the_reader_is_called(
++    conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch, name: str
++) -> None:
++    """T009 (a): the name's shape is design 2.4 step 2, before the set check."""
++    set_id, _ = seed_base(conn)
++    before = written(conn)
++    monkeypatch.setattr(service, "current_set", _refuse)
++    monkeypatch.setattr(service, "evaluate_filter", _refuse)
++    with pytest.raises(ValueError) as refused:
++        service.create_from_filter(conn, name, set_id, HIGH_VALUE)
++    assert type(refused.value) is ValueError
++    conn.rollback()
++    assert written(conn) == before
++
++
++def test_a_long_name_is_accepted_and_trimmed(conn: psycopg.Connection) -> None:
++    """T009 (a): no length bound exists (owner's open question)."""
++    set_id, _ = seed_base(conn)
++    long_name = "x" * 10_000
++    assert save(conn, f"  {long_name}\t", set_id, HIGH_VALUE).name == long_name
++
++
++@pytest.mark.parametrize("holder", ["by_hand", "from_filter"])
++def test_an_active_universe_holding_the_name_refuses(conn: psycopg.Connection, holder: str) -> None:
++    """T009 (b): ``UniverseNameInUse``; nothing written; a retired name is free again."""
++    set_id, _ = seed_base(conn)
++    if holder == "by_hand":
++        held = service.create_by_hand(conn, "Taken", ["AAA"])
++        conn.commit()
++    else:
++        held = save(conn, "Taken", set_id, HIGH_VALUE)
++    before = written(conn)
++    with pytest.raises(service.UniverseNameInUse):
++        service.create_from_filter(conn, "  Taken ", set_id, HIGH_VALUE)
++    conn.rollback()
++    assert written(conn) == before
++
++    conn.execute(
++        "INSERT INTO universe_event (universe_id, event_type) VALUES (%s, 'retired')",
++        (held.universe_id,),
++    )
++    conn.commit()
++    assert save(conn, "Taken", set_id, HIGH_VALUE).name == "Taken"
++
++
++def _lock_waiters(watcher: psycopg.Connection) -> int:
++    row = watcher.execute(
++        "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND NOT granted"
++    ).fetchone()
++    assert row is not None
++    return int(row[0])
++
++
++def _wait_for_waiter(watcher: psycopg.Connection) -> None:
++    deadline = time.monotonic() + 5
++    while _lock_waiters(watcher) == 0 and time.monotonic() < deadline:
++        time.sleep(0.02)
++    assert _lock_waiters(watcher) == 1, "the snapshot never reached the write lock"
++
++
++def test_the_snapshot_waits_on_the_write_lock(
++    conn: psycopg.Connection, migrated_db_through_0006: str
++) -> None:
++    """T009 (c): the lock is taken first (DEC-0065), as S3's TC-COMP-019."""
++    set_id, _ = seed_base(conn)
++    conn_b = psycopg.connect(migrated_db_through_0006)
++    watcher = psycopg.connect(migrated_db_through_0006, autocommit=True)
++    outcome: list[BaseException | service.Universe] = []
++
++    def snapshot() -> None:
++        try:
++            outcome.append(service.create_from_filter(conn_b, "Waited", set_id, HIGH_VALUE))
++            conn_b.commit()
++        except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
++            outcome.append(exc)
++
++    thread = threading.Thread(target=snapshot, daemon=True)
++    try:
++        conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
++        thread.start()
++        _wait_for_waiter(watcher)
++        assert outcome == [], "the snapshot proceeded without the lock"
++        conn.commit()
++        thread.join(timeout=10)
++        assert not thread.is_alive()
++    finally:
++        conn_b.close()
++        watcher.close()
++
++    assert len(outcome) == 1 and isinstance(outcome[0], service.Universe)
++    assert member_symbols(service.get_universe(conn, outcome[0].universe_id)) == [
++        "AAA",
++        "AAC",
++        "BAA",
++        "BBB",
++        "DDD",
++    ]
++
++
++def test_a_same_name_create_under_the_lock_wins_the_race(
++    conn: psycopg.Connection, migrated_db_through_0006: str
++) -> None:
++    """T009 (d): serialisation, never two active ``Race`` universes."""
++    set_id, _ = seed_base(conn)
++    conn_b = psycopg.connect(migrated_db_through_0006)
++    watcher = psycopg.connect(migrated_db_through_0006, autocommit=True)
++    outcome: list[BaseException | str] = []
++
++    def snapshot() -> None:
++        try:
++            service.create_from_filter(conn_b, "Race", set_id, HIGH_VALUE)
++            conn_b.commit()
++            outcome.append("created")
++        except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
++            outcome.append(exc)
++
++    thread = threading.Thread(target=snapshot, daemon=True)
++    try:
++        conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
++        thread.start()
++        _wait_for_waiter(watcher)
++        service.create_by_hand(conn, "Race", ["AAA"])  # re-entrant in the same session
++        conn.commit()
++        thread.join(timeout=10)
++        assert not thread.is_alive()
++    finally:
++        conn_b.close()
++        watcher.close()
++
++    assert len(outcome) == 1 and isinstance(outcome[0], service.UniverseNameInUse)
++    row = conn.execute(
++        "SELECT count(*) FROM universe_event WHERE event_type = 'created' AND name = 'Race'"
++    ).fetchone()
++    assert row == (1,)
++
++
++def test_a_failed_member_insert_rolls_the_whole_snapshot_back(
++    conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """T009 (e): the error propagates unchanged (SEC-ERR-001); nothing survives."""
++    set_id, _ = seed_base(conn)
++    before = written(conn)
++    failure = errors.OperationalError("member insert failed")
++
++    def broken(*_args: object, **_kwargs: object) -> None:
++        raise failure
++
++    monkeypatch.setattr(psycopg.Cursor, "executemany", broken)
++    with pytest.raises(errors.OperationalError) as raised:
++        service.create_from_filter(conn, "Broken", set_id, HIGH_VALUE)
++    assert raised.value is failure
++    conn.rollback()
++    assert written(conn) == before
++
++
++def test_a_reader_error_propagates_and_nothing_is_written(
++    conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """T009 (f): the reader's own failure is not swallowed."""
++    set_id, _ = seed_base(conn)
++    before = written(conn)
++    failure = RuntimeError("reader failed")
++
++    def broken(*_args: object) -> None:
++        raise failure
++
++    monkeypatch.setattr(service, "current_set", broken)
++    with pytest.raises(RuntimeError) as raised:
++        service.create_from_filter(conn, "Reader", set_id, HIGH_VALUE)
++    assert raised.value is failure
++    conn.rollback()
++    assert written(conn) == before
++
++
++def test_the_caller_owns_the_transaction(conn: psycopg.Connection) -> None:
++    """T009 (g): one connection, one transaction; the function never commits."""
++    set_id, _ = seed_base(conn)
++    before = written(conn)
++    conn.execute("SELECT 1")  # the caller's own open transaction
++    universe = service.create_from_filter(conn, "Outer", set_id, HIGH_VALUE)
++    assert conn.info.transaction_status == TransactionStatus.INTRANS
++    conn.rollback()  # the caller did not commit, so the universe is gone
++    assert written(conn) == before
++    with pytest.raises(service.UniverseNotFound):
++        service.get_universe(conn, universe.universe_id)
++
++    committed = save(conn, "Outer", set_id, HIGH_VALUE)
++    assert conn.info.transaction_status == TransactionStatus.IDLE
++    assert service.get_universe(conn, committed.universe_id).name == "Outer"

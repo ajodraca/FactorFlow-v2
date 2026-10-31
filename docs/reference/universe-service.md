@@ -6,14 +6,16 @@ universe's state is never stored: it is replayed from the append-only
 `universe_event` log that migration `0005_universes.sql` adds beside the
 `universe` table. `replay.py` is the read half (CAP-002-E1-S2); `service.py`
 is the writer and re-exports or delegates to the replay types and paged reads
-(DEC-0093). It creates by hand and adds members (CAP-002-E1-S3), and renames,
-removes a member and retires (CAP-002-E1-S4). Its statements are in
-`universes/sql/`. Creating a universe from a filter is CAP-002-E1-S5 and is not
-defined yet.
+(DEC-0093). It creates by hand and adds members (CAP-002-E1-S3), renames,
+removes a member and retires (CAP-002-E1-S4), and creates from a filter
+(CAP-002-E1-S5). Its reads are in `universes/sql/`; its writes are inline
+constants in `service.py`.
 
 No API route or screen calls the service yet: the only import of the package
 from elsewhere under `src/` is the classification reader's import of
-`MEMBERSHIP_AS_OF_SQL` from `replay.py`.
+`MEMBERSHIP_AS_OF_SQL` from `replay.py`. The service imports `Thresholds`,
+`current_set` and `evaluate_filter` from `factorflow.classification.reader`;
+the reader never imports the service, so there is no cycle.
 
 Every function takes the caller's `psycopg.Connection`. Neither module commits
 and neither catches a database error.
@@ -33,6 +35,7 @@ behind a retire is refused as retired. The service issues `INSERT` only, never
 |---|---|---|
 | `create_by_hand(conn, name, symbols)` | Appends a `universe` row, one `created` event and one `member_added` event per distinct symbol | The replayed `Universe` |
 | `add_members(conn, universe_id, symbols)` | Appends one `member_added` event per symbol that is not a current member. An empty list is a no-op (DEC-0095) | `(added, already_member)`, both ascending |
+| `create_from_filter(conn, name, set_id, thresholds)` | Appends a `universe` row, one `created` event carrying `filter_provenance`, and one `member_added` event per stock the filter matches, in symbol order. See [Create from a filter](#create-from-a-filter) | The replayed `Universe`, `origin.kind` `from_filter` |
 | `rename(conn, universe_id, name)` | Appends one `renamed` event. The id, `created_at`, history and members are unchanged. Renaming to the universe's own current name is allowed and appends an event (DEC-0096) | The replayed `Universe` |
 | `remove_member(conn, universe_id, symbol)` | Appends one `member_removed` event. Coverage is not consulted | The event's `recorded_at` |
 | `retire(conn, universe_id)` | Appends one `retired` event. Members, name and history stay readable | The replayed `Universe`, `lifecycle` `retired` |
@@ -46,6 +49,7 @@ refusal that applies:
 |---|---|
 | `create_by_hand` | name shape, symbol shape, coverage, name in use, empty |
 | `add_members` | symbol shape, coverage, universe known, universe active |
+| `create_from_filter` | name shape, set currency, empty, name in use |
 | `rename` | name shape, universe known, universe active, name in use by another active universe |
 | `remove_member` | symbol shape, universe known, universe active, current member, last member |
 | `retire` | universe known, universe active |
@@ -64,10 +68,49 @@ unknown universe.
   `remove_member` takes one symbol through the same rule.
 - **Coverage.** A symbol is covered when an `instrument` row with that symbol
   has at least one `coverage_segment`, whatever the instrument's lifecycle
-  (`coverage_check.sql`, `COVERAGE_CHECK_SQL`).
+  (`coverage_check.sql`, `COVERAGE_CHECK_SQL`). `create_from_filter` makes no
+  coverage check: its members are the reviewed filter result.
+- **Set currency.** `create_from_filter` reads `current_set(conn)` after the
+  lock. The call is refused unless a complete set exists and its `set_id`
+  equals the requested one. A later `building` or `failed` set is not a change.
 - **Current member and last member.** Membership is checked before the
   last-member rule, so `LastMember` is raised only when the removal would leave
   the universe empty.
+
+### Create from a filter
+
+`create_from_filter` saves the result of the classification list's threshold
+filter as a universe (AC-2, design 2.4).
+
+- **Members.** Exactly `evaluate_filter(conn, set_id, thresholds)`, the
+  reader's own list statement, so the list and the saved universe apply one
+  predicate (DEC-0076, DEC-0085). The whole `Thresholds` is passed unchanged:
+  the twelve bounds, `hide_incomplete` and the `symbol` prefix. The returned
+  ids are deduplicated and resolved to instruments in one read
+  (`_INSTRUMENTS_BY_ID_SQL`), ordered by symbol, and written in that order. An
+  empty result raises `EmptyUniverse` before the name check.
+- **Provenance.** The `created` event's `filter_provenance` is a JSON object
+  with exactly five keys:
+
+  | Key | Value |
+  |---|---|
+  | `set_id` | The requested set's id, as a string |
+  | `classification_date` | The current set's `classification_date`, ISO format |
+  | `thresholds` | Only the bounds that were set, keyed by the query-parameter names the reader uses (`{factor}_score_min` and so on); `{}` without bounds |
+  | `hide_incomplete` | Always present, `true` or `false` |
+  | `symbol` | The search prefix, or `null` without a search |
+
+- **Bound encoding (DEC-0248).** A bound is a `Decimal`. An integral one is
+  written as a JSON integer, any other as a JSON number through `float`.
+  `replay.origin_from_provenance` reads each back as `Decimal(str(value))`, so
+  a bound with more than 15 significant digits reads back as the nearest
+  double. Two bounds that `Thresholds` accepts cannot be written: a
+  non-integral bound above the largest double encodes as `Infinity`, which
+  PostgreSQL rejects, and an integral bound of 4300 or more digits raises
+  `ValueError`. Either is raised after the filter is evaluated, and nothing is
+  written.
+- **Immutability.** Membership is replayed from the events only. A later
+  classification set changes nothing a saved universe holds (DAC-E1-S5-6).
 
 ## Refusals
 
@@ -76,11 +119,11 @@ unknown universe.
 | `UniverseNotFound` | `LookupError` | No universe has the id |
 | `UniverseRetired` | `ValueError` | The universe is retired. Every write to it is refused: `rename`, `add_members`, `remove_member` and `retire` |
 | `UniverseNameInUse` | `ValueError` | Another active universe holds the name |
-| `EmptyUniverse` | `ValueError` | A create has no members |
+| `EmptyUniverse` | `ValueError` | A create by hand has no members, or a filter matches no stock |
 | `InstrumentNotAcquired` | `ValueError` | Any symbol is not covered. `symbols` names every one, sorted, and the whole request is refused |
 | `NotAMember` | `LookupError` | `remove_member`'s symbol is not a current member. The message names the normalised symbol |
 | `LastMember` | `ValueError` | `remove_member` would remove the sole current member. The message ends `retire the universe instead` |
-| `ClassificationSetChanged` | `ValueError` | Defined for CAP-002-E1-S5's create from a filter; nothing raises it yet |
+| `ClassificationSetChanged` | `ValueError` | `create_from_filter`'s `set_id` is not the current complete set. `requested_set_id` is the requested id; `current_set_id` the current one, or `None` when no set is complete |
 
 ## Reads
 

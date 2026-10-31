@@ -8,10 +8,12 @@ predicate (CAP-002-E3-S2, design sections 2.5 and 2.7). Its four statements are
 in `classification/sql/`. The compare, evidence and history reads are later
 stories.
 
-No route or other module calls the reader yet: nothing under `src/` imports
-`factorflow.classification.reader`. The reader imports `MEMBERSHIP_AS_OF_SQL`
-from `factorflow.universes.replay`, never the universe service, so the service
-can import the reader without a cycle
+No route calls the reader yet. Its one caller under `src/` is the universe
+service, whose `create_from_filter` imports `Thresholds`, `current_set` and
+`evaluate_filter` (CAP-002-E1-S5; see
+[`universe-service.md`](universe-service.md#create-from-a-filter)). The reader
+imports `MEMBERSHIP_AS_OF_SQL` from `factorflow.universes.replay`, never the
+universe service, so the service imports the reader without a cycle
 (`test_reader_does_not_import_the_universe_service`).
 
 Every function that reads the database takes the caller's `psycopg.Connection`. The reader writes

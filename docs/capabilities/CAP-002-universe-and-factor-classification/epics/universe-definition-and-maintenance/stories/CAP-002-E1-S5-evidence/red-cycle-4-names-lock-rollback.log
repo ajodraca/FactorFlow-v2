@@ -1,0 +1,22 @@
+# RED for cycle 4 (T009): create_from_filter already takes the lock and checks the name, so both were removed from service.py for this run and restored after it (task plan T014 cycle 5 guidance: a skipped _take_lock injected and reverted).
+$ uv run pytest -m postgres tests/integration/test_universe_filter_snapshot.py -q --tb=line -k 'name or lock or race or rolls or reader_error or caller_owns'
+......FFFF...                                                            [100%]
+=================================== FAILURES ===================================
+E   Failed: DID NOT RAISE UniverseNameInUse
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:784: Failed: DID NOT RAISE UniverseNameInUse
+E   Failed: DID NOT RAISE UniverseNameInUse
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:784: Failed: DID NOT RAISE UniverseNameInUse
+E   AssertionError: the snapshot never reached the write lock
+    assert 0 == 1
+     +  where 0 = _lock_waiters(<psycopg.Connection [IDLE] (host=localhost port=61148 user=test database=test_08fc4d7666a14cff9dc2e80776ed1232) at 0x10d15ffb0>)
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:809: AssertionError: the snapshot never reached the write lock
+E   AssertionError: the snapshot never reached the write lock
+    assert 0 == 1
+     +  where 0 = _lock_waiters(<psycopg.Connection [IDLE] (host=localhost port=61148 user=test database=test_9a4172aaca274de78cd9e024a04529a4) at 0x10d1670b0>)
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:809: AssertionError: the snapshot never reached the write lock
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_filter_snapshot.py::test_an_active_universe_holding_the_name_refuses[by_hand]
+FAILED tests/integration/test_universe_filter_snapshot.py::test_an_active_universe_holding_the_name_refuses[from_filter]
+FAILED tests/integration/test_universe_filter_snapshot.py::test_the_snapshot_waits_on_the_write_lock
+FAILED tests/integration/test_universe_filter_snapshot.py::test_a_same_name_create_under_the_lock_wins_the_race
+4 failed, 9 passed, 27 deselected in 13.47s

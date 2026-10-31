@@ -27,9 +27,14 @@ and the save and add dialogs with their notices (CAP-002-E4-S8):
 - `save-as-universe-dialog.tsx`, **Save these {n} as a universe…** and its
   dialog ([Save as a universe](#save-as-a-universe-save-as-universe-dialogtsx));
 - `add-to-universe-dialog.tsx`, the tray's **Add to universe…** dialog
-  ([Add to a universe](#add-to-a-universe-add-to-universe-dialogtsx)).
+  ([Add to a universe](#add-to-a-universe-add-to-universe-dialogtsx));
 
-No route or screen mounts any of them yet. The dialogs' only importers are
+and the first screen, the universes list with its create dialog
+(CAP-002-E1-S7), in `universes/`; see
+[Universes screen](#universes-screen-universes).
+
+No route mounts any of them yet: `/research/universes` and
+`/research/universes/:universeId` are registered by CAP-002-E4-S10. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
 dialogs and the tests. The factor cell, the *Possibly
 restated* mark, the not-current banner and the as-of line in
@@ -99,7 +104,7 @@ section 14.
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
-| `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail |
+| `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional) |
 | `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels |
 
 ### The retire allow-list
@@ -559,3 +564,124 @@ module-level state and touches no storage.
 
 `use-score-set-poll.test.ts` beside it carries TC-COMP-177 and TC-COMP-184
 and drives the hook with fake timers, mocking the client and `useHealth`.
+
+## Universes screen (`universes/`)
+
+The universes list and its create dialog (UX design 1.3; classification-ui
+2.7; AC-1, AC-3, AC-5; CAP-002-E1-S7). Three modules:
+
+- `index.tsx`, the default export `UniversesScreen`;
+- `universe-table.tsx`, `UniverseTable` and `universeDetailPath(universeId)`,
+  which gives `/research/universes/{id}` with the id URI-encoded;
+- `create-dialog.tsx`, `CreateDialog({ onCreated, onCancel })` and
+  `withLink(sentence, phrase, to)`, which renders the `phrase` inside
+  `sentence` as a link and leaves the words verbatim (DEC-0254).
+
+No route mounts the screen yet (CAP-002-E4-S10), and universe detail is
+CAP-002-E1-S9's.
+
+### The list (`index.tsx`)
+
+`UniversesScreen` mirrors the delivered Instruments screen: one `card` whose
+header keeps, in every state, the `h1` *Universes*, the counts line
+`UNIVERSE_LIFECYCLE.counts(active, retired)` once a read has succeeded, a
+lifecycle `select` (`data-variant="inline"`, named *Show: {option}*, options
+*Active* (default), *Retired*, *All*) and **New universe…**.
+
+Each selection reads every page of `listUniverses({ lifecycle, limit: 500,
+cursor })` until `nextCursor` is `null` (DEC-0101); the counts are the last
+page's. A selection change or **Try again** re-reads; a read that settles
+after a newer one started is ignored. The screen's `ScreenState`:
+
+| State | When | Renders |
+|-------|------|---------|
+| `loading` | a read is in flight | *Loading…* in a polite live region; the rows last shown stay, the table `aria-busy` and its body dimmed (DEC-0256, provisional) |
+| `populated` | the selection has universes | the table |
+| `empty-never-populated` | no universe exists in any lifecycle | no table; `UNIVERSES.noUniversesYet` with *Research* linking to `/research`, and focus on **New universe…** |
+| `empty-no-match` | the selection matches none (DEC-0103) | the table's header row over one four-column cell: *No retired universes.* with **Reset filter** selecting *Active*, or *No active universes.* with **Reset filter** selecting *All* (DEC-0255) |
+| `error` | a read failed | the header row over one cell: `failureSentence` for `list-universes` by `code` as an alert in `--destructive`, with **Try again** |
+| `unreachable` | `ApiUnreachableError` | nothing; the shell owns the state |
+
+**Reset filter** and **Try again** unmount when activated, so both move focus
+to the lifecycle select (DEC-0256). Creating opens `CreateDialog`; on success
+the screen navigates to `universeDetailPath` of the new id, with no toast. The
+screen has no delete (STD-UI-2).
+
+### The table (`universe-table.tsx`)
+
+`UniverseTable({ universes, body?, busy })` is the `data-table`
+`expandable` (`data-variant="expandable"`), patterned on the delivered
+coverage table. The header row (*Name*, *Lifecycle*, *Members*, *Created*) is
+always rendered; `body`, when given, replaces the rows in one `colSpan={4}`
+cell; `busy` sets `aria-busy` and the `tbody` class `opacity-50`.
+
+- **Name** sorts in the browser over the loaded rows, case-insensitively.
+  Its header button cycles `aria-sort` none, ascending, descending, none
+  (`NEXT_SORT`); unsorted is the order the API returned.
+- Each row header holds an expander (`aria-expanded`, `aria-controls` naming
+  the detail row, named *Show details for {name}* or *Hide details for
+  {name}*) and the name as a link to the universe's detail. A retired row
+  mutes its name and shows the `secondary` *Retired* badge, text with a
+  hollow square (STD-UI-8). *Members* is `memberCount`; *Created* is the
+  America/Chicago date of `createdAt`.
+- The expanded row shows *Created {timestamp}*, *Retired {timestamp}* when
+  `retiredAt` is set (both through `formatTimestamp`), and the origin line,
+  in a polite live region.
+- The origin line is read once per row while the table lives: `readOrigin`
+  pages `listUniverseEvents(universeId, { limit: 500, cursor })`, newest
+  first, until the `created` event, and passes its `filterProvenance` to
+  `describeOrigin`. A failure, or a history with no `created` event or a
+  provenance without `classification_date`, renders `failureSentence` for
+  `list-universe-events` as an alert with **Try again**, which re-reads and
+  moves focus to the row's expander.
+
+`describeOrigin(provenance)` is module-private and pure (DEC-0108: CAP-002-E1-S9
+will export and import it, so its name, parameter, `string` return and
+wording are fixed). `null` gives *Created by hand*. Otherwise it gives
+*Saved from a filter on {classification_date}*, then, each only when it
+applied: `: ` and the bounds, in factor order value, growth, momentum,
+percentile before standardised score, minimum before maximum, each
+*{factor} {measure} {at least|at most} {value}* with the value through
+`formatPercentile` or `formatScore`; `; search "{symbol}"`; and `; stocks with
+an incomplete score hidden`. A threshold key outside the twelve is dropped.
+
+### The create dialog (`create-dialog.tsx`)
+
+`CreateDialog` is a native `<dialog open>` (`data-variant="standard"`, drawn
+in `--popover`) built on the delivered `retire-dialog.tsx`: its own Tab
+cycle between the Name field and **Create**, Escape cancels unless a request
+is in flight, initial focus is on Name, and focus returns to the opener on
+unmount.
+
+- **Stocks to include** parses with CAP-001's `parseBulkSymbols` on paste
+  (the text the paste produces, a replaced selection included) and on blur,
+  never per keystroke. Blur rewrites the field one normalised entry per
+  line. A polite counter reads *{n} symbols recognised, {m} not recognised*
+  and lists each rejected entry.
+- **Create** is `blocked` (`data-variant="blocked"`, still focusable,
+  `aria-describedby` its reason) while the recognised entries, counted as
+  parsed with duplicates, number zero (*Enter at least one stock.*) or more
+  than 1000 (*Up to 1000 stocks can be added in one request.*) (DEC-0104).
+  Submitting while blocked sends nothing. Submit re-parses the field first.
+- A name empty after trimming is a Name field error, *Enter a name for the
+  universe.*, and sends nothing.
+- `createUniverse({ name, symbols })` sends the trimmed name and the distinct
+  normalised symbols; **Create** and **Cancel** are disabled in flight. On
+  success it calls `onCreated(universeId)`.
+- Failures render by `code`, never the envelope's `message`:
+  `instrument_not_acquired` with symbols gives the `failureSentence` naming
+  them, with *Follow them on Data health* linking to
+  `SHELL_ROUTES.followedStocks`, as an assertive alert; `universe_name_in_use`
+  gives the Name field error *Another active universe is already named
+  {name}.*; anything else gives the generic `create-universe` sentence. Both
+  fields keep their text. Focus moves to Name for a Name error and to
+  **Create** otherwise; editing Name clears its error.
+
+Tests: `universes.test.tsx` (TC-COMP-020, TC-COMP-021, TC-COMP-022 and the
+T010 cases) and `create-dialog.test.tsx` (TC-COMP-042, TC-COMP-006,
+TC-COMP-007 and the T009 cases), mocking the fetch layer.
+
+Open warnings from the story's implementation review v2: the `opacity-50`
+dimming of kept rows falls below STD-UI-24's 4.5:1 contrast (IR-001), and
+the list announces no row count after its rows update, which `data-table`
+section 5 asks for (IR-002).

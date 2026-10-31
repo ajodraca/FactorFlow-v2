@@ -1,0 +1,37 @@
+# RED for cycle 3 (T006, T007): the production code already satisfies these tests, so two faults were injected into service.py and reverted after this run (task plan T014 cycle 4 guidance): create_from_filter dropped hide_incomplete from the Thresholds it passes to evaluate_filter, and get_universe read the origin's set from the live current set.
+$ uv run pytest -m postgres tests/integration/test_universe_filter_snapshot.py -q --tb=line -k 'hide_incomplete_hides or later_set_that_changes'
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+E   AssertionError: assert ['INC', 'NER', 'OKK'] == ['NER', 'OKK']
+      
+      At index 0 diff: 'INC' != 'NER'
+      Left contains one more item: 'OKK'
+      Use -v to get more diff
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:631: AssertionError: assert ['INC', 'NER', 'OKK'] == ['NER', 'OKK']
+E   AssertionError: assert ['INC', 'NER', 'OKK'] == ['NER', 'OKK']
+      
+      At index 0 diff: 'INC' != 'NER'
+      Left contains one more item: 'OKK'
+      Use -v to get more diff
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:631: AssertionError: assert ['INC', 'NER', 'OKK'] == ['NER', 'OKK']
+E   AssertionError: assert ['INC', 'NER', 'OKK'] == ['NER', 'OKK']
+      
+      At index 0 diff: 'INC' != 'NER'
+      Left contains one more item: 'OKK'
+      Use -v to get more diff
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:631: AssertionError: assert ['INC', 'NER', 'OKK'] == ['NER', 'OKK']
+E   AssertionError: assert Origin(kind='..., symbol=None) == Origin(kind='..., symbol=None)
+      
+      Omitting 5 identical items, use -vv to show
+      Differing attributes:
+      ['set_id']
+      
+      Drill down into differing attribute set_id:
+        set_id: UUID('a78fc892-11a1-4069-8622-92a3fce91b40') != UUID('26889b65-9671-486e-9ef3-7d9ab4a1366d')
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_universe_filter_snapshot.py:669: AssertionError: assert Origin(kind='..., symbol=None) == Origin(kind='..., symbol=None)
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_filter_snapshot.py::test_hide_incomplete_hides_exactly_the_input_reason_stocks[input_missing]
+FAILED tests/integration/test_universe_filter_snapshot.py::test_hide_incomplete_hides_exactly_the_input_reason_stocks[input_outdated]
+FAILED tests/integration/test_universe_filter_snapshot.py::test_hide_incomplete_hides_exactly_the_input_reason_stocks[input_not_computable]
+FAILED tests/integration/test_universe_filter_snapshot.py::test_a_later_set_that_changes_the_matches_leaves_the_members_unchanged
+4 failed, 25 deselected in 2.43s
