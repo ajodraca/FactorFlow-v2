@@ -116,6 +116,11 @@ _SYMBOL_PREFIX: Final = re.compile(r"[A-Z][A-Z0-9.-]{0,15}")
 _CHICAGO: Final = ZoneInfo("America/Chicago")
 _CURSOR_VERSION: Final = 1
 _CURSOR_FIELDS: Final = frozenset({"v", "set", "sort", "order", "key", "null", "sym", "chk"})
+# A factor-sort key must be a value its column can hold, score numeric(18,6) and percentile
+# numeric(9,6): below these magnitudes, at no finer than six decimal places, and bound at that
+# scale (T018).
+_KEY_LIMITS: Final = {"score": Decimal(10) ** 12, "percentile": Decimal(10) ** 3}
+_KEY_QUANTUM: Final = Decimal("0.000001")
 
 # The keyset fragments, chosen in code; `{sort_expr}` is the allowlisted expression and the last
 # row's key and symbol are bound parameters. Rows not classified on the sort factor (a null key)
@@ -408,7 +413,13 @@ def _parse_cursor(
         raise CursorError("cursor key is not a decimal") from exc
     if not number.is_finite():
         raise CursorError("cursor key is not a finite decimal")
-    return data, (number, False, symbol)
+    limit = _KEY_LIMITS["percentile" if sort.endswith("_percentile") else "score"]
+    if abs(number) >= limit:
+        raise CursorError("cursor key is outside the range of its sort column")
+    stored = number.quantize(_KEY_QUANTUM)  # the column's own scale, whatever the exponent sent
+    if stored != number:
+        raise CursorError("cursor key is finer than its sort column holds")
+    return data, (stored, False, symbol)
 
 
 def list_classifications(conn: psycopg.Connection, filters: ListFilters) -> ClassificationPage:

@@ -19,6 +19,8 @@ import pytest
 from factorflow.api.bounds import MAX_PAGE_SIZE
 from factorflow.classification import reader
 from tests.integration.reader_seed import (
+    add_member,
+    insert_classification,
     insert_instrument,
     insert_reference,
     insert_run,
@@ -255,6 +257,25 @@ def test_restated_value_and_growth_cells_carry_the_mark(
     assert [plain[f].restated_possible for f in reader.FACTORS] == [False, False, False]
 
 
+# Implements TC-COMP-189
+def test_value_and_growth_marks_are_each_their_own_cell(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    """DAC-E3-S2-6, DAC-E3-12: a value-only restatement marks value and not growth, and a
+    growth-only one growth and not value, so neither cell reads the other's flag."""
+    conn = migrated_run_schema_connection
+    set_id = _complete_set(conn)
+    seed_scored_stock(conn, set_id, "VAL", restated=("value",))
+    seed_scored_stock(conn, set_id, "GRO", restated=("growth",))
+
+    page = _read(conn)
+
+    val = _row(page, "VAL").factors
+    assert [val[f].restated_possible for f in reader.FACTORS] == [True, False, False]
+    gro = _row(page, "GRO").factors
+    assert [gro[f].restated_possible for f in reader.FACTORS] == [False, True, False]
+
+
 # --- TC-COMP-112: unscoped is the active roster; a universe keeps retired members -----------
 
 
@@ -350,6 +371,51 @@ def test_universe_with_no_members_in_the_set_is_an_empty_page(
         page = _read(conn, universe_id=universe_id)
         assert (page.stocks, page.match_count, page.next_cursor) == ([], 0, None)
         assert page.set is not None
+
+
+# Two instants on 15 October in America/Chicago (CDT): 00:30, still 14 October in any zone west
+# of Chicago, and 23:30, already 16 October in every zone east of it.
+CHICAGO_TODAY = date(2026, 10, 15)
+CHICAGO_JUST_AFTER_MIDNIGHT = datetime(2026, 10, 15, 5, 30, tzinfo=UTC)
+CHICAGO_JUST_BEFORE_MIDNIGHT = datetime(2026, 10, 16, 4, 30, tzinfo=UTC)
+
+
+def _clock_fixed_at(instant: datetime) -> type[datetime]:
+    """A ``datetime`` whose ``now`` is ``instant``, to stand in for the reader's clock."""
+
+    class FixedNow(datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> "FixedNow":
+            return cls.fromtimestamp(instant.timestamp(), tz)
+
+    return FixedNow
+
+
+@pytest.mark.parametrize(
+    "instant",
+    [CHICAGO_JUST_AFTER_MIDNIGHT, CHICAGO_JUST_BEFORE_MIDNIGHT],
+    ids=["00:30-cdt", "23:30-cdt"],
+)
+# Implements TC-COMP-112
+def test_universe_scope_replays_membership_at_today_in_chicago(
+    scoped_stocks: tuple[psycopg.Connection, UUID, dict[str, int]],
+    monkeypatch: pytest.MonkeyPatch,
+    instant: datetime,
+) -> None:
+    """DAC-E3-S2-3, DEC-0128, DEC-0065: the scope is the membership as of today in
+    America/Chicago. At either instant a member added on that Chicago date is listed (at 00:30
+    a zone behind Chicago is still on the day before) and one recorded on the next Chicago date
+    is not (at 23:30 every zone ahead of Chicago is already on it, as is the host's later date)."""
+    conn, _, ids = scoped_stocks
+    universe_id = insert_universe(conn, "Today", [])
+    add_member(conn, universe_id, ids["ACT"], recorded_on=CHICAGO_TODAY)
+    add_member(conn, universe_id, ids["OUT"], recorded_on=CHICAGO_TODAY + timedelta(days=1))
+    monkeypatch.setattr(reader, "datetime", _clock_fixed_at(instant))
+
+    page = _read(conn, universe_id=universe_id)
+
+    assert _symbols(page) == ["ACT"]
+    assert page.match_count == 1
 
 
 # --- TC-COMP-120: match_count is the whole filtered scope on every page ----------------------
@@ -450,16 +516,18 @@ def test_empty_thresholds_match_every_stock_in_scope(
     conn, universe_id, ids = scoped_stocks
     set_id = reader.current_set(conn)
     assert set_id is not None
+    incomplete = seed_scored_stock(conn, set_id.set_id, "INC", momentum=NOT_COMPUTABLE_MOMENTUM)
+    add_member(conn, universe_id, incomplete)
 
     unscoped = _read(conn, thresholds=reader.Thresholds())
-    assert unscoped.match_count == len(unscoped.stocks) == 3
+    assert unscoped.match_count == len(unscoped.stocks) == 4
     scoped = _read(conn, universe_id=universe_id, thresholds=reader.Thresholds())
-    assert scoped.match_count == len(scoped.stocks) == 3
-    assert {r.symbol for r in scoped.stocks} == {"ACT", "OLD", "OUT"}
+    assert scoped.match_count == len(scoped.stocks) == 4
+    assert {r.symbol for r in scoped.stocks} == {"ACT", "INC", "OLD", "OUT"}
 
     evaluated = reader.evaluate_filter(conn, set_id.set_id, reader.Thresholds())
     assert evaluated == sorted(r.instrument_id for r in unscoped.stocks)
-    assert evaluated == sorted([ids["ACT"], ids["GONE"], ids["OUT"]])
+    assert evaluated == sorted([ids["ACT"], ids["GONE"], incomplete, ids["OUT"]])
 
 
 # --- evaluate_filter equals the list (design section 7) ------------------------------------
@@ -700,6 +768,54 @@ def test_input_reason_cell_carries_its_input_and_detail(
         "return_12m",
         "return_12m is input_not_computable",
     )
+
+
+def test_value_and_growth_input_reason_cells_carry_their_own_input_and_detail(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    """T014: each input-reason cell carries its own factor's stored reason_input and
+    reason_detail; the two factors' inputs differ, so neither cell can read the other's."""
+    conn = migrated_run_schema_connection
+    set_id = _complete_set(conn)
+    seed_scored_stock(conn, set_id, "TWO", value=MISSING_VALUE, growth=OUTDATED_GROWTH)
+    cells = _row(_read(conn), "TWO").factors
+
+    value, growth = cells["value"], cells["growth"]
+    assert (value.reason_code, value.reason_input, value.reason_detail) == (
+        "input_missing",
+        "book_to_price",
+        "book_to_price is input_missing",
+    )
+    assert (growth.reason_code, growth.reason_input, growth.reason_detail) == (
+        "input_outdated",
+        "revenue_growth",
+        "revenue_growth is input_outdated",
+    )
+
+
+# Implements task plan Open Gap 7
+@pytest.mark.parametrize(
+    "thresholds",
+    [
+        reader.Thresholds(),
+        reader.Thresholds(bounds={"value_score_min": D("0")}),
+    ],
+    ids=["no-bound", "bound-on-the-missing-factor"],
+)
+def test_a_missing_factor_row_is_a_data_integrity_error(
+    migrated_run_schema_connection: psycopg.Connection, thresholds: reader.Thresholds
+) -> None:
+    """Open Gap 7, DEC-0129: a stock with no value row in the set is neither dropped (not by
+    the join, not by a bound on that factor) nor given an invented cell; the read raises."""
+    conn = migrated_run_schema_connection
+    set_id = _complete_set(conn)
+    seed_scored_stock(conn, set_id, "FULL")
+    partial = insert_instrument(conn, "PART")
+    insert_classification(conn, set_id, partial, "growth", score=D("0.5"), percentile=D("50"))
+    insert_classification(conn, set_id, partial, "momentum", score=D("0.5"), percentile=D("50"))
+
+    with pytest.raises(ValueError, match=f"instrument {partial} has no value row"):
+        _read(conn, thresholds=thresholds)
 
 
 def test_name_is_the_latest_reference_name_or_none(

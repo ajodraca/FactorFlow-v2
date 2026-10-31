@@ -111,3 +111,82 @@ cycles:
         - id: manual:outer-order-dropped
           disposition: equivalent
           reason: the outer ORDER BY repeats the page subquery's order over a one-row LEFT JOIN, so the rows already arrive in that order; it makes the order a guarantee of the statement rather than of the plan, which no result can distinguish
+  - id: rework-1
+    tasks: [T008, T009, T011, T014, T018, T020]
+    description: >
+      Review rework against CAP-002-E3-S2-implementation-review-v1.md (CHANGES-REQUIRED), one cycle for its six
+      findings; the 11 non-equivalent survivors of its mutation run are re-run here. IR-001 (HIGH):
+      test_value_and_growth_marks_are_each_their_own_cell seeds a value-only and a growth-only restated stock, so
+      neither mark can be read from the other factor's row. IR-002 (HIGH):
+      test_value_and_growth_input_reason_cells_carry_their_own_input_and_detail asserts reason_code, reason_input
+      and reason_detail on a value (book_to_price) and a growth (revenue_growth) input-reason cell of one stock.
+      IR-003 (HIGH): test_universe_scope_replays_membership_at_today_in_chicago fixes the reader's clock (a datetime
+      subclass patched over reader.datetime) at 00:30 and at 23:30 CDT on 15 October, with one member recorded on
+      that Chicago date and one on the next; reader_seed.add_member gains a keyword-only recorded_on whose default
+      is the column's own. IR-004 (MEDIUM): test_a_missing_factor_row_is_a_data_integrity_error seeds a stock with
+      no value row and expects ValueError with no bound and with a bound on value (Open Gap 7, DEC-0129). IR-005
+      (LOW): _parse_cursor refuses, with CursorError, a factor-sort key at or beyond what its column holds (score
+      numeric(18,6), magnitude below 10^12; percentile numeric(9,6), below 10^3) or finer than six decimal places,
+      and returns the key quantized to six places, so a re-encoded 0E-200000 binds as 0.000000 (the second code
+      review's note); cursors the reader issues carry stored values and are unaffected. IR-006 (LOW): the TC-COMP-122
+      test now seeds an input-reason member (INC) in the universe, so its docstring holds; counts 3 to 4.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/red-rework-1.log
+    red_log_sha256: 8d725f819a2a1e07a5ef56d0bff11d464bd61855220a552e4000ff39386932c3
+    red_evidence: >
+      With every rework test written and reader.py, list_classifications.sql and universe_exists.sql as reviewed
+      (a4608e7, whose production files equal the reviewed c5a2039), the two touched files ran 13 failed, 106
+      passed: the nine out-of-range or over-fine keys decoded instead of raising CursorError, and four keys
+      (1.5000000, 100, 0E-200000, 0E+200000) decoded at an exponent other than -6. The IR-001, IR-002, IR-003,
+      IR-004 and IR-006 tests passed on the reviewed code by construction, since the code was correct and the
+      tests were missing; their RED is the review's 11 non-equivalent survivors, which each of them now kills
+      (TEST-TDD-006), each by the test written for it (results logs).
+    green_evidence: >
+      The story's focused files plus test_engine_sql_safety.py, test_package_data_ships_sql.py and
+      test_classification_sql_ships.py against PostgreSQL 16: 245 passed (green-rework-1.log); ruff check, ruff
+      format --check and mypy src clean. Full suite: 1838 passed, 1 xfailed (full-suite-rework-1.log). Mutation: 77
+      mutants, 7 generated over the staged production lines, the review's 60 hand-written ones (its 25 rv-* and the
+      35 of cycle-1, every target line still present), 2 clock-zone ones (UTC, America/New_York) and 8 for the key
+      check; 75 killed, all 11 of the review's non-equivalent survivors among them. The first code review asked
+      for an instant ahead of Chicago (now 23:30 CDT, which kills the UTC and New York zones) and the second for
+      0E-200000 (now quantized); each change was re-fingerprinted, re-mutated and re-reviewed. Final reviews:
+      code review APPROVED with NON-BLOCKING notes only (the red log shows only the cursor failures, the patch
+      couples to the reader's datetime import, absolute paths in logs); spec drift none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/green-rework-1.log
+        sha256: a447ea7b341709e8163c73e3415281b104e02e1f8f60b2492a58b61068338d09
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/full-suite-rework-1.log
+        sha256: 6939c4773e62589a796dedc8f876277c5b06e0b0d3c061ff8d14dcdb73cc92bd
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/code-review-rework-1.txt
+        sha256: 4cfcfbe6812d41ca6cb3fb1f0c53f6a1ba2e44cf5ca65a0e9e0060cc270073ae
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/spec-drift-rework-1.txt
+        sha256: bd6124e6b411ade0eb2b6e15f3b3b9ecb4493b3c7c328e858ce28ca444fd18b4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 581d1733b06bffafc2ca2fb7aa0a4a63838b1811bc5cf1d9b869200116f8227c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/rework-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutation-rework-1-results.json
+      results_sha256: 318ddbe4656e55ea4e6c9541dc556244519cb35dc4c360d4771a50c495a78531
+      generated: 77
+      killed: 75
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.974
+      survivors:
+        - id: manual:rv-name-tiebreak-asc
+          disposition: equivalent
+          reason: >
+            As review v1 judged: DEC-0245 makes the name that of the most recent instrument_reference row, and
+            value_hash only makes LIMIT 1 deterministic among rows recorded at the same instant, where no row is
+            more recent; which of two simultaneous names wins is left open by the decision.
+        - id: manual:outer-order-dropped
+          disposition: equivalent
+          reason: >
+            As cycle-1 and review v1 judged: the outer ORDER BY repeats the page subquery's order over a
+            one-row LEFT JOIN ... ON true, which PostgreSQL 16 can only run as a nested loop with the count on the
+            outer side, so the page already arrives in the subquery's order; no result distinguishes the two.

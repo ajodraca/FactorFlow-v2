@@ -213,11 +213,20 @@ def insert_universe(conn: psycopg.Connection, name: str, instrument_ids: Iterabl
     return universe_id
 
 
-def add_member(conn: psycopg.Connection, universe_id: UUID, instrument_id: int) -> None:
+def add_member(
+    conn: psycopg.Connection,
+    universe_id: UUID,
+    instrument_id: int,
+    *,
+    recorded_on: date | None = None,
+) -> None:
+    """A ``member_added`` event; ``recorded_on`` defaults to the column's America/Chicago
+    date of now (DEC-0065)."""
     conn.execute(
-        "INSERT INTO universe_event (universe_id, event_type, instrument_id) "
-        "VALUES (%s, 'member_added', %s)",
-        (universe_id, instrument_id),
+        "INSERT INTO universe_event (universe_id, event_type, instrument_id, recorded_on) "
+        "VALUES (%s, 'member_added', %s, "
+        "COALESCE(%s::date, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date))",
+        (universe_id, instrument_id, recorded_on),
     )
     conn.commit()
 

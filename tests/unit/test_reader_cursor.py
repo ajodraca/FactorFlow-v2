@@ -181,3 +181,51 @@ def test_symbol_sort_cannot_carry_a_null_key() -> None:
     payload["chk"] = reader._cursor_check(payload)
     with pytest.raises(reader.CursorError):
         _decode(_raw(payload), sort="symbol")
+
+
+@pytest.mark.parametrize(
+    ("sort", "key"),
+    [
+        ("value_score", "1E+200000"),
+        ("value_score", "-1E+200000"),
+        ("value_score", "1E-200000"),
+        ("value_score", "1000000000000"),
+        ("value_score", "-1000000000000"),
+        ("value_score", "0.0000001"),
+        ("growth_percentile", "1000"),
+        ("growth_percentile", "-1000"),
+        ("momentum_percentile", "50.0000001"),
+    ],
+)
+# Implements TC-COMP-121
+def test_key_no_stored_value_can_equal_is_refused(sort: str, key: str) -> None:
+    """DAC-E3-S2-5, T018: a re-encoded cursor whose key lies outside what its column holds
+    (score numeric(18,6), percentile numeric(9,6)) is a malformed cursor, refused with
+    CursorError before it can reach the database as a numeric overflow."""
+    cursor = reader.encode_cursor(SET_ID, sort, "asc", Decimal(key), False, "AAPL")
+    with pytest.raises(reader.CursorError):
+        _decode(cursor, sort=sort)
+
+
+@pytest.mark.parametrize(
+    ("sort", "key"),
+    [
+        ("value_score", "999999999999.999999"),
+        ("value_score", "-999999999999.999999"),
+        ("value_score", "0.000001"),
+        ("value_score", "1.5000000"),
+        ("growth_percentile", "999.999999"),
+        ("growth_percentile", "-999.999999"),
+        ("momentum_percentile", "100"),
+        ("value_score", "0E-200000"),
+        ("value_score", "0E+200000"),
+    ],
+)
+# Implements TC-COMP-121
+def test_key_at_the_edge_of_its_column_round_trips_at_its_scale(sort: str, key: str) -> None:
+    """The decoded key is the value sent, at the column's six decimal places, so whatever
+    exponent a re-encoded cursor carries, the bound parameter is one the column could hold."""
+    cursor = reader.encode_cursor(SET_ID, sort, "asc", Decimal(key), False, "AAPL")
+    decoded, key_is_null, symbol = _decode(cursor, sort=sort)
+    assert (decoded, key_is_null, symbol) == (Decimal(key), False, "AAPL")
+    assert isinstance(decoded, Decimal) and decoded.as_tuple().exponent == -6
