@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "command": "uv run --all-extras --offline python -B -m pytest -m \"postgres or not postgres\" -q -p no:cacheprovider tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged tests/integration/test_engine_transaction.py::test_revised_close_after_completion_leaves_the_set_unchanged tests/integration/test_engine_transaction.py::test_backfill_before_the_build_is_seen_by_that_set tests/integration/test_engine_inputs_fundamentals.py::test_unresolved_line_items_still_classify_momentum tests/integration/test_engine_volume_population.py tests/integration/test_engine_volume.py tests/unit/test_engine_volume_static.py",
+  "repo_head": "f42831f718896663c140e27bfc8b1280d3547706",
+  "tree_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/mutants.json",
+  "mutants_sha256": "8d3cbd950efa83010c2d5c132c3b0f465ae6f2916f650913b8ef2f23e9366c1c",
+  "jobs": 3,
+  "started": "2026-10-31T21:49:59Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 16.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/baseline-w1.log",
+      "log_sha256": "ae7a4fbef738b800163478e0be5125acedd4f1c84a6760b755149c3687acb920"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 16.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/baseline-w0.log",
+      "log_sha256": "b2e4712a46b2d10b0cc1d02d4bec540aeda0584e311215034cf1144ef26db8f7"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 17.2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/baseline-w2.log",
+      "log_sha256": "9c31ead5cf04b0377697ed39f7e1b5d57160953a66b4fb473cdc3a543b1f33db"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:value_inputs.sql:known_on-ignores-bar",
+      "cycle": "review",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "old": "greatest(p.known_on, b.observed_on) AS known_on",
+      "new": "p.known_on AS known_on",
+      "targets": "T005(a) price revision: known_on is the revision's observed_on (DAC-E2-9, DEC-0055 (7))",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 11.9,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/manual_value_inputs.sql_known_on-ignores-bar.log",
+      "log_sha256": "880c64c384ef63eb392554a37b398e9fe2fe72dfa03924c664d0299139feec6e"
+    },
+    {
+      "id": "manual:value_inputs.sql:bar-earliest-observation",
+      "cycle": "review",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "old": "ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+      "new": "ORDER BY d.session_date DESC, d.observed_on ASC, d.recorded_at DESC",
+      "targets": "T005(a): the next set reads the revised close (DAC-E2-9, DEC-0117 (1))",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 12.0,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/manual_value_inputs.sql_bar-earliest-observation.log",
+      "log_sha256": "93858283a9c0d9ed49f344f73e21c6791e2bbe264a0b2eb2312e7e87ea59a41a"
+    },
+    {
+      "id": "manual:growth_inputs.sql:known_on-period-end",
+      "cycle": "review",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "old": "max(observed_on) AS known_on",
+      "new": "max(fiscal_period_end) AS known_on",
+      "targets": "T004/TC-COMP-162: known_on equals the backfill's observed_on, never the period end (AC-19, DEC-0124)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 11.9,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/manual_growth_inputs.sql_known_on-period-end.log",
+      "log_sha256": "82c9272d5fe0d77e56e8531988caa5496d28f834a3c4b5ec4348001c4a3e3f8c"
+    },
+    {
+      "id": "manual:statements.sql:never-backfilled",
+      "cycle": "review",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/statements.sql",
+      "old": "coalesce(l.provider_filing_date < o.first_observed_on, false) AS backfilled",
+      "new": "false AS backfilled",
+      "targets": "T004/TC-COMP-162: the next set marks A's growth restated_possible (DEC-0124, DEC-0056)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 11.0,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/manual_statements.sql_never-backfilled.log",
+      "log_sha256": "bc5ddac0396c86c2a891b72cb8d4fd3e81d2101a19dd32bfde167747b9eeb382"
+    },
+    {
+      "id": "manual:growth_inputs.sql:unresolved-cause-dropped",
+      "cycle": "review",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "old": "CASE WHEN n.line_item = ANY(%(unresolved)s::text[]) THEN %(unresolved_cause)s::text",
+      "new": "CASE WHEN false THEN %(unresolved_cause)s::text",
+      "targets": "T014: growth inputs missing with detail.cause line_item_mapping_unresolved (DAC-E2-S2-5)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 10.8,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutation/logs/manual_growth_inputs.sql_unresolved-cause-dropped.log",
+      "log_sha256": "edec53463f4caa7b9628eed35b750d53e2db3a91d949a2ff573b9c0a30e19aa2"
+    }
+  ],
+  "finished": "2026-10-31T21:50:39Z"
+}

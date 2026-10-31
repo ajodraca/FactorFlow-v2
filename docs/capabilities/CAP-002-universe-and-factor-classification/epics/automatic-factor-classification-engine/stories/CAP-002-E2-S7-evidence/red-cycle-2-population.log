@@ -1,0 +1,44 @@
+# RED cycle-2 (T006): falsification run on HEAD f4deee3 plus the cycle-1 and cycle-2 test files
+# perturbation: populate_volume writes QUARTERS - 1 (seven) quarters instead of eight, in tests/integration/engine_proof_support.py (reverted after this run)
+# engine_proof_support.py (unperturbed) sha256 b637375b0b2ff2644bd69ef1bb170999c13434529b138b4ad24e23617f3d6489
+# test_engine_volume_population.py sha256 de303139bf97ddfd3657105e02b415cff176a639280a999965087b3be44de328
+# command: uv run pytest tests/integration/test_engine_volume_population.py -q
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_________ test_forty_stock_population_builds_with_every_input_present __________
+
+postgres_connection_string = 'postgresql://test:test@localhost:64642/test_28450cff94034ff78809f63a20d5757e'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd334d0>
+
+    @pytest.mark.postgres
+    def test_forty_stock_population_builds_with_every_input_present(
+        postgres_connection_string: str, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S7-1, DEC-0123: the heaviest path. Every input present, every stock classified,
+        each stock holding 273 bars, 24 statement rows and its dividend, and the momentum inputs
+        applying the dividend (and every tenth stock's split) inside their windows."""
+        conn = migrate_through_classification(postgres_connection_string)
+        try:
+            ids, classification_date = populate_volume(conn, STOCKS, last_session=LAST_SESSION)
+            set_id = complete_and_open_next(conn, classification_date)
+            install_test_line_items(monkeypatch)
+    
+            result = engine.build(conn, set_id, 60)
+    
+            assert result.state == "complete", result.failure_reason
+            assert classification_date == LAST_SESSION
+            assert len(ids) == STOCKS
+>           assert _status_counts(conn, "factor_input", set_id) == [
+                ("growth", "present", 2 * STOCKS),
+                ("momentum", "present", 3 * STOCKS),
+                ("value", "present", 3 * STOCKS),
+            ]
+E           AssertionError: assert [('growth', '...resent', 120)] == [('growth', '...resent', 120)]
+E             
+E             At index 0 diff: ('growth', 'missing', 80) != ('growth', 'present', 80)
+E             Use -v to get more diff
+
+tests/integration/test_engine_volume_population.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_volume_population.py::test_forty_stock_population_builds_with_every_input_present
+1 failed, 1 passed in 2.48s
