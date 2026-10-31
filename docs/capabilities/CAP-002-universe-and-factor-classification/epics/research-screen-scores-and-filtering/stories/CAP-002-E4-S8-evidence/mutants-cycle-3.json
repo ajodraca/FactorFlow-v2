@@ -1,0 +1,665 @@
+{
+ "schema": 1,
+ "repo_head": "f4deee3e319a7f7ef536df83d85d212b0fbf623f",
+ "range": "61e0ce4b661010b77f71509e4bafea5f9093c576..cb2947adf4dcad3034c236e00e5c44dca7935883",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:78:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 78,
+   "original": "  const pendingRef = useRef(false);",
+   "mutated": "  const pendingRef = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:80:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 80,
+   "original": "  const mountedRef = useRef(false);",
+   "mutated": "  const mountedRef = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:86:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 86,
+   "original": "  const [pending, setPending] = useState(false);",
+   "mutated": "  const [pending, setPending] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:89:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 89,
+   "original": "    mountedRef.current = true;",
+   "mutated": "    mountedRef.current = false;"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:91:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 91,
+   "original": "      mountedRef.current = false;",
+   "mutated": "      mountedRef.current = true;"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:96:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 96,
+   "original": "    let cancelled = false;",
+   "mutated": "    let cancelled = true;"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:97:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 97,
+   "original": "    listUniverses({ lifecycle: \"active\", limit: 500 }).then(",
+   "mutated": "    listUniverses({ lifecycle: \"active\", limit: 501 }).then("
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:99:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 99,
+   "original": "        if (!cancelled) {",
+   "mutated": "        if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:100:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 100,
+   "original": "          setChoice(page.universes[0]?.universeId ?? NEW_UNIVERSE);",
+   "mutated": "          setChoice(page.universes[1]?.universeId ?? NEW_UNIVERSE);"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:105:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 105,
+   "original": "        if (!cancelled) {",
+   "mutated": "        if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:111:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 111,
+   "original": "      cancelled = true;",
+   "mutated": "      cancelled = false;"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:123:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 123,
+   "original": "    if (loaded && document.activeElement === cancelRef.current) {",
+   "mutated": "    if (loaded || document.activeElement === cancelRef.current) {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:130:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 130,
+   "original": "    if (pendingRef.current || list.kind !== \"loaded\") {",
+   "mutated": "    if (pendingRef.current && list.kind !== \"loaded\") {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:134:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 134,
+   "original": "    if (isNew && trimmed === \"\") {",
+   "mutated": "    if (isNew || trimmed === \"\") {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:139:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 139,
+   "original": "    pendingRef.current = true;",
+   "mutated": "    pendingRef.current = false;"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:140:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 140,
+   "original": "    setPending(true);",
+   "mutated": "    setPending(false);"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:148:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 148,
+   "original": "          message: DIALOGS.added(universe.memberCount, universe.name, 0),",
+   "mutated": "          message: DIALOGS.added(universe.memberCount, universe.name, 1),"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:170:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 170,
+   "original": "      pendingRef.current = false;",
+   "mutated": "      pendingRef.current = true;"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:171:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 171,
+   "original": "      setPending(false);",
+   "mutated": "      setPending(true);"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:172:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 172,
+   "original": "      if (caught instanceof ClassificationApiError && caught.code === \"universe_name_in_use\") {",
+   "mutated": "      if (caught instanceof ClassificationApiError || caught.code === \"universe_name_in_use\") {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:175:drop-field-copy:1",
+   "cycle": "cycle-3",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 175,
+   "original": "            operation: caught.operation,",
+   "mutated": "            operation: nil,"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:176:drop-field-copy:1",
+   "cycle": "cycle-3",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 176,
+   "original": "            resource: caught.resource,",
+   "mutated": "            resource: nil,"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:177:drop-field-copy:1",
+   "cycle": "cycle-3",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 177,
+   "original": "            code: caught.code,",
+   "mutated": "            code: nil,"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:188:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 188,
+   "original": "  const unavailable = pending || list.kind !== \"loaded\";",
+   "mutated": "  const unavailable = pending && list.kind !== \"loaded\";"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:218:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 218,
+   "original": "                  if (!pendingRef.current) {",
+   "mutated": "                  if (pendingRef.current) {"
+  },
+  {
+   "id": "web/src/screens/research/add-to-universe-dialog.tsx:239:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "line": 239,
+   "original": "        {loaded && isNew ? (",
+   "mutated": "        {loaded || isNew ? ("
+  },
+  {
+   "id": "manual:cycle-3:no-snapshot",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "title={DIALOGS.addTitle(opened.length)}",
+   "new": "title={DIALOGS.addTitle(symbols.length)}"
+  },
+  {
+   "id": "manual:cycle-3:snapshot-not-sent",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "await addUniverseMembers(choice, opened)",
+   "new": "await addUniverseMembers(choice, symbols)"
+  },
+  {
+   "id": "manual:cycle-3:list-params",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "listUniverses({ lifecycle: \"active\", limit: 500 })",
+   "new": "listUniverses({ lifecycle: \"active\" })"
+  },
+  {
+   "id": "manual:cycle-3:list-all-lifecycles",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "listUniverses({ lifecycle: \"active\", limit: 500 })",
+   "new": "listUniverses({ limit: 500 })"
+  },
+  {
+   "id": "manual:cycle-3:late-list-applied",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "        if (!cancelled) {\n          setChoice",
+   "new": "        if (true) {\n          setChoice"
+  },
+  {
+   "id": "manual:cycle-3:default-new",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "setChoice(page.universes[0]?.universeId ?? NEW_UNIVERSE);",
+   "new": "setChoice(NEW_UNIVERSE);"
+  },
+  {
+   "id": "manual:cycle-3:default-last",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "setChoice(page.universes[0]?.universeId ?? NEW_UNIVERSE);",
+   "new": "setChoice(page.universes.at(-1)?.universeId ?? NEW_UNIVERSE);"
+  },
+  {
+   "id": "manual:cycle-3:no-initial-focus",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      (isNew ? nameRef : selectRef).current?.focus();\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:focus-always-select",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "(isNew ? nameRef : selectRef).current?.focus();",
+   "new": "selectRef.current?.focus();"
+  },
+  {
+   "id": "manual:cycle-3:focus-follows-choice",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "  }, [loaded]);",
+   "new": "  }, [loaded, isNew]);"
+  },
+  {
+   "id": "manual:cycle-3:submit-while-loading",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "if (pendingRef.current || list.kind !== \"loaded\") {",
+   "new": "if (pendingRef.current) {"
+  },
+  {
+   "id": "manual:cycle-3:double-submit",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "if (pendingRef.current || list.kind !== \"loaded\") {",
+   "new": "if (list.kind !== \"loaded\") {"
+  },
+  {
+   "id": "manual:cycle-3:empty-name-sent",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "    if (isNew && trimmed === \"\") {",
+   "new": "    if (false) {"
+  },
+  {
+   "id": "manual:cycle-3:empty-name-no-focus",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      setFieldError(DIALOGS.enterName);\n      nameRef.current?.focus();\n",
+   "new": "      setFieldError(DIALOGS.enterName);\n"
+  },
+  {
+   "id": "manual:cycle-3:untrimmed",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "createUniverse({ name: trimmed, symbols: opened })",
+   "new": "createUniverse({ name, symbols: opened })"
+  },
+  {
+   "id": "manual:cycle-3:created-count-from-symbols",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "DIALOGS.added(universe.memberCount, universe.name, 0)",
+   "new": "DIALOGS.added(opened.length, universe.name, 0)"
+  },
+  {
+   "id": "manual:cycle-3:created-typed-name",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "DIALOGS.added(universe.memberCount, universe.name, 0)",
+   "new": "DIALOGS.added(universe.memberCount, trimmed, 0)"
+  },
+  {
+   "id": "manual:cycle-3:created-no-link",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "          to: universePath(universe.universeId),\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:added-count-from-symbols",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "            result.added.length,\n",
+   "new": "            opened.length,\n"
+  },
+  {
+   "id": "manual:cycle-3:already-dropped",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "            result.alreadyMember.length,\n",
+   "new": "            0,\n"
+  },
+  {
+   "id": "manual:cycle-3:added-link-dropped",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "          to: universePath(choice),\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:alert-not-cleared",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "    setPending(true);\n    setAlert(null);\n",
+   "new": "    setPending(true);\n"
+  },
+  {
+   "id": "manual:cycle-3:closes-reopened",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      if (mountedRef.current) {\n        onClose();\n      }",
+   "new": "      onClose();"
+  },
+  {
+   "id": "manual:cycle-3:mounted-never-set",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "    mountedRef.current = true;\n    return () => {\n      mountedRef.current = false;",
+   "new": "    return () => {\n      mountedRef.current = false;"
+  },
+  {
+   "id": "manual:cycle-3:close-before-notify",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      onNotify(notice);\n      if (mountedRef.current) {\n        onClose();\n      }",
+   "new": "      if (mountedRef.current) {\n        onClose();\n      }\n      onNotify(notice);"
+  },
+  {
+   "id": "manual:cycle-3:pending-not-released",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      pendingRef.current = false;\n      setPending(false);\n      if (caught",
+   "new": "      setPending(false);\n      if (caught"
+  },
+  {
+   "id": "manual:cycle-3:busy-not-released",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      pendingRef.current = false;\n      setPending(false);\n      if (caught",
+   "new": "      pendingRef.current = false;\n      if (caught"
+  },
+  {
+   "id": "manual:cycle-3:name-in-use-as-alert",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "caught.code === \"universe_name_in_use\"",
+   "new": "caught.code === \"never\""
+  },
+  {
+   "id": "manual:cycle-3:name-in-use-no-name",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "            universeName: trimmed,\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:name-in-use-no-focus",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "          }),\n        );\n        nameRef.current?.focus();",
+   "new": "          }),\n        );"
+  },
+  {
+   "id": "manual:cycle-3:wrong-resource",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "isNew ? \"universe\" : \"universe-member\"",
+   "new": "\"universe\""
+  },
+  {
+   "id": "manual:cycle-3:wrong-operation",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "isNew ? \"create-universe\" : \"add-universe-members\"",
+   "new": "\"add-universe-members\""
+  },
+  {
+   "id": "manual:cycle-3:envelope-shown",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "    ? failureSentence(caught)\n",
+   "new": "    ? caught.message\n"
+  },
+  {
+   "id": "manual:cycle-3:busy-flag",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      busy={pending}\n",
+   "new": "      busy={false}\n"
+  },
+  {
+   "id": "manual:cycle-3:add-always-available",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "aria-disabled={unavailable ? \"true\" : undefined}",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:cancel-not-initial",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      initialFocusRef={cancelRef}\n",
+   "new": "      initialFocusRef={selectRef}\n"
+  },
+  {
+   "id": "manual:cycle-3:failed-keeps-select",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "        {list.kind === \"failed\" ? (",
+   "new": "        {false ? ("
+  },
+  {
+   "id": "manual:cycle-3:skeleton-no-pulse",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "`${FIELD_BOX} animate-pulse text-muted-foreground`",
+   "new": "FIELD_BOX"
+  },
+  {
+   "id": "manual:cycle-3:skeleton-other-box",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "`${FIELD_BOX} animate-pulse text-muted-foreground`",
+   "new": "\"animate-pulse rounded bg-secondary\""
+  },
+  {
+   "id": "manual:cycle-3:select-variant",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "data-variant=\"default\"",
+   "new": "data-variant=\"inline\""
+  },
+  {
+   "id": "manual:cycle-3:new-option-first",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "                {list.universes.map((universe) => (\n                  <option key={universe.universeId} value={universe.universeId}>\n                    {universe.name}\n                  </option>\n                ))}\n                <option value={NEW_UNIVERSE}>{DIALOGS.newUniverseOption}</option>",
+   "new": "                <option value={NEW_UNIVERSE}>{DIALOGS.newUniverseOption}</option>\n                {list.universes.map((universe) => (\n                  <option key={universe.universeId} value={universe.universeId}>\n                    {universe.name}\n                  </option>\n                ))}"
+  },
+  {
+   "id": "manual:cycle-3:name-shown-always",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "        {loaded && isNew ? (",
+   "new": "        {loaded ? ("
+  },
+  {
+   "id": "manual:cycle-3:field-error-not-cleared",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "                setName(event.target.value);\n                setFieldError(null);",
+   "new": "                setName(event.target.value);"
+  },
+  {
+   "id": "manual:cycle-3:invalid-dropped",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "              aria-invalid={fieldError !== null ? \"true\" : undefined}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:maxlength",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "              type=\"text\"\n",
+   "new": "              type=\"text\"\n              maxLength={100}\n"
+  },
+  {
+   "id": "manual:cycle-3:name-class",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "className=\"rounded border border-input p-2\"",
+   "new": "className=\"p-2\""
+  },
+  {
+   "id": "manual:cycle-3:cancel-after-add",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "          <button\n            ref={cancelRef}\n            type=\"button\"\n            onClick={onClose}\n            className=\"rounded border border-border px-3 py-2 text-base\"\n          >\n            {DIALOGS.cancel}\n          </button>\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:cancel-no-close",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "            ref={cancelRef}\n            type=\"button\"\n            onClick={onClose}\n",
+   "new": "            ref={cancelRef}\n            type=\"button\"\n"
+  },
+  {
+   "id": "manual:cycle-3:escape-no-close",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "      onCancel={onClose}\n",
+   "new": "      onCancel={() => {}}\n"
+  },
+  {
+   "id": "manual:cycle-3:alert-class",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "        {alert !== null ? (\n          <p role=\"alert\" className=\"text-status-critical text-sm\">",
+   "new": "        {alert !== null ? (\n          <p role=\"alert\">"
+  },
+  {
+   "id": "manual:cycle-3:focus-steals",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "if (loaded && document.activeElement === cancelRef.current) {",
+   "new": "if (loaded) {"
+  },
+  {
+   "id": "manual:cycle-3:choice-changes-while-pending",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "                  if (!pendingRef.current) {\n",
+   "new": "                  if (true) {\n"
+  },
+  {
+   "id": "manual:cycle-3:skeleton-unlabelled",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/add-to-universe-dialog.tsx",
+   "old": "<output id={selectId} className=",
+   "new": "<output className="
+  }
+ ]
+}

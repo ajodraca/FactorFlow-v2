@@ -513,6 +513,28 @@ export const DIALOGS = {
     `Added ${count} stocks to ${name}${alreadyMembers > 0 ? `, and ${alreadyMembers} were already members` : ""}`,
   cancel: "Cancel",
   name: "Name",
+  /**
+   * The one empty-name field error every universe name field shares: the Save
+   * and Add dialogs here, and the create and rename fields when they land
+   * (DEC-0167, DEC-0169; CAP-002-E4-S8 Open Gap 5). No design words it, so it
+   * is added under CAP-002-E4-S2 Open Gap 6; reuse it, never add a second.
+   */
+  enterName: "Enter a name for the universe.",
+  /**
+   * The Add dialog's universe `select` label (CAP-002-E4-S8 T011). UX 1.1
+   * names the control but not its label, so it is added under CAP-002-E4-S2
+   * Open Gap 6.
+   */
+  universe: "Universe",
+} as const;
+
+/**
+ * The success notices the save and add dialogs report through (toast design
+ * spec section 3, *optional dismiss control*; DEC-0168). No design words the
+ * dismiss control, so it is added here under CAP-002-E4-S2 Open Gap 6.
+ */
+export const NOTICES = {
+  dismiss: "Dismiss",
 } as const;
 
 /** The universes list and the create dialog (UX 1.3). */

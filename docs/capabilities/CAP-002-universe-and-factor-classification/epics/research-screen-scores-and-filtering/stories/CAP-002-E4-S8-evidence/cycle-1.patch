@@ -1,0 +1,359 @@
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 0f39d81..948f2a2 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -463,6 +463,7 @@ describe("copy.ts completeness and keying", () => {
+       "Could not set the momentum threshold: a standardised score is a finite number.",
+     );
+     expect(copy.DIALOGS.saved(14, "Tech")).toBe("Saved 14 stocks as Tech");
++    expect(copy.NOTICES.dismiss).toBe("Dismiss");
+     expect(copy.DIALOGS.added(3, "Tech", 0)).toBe("Added 3 stocks to Tech");
+     expect(copy.DIALOGS.added(3, "Tech", 1)).toBe(
+       "Added 3 stocks to Tech, and 1 were already members",
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 2567247..eb84dd6 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -515,6 +515,15 @@ export const DIALOGS = {
+   name: "Name",
+ } as const;
+ 
++/**
++ * The success notices the save and add dialogs report through (toast design
++ * spec section 3, *optional dismiss control*; DEC-0168). No design words the
++ * dismiss control, so it is added here under CAP-002-E4-S2 Open Gap 6.
++ */
++export const NOTICES = {
++  dismiss: "Dismiss",
++} as const;
++
+ /** The universes list and the create dialog (UX 1.3). */
+ export const UNIVERSES = {
+   title: "Universes",
+diff --git a/web/src/screens/research/notices.test.tsx b/web/src/screens/research/notices.test.tsx
+new file mode 100644
+index 0000000..06cf200
+--- /dev/null
++++ b/web/src/screens/research/notices.test.tsx
+@@ -0,0 +1,198 @@
++import { act, render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { useState } from "react";
++import { MemoryRouter } from "react-router-dom";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { NOTICES } from "./copy";
++import { type Notice, NoticeRegion, universePath, useNotices } from "./notices";
++
++/** A host as CAP-002-E4-S9 will be: `useNotices` once, `NoticeRegion` once (DEC-0168). */
++function Host({ children }: { children?: (notify: (notice: Notice) => void) => JSX.Element }) {
++  const { notices, notify, dismiss } = useNotices();
++  return (
++    <>
++      {children?.(notify)}
++      <NoticeRegion notices={notices} onDismiss={dismiss} />
++    </>
++  );
++}
++
++let captured: ((notice: Notice) => void) | null = null;
++let returned: unknown = "not called";
++
++function Capture({ notify }: { notify: (notice: Notice) => void }) {
++  captured = notify;
++  return null;
++}
++
++function renderHost() {
++  captured = null;
++  return render(
++    <MemoryRouter>
++      <Host>{(notify) => <Capture notify={notify} />}</Host>
++    </MemoryRouter>,
++  );
++}
++
++function raise(notice: Notice) {
++  act(() => {
++    returned = captured?.(notice);
++  });
++}
++
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++// Implements T009 (DAC-E4-S8-3, DAC-E4-S8-5; DEC-0168, Open Gap 2).
++describe("notices", () => {
++  it("renders a polite status region that is present and empty before any notice", () => {
++    renderHost();
++    const region = screen.getByRole("status");
++    expect(region).toHaveAttribute("aria-live", "polite");
++    expect(region).toHaveAttribute("aria-atomic", "false");
++    // Focusable by script (the Dismiss target), never a Tab stop of its own.
++    expect(region).toHaveAttribute("tabindex", "-1");
++    expect(region).toBeEmptyDOMElement();
++  });
++
++  it("shows one success item per notice, with a router link when `to` is given", () => {
++    renderHost();
++    raise({ message: "Saved 12 stocks as Tech", to: "/research/universes/u-9" });
++    const region = screen.getByRole("status");
++    const items = region.querySelectorAll("[data-variant]");
++    expect(items).toHaveLength(1);
++    expect(items[0]).toHaveAttribute("data-variant", "success");
++    // The toast's surface, text, accent and radius tokens (toast design spec section 6).
++    expect(items[0]).toHaveClass(
++      "border",
++      "border-status-good",
++      "bg-[hsl(var(--popover))]",
++      "text-[hsl(var(--popover-foreground))]",
++      "rounded-[var(--radius)]",
++    );
++    // The dismiss target is at least 24 by 24 CSS pixels: `--space-5` (toast design spec section 5).
++    expect(within(region).getByRole("button", { name: NOTICES.dismiss })).toHaveClass(
++      "min-h-5",
++      "min-w-5",
++    );
++    const link = within(region).getByRole("link", { name: "Saved 12 stocks as Tech" });
++    expect(link).toHaveAttribute("href", "/research/universes/u-9");
++    expect(returned).toBeUndefined();
++  });
++
++  it("shows the message as plain text, with no link, when `to` is absent", () => {
++    renderHost();
++    raise({ message: "Added 3 stocks to Tech" });
++    const region = screen.getByRole("status");
++    expect(within(region).queryByRole("link")).toBeNull();
++    expect(region.querySelector("[data-variant='success']")).toHaveTextContent(
++      `Added 3 stocks to Tech${NOTICES.dismiss}`,
++    );
++  });
++
++  it("renders a message as text, never as markup", () => {
++    renderHost();
++    raise({ message: "<b>Tech</b>", to: "/research/universes/u1" });
++    const region = screen.getByRole("status");
++    raise({ message: "<i>Dividend growers</i>" });
++    expect(within(region).getByRole("link")).toHaveTextContent("<b>Tech</b>");
++    expect(region).toHaveTextContent("<i>Dividend growers</i>");
++    expect(region.querySelector("b, i")).toBeNull();
++  });
++
++  it("stacks items in arrival order", () => {
++    renderHost();
++    raise({ message: "First" });
++    raise({ message: "Second", to: "/research/universes/u2" });
++    raise({ message: "Third" });
++    const items = [...screen.getByRole("status").querySelectorAll("[data-variant='success']")];
++    expect(items.map((item) => item.textContent)).toEqual([
++      `First${NOTICES.dismiss}`,
++      `Second${NOTICES.dismiss}`,
++      `Third${NOTICES.dismiss}`,
++    ]);
++  });
++
++  it("dismisses only the chosen item and returns focus to the region", async () => {
++    const user = userEvent.setup();
++    renderHost();
++    raise({ message: "First" });
++    raise({ message: "Second" });
++    raise({ message: "Third" });
++    const region = screen.getByRole("status");
++    const buttons = within(region).getAllByRole("button", { name: NOTICES.dismiss });
++    expect(buttons).toHaveLength(3);
++    await user.click(buttons[1] as HTMLElement);
++    const items = [...region.querySelectorAll("[data-variant='success']")];
++    expect(items.map((item) => item.textContent)).toEqual([
++      `First${NOTICES.dismiss}`,
++      `Third${NOTICES.dismiss}`,
++    ]);
++    expect(region).toHaveFocus();
++  });
++
++  it("gives each item a distinct id, so dismissing a later duplicate keeps the earlier one", async () => {
++    const user = userEvent.setup();
++    renderHost();
++    raise({ message: "Same" });
++    raise({ message: "Same" });
++    const region = screen.getByRole("status");
++    const buttons = within(region).getAllByRole("button", { name: NOTICES.dismiss });
++    await user.click(buttons[0] as HTMLElement);
++    expect(region.querySelectorAll("[data-variant='success']")).toHaveLength(1);
++    raise({ message: "Other" });
++    const after = within(region).getAllByRole("button", { name: NOTICES.dismiss });
++    await user.click(after[1] as HTMLElement);
++    expect(
++      [...region.querySelectorAll("[data-variant='success']")].map((i) => i.textContent),
++    ).toEqual([`Same${NOTICES.dismiss}`]);
++  });
++
++  it("removes nothing by time", () => {
++    vi.useFakeTimers();
++    renderHost();
++    raise({ message: "Saved 12 stocks as Tech", to: "/research/universes/u-9" });
++    act(() => {
++      vi.advanceTimersByTime(5 * 60 * 1000);
++    });
++    expect(screen.getByRole("link", { name: "Saved 12 stocks as Tech" })).toBeInTheDocument();
++  });
++
++  it("still shows a notice raised by a callback of a component that has unmounted", () => {
++    let late: ((notice: Notice) => void) | null = null;
++    function Dialog({ notify }: { notify: (notice: Notice) => void }) {
++      late = notify;
++      return <p>dialog</p>;
++    }
++    function Toggle({ notify }: { notify: (notice: Notice) => void }) {
++      const [open, setOpen] = useState(true);
++      return (
++        <>
++          {open ? <Dialog notify={notify} /> : null}
++          <button type="button" onClick={() => setOpen(false)}>
++            close
++          </button>
++        </>
++      );
++    }
++    render(
++      <MemoryRouter>
++        <Host>{(notify) => <Toggle notify={notify} />}</Host>
++      </MemoryRouter>,
++    );
++    act(() => {
++      screen.getByRole("button", { name: "close" }).click();
++    });
++    expect(screen.queryByText("dialog")).toBeNull();
++    act(() => {
++      late?.({ message: "Added 2 stocks to Tech" });
++    });
++    expect(screen.getByRole("status")).toHaveTextContent("Added 2 stocks to Tech");
++  });
++
++  it("builds the universe detail link, encoding the id", () => {
++    expect(universePath("u-9")).toBe("/research/universes/u-9");
++    expect(universePath("a/b c")).toBe("/research/universes/a%2Fb%20c");
++  });
++});
+diff --git a/web/src/screens/research/notices.tsx b/web/src/screens/research/notices.tsx
+new file mode 100644
+index 0000000..797787f
+--- /dev/null
++++ b/web/src/screens/research/notices.tsx
+@@ -0,0 +1,117 @@
++import { type JSX, useCallback, useRef, useState } from "react";
++import { Link } from "react-router-dom";
++import { NOTICES } from "./copy";
++
++/**
++ * The success notices the Research dialogs confirm through: *Saved {n} stocks
++ * as {name}* and *Added {n} stocks to {name}*, each linking to the universe
++ * (DAC-E4-S8-3, DAC-E4-S8-5; `toast` `success`, UX design 1.1; DEC-0168).
++ *
++ * Contract CAP-002-E4-S9 and later screens rely on: the host calls
++ * `useNotices` once and renders `NoticeRegion` once; a dialog only calls
++ * `notify`. The state lives in the host, so a notice raised by a dialog that
++ * is closing (the Add dialog is unmounted by its host on success, DEC-0163)
++ * still shows. Nothing is removed by time: DEC-0168 (owner-upheld; Open Gap
++ * 2) keeps an item until its Dismiss control is used, so the toast design
++ * spec's *about five seconds* for `success` is not applied here.
++ */
++
++/** One notice: its self-contained message and, optionally, the route it links to. */
++export interface Notice {
++  message: string;
++  to?: string;
++}
++
++/** A notice as the host holds it, with the id `dismiss` names it by. */
++export type HeldNotice = Notice & { id: number };
++
++/** What `useNotices` returns: the held notices and the two ways to change them. */
++export interface NoticesBinding {
++  notices: HeldNotice[];
++  notify: (notice: Notice) => void;
++  dismiss: (id: number) => void;
++}
++
++/** The universe detail route a notice links to (UX design 1.1; STD-UI-24). */
++export function universePath(universeId: string): string {
++  return `/research/universes/${encodeURIComponent(universeId)}`;
++}
++
++/** The host's notices, in arrival order; ids come from a counter (DAC-E4-S8-3, DAC-E4-S8-5). */
++export function useNotices(): NoticesBinding {
++  const [notices, setNotices] = useState<HeldNotice[]>([]);
++  const nextId = useRef(0);
++
++  const notify = useCallback((notice: Notice): void => {
++    nextId.current += 1;
++    const id = nextId.current;
++    setNotices((current) => [...current, { ...notice, id }]);
++  }, []);
++
++  const dismiss = useCallback((id: number): void => {
++    setNotices((current) => current.filter((notice) => notice.id !== id));
++  }, []);
++
++  return { notices, notify, dismiss };
++}
++
++/**
++ * The polite `status` region, always mounted so its first announcement is
++ * read, with one `success` item per notice and a Dismiss control that hands
++ * focus back to the region (DAC-E4-S8-3, DAC-E4-S8-5; toast design spec
++ * section 5).
++ */
++export function NoticeRegion({
++  notices,
++  onDismiss,
++}: {
++  notices: HeldNotice[];
++  onDismiss: (id: number) => void;
++}): JSX.Element {
++  const regionRef = useRef<HTMLOutputElement>(null);
++
++  return (
++    // An `output` carries `role="status"` implicitly, as the delivered status
++    // region and as-of line rely on. Not atomic: a second notice is read on
++    // its own rather than re-reading every item still shown.
++    <output
++      ref={regionRef}
++      aria-live="polite"
++      aria-atomic="false"
++      tabIndex={-1}
++      className="fixed right-4 bottom-4 flex flex-col gap-2"
++    >
++      {notices.map((notice) => (
++        // `span`, not `div`: an `output` holds phrasing content only.
++        <span
++          key={notice.id}
++          data-variant="success"
++          // The toast tokens (toast design spec section 6): `--popover` surface
++          // and text, `--status-good` accent, `--radius` corners. `popover` has
++          // no Tailwind colour, so the token is read directly; no literal value.
++          className="flex items-center gap-3 rounded-[var(--radius)] border border-status-good bg-[hsl(var(--popover))] p-3 text-[hsl(var(--popover-foreground))] text-sm"
++        >
++          {notice.to === undefined ? (
++            <span>{notice.message}</span>
++          ) : (
++            <Link to={notice.to} className="underline">
++              {notice.message}
++            </Link>
++          )}
++          <button
++            type="button"
++            onClick={() => {
++              onDismiss(notice.id);
++              regionRef.current?.focus();
++            }}
++            // `min-h-5 min-w-5` is `--space-5`, 24px: the toast contract's
++            // smallest dismiss target (toast design spec section 5).
++            className="min-h-5 min-w-5 rounded border border-border px-2 text-sm"
++          >
++            {NOTICES.dismiss}
++          </button>
++        </span>
++      ))}
++    </output>
++  );
++}

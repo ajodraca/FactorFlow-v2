@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/notices.test.tsx (0 test)
+ ❯ src/screens/research/copy.test.ts (311 tests | 1 failed) 23ms
+   × copy.ts completeness and keying > (d) renders the templated design messages for the design's example arguments 2ms
+     → Cannot read properties of undefined (reading 'dismiss')
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/notices.test.tsx [ src/screens/research/notices.test.tsx ]
+Error: Failed to resolve import "./notices" from "web/src/screens/research/notices.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/notices.test.tsx:7:68
+  6  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  7  |  import { NOTICES } from "./copy";
+  8  |  import { NoticeRegion, universePath, useNotices } from "./notices";
+     |                                                          ^
+  9  |  function Host({ children }) {
+  10 |    const { notices, notify, dismiss } = useNotices();
+ ❯ TransformPluginContext._formatError ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+ ❯ TransformPluginContext.error ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+ ❯ normalizeUrl ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+ ❯ ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+ ❯ TransformPluginContext.transform ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+ ❯ PluginContainer.transform ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+ ❯ loadAndTransform ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/copy.test.ts > copy.ts completeness and keying > (d) renders the templated design messages for the design's example arguments
+TypeError: Cannot read properties of undefined (reading 'dismiss')
+ ❯ src/screens/research/copy.test.ts:466:25
+    464|     );
+    465|     expect(copy.DIALOGS.saved(14, "Tech")).toBe("Saved 14 stocks as Te…
+    466|     expect(copy.NOTICES.dismiss).toBe("Dismiss");
+       |                         ^
+    467|     expect(copy.DIALOGS.added(3, "Tech", 0)).toBe("Added 3 stocks to T…
+    468|     expect(copy.DIALOGS.added(3, "Tech", 1)).toBe(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed (2)
+      Tests  1 failed | 310 passed (311)
+   Start at  10:48:05
+   Duration  653ms (transform 56ms, setup 99ms, collect 54ms, tests 23ms, environment 522ms, prepare 59ms)
+
