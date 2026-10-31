@@ -1,7 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NOTICES } from "./copy";
 import { type Notice, NoticeRegion, universePath, useNotices } from "./notices";
@@ -189,6 +189,86 @@ describe("notices", () => {
       late?.({ message: "Added 2 stocks to Tech" });
     });
     expect(screen.getByRole("status")).toHaveTextContent("Added 2 stocks to Tech");
+  });
+
+  it("navigates through the router when a notice link is activated", async () => {
+    const user = userEvent.setup();
+    captured = null;
+    render(
+      <MemoryRouter initialEntries={["/research"]}>
+        <Routes>
+          <Route
+            path="/research"
+            element={<Host>{(notify) => <Capture notify={notify} />}</Host>}
+          />
+          <Route path="/research/universes/:universeId" element={<p>universe detail</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    raise({ message: "Saved 12 stocks as Tech", to: "/research/universes/u-9" });
+    await user.click(screen.getByRole("link", { name: "Saved 12 stocks as Tech" }));
+    expect(screen.getByText("universe detail")).toBeInTheDocument();
+  });
+
+  // DEC-0258; toast design spec section 4: Esc dismisses the focused toast.
+  it("dismisses the item whose Dismiss control or link has focus on Escape", async () => {
+    const user = userEvent.setup();
+    renderHost();
+    raise({ message: "First" });
+    raise({ message: "Second", to: "/research/universes/u2" });
+    raise({ message: "Third" });
+    const region = screen.getByRole("status");
+    within(region).getByRole("link", { name: "Second" }).focus();
+    await user.keyboard("{Escape}");
+    expect(
+      [...region.querySelectorAll("[data-variant='success']")].map((i) => i.textContent),
+    ).toEqual([`First${NOTICES.dismiss}`, `Third${NOTICES.dismiss}`]);
+    expect(region).toHaveFocus();
+    (within(region).getAllByRole("button", { name: NOTICES.dismiss })[1] as HTMLElement).focus();
+    await user.keyboard("{Escape}");
+    expect(
+      [...region.querySelectorAll("[data-variant='success']")].map((i) => i.textContent),
+    ).toEqual([`First${NOTICES.dismiss}`]);
+    expect(region).toHaveFocus();
+  });
+
+  it("dismisses nothing on other keys, or on Escape with no item focused", async () => {
+    const user = userEvent.setup();
+    renderHost();
+    raise({ message: "First", to: "/research/universes/u1" });
+    const region = screen.getByRole("status");
+    const dismiss = within(region).getByRole("button", { name: NOTICES.dismiss });
+    dismiss.focus();
+    await user.keyboard("a");
+    within(region).getByRole("link").focus();
+    await user.keyboard("{Enter}");
+    region.focus();
+    await user.keyboard("{Escape}");
+    expect(region.querySelectorAll("[data-variant='success']")).toHaveLength(1);
+  });
+
+  // DEC-0258; toast design spec section 4: stack at most three, collapse the rest. DEC-0168
+  // keeps every notice until it is dismissed, so the rest are held, not dropped.
+  it("shows at most the three newest items and brings a held one back when one is dismissed", async () => {
+    const user = userEvent.setup();
+    renderHost();
+    for (const message of ["First", "Second", "Third", "Fourth", "Fifth"]) {
+      raise({ message });
+    }
+    const region = screen.getByRole("status");
+    const shown = () =>
+      [...region.querySelectorAll("[data-variant='success']")].map((i) =>
+        i.textContent?.replace(NOTICES.dismiss, ""),
+      );
+    expect(shown()).toEqual(["Third", "Fourth", "Fifth"]);
+    await user.click(
+      within(region).getAllByRole("button", { name: NOTICES.dismiss })[2] as HTMLElement,
+    );
+    expect(shown()).toEqual(["Second", "Third", "Fourth"]);
+    await user.click(
+      within(region).getAllByRole("button", { name: NOTICES.dismiss })[0] as HTMLElement,
+    );
+    expect(shown()).toEqual(["First", "Third", "Fourth"]);
   });
 
   it("builds the universe detail link, encoding the id", () => {

@@ -123,6 +123,10 @@ function Host({
       <button type="button" onClick={() => setOpen(true)}>
         Add to universe…
       </button>
+      {/* The host unmounting the dialog on its own, as CAP-002-E4-S9 may. */}
+      <button type="button" onClick={() => setOpen(false)}>
+        Host closes
+      </button>
       {open ? (
         <AddToUniverseDialog
           symbols={symbols}
@@ -237,7 +241,7 @@ describe("AddToUniverseDialog", () => {
         "This universe is retired and can't be changed. Its members and history are still viewable.",
       );
       expect(alert.textContent).toBe(UNIVERSE_LIFECYCLE.retiredRefusal);
-      expect(alert).toHaveClass("text-status-critical", "text-sm");
+      expect(alert).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
       expect(screen.getByRole("dialog")).toBeInTheDocument();
       expect(addButton()).not.toHaveAttribute("aria-disabled");
       expect(noticeItems()).toHaveLength(0);
@@ -285,6 +289,8 @@ describe("AddToUniverseDialog", () => {
         "py-1",
       );
       expect(within(dialog).queryByRole("combobox")).toBeNull();
+      // The choice is New universe until the list arrives, but its Name field is not shown.
+      expect(within(dialog).queryByRole("textbox")).toBeNull();
       const label = within(dialog).getByText(DIALOGS.universe);
       expect(label.nextElementSibling).toBe(skeleton);
       expect(label).toHaveClass("text-sm");
@@ -298,6 +304,19 @@ describe("AddToUniverseDialog", () => {
       expect(label.nextElementSibling).toBe(loaded);
       expect(loaded).toHaveClass("rounded", "border", "border-input", "px-2", "py-1");
       expect(addButton()).not.toHaveAttribute("aria-disabled");
+      expect(within(dialog).queryByRole("textbox")).toBeNull();
+    });
+
+    it("shows no Name field while the list loads, even when it arrives empty", async () => {
+      const pending = deferred<UniverseList>();
+      listUniverses.mockReturnValue(pending.promise);
+      const user = userEvent.setup();
+      renderHost();
+      const dialog = await openDialog(user);
+      expect(within(dialog).queryByRole("textbox")).toBeNull();
+      expect(within(dialog).queryByText(DIALOGS.name)).toBeNull();
+      await act(async () => pending.resolve(EMPTY));
+      expect(nameField()).toHaveFocus();
     });
 
     it("leaves no stale field error from an Add pressed while the list loaded", async () => {
@@ -335,7 +354,13 @@ describe("AddToUniverseDialog", () => {
       await user.selectOptions(select(), DIALOGS.newUniverseOption);
       expect(nameField()).toBeInTheDocument();
       expect(nameField()).not.toHaveAttribute("maxlength");
-      expect(nameField()).toHaveClass("rounded", "border", "border-input", "p-2");
+      expect(nameField()).toHaveClass(
+        "rounded",
+        "border",
+        "border-input",
+        "p-2",
+        "aria-[invalid=true]:border-[hsl(var(--destructive))]",
+      );
       expect(select()).toHaveFocus();
       // The Name field follows the select.
       expect(
@@ -398,7 +423,7 @@ describe("AddToUniverseDialog", () => {
       expect(nameField()).toHaveAttribute("aria-invalid", "true");
       const error = document.getElementById(nameField().getAttribute("aria-describedby") as string);
       expect(error?.textContent).toBe(DIALOGS.enterName);
-      expect(error).toHaveClass("text-status-critical", "text-sm");
+      expect(error).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
       expect(nameField()).toHaveFocus();
       expect(createUniverse).not.toHaveBeenCalled();
       await user.type(nameField(), "Q");
@@ -504,6 +529,7 @@ describe("AddToUniverseDialog", () => {
           code: "internal_error",
         }),
       );
+      expect(alert).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
       expect(within(dialog).queryByRole("combobox")).toBeNull();
       expect(within(dialog).queryByRole("status")).toBeNull();
       expect(addButton()).toHaveAttribute("aria-disabled", "true");
@@ -610,6 +636,106 @@ describe("AddToUniverseDialog", () => {
       expect(createUniverse).not.toHaveBeenCalled();
     });
 
+    it("traps Tab inside the dialog in both directions, the select included", async () => {
+      const user = userEvent.setup();
+      renderHost();
+      const dialog = await openLoaded(user);
+      const cancel = within(dialog).getByRole("button", { name: DIALOGS.cancel });
+      expect(select()).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(addButton()).toHaveFocus();
+      await user.tab();
+      expect(select()).toHaveFocus();
+      await user.tab();
+      expect(cancel).toHaveFocus();
+      await user.tab();
+      expect(addButton()).toHaveFocus();
+      await user.tab();
+      expect(select()).toHaveFocus();
+      await user.selectOptions(select(), DIALOGS.newUniverseOption);
+      await user.tab();
+      expect(nameField()).toHaveFocus();
+      await user.tab({ shift: true });
+      await user.tab({ shift: true });
+      expect(addButton()).toHaveFocus();
+    });
+
+    // DEC-0259; dialog spec section 4: never close the dialog before the result is known.
+    it("stays open on Escape, Cancel and the overlay while a request is pending", async () => {
+      const pending = deferred<AddMembersResult>();
+      addUniverseMembers.mockReturnValue(pending.promise);
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      renderHost({ onClose });
+      const dialog = await openLoaded(user);
+      const cancel = within(dialog).getByRole("button", { name: DIALOGS.cancel });
+      await user.click(addButton());
+      expect(cancel).toHaveAttribute("aria-disabled", "true");
+      expect(cancel).toHaveClass("aria-disabled:text-muted-foreground");
+      await user.keyboard("{Escape}");
+      await user.click(cancel);
+      await user.click(dialog.previousElementSibling as HTMLElement);
+      expect(screen.getByRole("dialog")).toBe(dialog);
+      // A click on the overlay never takes focus out of the dialog.
+      expect(cancel).toHaveFocus();
+      expect(onClose).not.toHaveBeenCalled();
+      await act(async () => pending.reject(refusal("universe_retired")));
+      expect(within(dialog).getByRole("alert").textContent).toBe(
+        failureSentence({
+          operation: "add-universe-members",
+          resource: "universe-member",
+          code: "universe_retired",
+        }),
+      );
+      expect(cancel).not.toHaveAttribute("aria-disabled");
+      await user.click(cancel);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    // DEC-0259; button spec section 4 (Loading) and dialog spec section 4 (Submitting).
+    it("shows progress in place on Add while a request is pending, keeping its label", async () => {
+      const pending = deferred<AddMembersResult>();
+      addUniverseMembers.mockReturnValue(pending.promise);
+      const user = userEvent.setup();
+      renderHost();
+      await openLoaded(user);
+      const progress = () => addButton().querySelector("[aria-hidden='true']");
+      expect(progress()).toHaveClass(
+        "invisible",
+        "motion-safe:animate-spin",
+        "size-4",
+        "rounded-[var(--radius)]",
+      );
+      expect(addButton()).toHaveClass("inline-flex", "items-center", "gap-2");
+      expect(addButton()).not.toHaveAttribute("data-pending");
+      await user.click(addButton());
+      expect(progress()).not.toHaveClass("invisible");
+      expect(progress()).toHaveClass("motion-safe:animate-spin", "size-4");
+      expect(addButton()).toHaveAttribute("data-pending", "true");
+      expect(addButton()).toHaveAttribute("aria-busy", "true");
+      expect(addButton().textContent).toBe(DIALOGS.add);
+      await act(async () => pending.reject(refusal("internal_error")));
+      expect(progress()).toHaveClass("invisible");
+      expect(addButton()).not.toHaveAttribute("data-pending");
+      expect(addButton()).not.toHaveAttribute("aria-busy");
+    });
+
+    it("shows no progress on Add while the list loads", async () => {
+      const pending = deferred<UniverseList>();
+      listUniverses.mockReturnValue(pending.promise);
+      const user = userEvent.setup();
+      renderHost();
+      await openDialog(user);
+      expect(addButton()).toHaveAttribute("aria-disabled", "true");
+      expect(addButton().querySelector("[aria-hidden='true']")).toHaveClass("invisible");
+      expect(addButton()).not.toHaveAttribute("data-pending");
+      expect(addButton()).not.toHaveAttribute("aria-busy");
+      expect(screen.getByRole("button", { name: DIALOGS.cancel })).not.toHaveAttribute(
+        "aria-disabled",
+      );
+      await act(async () => pending.resolve(UNIVERSES));
+    });
+
     it("cannot be submitted twice while a request is pending", async () => {
       const pending = deferred<AddMembersResult>();
       addUniverseMembers.mockReturnValue(pending.promise);
@@ -662,7 +788,7 @@ describe("AddToUniverseDialog", () => {
       await act(async () => pending.resolve({ added: SYMBOLS, alreadyMember: [] }));
     });
 
-    it("reports an add that completes after Escape without closing a reopened dialog", async () => {
+    it("reports an add that completes after the host closed it, without closing a reopened dialog", async () => {
       const pending = deferred<AddMembersResult>();
       addUniverseMembers.mockReturnValueOnce(pending.promise);
       const onClose = vi.fn();
@@ -670,12 +796,12 @@ describe("AddToUniverseDialog", () => {
       renderHost({ onClose });
       await openLoaded(user);
       await user.click(addButton());
-      await user.keyboard("{Escape}");
-      expect(onClose).toHaveBeenCalledTimes(1);
+      await user.click(screen.getByRole("button", { name: "Host closes" }));
+      expect(screen.queryByRole("dialog")).toBeNull();
       const reopened = await openLoaded(user);
       await act(async () => pending.resolve({ added: SYMBOLS, alreadyMember: [] }));
       expect(screen.getByRole("dialog")).toBe(reopened);
-      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByRole("link").textContent).toBe(DIALOGS.added(3, "Tech", 0));
     });
 
@@ -688,8 +814,11 @@ describe("AddToUniverseDialog", () => {
       const cancel = within(dialog).getByRole("button", { name: DIALOGS.cancel });
       expect(cancel.nextElementSibling).toBe(addButton());
       expect(addButton()).toHaveAttribute("type", "submit");
-      expect(addButton()).toHaveClass("bg-foreground", "text-background");
-      expect(cancel).toHaveClass("border", "border-border");
+      expect(addButton()).toHaveClass(
+        "bg-[hsl(var(--primary))]",
+        "text-[hsl(var(--primary-foreground))]",
+      );
+      expect(cancel).toHaveClass("border", "border-input");
       expect(cancel.parentElement).toHaveClass("flex", "justify-end", "gap-2");
       expect(dialog).toHaveAttribute("data-variant", "standard");
       await user.click(addButton());

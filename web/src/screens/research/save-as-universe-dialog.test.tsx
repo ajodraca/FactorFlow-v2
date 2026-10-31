@@ -238,7 +238,7 @@ describe("SaveAsUniverse", () => {
     it("uses the theme's tokens for the control and the reason", () => {
       renderHost({ matchCount: 0 });
       const control = trigger(0);
-      expect(control).toHaveClass("rounded", "border", "border-border", "px-3", "py-2");
+      expect(control).toHaveClass("rounded", "border", "border-input", "px-3", "py-2");
       expect(control).toHaveClass("data-[variant=blocked]:text-muted-foreground");
       const reason = document.getElementById(control.getAttribute("aria-describedby") as string);
       expect(reason).toHaveClass("text-muted-foreground", "text-sm");
@@ -450,6 +450,10 @@ describe("SaveAsUniverse", () => {
       const cancel = within(dialog).getByRole("button", { name: DIALOGS.cancel });
       // Same position: the last action, after Cancel, as Save was.
       expect(cancel.nextElementSibling).toBe(review);
+      expect(review).toHaveClass(
+        "bg-[hsl(var(--primary))]",
+        "text-[hsl(var(--primary-foreground))]",
+      );
       expect(review.nextElementSibling).toBeNull();
       expect(noticeItems()).toHaveLength(0);
       await user.click(review);
@@ -574,7 +578,7 @@ describe("SaveAsUniverse", () => {
       await openDialog(user);
       await user.click(screen.getByRole("button", { name: DIALOGS.save }));
       const error = document.getElementById(nameField().getAttribute("aria-describedby") as string);
-      expect(error).toHaveClass("text-status-critical", "text-sm");
+      expect(error).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
     });
 
     it("sends the trimmed name, and a long name unchanged with no maximum", async () => {
@@ -611,7 +615,7 @@ describe("SaveAsUniverse", () => {
         );
         expect(alert.textContent).not.toContain("raw envelope message");
         expect(alert.textContent).not.toContain(code);
-        expect(alert).toHaveClass("text-status-critical", "text-sm");
+        expect(alert).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
         expect(nameField().value).toBe("Tech leaders");
         expect(nameField()).not.toHaveAttribute("aria-invalid");
         expect(within(dialog).getByRole("button", { name: DIALOGS.save })).toBeInTheDocument();
@@ -697,36 +701,102 @@ describe("SaveAsUniverse", () => {
       expect(noticeItems()).toHaveLength(1);
     });
 
-    it("drops a failure that arrives after the dialog was closed", async () => {
+    // DEC-0259; dialog spec section 4: never close the dialog before the result is known.
+    it("stays open on Escape, Cancel and the overlay while a request is pending", async () => {
       const pending = deferred<UniverseDetail>();
       createUniverse.mockReturnValueOnce(pending.promise);
       const user = userEvent.setup();
       renderHost();
-      await openDialog(user);
+      const dialog = await openDialog(user);
       await user.type(nameField(), "Tech leaders");
       await user.click(screen.getByRole("button", { name: DIALOGS.save }));
-      await user.click(screen.getByRole("button", { name: DIALOGS.cancel }));
-      const reopened = await openDialog(user);
-      await act(async () => pending.reject(refusal("classification_set_changed")));
-      expect(within(reopened).queryByRole("alert")).toBeNull();
-      expect(within(reopened).getByRole("button", { name: DIALOGS.save })).toBeInTheDocument();
-      expect(reopened).not.toHaveAttribute("aria-busy");
+      const cancel = within(dialog).getByRole("button", { name: DIALOGS.cancel });
+      expect(cancel).toHaveAttribute("aria-disabled", "true");
+      expect(cancel).toHaveClass("aria-disabled:text-muted-foreground");
+      await user.keyboard("{Escape}");
+      await user.click(cancel);
+      await user.click(dialog.previousElementSibling as HTMLElement);
+      expect(screen.getByRole("dialog")).toBe(dialog);
+      // A click on the overlay never takes focus out of the dialog.
+      expect(cancel).toHaveFocus();
+      await act(async () => pending.reject(refusal("internal_error")));
+      expect(within(dialog).getByRole("alert").textContent).toBe(
+        failureSentence({
+          operation: "create-universe",
+          resource: "universe",
+          code: "internal_error",
+        }),
+      );
+      expect(nameField().value).toBe("Tech leaders");
+      expect(cancel).not.toHaveAttribute("aria-disabled");
+      await user.keyboard("{Escape}");
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
 
-    it("reports a save that completes after the dialog was closed, without closing a reopened one", async () => {
+    // DEC-0259; button spec section 4 (Loading) and dialog spec section 4 (Submitting).
+    it("shows progress in place on Save while a request is pending, keeping its label", async () => {
       const pending = deferred<UniverseDetail>();
       createUniverse.mockReturnValueOnce(pending.promise);
       const user = userEvent.setup();
       renderHost();
       await openDialog(user);
+      const save = screen.getByRole("button", { name: DIALOGS.save });
+      const progress = () => save.querySelector("[aria-hidden='true']");
+      expect(progress()).toHaveClass(
+        "invisible",
+        "motion-safe:animate-spin",
+        "size-4",
+        "rounded-[var(--radius)]",
+      );
+      expect(save).toHaveClass("inline-flex", "items-center", "gap-2");
+      expect(save).not.toHaveAttribute("data-pending");
+      await user.type(nameField(), "Tech leaders");
+      await user.click(save);
+      expect(progress()).not.toHaveClass("invisible");
+      expect(progress()).toHaveClass("motion-safe:animate-spin", "size-4");
+      expect(save).toHaveAttribute("data-pending", "true");
+      expect(save).toHaveAttribute("aria-busy", "true");
+      expect(save.textContent).toBe(DIALOGS.save);
+      await act(async () => pending.reject(refusal("internal_error")));
+      expect(progress()).toHaveClass("invisible");
+      expect(save).not.toHaveAttribute("data-pending");
+      expect(save).not.toHaveAttribute("aria-busy");
+    });
+
+    it("keeps a pending dialog open when the scope becomes a universe, closing it on success", async () => {
+      const pending = deferred<UniverseDetail>();
+      createUniverse.mockReturnValueOnce(pending.promise);
+      const user = userEvent.setup();
+      const { rerenderHost } = renderHost({ query: FILTERED });
+      const dialog = await openDialog(user);
       await user.type(nameField(), "Tech leaders");
       await user.click(screen.getByRole("button", { name: DIALOGS.save }));
-      await user.keyboard("{Escape}");
-      const reopened = await openDialog(user);
+      rerenderHost({ query: { ...FILTERED, scope: "u1" } });
+      expect(screen.getByRole("dialog")).toBe(dialog);
+      expect(screen.queryByRole("button", { name: RESULTS.saveThese(12) })).toBeNull();
       await act(async () => pending.resolve(universe()));
-      expect(reopened).toBeInTheDocument();
-      expect(screen.getByRole("dialog")).toBe(reopened);
+      expect(screen.queryByRole("dialog")).toBeNull();
       expect(screen.getByRole("link", { name: DIALOGS.saved(12, "Tech leaders") })).toBeVisible();
+    });
+
+    it("keeps a failure in view when the scope became a universe meanwhile, then closes for good", async () => {
+      const pending = deferred<UniverseDetail>();
+      createUniverse.mockReturnValueOnce(pending.promise);
+      const user = userEvent.setup();
+      const { rerenderHost } = renderHost({ query: FILTERED });
+      const dialog = await openDialog(user);
+      await user.type(nameField(), "Tech leaders");
+      await user.click(screen.getByRole("button", { name: DIALOGS.save }));
+      rerenderHost({ query: { ...FILTERED, scope: "u1" } });
+      await act(async () => pending.reject(refusal("internal_error")));
+      expect(screen.getByRole("dialog")).toBe(dialog);
+      expect(within(dialog).getByRole("alert")).toBeInTheDocument();
+      await user.click(within(dialog).getByRole("button", { name: DIALOGS.cancel }));
+      expect(screen.queryByRole("dialog")).toBeNull();
+      rerenderHost({ query: FILTERED });
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(trigger()).toBeInTheDocument();
+      expect(noticeItems()).toHaveLength(0);
     });
   });
 
@@ -745,7 +815,13 @@ describe("SaveAsUniverse", () => {
       expect(title).toHaveClass("text-lg");
       expect(nameField()).toHaveFocus();
       expect(nameField()).toHaveAttribute("type", "text");
-      expect(nameField()).toHaveClass("rounded", "border", "border-input", "p-2");
+      expect(nameField()).toHaveClass(
+        "rounded",
+        "border",
+        "border-input",
+        "p-2",
+        "aria-[invalid=true]:border-[hsl(var(--destructive))]",
+      );
       expect(screen.getByText(DIALOGS.name, { selector: "label" })).toHaveClass("text-sm");
       expect(dialog).toHaveClass(
         "fixed",
@@ -757,7 +833,8 @@ describe("SaveAsUniverse", () => {
         "rounded",
         "border",
         "border-border",
-        "bg-background",
+        "bg-[hsl(var(--popover))]",
+        "text-[hsl(var(--popover-foreground))]",
         "p-5",
       );
     });
@@ -784,8 +861,8 @@ describe("SaveAsUniverse", () => {
       expect(cancel.nextElementSibling).toBe(save);
       expect(save).toHaveAttribute("type", "submit");
       expect(cancel).toHaveAttribute("type", "button");
-      expect(save).toHaveClass("bg-foreground", "text-background");
-      expect(cancel).toHaveClass("border", "border-border");
+      expect(save).toHaveClass("bg-[hsl(var(--primary))]", "text-[hsl(var(--primary-foreground))]");
+      expect(cancel).toHaveClass("border", "border-input");
       expect(cancel.parentElement).toHaveClass("flex", "justify-end", "gap-2");
     });
 
@@ -801,6 +878,33 @@ describe("SaveAsUniverse", () => {
       expect(screen.queryByRole("dialog")).toBeNull();
       expect(trigger()).toHaveFocus();
       expect(createUniverse).not.toHaveBeenCalled();
+    });
+
+    // DEC-0259; dialog spec section 3 (Overlay) and section 4 (click on overlay closes `standard`).
+    it("draws an overlay behind the dialog that closes it when clicked", async () => {
+      const user = userEvent.setup();
+      renderHost();
+      const dialog = await openDialog(user);
+      const overlay = dialog.previousElementSibling as HTMLElement;
+      expect(overlay.tagName).toBe("DIV");
+      expect(overlay).toHaveAttribute("aria-hidden", "true");
+      expect(overlay).toHaveAttribute("data-slot", "overlay");
+      expect(overlay).toHaveClass("fixed", "inset-0", "bg-background/80");
+      expect(overlay).toBeEmptyDOMElement();
+      await user.click(overlay);
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(document.querySelector("[data-slot='overlay']")).toBeNull();
+      expect(trigger()).toHaveFocus();
+      expect(createUniverse).not.toHaveBeenCalled();
+    });
+
+    it("closes on a click on the overlay only, not inside the dialog", async () => {
+      const user = userEvent.setup();
+      renderHost();
+      const dialog = await openDialog(user);
+      await user.click(dialog);
+      await user.click(within(dialog).getByRole("heading"));
+      expect(screen.getByRole("dialog")).toBe(dialog);
     });
 
     it("ignores other keys", async () => {

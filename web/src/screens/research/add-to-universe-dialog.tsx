@@ -11,7 +11,7 @@ import type {
   UniverseSummary,
 } from "../../api/classification-types";
 import { DIALOGS, FILTERS, failureSentence } from "./copy";
-import { DialogFrame } from "./dialog-frame";
+import { ConfirmProgress, DialogFrame } from "./dialog-frame";
 import { type Notice, universePath } from "./notices";
 
 /** The `select` value of *New universe*; a universe id is never empty. */
@@ -48,9 +48,11 @@ function sentenceFor(
  * universe*, which reveals a Name field; the first universe is chosen, or
  * *New universe* when none exists. **Add** posts the checked symbols to the
  * chosen universe, or creates one by hand from them. Success calls `onNotify`
- * once and then `onClose`; a request that completes after the dialog closed
- * still notifies, since the stocks were added, but never closes the host's
- * next dialog. The symbols are those the dialog opened with.
+ * once and then `onClose`. Cancel, Escape and the overlay do nothing while a
+ * request is pending, so the dialog never closes before its result is known
+ * (DEC-0259); a request that completes after the host unmounted the dialog on
+ * its own still notifies, since the stocks were added, but never closes the
+ * host's next dialog. The symbols are those the dialog opened with.
  *
  * Built on the CAP-002-E4-S1 and S2 exports `listUniverses`,
  * `addUniverseMembers`, `createUniverse` (by-hand shape `{ name, symbols }`),
@@ -187,16 +189,23 @@ export function AddToUniverseDialog({
 
   const unavailable = pending || list.kind !== "loaded";
 
+  /** Cancel, Escape and the overlay: never while a request is pending (DEC-0259). */
+  function cancel(): void {
+    if (!pendingRef.current) {
+      onClose();
+    }
+  }
+
   return (
     <DialogFrame
       title={DIALOGS.addTitle(opened.length)}
       initialFocusRef={cancelRef}
-      onCancel={onClose}
+      onCancel={cancel}
       busy={pending}
     >
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-3">
         {list.kind === "failed" ? (
-          <p role="alert" className="text-status-critical text-sm">
+          <p role="alert" className="text-[hsl(var(--destructive))] text-sm">
             {list.sentence}
           </p>
         ) : (
@@ -252,17 +261,18 @@ export function AddToUniverseDialog({
                 setName(event.target.value);
                 setFieldError(null);
               }}
-              className="rounded border border-input p-2"
+              // `--destructive` border while in error (form spec section 6; DEC-0257).
+              className="rounded border border-input p-2 aria-[invalid=true]:border-[hsl(var(--destructive))]"
             />
             {fieldError !== null ? (
-              <p id={fieldErrorId} className="text-status-critical text-sm">
+              <p id={fieldErrorId} className="text-[hsl(var(--destructive))] text-sm">
                 {fieldError}
               </p>
             ) : null}
           </>
         ) : null}
         {alert !== null ? (
-          <p role="alert" className="text-status-critical text-sm">
+          <p role="alert" className="text-[hsl(var(--destructive))] text-sm">
             {alert}
           </p>
         ) : null}
@@ -270,16 +280,22 @@ export function AddToUniverseDialog({
           <button
             ref={cancelRef}
             type="button"
-            onClick={onClose}
-            className="rounded border border-border px-3 py-2 text-base"
+            aria-disabled={pending ? "true" : undefined}
+            onClick={cancel}
+            // Visibly unavailable while a request is pending (button spec section 4).
+            className="rounded border border-input px-3 py-2 text-base aria-disabled:text-muted-foreground"
           >
             {DIALOGS.cancel}
           </button>
           <button
             type="submit"
             aria-disabled={unavailable ? "true" : undefined}
-            className="rounded bg-foreground px-3 py-2 text-background"
+            aria-busy={pending ? "true" : undefined}
+            data-pending={pending ? "true" : undefined}
+            // `--primary` on `--primary-foreground` (button spec section 6; DEC-0257).
+            className="inline-flex items-center gap-2 rounded bg-[hsl(var(--primary))] px-3 py-2 text-[hsl(var(--primary-foreground))]"
           >
+            <ConfirmProgress pending={pending} />
             {DIALOGS.add}
           </button>
         </div>

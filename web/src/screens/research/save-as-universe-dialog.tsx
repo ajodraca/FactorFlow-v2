@@ -2,7 +2,7 @@ import { type FormEvent, type JSX, useEffect, useId, useRef, useState } from "re
 import { ClassificationApiError, createUniverse } from "../../api/classification-client";
 import { type ResearchQuery, toThresholds } from "../../api/research-query";
 import { DIALOGS, RESULTS, describeQuery, failureSentence } from "./copy";
-import { DialogFrame } from "./dialog-frame";
+import { ConfirmProgress, DialogFrame } from "./dialog-frame";
 import { type Notice, universePath } from "./notices";
 
 /**
@@ -16,7 +16,9 @@ import { type Notice, universePath } from "./notices";
  * (STD-UI-15: the *including* clause is omitted rather than guessed). The
  * control renders nothing under a universe scope: the save carries the
  * filter, not the scope. The dialog reads these props when it opens and keeps
- * that snapshot, so the title and the request always agree.
+ * that snapshot, so the title and the request always agree. A dialog open
+ * when the scope becomes a universe closes then, unless a save is pending: it
+ * stays until the result is known (DEC-0259).
  *
  * Built on the CAP-002-E4-S1 and S2 exports: `createUniverse` in its
  * from-a-result shape `{ name, filter, setId }` with `filter` the one
@@ -45,45 +47,53 @@ export function SaveAsUniverse({
   const reasonId = useId();
   const [opened, setOpened] = useState<Snapshot | null>(null);
 
-  if (query.scope !== null) {
-    // A dialog open when the scope became a universe closes for good, so it
-    // never reappears with an old snapshot when the scope returns.
-    if (opened !== null) {
-      setOpened(null);
-    }
-    return null;
-  }
+  const scopeLeft = query.scope !== null;
   const blocked = matchCount === 0 || setId === null;
 
+  // The dialog is outside the control's row, so it keeps its place in the tree
+  // (and a pending request) when the control goes under a universe scope.
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        data-variant={blocked ? "blocked" : "outline"}
-        aria-disabled={blocked ? "true" : undefined}
-        aria-describedby={blocked ? reasonId : undefined}
-        onClick={() => {
-          // `blocked`, never `disabled`: it stays focusable so its reason is
-          // reached (button design spec, `blocked`).
-          if (!blocked) {
-            setOpened({ query, matchCount, setId, incompleteCount });
-          }
-        }}
-        className="w-fit rounded border border-border px-3 py-2 text-base data-[variant=blocked]:text-muted-foreground"
-      >
-        {RESULTS.saveThese(matchCount)}
-      </button>
-      {blocked ? (
-        <span id={reasonId} className="text-muted-foreground text-sm">
-          {RESULTS.nothingToSave}
-        </span>
-      ) : null}
+    <>
+      {scopeLeft ? null : (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            data-variant={blocked ? "blocked" : "outline"}
+            aria-disabled={blocked ? "true" : undefined}
+            aria-describedby={blocked ? reasonId : undefined}
+            onClick={() => {
+              // `blocked`, never `disabled`: it stays focusable so its reason is
+              // reached (button design spec, `blocked`).
+              if (!blocked) {
+                setOpened({ query, matchCount, setId, incompleteCount });
+              }
+            }}
+            className="w-fit rounded border border-input px-3 py-2 text-base data-[variant=blocked]:text-muted-foreground"
+          >
+            {RESULTS.saveThese(matchCount)}
+          </button>
+          {blocked ? (
+            <span id={reasonId} className="text-muted-foreground text-sm">
+              {RESULTS.nothingToSave}
+            </span>
+          ) : null}
+        </div>
+      )}
       {opened !== null ? (
-        <SaveDialog snapshot={opened} onClose={() => setOpened(null)} onNotify={onNotify} />
+        <SaveDialog
+          snapshot={opened}
+          scopeLeft={scopeLeft}
+          onClose={() => setOpened(null)}
+          onNotify={onNotify}
+        />
       ) : null}
-    </div>
+    </>
   );
 }
+
+/** The confirm action: `--primary` on `--primary-foreground` (button spec section 6; DEC-0257). */
+const CONFIRM =
+  "inline-flex items-center gap-2 rounded bg-[hsl(var(--primary))] px-3 py-2 text-[hsl(var(--primary-foreground))]";
 
 /** The props as they were when the dialog opened; `setId` is never null once open. */
 interface Snapshot {
@@ -95,10 +105,12 @@ interface Snapshot {
 
 function SaveDialog({
   snapshot,
+  scopeLeft,
   onClose,
   onNotify,
 }: {
   snapshot: Snapshot;
+  scopeLeft: boolean;
   onClose: () => void;
   onNotify: (notice: Notice) => void;
 }): JSX.Element {
@@ -108,20 +120,28 @@ function SaveDialog({
   const descriptionId = useId();
   const nameRef = useRef<HTMLInputElement>(null);
   const pendingRef = useRef(false);
-  // Set by the effect, so StrictMode's remount marks it mounted again.
-  const mountedRef = useRef(false);
   const [name, setName] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [alert, setAlert] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
   const [pending, setPending] = useState(false);
 
+  // Closes for good when the scope becomes a universe, so the dialog never
+  // reappears with an old snapshot when the scope returns; a pending save
+  // keeps it open until its result is known (DEC-0259).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: closes on the scope change only, never on a later render.
   useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
+    if (scopeLeft && !pendingRef.current) {
+      onClose();
+    }
+  }, [scopeLeft]);
+
+  /** Cancel, Escape and the overlay: never while a save is pending (DEC-0259). */
+  function cancel(): void {
+    if (!pendingRef.current) {
+      onClose();
+    }
+  }
 
   const filterWords = describeQuery(query);
   const lines = [
@@ -147,19 +167,15 @@ function SaveDialog({
     setAlert(null);
     try {
       const saved = await createUniverse({ name: trimmed, filter: toThresholds(query), setId });
-      // The universe exists whether or not the dialog is still open, so the
-      // owner is told; a dialog closed meanwhile is not closed a second time.
+      // Nothing in the dialog closes it while the save is pending, so the
+      // result lands on this instance; if the host unmounts the control
+      // meanwhile, the notice still reaches it and the close is a no-op.
       onNotify({
         message: DIALOGS.saved(saved.memberCount, saved.name),
         to: universePath(saved.universeId),
       });
-      if (mountedRef.current) {
-        onClose();
-      }
+      onClose();
     } catch (caught) {
-      // A failure reaching a dialog closed meanwhile lands on an unmounted
-      // instance, whose state setters React drops; a reopened dialog is a new
-      // instance and never sees it.
       pendingRef.current = false;
       setPending(false);
       if (!(caught instanceof ClassificationApiError)) {
@@ -187,7 +203,7 @@ function SaveDialog({
     <DialogFrame
       title={DIALOGS.saveTitle(matchCount)}
       initialFocusRef={nameRef}
-      onCancel={onClose}
+      onCancel={cancel}
       busy={pending}
       descriptionId={lines.length > 0 ? descriptionId : undefined}
     >
@@ -211,23 +227,26 @@ function SaveDialog({
             setName(event.target.value);
             setFieldError(null);
           }}
-          className="rounded border border-input p-2"
+          // `--destructive` border while in error (form spec section 6; DEC-0257).
+          className="rounded border border-input p-2 aria-[invalid=true]:border-[hsl(var(--destructive))]"
         />
         {fieldError !== null ? (
-          <p id={fieldErrorId} className="text-status-critical text-sm">
+          <p id={fieldErrorId} className="text-[hsl(var(--destructive))] text-sm">
             {fieldError}
           </p>
         ) : null}
         {alert !== null ? (
-          <p role="alert" className="text-status-critical text-sm">
+          <p role="alert" className="text-[hsl(var(--destructive))] text-sm">
             {alert}
           </p>
         ) : null}
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            onClick={onClose}
-            className="rounded border border-border px-3 py-2 text-base"
+            aria-disabled={pending ? "true" : undefined}
+            onClick={cancel}
+            // Visibly unavailable while a request is pending (button spec section 4).
+            className="rounded border border-input px-3 py-2 text-base aria-disabled:text-muted-foreground"
           >
             {DIALOGS.cancel}
           </button>
@@ -235,19 +254,18 @@ function SaveDialog({
               Review new result replaces Save, so focus stays on it and never
               falls out of the dialog (pinned by the conflict focus test). */}
           {conflict ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded bg-foreground px-3 py-2 text-background"
-            >
+            <button type="button" onClick={onClose} className={CONFIRM}>
               {DIALOGS.reviewNewResult}
             </button>
           ) : (
             <button
               type="submit"
               aria-disabled={pending ? "true" : undefined}
-              className="rounded bg-foreground px-3 py-2 text-background"
+              aria-busy={pending ? "true" : undefined}
+              data-pending={pending ? "true" : undefined}
+              className={CONFIRM}
             >
+              <ConfirmProgress pending={pending} />
               {DIALOGS.save}
             </button>
           )}

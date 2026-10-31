@@ -15,6 +15,8 @@
 # Decisions applied: DEC-0167 (no name maximum, empty-after-trim is a field error), DEC-0168 (notices.tsx, dialog
 # seams, no auto-dismiss), DEC-0169 (Add defaults, list bound, New universe route, the one empty-name key); all
 # owner-upheld. No new decision was recorded.
+# Cycle 4 is the rework for implementation review v1 (IR-001 to IR-004) under owner decisions DEC-0257, DEC-0258 and
+# DEC-0259; its patch is the staged diff over the review commit ec8c8b2.
 
 cycles:
   - id: cycle-1
@@ -203,3 +205,71 @@ cycles:
           reason: >
             The resource argument is used only for a network failure, where failureSentence is called with code null;
             copy.ts returns the operation label plus FALLBACK_ERROR for a non-code and never reads the resource.
+
+  - id: cycle-4
+    tasks: [T008, T009, T010, T012, T013, T014]
+    description: >
+      Review rework for implementation review v1 (IR-001 to IR-004), one cycle. IR-001: the Add dialog shows no Name
+      field (no textbox, no Name label) while the universe list is pending, including when it then arrives empty; a
+      Tab/Shift+Tab test inside the Add dialog wraps Add to the select and the select to Add, with and without the Name
+      field; a notice link activated inside a MemoryRouter renders the /research/universes/:universeId route (a plain
+      anchor does not). IR-002 (DEC-0257): the dialog surface and text are --popover / --popover-foreground; field
+      errors, alerts and the list failure use --destructive, and an invalid Name field gets a --destructive border
+      (form spec section 6); Save, Add and Review new result are --primary on --primary-foreground; the Save trigger
+      and both Cancels use the --input outline border. IR-003 (DEC-0258): Esc on a notice's link or Dismiss control
+      dismisses that notice and returns focus to the region; at most the three newest notices are shown, and older
+      ones are held (DEC-0168: kept until dismissed) and return as shown ones are dismissed. IR-004 (DEC-0259): the
+      frame draws an aria-hidden overlay (bg-background/80, an alpha on an existing token per STD-UI-29) behind the
+      dialog, which closes a standard dialog on click without taking focus; while a request is pending, Cancel,
+      Escape and the overlay do nothing (dialog spec section 4: never close before the result is known), Cancel is
+      aria-disabled with a muted cue, and the confirm shows a spinner in a reserved slot (button spec section 4:
+      label kept, width preserved) with aria-busy and data-pending; a failure stays in the open dialog. A Save
+      dialog pending when the scope becomes a universe stays open until its result (success closes and notifies;
+      failure stays until Cancel); an idle one still closes for good. Save no longer needs its mounted flag (nothing
+      can close the dialog mid-request), so it was removed; the Add dialog keeps it for a host-driven unmount, which
+      its rewritten test exercises. Deviations from the task plan's wording, all owner-directed: T012/T016's
+      bg-background, bg-foreground/text-background and text-status-critical classes are replaced by the DEC-0257
+      tokens; T013's "returns null under a universe scope" now hides only the control, keeping a pending dialog
+      mounted (DEC-0259); the T007/T006 tests that pinned close-mid-request and a dropped late failure were replaced
+      by the DEC-0259 behaviour.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/red-cycle-4.log
+    red_log_sha256: d72615a37641781e9d75c0247032225b40398f6d468d54baf9b54684db39ea08
+    red_evidence: >
+      With the tests written and no production change, 22 failed and 396 passed (red-cycle-4.log): the token, overlay,
+      pending, scope and notice Esc/stack tests. The three IR-001 tests pass on HEAD, as the review states the
+      behaviour is correct; their RED is the review's mutants (name-shown-while-loading, trap-skips-select,
+      plain-anchor), each killed in this cycle's mutation run.
+    green_evidence: >
+      The four focused suites 418 passed (green-cycle-4.log); the full suite 56 files and 1176 tests passed
+      (full-suite-cycle-4.log); biome lint and format clean, tsc --noEmit clean, vite build ok with every new class
+      present in the built CSS (size-4 = var(--space-4)). Code review (independent subagent) first pass APPROVED with
+      seven LOWs; fixed: comment on host unmount, aria-busy on the confirms, motion-safe spinner; also from the
+      spec-drift review (first pass drift_detected true, four LOWs): aria-busy, the destructive field border, a
+      visible cue on the unavailable Cancel, spinner classes as whole literals, plan drift recorded here. Both
+      re-reviewed the regenerated patch: APPROVED and drift_detected false. Carried to the owner, not changed: held
+      notices have no "+N more" marker (interpretation of DEC-0258's "collapse the rest"); a request that never
+      settles keeps the dialog locked because the API client has no timeout; after a failure under a universe scope,
+      Cancel restores focus to a trigger that is no longer mounted, so focus falls to the body.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/green-cycle-4.log
+        sha256: 654a1faa659d85ae18f9f1712f0408311672d4b184f9711f452d389ac66ba06a
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/full-suite-cycle-4.log
+        sha256: 2106e29920793d9e4dffedc1a0d42a669a5aa0559e7bccfecf48bafeb0d28d81
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 27f6a8f64326c14d194b112b8f3edcd1182fce6beef8011ca9f6df49f756d6b4
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/mutation-cycle-4-results.json
+      results_sha256: 10ba5b68afdb32c2bc6d5ee9605648d29d4b129c3364475675d34ca31a3dfb67
+      generated: 70
+      killed: 70
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

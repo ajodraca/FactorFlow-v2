@@ -1,4 +1,4 @@
-import { type JSX, useCallback, useRef, useState } from "react";
+import { type JSX, type KeyboardEvent, useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { NOTICES } from "./copy";
 
@@ -12,9 +12,15 @@ import { NOTICES } from "./copy";
  * `notify`. The state lives in the host, so a notice raised by a dialog that
  * is closing (the Add dialog is unmounted by its host on success, DEC-0163)
  * still shows. Nothing is removed by time: DEC-0168 (owner-upheld; Open Gap
- * 2) keeps an item until its Dismiss control is used, so the toast design
- * spec's *about five seconds* for `success` is not applied here.
+ * 2) keeps an item until it is dismissed, so the toast design spec's *about
+ * five seconds* for `success` is not applied here. The spec's other two rules
+ * are (DEC-0258): `Esc` dismisses the focused item, and at most three are
+ * stacked, the newest, while the rest are held and return as those are
+ * dismissed.
  */
+
+/** The toast design spec's largest stack (section 4; DEC-0258). */
+const MAX_SHOWN = 3;
 
 /** One notice: its self-contained message and, optionally, the route it links to. */
 export interface Notice {
@@ -57,9 +63,10 @@ export function useNotices(): NoticesBinding {
 
 /**
  * The polite `status` region, always mounted so its first announcement is
- * read, with one `success` item per notice and a Dismiss control that hands
- * focus back to the region (DAC-E4-S8-3, DAC-E4-S8-5; toast design spec
- * section 5).
+ * read, with one `success` item for each of the newest three notices and a
+ * Dismiss control that, like `Esc` on the item's link or control, hands focus
+ * back to the region (DAC-E4-S8-3, DAC-E4-S8-5; toast design spec sections 4
+ * and 5; DEC-0258).
  */
 export function NoticeRegion({
   notices,
@@ -69,6 +76,19 @@ export function NoticeRegion({
   onDismiss: (id: number) => void;
 }): JSX.Element {
   const regionRef = useRef<HTMLOutputElement>(null);
+
+  function dismiss(id: number): void {
+    onDismiss(id);
+    regionRef.current?.focus();
+  }
+
+  function dismissOnEscape(id: number): (event: KeyboardEvent) => void {
+    return (event) => {
+      if (event.key === "Escape") {
+        dismiss(id);
+      }
+    };
+  }
 
   return (
     // An `output` carries `role="status"` implicitly, as the delivered status
@@ -81,7 +101,7 @@ export function NoticeRegion({
       tabIndex={-1}
       className="fixed right-4 bottom-4 flex flex-col gap-2"
     >
-      {notices.map((notice) => (
+      {notices.slice(-MAX_SHOWN).map((notice) => (
         // `span`, not `div`: an `output` holds phrasing content only.
         <span
           key={notice.id}
@@ -94,16 +114,14 @@ export function NoticeRegion({
           {notice.to === undefined ? (
             <span>{notice.message}</span>
           ) : (
-            <Link to={notice.to} className="underline">
+            <Link to={notice.to} onKeyDown={dismissOnEscape(notice.id)} className="underline">
               {notice.message}
             </Link>
           )}
           <button
             type="button"
-            onClick={() => {
-              onDismiss(notice.id);
-              regionRef.current?.focus();
-            }}
+            onClick={() => dismiss(notice.id)}
+            onKeyDown={dismissOnEscape(notice.id)}
             // `min-h-5 min-w-5` is `--space-5`, 24px: the toast contract's
             // smallest dismiss target (toast design spec section 5).
             className="min-h-5 min-w-5 rounded border border-border px-2 text-sm"
