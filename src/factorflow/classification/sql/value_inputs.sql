@@ -26,7 +26,7 @@ used AS (
     -- The rows an input reads: the most recent quarterly balance sheet and the four
     -- quarters of its trailing window.
     SELECT r.instrument_id, n.input_name, s.statement_type, s.fiscal_period_end,
-           s.observed_on, s.period_rank, s.payload,
+           s.observed_on, s.period_rank, s.payload, s.backfilled,
            jsonb_build_object('statement_type', s.statement_type,
                               'fiscal_period_end', s.fiscal_period_end,
                               'observed_on', s.observed_on,
@@ -72,6 +72,7 @@ periods AS (
            -- The earliest of the latest period ends used (DEC-0116 (3)).
            min(fiscal_period_end) FILTER (WHERE period_rank = 1) AS as_of,
            max(observed_on) AS known_on,
+           bool_or(backfilled) AS restated,
            jsonb_agg(period ORDER BY statement_type, fiscal_period_end DESC) AS periods
       FROM used
      GROUP BY instrument_id, input_name
@@ -102,7 +103,7 @@ bar AS (
 ),
 judged AS (
     SELECT r.instrument_id, n.input_name, n.window_type, p.balance_sheets, p.window_quarters,
-           p.as_of, p.periods, i.absent, f.periods_found, b.session_date AS bar_date,
+           p.as_of, p.periods, p.restated, i.absent, f.periods_found, b.session_date AS bar_date,
            -- DEC-0055 (7): the latest observation among the statement rows and the bar.
            greatest(p.known_on, b.observed_on) AS known_on,
            CASE n.input_name
@@ -162,9 +163,9 @@ SELECT s.instrument_id,
        CASE WHEN s.status = 'present' THEN s.numerator / s.market_capitalisation END AS value,
        CASE WHEN s.status <> 'missing' THEN s.as_of END AS as_of,
        CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,
-       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods
-       -- into the mark (DEC-0056, DEC-0122).
-       false AS restated_possible,
+       -- Marked when any statement row detail.periods lists is backfilled; a missing
+       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).
+       s.status <> 'missing' AND s.restated AS restated_possible,
        CASE s.status
             WHEN 'missing' THEN jsonb_strip_nulls(jsonb_build_object(
                 'cause', s.missing_cause,

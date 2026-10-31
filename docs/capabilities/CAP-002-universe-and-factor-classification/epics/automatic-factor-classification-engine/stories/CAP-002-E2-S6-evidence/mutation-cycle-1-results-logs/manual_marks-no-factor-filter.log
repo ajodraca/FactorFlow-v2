@@ -1,0 +1,48 @@
+...F
+=================================== FAILURES ===================================
+__________________ test_only_the_rows_an_input_reads_mark_it ___________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55729 user=test database=test_4738e210c86e496487a1d00fa749fbc0) at 0x10aa02de0>, set_id=UUID('954affe5-7fef-4465-ab40-51384b9c32c8'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ab145c0>
+
+    def test_only_the_rows_an_input_reads_mark_it(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-23, DEC-0122: a backfilled ninth quarter outside both windows marks nothing; the
+        same kind of row inside a window marks exactly the inputs that read it."""
+        conn, set_id = store
+        stocks = build_fixture(
+            conn,
+            {
+                "B": {("income_statement", 7)},  # the oldest prior-year quarter
+                "C": {("income_statement", 3)},  # the oldest trailing quarter
+            },
+            extra_old=("A",),
+        )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        flags = classification_flags(conn, set_id)
+        a, b, c, d = (stocks[s] for s in SYMBOLS)
+        assert input_flags(conn, set_id, a) == expect()
+        assert input_flags(conn, set_id, b) == expect(*GROWTH)
+        assert input_flags(conn, set_id, c) == expect("earnings_yield", *GROWTH)
+        assert input_flags(conn, set_id, d) == expect()
+>       assert {s: tuple(flags[(s, f)] for f in FACTORS) for s in (a, b, c, d)} == {
+            a: (False, False, False),
+            b: (False, True, False),
+            c: (True, True, False),
+            d: (False, False, False),
+        }
+E       assert {1: (False, F...False, False)} == {1: (False, F...False, False)}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {2: (True, True, False)} != {2: (False, True, False)}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:301: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_only_the_rows_an_input_reads_mark_it
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 passed in 3.03s

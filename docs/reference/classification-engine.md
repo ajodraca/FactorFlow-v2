@@ -159,7 +159,8 @@ shares its period end. Each row carries:
 
 - `backfilled`: the row's `provider_filing_date` is earlier than the first
   `observed_on` of any fundamental row held for the instrument (DEC-0056). A
-  null filing date gives `false`.
+  null filing date gives `false`. It decides the
+  [restatement mark](#restatement-mark).
 - `period_rank`: 1 for the newest period end of its statement type (P1), 2
   for the next (P2), and so on.
 - `ttm_slot`: 1 to 4 on P1 to P4 when the trailing window is formed, else
@@ -229,8 +230,6 @@ A latest period end exactly 6 months before `D` is still current.
   the same date.
 - `known_on` is the latest `observed_on` of every statement row the input
   read, and of its bar for a value input (DEC-0055 (7)).
-- `restated_possible` is always `false` from this stage. The `backfilled`
-  flags are kept in `detail.periods` (DEC-0056, DEC-0122).
 
 ### `detail`
 
@@ -247,6 +246,27 @@ A latest period end exactly 6 months before `D` is still current.
 `periods_found` lists every quarterly period in `stmt` of the statement types
 the input reads, as `statement_type` and `fiscal_period_end`, and is `[]` when
 there is none. Both are ordered newest first within each statement type.
+
+### Restatement mark
+
+`restated_possible` marks an input that may rest on restated figures
+(CAP-002-E2-S6; AC-23, DAC-E2-11). `value_inputs.sql` and `growth_inputs.sql`
+set it to `bool_or(backfilled)` over the statement rows the input read, which
+are the rows its `detail.periods` lists (DEC-0056, DEC-0122). One backfilled
+row among them is enough to mark it.
+
+- A `missing` input's `detail` has no `periods`, and the input is always
+  `false`, even when a row it read is backfilled.
+- An `outdated` or `not_computable` input is marked by the same rule as a
+  `present` one.
+- A row the input does not read never marks it, such as a quarter older than
+  its windows, or the trailing window of another statement type. Such a row can
+  still lower the instrument's first `observed_on`, and so decide whether a row
+  it does read is backfilled.
+- No value, status, date or `detail` key depends on the mark.
+
+While every line item is unresolved (see [Line items](#line-items)), every
+value and growth input is `missing`, so none is marked yet.
 
 ### Writing to `factor_input`
 
@@ -351,8 +371,19 @@ has 100 unless another stock ties it.
   `input_names`, and the statement holds no label text (DEC-0120, DEC-0130).
 - The 30 in the unranked sentence is the bound `min_peer_set_size`, so it is
   always the floor in force.
-- `restated_possible` is `false` on every row. CAP-002-E2-S6 carries the
-  restatement mark onto the classification (DEC-0121).
+- `restated_possible` carries the stock's restatement mark on `value` and
+  `growth` (CAP-002-E2-S6; AC-23, DAC-E2-11, DEC-0122). On each active
+  instrument's row, `classified` or `not_classified`, it is `true` when any of
+  the stock's `factor_input` rows of the factor in this set is marked (see
+  [Restatement mark](#restatement-mark)). A row that names a `missing` input is
+  therefore still marked when another input of the factor is. A stock with no
+  input row of the factor gets `false`, and so does every retired instrument.
+- On `momentum`, `restated_possible` is `false` on every row, whatever the
+  set's momentum `factor_input` rows hold. The `marks` CTE is guarded by
+  `%(factor)s::text IN ('value', 'growth')`, so it is empty for any other
+  factor.
+- No status, score, percentile or reason depends on the mark. Each set's rows
+  are written once, so a later set never changes an earlier set's mark.
 
 ### Static checks
 
@@ -370,6 +401,21 @@ statements to these rules:
 It also asserts that no module under `classification/` imports `numpy`,
 `scipy`, `pandas` or `statistics`. `INPUT_LABELS` must have exactly one label
 per input name, and the labels must equal the product vocabulary.
+
+`tests/unit/test_restatement_sql_static.py` (CAP-002-E2-S6) also needs no
+database. It holds the restatement mark to these rules:
+
+- `value_inputs.sql` and `growth_inputs.sql` each compute the mark with
+  `bool_or` over `backfilled`, and neither writes the constant `false` as
+  `restated_possible`.
+- `classify.sql` reads the mark from `factor_input` with
+  `bool_or(restated_possible)`, behind exactly one factor guard. The guard
+  names only `value` and `growth`. Outside its comments, the statement holds
+  no `'momentum'` literal.
+- Of `classify.sql`'s four row sets, only the `retired` one writes the
+  constant `false`.
+- None of the three statements takes a `%(name)s` parameter it did not take
+  before CAP-002-E2-S6.
 
 ## Statements
 

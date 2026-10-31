@@ -1,0 +1,41 @@
+...F
+=================================== FAILURES ===================================
+__________________ test_only_the_rows_an_input_reads_mark_it ___________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55600 user=test database=test_f4a38bc91ad54978987c82b8337d5491) at 0x10b352000>, set_id=UUID('4bb49c9d-b34d-4a4b-9ae9-f202740872ff'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b350b60>
+
+    def test_only_the_rows_an_input_reads_mark_it(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-23, DEC-0122: a backfilled ninth quarter outside both windows marks nothing; the
+        same kind of row inside a window marks exactly the inputs that read it."""
+        conn, set_id = store
+        stocks = build_fixture(
+            conn,
+            {
+                "B": {("income_statement", 7)},  # the oldest prior-year quarter
+                "C": {("income_statement", 3)},  # the oldest trailing quarter
+            },
+            extra_old=("A",),
+        )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        flags = classification_flags(conn, set_id)
+        a, b, c, d = (stocks[s] for s in SYMBOLS)
+        assert input_flags(conn, set_id, a) == expect()
+        assert input_flags(conn, set_id, b) == expect(*GROWTH)
+>       assert input_flags(conn, set_id, c) == expect("earnings_yield", *GROWTH)
+E       AssertionError: assert {'book_to_pri...h': True, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'earnings_yield': False} != {'earnings_yield': True}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:299: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_only_the_rows_an_input_reads_mark_it
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 passed in 2.88s

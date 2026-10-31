@@ -1,0 +1,33 @@
+......F
+=================================== FAILURES ===================================
+________ test_a_not_classified_row_for_a_missing_input_carries_the_mark ________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55848 user=test database=test_e1fabe78472648899b91cf8043108077) at 0x10b33ed50>, set_id=UUID('a129f064-8cea-4d15-a937-8dc1ae8ddb1c'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b33fef0>
+
+    def test_a_not_classified_row_for_a_missing_input_carries_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A holds no cash-flow statement, so fcf_yield is missing and lists no period;
+        A's value row is not classified for it and still carries its other inputs' mark."""
+        conn, set_id = store
+        stocks = build_fixture(conn, statement_types={"A": ("balance_sheet", "income_statement")})
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        rows = classifications_for(conn, set_id)
+        value = rows[(a, "value")]
+        assert (value["status"], value["reason_code"], value["reason_input"]) == (
+            "not_classified",
+            "input_missing",
+            "fcf_yield",
+        )
+>       assert value["restated_possible"] is True
+E       assert False is True
+
+tests/integration/test_engine_restatement.py:394: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_a_not_classified_row_for_a_missing_input_carries_the_mark
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 6 passed in 3.73s

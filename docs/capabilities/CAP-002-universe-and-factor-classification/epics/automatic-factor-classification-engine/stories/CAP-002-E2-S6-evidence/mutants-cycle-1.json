@@ -1,0 +1,439 @@
+{
+  "schema": 1,
+  "repo_head": "d643a52a339fc8c49406851e64e3aa0a6470c968",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:86:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 86,
+      "original": "    -- (DEC-0119, DEC-0122). The factor guard, not the input rows, is what keeps momentum",
+      "mutated": "    -- (DEC-120, DEC-0122). The factor guard, not the input rows, is what keeps momentum"
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:86:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 86,
+      "original": "    -- (DEC-0119, DEC-0122). The factor guard, not the input rows, is what keeps momentum",
+      "mutated": "    -- (DEC-0119, DEC-123). The factor guard, not the input rows, is what keeps momentum"
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:87:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 87,
+      "original": "    -- unmarked (AC-23, DAC-E2-11).",
+      "mutated": "    -- unmarked (AC-24, DAC-E2-11)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:87:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 87,
+      "original": "    -- unmarked (AC-23, DAC-E2-11).",
+      "mutated": "    -- unmarked (AC-23, DAC-E2-12)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:99:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 99,
+      "original": "-- restated_possible is the stock's mark in the three active-stock row sets, false for a stock",
+      "mutated": "-- restated_possible is the stock's mark in the three active-stock row sets, true for a stock"
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:100:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 100,
+      "original": "-- with no input row, and false for a retired stock, which has no input (DEC-0122).",
+      "mutated": "-- with no input row, and true for a retired stock, which has no input (DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:100:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 100,
+      "original": "-- with no input row, and false for a retired stock, which has no input (DEC-0122).",
+      "mutated": "-- with no input row, and false for a retired stock, which has no input (DEC-123)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:102:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 102,
+      "original": "       r.score, r.percentile, NULL, NULL, NULL, coalesce(m.restated, false)",
+      "mutated": "       r.score, r.percentile, NULL, NULL, NULL, coalesce(m.restated, true)"
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:115:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 115,
+      "original": "       coalesce(m.restated, false)",
+      "mutated": "       coalesce(m.restated, true)"
+    },
+    {
+      "id": "src/factorflow/classification/sql/classify.sql:125:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 125,
+      "original": "       coalesce(m.restated, false)",
+      "mutated": "       coalesce(m.restated, true)"
+    },
+    {
+      "id": "src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 101,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-24, DAC-E2-11, DEC-0056, DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 101,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-23, DAC-E2-12, DEC-0056, DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:3",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 101,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-23, DAC-E2-11, DEC-57, DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/growth_inputs.sql:101:off-by-one:4",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 101,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-123)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 167,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-24, DAC-E2-11, DEC-0056, DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 167,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-23, DAC-E2-12, DEC-0056, DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:3",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 167,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-23, DAC-E2-11, DEC-57, DEC-0122)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/value_inputs.sql:167:off-by-one:4",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 167,
+      "original": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).",
+      "mutated": "       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-123)."
+    },
+    {
+      "id": "manual:value-constant-false",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 168,
+      "old": "s.status <> 'missing' AND s.restated AS restated_possible",
+      "new": "false AS restated_possible"
+    },
+    {
+      "id": "manual:value-missing-guard-dropped",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 168,
+      "old": "s.status <> 'missing' AND s.restated AS restated_possible",
+      "new": "coalesce(s.restated, false) AS restated_possible"
+    },
+    {
+      "id": "manual:value-guard-inverted",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 168,
+      "old": "s.status <> 'missing' AND s.restated AS restated_possible",
+      "new": "s.status = 'missing' AND coalesce(s.restated, false) AS restated_possible"
+    },
+    {
+      "id": "manual:value-bool-and",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 75,
+      "old": "bool_or(backfilled) AS restated",
+      "new": "bool_and(backfilled) AS restated"
+    },
+    {
+      "id": "manual:value-balance-sheet-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 75,
+      "old": "bool_or(backfilled) AS restated",
+      "new": "coalesce(bool_or(backfilled) FILTER (WHERE statement_type = 'balance_sheet'), false) AS restated"
+    },
+    {
+      "id": "manual:value-window-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 75,
+      "old": "bool_or(backfilled) AS restated",
+      "new": "coalesce(bool_or(backfilled) FILTER (WHERE statement_type <> 'balance_sheet'), false) AS restated"
+    },
+    {
+      "id": "manual:growth-constant-false",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 102,
+      "old": "s.status <> 'missing' AND s.restated,",
+      "new": "false,"
+    },
+    {
+      "id": "manual:growth-missing-guard-dropped",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 102,
+      "old": "s.status <> 'missing' AND s.restated,",
+      "new": "coalesce(s.restated, false),"
+    },
+    {
+      "id": "manual:growth-guard-inverted",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 102,
+      "old": "s.status <> 'missing' AND s.restated,",
+      "new": "s.status = 'missing' AND coalesce(s.restated, false),"
+    },
+    {
+      "id": "manual:growth-bool-and",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 51,
+      "old": "bool_or(backfilled) AS restated",
+      "new": "bool_and(backfilled) AS restated"
+    },
+    {
+      "id": "manual:growth-trailing-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 51,
+      "old": "bool_or(backfilled) AS restated",
+      "new": "coalesce(bool_or(backfilled) FILTER (WHERE in_ttm), false) AS restated"
+    },
+    {
+      "id": "manual:marks-no-factor-guard",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 93,
+      "old": "       AND %(factor)s::text IN ('value', 'growth')\n",
+      "new": ""
+    },
+    {
+      "id": "manual:marks-guard-admits-momentum",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 93,
+      "old": "IN ('value', 'growth')",
+      "new": "IN ('value', 'growth', 'momentum')"
+    },
+    {
+      "id": "manual:marks-guard-value-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 93,
+      "old": "IN ('value', 'growth')",
+      "new": "IN ('value')"
+    },
+    {
+      "id": "manual:marks-no-factor-filter",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 91,
+      "old": "     WHERE fi.set_id = %(set_id)s::uuid\n       AND fi.factor = %(factor)s::text\n       AND %(factor)s::text IN",
+      "new": "     WHERE fi.set_id = %(set_id)s::uuid\n       AND %(factor)s::text IN"
+    },
+    {
+      "id": "manual:marks-no-set-filter",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 90,
+      "old": "      JOIN active a USING (instrument_id)\n     WHERE fi.set_id = %(set_id)s::uuid\n       AND fi.factor = %(factor)s::text\n       AND %(factor)s::text IN",
+      "new": "      JOIN active a USING (instrument_id)\n     WHERE fi.factor = %(factor)s::text\n       AND %(factor)s::text IN"
+    },
+    {
+      "id": "manual:marks-no-roster-join",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 88,
+      "old": "    SELECT fi.instrument_id, bool_or(fi.restated_possible) AS restated\n      FROM factor_input fi\n      JOIN active a USING (instrument_id)\n",
+      "new": "    SELECT fi.instrument_id, bool_or(fi.restated_possible) AS restated\n      FROM factor_input fi\n"
+    },
+    {
+      "id": "manual:marks-bool-and",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 88,
+      "old": "bool_or(fi.restated_possible)",
+      "new": "bool_and(fi.restated_possible)"
+    },
+    {
+      "id": "manual:classified-row-unmarked",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 102,
+      "old": "r.score, r.percentile, NULL, NULL, NULL, coalesce(m.restated, false)",
+      "new": "r.score, r.percentile, NULL, NULL, NULL, false"
+    },
+    {
+      "id": "manual:classified-row-inner-join",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 103,
+      "old": "  FROM ranked_scores r\n  LEFT JOIN marks m",
+      "new": "  FROM ranked_scores r\n  JOIN marks m"
+    },
+    {
+      "id": "manual:gap-row-unmarked",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 114,
+      "old": "                                          END),\n       coalesce(m.restated, false)",
+      "new": "                                          END),\n       false"
+    },
+    {
+      "id": "manual:gap-row-inner-join",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 116,
+      "old": "  FROM first_gap g\n  LEFT JOIN marks m",
+      "new": "  FROM first_gap g\n  JOIN marks m"
+    },
+    {
+      "id": "manual:unranked-row-unmarked",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 124,
+      "old": "' stocks qualified'),\n       coalesce(m.restated, false)",
+      "new": "' stocks qualified'),\n       false"
+    },
+    {
+      "id": "manual:unranked-row-inner-join",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 126,
+      "old": "  FROM active a\n  LEFT JOIN marks m",
+      "new": "  FROM active a\n  JOIN marks m"
+    },
+    {
+      "id": "manual:retired-row-marked",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 134,
+      "old": "       NULL,\n       false\n  FROM unnest(%(retired_ids)s::bigint[])",
+      "new": "       NULL,\n       true\n  FROM unnest(%(retired_ids)s::bigint[])"
+    },
+    {
+      "id": "manual:value-present-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 168,
+      "old": "s.status <> 'missing' AND s.restated AS restated_possible",
+      "new": "s.status = 'present' AND s.restated AS restated_possible"
+    },
+    {
+      "id": "manual:value-not-computable-unmarked",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 168,
+      "old": "s.status <> 'missing' AND s.restated AS restated_possible",
+      "new": "s.status IN ('present', 'outdated') AND s.restated AS restated_possible"
+    },
+    {
+      "id": "manual:growth-present-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 102,
+      "old": "s.status <> 'missing' AND s.restated,",
+      "new": "s.status = 'present' AND s.restated,"
+    },
+    {
+      "id": "manual:growth-not-computable-unmarked",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 102,
+      "old": "s.status <> 'missing' AND s.restated,",
+      "new": "s.status IN ('present', 'outdated') AND s.restated,"
+    },
+    {
+      "id": "manual:marks-present-inputs-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/classify.sql",
+      "line": 93,
+      "old": "       AND %(factor)s::text IN ('value', 'growth')\n",
+      "new": "       AND %(factor)s::text IN ('value', 'growth')\n       AND fi.status = 'present'\n"
+    }
+  ]
+}
