@@ -16,9 +16,22 @@ and the Filters pane with its two parts (CAP-002-E4-S5):
 - `threshold-sentence.tsx`, one factor's threshold sentence
   ([Threshold sentence](#threshold-sentence-threshold-sentencetsx));
 - `filters-pane.tsx`, the pane itself
-  ([Filters pane](#filters-pane-filters-panetsx)).
+  ([Filters pane](#filters-pane-filters-panetsx));
 
-No route or screen mounts any of them yet. The factor cell, the *Possibly
+and the save and add dialogs with their notices (CAP-002-E4-S8):
+
+- `notices.tsx`, the success notices the dialogs confirm through
+  ([Success notices](#success-notices-noticestsx));
+- `dialog-frame.tsx`, the frame both dialogs share
+  ([Dialog frame](#dialog-frame-dialog-frametsx));
+- `save-as-universe-dialog.tsx`, **Save these {n} as a universe…** and its
+  dialog ([Save as a universe](#save-as-a-universe-save-as-universe-dialogtsx));
+- `add-to-universe-dialog.tsx`, the tray's **Add to universe…** dialog
+  ([Add to a universe](#add-to-a-universe-add-to-universe-dialogtsx)).
+
+No route or screen mounts any of them yet. The dialogs' only importers are
+their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
+dialogs and the tests. The factor cell, the *Possibly
 restated* mark, the not-current banner and the as-of line in
 `web/src/components/patterns/` import `format.ts` and `copy.ts`
 (CAP-002-E4-S3, CAP-002-E4-S4); see
@@ -84,7 +97,8 @@ section 14.
 | `thresholdFieldError(factor, measure)` | the threshold field's error on blur, *Could not set the {factor} threshold: {rule}.*, where `rule` is *a percentile is a number from 0 to 100* or *a standardised score is a finite number* (DEC-0157, provisional). A standalone string: not `failureSentence` output and no `OPERATION_LABELS` entry |
 | `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
-| `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs |
+| `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
+| `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
 | `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail |
 | `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels |
 
@@ -290,6 +304,182 @@ Its parts, in order, each a `py-3` block separated by a divider:
 
 Tests: `filters-pane.test.tsx` (TC-COMP-135, TC-COMP-136), driven through a
 probe host that issues one `toListParams` request per `query` change.
+
+## Success notices (`notices.tsx`)
+
+The save and add dialogs confirm through `success` notices, *Saved {n} stocks
+as {name}* and *Added {n} stocks to {name}*, each linking to the universe
+(DAC-E4-S8-3, DAC-E4-S8-5; UX design 1.1; DEC-0168, DEC-0258). The state
+lives in the host, not the dialog, so a notice raised by a dialog that is
+closing or already unmounted still shows.
+
+| Export | Behaviour |
+|--------|-----------|
+| `useNotices()` | returns a `NoticesBinding`: `notices`, the `HeldNotice[]` in arrival order; `notify(notice)`, which appends it with the next id from a counter ref; `dismiss(id)`, which removes only that item |
+| `NoticeRegion({ notices, onDismiss })` | the region that renders them |
+| `Notice` | `{ message, to? }`: the self-contained message and, optionally, the route it links to |
+| `HeldNotice` | a `Notice` with the `id` `dismiss` names it by |
+| `universePath(universeId)` | `/research/universes/{id}`, the id URI-encoded |
+
+The contract a host relies on: it calls `useNotices` once and renders
+`NoticeRegion` once; a dialog only calls `notify`.
+
+`NoticeRegion` is an `output` (implicit `role="status"`) with
+`aria-live="polite"`, `aria-atomic="false"` and `tabIndex={-1}`, fixed at the
+bottom right, and always mounted, empty before any notice, so its first
+announcement is read. It renders the three newest notices only (`MAX_SHOWN`);
+older ones are held in the host's state and return as shown ones are
+dismissed (DEC-0258). Each shown notice is a `span` with
+`data-variant="success"` on the `--popover` surface with a `--status-good`
+border. Its message is plain text, a router `Link` when `to` is given, then a
+**Dismiss** button (`NOTICES.dismiss`). Dismiss, or `Escape` while the link
+or Dismiss has focus, removes the item and moves focus to the region. Nothing
+is removed by time: DEC-0168 keeps an item until it is dismissed, so the
+toast spec's five-second `success` timeout is not applied.
+
+Two warnings of the story's implementation review v2 remain open here. A held
+notice that returns to the stack is announced again as if new (IR-003).
+The region is `fixed` with no `z-index`, so a host that renders it after a
+dialog draws it above the dialog's overlay, still clickable (IR-001; see
+[Dialog frame](#dialog-frame-dialog-frametsx)).
+
+Tests: `notices.test.tsx`.
+
+## Dialog frame (`dialog-frame.tsx`)
+
+`DialogFrame({ title, children, initialFocusRef, onCancel, busy,
+descriptionId? })` is the `dialog` `standard` frame both dialogs render
+(classification-ui 2.7; dialog design spec sections 3 to 6), following the
+frame `screens/instruments/retire-dialog.tsx` established. It keeps no state
+of its own.
+
+- A native `<dialog open>` with `aria-modal="true"`, `data-variant="standard"`,
+  labelled by its `h2` title and described by `descriptionId` when given;
+  `aria-busy` while `busy`. Surface and text are `--popover` and
+  `--popover-foreground` (DEC-0257).
+- Before it, an overlay: an `aria-hidden` `fixed inset-0` layer in
+  `bg-background/80` that dims the page behind and takes the pointer
+  (DEC-0259). A click on it calls `onCancel`; a press on it never moves focus
+  out of the dialog.
+- On open, focus moves to `initialFocusRef`; on unmount, for any reason,
+  focus returns to whatever held it before the dialog opened.
+- `Escape` calls `onCancel`. `Tab` and `Shift+Tab` cycle over the enabled,
+  tabbable controls present at each keypress, so a confirm swapped while open
+  stays in the cycle.
+
+`onCancel` is the dialog's own Cancel. Each dialog makes it a no-op while a
+request is pending, so Cancel, `Escape` and the overlay never close a dialog
+before its request's result is known (DEC-0259).
+
+`ConfirmProgress({ pending })` is a confirm action's progress in place: an
+`aria-hidden` spinner beside the label whose slot is always reserved
+(`invisible` when not pending), so the button's width never changes. It spins
+only under `motion-safe`.
+
+`<dialog open>` is not modal, and the overlay and the dialog are `fixed` with
+no `z-index`. Stacking therefore follows DOM order: positioned content the
+host renders after the frame, such as a `NoticeRegion`, draws above the
+overlay and still receives the pointer. This is the open warning IR-001 of
+the story's implementation review v2, to be settled before CAP-002-E4-S9
+places the region.
+
+Tests: the frame is exercised through both dialogs' tests.
+
+## Save as a universe (`save-as-universe-dialog.tsx`)
+
+`SaveAsUniverse({ query, matchCount, setId, incompleteCount, onNotify })` is
+**Save these {n} as a universe…** and its dialog (AC-2, AC-5, DAC-E4-5,
+DAC-E4-S8-1 to DAC-E4-S8-4; UX design 1.1; DEC-0167, DEC-0168, DEC-0259).
+
+| Prop | Meaning |
+|------|---------|
+| `query` | the current `ResearchQuery` |
+| `matchCount` | the results header's match count |
+| `setId` | the on-screen score set; `null` while none is shown |
+| `incompleteCount` | the incomplete matches, only when every matching row is loaded, else `null`: the *including* clause is then omitted, not guessed (STD-UI-15) |
+| `onNotify` | the host's `notify` |
+
+**The control.** An outline button reading `RESULTS.saveThese(matchCount)`.
+At zero matches or with no set it is `blocked`: `aria-disabled`, still
+focusable, described by `RESULTS.nothingToSave`, and activating it opens
+nothing and sends nothing. Under a universe scope (`query.scope` non-null)
+the control is not rendered: the save carries the filter, not the scope.
+
+**Open.** Activating the control snapshots `query`, `matchCount`, `setId`
+and `incompleteCount`; the dialog reads only that snapshot, so its title and
+its request always agree. The title is `DIALOGS.saveTitle(matchCount)`. The
+description is `DIALOGS.includingIncomplete` when the incomplete count is
+above zero, then `describeQuery(query)` when not empty. Focus starts on the
+Name field.
+
+**Save.** A blank name (after trimming) shows `DIALOGS.enterName` as a field
+error and sends nothing. Otherwise it posts `createUniverse({ name, filter:
+toThresholds(query), setId })`, the same thresholds object the list read
+uses. While the request is pending, Save shows `ConfirmProgress` with
+`aria-busy` and `data-pending`, Cancel is `aria-disabled` with a muted cue,
+and a second submit does nothing. On success it calls `onNotify` with
+`DIALOGS.saved(memberCount, name)` from the response, linking to
+`universePath(universeId)`, then closes. On failure the dialog stays open:
+
+| Failure | Shown as |
+|---------|----------|
+| `universe_name_in_use` | a field error on Name, `failureSentence` with the trimmed name, and focus on Name |
+| `classification_set_changed` | an alert with `failureSentence`; **Review new result** replaces Save in the same button, keeping focus, and closes the dialog without a request |
+| any other `ClassificationApiError` | an alert with `failureSentence` |
+| any other cause | an alert with `failureSentence` of `create-universe` with no code |
+
+Errors and the invalid border use `--destructive`, and the confirm is
+`--primary` on `--primary-foreground` (DEC-0257).
+
+**Scope change.** If the scope becomes a universe while the dialog is open
+and idle, it closes for good, so it never returns with an old snapshot. A
+pending save keeps it open until its result is known (DEC-0259). When the
+dialog closes after its trigger was unmounted this way, focus falls to the
+document body (open warning IR-002 of the story's implementation review v2).
+
+Tests: `save-as-universe-dialog.test.tsx` (TC-COMP-008 to TC-COMP-011).
+
+## Add to a universe (`add-to-universe-dialog.tsx`)
+
+`AddToUniverseDialog({ symbols, onClose, onNotify })` is the tray's **Add to
+universe…** dialog (DAC-E4-S8-5, AC-4, AC-5; UX design 1.1; DEC-0163,
+DEC-0168, DEC-0169, DEC-0259). Its host renders it while open (CAP-002-E4-S9,
+behind the tray's `onAddToUniverse`) and owns the notices. The symbols are
+those it opened with; a later change to `symbols` is ignored.
+
+**Universes.** On open it reads the active universes once,
+`listUniverses({ lifecycle: "active", limit: 500 })`, the API's largest page,
+with no paging (DEC-0169). Meanwhile a `status` skeleton reading
+`FILTERS.loadingUniverses` holds the select's box. The select, labelled
+`DIALOGS.universe`, lists the universes in the API's order, then
+`DIALOGS.newUniverseOption`. The first universe is chosen, or *New universe*
+when none exists. A failed read replaces the field with an alert,
+`failureSentence` of `list-universes`. Add is `aria-disabled` and does
+nothing until the list has loaded.
+
+**Focus.** It starts on Cancel. When the list arrives it moves to the
+select, or to the Name field when there is no universe, unless the owner has
+moved it meanwhile.
+
+**Add.** *New universe* reveals a Name field; a blank name shows
+`DIALOGS.enterName` and sends nothing. Add then calls
+`createUniverse({ name, symbols })`, the by-hand shape, or
+`addUniverseMembers(universeId, symbols)` for a chosen universe. While
+pending, Add shows `ConfirmProgress`, Cancel is `aria-disabled`, and a changed
+choice is ignored, so a refusal lands on the field it concerns. On success it
+calls `onNotify` once with `DIALOGS.added(added, name, alreadyMembers)`,
+counted from the response (a new universe's `memberCount`, with no
+already-member clause), linking to the universe, then `onClose`. A
+`universe_name_in_use` refusal is a field error on Name; any other failure,
+`universe_retired` included, is an alert, and Add stays available.
+
+Cancel, `Escape` and the overlay do nothing while a request is pending
+(DEC-0259). A request that succeeds after the host unmounted the dialog
+itself still notifies, since the stocks were added, but never calls
+`onClose`. A failure after such an unmount is dropped: the owner is not told
+(open warning IR-004 of the story's implementation review v2).
+
+Tests: `add-to-universe-dialog.test.tsx` (TC-COMP-033).
 
 ## The score-set poll (`use-score-set-poll.ts`)
 
