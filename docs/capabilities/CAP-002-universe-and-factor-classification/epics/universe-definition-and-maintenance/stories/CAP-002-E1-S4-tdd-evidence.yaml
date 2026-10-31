@@ -1,0 +1,92 @@
+# TDD evidence for CAP-002-E1-S4 - Universe Maintenance: Rename, Remove a Member and Retire.
+# Cycles share the one stage commit, so each cites its reviewed_patch (incremental, applied in order:
+# each patch is the diff between the index trees written before and after that cycle).
+# Decisions: DEC-0096 (recorded at planning; no new decision at coding).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T011, T013]
+    description: >
+      rename and retire in service.py (lock first, trimmed name, active target, name free among the other active universes, one renamed or retired event through _INSERT_EVENT_SQL, replayed result via get_universe), with TC-COMP-025, the rename half of TC-COMP-023 (DEC-0096 own-name case pinned) and the rename and second-retire part of TC-COMP-038. The suggested cycle order was changed: retire joins this cycle because T003(c) needs it, and the full TC-COMP-037 test moves to cycle 2 because it needs remove_member.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-1-rename-and-retire.log
+    red_log_sha256: fcbd67c62242366fdd61d46d5c6b756dab6827d5e336ca24c935e5f5c7ed47b6
+    red_evidence: >
+      13 failed before rename and retire existed, every one with AttributeError: module 'factorflow.universes.service' has no attribute 'rename' (or 'retire').
+    green_evidence: >
+      tests/integration/test_universe_maintenance.py and tests/integration/test_universe_create.py 44 passed; tests/unit/test_universe_sql_safety.py and tests/unit/test_universe_service_validation.py 66 passed; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 66af4fc4e781e0f6fb1b27ddcd2f86410e08890c5830dca797777cc67e54d876
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 03426b13ab928a9dbb2906c4721966ed2586c0df52faf8eb0d12abebaf32a067
+      generated: 8
+      killed: 8
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T004, T005, T006, T007, T008, T011, T013]
+    description: >
+      remove_member in service.py and _INSERT_MEMBER_REMOVED_SQL (INSERT only, RETURNING recorded_at): lock, normalised symbol, active target, NotAMember before LastMember (which offers retirement), one member_removed event, no coverage check. Tests for TC-COMP-026, TC-COMP-036, TC-COMP-053, the full TC-COMP-037 (moved from cycle 1 because it removes a member first) and the full TC-COMP-038 (all four writes and the check order), plus two cycle-1 tests strengthened after the cycle-1 review's low findings.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-2-remove-member.log
+    red_log_sha256: 675913819bb08483a6e962f76983669a28d0671bf9299c9d8f988f5eae5d10e8
+    red_evidence: >
+      16 failed, 12 passed before remove_member existed: every new test failed with AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'; the 12 passing are cycle 1's.
+    green_evidence: >
+      tests/integration/test_universe_maintenance.py and tests/integration/test_universe_create.py 59 passed; the universe and research unit scans 91 passed; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: de6324ac9de92f8118e80045828fa05d36783ac30310dfe26cc5106f4ad97a33
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: 81787c25dae8e8b05f209d037bbeba55ed1af9952561e1a825f85fae90668257
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T009, T010, T012, T013]
+    description: >
+      Test-only cycle. T009 appends the TC-COMP-054 cases to CAP-002-E1-S2's tests/unit/test_universe_sql_safety.py (one new import line and an appended block; no S2 line changed): the service's *_SQL constants including _INSERT_MEMBER_REMOVED_SQL pass the append-only and named-placeholder checks, rename/remove_member/retire hold no UPDATE/DELETE literal and pass execute only names or constants, the statements they execute are event INSERTs, and the scan fires on synthetic DELETE, f-string, .format and % sources. T010 adds the integration tests for the write lock (each operation waits on pg_locks), rename/create serialisation, rollback when the event INSERT fails, event order, remove_member's returned recorded_at, symbol normalisation and removal of a retired instrument's membership. Also re-checks the sole member after LastMember (cycle-2 review low finding). The full Validation Plan ran green before this cycle was fingerprinted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-3-lock-and-safety.log
+    red_log_sha256: 9defa5b06daf5881c2e5b8f1ca5925a6502c238db04ac9c056367e1e745ea4b4
+    red_evidence: >
+      The production code already existed, so RED was observed against an injected break, reverted after the run (the log's first line names it): _take_lock skipped in rename, remove_member and retire, and remove_member's execute argument built by concatenation. 7 failed, 70 passed: S2's interpolation scan, the two new TC-COMP-054 structural tests, the three lock-wait tests and the rename/create serialisation test.
+    green_evidence: >
+      With the injection reverted: tests/unit/test_universe_sql_safety.py 38 passed and tests/integration/test_universe_maintenance.py 39 passed; uv run pytest -m 'not postgres' 1221 passed, 1 xfailed; uv run pytest -m postgres 664 passed; ruff check, ruff format --check, mypy src and uv build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 82c78f20d546593c0eb61ce6b711d0323529cbee721e138262b185e231473d29
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 595b414ff5fd7c7af98741ee883a012a6afbbdfce85ebeab9f1b5b8b651eb2b6
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

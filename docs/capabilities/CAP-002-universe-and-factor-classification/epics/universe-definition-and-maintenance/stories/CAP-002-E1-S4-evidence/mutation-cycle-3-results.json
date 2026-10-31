@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "command": "uv sync -q --all-extras --all-groups && uv run pytest -m \"postgres or not postgres\" tests/unit/test_universe_sql_safety.py tests/integration/test_universe_maintenance.py -x -q -p no:cacheprovider",
+  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+  "tree_patch_sha256": "09566edae73f9bdc0b34adf4eda4ba28dd926d37427dbc3ffb1d5438e1ffc9b1",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mutants-3.json",
+  "mutants_sha256": "0837f4e974ef66d237fa2b7371181d16a42cdbd7b9a1d8b44ee6d2a07e01e967",
+  "jobs": 5,
+  "started": "2026-10-31T02:08:39Z",
+  "baselines": [
+    {
+      "worker": 4,
+      "exit_code": 0,
+      "seconds": 10.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/baseline-w4.log",
+      "log_sha256": "b6757422873ad2f3ee6a041e901bf4970a5a4e87420a9c5b5ba4dad363f10b4b"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 10.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/baseline-w2.log",
+      "log_sha256": "b549288029445216310a6577b64134e3afe8dee6ded7e1efa28a952b3deac2cd"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 10.7,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/baseline-w3.log",
+      "log_sha256": "ce925788361856c602882d2431bd11cc550d07ee10a71adf19306aca21a65c5c"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 10.9,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/baseline-w0.log",
+      "log_sha256": "bff0a968c64a7c3671b52d8388da2df2adac0af98ef7aa98e52bbb06692418ac"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 11.7,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/baseline-w1.log",
+      "log_sha256": "90105ecc4c30802a59d1d2e281047ec9edd90c049a5e012ca12c6af32741f306"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:rename-skips-lock",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        new_name = _normalise_name(name)",
+      "new": "        new_name = _normalise_name(name)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 11.3,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/manual_rename-skips-lock.log",
+      "log_sha256": "3065cdfbeb7cb49f2ef1e2ff712c7bc789ca3dbd32ff04a5af1bf62baee3625b"
+    },
+    {
+      "id": "manual:remove-skips-lock",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        [clean_symbol] = _normalise_symbols([symbol])",
+      "new": "        [clean_symbol] = _normalise_symbols([symbol])",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 11.2,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/manual_remove-skips-lock.log",
+      "log_sha256": "e60902fabd2e8635d8483e38a2d3e1a805e1b554f1d38edd6d264f5a39bb7b3b"
+    },
+    {
+      "id": "manual:retire-skips-lock",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        _require_active(conn, universe_id)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))",
+      "new": "        _require_active(conn, universe_id)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 11.5,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/manual_retire-skips-lock.log",
+      "log_sha256": "f911dd6a486cdb41680cf71a31ab8111681a5b5f97de5c0a63a8fea674169a52"
+    },
+    {
+      "id": "manual:rename-lock-after-name-check",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n        if _name_in_use(conn, new_name, excluding=universe_id):\n            raise UniverseNameInUse(f\"an active universe is already named {new_name!r}\")\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"renamed\", name=new_name))",
+      "new": "        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n        if _name_in_use(conn, new_name, excluding=universe_id):\n            raise UniverseNameInUse(f\"an active universe is already named {new_name!r}\")\n        _take_lock(conn)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"renamed\", name=new_name))",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 6.7,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/manual_rename-lock-after-name-check.log",
+      "log_sha256": "bbcc9d00d0aa73e00144af38ab9275b156711c7ff4001ee8314d758192312825"
+    },
+    {
+      "id": "manual:remove-statement-built",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            _INSERT_MEMBER_REMOVED_SQL,\n",
+      "new": "            _INSERT_MEMBER_REMOVED_SQL + \"\",\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.2,
+      "worker": 4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut3-logs/manual_remove-statement-built.log",
+      "log_sha256": "660d146d05a55ea6fb7b750464eb1af4d1a2fe15642eb35552bb12cd1f2bce61"
+    }
+  ],
+  "finished": "2026-10-31T02:09:03Z"
+}
