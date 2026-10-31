@@ -1,0 +1,192 @@
+# TDD evidence for CAP-002-E3-S2 - Classification list read and the single evaluate_filter predicate.
+# One cycle: the plan writes every test first (Phase 2, T002-T016), then the models, cursor, two statements and the
+# two reads (Phase 3, T017-T020), so there is a single RED and a single GREEN. The driver commits once per stage:
+# commit_hash is stage.
+# Decisions recorded by this stage: DEC-0245 (PROVISIONAL: StockRow.name is the latest instrument_reference
+# company_name, None when none; the design's i.name has no column) and DEC-0246 (the cursor carries a payload check,
+# so an altered cursor is refused, as DAC-E3-S2-5 and T004 require). Plan-time DEC-0127, DEC-0128 (PROVISIONAL,
+# pinned by test_retired_universe_is_still_a_scope) and DEC-0129 are implemented as the plan records them.
+# Reviews: one independent code-review session and one independent spec-drift session (fresh claude -p sessions
+# with read-only tools) judged cycle-1.patch, the staged diff the fingerprint hashes: APPROVED and drift_detected
+# false (code-review-cycle-1.txt, spec-drift-cycle-1.txt). Their non-blocking notes asked for no change here: compare
+# (CAP-002-E3-S3) must widen the scope's active-only rule when symbols is set (DAC-E3-5); Thresholds.bounds is a dict
+# inside a frozen dataclass; DEC-0245 awaits the owner; the final SELECT uses a plain LEFT JOIN where the plan wrote
+# LEFT JOIN LATERAL, identical because the subquery references no outer column.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019, T020, T021, T022, T023]
+    description: >
+      src/factorflow/classification/reader.py (INPUT_REASONS, SORT_ALLOWLIST, resolve_sort, escape_like,
+      UniverseNotFound, CursorError re-exported from runs/queries.py, Thresholds, FactorCell, StockRow, ListFilters,
+      ClassificationPage, encode_cursor/decode_cursor, list_classifications, evaluate_filter), sql/list_classifications.sql
+      (scope and matched CTEs, twelve guarded bounds, hide_incomplete over the input reasons, a one-row count joined to
+      the keyset page) and sql/universe_exists.sql. A universe scope runs the imported MEMBERSHIP_AS_OF_SQL (the name
+      the plan expected) with today in America/Chicago. Tests: tests/integration/reader_seed.py (insert_classification,
+      insert_reference, insert_universe, add_member, remove_member, retire_universe, seed_scored_stock),
+      tests/integration/test_reader_list.py (TC-COMP-096, 108, 112, 120, 122, 189 and the T012-T015 cases),
+      tests/unit/test_reader_sort_allowlist.py and test_reader_cursor.py (TC-COMP-121), test_reader_filters.py
+      (TC-COMP-122 model half, the import-order guard) and the T016 extension of test_reader_sql_read_only.py. The
+      first mutation run left 31 survivors; tests were added for the inclusive momentum bounds, a full last page,
+      ListFilters.symbols, UniverseNotFound.universe_id, frozen models, the check's length and field-order
+      independence, and the rerun left only the 15 equivalent survivors below.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/red-cycle-1.log
+    red_log_sha256: 73cf14071b0db2a6d10d083cb45efe51225d9bcc8765224eaf394a1bddb82642
+    red_evidence: >
+      Observed with the test files written and no S2 production code (HEAD b6b5838): 73 failed, 4 passed, 2 errors
+      (test_reader_cursor.py and test_reader_list.py failed at collection with AttributeError on reader.encode_cursor
+      and reader.ClassificationPage; the other unit tests failed on the missing names and SQL files). The 4 that
+      passed were the S1 read-only cases and the import-order guard, which holds before and after.
+    green_evidence: >
+      The story's test files plus test_engine_sql_safety.py (unedited, T023), test_package_data_ships_sql.py (T021)
+      and test_classification_sql_ships.py against a real PostgreSQL 16 container: 221 passed (green-cycle-1.log).
+      ruff check, ruff format --check and mypy src clean. The full suite is recorded in the stage report.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/green-cycle-1.log
+        sha256: 86b7fab1f6ae2a9bb80a411555f916ccd7dc4fa058bc58be67e8b31be8c3dd6f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/code-review-cycle-1.txt
+        sha256: bd073c775c06cae681c7a5963053c2df7e06e405b2490b7287099c42262b8410
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/spec-drift-cycle-1.txt
+        sha256: 62da8f82a42666fe9488eac7237fe4efd9aef3688a09877b9002c9df938a0f26
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 66df8dbafcb2db0a6cd04820a5c0bddfd8a6a7ce672c32bbc5caa61cf6b6dc05
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 2235ea57e21be7b2d5ff77d3d761916b133524ca8c02f2c0e540199eac4f4478
+      generated: 154
+      killed: 139
+      survived: 15
+      stillborn: 0
+      timeout: 0
+      score: 0.903
+      survivors:
+        - id: src/factorflow/classification/reader.py:275:off-by-one:1
+          disposition: equivalent
+          reason: every bound name starts with its factor and an underscore, so split("_", 2)[0] and split("_", 1)[0] are the same factor
+        - id: src/factorflow/classification/reader.py:524:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: k is bound only by a keyset fragment; with no cursor the keyset is "true", which names no k, and psycopg ignores an absent unused key
+        - id: src/factorflow/classification/reader.py:525:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: ksym is bound only by a keyset fragment; with no cursor the keyset is "true", which names no ksym
+        - id: src/factorflow/classification/reader.py:543:off-by-one:1
+          disposition: equivalent
+          reason: the statement always returns at least the count row, whose match_count overwrites the initial value
+        - id: src/factorflow/classification/reader.py:548:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:548:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/sql/list_classifications.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/list_classifications.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/list_classifications.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/list_classifications.sql:8:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/list_classifications.sql:9:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/list_classifications.sql:23:off-by-one:1
+          disposition: equivalent
+          reason: EXISTS ignores its subquery's select list, so SELECT 2 and SELECT 1 test the same rows
+        - id: src/factorflow/classification/sql/universe_exists.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/universe_exists.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: EXISTS ignores its subquery's select list, so SELECT 2 and SELECT 1 test the same rows
+        - id: manual:outer-order-dropped
+          disposition: equivalent
+          reason: the outer ORDER BY repeats the page subquery's order over a one-row LEFT JOIN, so the rows already arrive in that order; it makes the order a guarantee of the statement rather than of the plan, which no result can distinguish
+  - id: rework-1
+    tasks: [T008, T009, T011, T014, T018, T020]
+    description: >
+      Review rework against CAP-002-E3-S2-implementation-review-v1.md (CHANGES-REQUIRED), one cycle for its six
+      findings; the 11 non-equivalent survivors of its mutation run are re-run here. IR-001 (HIGH):
+      test_value_and_growth_marks_are_each_their_own_cell seeds a value-only and a growth-only restated stock, so
+      neither mark can be read from the other factor's row. IR-002 (HIGH):
+      test_value_and_growth_input_reason_cells_carry_their_own_input_and_detail asserts reason_code, reason_input
+      and reason_detail on a value (book_to_price) and a growth (revenue_growth) input-reason cell of one stock.
+      IR-003 (HIGH): test_universe_scope_replays_membership_at_today_in_chicago fixes the reader's clock (a datetime
+      subclass patched over reader.datetime) at 00:30 and at 23:30 CDT on 15 October, with one member recorded on
+      that Chicago date and one on the next; reader_seed.add_member gains a keyword-only recorded_on whose default
+      is the column's own. IR-004 (MEDIUM): test_a_missing_factor_row_is_a_data_integrity_error seeds a stock with
+      no value row and expects ValueError with no bound and with a bound on value (Open Gap 7, DEC-0129). IR-005
+      (LOW): _parse_cursor refuses, with CursorError, a factor-sort key at or beyond what its column holds (score
+      numeric(18,6), magnitude below 10^12; percentile numeric(9,6), below 10^3) or finer than six decimal places,
+      and returns the key quantized to six places, so a re-encoded 0E-200000 binds as 0.000000 (the second code
+      review's note); cursors the reader issues carry stored values and are unaffected. IR-006 (LOW): the TC-COMP-122
+      test now seeds an input-reason member (INC) in the universe, so its docstring holds; counts 3 to 4.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/red-rework-1.log
+    red_log_sha256: 8d725f819a2a1e07a5ef56d0bff11d464bd61855220a552e4000ff39386932c3
+    red_evidence: >
+      With every rework test written and reader.py, list_classifications.sql and universe_exists.sql as reviewed
+      (a4608e7, whose production files equal the reviewed c5a2039), the two touched files ran 13 failed, 106
+      passed: the nine out-of-range or over-fine keys decoded instead of raising CursorError, and four keys
+      (1.5000000, 100, 0E-200000, 0E+200000) decoded at an exponent other than -6. The IR-001, IR-002, IR-003,
+      IR-004 and IR-006 tests passed on the reviewed code by construction, since the code was correct and the
+      tests were missing; their RED is the review's 11 non-equivalent survivors, which each of them now kills
+      (TEST-TDD-006), each by the test written for it (results logs).
+    green_evidence: >
+      The story's focused files plus test_engine_sql_safety.py, test_package_data_ships_sql.py and
+      test_classification_sql_ships.py against PostgreSQL 16: 245 passed (green-rework-1.log); ruff check, ruff
+      format --check and mypy src clean. Full suite: 1838 passed, 1 xfailed (full-suite-rework-1.log). Mutation: 77
+      mutants, 7 generated over the staged production lines, the review's 60 hand-written ones (its 25 rv-* and the
+      35 of cycle-1, every target line still present), 2 clock-zone ones (UTC, America/New_York) and 8 for the key
+      check; 75 killed, all 11 of the review's non-equivalent survivors among them. The first code review asked
+      for an instant ahead of Chicago (now 23:30 CDT, which kills the UTC and New York zones) and the second for
+      0E-200000 (now quantized); each change was re-fingerprinted, re-mutated and re-reviewed. Final reviews:
+      code review APPROVED with NON-BLOCKING notes only (the red log shows only the cursor failures, the patch
+      couples to the reader's datetime import, absolute paths in logs); spec drift none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/green-rework-1.log
+        sha256: a447ea7b341709e8163c73e3415281b104e02e1f8f60b2492a58b61068338d09
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/full-suite-rework-1.log
+        sha256: 6939c4773e62589a796dedc8f876277c5b06e0b0d3c061ff8d14dcdb73cc92bd
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/code-review-rework-1.txt
+        sha256: 4cfcfbe6812d41ca6cb3fb1f0c53f6a1ba2e44cf5ca65a0e9e0060cc270073ae
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/spec-drift-rework-1.txt
+        sha256: bd6124e6b411ade0eb2b6e15f3b3b9ecb4493b3c7c328e858ce28ca444fd18b4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 581d1733b06bffafc2ca2fb7aa0a4a63838b1811bc5cf1d9b869200116f8227c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/rework-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutation-rework-1-results.json
+      results_sha256: 318ddbe4656e55ea4e6c9541dc556244519cb35dc4c360d4771a50c495a78531
+      generated: 77
+      killed: 75
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.974
+      survivors:
+        - id: manual:rv-name-tiebreak-asc
+          disposition: equivalent
+          reason: >
+            As review v1 judged: DEC-0245 makes the name that of the most recent instrument_reference row, and
+            value_hash only makes LIMIT 1 deterministic among rows recorded at the same instant, where no row is
+            more recent; which of two simultaneous names wins is left open by the decision.
+        - id: manual:outer-order-dropped
+          disposition: equivalent
+          reason: >
+            As cycle-1 and review v1 judged: the outer ORDER BY repeats the page subquery's order over a
+            one-row LEFT JOIN ... ON true, which PostgreSQL 16 can only run as a nested loop with the count on the
+            outer side, so the page already arrives in the subquery's order; no result distinguishes the two.

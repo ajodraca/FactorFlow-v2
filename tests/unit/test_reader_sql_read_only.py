@@ -21,7 +21,15 @@ def _strip_comments(text: str) -> str:
     return re.sub(r"--[^\n]*", " ", text)
 
 
-@pytest.mark.parametrize("name", ["current_set.sql", "summary.sql"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "current_set.sql",
+        "summary.sql",
+        "list_classifications.sql",  # CAP-002-E3-S2 T016
+        "universe_exists.sql",  # CAP-002-E3-S2 T016
+    ],
+)
 def test_reader_statement_is_one_read_only_query(name: str) -> None:
     """DAC-E3-S1-6: one statement starting WITH or SELECT and no write keyword."""
     body = _strip_comments((SQL_DIR / name).read_text(encoding="utf-8")).strip()

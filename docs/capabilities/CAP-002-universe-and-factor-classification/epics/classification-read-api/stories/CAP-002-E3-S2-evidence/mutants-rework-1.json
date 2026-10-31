@@ -1,0 +1,630 @@
+{
+ "schema": 1,
+ "repo_head": "a4608e7c0c8b3d6009e51e21d38d7db47cd3bf1c",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/reader.py:122:off-by-one:1",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 122,
+   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
+   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(11) ** 12, \"percentile\": Decimal(10) ** 3}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:122:off-by-one:2",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 122,
+   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
+   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 13, \"percentile\": Decimal(10) ** 3}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:122:off-by-one:3",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 122,
+   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
+   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(11) ** 3}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:122:off-by-one:4",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 122,
+   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
+   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 4}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:417:off-by-one:1",
+   "cycle": "rework-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 417,
+   "original": "    if abs(number) >= limit:",
+   "mutated": "    if abs(number) > limit:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:420:negate-boolean:1",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 420,
+   "original": "    if stored != number:",
+   "mutated": "    if stored == number:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:422:negate-boolean:1",
+   "cycle": "rework-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 422,
+   "original": "    return data, (stored, False, symbol)",
+   "mutated": "    return data, (stored, True, symbol)"
+  },
+  {
+   "id": "manual:rv-today-zone-behind-chicago",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
+   "new": "_CHICAGO: Final = ZoneInfo(\"America/Los_Angeles\")"
+  },
+  {
+   "id": "manual:rv-today-host-date",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "today = datetime.now(_CHICAGO).date()",
+   "new": "today = date.today()"
+  },
+  {
+   "id": "manual:rv-missing-row-accepted",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    if status is None:  # the engine writes three rows per stock (task plan Open Gap 7)",
+   "new": "    if False:  # the engine writes three rows per stock (task plan Open Gap 7)"
+  },
+  {
+   "id": "manual:rv-threshold-guard-not-equal",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "WHERE (%(value_score_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
+   "new": "WHERE (%(value_score_min)s::numeric IS NULL OR c_value.status <> 'classified'"
+  },
+  {
+   "id": "manual:rv-value-join-inner",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "      LEFT JOIN factor_classification c_value\n",
+   "new": "      JOIN factor_classification c_value\n"
+  },
+  {
+   "id": "manual:rv-name-tiebreak-asc",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
+   "new": "ORDER BY r.recorded_at DESC, r.value_hash ASC"
+  },
+  {
+   "id": "manual:rv-name-any-instrument",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "             WHERE r.instrument_id = i.instrument_id\n",
+   "new": "             WHERE true\n"
+  },
+  {
+   "id": "manual:rv-growth-restated-from-value",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_growth.restated_possible AS growth_restated_possible,",
+   "new": "c_value.restated_possible AS growth_restated_possible,"
+  },
+  {
+   "id": "manual:rv-value-restated-from-growth",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_value.restated_possible AS value_restated_possible,",
+   "new": "c_growth.restated_possible AS value_restated_possible,"
+  },
+  {
+   "id": "manual:rv-momentum-restated-from-value",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_momentum.restated_possible AS momentum_restated_possible",
+   "new": "c_value.restated_possible AS momentum_restated_possible"
+  },
+  {
+   "id": "manual:rv-growth-reason-input-from-value",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_growth.reason_input AS growth_reason_input",
+   "new": "c_value.reason_input AS growth_reason_input"
+  },
+  {
+   "id": "manual:rv-growth-reason-detail-from-value",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_growth.reason_detail AS growth_reason_detail",
+   "new": "c_value.reason_detail AS growth_reason_detail"
+  },
+  {
+   "id": "manual:rv-value-reason-input-from-growth",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_value.reason_input AS value_reason_input",
+   "new": "c_growth.reason_input AS value_reason_input"
+  },
+  {
+   "id": "manual:rv-value-reason-detail-from-growth",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_value.reason_detail AS value_reason_detail",
+   "new": "c_growth.reason_detail AS value_reason_detail"
+  },
+  {
+   "id": "manual:rv-momentum-reason-input-from-value",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "c_momentum.reason_input AS momentum_reason_input",
+   "new": "c_value.reason_input AS momentum_reason_input"
+  },
+  {
+   "id": "manual:rv-count-over-scope",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
+   "new": "FROM (SELECT count(*) AS match_count FROM scope) c"
+  },
+  {
+   "id": "manual:rv-keyset-asc-numeric-drops-nulls",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "(\"asc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\"",
+   "new": "(\"asc\", \"numeric\"): \"({sort_expr} > %(k)s::numeric\""
+  },
+  {
+   "id": "manual:rv-keyset-desc-text-wrong-way",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "(\"desc\", \"text\"): \"({sort_expr} < %(k)s::text\"",
+   "new": "(\"desc\", \"text\"): \"({sort_expr} > %(k)s::text\""
+  },
+  {
+   "id": "manual:rv-keyset-desc-numeric-tie-repeat",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"\n    \" OR ({sort_expr} = %(k)s::numeric AND m.symbol > %(ksym)s::text))\",",
+   "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"\n    \" OR ({sort_expr} = %(k)s::numeric AND m.symbol >= %(ksym)s::text))\","
+  },
+  {
+   "id": "manual:rv-next-cursor-null-flag-false",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "current.set_id, filters.sort, filters.order, key, key is None, stocks[-1].symbol",
+   "new": "current.set_id, filters.sort, filters.order, key, False, stocks[-1].symbol"
+  },
+  {
+   "id": "manual:rv-escape-like-noop",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
+   "new": "return prefix"
+  },
+  {
+   "id": "manual:rv-early-cursor-check-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    if filters.cursor is not None:\n        _parse_cursor(filters.cursor, filters.sort)\n",
+   "new": ""
+  },
+  {
+   "id": "manual:rv-symbol-shape-prefix-match",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if not _SYMBOL_PREFIX.fullmatch(upper):",
+   "new": "if not _SYMBOL_PREFIX.match(upper):"
+  },
+  {
+   "id": "manual:rv-percentile-range-on-score",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if \"_percentile_\" in name and not",
+   "new": "if \"_score_\" in name and not"
+  },
+  {
+   "id": "manual:rv-cell-name-from-symbol",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "        name=c[\"name\"],",
+   "new": "        name=c[\"symbol\"],"
+  },
+  {
+   "id": "manual:value-score-min-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.score >= %(value_score_min)s::numeric",
+   "new": "OR c_value.score > %(value_score_min)s::numeric"
+  },
+  {
+   "id": "manual:value-score-max-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.score <= %(value_score_max)s::numeric",
+   "new": "OR c_value.score < %(value_score_max)s::numeric"
+  },
+  {
+   "id": "manual:value-pmin-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.percentile >= %(value_percentile_min)s::numeric",
+   "new": "OR c_value.percentile > %(value_percentile_min)s::numeric"
+  },
+  {
+   "id": "manual:value-pmax-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.percentile <= %(value_percentile_max)s::numeric",
+   "new": "OR c_value.percentile < %(value_percentile_max)s::numeric"
+  },
+  {
+   "id": "manual:growth-score-min-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.score >= %(growth_score_min)s::numeric",
+   "new": "OR c_growth.score > %(growth_score_min)s::numeric"
+  },
+  {
+   "id": "manual:growth-score-max-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.score <= %(growth_score_max)s::numeric",
+   "new": "OR c_growth.score < %(growth_score_max)s::numeric"
+  },
+  {
+   "id": "manual:growth-pmin-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.percentile >= %(growth_percentile_min)s::numeric",
+   "new": "OR c_growth.percentile > %(growth_percentile_min)s::numeric"
+  },
+  {
+   "id": "manual:growth-pmax-exclusive",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.percentile <= %(growth_percentile_max)s::numeric",
+   "new": "OR c_growth.percentile < %(growth_percentile_max)s::numeric"
+  },
+  {
+   "id": "manual:momentum-score-min-other-metric",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_momentum.score >= %(momentum_score_min)s::numeric",
+   "new": "OR c_momentum.percentile >= %(momentum_score_min)s::numeric"
+  },
+  {
+   "id": "manual:momentum-pmax-other-factor",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_momentum.percentile <= %(momentum_percentile_max)s::numeric",
+   "new": "OR c_value.percentile <= %(momentum_percentile_max)s::numeric"
+  },
+  {
+   "id": "manual:value-pmin-classified-only-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(%(value_percentile_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
+   "new": "(%(value_percentile_min)s::numeric IS NULL"
+  },
+  {
+   "id": "manual:momentum-pmin-classified-only-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(%(momentum_percentile_min)s::numeric IS NULL\n            OR c_momentum.status IS DISTINCT FROM 'classified'",
+   "new": "(%(momentum_percentile_min)s::numeric IS NULL"
+  },
+  {
+   "id": "manual:hide-design-snippet-null",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "c_value.reason_code = ANY(%(input_reasons)s::text[])"
+  },
+  {
+   "id": "manual:hide-drops-growth",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR COALESCE(c_growth.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "OR false"
+  },
+  {
+   "id": "manual:hide-drops-momentum",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR COALESCE(c_momentum.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "OR false"
+  },
+  {
+   "id": "manual:hide-any-not-classified",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "COALESCE(c_value.reason_code IS NOT NULL, false)"
+  },
+  {
+   "id": "manual:unscoped-includes-retired",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR (NOT %(scoped)s::boolean AND i.lifecycle = 'active'))",
+   "new": "OR (NOT %(scoped)s::boolean))"
+  },
+  {
+   "id": "manual:scoped-active-only",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]))",
+   "new": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]) AND i.lifecycle = 'active')"
+  },
+  {
+   "id": "manual:no-set-row-required",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "WHERE c.set_id = %(set_id)s::uuid AND c.instrument_id = i.instrument_id",
+   "new": "WHERE c.instrument_id = i.instrument_id"
+  },
+  {
+   "id": "manual:growth-joins-value",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "AND c_growth.factor = 'growth'",
+   "new": "AND c_growth.factor = 'value'"
+  },
+  {
+   "id": "manual:nulls-first",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
+   "new": "ORDER BY ({sort_expr} IS NULL) DESC, {sort_expr} {order}, m.symbol ASC\n         LIMIT"
+  },
+  {
+   "id": "manual:tie-symbol-desc",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
+   "new": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol DESC\n         LIMIT"
+  },
+  {
+   "id": "manual:outer-order-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": " ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC;",
+   "new": " ;"
+  },
+  {
+   "id": "manual:count-over-page",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
+   "new": "FROM (SELECT count(*) AS match_count FROM matched WHERE {keyset}) c"
+  },
+  {
+   "id": "manual:name-oldest",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
+   "new": "ORDER BY r.recorded_at ASC, r.value_hash DESC"
+  },
+  {
+   "id": "manual:symbol-prefix-ignored",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE",
+   "new": "OR true OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE"
+  },
+  {
+   "id": "manual:keyset-desc-wrong-way",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"",
+   "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\""
+  },
+  {
+   "id": "manual:keyset-ties-repeat",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol > %(ksym)s::text)\"",
+   "new": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol >= %(ksym)s::text)\""
+  },
+  {
+   "id": "manual:page-no-lookahead",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "limit_plus_one=filters.limit + 1,",
+   "new": "limit_plus_one=filters.limit,"
+  },
+  {
+   "id": "manual:prefix-not-a-prefix",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "escape_like(thresholds.symbol) + \"%\" if",
+   "new": "escape_like(thresholds.symbol) if"
+  },
+  {
+   "id": "manual:escape-order",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
+   "new": "return prefix.replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\").replace(\"\\\\\", \"\\\\\\\\\")"
+  },
+  {
+   "id": "manual:cursor-ignores-set",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if (data[\"set\"], data[\"sort\"], data[\"order\"]) != (str(set_id), sort, order):",
+   "new": "if (data[\"sort\"], data[\"order\"]) != (sort, order):"
+  },
+  {
+   "id": "manual:cursor-no-check",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if data[\"chk\"] != _cursor_check(data):",
+   "new": "if False:"
+  },
+  {
+   "id": "manual:evaluate-hides-incomplete-always",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "hide_incomplete=thresholds.hide_incomplete,",
+   "new": "hide_incomplete=True,"
+  },
+  {
+   "id": "manual:universe-today-utc",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "today = datetime.now(_CHICAGO).date()",
+   "new": "today = date(2000, 1, 1)"
+  },
+  {
+   "id": "manual:rework-1:key-limit-always-score",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    limit = _KEY_LIMITS[\"percentile\" if sort.endswith(\"_percentile\") else \"score\"]",
+   "new": "    limit = _KEY_LIMITS[\"score\"]"
+  },
+  {
+   "id": "manual:rework-1:key-limit-always-percentile",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    limit = _KEY_LIMITS[\"percentile\" if sort.endswith(\"_percentile\") else \"score\"]",
+   "new": "    limit = _KEY_LIMITS[\"percentile\"]"
+  },
+  {
+   "id": "manual:rework-1:key-quantum-coarser",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_KEY_QUANTUM: Final = Decimal(\"0.000001\")",
+   "new": "_KEY_QUANTUM: Final = Decimal(\"0.00001\")"
+  },
+  {
+   "id": "manual:rework-1:key-quantum-finer",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_KEY_QUANTUM: Final = Decimal(\"0.000001\")",
+   "new": "_KEY_QUANTUM: Final = Decimal(\"0.0000001\")"
+  },
+  {
+   "id": "manual:rework-1:today-zone-utc",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
+   "new": "_CHICAGO: Final = ZoneInfo(\"UTC\")"
+  },
+  {
+   "id": "manual:rework-1:today-zone-ahead-of-chicago",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
+   "new": "_CHICAGO: Final = ZoneInfo(\"America/New_York\")"
+  },
+  {
+   "id": "manual:rework-1:key-limit-drops-abs",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    if abs(number) >= limit:",
+   "new": "    if number >= limit:"
+  },
+  {
+   "id": "manual:rework-1:key-range-check-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    if abs(number) >= limit:\n        raise CursorError(\"cursor key is outside the range of its sort column\")\n",
+   "new": ""
+  },
+  {
+   "id": "manual:rework-1:key-scale-check-dropped",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    if stored != number:\n        raise CursorError(\"cursor key is finer than its sort column holds\")\n",
+   "new": ""
+  },
+  {
+   "id": "manual:rework-1:key-returned-unquantized",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    return data, (stored, False, symbol)",
+   "new": "    return data, (number, False, symbol)"
+  }
+ ]
+}

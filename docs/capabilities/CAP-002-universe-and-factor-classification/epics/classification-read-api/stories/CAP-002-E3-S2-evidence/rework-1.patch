@@ -1,0 +1,2161 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/green-rework-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/green-rework-1.log
+new file mode 100644
+index 0000000..7bba0c0
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/green-rework-1.log
+@@ -0,0 +1,17 @@
++# GREEN, CAP-002-E3-S2 rework-1: the rework tests and the IR-005 key-range check (HEAD a4608e7 plus the staged rework)
++$ uv run --offline pytest tests/unit/test_reader_sort_allowlist.py tests/unit/test_reader_cursor.py tests/unit/test_reader_filters.py tests/unit/test_reader_sql_read_only.py tests/integration/test_reader_list.py tests/unit/test_engine_sql_safety.py tests/unit/test_package_data_ships_sql.py tests/unit/test_classification_sql_ships.py -q -p no:randomly
++........................................................................ [ 29%]
++........................................................................ [ 58%]
++........................................................................ [ 88%]
++.............................                                            [100%]
++245 passed in 13.23s
++exit=0
++$ uv run --offline ruff check .
++All checks passed!
++exit=0
++$ uv run --offline ruff format --check .
++247 files already formatted
++exit=0
++$ uv run --offline mypy src
++Success: no issues found in 57 source files
++exit=0
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutants-rework-1.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutants-rework-1.json
+new file mode 100644
+index 0000000..4c64eb6
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutants-rework-1.json
+@@ -0,0 +1,630 @@
++{
++ "schema": 1,
++ "repo_head": "a4608e7c0c8b3d6009e51e21d38d7db47cd3bf1c",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "src/factorflow/classification/reader.py:122:off-by-one:1",
++   "cycle": "rework-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 122,
++   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(11) ** 12, \"percentile\": Decimal(10) ** 3}"
++  },
++  {
++   "id": "src/factorflow/classification/reader.py:122:off-by-one:2",
++   "cycle": "rework-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 122,
++   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 13, \"percentile\": Decimal(10) ** 3}"
++  },
++  {
++   "id": "src/factorflow/classification/reader.py:122:off-by-one:3",
++   "cycle": "rework-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 122,
++   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(11) ** 3}"
++  },
++  {
++   "id": "src/factorflow/classification/reader.py:122:off-by-one:4",
++   "cycle": "rework-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 122,
++   "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++   "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 4}"
++  },
++  {
++   "id": "src/factorflow/classification/reader.py:417:off-by-one:1",
++   "cycle": "rework-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 417,
++   "original": "    if abs(number) >= limit:",
++   "mutated": "    if abs(number) > limit:"
++  },
++  {
++   "id": "src/factorflow/classification/reader.py:420:negate-boolean:1",
++   "cycle": "rework-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 420,
++   "original": "    if stored != number:",
++   "mutated": "    if stored == number:"
++  },
++  {
++   "id": "src/factorflow/classification/reader.py:422:negate-boolean:1",
++   "cycle": "rework-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/classification/reader.py",
++   "line": 422,
++   "original": "    return data, (stored, False, symbol)",
++   "mutated": "    return data, (stored, True, symbol)"
++  },
++  {
++   "id": "manual:rv-today-zone-behind-chicago",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
++   "new": "_CHICAGO: Final = ZoneInfo(\"America/Los_Angeles\")"
++  },
++  {
++   "id": "manual:rv-today-host-date",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "today = datetime.now(_CHICAGO).date()",
++   "new": "today = date.today()"
++  },
++  {
++   "id": "manual:rv-missing-row-accepted",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    if status is None:  # the engine writes three rows per stock (task plan Open Gap 7)",
++   "new": "    if False:  # the engine writes three rows per stock (task plan Open Gap 7)"
++  },
++  {
++   "id": "manual:rv-threshold-guard-not-equal",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "WHERE (%(value_score_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
++   "new": "WHERE (%(value_score_min)s::numeric IS NULL OR c_value.status <> 'classified'"
++  },
++  {
++   "id": "manual:rv-value-join-inner",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "      LEFT JOIN factor_classification c_value\n",
++   "new": "      JOIN factor_classification c_value\n"
++  },
++  {
++   "id": "manual:rv-name-tiebreak-asc",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
++   "new": "ORDER BY r.recorded_at DESC, r.value_hash ASC"
++  },
++  {
++   "id": "manual:rv-name-any-instrument",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "             WHERE r.instrument_id = i.instrument_id\n",
++   "new": "             WHERE true\n"
++  },
++  {
++   "id": "manual:rv-growth-restated-from-value",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_growth.restated_possible AS growth_restated_possible,",
++   "new": "c_value.restated_possible AS growth_restated_possible,"
++  },
++  {
++   "id": "manual:rv-value-restated-from-growth",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_value.restated_possible AS value_restated_possible,",
++   "new": "c_growth.restated_possible AS value_restated_possible,"
++  },
++  {
++   "id": "manual:rv-momentum-restated-from-value",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_momentum.restated_possible AS momentum_restated_possible",
++   "new": "c_value.restated_possible AS momentum_restated_possible"
++  },
++  {
++   "id": "manual:rv-growth-reason-input-from-value",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_growth.reason_input AS growth_reason_input",
++   "new": "c_value.reason_input AS growth_reason_input"
++  },
++  {
++   "id": "manual:rv-growth-reason-detail-from-value",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_growth.reason_detail AS growth_reason_detail",
++   "new": "c_value.reason_detail AS growth_reason_detail"
++  },
++  {
++   "id": "manual:rv-value-reason-input-from-growth",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_value.reason_input AS value_reason_input",
++   "new": "c_growth.reason_input AS value_reason_input"
++  },
++  {
++   "id": "manual:rv-value-reason-detail-from-growth",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_value.reason_detail AS value_reason_detail",
++   "new": "c_growth.reason_detail AS value_reason_detail"
++  },
++  {
++   "id": "manual:rv-momentum-reason-input-from-value",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "c_momentum.reason_input AS momentum_reason_input",
++   "new": "c_value.reason_input AS momentum_reason_input"
++  },
++  {
++   "id": "manual:rv-count-over-scope",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
++   "new": "FROM (SELECT count(*) AS match_count FROM scope) c"
++  },
++  {
++   "id": "manual:rv-keyset-asc-numeric-drops-nulls",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "(\"asc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\"",
++   "new": "(\"asc\", \"numeric\"): \"({sort_expr} > %(k)s::numeric\""
++  },
++  {
++   "id": "manual:rv-keyset-desc-text-wrong-way",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "(\"desc\", \"text\"): \"({sort_expr} < %(k)s::text\"",
++   "new": "(\"desc\", \"text\"): \"({sort_expr} > %(k)s::text\""
++  },
++  {
++   "id": "manual:rv-keyset-desc-numeric-tie-repeat",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"\n    \" OR ({sort_expr} = %(k)s::numeric AND m.symbol > %(ksym)s::text))\",",
++   "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"\n    \" OR ({sort_expr} = %(k)s::numeric AND m.symbol >= %(ksym)s::text))\","
++  },
++  {
++   "id": "manual:rv-next-cursor-null-flag-false",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "current.set_id, filters.sort, filters.order, key, key is None, stocks[-1].symbol",
++   "new": "current.set_id, filters.sort, filters.order, key, False, stocks[-1].symbol"
++  },
++  {
++   "id": "manual:rv-escape-like-noop",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
++   "new": "return prefix"
++  },
++  {
++   "id": "manual:rv-early-cursor-check-dropped",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    if filters.cursor is not None:\n        _parse_cursor(filters.cursor, filters.sort)\n",
++   "new": ""
++  },
++  {
++   "id": "manual:rv-symbol-shape-prefix-match",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "if not _SYMBOL_PREFIX.fullmatch(upper):",
++   "new": "if not _SYMBOL_PREFIX.match(upper):"
++  },
++  {
++   "id": "manual:rv-percentile-range-on-score",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "if \"_percentile_\" in name and not",
++   "new": "if \"_score_\" in name and not"
++  },
++  {
++   "id": "manual:rv-cell-name-from-symbol",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "        name=c[\"name\"],",
++   "new": "        name=c[\"symbol\"],"
++  },
++  {
++   "id": "manual:value-score-min-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_value.score >= %(value_score_min)s::numeric",
++   "new": "OR c_value.score > %(value_score_min)s::numeric"
++  },
++  {
++   "id": "manual:value-score-max-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_value.score <= %(value_score_max)s::numeric",
++   "new": "OR c_value.score < %(value_score_max)s::numeric"
++  },
++  {
++   "id": "manual:value-pmin-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_value.percentile >= %(value_percentile_min)s::numeric",
++   "new": "OR c_value.percentile > %(value_percentile_min)s::numeric"
++  },
++  {
++   "id": "manual:value-pmax-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_value.percentile <= %(value_percentile_max)s::numeric",
++   "new": "OR c_value.percentile < %(value_percentile_max)s::numeric"
++  },
++  {
++   "id": "manual:growth-score-min-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_growth.score >= %(growth_score_min)s::numeric",
++   "new": "OR c_growth.score > %(growth_score_min)s::numeric"
++  },
++  {
++   "id": "manual:growth-score-max-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_growth.score <= %(growth_score_max)s::numeric",
++   "new": "OR c_growth.score < %(growth_score_max)s::numeric"
++  },
++  {
++   "id": "manual:growth-pmin-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_growth.percentile >= %(growth_percentile_min)s::numeric",
++   "new": "OR c_growth.percentile > %(growth_percentile_min)s::numeric"
++  },
++  {
++   "id": "manual:growth-pmax-exclusive",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_growth.percentile <= %(growth_percentile_max)s::numeric",
++   "new": "OR c_growth.percentile < %(growth_percentile_max)s::numeric"
++  },
++  {
++   "id": "manual:momentum-score-min-other-metric",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_momentum.score >= %(momentum_score_min)s::numeric",
++   "new": "OR c_momentum.percentile >= %(momentum_score_min)s::numeric"
++  },
++  {
++   "id": "manual:momentum-pmax-other-factor",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR c_momentum.percentile <= %(momentum_percentile_max)s::numeric",
++   "new": "OR c_value.percentile <= %(momentum_percentile_max)s::numeric"
++  },
++  {
++   "id": "manual:value-pmin-classified-only-dropped",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "(%(value_percentile_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
++   "new": "(%(value_percentile_min)s::numeric IS NULL"
++  },
++  {
++   "id": "manual:momentum-pmin-classified-only-dropped",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "(%(momentum_percentile_min)s::numeric IS NULL\n            OR c_momentum.status IS DISTINCT FROM 'classified'",
++   "new": "(%(momentum_percentile_min)s::numeric IS NULL"
++  },
++  {
++   "id": "manual:hide-design-snippet-null",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
++   "new": "c_value.reason_code = ANY(%(input_reasons)s::text[])"
++  },
++  {
++   "id": "manual:hide-drops-growth",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR COALESCE(c_growth.reason_code = ANY(%(input_reasons)s::text[]), false)",
++   "new": "OR false"
++  },
++  {
++   "id": "manual:hide-drops-momentum",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR COALESCE(c_momentum.reason_code = ANY(%(input_reasons)s::text[]), false)",
++   "new": "OR false"
++  },
++  {
++   "id": "manual:hide-any-not-classified",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
++   "new": "COALESCE(c_value.reason_code IS NOT NULL, false)"
++  },
++  {
++   "id": "manual:unscoped-includes-retired",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR (NOT %(scoped)s::boolean AND i.lifecycle = 'active'))",
++   "new": "OR (NOT %(scoped)s::boolean))"
++  },
++  {
++   "id": "manual:scoped-active-only",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]))",
++   "new": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]) AND i.lifecycle = 'active')"
++  },
++  {
++   "id": "manual:no-set-row-required",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "WHERE c.set_id = %(set_id)s::uuid AND c.instrument_id = i.instrument_id",
++   "new": "WHERE c.instrument_id = i.instrument_id"
++  },
++  {
++   "id": "manual:growth-joins-value",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "AND c_growth.factor = 'growth'",
++   "new": "AND c_growth.factor = 'value'"
++  },
++  {
++   "id": "manual:nulls-first",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
++   "new": "ORDER BY ({sort_expr} IS NULL) DESC, {sort_expr} {order}, m.symbol ASC\n         LIMIT"
++  },
++  {
++   "id": "manual:tie-symbol-desc",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
++   "new": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol DESC\n         LIMIT"
++  },
++  {
++   "id": "manual:outer-order-dropped",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": " ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC;",
++   "new": " ;"
++  },
++  {
++   "id": "manual:count-over-page",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
++   "new": "FROM (SELECT count(*) AS match_count FROM matched WHERE {keyset}) c"
++  },
++  {
++   "id": "manual:name-oldest",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
++   "new": "ORDER BY r.recorded_at ASC, r.value_hash DESC"
++  },
++  {
++   "id": "manual:symbol-prefix-ignored",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/sql/list_classifications.sql",
++   "old": "OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE",
++   "new": "OR true OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE"
++  },
++  {
++   "id": "manual:keyset-desc-wrong-way",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"",
++   "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\""
++  },
++  {
++   "id": "manual:keyset-ties-repeat",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol > %(ksym)s::text)\"",
++   "new": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol >= %(ksym)s::text)\""
++  },
++  {
++   "id": "manual:page-no-lookahead",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "limit_plus_one=filters.limit + 1,",
++   "new": "limit_plus_one=filters.limit,"
++  },
++  {
++   "id": "manual:prefix-not-a-prefix",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "escape_like(thresholds.symbol) + \"%\" if",
++   "new": "escape_like(thresholds.symbol) if"
++  },
++  {
++   "id": "manual:escape-order",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
++   "new": "return prefix.replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\").replace(\"\\\\\", \"\\\\\\\\\")"
++  },
++  {
++   "id": "manual:cursor-ignores-set",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "if (data[\"set\"], data[\"sort\"], data[\"order\"]) != (str(set_id), sort, order):",
++   "new": "if (data[\"sort\"], data[\"order\"]) != (sort, order):"
++  },
++  {
++   "id": "manual:cursor-no-check",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "if data[\"chk\"] != _cursor_check(data):",
++   "new": "if False:"
++  },
++  {
++   "id": "manual:evaluate-hides-incomplete-always",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "hide_incomplete=thresholds.hide_incomplete,",
++   "new": "hide_incomplete=True,"
++  },
++  {
++   "id": "manual:universe-today-utc",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "today = datetime.now(_CHICAGO).date()",
++   "new": "today = date(2000, 1, 1)"
++  },
++  {
++   "id": "manual:rework-1:key-limit-always-score",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    limit = _KEY_LIMITS[\"percentile\" if sort.endswith(\"_percentile\") else \"score\"]",
++   "new": "    limit = _KEY_LIMITS[\"score\"]"
++  },
++  {
++   "id": "manual:rework-1:key-limit-always-percentile",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    limit = _KEY_LIMITS[\"percentile\" if sort.endswith(\"_percentile\") else \"score\"]",
++   "new": "    limit = _KEY_LIMITS[\"percentile\"]"
++  },
++  {
++   "id": "manual:rework-1:key-quantum-coarser",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "_KEY_QUANTUM: Final = Decimal(\"0.000001\")",
++   "new": "_KEY_QUANTUM: Final = Decimal(\"0.00001\")"
++  },
++  {
++   "id": "manual:rework-1:key-quantum-finer",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "_KEY_QUANTUM: Final = Decimal(\"0.000001\")",
++   "new": "_KEY_QUANTUM: Final = Decimal(\"0.0000001\")"
++  },
++  {
++   "id": "manual:rework-1:today-zone-utc",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
++   "new": "_CHICAGO: Final = ZoneInfo(\"UTC\")"
++  },
++  {
++   "id": "manual:rework-1:today-zone-ahead-of-chicago",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
++   "new": "_CHICAGO: Final = ZoneInfo(\"America/New_York\")"
++  },
++  {
++   "id": "manual:rework-1:key-limit-drops-abs",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    if abs(number) >= limit:",
++   "new": "    if number >= limit:"
++  },
++  {
++   "id": "manual:rework-1:key-range-check-dropped",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    if abs(number) >= limit:\n        raise CursorError(\"cursor key is outside the range of its sort column\")\n",
++   "new": ""
++  },
++  {
++   "id": "manual:rework-1:key-scale-check-dropped",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    if stored != number:\n        raise CursorError(\"cursor key is finer than its sort column holds\")\n",
++   "new": ""
++  },
++  {
++   "id": "manual:rework-1:key-returned-unquantized",
++   "cycle": "rework-1",
++   "operator": "manual",
++   "file": "src/factorflow/classification/reader.py",
++   "old": "    return data, (stored, False, symbol)",
++   "new": "    return data, (number, False, symbol)"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutation-rework-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutation-rework-1-results.json
+new file mode 100644
+index 0000000..5ced702
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutation-rework-1-results.json
+@@ -0,0 +1,1128 @@
++{
++  "schema": 1,
++  "command": "uv run --offline --all-extras pytest -x -q -p no:cacheprovider -p no:randomly tests/unit/test_reader_sort_allowlist.py tests/unit/test_reader_cursor.py tests/unit/test_reader_filters.py tests/unit/test_reader_sql_read_only.py tests/integration/test_reader_list.py",
++  "repo_head": "a4608e7c0c8b3d6009e51e21d38d7db47cd3bf1c",
++  "tree_patch_sha256": "706f75eac4c45bd280ed243b5b329caca590243beae82b0bc42337a60632fae9",
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/mutants-rework-1.json",
++  "mutants_sha256": "65930c0cd79f20d49a6532c0269cfd9afee927e729be201c2d9d16f955ef8a10",
++  "jobs": 4,
++  "started": "2026-10-31T00:43:43Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 21.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/baseline-w2.log",
++      "log_sha256": "c4a39e88c81626ca460ffd248ed0b9d5217b362575de12f0f06b41e8b99bcf68"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 21.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/baseline-w3.log",
++      "log_sha256": "ba9d1d8488f8d80a11b81ea0b6a611f954a6ceea0442149733f776ede1f6933d"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 21.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/baseline-w0.log",
++      "log_sha256": "dfff5626de60fb9d713bb95ef6b0a196ccfc6f463749a07c9518b5b6736a0e1f"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 21.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/baseline-w1.log",
++      "log_sha256": "6af718a5ffaea61f77a7650f638198473e4e507db01d679c57af494511c5a22e"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/classification/reader.py:122:off-by-one:1",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 122,
++      "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++      "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(11) ** 12, \"percentile\": Decimal(10) ** 3}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_122_off-by-one_1.log",
++      "log_sha256": "46957e9363bc753ad79bff2b84f3da008090e79dd06de12ccd58800d6a67dd82"
++    },
++    {
++      "id": "src/factorflow/classification/reader.py:122:off-by-one:2",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 122,
++      "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++      "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 13, \"percentile\": Decimal(10) ** 3}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_122_off-by-one_2.log",
++      "log_sha256": "46957e9363bc753ad79bff2b84f3da008090e79dd06de12ccd58800d6a67dd82"
++    },
++    {
++      "id": "src/factorflow/classification/reader.py:122:off-by-one:3",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 122,
++      "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++      "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(11) ** 3}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_122_off-by-one_3.log",
++      "log_sha256": "d737436c794fc44f8ff1bdacffefa247e5bbce33a800dd806a6a0eda35e80b1d"
++    },
++    {
++      "id": "src/factorflow/classification/reader.py:122:off-by-one:4",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 122,
++      "original": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 3}",
++      "mutated": "_KEY_LIMITS: Final = {\"score\": Decimal(10) ** 12, \"percentile\": Decimal(10) ** 4}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_122_off-by-one_4.log",
++      "log_sha256": "d737436c794fc44f8ff1bdacffefa247e5bbce33a800dd806a6a0eda35e80b1d"
++    },
++    {
++      "id": "src/factorflow/classification/reader.py:417:off-by-one:1",
++      "cycle": "rework-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 417,
++      "original": "    if abs(number) >= limit:",
++      "mutated": "    if abs(number) > limit:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_417_off-by-one_1.log",
++      "log_sha256": "41fe1a5ac6e06e97dcdfd382efb62658e1626259e5380dd5e904de3a50a909b3"
++    },
++    {
++      "id": "src/factorflow/classification/reader.py:420:negate-boolean:1",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 420,
++      "original": "    if stored != number:",
++      "mutated": "    if stored == number:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_420_negate-boolean_1.log",
++      "log_sha256": "8cca41946a6b7cf6d6603c2b851ecefa952664ed5e646be6140d0872aa2da714"
++    },
++    {
++      "id": "src/factorflow/classification/reader.py:422:negate-boolean:1",
++      "cycle": "rework-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/classification/reader.py",
++      "line": 422,
++      "original": "    return data, (stored, False, symbol)",
++      "mutated": "    return data, (stored, True, symbol)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/src_factorflow_classification_reader.py_422_negate-boolean_1.log",
++      "log_sha256": "586a0c52b8297c8ef70cc458ca61ffae7e2552cf40abf5f61a80db158ce9d51b"
++    },
++    {
++      "id": "manual:rv-today-zone-behind-chicago",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
++      "new": "_CHICAGO: Final = ZoneInfo(\"America/Los_Angeles\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-today-zone-behind-chicago.log",
++      "log_sha256": "c3c5e279dc00c1dafe82c753512161f0340bd069519b5488665f7276609445c9"
++    },
++    {
++      "id": "manual:rv-today-host-date",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "today = datetime.now(_CHICAGO).date()",
++      "new": "today = date.today()",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-today-host-date.log",
++      "log_sha256": "474ea9214e6d54c72b1ac027a64b8226d64628d02a4492946a7db1cee9f29d9e"
++    },
++    {
++      "id": "manual:rv-missing-row-accepted",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    if status is None:  # the engine writes three rows per stock (task plan Open Gap 7)",
++      "new": "    if False:  # the engine writes three rows per stock (task plan Open Gap 7)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 19.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-missing-row-accepted.log",
++      "log_sha256": "c322857416bf81c30e13d6081ee91a52edcb225b4f92d354cb55b05a7a323bc5"
++    },
++    {
++      "id": "manual:rv-threshold-guard-not-equal",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "WHERE (%(value_score_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
++      "new": "WHERE (%(value_score_min)s::numeric IS NULL OR c_value.status <> 'classified'",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 19.6,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-threshold-guard-not-equal.log",
++      "log_sha256": "556fa1e6222502599d3f38b0076ab4da661b07b14b34956c4da3335e43caf02f"
++    },
++    {
++      "id": "manual:rv-value-join-inner",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "      LEFT JOIN factor_classification c_value\n",
++      "new": "      JOIN factor_classification c_value\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 18.8,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-value-join-inner.log",
++      "log_sha256": "18c692c7ee645b4ed4231ea461dec8171c2f2464d3ca9210606e55957a72652c"
++    },
++    {
++      "id": "manual:rv-name-tiebreak-asc",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
++      "new": "ORDER BY r.recorded_at DESC, r.value_hash ASC",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 19.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-name-tiebreak-asc.log",
++      "log_sha256": "eb3dc9279aa8d0355446d8a8b6ff9071eeef2b3bef7aee3c78c17fb54360b95c"
++    },
++    {
++      "id": "manual:rv-name-any-instrument",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "             WHERE r.instrument_id = i.instrument_id\n",
++      "new": "             WHERE true\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 20.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-name-any-instrument.log",
++      "log_sha256": "46f0b4997244dd89b0d22d6d84079a66f9e1cb994e702f765503a48e6f9cc760"
++    },
++    {
++      "id": "manual:rv-growth-restated-from-value",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_growth.restated_possible AS growth_restated_possible,",
++      "new": "c_value.restated_possible AS growth_restated_possible,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.8,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-growth-restated-from-value.log",
++      "log_sha256": "004f4fb19f61c55baef7c2bdce6434258b401ad170dbc26149f5cb93a60bffec"
++    },
++    {
++      "id": "manual:rv-value-restated-from-growth",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_value.restated_possible AS value_restated_possible,",
++      "new": "c_growth.restated_possible AS value_restated_possible,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.9,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-value-restated-from-growth.log",
++      "log_sha256": "4f91d1dedf9333a7c4b8702cbe9830a280ba4402fe99ab728eb4ecb1ca82f533"
++    },
++    {
++      "id": "manual:rv-momentum-restated-from-value",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_momentum.restated_possible AS momentum_restated_possible",
++      "new": "c_value.restated_possible AS momentum_restated_possible",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-momentum-restated-from-value.log",
++      "log_sha256": "33c7f05c6bc27fa7e9214680213b6f64224569c2457abcf0456b3b6d89aa611b"
++    },
++    {
++      "id": "manual:rv-growth-reason-input-from-value",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_growth.reason_input AS growth_reason_input",
++      "new": "c_value.reason_input AS growth_reason_input",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 19.1,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-growth-reason-input-from-value.log",
++      "log_sha256": "e8d94b7aef714a17eb7a4d31313d1f931d060cea1b483c48fd0b748b9ac6f8ed"
++    },
++    {
++      "id": "manual:rv-growth-reason-detail-from-value",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_growth.reason_detail AS growth_reason_detail",
++      "new": "c_value.reason_detail AS growth_reason_detail",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 18.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-growth-reason-detail-from-value.log",
++      "log_sha256": "c1a375ec9bd98d320ff952597b33ee0df909b3f2c1bf55c50330783daac19a7f"
++    },
++    {
++      "id": "manual:rv-value-reason-input-from-growth",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_value.reason_input AS value_reason_input",
++      "new": "c_growth.reason_input AS value_reason_input",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 18.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-value-reason-input-from-growth.log",
++      "log_sha256": "f3f50c88402fe943afd8b4f08e592248246126ac6db79c1d520b8f8c35295b3b"
++    },
++    {
++      "id": "manual:rv-value-reason-detail-from-growth",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_value.reason_detail AS value_reason_detail",
++      "new": "c_growth.reason_detail AS value_reason_detail",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 19.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-value-reason-detail-from-growth.log",
++      "log_sha256": "80e956d124a7b163a02d3d44e53e626b826eddf9629ffbf2df54232fc0b08e67"
++    },
++    {
++      "id": "manual:rv-momentum-reason-input-from-value",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "c_momentum.reason_input AS momentum_reason_input",
++      "new": "c_value.reason_input AS momentum_reason_input",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 19.9,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-momentum-reason-input-from-value.log",
++      "log_sha256": "fb01d4fc0c1ca5c44cd4201cc2be38c1e778cd4a0a978072b38439aa8d8da63d"
++    },
++    {
++      "id": "manual:rv-count-over-scope",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
++      "new": "FROM (SELECT count(*) AS match_count FROM scope) c",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-count-over-scope.log",
++      "log_sha256": "0011891fe8dee786a2c7cc0c7a0fc0e3304a9b30a2d329a605dfb95bb429494f"
++    },
++    {
++      "id": "manual:rv-keyset-asc-numeric-drops-nulls",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "(\"asc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\"",
++      "new": "(\"asc\", \"numeric\"): \"({sort_expr} > %(k)s::numeric\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 15.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-keyset-asc-numeric-drops-nulls.log",
++      "log_sha256": "ecc2212deb613abfb1876b1618f9ac0d0c45a967d3d19543c2283a24b1d3949f"
++    },
++    {
++      "id": "manual:rv-keyset-desc-text-wrong-way",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "(\"desc\", \"text\"): \"({sort_expr} < %(k)s::text\"",
++      "new": "(\"desc\", \"text\"): \"({sort_expr} > %(k)s::text\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 17.2,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-keyset-desc-text-wrong-way.log",
++      "log_sha256": "a12d9e431e85ef751a2fb01a339105aed77e7060daafdb3789006bf9f1e3d5be"
++    },
++    {
++      "id": "manual:rv-keyset-desc-numeric-tie-repeat",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"\n    \" OR ({sort_expr} = %(k)s::numeric AND m.symbol > %(ksym)s::text))\",",
++      "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"\n    \" OR ({sort_expr} = %(k)s::numeric AND m.symbol >= %(ksym)s::text))\",",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 13.0,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-keyset-desc-numeric-tie-repeat.log",
++      "log_sha256": "7a393a278608a82e6e402a120cecb00eb107e27d1d138246d2f34bcdcc7b295a"
++    },
++    {
++      "id": "manual:rv-next-cursor-null-flag-false",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "current.set_id, filters.sort, filters.order, key, key is None, stocks[-1].symbol",
++      "new": "current.set_id, filters.sort, filters.order, key, False, stocks[-1].symbol",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 15.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-next-cursor-null-flag-false.log",
++      "log_sha256": "afed9e75a62e9ab68ca866f6b6dc88a3ef267b21543d252b2b3815c13cd0673e"
++    },
++    {
++      "id": "manual:rv-escape-like-noop",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
++      "new": "return prefix",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-escape-like-noop.log",
++      "log_sha256": "a88310d85d9b3f8fc40a9f720e25d0dd3ce290e7ec36e0d9231098dcd647290f"
++    },
++    {
++      "id": "manual:rv-early-cursor-check-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    if filters.cursor is not None:\n        _parse_cursor(filters.cursor, filters.sort)\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 20.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-early-cursor-check-dropped.log",
++      "log_sha256": "a4e659612870bc0446f7482768b0ef5d576c3398b3caccea98f7a938631f8568"
++    },
++    {
++      "id": "manual:rv-symbol-shape-prefix-match",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "if not _SYMBOL_PREFIX.fullmatch(upper):",
++      "new": "if not _SYMBOL_PREFIX.match(upper):",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-symbol-shape-prefix-match.log",
++      "log_sha256": "9cef756b1ee391a47b6d2e400b3ffd92821d31c98fb778030897c154ad8db40b"
++    },
++    {
++      "id": "manual:rv-percentile-range-on-score",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "if \"_percentile_\" in name and not",
++      "new": "if \"_score_\" in name and not",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-percentile-range-on-score.log",
++      "log_sha256": "4b32566e7f2fa9aa77b51552b152cd0d31a98b75a5f4d2586ef4e815c2f1815a"
++    },
++    {
++      "id": "manual:rv-cell-name-from-symbol",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "        name=c[\"name\"],",
++      "new": "        name=c[\"symbol\"],",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 21.1,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rv-cell-name-from-symbol.log",
++      "log_sha256": "8c676fbfa8f6e96b0ab499b086d8fb8ceea17e27f683ac0c2d4f587df94acabd"
++    },
++    {
++      "id": "manual:value-score-min-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_value.score >= %(value_score_min)s::numeric",
++      "new": "OR c_value.score > %(value_score_min)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_value-score-min-exclusive.log",
++      "log_sha256": "a977f2c13f802720839b56dbd16157ad6fa3791a181eb674ede8717260bf478f"
++    },
++    {
++      "id": "manual:value-score-max-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_value.score <= %(value_score_max)s::numeric",
++      "new": "OR c_value.score < %(value_score_max)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_value-score-max-exclusive.log",
++      "log_sha256": "ab7bc9e6b251dc936488e1c30f8264388c3a93e80d9ac6da851ee06256c9ea73"
++    },
++    {
++      "id": "manual:value-pmin-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_value.percentile >= %(value_percentile_min)s::numeric",
++      "new": "OR c_value.percentile > %(value_percentile_min)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_value-pmin-exclusive.log",
++      "log_sha256": "9ba98cdb05468d63acbf99a22ae2d5b05801a1660dd65334ac1672dbda58066b"
++    },
++    {
++      "id": "manual:value-pmax-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_value.percentile <= %(value_percentile_max)s::numeric",
++      "new": "OR c_value.percentile < %(value_percentile_max)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_value-pmax-exclusive.log",
++      "log_sha256": "6824e43d236f71d58d5a0a280b311dcccab4ee36b36b45e28d1a70caa67f073d"
++    },
++    {
++      "id": "manual:growth-score-min-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_growth.score >= %(growth_score_min)s::numeric",
++      "new": "OR c_growth.score > %(growth_score_min)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_growth-score-min-exclusive.log",
++      "log_sha256": "232c9cb6ae01c832b481cd41029453b1c5bf924510381254b8df7e57e9a7240e"
++    },
++    {
++      "id": "manual:growth-score-max-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_growth.score <= %(growth_score_max)s::numeric",
++      "new": "OR c_growth.score < %(growth_score_max)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_growth-score-max-exclusive.log",
++      "log_sha256": "b037a9b228226208ecf516a9f257fa157bf2ced4e32ac7a27a72b3518e9f5e00"
++    },
++    {
++      "id": "manual:growth-pmin-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_growth.percentile >= %(growth_percentile_min)s::numeric",
++      "new": "OR c_growth.percentile > %(growth_percentile_min)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_growth-pmin-exclusive.log",
++      "log_sha256": "07d00a8d2035af09904a8600ae2d473d928d6c5657b0a06ea1f7ec356288f9fa"
++    },
++    {
++      "id": "manual:growth-pmax-exclusive",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_growth.percentile <= %(growth_percentile_max)s::numeric",
++      "new": "OR c_growth.percentile < %(growth_percentile_max)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_growth-pmax-exclusive.log",
++      "log_sha256": "83db18abb1a2e67ea191354a1757a902ebe38ed656ccff7d6e6c4b8c8549eeed"
++    },
++    {
++      "id": "manual:momentum-score-min-other-metric",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_momentum.score >= %(momentum_score_min)s::numeric",
++      "new": "OR c_momentum.percentile >= %(momentum_score_min)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_momentum-score-min-other-metric.log",
++      "log_sha256": "55ce45df0d309662988411b6c540a0210be3723e9c4be311ab31a1fa583cfe7b"
++    },
++    {
++      "id": "manual:momentum-pmax-other-factor",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR c_momentum.percentile <= %(momentum_percentile_max)s::numeric",
++      "new": "OR c_value.percentile <= %(momentum_percentile_max)s::numeric",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_momentum-pmax-other-factor.log",
++      "log_sha256": "1d5cf4a3ddbbfa376a7ba3dd8a583f4a5ebf704c86e86dfd7a8d8d0910ed6a31"
++    },
++    {
++      "id": "manual:value-pmin-classified-only-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "(%(value_percentile_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
++      "new": "(%(value_percentile_min)s::numeric IS NULL",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_value-pmin-classified-only-dropped.log",
++      "log_sha256": "00954a34ceeca0cff749df80c63bf30196aaa1da27540a9ccda95d57ea47d174"
++    },
++    {
++      "id": "manual:momentum-pmin-classified-only-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "(%(momentum_percentile_min)s::numeric IS NULL\n            OR c_momentum.status IS DISTINCT FROM 'classified'",
++      "new": "(%(momentum_percentile_min)s::numeric IS NULL",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_momentum-pmin-classified-only-dropped.log",
++      "log_sha256": "fc1378b2b079240d5fee6fdcfecb73f059d8a7dd7a1f64df8aedeb01b332c721"
++    },
++    {
++      "id": "manual:hide-design-snippet-null",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
++      "new": "c_value.reason_code = ANY(%(input_reasons)s::text[])",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.7,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_hide-design-snippet-null.log",
++      "log_sha256": "830d730f0ebf0940cc5925763803c38c602c7da5be23d9405bfef373a588b46e"
++    },
++    {
++      "id": "manual:hide-drops-growth",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR COALESCE(c_growth.reason_code = ANY(%(input_reasons)s::text[]), false)",
++      "new": "OR false",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_hide-drops-growth.log",
++      "log_sha256": "554a53fa6b2584b703ff30b816e1b73aa32c34e719144cbf81cc1b8407ad870e"
++    },
++    {
++      "id": "manual:hide-drops-momentum",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR COALESCE(c_momentum.reason_code = ANY(%(input_reasons)s::text[]), false)",
++      "new": "OR false",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_hide-drops-momentum.log",
++      "log_sha256": "2233ea458cbaf707a6305e549486b49342954ad41552fa26897ad9d49c362277"
++    },
++    {
++      "id": "manual:hide-any-not-classified",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
++      "new": "COALESCE(c_value.reason_code IS NOT NULL, false)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_hide-any-not-classified.log",
++      "log_sha256": "c68e8877e5ac0ba1ecf862094bdedcb17c7ac0a810efa34cb1e703004f34135a"
++    },
++    {
++      "id": "manual:unscoped-includes-retired",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR (NOT %(scoped)s::boolean AND i.lifecycle = 'active'))",
++      "new": "OR (NOT %(scoped)s::boolean))",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.8,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_unscoped-includes-retired.log",
++      "log_sha256": "7a428d87660d258ad5407dcf507a06f8b9d2effec42f923b5f7af316aebe6f52"
++    },
++    {
++      "id": "manual:scoped-active-only",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]))",
++      "new": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]) AND i.lifecycle = 'active')",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.8,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_scoped-active-only.log",
++      "log_sha256": "747a9c2fc4f74cb7210b31cf2961ed0b21adfa2afbefbabe405e3ddf79c3e0b2"
++    },
++    {
++      "id": "manual:no-set-row-required",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "WHERE c.set_id = %(set_id)s::uuid AND c.instrument_id = i.instrument_id",
++      "new": "WHERE c.instrument_id = i.instrument_id",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 14.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_no-set-row-required.log",
++      "log_sha256": "eeabdd2eb2b07dd6f41e0974805256c1139743e83cf6cfb21a5207dfc1e0e284"
++    },
++    {
++      "id": "manual:growth-joins-value",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "AND c_growth.factor = 'growth'",
++      "new": "AND c_growth.factor = 'value'",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_growth-joins-value.log",
++      "log_sha256": "c3793f498f659bec4a323e3bfef81719b5400400133280a3713f9b6da67dee15"
++    },
++    {
++      "id": "manual:nulls-first",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
++      "new": "ORDER BY ({sort_expr} IS NULL) DESC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 14.6,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_nulls-first.log",
++      "log_sha256": "b3110733177e669bc325f8648f80c8652202fb614f128975247d028b78cb7238"
++    },
++    {
++      "id": "manual:tie-symbol-desc",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
++      "new": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol DESC\n         LIMIT",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 14.1,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_tie-symbol-desc.log",
++      "log_sha256": "121942a31ca0af9150a7da789a8aee352295af0680864f841b3344f3588ac917"
++    },
++    {
++      "id": "manual:outer-order-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": " ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC;",
++      "new": " ;",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 21.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_outer-order-dropped.log",
++      "log_sha256": "5faf7d697ce42ff19282594933bcd823d193a49d9daad2b95bb3237a31ddc912"
++    },
++    {
++      "id": "manual:count-over-page",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
++      "new": "FROM (SELECT count(*) AS match_count FROM matched WHERE {keyset}) c",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_count-over-page.log",
++      "log_sha256": "fe8984c1856d85ca207aeff3967a21636f340456f2ebd939b51d03b48f705221"
++    },
++    {
++      "id": "manual:name-oldest",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
++      "new": "ORDER BY r.recorded_at ASC, r.value_hash DESC",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 20.0,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_name-oldest.log",
++      "log_sha256": "1f96ca4fb40221b6de846fb35c03ecdf69820e48e5b5f1b7aa704592efacd26e"
++    },
++    {
++      "id": "manual:symbol-prefix-ignored",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/sql/list_classifications.sql",
++      "old": "OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE",
++      "new": "OR true OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 9.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_symbol-prefix-ignored.log",
++      "log_sha256": "4f35804277337102a420a2de97e88f3ed5a71c669538b968ca803dee3a30e18f"
++    },
++    {
++      "id": "manual:keyset-desc-wrong-way",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"",
++      "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 13.1,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_keyset-desc-wrong-way.log",
++      "log_sha256": "be14a1ef7e912f834e32c34dbaf538ab49f24771aa3cc0759f4bb6df1643605f"
++    },
++    {
++      "id": "manual:keyset-ties-repeat",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol > %(ksym)s::text)\"",
++      "new": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol >= %(ksym)s::text)\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 14.0,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_keyset-ties-repeat.log",
++      "log_sha256": "d8291904f96c20a25e0683b20acb8b7fcd708cae00e2bc9e199891cfec775a74"
++    },
++    {
++      "id": "manual:page-no-lookahead",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "limit_plus_one=filters.limit + 1,",
++      "new": "limit_plus_one=filters.limit,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_page-no-lookahead.log",
++      "log_sha256": "09a8202ad503d4428d342fb1cbe562e42eb108a934a3641c1cfa17f81e6ac1b2"
++    },
++    {
++      "id": "manual:prefix-not-a-prefix",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "escape_like(thresholds.symbol) + \"%\" if",
++      "new": "escape_like(thresholds.symbol) if",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_prefix-not-a-prefix.log",
++      "log_sha256": "332b708e2fc9b904d63bfb32e4ea1da98efa4c73f0c863b7fe9bf59e62396c69"
++    },
++    {
++      "id": "manual:escape-order",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
++      "new": "return prefix.replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\").replace(\"\\\\\", \"\\\\\\\\\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_escape-order.log",
++      "log_sha256": "024c8f758803f8868cdd4178541434b045628429609839e3d23bb5ba748b7011"
++    },
++    {
++      "id": "manual:cursor-ignores-set",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "if (data[\"set\"], data[\"sort\"], data[\"order\"]) != (str(set_id), sort, order):",
++      "new": "if (data[\"sort\"], data[\"order\"]) != (sort, order):",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_cursor-ignores-set.log",
++      "log_sha256": "15884e2f5ede21a26149d748ce8c9cca6088240c6f287ca47f1dd0db1bf93e60"
++    },
++    {
++      "id": "manual:cursor-no-check",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "if data[\"chk\"] != _cursor_check(data):",
++      "new": "if False:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_cursor-no-check.log",
++      "log_sha256": "2634999ce9ccd7d7e03770ef41cdd7d678c8d8123d89eea1292b32257af80ce5"
++    },
++    {
++      "id": "manual:evaluate-hides-incomplete-always",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "hide_incomplete=thresholds.hide_incomplete,",
++      "new": "hide_incomplete=True,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_evaluate-hides-incomplete-always.log",
++      "log_sha256": "337a9087aa9cf4292c69013d15b4c151f839c08f84a82789e2344408c69456a2"
++    },
++    {
++      "id": "manual:universe-today-utc",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "today = datetime.now(_CHICAGO).date()",
++      "new": "today = date(2000, 1, 1)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.2,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_universe-today-utc.log",
++      "log_sha256": "63cf694b9ff532053654184febb6dcb014dfaad0acc9527e483cbe0313db8355"
++    },
++    {
++      "id": "manual:rework-1:key-limit-always-score",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    limit = _KEY_LIMITS[\"percentile\" if sort.endswith(\"_percentile\") else \"score\"]",
++      "new": "    limit = _KEY_LIMITS[\"score\"]",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-limit-always-score.log",
++      "log_sha256": "b667ff871a55a706cfa5488530634e9e095b5dadd7cfc8a37a0f123690040d0a"
++    },
++    {
++      "id": "manual:rework-1:key-limit-always-percentile",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    limit = _KEY_LIMITS[\"percentile\" if sort.endswith(\"_percentile\") else \"score\"]",
++      "new": "    limit = _KEY_LIMITS[\"percentile\"]",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-limit-always-percentile.log",
++      "log_sha256": "a37563d7cdd0b2da8239196ed731f5ecac4483a0d178ca6b884fe25a40a3edb9"
++    },
++    {
++      "id": "manual:rework-1:key-quantum-coarser",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "_KEY_QUANTUM: Final = Decimal(\"0.000001\")",
++      "new": "_KEY_QUANTUM: Final = Decimal(\"0.00001\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-quantum-coarser.log",
++      "log_sha256": "777334a62e667cdd2b1bd44258cc4cdae7824d98a98f1705b3f27481bf1f58cd"
++    },
++    {
++      "id": "manual:rework-1:key-quantum-finer",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "_KEY_QUANTUM: Final = Decimal(\"0.000001\")",
++      "new": "_KEY_QUANTUM: Final = Decimal(\"0.0000001\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-quantum-finer.log",
++      "log_sha256": "694170c4cec0d60c34526f7f236d6cdc92000f4cc6b288da802a47f540197996"
++    },
++    {
++      "id": "manual:rework-1:today-zone-utc",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
++      "new": "_CHICAGO: Final = ZoneInfo(\"UTC\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_today-zone-utc.log",
++      "log_sha256": "fc0653080d89f488c2c9aec9a778309370e954f5a6d775338762abd5a749bfc1"
++    },
++    {
++      "id": "manual:rework-1:today-zone-ahead-of-chicago",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "_CHICAGO: Final = ZoneInfo(\"America/Chicago\")",
++      "new": "_CHICAGO: Final = ZoneInfo(\"America/New_York\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_today-zone-ahead-of-chicago.log",
++      "log_sha256": "5389382384f662b3f0e5166b90a632cdba4b36580288e01971ddf3c6c18c2e2d"
++    },
++    {
++      "id": "manual:rework-1:key-limit-drops-abs",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    if abs(number) >= limit:",
++      "new": "    if number >= limit:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-limit-drops-abs.log",
++      "log_sha256": "0681b63aefd7e8def3368e7171dd71a58129d92042f13a69ea704ba1901720f2"
++    },
++    {
++      "id": "manual:rework-1:key-range-check-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    if abs(number) >= limit:\n        raise CursorError(\"cursor key is outside the range of its sort column\")\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-range-check-dropped.log",
++      "log_sha256": "ed39383494cd75c8e4bfe60b784e9d92cec3b5c2bff2824ec4437b710c648c60"
++    },
++    {
++      "id": "manual:rework-1:key-scale-check-dropped",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    if stored != number:\n        raise CursorError(\"cursor key is finer than its sort column holds\")\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-scale-check-dropped.log",
++      "log_sha256": "2605c11daecb95e46ef67033b36cf1164f80d77a812a5efc732b2efe87cca0a1"
++    },
++    {
++      "id": "manual:rework-1:key-returned-unquantized",
++      "cycle": "rework-1",
++      "operator": "manual",
++      "file": "src/factorflow/classification/reader.py",
++      "old": "    return data, (stored, False, symbol)",
++      "new": "    return data, (number, False, symbol)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-design-cap-003-f106a0/76711249-905e-4d95-876b-1898ed3aa9ed/scratchpad/rw/results3-logs/manual_rework-1_key-returned-unquantized.log",
++      "log_sha256": "5b9d680291645cde94e8459ba2cbabc8f0f4fc5f6f372d9da040ce9454ef9ac1"
++    }
++  ],
++  "finished": "2026-10-31T00:46:34Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/red-rework-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/red-rework-1.log
+new file mode 100644
+index 0000000..173ba52
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2-evidence/red-rework-1.log
+@@ -0,0 +1,63 @@
++# RED, CAP-002-E3-S2 rework-1: the rework tests written against the reviewed code (HEAD a4608e7; reader.py, list_classifications.sql and universe_exists.sql as reviewed)
++$ uv run --offline pytest tests/unit/test_reader_cursor.py tests/integration/test_reader_list.py -q -p no:randomly -rfE --tb=line
++...............................FFFFFFFFF...F..FFF....................... [ 60%]
++...............................................                          [100%]
++=================================== FAILURES ===================================
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   Failed: DID NOT RAISE CursorError
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
++E   AssertionError: assert (True and -7 == -6)
++     +  where True = isinstance(Decimal('1.5000000'), Decimal)
++     +  and   -7 = DecimalTuple(sign=0, digits=(1, 5, 0, 0, 0, 0, 0, 0), exponent=-7).exponent
++     +    where DecimalTuple(sign=0, digits=(1, 5, 0, 0, 0, 0, 0, 0), exponent=-7) = <built-in method as_tuple of decimal.Decimal object at 0x108d1dca0>()
++     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1dca0> = Decimal('1.5000000').as_tuple
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and -7 == -6)
++E   AssertionError: assert (True and 0 == -6)
++     +  where True = isinstance(Decimal('100'), Decimal)
++     +  and   0 = DecimalTuple(sign=0, digits=(1, 0, 0), exponent=0).exponent
++     +    where DecimalTuple(sign=0, digits=(1, 0, 0), exponent=0) = <built-in method as_tuple of decimal.Decimal object at 0x108d1e1e0>()
++     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1e1e0> = Decimal('100').as_tuple
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and 0 == -6)
++E   AssertionError: assert (True and -200000 == -6)
++     +  where True = isinstance(Decimal('0E-200000'), Decimal)
++     +  and   -200000 = DecimalTuple(sign=0, digits=(0,), exponent=-200000).exponent
++     +    where DecimalTuple(sign=0, digits=(0,), exponent=-200000) = <built-in method as_tuple of decimal.Decimal object at 0x108d1e410>()
++     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1e410> = Decimal('0E-200000').as_tuple
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and -200000 == -6)
++E   AssertionError: assert (True and 200000 == -6)
++     +  where True = isinstance(Decimal('0E+200000'), Decimal)
++     +  and   200000 = DecimalTuple(sign=0, digits=(0,), exponent=200000).exponent
++     +    where DecimalTuple(sign=0, digits=(0,), exponent=200000) = <built-in method as_tuple of decimal.Decimal object at 0x108d1e6b0>()
++     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1e6b0> = Decimal('0E+200000').as_tuple
++/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and 200000 == -6)
++=========================== short test summary info ============================
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-1E+200000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score--1E+200000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-1E-200000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-1000000000000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score--1000000000000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-0.0000001]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[growth_percentile-1000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[growth_percentile--1000]
++FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[momentum_percentile-50.0000001]
++FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[value_score-1.5000000]
++FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[momentum_percentile-100]
++FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[value_score-0E-200000]
++FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[value_score-0E+200000]
++13 failed, 106 passed in 12.97s
++exit=1
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2.md
+index 694d2da..ea87d9e 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S2.md
+@@ -10,7 +10,7 @@ component: FactorFlow-v2
+ type: feature
+ priority: P1
+ estimate: 8
+-status: in-review
++status: in-progress
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-17
+diff --git a/src/factorflow/classification/reader.py b/src/factorflow/classification/reader.py
+index 310b8ee..06d0942 100644
+--- a/src/factorflow/classification/reader.py
++++ b/src/factorflow/classification/reader.py
+@@ -116,6 +116,11 @@ _SYMBOL_PREFIX: Final = re.compile(r"[A-Z][A-Z0-9.-]{0,15}")
+ _CHICAGO: Final = ZoneInfo("America/Chicago")
+ _CURSOR_VERSION: Final = 1
+ _CURSOR_FIELDS: Final = frozenset({"v", "set", "sort", "order", "key", "null", "sym", "chk"})
++# A factor-sort key must be a value its column can hold, score numeric(18,6) and percentile
++# numeric(9,6): below these magnitudes, at no finer than six decimal places, and bound at that
++# scale (T018).
++_KEY_LIMITS: Final = {"score": Decimal(10) ** 12, "percentile": Decimal(10) ** 3}
++_KEY_QUANTUM: Final = Decimal("0.000001")
+ 
+ # The keyset fragments, chosen in code; `{sort_expr}` is the allowlisted expression and the last
+ # row's key and symbol are bound parameters. Rows not classified on the sort factor (a null key)
+@@ -408,7 +413,13 @@ def _parse_cursor(
+         raise CursorError("cursor key is not a decimal") from exc
+     if not number.is_finite():
+         raise CursorError("cursor key is not a finite decimal")
+-    return data, (number, False, symbol)
++    limit = _KEY_LIMITS["percentile" if sort.endswith("_percentile") else "score"]
++    if abs(number) >= limit:
++        raise CursorError("cursor key is outside the range of its sort column")
++    stored = number.quantize(_KEY_QUANTUM)  # the column's own scale, whatever the exponent sent
++    if stored != number:
++        raise CursorError("cursor key is finer than its sort column holds")
++    return data, (stored, False, symbol)
+ 
+ 
+ def list_classifications(conn: psycopg.Connection, filters: ListFilters) -> ClassificationPage:
+diff --git a/tests/integration/reader_seed.py b/tests/integration/reader_seed.py
+index 344962d..6891564 100644
+--- a/tests/integration/reader_seed.py
++++ b/tests/integration/reader_seed.py
+@@ -213,11 +213,20 @@ def insert_universe(conn: psycopg.Connection, name: str, instrument_ids: Iterabl
+     return universe_id
+ 
+ 
+-def add_member(conn: psycopg.Connection, universe_id: UUID, instrument_id: int) -> None:
++def add_member(
++    conn: psycopg.Connection,
++    universe_id: UUID,
++    instrument_id: int,
++    *,
++    recorded_on: date | None = None,
++) -> None:
++    """A ``member_added`` event; ``recorded_on`` defaults to the column's America/Chicago
++    date of now (DEC-0065)."""
+     conn.execute(
+-        "INSERT INTO universe_event (universe_id, event_type, instrument_id) "
+-        "VALUES (%s, 'member_added', %s)",
+-        (universe_id, instrument_id),
++        "INSERT INTO universe_event (universe_id, event_type, instrument_id, recorded_on) "
++        "VALUES (%s, 'member_added', %s, "
++        "COALESCE(%s::date, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date))",
++        (universe_id, instrument_id, recorded_on),
+     )
+     conn.commit()
+ 
+diff --git a/tests/integration/test_reader_list.py b/tests/integration/test_reader_list.py
+index 9a2e61b..0ee5ff0 100644
+--- a/tests/integration/test_reader_list.py
++++ b/tests/integration/test_reader_list.py
+@@ -19,6 +19,8 @@ import pytest
+ from factorflow.api.bounds import MAX_PAGE_SIZE
+ from factorflow.classification import reader
+ from tests.integration.reader_seed import (
++    add_member,
++    insert_classification,
+     insert_instrument,
+     insert_reference,
+     insert_run,
+@@ -255,6 +257,25 @@ def test_restated_value_and_growth_cells_carry_the_mark(
+     assert [plain[f].restated_possible for f in reader.FACTORS] == [False, False, False]
+ 
+ 
++# Implements TC-COMP-189
++def test_value_and_growth_marks_are_each_their_own_cell(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S2-6, DAC-E3-12: a value-only restatement marks value and not growth, and a
++    growth-only one growth and not value, so neither cell reads the other's flag."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "VAL", restated=("value",))
++    seed_scored_stock(conn, set_id, "GRO", restated=("growth",))
++
++    page = _read(conn)
++
++    val = _row(page, "VAL").factors
++    assert [val[f].restated_possible for f in reader.FACTORS] == [True, False, False]
++    gro = _row(page, "GRO").factors
++    assert [gro[f].restated_possible for f in reader.FACTORS] == [False, True, False]
++
++
+ # --- TC-COMP-112: unscoped is the active roster; a universe keeps retired members -----------
+ 
+ 
+@@ -352,6 +373,51 @@ def test_universe_with_no_members_in_the_set_is_an_empty_page(
+         assert page.set is not None
+ 
+ 
++# Two instants on 15 October in America/Chicago (CDT): 00:30, still 14 October in any zone west
++# of Chicago, and 23:30, already 16 October in every zone east of it.
++CHICAGO_TODAY = date(2026, 10, 15)
++CHICAGO_JUST_AFTER_MIDNIGHT = datetime(2026, 10, 15, 5, 30, tzinfo=UTC)
++CHICAGO_JUST_BEFORE_MIDNIGHT = datetime(2026, 10, 16, 4, 30, tzinfo=UTC)
++
++
++def _clock_fixed_at(instant: datetime) -> type[datetime]:
++    """A ``datetime`` whose ``now`` is ``instant``, to stand in for the reader's clock."""
++
++    class FixedNow(datetime):
++        @classmethod
++        def now(cls, tz: Any = None) -> "FixedNow":
++            return cls.fromtimestamp(instant.timestamp(), tz)
++
++    return FixedNow
++
++
++@pytest.mark.parametrize(
++    "instant",
++    [CHICAGO_JUST_AFTER_MIDNIGHT, CHICAGO_JUST_BEFORE_MIDNIGHT],
++    ids=["00:30-cdt", "23:30-cdt"],
++)
++# Implements TC-COMP-112
++def test_universe_scope_replays_membership_at_today_in_chicago(
++    scoped_stocks: tuple[psycopg.Connection, UUID, dict[str, int]],
++    monkeypatch: pytest.MonkeyPatch,
++    instant: datetime,
++) -> None:
++    """DAC-E3-S2-3, DEC-0128, DEC-0065: the scope is the membership as of today in
++    America/Chicago. At either instant a member added on that Chicago date is listed (at 00:30
++    a zone behind Chicago is still on the day before) and one recorded on the next Chicago date
++    is not (at 23:30 every zone ahead of Chicago is already on it, as is the host's later date)."""
++    conn, _, ids = scoped_stocks
++    universe_id = insert_universe(conn, "Today", [])
++    add_member(conn, universe_id, ids["ACT"], recorded_on=CHICAGO_TODAY)
++    add_member(conn, universe_id, ids["OUT"], recorded_on=CHICAGO_TODAY + timedelta(days=1))
++    monkeypatch.setattr(reader, "datetime", _clock_fixed_at(instant))
++
++    page = _read(conn, universe_id=universe_id)
++
++    assert _symbols(page) == ["ACT"]
++    assert page.match_count == 1
++
++
+ # --- TC-COMP-120: match_count is the whole filtered scope on every page ----------------------
+ 
+ 
+@@ -450,16 +516,18 @@ def test_empty_thresholds_match_every_stock_in_scope(
+     conn, universe_id, ids = scoped_stocks
+     set_id = reader.current_set(conn)
+     assert set_id is not None
++    incomplete = seed_scored_stock(conn, set_id.set_id, "INC", momentum=NOT_COMPUTABLE_MOMENTUM)
++    add_member(conn, universe_id, incomplete)
+ 
+     unscoped = _read(conn, thresholds=reader.Thresholds())
+-    assert unscoped.match_count == len(unscoped.stocks) == 3
++    assert unscoped.match_count == len(unscoped.stocks) == 4
+     scoped = _read(conn, universe_id=universe_id, thresholds=reader.Thresholds())
+-    assert scoped.match_count == len(scoped.stocks) == 3
+-    assert {r.symbol for r in scoped.stocks} == {"ACT", "OLD", "OUT"}
++    assert scoped.match_count == len(scoped.stocks) == 4
++    assert {r.symbol for r in scoped.stocks} == {"ACT", "INC", "OLD", "OUT"}
+ 
+     evaluated = reader.evaluate_filter(conn, set_id.set_id, reader.Thresholds())
+     assert evaluated == sorted(r.instrument_id for r in unscoped.stocks)
+-    assert evaluated == sorted([ids["ACT"], ids["GONE"], ids["OUT"]])
++    assert evaluated == sorted([ids["ACT"], ids["GONE"], incomplete, ids["OUT"]])
+ 
+ 
+ # --- evaluate_filter equals the list (design section 7) ------------------------------------
+@@ -702,6 +770,54 @@ def test_input_reason_cell_carries_its_input_and_detail(
+     )
+ 
+ 
++def test_value_and_growth_input_reason_cells_carry_their_own_input_and_detail(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """T014: each input-reason cell carries its own factor's stored reason_input and
++    reason_detail; the two factors' inputs differ, so neither cell can read the other's."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "TWO", value=MISSING_VALUE, growth=OUTDATED_GROWTH)
++    cells = _row(_read(conn), "TWO").factors
++
++    value, growth = cells["value"], cells["growth"]
++    assert (value.reason_code, value.reason_input, value.reason_detail) == (
++        "input_missing",
++        "book_to_price",
++        "book_to_price is input_missing",
++    )
++    assert (growth.reason_code, growth.reason_input, growth.reason_detail) == (
++        "input_outdated",
++        "revenue_growth",
++        "revenue_growth is input_outdated",
++    )
++
++
++# Implements task plan Open Gap 7
++@pytest.mark.parametrize(
++    "thresholds",
++    [
++        reader.Thresholds(),
++        reader.Thresholds(bounds={"value_score_min": D("0")}),
++    ],
++    ids=["no-bound", "bound-on-the-missing-factor"],
++)
++def test_a_missing_factor_row_is_a_data_integrity_error(
++    migrated_run_schema_connection: psycopg.Connection, thresholds: reader.Thresholds
++) -> None:
++    """Open Gap 7, DEC-0129: a stock with no value row in the set is neither dropped (not by
++    the join, not by a bound on that factor) nor given an invented cell; the read raises."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "FULL")
++    partial = insert_instrument(conn, "PART")
++    insert_classification(conn, set_id, partial, "growth", score=D("0.5"), percentile=D("50"))
++    insert_classification(conn, set_id, partial, "momentum", score=D("0.5"), percentile=D("50"))
++
++    with pytest.raises(ValueError, match=f"instrument {partial} has no value row"):
++        _read(conn, thresholds=thresholds)
++
++
+ def test_name_is_the_latest_reference_name_or_none(
+     migrated_run_schema_connection: psycopg.Connection,
+ ) -> None:
+diff --git a/tests/unit/test_reader_cursor.py b/tests/unit/test_reader_cursor.py
+index a9128fb..57cc764 100644
+--- a/tests/unit/test_reader_cursor.py
++++ b/tests/unit/test_reader_cursor.py
+@@ -181,3 +181,51 @@ def test_symbol_sort_cannot_carry_a_null_key() -> None:
+     payload["chk"] = reader._cursor_check(payload)
+     with pytest.raises(reader.CursorError):
+         _decode(_raw(payload), sort="symbol")
++
++
++@pytest.mark.parametrize(
++    ("sort", "key"),
++    [
++        ("value_score", "1E+200000"),
++        ("value_score", "-1E+200000"),
++        ("value_score", "1E-200000"),
++        ("value_score", "1000000000000"),
++        ("value_score", "-1000000000000"),
++        ("value_score", "0.0000001"),
++        ("growth_percentile", "1000"),
++        ("growth_percentile", "-1000"),
++        ("momentum_percentile", "50.0000001"),
++    ],
++)
++# Implements TC-COMP-121
++def test_key_no_stored_value_can_equal_is_refused(sort: str, key: str) -> None:
++    """DAC-E3-S2-5, T018: a re-encoded cursor whose key lies outside what its column holds
++    (score numeric(18,6), percentile numeric(9,6)) is a malformed cursor, refused with
++    CursorError before it can reach the database as a numeric overflow."""
++    cursor = reader.encode_cursor(SET_ID, sort, "asc", Decimal(key), False, "AAPL")
++    with pytest.raises(reader.CursorError):
++        _decode(cursor, sort=sort)
++
++
++@pytest.mark.parametrize(
++    ("sort", "key"),
++    [
++        ("value_score", "999999999999.999999"),
++        ("value_score", "-999999999999.999999"),
++        ("value_score", "0.000001"),
++        ("value_score", "1.5000000"),
++        ("growth_percentile", "999.999999"),
++        ("growth_percentile", "-999.999999"),
++        ("momentum_percentile", "100"),
++        ("value_score", "0E-200000"),
++        ("value_score", "0E+200000"),
++    ],
++)
++# Implements TC-COMP-121
++def test_key_at_the_edge_of_its_column_round_trips_at_its_scale(sort: str, key: str) -> None:
++    """The decoded key is the value sent, at the column's six decimal places, so whatever
++    exponent a re-encoded cursor carries, the bound parameter is one the column could hold."""
++    cursor = reader.encode_cursor(SET_ID, sort, "asc", Decimal(key), False, "AAPL")
++    decoded, key_is_null, symbol = _decode(cursor, sort=sort)
++    assert (decoded, key_is_null, symbol) == (Decimal(key), False, "AAPL")
++    assert isinstance(decoded, Decimal) and decoded.as_tuple().exponent == -6

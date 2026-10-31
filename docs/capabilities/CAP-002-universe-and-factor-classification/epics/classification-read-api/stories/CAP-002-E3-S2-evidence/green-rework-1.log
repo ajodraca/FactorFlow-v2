@@ -1,0 +1,17 @@
+# GREEN, CAP-002-E3-S2 rework-1: the rework tests and the IR-005 key-range check (HEAD a4608e7 plus the staged rework)
+$ uv run --offline pytest tests/unit/test_reader_sort_allowlist.py tests/unit/test_reader_cursor.py tests/unit/test_reader_filters.py tests/unit/test_reader_sql_read_only.py tests/integration/test_reader_list.py tests/unit/test_engine_sql_safety.py tests/unit/test_package_data_ships_sql.py tests/unit/test_classification_sql_ships.py -q -p no:randomly
+........................................................................ [ 29%]
+........................................................................ [ 58%]
+........................................................................ [ 88%]
+.............................                                            [100%]
+245 passed in 13.23s
+exit=0
+$ uv run --offline ruff check .
+All checks passed!
+exit=0
+$ uv run --offline ruff format --check .
+247 files already formatted
+exit=0
+$ uv run --offline mypy src
+Success: no issues found in 57 source files
+exit=0
