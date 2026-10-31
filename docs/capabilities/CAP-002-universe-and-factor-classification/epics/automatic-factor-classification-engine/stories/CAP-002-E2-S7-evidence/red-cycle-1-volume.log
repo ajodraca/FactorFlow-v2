@@ -1,0 +1,36 @@
+# RED cycle-1 (T003, TC-COMP-091): falsification run on HEAD f4deee3 plus the cycle-1 test files
+# perturbation: BUDGET_SECONDS = 295 -> 1 in tests/integration/test_engine_volume.py (reverted after this run)
+# engine_proof_support.py sha256 65052d2e0a02d7626e1850a449fe4d0d744addb67dfba74017873d145a9868c4
+# test_engine_volume.py (unperturbed) sha256 b874ff6ec725d6a98efa332ec88d50b34bec1897cdb815b48464ad49a72204ec
+# command: uv run pytest -m slow tests/integration/test_engine_volume.py -s -q
+
+[TC-COMP-091 diagnostic] 3000-instrument build elapsed: 1.525s
+F
+=================================== FAILURES ===================================
+________________ test_3000_instruments_build_within_the_budget _________________
+
+volume_set = (<psycopg.Connection [IDLE] (host=localhost port=63337 user=test database=test_36d6b278307b49df90e1be627c2a7338) at 0x10b1a30e0>, UUID('586011a1-18a2-498a-be5e-c011d805c41e'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b15eea0>
+
+    @pytest.mark.slow
+    @pytest.mark.postgres
+    def test_3000_instruments_build_within_the_budget(
+        volume_set: tuple[psycopg.Connection, UUID], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = volume_set
+        install_test_line_items(monkeypatch)
+    
+        started = time.perf_counter()
+        result = engine.build(conn, set_id, TIMEOUT_SECONDS)
+        elapsed = time.perf_counter() - started
+        print(f"\n[TC-COMP-091 diagnostic] 3000-instrument build elapsed: {elapsed:.3f}s")
+    
+        assert result.state == "complete", result.failure_reason
+        assert result.failure_reason is None
+>       assert elapsed <= BUDGET_SECONDS
+E       assert 1.5254873330704868 <= 1
+
+tests/integration/test_engine_volume.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_volume.py::test_3000_instruments_build_within_the_budget
+1 failed in 9.43s

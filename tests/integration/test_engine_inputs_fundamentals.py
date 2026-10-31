@@ -33,6 +33,7 @@ from tests.integration.engine_inputs_support import (
     months_before,
     run_fundamentals_stage,
 )
+from tests.integration.engine_proof_support import complete_and_open_next, populate_volume
 
 pytestmark = pytest.mark.postgres
 
@@ -1378,3 +1379,77 @@ def test_statement_committed_during_the_build_is_not_used(
     assert second["revenue_growth"]["value"] == ratio(Decimal(575), Decimal(370), 1)
     assert second["revenue_growth"]["known_on"] == date(2026, 10, 17)
     assert inputs_for(env.conn, env.set_id, env.stock) == first
+
+
+# --- CAP-002-E2-S7 T014: unresolved line items still classify momentum ------------------------
+
+
+def test_unresolved_line_items_still_classify_momentum(postgres_connection_string: str) -> None:
+    """TC-COMP-059's end-to-end clause, shared with CAP-002-E2-S2 (DAC-E2-S2-5; factor-engine
+    section 8 acceptance criterion 13 and section 7 row "Unresolved line items"). With the real,
+    unresolved ``LINE_ITEMS``, the real stages and the real peer-set floor, the value and growth
+    inputs are missing with the unresolved cause, momentum is ranked and every stock classified
+    on it, value and growth are unranked, and the set completes (AC-7, AC-12, AC-14). An
+    unranked factor's reason wins over the input's (factor-engine 2.5), and factor_classification
+    has no detail, so the cause is asserted on factor_input only."""
+    conn = migrate_through_classification(postgres_connection_string)
+    try:
+        ids, classification_date = populate_volume(conn, 40, last_session=date(2026, 11, 13))
+        set_id = complete_and_open_next(conn, classification_date)
+        assert line_items.unresolved() == list(line_items.LINE_ITEMS)
+        assert len(line_items.unresolved()) == 7
+
+        result = engine.build(conn, set_id, 60)
+
+        assert result.state == "complete"
+        assert result.failure_reason is None
+        assert result.qualified_counts == {"value": 0, "growth": 0, "momentum": 40}
+        set_state = conn.execute(
+            "SELECT state, active_instruments FROM classification_set WHERE set_id = %s",
+            (set_id,),
+        ).fetchone()
+        conn.commit()
+        assert set_state == ("complete", 40)
+
+        for instrument_id in ids:
+            inputs = inputs_for(conn, set_id, instrument_id)
+            for name in VALUE + GROWTH:
+                assert inputs[name]["status"] == "missing", (instrument_id, name)
+                assert inputs[name]["detail"]["cause"] == "line_item_mapping_unresolved"
+            for name in ("return_3m", "return_6m", "return_12m"):
+                assert inputs[name]["status"] == "present", (instrument_id, name)
+
+        factors = conn.execute(
+            "SELECT factor, ranked, qualified_count FROM classification_set_factor "
+            "WHERE set_id = %s ORDER BY factor",
+            (set_id,),
+        ).fetchall()
+        assert factors == [("growth", False, 0), ("momentum", True, 40), ("value", False, 0)]
+        momentum = conn.execute(
+            "SELECT status, score IS NOT NULL, percentile IS NOT NULL, count(*) "
+            "FROM factor_classification WHERE set_id = %s AND factor = 'momentum' "
+            "GROUP BY 1, 2, 3",
+            (set_id,),
+        ).fetchall()
+        assert momentum == [("classified", True, True, 40)]
+        unranked = conn.execute(
+            "SELECT factor, status, reason_code, reason_input, reason_detail, score, count(*) "
+            "FROM factor_classification WHERE set_id = %s AND factor IN ('value', 'growth') "
+            "GROUP BY 1, 2, 3, 4, 5, 6 ORDER BY 1",
+            (set_id,),
+        ).fetchall()
+        conn.commit()
+        assert unranked == [
+            (
+                factor,
+                "not_classified",
+                "not_enough_stocks",
+                None,
+                "0 of 30 stocks qualified",
+                None,
+                40,
+            )
+            for factor in ("growth", "value")
+        ]
+    finally:
+        conn.close()

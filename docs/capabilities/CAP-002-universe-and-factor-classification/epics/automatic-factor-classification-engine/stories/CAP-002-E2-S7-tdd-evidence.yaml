@@ -1,0 +1,270 @@
+# TDD evidence for CAP-002-E2-S7 - Whole-build proof: no backdating and the 3000-instrument volume test.
+# The story adds tests only; no production file changes (T009 skipped: the volume build took under 2 s against
+# the 295 s budget). Every cycle is a characterisation test of behaviour CAP-002-E2-S3 to S6 delivered, so its RED
+# is the falsification run the task plan's T013 names, recorded in red_log, with the perturbation reverted before
+# the diff was staged.
+# The driver commits once per stage, so every cycle records commit_hash: stage and cites its reviewed_patch. The
+# cycles share that commit: cycle-1's patch is the staged diff against HEAD (check-tdd-evidence.py fingerprint
+# --staged); each later cycle's patch is the diff from the index tree the previous cycle was reviewed at to the
+# index tree after staging its own files (fingerprint --range <previous tree>..<new tree>), so the patches apply in
+# order onto the stage commit's parent and rebuild it.
+# Decisions applied: DEC-0123 (volume test shape), DEC-0124 (no-backdating assertions).
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003]
+    decisions: [DEC-0123]
+    description: >
+      T001 confirmed every hard prerequisite on the branch (cut from origin/main f4deee3): engine.py registers
+      _fundamental_inputs_stage, _momentum_inputs_stage and _classification_stage in that order, the classification
+      stage last (DEC-0121); the seven SQL files exist; value_inputs.sql, growth_inputs.sql and classify.sql write
+      restated_possible from bool_or (S6); the S2 and S3 support modules and the two test files to append to exist.
+      T002 adds tests/integration/engine_proof_support.py: volume_sessions (273 weekdays over 13 months and 7 days,
+      evenly spaced interior weekdays dropped), populate_volume (set-based INSERT ... SELECT with bound parameters:
+      n instruments V00001 up, one bar per session observed on its session date, eight calendar quarters of the
+      three statement types observed and filed 30 days before the last session with JSON-number payloads under
+      TEST_KEYS, one cash dividend per instrument between 3 and 2 months back, a split for every tenth between 6 and
+      5 months back, then ANALYZE), _insert_bar, populate_backdating, backfill_statement, revise_close, snapshot_set
+      (jsonb kept as the store's text) and complete_and_open_next. T003 adds tests/integration/test_engine_volume.py,
+      TC-COMP-091: 3000 instruments built through the real stages and the real floor, wall clock around the one
+      engine.build call, complete within BUDGET_SECONDS = 295 with 24,000 inputs, 9,000 classified rows, three
+      ranked factors of 3000 and the set complete with 3000 active instruments.
+    deviations: >
+      (1) BackdatingPopulation also carries classification_date, which backfill_statement needs and T002's field list
+      omits. (2) T003 also asserts each classification_set_factor row is ranked with 3000 qualified, the plan's
+      "every factor is ranked" read from the table as well as from BuildResult.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/red-cycle-1-volume.log
+    red_log_sha256: 8f70b278cb47523d82261cee45acc73bd9b6c5669b76b669fe01b01b456f115c
+    red_evidence: >
+      Falsification run named by T013: BUDGET_SECONDS temporarily set to 1 in test_engine_volume.py, on HEAD f4deee3
+      plus the two cycle-1 files: 1 failed, on assert elapsed <= BUDGET_SECONDS (1.525 s against 1). Reverted before
+      staging; the unperturbed file's sha256 is in the log header and matches the staged file.
+    green_evidence: >
+      uv run pytest -m slow tests/integration/test_engine_volume.py -s: 1 passed, build elapsed 1.649 s (fixture load
+      7.2 s, excluded from the clock). ruff check and ruff format --check clean on both files; mypy --strict on them
+      reports only the pre-existing engine_inputs_support.py:194 error outside this story. The code review
+      (APPROVED) and the spec-drift review (no drift) judged cycle-1.patch. The code reviewer also probed the
+      population in a scratch database: 819,000 bars, 72,000 statement rows, 3,000 dividends and 300 splits; all
+      24,000 inputs present; every momentum input lists a dividend and the 6- and 12-month inputs of every tenth
+      stock a split; and the backdating helpers give A's growth 7 periods found, a peer set of 30 then 31, and an
+      unchanged set-1 snapshot. Non-blocking notes taken into cycle-2: the split comment said 1-for-2 for what is a
+      2-for-1 split; EPS and net income varied only with id mod 23 and 17, so two backdating stocks shared an EPS
+      series; a classification date within 30 days after a quarter end would make statements observed before their
+      period end. Noted, not changed: TC-COMP-091 does not itself count corporate actions in the inputs' detail (the
+      population test of cycle-2 does, at 40 stocks); the RED margin depends on the host (1.5 s against 1 s).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/green-cycle-1-volume.log
+        sha256: 2e8ab6dfe33e2b8602f8837d74bbdca20fc4834a264ea3f877a5ca1dc01eb90c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 842bbe745f9baeac39d3ee3e6b332c14fa04aea7a01dbe4e5fc29647526be8c5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds only test code and changes no production behaviour
+
+  - id: cycle-2
+    tasks: [T006]
+    decisions: [DEC-0123]
+    description: >
+      T006 adds tests/integration/test_engine_volume_population.py: volume_sessions gives 273 distinct ascending
+      weekdays ending on the last session and reaching back 13 months (an unmarked test, no database), and the
+      volume population at 40 stocks, built through the real stages with the test line items (postgres, not slow),
+      is complete with all 320 inputs present and all 120 classifications classified, each stock holding 273 bars, 24
+      statement rows and its dividend. The support module takes three notes of the cycle-1 code review: the split is
+      described as 2-for-1 (price factor 1/2), net income and EPS vary with id mod 61 and id mod 97 so the 31
+      backdating stocks are distinct, and _insert_statements asserts the statements are observed after their newest
+      period end.
+    deviations: >
+      (1) Beyond T006's list, the 40-stock test asserts each momentum input's detail lists its dividend, and the 6-
+      and 12-month inputs of every tenth stock its split, so the corporate actions are shown applied inside the
+      windows, not only stored (DEC-0123's two action types). (2) The volume_sessions check is its own unmarked test,
+      since it needs no database.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/red-cycle-2-population.log
+    red_log_sha256: 021810dae9aec2f0e7e6ece27098ddb3640ff84cf805d4653b89d2cb834aa77d
+    red_evidence: >
+      Falsification run named by T013: populate_volume temporarily wrote seven quarters (QUARTERS - 1) instead of
+      eight: 1 failed, 1 passed; the build's factor_input rows showed growth missing 80 where present 80 is expected.
+      Reverted before staging; the unperturbed support module's sha256 is in the log header and matches the staged
+      file.
+    green_evidence: >
+      uv run pytest tests/integration/test_engine_volume_population.py tests/integration/test_engine_volume.py -m
+      'postgres or not postgres' -s: 3 passed, the 3000-instrument build 1.906 s after the support changes. ruff
+      check and ruff format --check clean; mypy --strict reports only the pre-existing engine_inputs_support.py:194
+      error. Interim suites on the cycle-2 tree: -m 'not postgres' 1235 passed, 1 xfailed; -m postgres 765 passed.
+      The code review (APPROVED) and the spec-drift review (no drift) judged cycle-2.patch. Non-blocking notes:
+      LAST_SESSION is a second literal that must stay equal to test_engine_volume.py's for the 40-stock test to
+      vouch for the 3000-stock population (kept: the code reviewer's cycle-1 sweep found the action dates inside the
+      windows for every weekday from 2018 to 2034); the date guard's message names no dates (taken into cycle-4);
+      the guard now refuses a classification date within 30 days after a quarter end, so later cycles use
+      2026-11-13 too; the 40-stock test does not assert failure_reason is None (complete implies it).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/green-cycle-2-population.log
+        sha256: d2ac4e15efc52cab7504b65e7b6a10930b13f3c7e58ac896c0852e100e2444a0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2e44e95b6d11f052ad815166406439aab2b8954a483c766be4368b9324c8f044
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds and changes only test code and changes no production behaviour
+
+  - id: cycle-3
+    tasks: [T007]
+    decisions: []
+    description: >
+      T007 adds tests/unit/test_engine_volume_static.py (no database), which parses tests/integration/
+      test_engine_volume.py with ast and refuses: a test function not marked both slow and postgres; the literals
+      295 and 300.0 other than exactly once each, as the module-level BUDGET_SECONDS and TIMEOUT_SECONDS; engine.build
+      called other than once; any reference to _STAGES or MIN_PEER_SET_SIZE (a name, an attribute, an import, or a
+      string that is the name or a dotted path ending in it, so every way of assigning either is covered). Each rule
+      is run against an inline source that breaks it (26 cases) and against that source unbroken.
+    deviations: >
+      Rules beyond T007's list, added on the code review: skip, skipif and xfail marks and pytest.skip and
+      pytest.xfail calls are refused (a skipped or expected-to-fail volume test proves nothing, DAC-E2-5); each
+      pinned constant is bound exactly once anywhere in the module; engine.build is passed TIMEOUT_SECONDS; exactly
+      one assert compares a value <= BUDGET_SECONDS with the bare name as comparator. "No assignment to _STAGES" is
+      enforced as no reference at all, which also refuses a read the volume test has no reason to make. The module
+      must hold exactly one test function. A module-level pytestmark counts for the markers.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/red-cycle-3-static.log
+    red_log_sha256: 5e0822e6217ffff1bdb08173124e621f6bba664c89b1629e19ac012be3aefbbd
+    red_evidence: >
+      T013 names no perturbation for T007, so three were run on the final tests, each on the real volume test and
+      reverted before staging (the unperturbed file's sha256 is in the log header and matches the staged blob):
+      the slow decorator removed, BUDGET_SECONDS 295 -> 300, and the line assert elapsed <= BUDGET_SECONDS deleted.
+      Each run: 1 failed (test_the_volume_test_keeps_every_rule, with the violated rule's message), 28 passed. An
+      earlier RED of the first draft (two perturbations, 1 failed and 16 passed each) was superseded by this one.
+    green_evidence: >
+      uv run pytest tests/unit/test_engine_volume_static.py: 29 passed. ruff check, ruff format --check and mypy
+      --strict clean. Interim suites on the cycle-3 tree: -m 'not postgres' 1264 passed, 1 xfailed; an earlier full
+      run on the first draft of the cycle gave 2017 passed, 1 xfailed. Review round: the first code review was
+      APPROVED with non-blocking findings (the budget's use unchecked, xfail or skip neutralising the test, the
+      dotted-path monkeypatch form passing); the first spec-drift review found drift (two docstrings cited no AC,
+      against T012 and the Phase 2 preamble). Both were fixed, the RED re-recorded, and the code review (APPROVED)
+      and spec-drift review (no drift) then judged the final cycle-3.patch as recorded in diff_sha256. Their
+      non-blocking notes, not changed: the budget assert's left operand is not tied to the measured elapsed time
+      (assert 0 <= BUDGET_SECONDS would pass); a defaulted parameter or a walrus named like the constant is not
+      counted as a binding; pytest.importorskip is not refused; the guard refuses forms the plan would accept
+      (elapsed < BUDGET_SECONDS, an annotated constant, a second test in the module), acceptable since no later task
+      edits the volume test.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/green-cycle-3-static.log
+        sha256: 7291205d80821320aed301ab86ebca502fa420cd7a54ecf72f2fbe0369fa1c74
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8645ed8515825b2639a5e6ec2692800f0bbab9d3ccb9079bca13085d532c5037
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds only test code and changes no production behaviour
+
+  - id: cycle-4
+    tasks: [T004, T005]
+    decisions: [DEC-0124]
+    description: >
+      Three tests appended to CAP-002-E2-S2's tests/integration/test_engine_transaction.py under a CAP-002-E2-S7
+      section, over populate_backdating at 2026-11-13 with the real stages and the real floor. T004, TC-COMP-162:
+      set 1 shows A's growth inputs missing with seven periods found, A not classified on growth for input_missing
+      and growth ranked at 30; the backfilled statement is then recorded (filed before A's first observation, so
+      backfilled under DEC-0056, recorded_at later than set 1's ended_at); every column of every row of set 1's four
+      tables is unchanged after the backfill and again after set 2; set 2, dated the backfill's observed_on, holds
+      A's growth inputs present, restated_possible and known on that observed_on (not the filing date nor the
+      period end), A classified and marked on growth, growth ranked at 31; no set-1 known_on is on or after that
+      date. T005 (a): a close revised after set 1 completes (observed the next day) leaves set 1 unchanged, and set
+      2's book_to_price takes the revised close, differs in value and is known on the revision's observed_on. T005
+      (b), the control: the same statement recorded before set 1 builds, on the same date, gives A's growth inputs
+      present in set 1 and growth ranked at 31. The support module's date guard names its dates (cycle-2 note).
+    deviations: >
+      (1) The import block gains the new imports and one extended line (from datetime import date, timedelta);
+      ruff's E402 and isort rules put module imports there, so the S7 code is the appended section plus the import
+      block, as the plan allows for T014's file; no existing test, fixture or helper changes. (2) Helpers in the
+      appended section (build_complete, factor_row, classification_row, backfilled_row) and assertions beyond the
+      plan's list: the stored row's observed_on and pre-first-observation filing date; set 1 re-checked after set 2
+      in T005 (a); set 2's detail close is the revised close; the control's known_on is the statement's observed_on.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/red-cycle-4-backdating.log
+    red_log_sha256: 1cb753d97f04d4bd72ce1e731375514153e8d3cbdfcd9bf6aba6ec7cbba736bf
+    red_evidence: >
+      Four falsification runs, each perturbing test_engine_transaction.py and reverted (the unperturbed file's
+      sha256 is in the log and matches the staged blob), each 1 failed: T013's perturbation for T004,
+      backfill_statement moved ahead of the set-1 build, fails at the missing precondition (present where missing
+      is expected); because that run stops before the unchanged-set comparison, a second T004 run flips one set-1
+      factor_classification column after the snapshot and fails the snapshot comparison; T005 (a) with
+      revise_close moved ahead of the set-1 build fails (set 1 already known on the revision date); T005 (b) with
+      the backfill moved after the set-1 build fails (missing where present is expected).
+    green_evidence: >
+      uv run pytest tests/integration/test_engine_transaction.py tests/integration/test_engine_volume_population.py
+      tests/integration/test_engine_volume.py -m 'postgres or not postgres': 34 passed (S2's 28 transaction tests
+      unchanged and passing). Interim -m postgres on the cycle-4 tree: 768 passed. ruff check and ruff format
+      --check clean; mypy --strict reports only the pre-existing engine_inputs_support.py:194 and
+      test_engine_transaction.py:65 (S2's RecordingConnection) errors. The code review (APPROVED) and spec-drift
+      review (no drift) judged cycle-4.patch. Non-blocking notes: the comment "recorded after set 1 completed"
+      claims more than recorded_at > ended_at shows, since ended_at is the build transaction's start time; nothing
+      asserted the snapshots are non-empty; a comment should say the control's known_on after its classification
+      date is a fixture artefact (all three taken into cycle-5); S2's module docstring still describes injected
+      stages (left: the plan forbids editing existing lines).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/green-cycle-4-backdating.log
+        sha256: 342fcb2b75aaa6b1519286285cdfa086fed89bd0c724f8df6bcd0fbe88dcd74c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 72c54ffc09700b193b88c1cdb10147a5cb2d34cfc214a131e66175f1e3184194
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds and changes only test code and changes no production behaviour
+
+  - id: cycle-5
+    tasks: [T014, T004, T005]
+    decisions: []
+    description: >
+      T014 appends test_unresolved_line_items_still_classify_momentum to CAP-002-E2-S3's
+      tests/integration/test_engine_inputs_fundamentals.py (one import line added to the import block; no existing
+      line changes): with the real, unresolved LINE_ITEMS (all seven, asserted as a precondition), the real stages
+      and the real floor over a 40-stock populate_volume at 2026-11-13, the build is complete with qualified counts
+      value 0, growth 0, momentum 40 and the set complete with 40; every stock's five value and growth inputs are
+      missing with detail.cause line_item_mapping_unresolved and its three momentum inputs present; only momentum
+      is ranked; all 40 momentum rows are classified with a score and percentile; all 80 value and growth rows are
+      not_enough_stocks with reason_input null, "0 of 30 stocks qualified" and no score. No # Implements tag (it
+      stays on CAP-002-E2-S2 T011); the docstring cites TC-COMP-059, DAC-E2-S2-5 and factor-engine section 8
+      criterion 13 and section 7 row "Unresolved line items". The cycle also takes the three cycle-4 review notes in
+      test_engine_transaction.py's S7 section: the recorded_at comment says what the assertion shows, both set-1
+      snapshots are asserted non-empty, and a comment explains the control's known_on after its classification
+      date.
+    deviations: >
+      The cycle-4 note edits are in this cycle's patch, inside the S7 section of test_engine_transaction.py; they
+      add one assertion to each of T004 and T005 (a) and change no other assertion.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/red-cycle-5-unresolved.log
+    red_log_sha256: c33bde0124d62e889daa6f56e4a5f164d9dc4bbbe7d1ab16d1c1084646a8e225
+    red_evidence: >
+      Two falsification runs, each reverted (the unperturbed files' sha256 are in the log and match the staged
+      blobs), each 1 failed: T013's perturbation for T014, populate_volume given 29 stocks instead of 40, fails at
+      (a) with momentum 29 qualified where 40 is expected (29 is below the floor of 30, so momentum is no longer
+      ranked); the T004 set-1 snapshot emptied fails the new non-empty check.
+    green_evidence: >
+      uv run pytest tests/integration/test_engine_inputs_fundamentals.py tests/integration/test_engine_transaction.py:
+      89 passed (S3's 57 and S2's 28 collected tests unchanged and passing, plus T014 and S7's three). ruff check and ruff format --check clean; mypy
+      --strict reports only errors in lines that predate this story (test_engine_inputs_fundamentals.py:130 and
+      :995, engine_inputs_support.py:194, test_engine_transaction.py:65). The code review (APPROVED, no new findings)
+      and spec-drift review (no drift) judged cycle-5.patch. The cumulative staged diff touches only the six test
+      files the plan names; no SQL file, engine.py, constants.py, conftest, pyproject.toml or migration changes.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/green-cycle-5-unresolved.log
+        sha256: a81e320599f1600e9caa6de6e8853a0e80c8d018c5324b1527f1eb6e023f131d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ee6d2c72351e83616f5939a0cf730e1196797480273b31b4a0f6b2585a7c11f7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S7-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle adds and changes only test code and changes no production behaviour

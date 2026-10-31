@@ -1,0 +1,341 @@
+"""Static guard on the volume proof (CAP-002-E2-S7, DAC-E2-5).
+
+``tests/integration/test_engine_volume.py`` proves the AC-11 budget only while it times one
+build of the real stages with the real peer-set floor, under the budget DAC-E2-5 sets, in the
+``slow`` and ``postgres`` runs. A replaced stage list, a patched floor, a second build, a
+dropped or disabling marker, or a drifted or unused constant would each let it pass while
+proving less. This module reads the file with ``ast`` and refuses each, and runs every rule
+against an inline source that breaks it, so each rule is shown able to fail. No database is
+used.
+"""
+
+import ast
+from pathlib import Path
+
+import pytest
+
+VOLUME_TEST = Path(__file__).resolve().parents[1] / "integration" / "test_engine_volume.py"
+REQUIRED_MARKS = ("slow", "postgres")
+DISABLING_MARKS = ("skip", "skipif", "xfail")
+DISABLING_CALLS = ("skip", "xfail")
+BUDGET, TIMEOUT = "BUDGET_SECONDS", "TIMEOUT_SECONDS"
+PINNED = ((BUDGET, 295), (TIMEOUT, 300.0))
+FORBIDDEN = ("_STAGES", "MIN_PEER_SET_SIZE")
+
+
+def _mark_names(node: ast.expr) -> set[str]:
+    """The ``pytest.mark.<name>`` marks an expression applies, called or not, in a list or not."""
+    if isinstance(node, ast.List | ast.Tuple):
+        return set().union(*(_mark_names(item) for item in node.elts))
+    if isinstance(node, ast.Call):
+        node = node.func
+    if (
+        isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Attribute)
+        and node.value.attr == "mark"
+        and isinstance(node.value.value, ast.Name)
+        and node.value.value.id == "pytest"
+    ):
+        return {node.attr}
+    return set()
+
+
+def _module_marks(tree: ast.Module) -> set[str]:
+    marks: set[str] = set()
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "pytestmark" for t in node.targets
+        ):
+            marks |= _mark_names(node.value)
+    return marks
+
+
+def _references(tree: ast.Module, name: str) -> bool:
+    """Whether ``name`` appears as a name, an attribute, an import, or a string that is the
+    name or a dotted path ending in it.
+
+    Any reference is refused, which covers every way of assigning it: attribute or slice
+    assignment, ``monkeypatch.setattr`` by name or by dotted path, list mutation and
+    ``from ... import``.
+    """
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and node.id == name:
+            return True
+        if isinstance(node, ast.Attribute) and node.attr == name:
+            return True
+        if (
+            isinstance(node, ast.Constant)
+            and isinstance(node.value, str)
+            and node.value.rsplit(".", 1)[-1] == name
+        ):
+            return True
+        if isinstance(node, ast.alias) and name in (node.name, node.asname):
+            return True
+    return False
+
+
+def _bindings(tree: ast.Module, name: str) -> int:
+    """How many statements anywhere in the module bind ``name``."""
+    count = 0
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, ast.AugAssign | ast.AnnAssign):
+            targets = [node.target]
+        else:
+            continue
+        count += sum(
+            isinstance(t, ast.Name) and t.id == name for target in targets for t in ast.walk(target)
+        )
+    return count
+
+
+def _is_name(node: ast.expr, name: str) -> bool:
+    return isinstance(node, ast.Name) and node.id == name
+
+
+def _test_rules(tree: ast.Module) -> list[str]:
+    """One test function, marked slow and postgres, and never skipped or expected to fail."""
+    found: list[str] = []
+    tests = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        and node.name.startswith("test_")
+    ]
+    if len(tests) != 1:
+        found.append(f"expected one test function, found {len(tests)}")
+    module_marks = _module_marks(tree)
+    for test in tests:
+        marks = module_marks.union(*(_mark_names(d) for d in test.decorator_list))
+        found.extend(
+            f"{test.name} is not marked {mark}" for mark in REQUIRED_MARKS if mark not in marks
+        )
+        found.extend(f"{test.name} is marked {mark}" for mark in DISABLING_MARKS if mark in marks)
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in DISABLING_CALLS
+            and _is_name(node.func.value, "pytest")
+        ):
+            found.append(f"the module calls pytest.{node.func.attr}")
+    return found
+
+
+def _constant_rules(tree: ast.Module) -> list[str]:
+    """Each pinned literal once, as its constant's only binding, at module level."""
+    found: list[str] = []
+    for constant, value in PINNED:
+        literals = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Constant)
+            and type(node.value) is type(value)
+            and node.value == value
+        ]
+        named = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(_is_name(t, constant) for t in node.targets)
+            and any(node.value is literal for literal in literals)
+        ]
+        if len(literals) != 1:
+            found.append(f"the literal {value!r} appears {len(literals)} times, not once")
+        if len(named) != 1:
+            found.append(f"{constant} is not assigned the literal {value!r} at module level")
+        bindings = _bindings(tree, constant)
+        if bindings != 1:
+            found.append(f"{constant} is bound {bindings} times, not once")
+    return found
+
+
+def _build_rules(tree: ast.Module) -> list[str]:
+    """One ``engine.build`` call, given ``TIMEOUT_SECONDS``, and one assertion of the elapsed
+    time against ``BUDGET_SECONDS`` itself."""
+    found: list[str] = []
+    builds = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "build"
+        and _is_name(node.func.value, "engine")
+    ]
+    if len(builds) != 1:
+        found.append(f"engine.build is called {len(builds)} times, not once")
+    for build in builds:
+        arguments = [*build.args, *(keyword.value for keyword in build.keywords)]
+        if not any(_is_name(argument, TIMEOUT) for argument in arguments):
+            found.append(f"engine.build is not passed {TIMEOUT}")
+    budget_asserts = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assert)
+        and isinstance(node.test, ast.Compare)
+        and [type(op) for op in node.test.ops] == [ast.LtE]
+        and _is_name(node.test.comparators[0], BUDGET)
+    ]
+    if len(budget_asserts) != 1:
+        found.append(f"no single assert compares the elapsed time <= {BUDGET}")
+    return found
+
+
+def violations(source: str) -> list[str]:
+    """Every rule the volume test module ``source`` breaks; empty when it keeps them all."""
+    tree = ast.parse(source)
+    found = [*_test_rules(tree), *_constant_rules(tree), *_build_rules(tree)]
+    found.extend(f"the module references {name}" for name in FORBIDDEN if _references(tree, name))
+    return found
+
+
+def test_the_volume_test_keeps_every_rule() -> None:
+    """DAC-E2-5: the delivered volume test times one real build under the pinned budget."""
+    assert violations(VOLUME_TEST.read_text()) == []
+
+
+GOOD = """
+import time
+
+import pytest
+from factorflow.classification import engine
+
+BUDGET_SECONDS = 295
+TIMEOUT_SECONDS = 300.0
+
+
+@pytest.mark.slow
+@pytest.mark.postgres
+def test_volume(volume_set, monkeypatch):
+    conn, set_id = volume_set
+    started = time.perf_counter()
+    result = engine.build(conn, set_id, TIMEOUT_SECONDS)
+    elapsed = time.perf_counter() - started
+    assert result.state == "complete"
+    assert elapsed <= BUDGET_SECONDS
+"""
+
+BUILD = "    result = engine.build(conn, set_id, TIMEOUT_SECONDS)\n"
+CHECK = "    assert elapsed <= BUDGET_SECONDS\n"
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "expected"),
+    [
+        ("@pytest.mark.slow\n", "", "test_volume is not marked slow"),
+        ("@pytest.mark.postgres\n", "", "test_volume is not marked postgres"),
+        ("@pytest.mark.slow\n", "@pytest.mark.slow\n@pytest.mark.xfail\n", "is marked xfail"),
+        ("@pytest.mark.slow\n", "@pytest.mark.slow\n@pytest.mark.skip\n", "is marked skip"),
+        (
+            "@pytest.mark.slow\n",
+            '@pytest.mark.slow\n@pytest.mark.skipif(True, reason="x")\n',
+            "is marked skipif",
+        ),
+        (BUILD, '    pytest.skip("x")\n' + BUILD, "the module calls pytest.skip"),
+        (BUILD, '    pytest.xfail("x")\n' + BUILD, "the module calls pytest.xfail"),
+        ("BUDGET_SECONDS = 295", "BUDGET_SECONDS = 600", "the literal 295 appears 0 times"),
+        (
+            "BUDGET_SECONDS = 295",
+            "LIMIT = 295\nBUDGET_SECONDS = LIMIT",
+            "BUDGET_SECONDS is not assigned the literal 295",
+        ),
+        (CHECK, CHECK + "    assert 1 <= 295\n", "the literal 295 appears 2 times"),
+        (
+            "TIMEOUT_SECONDS = 300.0\n",
+            "TIMEOUT_SECONDS = 300.0\nBUDGET_SECONDS = 10_000\n",
+            "BUDGET_SECONDS is bound 2 times",
+        ),
+        (BUILD, "    BUDGET_SECONDS = 10_000\n" + BUILD, "BUDGET_SECONDS is bound 2 times"),
+        (CHECK, "", "no single assert compares the elapsed time <= BUDGET_SECONDS"),
+        (
+            CHECK,
+            "    assert elapsed <= BUDGET_SECONDS * 10\n",
+            "no single assert compares the elapsed time <= BUDGET_SECONDS",
+        ),
+        ("TIMEOUT_SECONDS = 300.0", "TIMEOUT_SECONDS = 300", "the literal 300.0 appears 0 times"),
+        (
+            BUILD,
+            "    result = engine.build(conn, set_id, 3600.0)\n",
+            "engine.build is not passed TIMEOUT_SECONDS",
+        ),
+        (BUILD, BUILD + BUILD, "engine.build is called 2 times"),
+        (BUILD, "    result = None\n", "engine.build is called 0 times"),
+        (BUILD, "    engine._STAGES = []\n" + BUILD, "the module references _STAGES"),
+        (BUILD, "    engine._STAGES[:] = []\n" + BUILD, "the module references _STAGES"),
+        (
+            BUILD,
+            '    monkeypatch.setattr(engine, "_STAGES", [])\n' + BUILD,
+            "the module references _STAGES",
+        ),
+        (
+            BUILD,
+            '    monkeypatch.setattr("factorflow.classification.engine._STAGES", [])\n' + BUILD,
+            "the module references _STAGES",
+        ),
+        (
+            BUILD,
+            '    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 3)\n' + BUILD,
+            "the module references MIN_PEER_SET_SIZE",
+        ),
+        (
+            BUILD,
+            '    monkeypatch.setattr("factorflow.classification.constants.MIN_PEER_SET_SIZE", 3)\n'
+            + BUILD,
+            "the module references MIN_PEER_SET_SIZE",
+        ),
+        (
+            "from factorflow.classification import engine\n",
+            "from factorflow.classification import engine\n"
+            "from factorflow.classification.constants import MIN_PEER_SET_SIZE\n",
+            "the module references MIN_PEER_SET_SIZE",
+        ),
+        ("def test_volume(", "def check_volume(", "expected one test function, found 0"),
+    ],
+    ids=[
+        "no-slow-mark",
+        "no-postgres-mark",
+        "xfail-mark",
+        "skip-mark",
+        "skipif-mark",
+        "skip-call",
+        "xfail-call",
+        "budget-changed",
+        "budget-not-the-literal",
+        "budget-literal-twice",
+        "budget-rebound",
+        "budget-shadowed",
+        "budget-not-asserted",
+        "budget-loosened",
+        "timeout-not-a-float",
+        "timeout-not-passed",
+        "two-builds",
+        "no-build",
+        "stages-assigned",
+        "stages-slice-assigned",
+        "stages-monkeypatched",
+        "stages-monkeypatched-by-path",
+        "floor-monkeypatched",
+        "floor-monkeypatched-by-path",
+        "floor-imported",
+        "no-test-function",
+    ],
+)
+def test_each_rule_can_fail(old: str, new: str, expected: str) -> None:
+    """DAC-E2-5: each rule refuses a source that breaks it."""
+    assert GOOD.count(old) == 1
+    assert any(expected in found for found in violations(GOOD.replace(old, new)))
+
+
+def test_the_inline_source_keeps_every_rule() -> None:
+    """DAC-E2-5: the negative cases each break one rule of a source that keeps them all."""
+    assert violations(GOOD) == []
+
+
+def test_module_level_marks_count() -> None:
+    """DAC-E2-5: a ``pytestmark`` list marks the test as the decorators do."""
+    source = GOOD.replace("@pytest.mark.slow\n@pytest.mark.postgres\n", "").replace(
+        "BUDGET_SECONDS = 295",
+        "pytestmark = [pytest.mark.slow, pytest.mark.postgres]\nBUDGET_SECONDS = 295",
+    )
+    assert violations(source) == []
