@@ -1749,6 +1749,30 @@ describe("TC-COMP-138: sorting is a request", () => {
     expect(listMock).toHaveBeenCalledTimes(3);
     expect(listMock.mock.calls[2][0]).toMatchObject({ sort: "value_percentile", order: "desc" });
   });
+
+  it("keeps focus on a sort button activated after an arrow press onto the already-selected row", async () => {
+    const user = await renderSorted();
+    await user.click(screen.getByRole("rowheader", { name: "SYM0000" }));
+    checkboxOf("SYM0001").focus();
+    await user.keyboard("{ArrowUp}");
+    expect(selectedSymbols()).toEqual(["SYM0000"]);
+
+    const pending = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(pending.promise);
+    const button = sortButton(SORT.byPercentile("value"));
+    await user.click(button);
+    expect(listMock.mock.calls[1][0]).toEqual({
+      sort: "value_percentile",
+      order: "asc",
+      limit: PAGE_SIZE,
+    });
+    expect(document.activeElement).toBe(button);
+    await act(async () => {
+      pending.resolve(list(generated(3), { matchCount: 2846 }));
+    });
+    expect(table()).not.toHaveAttribute("aria-busy", "true");
+    expect(document.activeElement).toBe(button);
+  });
 });
 
 // T008, the header half: the sort controls and the header's composition (AC-9, DAC-E4-1; Open Gap 3).
@@ -2143,6 +2167,59 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
     );
     expect(selectedSymbols()).toEqual(["MSFT"]);
     expect(rowOf("MSFT").tabIndex).toBe(0);
+  });
+
+  /** Selects AAPL, tabs to MSFT's checkbox and presses ArrowUp, which targets the selected row. */
+  async function arrowOntoSelected(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+    await user.click(screen.getByRole("rowheader", { name: "AAPL" }));
+    await user.tab();
+    await user.tab();
+    expect(document.activeElement).toBe(checkboxOf("MSFT"));
+    await user.keyboard("{ArrowUp}");
+  }
+
+  it("focuses the already-selected row when an arrow key from a neighbour's checkbox targets it", async () => {
+    const user = await renderRows();
+    await arrowOntoSelected(user);
+    expect(selectedSymbols()).toEqual(["AAPL"]);
+    expect(document.activeElement).toBe(rowOf("AAPL"));
+    expect(hostChecked()).toBe("");
+  });
+
+  it("keeps focus on a checkbox checked with Space after an arrow press onto the already-selected row", async () => {
+    const user = await renderRows();
+    await arrowOntoSelected(user);
+    checkboxOf("MSFT").focus();
+    await user.keyboard(" ");
+    expect(hostChecked()).toBe("MSFT");
+    expect(selectedSymbols()).toEqual(["AAPL"]);
+    expect(document.activeElement).toBe(checkboxOf("MSFT"));
+  });
+
+  it("leaves focus on a control outside the table across a query change after an arrow press onto the already-selected row", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(THREE));
+    const { rerender } = render(<Host query={DEFAULT_RESEARCH_QUERY} />);
+    await screen.findByText("AAPL");
+    await arrowOntoSelected(user);
+    const outside = document.createElement("input");
+    outside.setAttribute("aria-label", "Host filter");
+    document.body.append(outside);
+    try {
+      outside.focus();
+      const pending = deferred<ClassificationList>();
+      listMock.mockReturnValueOnce(pending.promise);
+      rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, hideIncomplete: true }} />);
+      expect(listMock).toHaveBeenCalledTimes(2);
+      expect(document.activeElement).toBe(outside);
+      await act(async () => {
+        pending.resolve(list(THREE));
+      });
+      expect(table()).not.toHaveAttribute("aria-busy", "true");
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      outside.remove();
+    }
   });
 });
 

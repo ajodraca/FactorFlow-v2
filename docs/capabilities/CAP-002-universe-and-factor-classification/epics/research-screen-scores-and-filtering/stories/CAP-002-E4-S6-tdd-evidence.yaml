@@ -532,3 +532,60 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: rework-3
+    tasks: [T003, T004, T013]
+    addresses_review: CAP-002-E4-S6-implementation-review-v3.md
+    findings: [IR-001]
+    description: >
+      IR-001 (CRITICAL, production): move() no longer leaves a focus request that no render consumes. When the
+      arrow target is already inside the viewport (scrollTopToReveal returns the current scrollTop, so the row
+      is rendered: the viewport lies within visibleWindow's overscan), the row is focused directly and the
+      pending-focus ref is cleared; this covers the already-selected target, where select() returns early and
+      nothing re-renders. Only when a scroll is needed is the request set, and then setScrollTop with a new
+      value guarantees the render that brings the row into the window and consumes it. Four tests: TC-COMP-139
+      selects AAPL, tabs twice to MSFT's checkbox and presses ArrowUp, then asserts focus on the AAPL row; after
+      the same arming, Space on MSFT's checkbox checks it and keeps focus on it; after the same arming, a
+      controlled-query change (hideIncomplete) keeps focus on an input outside the table before and after the
+      deferred page arrives. TC-COMP-138 arms from SYM0001's checkbox onto the selected SYM0000, activates Sort
+      by value percentile, and asserts the request and focus on the button before and after the deferred page.
+      DEC-0244 (focus falls to document.body when a refresh drops the focused row) is unchanged. Code review by
+      an independent subagent (APPROVED, read-only, over the code diff); spec drift was assessed by the coding
+      agent, since the change restores T013 and DAC-E4-S6-2 as written and touches no specification.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-3.log
+    red_log_sha256: aac0157bf199e61c811b5c6b1e74543a2cb7d82a1294a952410750d173ddc3ff
+    red_evidence: >
+      With the four tests written against the reviewed table (HEAD f8ac5ea, results-table.tsx unchanged),
+      results-table.test.tsx ran 94 tests: 4 failed, 90 passed. The failures are the review's probes: focus
+      stays on MSFT's checkbox instead of the AAPL row (T013); Space moves focus to the AAPL row (P4); the sort
+      button loses focus to the SYM0000 row (P5); the outside input loses focus to the AAPL row (P7).
+    green_evidence: >
+      results-table.test.tsx 94, results-window.test.ts 17 and copy.test.ts 327 passed, 438 in all
+      (green-rework-3.log); the full web suite 1196 passed in 55 files (full-suite-rework-3.log, npm run test);
+      npm run lint, npm run format, tsc --noEmit and npm run build exit 0; npm run test:e2e not run (the plan
+      excludes it). Mutation: the catalogue yields no mutant over the changed lines; five hand-written mutants
+      (the v3 defect restored, the direct focus dropped, the scroll branch's request dropped, a request left
+      behind beside the direct focus, the direct branch taken on every press) are all killed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-3.log
+        sha256: 8cda1636dbfebff0ab34fc6051296320f4a16bb10c7408de5e26b5d255b2d070
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-3.log
+        sha256: a9d94ddd2c5421fcf9887a9d97cee43408be45979b2e812b05ad560022022432
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3ffa81f4b57dad42487ef377e291d92e4edfd26722beaba52ce31b7e3f36bb01
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-3.patch
+    commit_hash: stage
+    decisions: [DEC-0244]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-3-results.json
+      results_sha256: 139eb4f726a41e144561d12aa9ab5d996773658a973078a3e5e394ff8b8389ea
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

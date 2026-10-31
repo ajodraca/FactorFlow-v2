@@ -585,15 +585,23 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
     if (target === fromIndex) {
       return;
     }
-    select(loaded.stocks[target].symbol);
-    pendingFocus.current = loaded.stocks[target].symbol;
+    const symbol = loaded.stocks[target].symbol;
+    select(symbol);
     const revealed = scrollTopToReveal(target, scrollTop);
-    if (revealed !== scrollTop) {
-      if (scrollRef.current !== null) {
-        scrollRef.current.scrollTop = revealed;
-      }
-      setScrollTop(revealed);
+    if (revealed === scrollTop) {
+      // In the viewport, so already rendered: focus it now. A request here
+      // could outlive the press when the target is already selected, since
+      // nothing re-renders, and a later unrelated render would act on it.
+      pendingFocus.current = null;
+      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol="${symbol}"]`)?.focus();
+      return;
     }
+    // The scroll's own render brings the row into the window and consumes the request.
+    pendingFocus.current = symbol;
+    if (scrollRef.current !== null) {
+      scrollRef.current.scrollTop = revealed;
+    }
+    setScrollTop(revealed);
   }
 
   const renderedSymbols = showRows
