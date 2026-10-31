@@ -1,0 +1,123 @@
+# TDD evidence for CAP-002-E1-S5 - Universe from a Filter Result: Snapshot with Provenance.
+# Cycles share the one stage commit, so each cites its reviewed_patch (incremental, applied in order;
+# each patch is the canonical diff between the index trees written after consecutive cycles).
+# Decisions: DEC-0248 (owner-decided, one-way: the JSON encoding of bounds inside filter_provenance;
+# exercised in cycles 1 and 2). The code also relies on DEC-0065, DEC-0073, DEC-0076, DEC-0079,
+# DEC-0081, DEC-0085 and DEC-0093. No new decision was recorded while coding.
+# Plan deviation: the plan's suggested cycles 2 and 3 (happy path; set-currency and empty refusals)
+# were run as one cycle (cycle-2 below), so its RED covers T002-T005, T008 and T010(d) together.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T010, T011]
+    decision: DEC-0248
+    description: >
+      The pure part of T011 in service.py: _json_default (an integral Decimal as a JSON integer, any other Decimal as a JSON number through float, anything else TypeError; DEC-0248), _dump_json (the dumps the filter_provenance Jsonb is written with) and _filter_provenance (the five keys of design 2.4), with T010 (a)-(c) unit tests. T001 verified the S1, S2, S3, E3-S1, E3-S2 and E2-S1 producers without editing them (Thresholds.bounds keys are the classification-api query-parameter names).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/red-cycle-1-provenance.log
+    red_log_sha256: 3fe63b3cf9833504a0d834eb0639139dab887dd8385095401c27ce230cb4b7d0
+    red_evidence: >
+      24 failed: AttributeError, factorflow.universes.service had no _filter_provenance, _dump_json or _json_default.
+    green_evidence: >
+      tests/unit/test_universe_filter_provenance.py 24 passed with test_universe_sql_safety, test_universe_service_validation and test_research_sql_is_append_only (115 passed); ruff check, ruff format --check and mypy src clean; service and reader import in both orders.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 276b2d1bd369bbf9ecc836337f8892ddbcf77cc0bfd83a279acb1f4647175256
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: 5e3a2d69988922a172b718e46c72c1b1ed48cb43f7a39ac24cc27e140e1329db
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T003, T004, T005, T008, T010, T011, T013]
+    decision: DEC-0248
+    description: >
+      create_from_filter and _INSTRUMENTS_BY_ID_SQL (T011): lock first, name shape, ClassificationSetChanged unless set_id is the current complete set, the reader's evaluate_filter with the whole Thresholds, EmptyUniverse before the name check, UniverseNameInUse, members resolved in symbol order, one created event with filter_provenance (bounds encoded per DEC-0248) and one member_added each in one executemany, the replayed result. Tests: the new integration module with its own migrated_db_through_0006 fixture and seeding helpers, TC-COMP-012, TC-COMP-013, TC-COMP-014, TC-COMP-039 and the T008 rows; T010(d) AST checks; follow-ups of the cycle-1 review (a vacuous assertion dropped, the DEC-0248 precision consequence pinned).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/red-cycle-2-snapshot.log
+    red_log_sha256: 9588c7a336fad44eac64656370d273e5e103b10ec71cf552c4814269a91a20d8
+    red_evidence: >
+      27 failed, 26 passed: 23 integration tests failed with AttributeError (no service.create_from_filter), the duplicate-id test could not patch service.evaluate_filter, and the three T010(d) checks failed (no create_from_filter, no _INSTRUMENTS_BY_ID_SQL, reader imports missing). The 26 passing are cycle 1's unit tests plus the new DEC-0248 precision test, which pins cycle-1 code.
+    green_evidence: >
+      The snapshot module, the provenance unit tests, test_universe_sql_safety, test_universe_service_validation, test_research_sql_is_append_only and S3's test_universe_create: 175 passed; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5bced43d41651d1aa34971ede70b68cec8c72cf7b398b21e654759c9e5e1daad
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 5093fd00a3ece01f46aa32b0679d31e900c6a61e2e774a0f741eb9f26479e9dc
+      generated: 13
+      killed: 12
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.923
+      survivors:
+        - id: manual:no-dedupe
+          disposition: equivalent
+          reason: >
+            instrument_id = ANY(%(instrument_ids)s) returns each instrument row once however often an id repeats in the array, and the statement orders by symbol, so dropping sorted(set(...)) changes neither the members nor their order; the independent cycle-2 review judged it equivalent. The set() stays because T011 requires it.
+
+  - id: cycle-3
+    tasks: [T006, T007, T013]
+    description: >
+      Tests only: TC-COMP-015 (hide_incomplete hides exactly the input-reason stocks, parametrized over the three input reasons; a retired-lifecycle instrument is never saved, DEC-0073, DEC-0079) and TC-COMP-016 (a newer set that changes the matches leaves members, origin, events, the as-of read and the list unchanged), plus follow-ups of the cycle-2 review (nothing-written checks on four refusal tests, a rename, a mypy annotation, a redundant assertion dropped).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/red-cycle-3-hide-and-immutability.log
+    red_log_sha256: 084762a6d64ed616ba00fe361d83430ca283f7b3966fcfdde1eeba45268f83e6
+    red_evidence: >
+      The code already satisfied these tests, so two faults were injected into service.py for one run and reverted (task plan T014 guidance): create_from_filter dropped hide_incomplete from the Thresholds it passed on, and get_universe read the origin's set from the live current set. 4 failed: the three TC-COMP-015 cases and TC-COMP-016.
+    green_evidence: >
+      The snapshot module and provenance unit tests: 57 passed; ruff check and ruff format --check clean; service.py byte-identical to the staged version after the revert.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 772d4cb11f61e967c56a467b2197939eb55372ccd6460dd55feed699a6d8c7f9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: >
+        The cycle changes test files only; no production line changed. The two injected faults of the RED run act as its hand-written mutants and both were killed.
+
+  - id: cycle-4
+    tasks: [T009, T012, T013]
+    description: >
+      Tests only: T009 (a) empty or whitespace name refused before the reader, a 10 000-character name accepted; (b) UniverseNameInUse for a by-hand or filter holder, nothing written, a retired name free again; (c) the snapshot waits on the write lock (DEC-0065); (d) a same-name create under the lock wins; (e) a failed member insert propagates unchanged and rolls everything back; (f) a reader error propagates; (g) the caller owns the transaction. Plus the cycle-3 review follow-up (the as-of read is asserted non-empty).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/red-cycle-4-names-lock-rollback.log
+    red_log_sha256: 01a8fb762a110d9c48efd9687b5d47d538193680c2150243d23e6e4d05ed414e
+    red_evidence: >
+      The code already took the lock and checked the name, so both were removed from create_from_filter for one run and restored (task plan T014 guidance: a skipped _take_lock injected and reverted). 4 failed: both name-holder cases and both lock tests; the other T009 items are covered by the cycle's manual mutants.
+    green_evidence: >
+      The snapshot module: 40 passed; ruff check and ruff format --check clean; service.py byte-identical to the staged version after the revert.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: bf2ea65e5d9f8de255b1520121e31548d684fa45271eccf7362215216ec2f04d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S5-evidence/mutation-cycle-4-results.json
+      results_sha256: fa736dfa913f6138ebae884836328d99e3d9e1135ff5519292ed7ca751effd54
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
