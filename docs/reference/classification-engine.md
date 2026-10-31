@@ -2,23 +2,23 @@
 
 `src/factorflow/classification/engine.py` is the factor engine's build
 transaction (CAP-002-E2-S2; `component-design-factor-engine.md` sections 2.1
-to 2.4). With it come `constants.py`, `line_items.py` and nine statements in
+to 2.4). With it come `constants.py`, `line_items.py` and ten statements in
 `classification/sql/`: `set_context.sql`, `complete_set.sql` and
 `fail_set.sql` for the transaction, `statements.sql`, `value_inputs.sql`,
 `growth_inputs.sql` and `insert_inputs.sql` for the fundamentals stage
-(CAP-002-E2-S3), and `peer_sets.sql` and `classify.sql` for the
+(CAP-002-E2-S3), `momentum_inputs.sql` for the momentum stage
+(CAP-002-E2-S4), and `peer_sets.sql` and `classify.sql` for the
 classification stage (CAP-002-E2-S5). `build` either commits a whole
 classification set or records the set `failed` with its reason, so no reader
 ever sees half a set.
 
-Two stages are registered, in this order. The first derives the value and
+Three stages are registered, in this order. The first derives the value and
 growth inputs of every active instrument and writes them to `factor_input`
-(see [Fundamental inputs](#fundamental-inputs)). The second forms each
-factor's peer set from the set's `factor_input` rows and writes every
+(see [Fundamental inputs](#fundamental-inputs)). The second does the same for
+the momentum inputs (see [Momentum inputs](#momentum-inputs)). The third forms
+each factor's peer set from the set's `factor_input` rows and writes every
 instrument's classification on each factor (see
-[Classification](#classification)). No stage derives a momentum input yet, so
-`momentum` has 0 qualifying stocks and every active instrument is
-`not_classified` on it with `not_enough_stocks`. Only the
+[Classification](#classification)). Only the
 [classification scheduler](classification-scheduler.md) calls `build`, and
 no running process starts it yet.
 
@@ -121,8 +121,9 @@ every later statement.
 
 A stage is `Callable[[psycopg.Connection, BuildContext], None]`. It runs
 inside the build transaction and writes through the connection it is given.
-`_STAGES` holds two stages, `_fundamental_inputs_stage` and then
-`_classification_stage`, which is appended by the last
+`_STAGES` holds three stages, `_fundamental_inputs_stage`,
+`_momentum_inputs_stage` and then `_classification_stage`, which is appended
+by the last
 statement of the module. The docstring under `_STAGES` records the order later
 stages must be registered in (DEC-0121, amending DEC-0112). Tests replace the
 list with `monkeypatch`.
@@ -280,6 +281,159 @@ lacks: `prices` for `price_missing`, `fundamentals` for every other cause
 `factor_input.value` is `numeric(30, 10)`. A present value of magnitude 1e20
 or more does not fit, and the insert fails the build.
 
+## Momentum inputs
+
+`_momentum_inputs_stage` derives three inputs for every instrument in
+`active_ids` (CAP-002-E2-S4; `component-design-factor-engine.md` section 2.4):
+`return_3m`, `return_6m` and `return_12m`, the total returns for the
+`momentum` factor. It binds the set's dates and active roster, and
+`MOMENTUM_LAG_MONTHS` and `MOMENTUM_WINDOWS_MONTHS` as `momentum_lag_months`
+and `momentum_windows`, read when it runs. It then runs two statements on one
+cursor:
+
+1. `momentum_inputs.sql` inserts the momentum inputs into the temporary table
+   `inputs`, which `value_inputs.sql` creates, so this stage runs after the
+   fundamentals stage (DEC-0115).
+2. `insert_inputs.sql` appends the `momentum` rows of `inputs` to
+   `factor_input`.
+
+Only the second statement writes to the store. Every active instrument gets
+exactly three rows, even one with no bar, and a retired instrument gets none.
+The stage reads no fundamental row and no line item, so the unresolved line
+items that leave every value and growth input `missing` do not affect it.
+`test_the_momentum_stage_is_registered_once_between_fundamentals_and_classification`
+in `tests/integration/test_engine_inputs_momentum.py` fails unless the stage
+is registered once, between the other two. Below, `D` is the set's
+`classification_date` and `L` its `latest_trading_day`.
+
+### Return windows
+
+Each bar lookup is resolved against the stock's own bars and takes a session's
+latest observation, by `observed_on` and then `recorded_at` (DEC-0117 (1)). A
+re-acquired bar is therefore used as currently known, and the earlier
+observation is left as it is.
+
+- `E`, the end of every window, is the stock's latest session on or before `D`
+  minus `MOMENTUM_LAG_MONTHS` months (DEC-0055 (3)).
+- `S_k`, the start of window k, is its latest session on or before `E` minus k
+  months, for each k in `MOMENTUM_WINDOWS_MONTHS`. It is counted from `E`'s
+  `session_date`, not from `D`.
+
+Months are PostgreSQL calendar intervals, so 2026-03-31 minus one month is
+2026-02-28. Window k is (S_k, E]: a split or dividend effective on `S_k` is
+outside it, and one effective on `E` is inside it.
+
+### Split and dividend adjustment
+
+Bars are stored unadjusted (DEC-0001), so splits and dividends are applied
+here, at read time (DEC-0055 (4)). Only `split` and `dividend` corporate
+actions are read, and ticker changes and IPOs adjust no price. Each action is
+read as its latest observation per `action_type` and `effective_on`, by
+`observed_on` and then `recorded_at` (DEC-0117 (1)), so a revised dividend is
+applied once, with its later amount.
+
+`split_from`, `split_to` and `cash_amount` are read from the action's
+`payload` only when the value is a JSON number or a JSON string holding a
+plain decimal (`^-?[0-9]+(\.[0-9]+)?$`), checked before the cast. A split is
+usable when both its values are positive, and a dividend when its cash amount
+is zero or more (DEC-0117 (2)). Any other split or dividend is unusable.
+
+The return over window k is
+`(E close / S_k adjusted close) × dividend factor - 1`:
+
+- `S_k`'s adjusted close is its close times `split_from / split_to` of every
+  usable split in the window, so a 2-for-1 split (`split_from` 1, `split_to`
+  2) halves it. `E`'s adjusted close is its close.
+- The dividend factor is the product, over the usable dividends in the window,
+  of `1 + cash_amount × split factor / prior adjusted close` (design 2.4). It
+  is 1 when the window holds no dividend, and a dividend of 0 leaves it
+  unchanged.
+- A dividend's prior session is the stock's latest bar before the ex-date
+  (`effective_on`), which lies in [S_k, E) because `S_k` is itself a bar
+  (DEC-0118 (3)). Its adjusted close is its close times the usable splits
+  after the prior session and on or before `E`.
+- A dividend's split factor is the product of the usable splits strictly after
+  the ex-date and on or before `E` (DEC-0118 (2)). A split on the ex-date
+  therefore scales the prior close but not the cash amount, and a dividend
+  before a later split is scaled by that split.
+
+### Momentum status
+
+Every momentum input gets one status, decided in this order: `missing`, then
+`outdated`, else `present` (DEC-0116 (1)). A momentum input is never
+`not_computable` (design 2.4, DEC-0118 (4)). The causes of `missing` are also
+tested in the order listed, and the first that applies is named
+(DEC-0241 (2)).
+
+| Status | When | Named in `detail` |
+|---|---|---|
+| `missing` | The stock has no bar on or before `E`'s target date, or none on or before `S_k`'s | `boundary`: `E`, or `S_` and k, such as `S_12` |
+| `missing` | A bar the window uses has a close of zero or less: its `E` bar, its `S_k` bar, or the prior session of any dividend in the window, usable or not (DEC-0241 (1)) | `cause`: `price_not_positive` |
+| `missing` | A split or dividend in the window is unusable (DEC-0117 (3)) | `cause`: `corporate_action_payload_unusable` |
+| `outdated` | The stock's latest bar has a `session_date` earlier than `L` (AC-13, DEC-0055 (5)). The latest bar has no upper bound, so it can be after `E` and still be outdated | `cause`: `outdated` |
+| `present` | Otherwise | none |
+
+A `missing` input never fails the build, and only the windows that use the bar
+or hold the action are `missing`. A bar no window uses, such as the prior
+session of a dividend outside every window, is never divided by, so its close
+changes nothing (DEC-0241 (3)). A positive close below 1 is read like any
+other. Price currency reads no fundamental row.
+
+### Momentum dates
+
+- `value` is set only on a `present` input, as the return above
+  (DEC-0116 (5)).
+- `as_of` is `E`'s `session_date` on every input, `missing` ones included. It
+  is null only when `E` is missing (DEC-0118 (4)).
+- `known_on` is null on every `missing` input, whatever its cause (DEC-0242).
+  On a `present` or `outdated` input it is the latest `observed_on` of the
+  window's `E` bar and `S_k` bar, of every split and dividend in the window,
+  and of each dividend's prior session (DEC-0118 (1), DEC-0055 (7)). The
+  stock's latest bar counts only when it is one of those rows.
+- `restated_possible` is `false` on every momentum input (DEC-0118 (4)).
+
+### Momentum `detail`
+
+| Status | Keys |
+|---|---|
+| `present` | `window_months`, `E`, `S`, `adjusted_close`, `splits`, `dividends` |
+| `outdated` | The `present` keys, plus `cause` and `outdated`. `outdated.prices` holds `bar_date`, the stock's latest session, and `latest_trading_day` |
+| `missing`, no `E` | `boundary`, `on_or_before` (the target date) and `window_months` |
+| `missing`, no `S_k` | `boundary`, `on_or_before` (the target date), `window_months` and `E` |
+| `missing`, `price_not_positive` | `cause`, `window_months`, `E`, `S` and `dividends`. `dividends` lists each dividend in the window whose prior close is zero or less, with `effective_on` and `prior_session`, and is `[]` when none is |
+| `missing`, `corporate_action_payload_unusable` | `cause`, `actions`, `window_months`, `E` and `S`. `actions` lists each unusable split or dividend in the window with `action_type`, `effective_on`, `observed_on` and its `payload` as stored |
+
+A missing boundary is named by `boundary`, and its `detail` has no `cause`.
+`E`, `S` and each `prior_session` are bars as read, with `session_date`,
+`close` and `observed_on`. `adjusted_close` holds the adjusted closes of `E`
+and `S`. On a `present` or `outdated` input:
+
+- `splits` lists each usable split in the window, with `effective_on`,
+  `split_from`, `split_to` and `observed_on`.
+- `dividends` lists each usable dividend in the window, with `effective_on`,
+  `cash_amount`, `observed_on`, `split_factor`, `prior_session` and
+  `prior_adjusted_close`.
+
+Both are ordered by `effective_on`, and are `[]` when there is none.
+
+### Momentum rows in `factor_input`
+
+The stage runs `insert_inputs.sql` with `factors = ['momentum']`, so it
+appends only the momentum rows of `inputs`. A `missing` row's `detail` gains
+`last_acquisition`, as in [Writing to `factor_input`](#writing-to-factor_input),
+from the instrument's `acquisition_state` row for one data type (DEC-0243,
+design 2.3 step 5):
+
+- `corporate_actions` when the cause is `corporate_action_payload_unusable`;
+- `prices` for every other cause, a missing boundary and `price_not_positive`
+  included. A window with a non-positive close and an unusable payload is
+  named `price_not_positive`, so it names `prices`.
+
+When the instrument has no such row, `detail` is written as derived. A
+`present` or `outdated` row gains no `last_acquisition`. A present return of
+magnitude 1e20 or more does not fit `factor_input.value`, and the insert fails
+the build.
+
 ## Classification
 
 `_classification_stage` classifies every instrument on each factor
@@ -419,7 +573,7 @@ database. It holds the restatement mark to these rules:
 
 ## Statements
 
-All nine are loaded once, at import, from `classification/sql/`. They ship as
+All ten are loaded once, at import, from `classification/sql/`. They ship as
 package data (`classification/sql/*.sql` under
 `[tool.setuptools.package-data]` in `pyproject.toml`). Every value is bound as
 a `%(name)s` parameter.
@@ -433,6 +587,7 @@ a `%(name)s` parameter.
 | `value_inputs.sql` | Creates the temporary table `inputs` holding the three value inputs of every active instrument. Writes no stored table |
 | `growth_inputs.sql` | Inserts the two growth inputs of every active instrument into `inputs`. Writes no stored table |
 | `insert_inputs.sql` | Appends the rows of `inputs` for the factors in `factors` to `factor_input`, adding `last_acquisition` to a `missing` row's `detail` |
+| `momentum_inputs.sql` | Inserts the three momentum inputs of every active instrument into `inputs`: the split- and dividend-adjusted total return over each window, with its status, dates and `detail`. Writes no stored table |
 | `peer_sets.sql` | Inserts one `classification_set_factor` row per factor: how many active instruments have every input of the factor `present`, and whether that count reaches the floor |
 | `classify.sql` | Inserts one factor's `factor_classification` rows: the score and percentile of each stock in a ranked factor's peer set, and a `not_classified` row with its reason for every other active or retired instrument |
 
@@ -441,7 +596,8 @@ a `%(name)s` parameter.
 `constants.py` holds the numbers and names classification is built on. Each
 value cites its source in the code. `engine.py` reads
 `FUNDAMENTALS_STALE_AFTER_MONTHS` in the fundamentals stage, which binds it as
-`stale_months`, and `FACTORS`, `INPUT_NAMES`, `INPUT_LABELS` and
+`stale_months`, `MOMENTUM_LAG_MONTHS` and `MOMENTUM_WINDOWS_MONTHS` in the
+momentum stage, and `FACTORS`, `INPUT_NAMES`, `INPUT_LABELS` and
 `MIN_PEER_SET_SIZE` in the classification stage.
 
 | Name | Value | Source |

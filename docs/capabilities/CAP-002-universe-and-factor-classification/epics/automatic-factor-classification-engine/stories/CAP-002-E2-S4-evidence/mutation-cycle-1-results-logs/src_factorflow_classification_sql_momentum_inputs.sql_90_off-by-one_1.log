@@ -1,0 +1,25 @@
+..................F
+=================================== FAILURES ===================================
+_________________ test_a_zero_dividend_leaves_the_factor_at_1 __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49279 user=test database=test_78822a9c8d4e4c748ceb9fb5cf2036c...cb37d40>, stock=1, set_id=UUID('c63f09c4-95ec-40a6-b77f-020e50622f41'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb35490>
+
+    def test_a_zero_dividend_leaves_the_factor_at_1(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0117 (2): a cash_amount of 0 is usable and multiplies the factor by 1."""
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 7, 31): 110})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "0"})
+    
+        rows = build(env, monkeypatch)
+    
+>       assert rows["return_3m"]["status"] == "present"
+E       AssertionError: assert 'missing' == 'present'
+E         
+E         - present
+E         + missing
+
+tests/integration/test_engine_inputs_momentum.py:550: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_zero_dividend_leaves_the_factor_at_1
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 18 passed in 5.12s

@@ -1,0 +1,36 @@
+.........................................F
+=================================== FAILURES ===================================
+______ test_a_missing_momentum_input_carries_the_last_prices_acquisition _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=57177 user=test database=test_1677614666754265940272451d29850...8ef7d40>, stock=1, set_id=UUID('9c0395b8-dac2-4869-ac77-a71baceb4713'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108d06570>
+
+    def test_a_missing_momentum_input_carries_the_last_prices_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, AC-12, DEC-0115: a missing momentum input names the last prices
+        outcome, not another data type's; a present one carries no acquisition."""
+        acquired_at = datetime(2026, 10, 16, 21, tzinfo=UTC)
+        for data_type, outcome in (("prices", "not_found"), ("corporate_actions", "written")):
+            env.conn.execute(
+                "INSERT INTO acquisition_state (instrument_id, data_type, last_acquired_at, "
+                "last_run_id, last_outcome) VALUES (%s, %s, %s, gen_random_uuid(), %s)",
+                (env.stock, data_type, acquired_at, outcome),
+            )
+        env.conn.commit()
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        last = rows["return_12m"]["detail"]["last_acquisition"]
+>       assert last["data_type"] == "prices"
+E       AssertionError: assert 'corporate_actions' == 'prices'
+E         
+E         - prices
+E         + corporate_actions
+
+tests/integration/test_engine_inputs_momentum.py:1074: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_momentum_input_carries_the_last_prices_acquisition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 41 passed in 14.04s

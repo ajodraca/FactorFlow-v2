@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "repo_head": "41bc50e976492beea88445721059fd8dd6036f3a",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "manual:review2-known-on-not-boundary",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE WHEN s.boundary IS NULL THEN s.known_on END AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "manual:review2-known-on-missing-e-bar",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE WHEN s.status <> 'missing' THEN s.known_on ELSE (s.e_bar ->> 'observed_on')::date END AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "manual:review2-known-on-missing-applied-bars",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE WHEN s.status <> 'missing' THEN s.known_on WHEN s.boundary IS NULL THEN greatest((s.e_bar ->> 'observed_on')::date, (s.s_bar ->> 'observed_on')::date) END AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "manual:review2-known-on-outdated-e",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE s.status WHEN 'present' THEN s.known_on WHEN 'outdated' THEN s.e_session END AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "manual:rework-known-on-unguarded",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "s.known_on AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "manual:rework-known-on-present-only",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE WHEN s.status = 'present' THEN s.known_on END AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "manual:rework-known-on-never",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "NULL::date AS known_on,",
+      "cycle": "cycle-3"
+    },
+    {
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "cycle": "cycle-3",
+      "id": "manual:rework3-known-on-outdated-latest-session",
+      "new": "CASE s.status WHEN 'present' THEN s.known_on WHEN 'outdated' THEN s.latest_session END AS known_on,"
+    },
+    {
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "cycle": "cycle-3",
+      "id": "manual:rework3-known-on-outdated-bars-only",
+      "new": "CASE s.status WHEN 'present' THEN s.known_on WHEN 'outdated' THEN greatest((s.e_bar ->> 'observed_on')::date, (s.s_bar ->> 'observed_on')::date) END AS known_on,"
+    }
+  ]
+}

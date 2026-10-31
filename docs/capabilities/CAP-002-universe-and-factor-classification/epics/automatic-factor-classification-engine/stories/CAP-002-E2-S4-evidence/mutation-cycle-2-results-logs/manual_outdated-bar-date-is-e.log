@@ -1,0 +1,49 @@
+..................................F
+=================================== FAILURES ===================================
+_______ test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56573 user=test database=test_62904cbf032c4bb4b44c99db95cb276...abaf050>, stock=1, set_id=UUID('85a37db2-2fbf-474e-ab15-40fc571ea064'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10abaf290>
+
+    def test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stale = add_instrument(env.conn, "STALE")
+        stale_day = date(2026, 10, 15)
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, stale_day: 130})
+    
+        rows = build(env, monkeypatch)
+        stale_rows = momentum(env.conn, env.set_id, stale)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            row = stale_rows[name]
+            assert row["status"] == "outdated", name
+            assert row["value"] is None
+            assert row["as_of"] == E
+            assert row["known_on"] == E
+            start = START[name]
+>           assert row["detail"] == {
+                "cause": "outdated",
+                "outdated": {"prices": {"bar_date": str(stale_day), "latest_trading_day": str(L)}},
+                "window_months": WINDOW[name],
+                "E": bar(E, 120),
+                "S": bar(start, STANDARD[start]),
+                "adjusted_close": {"E": 120, "S": STANDARD[start]},
+                "splits": [],
+                "dividends": [],
+            }, name
+E           AssertionError: return_3m
+E           assert {'E': {'close...its': [], ...} == {'cause': 'ou...-09-17'}, ...}
+E             
+E             Omitting 7 identical items, use -vv to show
+E             Differing items:
+E             {'outdated': {'prices': {'bar_date': '2026-09-17', 'latest_trading_day': '2026-10-16'}}} != {'outdated': {'prices': {'bar_date': '2026-10-15', 'latest_trading_day': '2026-10-16'}}}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:916: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 passed in 7.39s

@@ -1,0 +1,46 @@
+.............................................F
+=================================== FAILURES ===================================
+___________ test_a_re_acquired_start_or_prior_bar_is_used[prior bar] ___________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53610 user=test database=test_981cd0eaeb4e491a85c0c507a9f98ff...c595ee0>, stock=1, set_id=UUID('caf6fe50-3e31-42e2-8a9d-550c40bbd8fd'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c5966c0>
+revised = datetime.date(2026, 7, 31), close = 50, expected = Decimal('0.224')
+
+    @pytest.mark.parametrize(
+        ("revised", "close", "expected"),
+        [
+            (S3, 120, ret(120, 120, Decimal("1.01"))),
+            (date(2026, 7, 31), 50, ret(120, 100, Decimal("1.02"))),
+        ],
+        ids=["S bar", "prior bar"],
+    )
+    def test_a_re_acquired_start_or_prior_bar_is_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, revised: date, close: int, expected: Decimal
+    ) -> None:
+        """DEC-0117 (1), design 2.4: S_k's bar and a dividend's prior-session bar are each read
+        at the session's latest observation."""
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 7, 31): 100})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+        add_bar_observed(env.conn, env.stock, revised, close, revised + timedelta(days=3))
+    
+        rows = build(env, monkeypatch)
+    
+>       assert_close(rows["return_3m"]["value"], expected)
+
+tests/integration/test_engine_inputs_momentum.py:1159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.2120000000'), expected = Decimal('0.224')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.2120000000'), Decimal('0.224'))
+E       assert Decimal('0.0120000000') <= Decimal('1E-8')
+E        +  where Decimal('0.0120000000') = abs((Decimal('0.2120000000') - Decimal('0.224')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_re_acquired_start_or_prior_bar_is_used[prior bar]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 45 passed in 8.28s

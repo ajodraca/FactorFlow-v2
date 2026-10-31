@@ -1,0 +1,73 @@
+...........................................................F
+=================================== FAILURES ===================================
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=57243 user=test database=test_b07b811c1b8d426f8cc2daf45ef30c9...cc711c0>, stock=1, set_id=UUID('967d3689-5b19-4c68-9d3c-df81f24393de'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cad1340>
+bars = {datetime.date(2026, 7, 31): 0}
+missing = ('return_3m', 'return_6m', 'return_12m')
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:1120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=57243 user=test database=test_b07b811c1b8d426f8cc2daf45ef30c9...cc711c0>, stock=1, set_id=UUID('967d3689-5b19-4c68-9d3c-df81f24393de'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cad1340>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> dict[str, dict]:
+        result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: DivisionByZero: division by zero
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_momentum.py:105: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:140 classification build failed: DivisionByZero: division by zero
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutwork/mutation-run-29y71cqb/w2/src/factorflow/classification/engine.py", line 122, in build
+    stage(conn, context)
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutwork/mutation-run-29y71cqb/w2/src/factorflow/classification/engine.py", line 223, in _momentum_inputs_stage
+    cur.execute(
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mutwork/mutation-run-29y71cqb/w2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DivisionByZero: division by zero
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-zero]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 59 passed in 19.69s

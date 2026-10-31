@@ -1,0 +1,58 @@
+..F
+=================================== FAILURES ===================================
+______ test_boundaries_resolve_to_the_latest_bar_on_or_before_each_target ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53701 user=test database=test_4f6354d5ce39455b8269ec14085afcb...8ba3320>, stock=1, set_id=UUID('82b5417b-a311-4eeb-8dd8-b5e5fe72fe8f'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108ba2f90>
+
+    def test_boundaries_resolve_to_the_latest_bar_on_or_before_each_target(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (3), DAC-E2-1: E is the latest bar on or before D minus one month, S_k the
+        latest on or before the resolved E (not E's target) minus k months; a bar after a target
+        is never chosen."""
+        e = date(2026, 9, 15)  # no bar on 09-16 or 09-17, so E is 09-15 and S_k targets the 15th
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                date(2025, 9, 12): 40,
+                date(2025, 9, 16): 1,  # after S_12's target 2025-09-15, before E's target minus 12
+                date(2026, 3, 13): 60,
+                date(2026, 3, 16): 1,
+                date(2026, 6, 12): 80,
+                date(2026, 6, 17): 1,  # on E's target minus 3 months, after the resolved one
+                e: 100,
+                date(2026, 9, 18): 1,  # after E's target
+                L: 110,
+            },
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        resolved = {
+            "return_3m": (date(2026, 6, 12), 80),
+            "return_6m": (date(2026, 3, 13), 60),
+            "return_12m": (date(2025, 9, 12), 40),
+        }
+        for name, (start, close) in resolved.items():
+            assert rows[name]["status"] == "present", name
+>           assert_close(rows[name]["value"], ret(100, close))
+
+tests/integration/test_engine_inputs_momentum.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('99.0000000000'), expected = Decimal('0.25')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('99.0000000000'), Decimal('0.25'))
+E       assert Decimal('98.7500000000') <= Decimal('1E-8')
+E        +  where Decimal('98.7500000000') = abs((Decimal('99.0000000000') - Decimal('0.25')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_boundaries_resolve_to_the_latest_bar_on_or_before_each_target
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 2.52s

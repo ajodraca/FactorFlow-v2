@@ -1,0 +1,40 @@
+...............................................F
+=================================== FAILURES ===================================
+________ test_a_revised_dividend_is_applied_once_with_the_later_amount _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53952 user=test database=test_20449abeeace4f3795c797b02aae5dc...caa62a0>, stock=1, set_id=UUID('a3e20d63-5e05-4088-a8cd-7801bc1726e8'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10caa71d0>
+
+    def test_a_revised_dividend_is_applied_once_with_the_later_amount(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1): a revised dividend (same ex-date, later observation) is counted once,
+        with the revised amount."""
+        ex_date = date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 7, 31): 100})
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, {"cash_amount": "1"})
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "2"}, date(2026, 8, 10)
+        )
+    
+        rows = build(env, monkeypatch)
+    
+>       assert_close(rows["return_3m"]["value"], ret(120, 100, Decimal("1.02")))
+
+tests/integration/test_engine_inputs_momentum.py:1201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.2362400000'), expected = Decimal('0.224')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.2362400000'), Decimal('0.224'))
+E       assert Decimal('0.0122400000') <= Decimal('1E-8')
+E        +  where Decimal('0.0122400000') = abs((Decimal('0.2362400000') - Decimal('0.224')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_revised_dividend_is_applied_once_with_the_later_amount
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 47 passed in 9.07s

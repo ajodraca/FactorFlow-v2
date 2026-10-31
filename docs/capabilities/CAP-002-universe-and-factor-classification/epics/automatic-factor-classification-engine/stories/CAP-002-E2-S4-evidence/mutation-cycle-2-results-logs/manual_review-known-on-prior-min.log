@@ -1,0 +1,43 @@
+................................F
+=================================== FAILURES ===================================
+_ test_known_on_covers_the_prior_session_of_every_dividend_in_the_window[earlier prior bar] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52415 user=test database=test_d9d0ff7067c74d9fb1dc789d1f7da16...930d460>, stock=1, set_id=UUID('952c618b-fc88-4fc2-a396-e7821798e850'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10930cb90>
+latest = 'earlier prior bar'
+
+    @pytest.mark.parametrize("latest", ["earlier prior bar", "later prior bar"])
+    def test_known_on_covers_the_prior_session_of_every_dividend_in_the_window(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        """DEC-0118 (1), DAC-E2-S4-4: with two dividends in the window, known_on covers each
+        dividend's prior-session bar, so whichever of them was observed last dates the input
+        (review v1 IR-002)."""
+        earlier_prior, later_prior = date(2026, 7, 14), date(2026, 8, 13)
+        observed = {"earlier prior bar": earlier_prior, "later prior bar": later_prior}
+        observed[latest] = date(2026, 10, 5)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 15): 99, date(2026, 8, 14): 49, E: 99, L: 99},
+        )
+        add_bar_observed(env.conn, env.stock, earlier_prior, 100, observed["earlier prior bar"])
+        add_bar_observed(env.conn, env.stock, later_prior, 50, observed["later prior bar"])
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 7, 15), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 14), {"cash_amount": "1"})
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01"), Decimal("1.02")))
+>           assert rows[name]["known_on"] == date(2026, 10, 5), name
+E           AssertionError: return_3m
+E           assert datetime.date(2026, 9, 17) == datetime.date(2026, 10, 5)
+E            +  where datetime.date(2026, 10, 5) = date(2026, 10, 5)
+
+tests/integration/test_engine_inputs_momentum.py:890: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_covers_the_prior_session_of_every_dividend_in_the_window[earlier prior bar]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 32 passed in 6.39s

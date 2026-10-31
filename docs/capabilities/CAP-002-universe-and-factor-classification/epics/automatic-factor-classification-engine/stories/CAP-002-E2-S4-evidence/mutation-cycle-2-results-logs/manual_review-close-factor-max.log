@@ -1,0 +1,61 @@
+........................F
+=================================== FAILURES ===================================
+_____ test_a_dividends_split_factors_are_the_product_of_every_later_split ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=52764 user=test database=test_1a0dc927bbfd4da7b14cf5861ca5051...d722630>, stock=1, set_id=UUID('6b6b7066-f68c-4899-a2d6-0f6e157f23ea'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d717d40>
+
+    def test_a_dividends_split_factors_are_the_product_of_every_later_split(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4, DEC-0118 (2): a dividend followed by several splits has its prior close
+        scaled by the product of every split after its prior session, and its cash amount by the
+        product of every split strictly after its ex-date, each on or before E (review v1 IR-003)."""
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                S12: 1200,
+                S6: 1200,
+                S3: 1200,
+                date(2026, 7, 31): 1200,
+                ex_date: 600,
+                date(2026, 8, 20): 200,
+                date(2026, 9, 1): 100,
+                E: 110,
+                L: 110,
+            },
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, {"cash_amount": "6"})
+        add_corporate_action(env.conn, env.stock, "split", ex_date, SPLIT_2_FOR_1)
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 8, 20), {"split_from": "1", "split_to": "3"}
+        )
+        add_corporate_action(env.conn, env.stock, "split", date(2026, 9, 1), SPLIT_2_FOR_1)
+    
+        rows = build(env, monkeypatch)
+    
+        # Prior close 1200 x 1/2 x 1/3 x 1/2 = 100 and cash 6 x 1/3 x 1/2 = 1, so the factor is
+        # 1 + 1 / 100; S close 1200 / 12 = 100.
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+>           assert_close(rows[name]["value"], ret(110, 100, Decimal("1.01")))
+
+tests/integration/test_engine_inputs_momentum.py:768: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.1018333333'), expected = Decimal('0.111')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.1018333333'), Decimal('0.111'))
+E       assert Decimal('0.0091666667') <= Decimal('1E-8')
+E        +  where Decimal('0.0091666667') = abs((Decimal('0.1018333333') - Decimal('0.111')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividends_split_factors_are_the_product_of_every_later_split
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 24 passed in 5.46s

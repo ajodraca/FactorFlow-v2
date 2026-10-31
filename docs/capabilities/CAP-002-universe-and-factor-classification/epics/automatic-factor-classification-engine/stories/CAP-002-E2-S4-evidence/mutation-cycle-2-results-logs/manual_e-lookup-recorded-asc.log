@@ -1,0 +1,48 @@
+..............................................F
+=================================== FAILURES ===================================
+______________ test_on_equal_observed_on_the_later_recording_wins ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53293 user=test database=test_f0410c1ac1224837bc32111314b4c4d...87b3e30>, stock=1, set_id=UUID('20824248-8f08-4d5d-b96f-e3a0e3c8ef4e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1087b2930>
+
+    def test_on_equal_observed_on_the_later_recording_wins(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1): ties on observed_on are broken by recorded_at, for bars and for
+        corporate actions; the later recording is inserted first, so insertion order cannot pass."""
+        early = datetime(2026, 9, 17, 22, tzinfo=UTC)
+        late = early + timedelta(hours=1)
+        add_close_series(
+            env.conn, env.stock, {S12: 50, S6: 80, S3: 100, date(2026, 7, 31): 100, L: 130}
+        )
+        add_bar_observed(env.conn, env.stock, E, 160, E, late)
+        add_bar_observed(env.conn, env.stock, E, 150, E, early)
+        ex_date = date(2026, 8, 3)
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "2"}, ex_date, late
+        )
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "1"}, ex_date, early
+        )
+    
+        rows = build(env, monkeypatch)
+    
+>       assert_close(rows["return_3m"]["value"], ret(160, 100, Decimal("1.02")))
+
+tests/integration/test_engine_inputs_momentum.py:1184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.5300000000'), expected = Decimal('0.632')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.5300000000'), Decimal('0.632'))
+E       assert Decimal('0.1020000000') <= Decimal('1E-8')
+E        +  where Decimal('0.1020000000') = abs((Decimal('0.5300000000') - Decimal('0.632')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_on_equal_observed_on_the_later_recording_wins
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 46 passed in 8.41s
