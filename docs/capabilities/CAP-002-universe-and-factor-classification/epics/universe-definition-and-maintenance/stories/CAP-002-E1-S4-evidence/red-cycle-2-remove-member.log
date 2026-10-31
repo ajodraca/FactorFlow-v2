@@ -1,0 +1,313 @@
+............FFFFFFFFFFFFFFFF                                             [100%]
+=================================== FAILURES ===================================
+________ test_retire_appends_one_retired_event_and_data_stays_readable _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_b2f84eacdd6c48a69c23fd9a307f19aa) at 0x10c835880>
+
+    def test_retire_appends_one_retired_event_and_data_stays_readable(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-037."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+>       service.remove_member(conn, uid, "BBB")
+        ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:214: AttributeError
+________ test_every_write_to_a_retired_universe_raises_universe_retired ________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_76a4126a07334b018fa340aadb02915a) at 0x10c8374a0>
+
+    def test_every_write_to_a_retired_universe_raises_universe_retired(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-038."""
+        seed(conn, "AAA", "BBB", "CCC")
+        seed_instrument(conn, "DDD", covered=False)
+        conn.commit()
+        _create(conn, "Taken", "AAA")
+        uid = _create(conn, "U", "AAA", "BBB")
+        service.retire(conn, uid)
+        conn.commit()
+        before = count_events(conn)
+        history = event_rows(conn, uid)
+    
+        writes = [
+            lambda: service.retire(conn, uid),
+            lambda: service.add_members(conn, uid, ["CCC"]),
+            lambda: service.remove_member(conn, uid, "AAA"),
+            lambda: service.rename(conn, uid, "Other"),
+            # the target check precedes the member and name checks (design 2.4 step 5)
+            lambda: service.remove_member(conn, uid, "ZZZ"),
+            lambda: service.rename(conn, uid, "Taken"),
+        ]
+        for write in writes:
+            with pytest.raises(UniverseRetired):
+>               write()
+
+tests/integration/test_universe_maintenance.py:283: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>       lambda: service.remove_member(conn, uid, "AAA"),
+                ^^^^^^^^^^^^^^^^^^^^^
+        lambda: service.rename(conn, uid, "Other"),
+        # the target check precedes the member and name checks (design 2.4 step 5)
+        lambda: service.remove_member(conn, uid, "ZZZ"),
+        lambda: service.rename(conn, uid, "Taken"),
+    ]
+E   AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:275: AttributeError
+______ test_removing_a_non_member_raises_not_a_member_and_writes_nothing _______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_407a3cf7cc38484f852dca534c9f8580) at 0x10cd25790>
+
+    def test_removing_a_non_member_raises_not_a_member_and_writes_nothing(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-026."""
+        seed(conn, "AAA", "BBB", "CCC")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = count_events(conn)
+    
+        with pytest.raises(NotAMember) as excinfo:
+>           service.remove_member(conn, uid, "CCC")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:311: AttributeError
+_______________ test_a_symbol_with_no_instrument_is_not_a_member _______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_8247b6d8eb784df8955ff849016c81bd) at 0x10c8359d0>
+
+    def test_a_symbol_with_no_instrument_is_not_a_member(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-026: removal does not consult coverage."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = count_events(conn)
+    
+        with pytest.raises(NotAMember, match="ZZZ"):
+>           service.remove_member(conn, uid, "ZZZ")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:326: AttributeError
+_____________ test_a_lower_case_non_member_is_reported_normalised ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_1bcbfcbbf2604f1eaf3c7066ca685e4c) at 0x10c78f3b0>
+
+    def test_a_lower_case_non_member_is_reported_normalised(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-026."""
+        seed(conn, "AAA", "BBB", "CCC")
+        uid = _create(conn, "U", "AAA", "BBB")
+    
+        with pytest.raises(NotAMember) as excinfo:
+>           service.remove_member(conn, uid, "ccc")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:338: AttributeError
+_________________ test_a_removed_symbol_is_no_longer_a_member __________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_dd88dc518e6042ac82a029d516e8f434) at 0x10c7ab260>
+
+    def test_a_removed_symbol_is_no_longer_a_member(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-026."""
+        seed(conn, "AAA", "BBB", "CCC")
+        uid = _create(conn, "U", "AAA", "BBB", "CCC")
+>       service.remove_member(conn, uid, "BBB")
+        ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:349: AttributeError
+______ test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[1ABC] _______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_5e05bab37c54471cbbf9157792175967) at 0x10c7aae10>
+symbol = '1ABC'
+
+    @pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
+    def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
+        conn: psycopg.Connection, symbol: str
+    ) -> None:
+        """Implements TC-COMP-026."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="invalid symbol"):
+>           service.remove_member(conn, uid, symbol)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:370: AttributeError
+________ test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[] _________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_222fe4a623e74209b0c0eacf6621778d) at 0x10c832ea0>
+symbol = ''
+
+    @pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
+    def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
+        conn: psycopg.Connection, symbol: str
+    ) -> None:
+        """Implements TC-COMP-026."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="invalid symbol"):
+>           service.remove_member(conn, uid, symbol)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:370: AttributeError
+_______ test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[  ] ________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_0d1f04b9bf0045c9a596c1850979169d) at 0x10c832d80>
+symbol = '  '
+
+    @pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
+    def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
+        conn: psycopg.Connection, symbol: str
+    ) -> None:
+        """Implements TC-COMP-026."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="invalid symbol"):
+>           service.remove_member(conn, uid, symbol)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:370: AttributeError
+__ test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member __
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_a7a58e9d9ddb4567bcca63518b6fa7c1) at 0x10c833c80>
+
+    def test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-026: membership is checked before the last-member rule."""
+        seed(conn, "AAA", "CCC")
+        uid = _create(conn, "U", "AAA")
+    
+        with pytest.raises(NotAMember):
+>           service.remove_member(conn, uid, "CCC")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:384: AttributeError
+______________ test_removing_from_an_unknown_universe_is_refused _______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_dbe2cde1c9974efd8234863135e97a67) at 0x10c7869c0>
+
+    def test_removing_from_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-026."""
+        with pytest.raises(UniverseNotFound):
+>           service.remove_member(conn, UUID(int=7), "AAA")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:391: AttributeError
+_____ test_removing_the_sole_member_raises_last_member_offering_retirement _____
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_bf5aa7a826b14f8da10f01ddfa0e6f2b) at 0x10c77ee10>
+
+    def test_removing_the_sole_member_raises_last_member_offering_retirement(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-036."""
+        seed(conn, "AAA")
+        uid = _create(conn, "U", "AAA")
+        before = count_events(conn)
+    
+        with pytest.raises(LastMember) as excinfo:
+>           service.remove_member(conn, uid, "AAA")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:406: AttributeError
+_________ test_the_last_member_rule_applies_to_the_current_membership __________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_b59b3d964aad4b3c818e1659372fe3c2) at 0x10c6767b0>
+
+    def test_the_last_member_rule_applies_to_the_current_membership(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-036."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+>       service.remove_member(conn, uid, "BBB")
+        ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:425: AttributeError
+_________ test_a_re_added_member_counts_towards_the_current_membership _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_5645d8a5df2f4e63a6913f8b0a4ea847) at 0x10cd25220>
+
+    def test_a_re_added_member_counts_towards_the_current_membership(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-036."""
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+>       service.remove_member(conn, uid, "BBB")
+        ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:439: AttributeError
+_____ test_the_sole_member_is_protected_whatever_its_instrument_lifecycle ______
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_479b4d9fc5d3418d880838cafe2e83f9) at 0x10cd251c0>
+
+    def test_the_sole_member_is_protected_whatever_its_instrument_lifecycle(
+        conn: psycopg.Connection,
+    ) -> None:
+        """Implements TC-COMP-036: the rule counts members, not lifecycle (AC-15)."""
+        seed_instrument(conn, "OLD", lifecycle="retired")
+        conn.commit()
+        uid = _create(conn, "U", "OLD")
+        before = count_events(conn)
+    
+        with pytest.raises(LastMember):
+>           service.remove_member(conn, uid, "OLD")
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:462: AttributeError
+______________ test_a_removed_member_keeps_both_events_in_history ______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_b2654643ba3741e49aede141cee0506c) at 0x10cd253d0>
+
+    def test_a_removed_member_keeps_both_events_in_history(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-053."""
+        seed(conn, "AAA", "BBB", "CCC")
+        uid = _create(conn, "U", "AAA", "BBB", "CCC")
+        other = _create(conn, "Other", "BBB")
+        before = event_rows(conn, uid)
+    
+>       removed_at = service.remove_member(conn, uid, "bbb")
+                     ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
+
+tests/integration/test_universe_maintenance.py:478: AttributeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_retire_appends_one_retired_event_and_data_stays_readable
+FAILED tests/integration/test_universe_maintenance.py::test_every_write_to_a_retired_universe_raises_universe_retired
+FAILED tests/integration/test_universe_maintenance.py::test_removing_a_non_member_raises_not_a_member_and_writes_nothing
+FAILED tests/integration/test_universe_maintenance.py::test_a_symbol_with_no_instrument_is_not_a_member
+FAILED tests/integration/test_universe_maintenance.py::test_a_lower_case_non_member_is_reported_normalised
+FAILED tests/integration/test_universe_maintenance.py::test_a_removed_symbol_is_no_longer_a_member
+FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[1ABC]
+FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[]
+FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[  ]
+FAILED tests/integration/test_universe_maintenance.py::test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member
+FAILED tests/integration/test_universe_maintenance.py::test_removing_from_an_unknown_universe_is_refused
+FAILED tests/integration/test_universe_maintenance.py::test_removing_the_sole_member_raises_last_member_offering_retirement
+FAILED tests/integration/test_universe_maintenance.py::test_the_last_member_rule_applies_to_the_current_membership
+FAILED tests/integration/test_universe_maintenance.py::test_a_re_added_member_counts_towards_the_current_membership
+FAILED tests/integration/test_universe_maintenance.py::test_the_sole_member_is_protected_whatever_its_instrument_lifecycle
+FAILED tests/integration/test_universe_maintenance.py::test_a_removed_member_keeps_both_events_in_history
+16 failed, 12 passed in 3.96s

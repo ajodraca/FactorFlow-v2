@@ -1,0 +1,244 @@
+# RED injection (reverted after this run): _take_lock(conn) replaced by pass in rename, remove_member and retire; remove_member's execute argument built as _INSERT_MEMBER_REMOVED_SQL + "".
+...........F...................FF.................................FFFF.. [ 93%]
+.....                                                                    [100%]
+=================================== FAILURES ===================================
+___ test_no_module_interpolates_sql_or_reads_a_file_after_import[service.py] ___
+
+path = PosixPath('/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/src/factorflow/universes/service.py')
+
+    @pytest.mark.parametrize("path", _python_files(), ids=lambda p: p.name)
+    def test_no_module_interpolates_sql_or_reads_a_file_after_import(path: Path) -> None:
+>       assert interpolation_problems(path.read_text()) == []
+E       AssertionError: assert ['execute() r...d expression'] == []
+E         
+E         Left contains one more item: 'execute() receives a computed expression'
+E         Use -v to get more diff
+
+tests/unit/test_universe_sql_safety.py:149: AssertionError
+___ test_the_maintenance_functions_issue_no_mutation_and_no_built_statement ____
+
+    def test_the_maintenance_functions_issue_no_mutation_and_no_built_statement() -> None:
+>       assert function_problems(SERVICE_PY.read_text(), MAINTENANCE_FUNCTIONS) == []
+E       AssertionError: assert ['remove_memb...t expression'] == []
+E         
+E         Left contains one more item: 'remove_member: execute() receives a built expression'
+E         Use -v to get more diff
+
+tests/unit/test_universe_sql_safety.py:344: AssertionError
+__________ test_the_maintenance_functions_only_lock_or_append_events ___________
+
+    def test_the_maintenance_functions_only_lock_or_append_events() -> None:
+        names = executed_constant_names(SERVICE_PY.read_text(), MAINTENANCE_FUNCTIONS)
+        statements = [getattr(universe_service, name) for name in names]
+    
+>       assert sorted(names) == ["_INSERT_EVENT_SQL", "_INSERT_EVENT_SQL", "_INSERT_MEMBER_REMOVED_SQL"]
+E       AssertionError: assert ['_INSERT_EVE...RT_EVENT_SQL'] == ['_INSERT_EVE..._REMOVED_SQL']
+E         
+E         Right contains one more item: '_INSERT_MEMBER_REMOVED_SQL'
+E         Use -v to get more diff
+
+tests/unit/test_universe_sql_safety.py:352: AssertionError
+______ test_each_maintenance_write_waits_on_the_write_lock[remove_member] ______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=62570 user=test database=test_836e51b9051843a6a6520f1c073e92fd) at 0x10ac25670>
+postgres_connection_string = 'postgresql://test:test@localhost:62570/test_836e51b9051843a6a6520f1c073e92fd'
+operation = 'remove_member'
+
+    @pytest.mark.parametrize("operation", sorted(_OPERATIONS))
+    def test_each_maintenance_write_waits_on_the_write_lock(
+        conn: psycopg.Connection, postgres_connection_string: str, operation: str
+    ) -> None:
+        """The write lock is the first statement of every write (design 2.3, DEC-0065)."""
+        call, event_type = _OPERATIONS[operation]
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def writer() -> None:
+            try:
+                call(conn_b, uid)
+                conn_b.commit()
+                outcome.append("done")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=writer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            waited_with_no_result = outcome == []
+            conn.commit()
+            thread.join(timeout=10)
+            assert not thread.is_alive()
+        finally:
+            conn.rollback()
+            thread.join(timeout=10)
+            conn_b.close()
+            watcher.close()
+    
+>       assert waiting == 1, f"{operation} never reached the lock"
+E       AssertionError: remove_member never reached the lock
+E       assert 0 == 1
+
+tests/integration/test_universe_maintenance.py:573: AssertionError
+_________ test_each_maintenance_write_waits_on_the_write_lock[rename] __________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=62570 user=test database=test_c898a91e81b348fdb4273452aab1a4b0) at 0x10b122180>
+postgres_connection_string = 'postgresql://test:test@localhost:62570/test_c898a91e81b348fdb4273452aab1a4b0'
+operation = 'rename'
+
+    @pytest.mark.parametrize("operation", sorted(_OPERATIONS))
+    def test_each_maintenance_write_waits_on_the_write_lock(
+        conn: psycopg.Connection, postgres_connection_string: str, operation: str
+    ) -> None:
+        """The write lock is the first statement of every write (design 2.3, DEC-0065)."""
+        call, event_type = _OPERATIONS[operation]
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def writer() -> None:
+            try:
+                call(conn_b, uid)
+                conn_b.commit()
+                outcome.append("done")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=writer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            waited_with_no_result = outcome == []
+            conn.commit()
+            thread.join(timeout=10)
+            assert not thread.is_alive()
+        finally:
+            conn.rollback()
+            thread.join(timeout=10)
+            conn_b.close()
+            watcher.close()
+    
+>       assert waiting == 1, f"{operation} never reached the lock"
+E       AssertionError: rename never reached the lock
+E       assert 0 == 1
+
+tests/integration/test_universe_maintenance.py:573: AssertionError
+_________ test_each_maintenance_write_waits_on_the_write_lock[retire] __________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=62570 user=test database=test_c2c9514004954a0e8cdb709e8cdde097) at 0x10abf2ed0>
+postgres_connection_string = 'postgresql://test:test@localhost:62570/test_c2c9514004954a0e8cdb709e8cdde097'
+operation = 'retire'
+
+    @pytest.mark.parametrize("operation", sorted(_OPERATIONS))
+    def test_each_maintenance_write_waits_on_the_write_lock(
+        conn: psycopg.Connection, postgres_connection_string: str, operation: str
+    ) -> None:
+        """The write lock is the first statement of every write (design 2.3, DEC-0065)."""
+        call, event_type = _OPERATIONS[operation]
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def writer() -> None:
+            try:
+                call(conn_b, uid)
+                conn_b.commit()
+                outcome.append("done")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=writer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            waited_with_no_result = outcome == []
+            conn.commit()
+            thread.join(timeout=10)
+            assert not thread.is_alive()
+        finally:
+            conn.rollback()
+            thread.join(timeout=10)
+            conn_b.close()
+            watcher.close()
+    
+>       assert waiting == 1, f"{operation} never reached the lock"
+E       AssertionError: retire never reached the lock
+E       assert 0 == 1
+
+tests/integration/test_universe_maintenance.py:573: AssertionError
+______ test_a_rename_waiting_on_the_lock_sees_a_create_that_took_the_name ______
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=62570 user=test database=test_70027846ee854fb386ea2f56c9bed1e1) at 0x10b197fb0>
+postgres_connection_string = 'postgresql://test:test@localhost:62570/test_70027846ee854fb386ea2f56c9bed1e1'
+
+    def test_a_rename_waiting_on_the_lock_sees_a_create_that_took_the_name(
+        conn: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        """A rename and a create of the same name serialise: never two active holders."""
+        seed(conn, "AAA")
+        u2 = _create(conn, "U2", "AAA")
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def renamer() -> None:
+            try:
+                service.rename(conn_b, u2, "Race")
+                conn_b.commit()
+                outcome.append("renamed")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=renamer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            waited_with_no_result = outcome == []
+            # the same session holds the lock, so it is re-entrant here
+>           service.create_by_hand(conn, "Race", ["AAA"])
+
+tests/integration/test_universe_maintenance.py:604: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=62570 user=test database=test_70027846ee854fb386ea2f56c9bed1e1) at 0x10b197fb0>
+name = 'Race', symbols = ['AAA']
+
+    def create_by_hand(conn: psycopg.Connection, name: str, symbols: list[str]) -> Universe:
+        """Create a universe from covered stocks: one ``created`` and one ``member_added`` each.
+    
+        Refuses the whole request on any uncovered symbol, naming all of them, and an
+        empty one; nothing is written on a refusal because the transaction block exits
+        by exception. The caller commits.
+        """
+        with conn.transaction():
+            _take_lock(conn)
+            clean_name = _normalise_name(name)
+            clean_symbols = _normalise_symbols(symbols)
+            uncovered = _uncovered(conn, clean_symbols)
+            if uncovered:
+                raise InstrumentNotAcquired(uncovered)
+            if _name_in_use(conn, clean_name):
+>               raise UniverseNameInUse(f"an active universe is already named {clean_name!r}")
+E               factorflow.universes.service.UniverseNameInUse: an active universe is already named 'Race'
+
+src/factorflow/universes/service.py:218: UniverseNameInUse
+=========================== short test summary info ============================
+FAILED tests/unit/test_universe_sql_safety.py::test_no_module_interpolates_sql_or_reads_a_file_after_import[service.py]
+FAILED tests/unit/test_universe_sql_safety.py::test_the_maintenance_functions_issue_no_mutation_and_no_built_statement
+FAILED tests/unit/test_universe_sql_safety.py::test_the_maintenance_functions_only_lock_or_append_events
+FAILED tests/integration/test_universe_maintenance.py::test_each_maintenance_write_waits_on_the_write_lock[remove_member]
+FAILED tests/integration/test_universe_maintenance.py::test_each_maintenance_write_waits_on_the_write_lock[rename]
+FAILED tests/integration/test_universe_maintenance.py::test_each_maintenance_write_waits_on_the_write_lock[retire]
+FAILED tests/integration/test_universe_maintenance.py::test_a_rename_waiting_on_the_lock_sees_a_create_that_took_the_name
+7 failed, 70 passed in 24.71s
