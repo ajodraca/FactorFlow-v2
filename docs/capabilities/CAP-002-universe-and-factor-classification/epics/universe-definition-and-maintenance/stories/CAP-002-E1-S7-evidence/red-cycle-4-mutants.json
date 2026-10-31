@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && ./node_modules/.bin/vitest run src/screens/research/universes src/screens/research/copy.test.ts",
+  "repo_head": "341860251471ca2e854ac42832d1e700c4b1d4a8",
+  "tree_patch_sha256": "124910bc886498a46e994e60947b6fa308b32c7e83905c17cb0cf3754c6091dc",
+  "mutants_file": "/tmp/claude-501/s7/red-c4-mutants.json",
+  "mutants_sha256": "a6d3d1902e2f78f79b220dacdca57b00701eeb5f654f18f8fd1cb183c014e565",
+  "jobs": 4,
+  "started": "2026-10-31T16:29:38Z",
+  "baselines": [
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 3.0,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/baseline-w3.log",
+      "log_sha256": "fbd87cc70cccd82bafcd2780f5cef96ece2534c4bb83edbbbc365b304f14be8e"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 3.0,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/baseline-w0.log",
+      "log_sha256": "784d4ad00bdb9605b4e35658c768f589d1eb8d82ab7bb91ca891caf6b08fa392"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 3.0,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/baseline-w2.log",
+      "log_sha256": "7e41dfce21b0530ade2ad46f59d3aba385db8199f8a91c1924ee8fe76ec50f8c"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 3.1,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/baseline-w1.log",
+      "log_sha256": "a7aebc786190076c27f039649a1388e58108f472aeb1753f6939d1cf23939278"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "web/src/screens/research/universes/create-dialog.tsx:manual:10",
+      "operator": "manual",
+      "file": "web/src/screens/research/universes/create-dialog.tsx",
+      "old": "field.value.slice(field.selectionEnd)",
+      "new": "field.value.slice(field.selectionStart)",
+      "why": "paste over a selection keeps the replaced text in the preview",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.7,
+      "worker": 0,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/web_src_screens_research_universes_create-dialog.tsx_manual_10.log",
+      "log_sha256": "a0b7e281b353172e5ae74bbb582263e564100799b96cfc5e73af4cbbc500ca75"
+    },
+    {
+      "id": "web/src/screens/research/universes/universe-table.tsx:manual:45",
+      "operator": "manual",
+      "file": "web/src/screens/research/universes/universe-table.tsx",
+      "old": "            aria-controls={detailId}\n",
+      "new": "",
+      "why": "expander loses aria-controls (T012)",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.8,
+      "worker": 1,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/web_src_screens_research_universes_universe-table.tsx_manual_45.log",
+      "log_sha256": "e175e17c5e918a5b506f9a017d4f4fd9c8080fb8813617f5fd4c2252198dc6a5"
+    },
+    {
+      "id": "web/src/screens/research/universes/universe-table.tsx:manual:46",
+      "operator": "manual",
+      "file": "web/src/screens/research/universes/universe-table.tsx",
+      "old": "<tr id={detailId}>",
+      "new": "<tr>",
+      "why": "detail row loses the id aria-controls names (T012)",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.7,
+      "worker": 2,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/web_src_screens_research_universes_universe-table.tsx_manual_46.log",
+      "log_sha256": "53aa316319edabfb99752cabcef4b61b2f4e690caa66ea5bbf32c5bc3691c4e8"
+    },
+    {
+      "id": "web/src/screens/research/universes/index.tsx:manual:47",
+      "operator": "manual",
+      "file": "web/src/screens/research/universes/index.tsx",
+      "old": "<h1 className=\"text-lg\">{UNIVERSES.title}</h1>",
+      "new": "<h2 className=\"text-lg\">{UNIVERSES.title}</h2>",
+      "why": "page title is not h1 (UX 1.3, T014)",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.7,
+      "worker": 3,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/web_src_screens_research_universes_index.tsx_manual_47.log",
+      "log_sha256": "10d3ebec30a792b110e9965cb503f01f8fa6b3416933db9c4209c7760daf3639"
+    },
+    {
+      "id": "web/src/screens/research/universes/index.tsx:manual:48",
+      "operator": "manual",
+      "file": "web/src/screens/research/universes/index.tsx",
+      "old": "          data-variant=\"inline\"\n",
+      "new": "",
+      "why": "lifecycle select loses the inline variant (UX 1.3)",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.9,
+      "worker": 0,
+      "log": "/tmp/claude-501/s7/red-c4-results-logs/web_src_screens_research_universes_index.tsx_manual_48.log",
+      "log_sha256": "e94693fbe6510154856baac7af437a970ee53d6fe5fa9eb851f499715aee0ddb"
+    }
+  ],
+  "finished": "2026-10-31T16:29:46Z"
+}
