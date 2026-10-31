@@ -6,10 +6,10 @@ universe's state is never stored: it is replayed from the append-only
 `universe_event` log that migration `0005_universes.sql` adds beside the
 `universe` table. `replay.py` is the read half (CAP-002-E1-S2); `service.py`
 is the writer and re-exports or delegates to the replay types and paged reads
-(DEC-0093). It creates by hand and adds members (CAP-002-E1-S3), and creates
-from a filter (CAP-002-E1-S5). Its reads are in `universes/sql/`; its writes
-are inline constants in `service.py`. Renaming, removing a member and retiring
-are CAP-002-E1-S4 and are not defined yet.
+(DEC-0093). It creates by hand and adds members (CAP-002-E1-S3), renames,
+removes a member and retires (CAP-002-E1-S4), and creates from a filter
+(CAP-002-E1-S5). Its reads are in `universes/sql/`; its writes are inline
+constants in `service.py`.
 
 No API route or screen calls the service yet: the only import of the package
 from elsewhere under `src/` is the classification reader's import of
@@ -25,16 +25,20 @@ and neither catches a database error.
 Every write runs inside `with conn.transaction():`, so a refusal raised inside
 it writes nothing. Its first statement is
 `SELECT pg_advisory_xact_lock(UNIVERSE_WRITE_LOCK_KEY)` (`2002_0001`, one key
-for every universe write, DEC-0065). Every check after it is made under that
-lock, so a write that waited sees what the lock holder committed: two
-concurrent creates of one name cannot both succeed. The service issues
-`INSERT` only, never `UPDATE` or `DELETE` (DEC-0057).
+for every universe write, DEC-0065). Every check after it is made by replay
+under that lock, so a write that waited sees what the lock holder committed:
+two concurrent creates of one name cannot both succeed, and a write queued
+behind a retire is refused as retired. The service issues `INSERT` only, never
+`UPDATE` or `DELETE` (DEC-0057).
 
 | Function | Does | Returns |
 |---|---|---|
 | `create_by_hand(conn, name, symbols)` | Appends a `universe` row, one `created` event and one `member_added` event per distinct symbol | The replayed `Universe` |
 | `add_members(conn, universe_id, symbols)` | Appends one `member_added` event per symbol that is not a current member. An empty list is a no-op (DEC-0095) | `(added, already_member)`, both ascending |
 | `create_from_filter(conn, name, set_id, thresholds)` | Appends a `universe` row, one `created` event carrying `filter_provenance`, and one `member_added` event per stock the filter matches, in symbol order. See [Create from a filter](#create-from-a-filter) | The replayed `Universe`, `origin.kind` `from_filter` |
+| `rename(conn, universe_id, name)` | Appends one `renamed` event. The id, `created_at`, history and members are unchanged. Renaming to the universe's own current name is allowed and appends an event (DEC-0096) | The replayed `Universe` |
+| `remove_member(conn, universe_id, symbol)` | Appends one `member_removed` event. Coverage is not consulted | The event's `recorded_at` |
+| `retire(conn, universe_id)` | Appends one `retired` event. Members, name and history stay readable | The replayed `Universe`, `lifecycle` `retired` |
 
 ### Order of checks
 
@@ -46,6 +50,9 @@ refusal that applies:
 | `create_by_hand` | name shape, symbol shape, coverage, name in use, empty |
 | `add_members` | symbol shape, coverage, universe known, universe active |
 | `create_from_filter` | name shape, set currency, empty, name in use |
+| `rename` | name shape, universe known, universe active, name in use by another active universe |
+| `remove_member` | symbol shape, universe known, universe active, current member, last member |
+| `retire` | universe known, universe active |
 
 So a malformed name or symbol is a plain `ValueError` even against an unknown
 or retired universe, and `add_members` reports uncovered symbols before an
@@ -58,6 +65,7 @@ unknown universe.
 - **Symbol shape.** Symbols are normalised to upper case, deduplicated and
   sorted. More than `MAX_SYMBOLS_PER_REQUEST` raw symbols, or any symbol that
   fails `factorflow.instruments.symbols.is_valid`, raises `ValueError`.
+  `remove_member` takes one symbol through the same rule.
 - **Coverage.** A symbol is covered when an `instrument` row with that symbol
   has at least one `coverage_segment`, whatever the instrument's lifecycle
   (`coverage_check.sql`, `COVERAGE_CHECK_SQL`). `create_from_filter` makes no
@@ -65,6 +73,9 @@ unknown universe.
 - **Set currency.** `create_from_filter` reads `current_set(conn)` after the
   lock. The call is refused unless a complete set exists and its `set_id`
   equals the requested one. A later `building` or `failed` set is not a change.
+- **Current member and last member.** Membership is checked before the
+  last-member rule, so `LastMember` is raised only when the removal would leave
+  the universe empty.
 
 ### Create from a filter
 
@@ -106,12 +117,13 @@ filter as a universe (AC-2, design 2.4).
 | Exception | Base | Raised when |
 |---|---|---|
 | `UniverseNotFound` | `LookupError` | No universe has the id |
-| `UniverseRetired` | `ValueError` | `add_members` targets a retired universe |
+| `UniverseRetired` | `ValueError` | The universe is retired. Every write to it is refused: `rename`, `add_members`, `remove_member` and `retire` |
 | `UniverseNameInUse` | `ValueError` | Another active universe holds the name |
 | `EmptyUniverse` | `ValueError` | A create by hand has no members, or a filter matches no stock |
 | `InstrumentNotAcquired` | `ValueError` | Any symbol is not covered. `symbols` names every one, sorted, and the whole request is refused |
+| `NotAMember` | `LookupError` | `remove_member`'s symbol is not a current member. The message names the normalised symbol |
+| `LastMember` | `ValueError` | `remove_member` would remove the sole current member. The message ends `retire the universe instead` |
 | `ClassificationSetChanged` | `ValueError` | `create_from_filter`'s `set_id` is not the current complete set. `requested_set_id` is the requested id; `current_set_id` the current one, or `None` when no set is complete |
-| `NotAMember`, `LastMember` | `LookupError`, `ValueError` | Defined for CAP-002-E1-S4's member removal; nothing raises them yet |
 
 ## Reads
 

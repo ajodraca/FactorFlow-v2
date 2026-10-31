@@ -1,0 +1,38 @@
+..........................................F
+=================================== FAILURES ===================================
+_______ test_an_unusable_payload_names_the_corporate_actions_acquisition _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=57106 user=test database=test_0a3575227b954c66b6a1dd8093d65e0...d1efd70>, stock=1, set_id=UUID('8d9d95ae-5f34-4998-bc5c-6f95029eecb3'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cffeb40>
+
+    def test_an_unusable_payload_names_the_corporate_actions_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0243, design 2.3 step 5, AC-12: an input missing because a split or dividend in its
+        window is unusable names the last corporate_actions outcome, not the prices one; the
+        input whose window does not hold the action is present and names none."""
+        record_acquisitions(env)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_3m"]["status"] == "present"
+        assert "last_acquisition" not in rows["return_3m"]["detail"]
+        for name in ("return_6m", "return_12m"):
+            detail = rows[name]["detail"]
+            assert detail["cause"] == "corporate_action_payload_unusable", name
+>           assert detail["last_acquisition"]["data_type"] == "corporate_actions", name
+E           AssertionError: return_6m
+E           assert 'prices' == 'corporate_actions'
+E             
+E             - corporate_actions
+E             + prices
+
+tests/integration/test_engine_inputs_momentum.py:1114: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_names_the_corporate_actions_acquisition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 42 passed in 14.66s

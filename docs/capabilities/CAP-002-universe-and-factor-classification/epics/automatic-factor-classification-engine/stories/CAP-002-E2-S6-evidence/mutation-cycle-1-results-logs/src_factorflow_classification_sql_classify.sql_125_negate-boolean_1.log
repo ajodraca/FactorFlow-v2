@@ -1,0 +1,32 @@
+F
+=================================== FAILURES ===================================
+_ test_statement_filed_before_first_observation_marks_its_inputs_and_classifications _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=53867 user=test database=test_f0c4f16283fb4e38971408174f65b6f2) at 0x108e59040>, set_id=UUID('e369500c-c162-49fd-97b6-0f0dc729623a'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e5ac90>
+
+    def test_statement_filed_before_first_observation_marks_its_inputs_and_classifications(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store
+        stocks = build_fixture(conn)
+    
+        result = run_two_stage_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = classifications_for(conn, set_id)
+        a = stocks["A"]
+        assert input_flags(conn, set_id, a) == expect(*FUNDAMENTAL_INPUTS)
+        for factor in ("value", "growth"):
+            assert rows[(a, factor)]["status"] == "classified"
+            assert rows[(a, factor)]["restated_possible"] is True
+        # No momentum input exists in this build, so momentum is not ranked.
+        assert rows[(a, "momentum")]["status"] == "not_classified"
+>       assert rows[(a, "momentum")]["restated_possible"] is False
+E       assert True is False
+
+tests/integration/test_engine_restatement.py:165: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_statement_filed_before_first_observation_marks_its_inputs_and_classifications
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.30s

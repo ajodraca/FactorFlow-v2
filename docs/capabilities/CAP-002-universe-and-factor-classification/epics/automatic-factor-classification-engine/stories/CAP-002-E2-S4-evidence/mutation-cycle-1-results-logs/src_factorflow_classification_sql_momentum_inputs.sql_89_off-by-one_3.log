@@ -1,0 +1,40 @@
+......F
+=================================== FAILURES ===================================
+_ test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-strings] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49159 user=test database=test_4be58641378648fb9ab9b21d1b7593d...929a6f0>, stock=1, set_id=UUID('14351e38-e8c9-4f5f-aa8b-ed2f9a309efd'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10929a900>
+split = {'split_from': '1', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        "split",
+        [SPLIT_2_FOR_1, {"split_from": 1, "split_to": 2}],
+        ids=["json-strings", "json-numbers"],
+    )
+    def test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged(
+        env: Env, monkeypatch: pytest.MonkeyPatch, split: dict[str, Any]
+    ) -> None:
+        twin = add_instrument(env.conn, "TWIN")
+        split_on = date(2026, 7, 1)
+        pre: dict[date, Decimal | int] = {S12: 80, S6: 90, S3: 100, date(2026, 6, 30): 100}
+        post: dict[date, Decimal | int] = {split_on: 50, E: 55, L: 56}
+        add_close_series(env.conn, env.stock, pre | post)
+        add_close_series(env.conn, twin, {d: Decimal(c) / 2 for d, c in pre.items()} | post)
+        add_corporate_action(env.conn, env.stock, "split", split_on, split)
+    
+        rows = build(env, monkeypatch)
+        twin_rows = momentum(env.conn, env.set_id, twin)
+    
+        for name in MOMENTUM:
+>           assert rows[name]["status"] == "present", name
+E           AssertionError: return_3m
+E           assert 'missing' == 'present'
+E             
+E             - present
+E             + missing
+
+tests/integration/test_engine_inputs_momentum.py:323: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-strings]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 6 passed in 3.91s

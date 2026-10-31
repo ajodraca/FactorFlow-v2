@@ -1,0 +1,35 @@
+...........F
+=================================== FAILURES ===================================
+_________________ test_a_reverse_split_doubles_earlier_prices __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49165 user=test database=test_9bcb71deb99a485bacfd42d4af05e9e...92234a0>, stock=1, set_id=UUID('740e3dd6-797a-445b-89ee-b0b0ddbc7958'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109221e80>
+
+    def test_a_reverse_split_doubles_earlier_prices(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): prices before the split are scaled by split_from / split_to = 2."""
+        add_close_series(
+            env.conn, env.stock, {S12: 10, S6: 10, S3: 10, date(2026, 7, 1): 20, E: 25, L: 25}
+        )
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 7, 1), {"split_from": "2", "split_to": "1"}
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+>           assert_close(rows[name]["value"], ret(25, 20))
+
+tests/integration/test_engine_inputs_momentum.py:405: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = None, expected = Decimal('0.25')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+>       assert actual is not None
+E       assert None is not None
+
+tests/integration/test_engine_inputs_momentum.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_reverse_split_doubles_earlier_prices
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 11 passed in 5.14s

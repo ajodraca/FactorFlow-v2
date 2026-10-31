@@ -1,0 +1,26 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=57051 user=test database=test_eb4eab1869eb45dba8ac2e78fab2502...cfbae70>, stock=1, set_id=UUID('3c8f8e3a-85bc-482c-99a9-97252c96bc2a'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfb9e20>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["value"] is None
+        assert rows["return_12m"]["as_of"] == E
+        # DEC-0242: a missing input has no known_on, although its E bar was read.
+>       assert rows["return_12m"]["known_on"] is None
+E       assert datetime.date(2026, 9, 17) is None
+
+tests/integration/test_engine_inputs_momentum.py:145: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.27s

@@ -1,0 +1,72 @@
+# RED, CAP-002-E2-S6 cycle-2 (implementation review v1 rework: IR-001). Tests only; no production file changes.
+# Tree: 2cc906d6bf204c8c77ffd4cf5ca696b75c2c4fa8 (review-report commit; src identical to the coding commit a46dbff).
+# Mutants: mutants-cycle-2.json, review v1's manual:review-value-own-observed-rule (value_inputs.sql:29) and its
+# growth_inputs.sql:24 twin manual:review-growth-own-observed-rule, the reviewer's ids and edits, applied one at a
+# time by scripts/mutation-run.py. Each swaps statements.sql's backfilled flag (DEC-0056: filed before the
+# instrument's first observed_on) for the rule DEC-0056 rejects (filed before the row's own observed_on).
+# sha256 b1b8f358b0083d7a16b0ea9f715bc47fc381299b9288fc5c003679692211ad3b tests/integration/test_engine_restatement.py (as committed in HEAD, cycle-1)
+# sha256 6cb53f9a38589db02e8ab3ae4d64d4b6d237bc377d84c754eadc78d9c756a9ce tests/integration/test_engine_restatement.py (as staged, cycle-2)
+
+## Part 1: both mutants survive the cycle-1 story tests
+# Run before any cycle-2 edit, on the clean tree: the story's two test files only, without the S3 tests that
+# killed the growth twin in review v1.
+$ uv run --all-extras --offline python -B -m pytest -m "postgres or not postgres" -q -p no:cacheprovider tests/integration/test_engine_restatement.py tests/unit/test_restatement_sql_static.py
+baseline worker 0: exit 0
+baseline worker 1: exit 0
+survived  manual:review-value-own-observed-rule (exit 0)
+survived  manual:review-growth-own-observed-rule (exit 0)
+--- manual:review-value-own-observed-rule: 26 passed in 4.01s
+--- manual:review-growth-own-observed-rule: 26 passed in 4.04s
+# results sha256 f8d1645c2fd2e4165a0c796c83d95b6d39ea5edbe3d992f4350df424775ea4b3
+
+## Part 2: the two strengthened tests under each mutant (RED), then unmutated (GREEN)
+# Same HEAD plus the staged cycle-2 test file. Both tests fail under each mutant; the baselines pass.
+$ uv run --all-extras --offline python -B -m pytest -m "postgres or not postgres" -q -p no:cacheprovider -rf "tests/integration/test_engine_restatement.py::test_a_later_set_leaves_the_earlier_sets_mark_unchanged" "tests/integration/test_engine_restatement.py::test_filing_date_boundary_and_null_filing_date"
+baseline worker 0: exit 0
+baseline worker 1: exit 0
+killed    manual:review-value-own-observed-rule (exit 1)
+killed    manual:review-growth-own-observed-rule (exit 1)
+--- manual:review-value-own-observed-rule: 2 failed in 2.38s
+--- manual:review-growth-own-observed-rule: 2 failed in 2.43s
+
+### RED: manual:review-value-own-observed-rule (src/factorflow/classification/sql/value_inputs.sql:29)
+
+>       assert input_flags(conn, set_2, a) == expect("earnings_yield", "fcf_yield", *GROWTH)
+E       AssertionError: assert {'book_to_pri...h': True, ...} == {'book_to_pri...h': True, ...}
+E         Differing items:
+E         {'book_to_price': True} != {'book_to_price': False}
+tests/integration/test_engine_restatement.py:271: AssertionError
+>       assert input_flags(conn, set_id, d) == expect()
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...': False, ...}
+E         Differing items:
+E         {'fcf_yield': True} != {'fcf_yield': False}
+E         {'book_to_price': True} != {'book_to_price': False}
+E         {'earnings_yield': True} != {'earnings_yield': False}
+tests/integration/test_engine_restatement.py:364: AssertionError
+FAILED tests/integration/test_engine_restatement.py::test_a_later_set_leaves_the_earlier_sets_mark_unchanged
+FAILED tests/integration/test_engine_restatement.py::test_filing_date_boundary_and_null_filing_date
+2 failed in 2.38s
+
+### RED: manual:review-growth-own-observed-rule (src/factorflow/classification/sql/growth_inputs.sql:24)
+
+>           assert input_flags(conn, set_2, stock) == expect(), symbol
+E           AssertionError: B
+E           assert {'book_to_pri...h': True, ...} == {'book_to_pri...': False, ...}
+E             Differing items:
+E             {'revenue_growth': True} != {'revenue_growth': False}
+E             {'eps_growth': True} != {'eps_growth': False}
+tests/integration/test_engine_restatement.py:274: AssertionError
+>       assert input_flags(conn, set_id, d) == expect()
+E       AssertionError: assert {'book_to_pri...h': True, ...} == {'book_to_pri...': False, ...}
+E         Differing items:
+E         {'revenue_growth': True} != {'revenue_growth': False}
+E         {'eps_growth': True} != {'eps_growth': False}
+tests/integration/test_engine_restatement.py:364: AssertionError
+FAILED tests/integration/test_engine_restatement.py::test_a_later_set_leaves_the_earlier_sets_mark_unchanged
+FAILED tests/integration/test_engine_restatement.py::test_filing_date_boundary_and_null_filing_date
+2 failed in 2.43s
+
+### GREEN (unmutated baseline, worker 0): 2 passed in 2.51s
+
+### GREEN (unmutated baseline, worker 1): 2 passed in 2.50s
+# results sha256 c2572ef749a796798af68ddecd197c49e1e73a62ceaf27a5e751e59c25e17dce

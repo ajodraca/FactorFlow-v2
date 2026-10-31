@@ -1,0 +1,30 @@
+..................................F
+=================================== FAILURES ===================================
+_______ test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56454 user=test database=test_b8e09e2acaba403388e64569794ed1d...93580b0>, stock=1, set_id=UUID('ff8017df-d39f-4625-909b-7a77f83e9c81'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1093586e0>
+
+    def test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stale = add_instrument(env.conn, "STALE")
+        stale_day = date(2026, 10, 15)
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, stale_day: 130})
+    
+        rows = build(env, monkeypatch)
+        stale_rows = momentum(env.conn, env.set_id, stale)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            row = stale_rows[name]
+            assert row["status"] == "outdated", name
+>           assert row["value"] is None
+E           AssertionError: assert Decimal('0.2000000000') is None
+
+tests/integration/test_engine_inputs_momentum.py:912: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 passed in 6.72s

@@ -1,0 +1,286 @@
+# RED for cycle-4: the five surviving mutants of CAP-002-E1-S4-implementation-review-v1-mutation.json, each applied alone in a scratch clone by scripts/mutation-run.py with the cycle-4 tests in place; production is unchanged in the reviewed repository.
+
+===== review:remove-lock-after-replay =====
+........................................................................ [ 47%]
+......................................F
+=================================== FAILURES ===================================
+_ test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[remove_member] _
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60647 user=test database=test_9be13792b60444c6821f7eccc245f1be) at 0x10d07dd90>
+postgres_connection_string = 'postgresql://test:test@localhost:60647/test_9be13792b60444c6821f7eccc245f1be'
+operation = 'remove_member'
+
+    @pytest.mark.parametrize("operation", sorted(_RACES))
+    def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
+        conn: psycopg.Connection, postgres_connection_string: str, operation: str
+    ) -> None:
+        """The lock precedes the replay checks, so two writes cannot both pass them.
+    
+        Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
+        AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
+        holder committed meanwhile, not on the state it could have read before waiting.
+        """
+        holder_change, call, refusal, holder_event = _RACES[operation]
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = [e["event_type"] for e in event_rows(conn, uid)]
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def writer() -> None:
+            try:
+                call(conn_b, uid)
+                conn_b.commit()
+                outcome.append("done")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=writer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            # the same session holds the lock, so it is re-entrant here
+            holder_change(conn, uid)
+            conn.commit()
+            thread.join(timeout=10)
+            assert not thread.is_alive()
+        finally:
+            conn.rollback()
+            thread.join(timeout=10)
+            conn_b.close()
+            watcher.close()
+    
+        assert waiting == 1, f"{operation} never reached the lock"
+>       assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
+E       AssertionError: ['done']
+E       assert (1 == 1 and <class 'str'> is <class 'factorflow.universes.service.LastMember'>)
+E        +  where 1 = len(['done'])
+E        +  and   <class 'str'> = type('done')
+
+tests/integration/test_universe_maintenance.py:744: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[remove_member]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 110 passed in 6.58s
+
+===== review:retire-lock-after-replay =====
+........................................................................ [ 47%]
+........................................F
+=================================== FAILURES ===================================
+__ test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[retire] ___
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60649 user=test database=test_564b2de0144b4453b62d9f682ed99608) at 0x10b40cb30>
+postgres_connection_string = 'postgresql://test:test@localhost:60649/test_564b2de0144b4453b62d9f682ed99608'
+operation = 'retire'
+
+    @pytest.mark.parametrize("operation", sorted(_RACES))
+    def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
+        conn: psycopg.Connection, postgres_connection_string: str, operation: str
+    ) -> None:
+        """The lock precedes the replay checks, so two writes cannot both pass them.
+    
+        Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
+        AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
+        holder committed meanwhile, not on the state it could have read before waiting.
+        """
+        holder_change, call, refusal, holder_event = _RACES[operation]
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = [e["event_type"] for e in event_rows(conn, uid)]
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def writer() -> None:
+            try:
+                call(conn_b, uid)
+                conn_b.commit()
+                outcome.append("done")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=writer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            # the same session holds the lock, so it is re-entrant here
+            holder_change(conn, uid)
+            conn.commit()
+            thread.join(timeout=10)
+            assert not thread.is_alive()
+        finally:
+            conn.rollback()
+            thread.join(timeout=10)
+            conn_b.close()
+            watcher.close()
+    
+        assert waiting == 1, f"{operation} never reached the lock"
+>       assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
+E       AssertionError: [UniqueViolation('duplicate key value violates unique constraint "idx_universe_event_single_retired"
+E         DETAIL:  Key (universe_id)=(63a5de58-4912-4e77-9820-531c63daf050) already exists.')]
+E       assert (1 == 1 and <class 'psycopg.errors.UniqueViolation'> is <class 'factorflow.universes.service.UniverseRetired'>)
+E        +  where 1 = len([UniqueViolation('duplicate key value violates unique constraint "idx_universe_event_single_retired"\nDETAIL:  Key (universe_id)=(63a5de58-4912-4e77-9820-531c63daf050) already exists.')])
+E        +  and   <class 'psycopg.errors.UniqueViolation'> = type(UniqueViolation('duplicate key value violates unique constraint "idx_universe_event_single_retired"\nDETAIL:  Key (universe_id)=(63a5de58-4912-4e77-9820-531c63daf050) already exists.'))
+
+tests/integration/test_universe_maintenance.py:744: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[retire]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 112 passed in 6.81s
+
+===== review:rename-lock-after-replay =====
+........................................................................ [ 47%]
+.......................................F
+=================================== FAILURES ===================================
+__ test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[rename] ___
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=60646 user=test database=test_73ca03780b1d43189809f9b3e3474c9d) at 0x10cf42f30>
+postgres_connection_string = 'postgresql://test:test@localhost:60646/test_73ca03780b1d43189809f9b3e3474c9d'
+operation = 'rename'
+
+    @pytest.mark.parametrize("operation", sorted(_RACES))
+    def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
+        conn: psycopg.Connection, postgres_connection_string: str, operation: str
+    ) -> None:
+        """The lock precedes the replay checks, so two writes cannot both pass them.
+    
+        Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
+        AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
+        holder committed meanwhile, not on the state it could have read before waiting.
+        """
+        holder_change, call, refusal, holder_event = _RACES[operation]
+        seed(conn, "AAA", "BBB")
+        uid = _create(conn, "U", "AAA", "BBB")
+        before = [e["event_type"] for e in event_rows(conn, uid)]
+        conn_b = psycopg.connect(postgres_connection_string)
+        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+        outcome: list[object] = []
+    
+        def writer() -> None:
+            try:
+                call(conn_b, uid)
+                conn_b.commit()
+                outcome.append("done")
+            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+                outcome.append(exc)
+    
+        thread = threading.Thread(target=writer, daemon=True)
+        try:
+            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+            thread.start()
+            waiting = _wait_for_a_lock_waiter(watcher)
+            # the same session holds the lock, so it is re-entrant here
+            holder_change(conn, uid)
+            conn.commit()
+            thread.join(timeout=10)
+            assert not thread.is_alive()
+        finally:
+            conn.rollback()
+            thread.join(timeout=10)
+            conn_b.close()
+            watcher.close()
+    
+        assert waiting == 1, f"{operation} never reached the lock"
+>       assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
+E       AssertionError: ['done']
+E       assert (1 == 1 and <class 'str'> is <class 'factorflow.universes.service.UniverseRetired'>)
+E        +  where 1 = len(['done'])
+E        +  and   <class 'str'> = type('done')
+
+tests/integration/test_universe_maintenance.py:744: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[rename]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 111 passed in 6.66s
+
+===== review:rename-target-before-shape =====
+........................................................................ [ 47%]
+...........F
+=================================== FAILURES ===================================
+___ test_a_blank_rename_is_a_shape_failure_before_the_target_check[unknown] ____
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60648 user=test database=test_a3e4227066bf4e3b896372b5cf833725) at 0x10d95ce30>
+target = 'unknown'
+
+    @pytest.mark.parametrize("target", ["unknown", "retired"])
+    def test_a_blank_rename_is_a_shape_failure_before_the_target_check(
+        conn: psycopg.Connection, target: str
+    ) -> None:
+        """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
+        uid = _unknown_or_retired(conn, target)
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="must not be empty") as excinfo:
+>           service.rename(conn, uid, "   ")
+
+tests/integration/test_universe_maintenance.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/universes/service.py:284: in rename
+    _require_active(conn, universe_id)
+src/factorflow/universes/service.py:190: in _require_active
+    universe = _replayed(conn, universe_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60648 user=test database=test_a3e4227066bf4e3b896372b5cf833725) at 0x10d95ce30>
+universe_id = UUID('00000000-0000-0000-0000-000000000007')
+
+    def _replayed(conn: psycopg.Connection, universe_id: UUID) -> Universe:
+        universe = replay.current_state(conn, universe_id)
+        if universe is None:
+>           raise UniverseNotFound(str(universe_id))
+E           factorflow.universes.service.UniverseNotFound: 00000000-0000-0000-0000-000000000007
+
+src/factorflow/universes/service.py:199: UniverseNotFound
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_a_blank_rename_is_a_shape_failure_before_the_target_check[unknown]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 83 passed in 3.30s
+
+===== review:remove-target-before-shape =====
+........................................................................ [ 47%]
+.........................F
+=================================== FAILURES ===================================
+_ test_a_malformed_symbol_is_a_shape_failure_before_the_target_check[unknown] __
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60853 user=test database=test_8bd1c2ad9bce40b2b65bd1f57ee2bf4e) at 0x10b66e5d0>
+target = 'unknown'
+
+    @pytest.mark.parametrize("target", ["unknown", "retired"])
+    def test_a_malformed_symbol_is_a_shape_failure_before_the_target_check(
+        conn: psycopg.Connection, target: str
+    ) -> None:
+        """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
+        uid = _unknown_or_retired(conn, target)
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="invalid symbol") as excinfo:
+>           service.remove_member(conn, uid, "1ABC")
+
+tests/integration/test_universe_maintenance.py:418: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/universes/service.py:302: in remove_member
+    universe = _require_active(conn, universe_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/universes/service.py:190: in _require_active
+    universe = _replayed(conn, universe_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=60853 user=test database=test_8bd1c2ad9bce40b2b65bd1f57ee2bf4e) at 0x10b66e5d0>
+universe_id = UUID('00000000-0000-0000-0000-000000000007')
+
+    def _replayed(conn: psycopg.Connection, universe_id: UUID) -> Universe:
+        universe = replay.current_state(conn, universe_id)
+        if universe is None:
+>           raise UniverseNotFound(str(universe_id))
+E           factorflow.universes.service.UniverseNotFound: 00000000-0000-0000-0000-000000000007
+
+src/factorflow/universes/service.py:199: UniverseNotFound
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_before_the_target_check[unknown]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 97 passed in 4.39s

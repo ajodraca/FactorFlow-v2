@@ -1,0 +1,37 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56469 user=test database=test_5097b219b998481ea41d1205ed8f26f...cb3be60>, stock=1, set_id=UUID('648b3b1a-e77f-404a-b7f0-19ca789bf2dc'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb3a930>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["value"] is None
+        assert rows["return_12m"]["as_of"] == E
+        # DEC-0242: a missing input has no known_on, although its E bar was read.
+        assert rows["return_12m"]["known_on"] is None
+>       assert rows["return_12m"]["detail"] == {
+            "boundary": "S_12",
+            "on_or_before": str(S12),
+            "window_months": 12,
+            "E": bar(E, 120),
+        }
+E       AssertionError: assert {'E': {'close...w_months': 12} == {'boundary': ...'2026-09-17'}}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'boundary': 'S12'} != {'boundary': 'S_12'}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:146: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.17s

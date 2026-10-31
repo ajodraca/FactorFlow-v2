@@ -1,0 +1,745 @@
+{
+  "schema": 1,
+  "repo_head": "234563db56d16d35b8afdd11d7a78962d5a27bb6",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/classification/sql/momentum_inputs.sql:239:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 239,
+      "original": "       -- A missing input has no known_on, whatever its cause (DEC-0242). A present or outdated",
+      "mutated": "       -- A missing input has no known_on, whatever its cause (DEC-243). A present or outdated"
+    },
+    {
+      "id": "src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 240,
+      "original": "       -- one applies every split and dividend in its window, so known_on follows DEC-0118 (1).",
+      "mutated": "       -- one applies every split and dividend in its window, so known_on follows DEC-119 (1)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/momentum_inputs.sql:240:off-by-one:2",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 240,
+      "original": "       -- one applies every split and dividend in its window, so known_on follows DEC-0118 (1).",
+      "mutated": "       -- one applies every split and dividend in its window, so known_on follows DEC-0118 (2)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/momentum_inputs.sql:268:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 268,
+      "original": "       -- 5): corporate_actions when the cause is an unusable payload, else prices (DEC-0243).",
+      "mutated": "       -- 6): corporate_actions when the cause is an unusable payload, else prices (DEC-0243)."
+    },
+    {
+      "id": "src/factorflow/classification/sql/momentum_inputs.sql:268:off-by-one:2",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 268,
+      "original": "       -- 5): corporate_actions when the cause is an unusable payload, else prices (DEC-0243).",
+      "mutated": "       -- 5): corporate_actions when the cause is an unusable payload, else prices (DEC-244)."
+    },
+    {
+      "id": "manual:review-restated-true",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "       false AS restated_possible,",
+      "new": "       true AS restated_possible,",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-unusable-bool-and",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 151,
+      "old": "coalesce(bool_or(NOT a.usable), false) AS unusable",
+      "new": "coalesce(bool_and(NOT a.usable), false) AS unusable",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-known-on-prior-min",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 164,
+      "old": "max(a.prior_observed_on)) AS known_on",
+      "new": "min(a.prior_observed_on)) AS known_on",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-close-factor-max",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 111,
+      "old": "(SELECT exp(sum(x.log_factor))\n              FROM unnest(sp.effective_on, sp.log_factor) AS x (effective_on, log_factor)\n             WHERE x.effective_on > p.session_date",
+      "new": "(SELECT exp(max(x.log_factor))\n              FROM unnest(sp.effective_on, sp.log_factor) AS x (effective_on, log_factor)\n             WHERE x.effective_on > p.session_date",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-cash-factor-max",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 115,
+      "old": "(SELECT exp(sum(x.log_factor))\n              FROM unnest(sp.effective_on, sp.log_factor) AS x (effective_on, log_factor)\n             WHERE x.effective_on > a.effective_on",
+      "new": "(SELECT exp(max(x.log_factor))\n              FROM unnest(sp.effective_on, sp.log_factor) AS x (effective_on, log_factor)\n             WHERE x.effective_on > a.effective_on",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-split-set-any-instrument",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 121,
+      "old": "LEFT JOIN split_set sp ON sp.instrument_id = a.instrument_id",
+      "new": "LEFT JOIN split_set sp ON true",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-prior-any-instrument",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 124,
+      "old": "WHERE a.action_type = 'dividend'\n                            AND d.instrument_id = a.instrument_id\n",
+      "new": "WHERE a.action_type = 'dividend'\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-distinct-on-without-type",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 53,
+      "old": "SELECT DISTINCT ON (c.instrument_id, c.action_type, c.effective_on)\n           c.instrument_id, c.action_type, c.effective_on, c.observed_on, c.payload\n      FROM corporate_action c\n     WHERE c.instrument_id = ANY(%(active_ids)s::bigint[])\n       AND c.action_type IN ('split', 'dividend')\n     ORDER BY c.instrument_id, c.action_type, c.effective_on,",
+      "new": "SELECT DISTINCT ON (c.instrument_id, c.effective_on)\n           c.instrument_id, c.action_type, c.effective_on, c.observed_on, c.payload\n      FROM corporate_action c\n     WHERE c.instrument_id = ANY(%(active_ids)s::bigint[])\n       AND c.action_type IN ('split', 'dividend')\n     ORDER BY c.instrument_id, c.effective_on,",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-prior-on-ex-date",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 126,
+      "old": "AND d.session_date < a.effective_on",
+      "new": "AND d.session_date <= a.effective_on",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-outdated-le",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 218,
+      "old": "WHEN j.latest_session < %(latest_trading_day)s::date THEN 'outdated'",
+      "new": "WHEN j.latest_session <= %(latest_trading_day)s::date THEN 'outdated'",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-cash-json-number-only",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 73,
+      "old": "CASE WHEN jsonb_typeof(l.payload -> 'cash_amount') IN ('number', 'string')",
+      "new": "CASE WHEN jsonb_typeof(l.payload -> 'cash_amount') IN ('number')",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-cash-regex-allows-plus",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 74,
+      "old": "AND l.payload ->> 'cash_amount' ~ '^-?[0-9]+(\\.[0-9]+)?$'",
+      "new": "AND l.payload ->> 'cash_amount' ~ '^[-+]?[0-9]+(\\.[0-9]+)?$'",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:review-non-positive-ignores-unusable",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 159,
+      "old": "FILTER (WHERE a.action_type = 'dividend' AND a.prior_close <= 0)",
+      "new": "FILTER (WHERE a.action_type = 'dividend' AND a.usable AND a.prior_close <= 0)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:e-lookup-observed-asc",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "AND d.session_date <= t.e_target\n                          ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+      "new": "AND d.session_date <= t.e_target\n                          ORDER BY d.session_date DESC, d.observed_on ASC, d.recorded_at DESC",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:e-lookup-recorded-asc",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "AND d.session_date <= t.e_target\n                          ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+      "new": "AND d.session_date <= t.e_target\n                          ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at ASC",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:s-lookup-observed-asc",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "<= (h.e_session - make_interval(months => w.k))::date\n                          ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+      "new": "<= (h.e_session - make_interval(months => w.k))::date\n                          ORDER BY d.session_date DESC, d.observed_on ASC, d.recorded_at DESC",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:prior-lookup-observed-asc",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "AND d.session_date < a.effective_on\n                          ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC",
+      "new": "AND d.session_date < a.effective_on\n                          ORDER BY d.session_date DESC, d.observed_on ASC, d.recorded_at DESC",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:e-target-without-lag",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "(SELECT (%(classification_date)s::date\n                         - make_interval(months => %(momentum_lag_months)s::integer))::date\n                        AS e_target)",
+      "new": "(SELECT %(classification_date)s::date AS e_target)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:s-target-from-e-target",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "<= (h.e_session - make_interval(months => w.k))::date\n                          ORDER BY",
+      "new": "<= (h.e_target - make_interval(months => w.k))::date\n                          ORDER BY",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:latest-session-bounded-by-e-target",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "WHERE d.instrument_id = r.instrument_id) l",
+      "new": "WHERE d.instrument_id = r.instrument_id AND d.session_date <= t.e_target) l",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:latest-session-is-e",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "WHEN j.latest_session < %(latest_trading_day)s::date THEN 'outdated'",
+      "new": "WHEN j.e_session < %(latest_trading_day)s::date THEN 'outdated'",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:roster-is-stocks-with-bars",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "SELECT unnest(%(active_ids)s::bigint[]) AS instrument_id",
+      "new": "SELECT DISTINCT b.instrument_id FROM daily_bar b WHERE b.instrument_id = ANY(%(active_ids)s::bigint[])",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:e-inner-join",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "LEFT JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on\n                           FROM daily_bar d\n                          WHERE d.instrument_id = r.instrument_id\n                            AND d.session_date <= t.e_target",
+      "new": "JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on\n                           FROM daily_bar d\n                          WHERE d.instrument_id = r.instrument_id\n                            AND d.session_date <= t.e_target",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:s-inner-join",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "      LEFT JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on\n                           FROM daily_bar d\n                          WHERE d.instrument_id = h.instrument_id",
+      "new": "      JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on\n                           FROM daily_bar d\n                          WHERE d.instrument_id = h.instrument_id",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:action-observed-asc",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "c.observed_on DESC, c.recorded_at DESC",
+      "new": "c.observed_on ASC, c.recorded_at DESC",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:action-recorded-asc",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "c.observed_on DESC, c.recorded_at DESC",
+      "new": "c.observed_on DESC, c.recorded_at ASC",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:action-every-observation",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "SELECT DISTINCT ON (c.instrument_id, c.action_type, c.effective_on)",
+      "new": "SELECT DISTINCT ON (c.instrument_id, c.action_type, c.effective_on, c.observed_on)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:action-every-type",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "       AND c.action_type IN ('split', 'dividend')\n",
+      "new": "",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:split-to-regex-dropped",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "                 AND l.payload ->> 'split_to' ~ '^-?[0-9]+(\\.[0-9]+)?$'\n",
+      "new": "",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:split-from-regex-dropped",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "                 AND l.payload ->> 'split_from' ~ '^-?[0-9]+(\\.[0-9]+)?$'\n",
+      "new": "",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:cash-regex-dropped",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "                 AND l.payload ->> 'cash_amount' ~ '^-?[0-9]+(\\.[0-9]+)?$'\n",
+      "new": "",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:split-log-unguarded",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "CASE WHEN u.action_type = 'split' AND u.usable\n",
+      "new": "CASE WHEN u.action_type = 'split'\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:dividend-log-unguarded",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "CASE WHEN s.action_type = 'dividend' AND s.usable AND s.prior_close > 0\n",
+      "new": "CASE WHEN s.action_type = 'dividend' AND s.prior_close > 0\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:prior-guard-dropped",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "CASE WHEN s.action_type = 'dividend' AND s.usable AND s.prior_close > 0\n",
+      "new": "CASE WHEN s.action_type = 'dividend' AND s.usable\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:split-factor-inverted",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "THEN ln(u.split_from / u.split_to)",
+      "new": "THEN ln(u.split_to / u.split_from)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:unusable-not-missing",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "                  OR j.unusable THEN 'missing'",
+      "new": "                  THEN 'missing'",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:price-not-positive-not-missing",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "OR j.s_session IS NULL OR j.price_not_positive\n",
+      "new": "OR j.s_session IS NULL\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:price-check-without-e",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "coalesce(j.e_close <= 0 OR j.s_close <= 0 OR",
+      "new": "coalesce(j.s_close <= 0 OR",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:price-check-without-s",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "coalesce(j.e_close <= 0 OR j.s_close <= 0 OR",
+      "new": "coalesce(j.e_close <= 0 OR",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:price-check-without-prior",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "OR j.non_positive_dividends IS NOT NULL,\n",
+      "new": ",\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:price-check-every-dividend",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "FILTER (WHERE a.action_type = 'dividend' AND a.prior_close <= 0)",
+      "new": "FILTER (WHERE a.action_type = 'dividend')",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:price-after-payload",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "            WHEN s.price_not_positive\n            THEN jsonb_build_object('cause', 'price_not_positive',",
+      "new": "            WHEN s.price_not_positive AND NOT s.unusable\n            THEN jsonb_build_object('cause', 'price_not_positive',",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:start-unadjusted",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "w.s_close * coalesce(exp(sum(a.log_factor)), 1) AS s_adjusted_close",
+      "new": "w.s_close AS s_adjusted_close",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:cash-unscaled",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "THEN ln(1 + s.cash_amount * coalesce(s.cash_factor, 1)",
+      "new": "THEN ln(1 + s.cash_amount",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:prior-close-unadjusted",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "/ (s.prior_close * coalesce(s.close_factor, 1)))",
+      "new": "/ s.prior_close)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:close-factor-no-upper-bound",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "WHERE x.effective_on > p.session_date\n               AND x.effective_on <= h.e_session) AS close_factor",
+      "new": "WHERE x.effective_on > p.session_date) AS close_factor",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:cash-factor-no-upper-bound",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "WHERE x.effective_on > a.effective_on\n               AND x.effective_on <= h.e_session) AS cash_factor",
+      "new": "WHERE x.effective_on > a.effective_on) AS cash_factor",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:cash-factor-from-prior",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "WHERE x.effective_on > a.effective_on\n",
+      "new": "WHERE x.effective_on > p.session_date\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:dividend-factor-ignored",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "THEN (s.e_close / s.s_adjusted_close) * s.dividend_factor - 1",
+      "new": "THEN (s.e_close / s.s_adjusted_close) - 1",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:split-set-inner-join",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "LEFT JOIN split_set sp",
+      "new": "JOIN split_set sp",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:prior-inner-join",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "LEFT JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on\n                           FROM daily_bar d\n                          WHERE a.action_type = 'dividend'",
+      "new": "JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on\n                           FROM daily_bar d\n                          WHERE a.action_type = 'dividend'",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:window-actions-inner-join",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "      LEFT JOIN priced a ON a.instrument_id = w.instrument_id",
+      "new": "      JOIN priced a ON a.instrument_id = w.instrument_id",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:known-on-without-prior",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "greatest(w.e_observed_on, w.s_observed_on, max(a.observed_on),\n                    max(a.prior_observed_on)) AS known_on",
+      "new": "greatest(w.e_observed_on, w.s_observed_on, max(a.observed_on)) AS known_on",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:known-on-without-actions",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "greatest(w.e_observed_on, w.s_observed_on, max(a.observed_on),\n                    max(a.prior_observed_on)) AS known_on",
+      "new": "greatest(w.e_observed_on, w.s_observed_on, max(a.prior_observed_on)) AS known_on",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:known-on-without-s",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "greatest(w.e_observed_on, w.s_observed_on, max(a.observed_on),",
+      "new": "greatest(w.e_observed_on, max(a.observed_on),",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:known-on-without-e",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "greatest(w.e_observed_on, w.s_observed_on, max(a.observed_on),",
+      "new": "greatest(w.s_observed_on, max(a.observed_on),",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:outdated-before-missing",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "           CASE WHEN j.e_session IS NULL OR j.s_session IS NULL OR j.price_not_positive\n                  OR j.unusable THEN 'missing'\n                WHEN j.latest_session < %(latest_trading_day)s::date THEN 'outdated'\n",
+      "new": "           CASE WHEN j.latest_session < %(latest_trading_day)s::date THEN 'outdated'\n                WHEN j.e_session IS NULL OR j.s_session IS NULL OR j.price_not_positive\n                  OR j.unusable THEN 'missing'\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:as-of-only-when-not-missing",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "       s.e_session AS as_of,",
+      "new": "       CASE WHEN s.status <> 'missing' THEN s.e_session END AS as_of,",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:value-when-not-missing",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "       CASE WHEN s.status = 'present'\n            THEN (s.e_close",
+      "new": "       CASE WHEN s.status <> 'missing'\n            THEN (s.e_close",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:boundary-label-without-underscore",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "THEN concat('S_', j.k)",
+      "new": "THEN concat('S', j.k)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:e-boundary-names-s-target",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "THEN jsonb_build_object('boundary', s.boundary, 'on_or_before', s.e_target,",
+      "new": "THEN jsonb_build_object('boundary', s.boundary, 'on_or_before', s.s_target,",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:outdated-bar-date-is-e",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "'bar_date', s.latest_session,",
+      "new": "'bar_date', s.e_session,",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:factor-not-momentum",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 1,
+      "old": "'momentum'::text AS factor",
+      "new": "'value'::text AS factor",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-not-registered",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "_STAGES.append(_momentum_inputs_stage)\n",
+      "new": "\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-before-fundamentals",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "_STAGES.append(_momentum_inputs_stage)\n",
+      "new": "_STAGES.insert(0, _momentum_inputs_stage)\n",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-writes-every-factor",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "\"factors\": [\"momentum\"]",
+      "new": "\"factors\": list(constants.FACTORS)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-writes-no-factor",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "\"factors\": [\"momentum\"]",
+      "new": "\"factors\": [\"value\"]",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-lag-zero",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "\"momentum_lag_months\": constants.MOMENTUM_LAG_MONTHS,",
+      "new": "\"momentum_lag_months\": 0,",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-windows-dropped-12",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "\"momentum_windows\": list(constants.MOMENTUM_WINDOWS_MONTHS),",
+      "new": "\"momentum_windows\": list(constants.MOMENTUM_WINDOWS_MONTHS)[:2],",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:stage-latest-trading-day-is-classification-date",
+      "operator": "manual",
+      "file": "src/factorflow/classification/engine.py",
+      "line": 1,
+      "old": "\"latest_trading_day\": ctx.latest_trading_day,\n                \"momentum_lag_months\"",
+      "new": "\"latest_trading_day\": ctx.classification_date,\n                \"momentum_lag_months\"",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "manual:rework-known-on-unguarded",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "s.known_on AS known_on,"
+    },
+    {
+      "id": "manual:rework-known-on-present-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "CASE WHEN s.status = 'present' THEN s.known_on END AS known_on,"
+    },
+    {
+      "id": "manual:rework-known-on-never",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 241,
+      "old": "CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,",
+      "new": "NULL::date AS known_on,"
+    },
+    {
+      "id": "manual:rework-data-type-prices",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 270,
+      "old": "CASE WHEN s.unusable AND NOT s.price_not_positive THEN 'corporate_actions'\n            ELSE 'prices'\n       END AS missing_data_type",
+      "new": "'prices'::text AS missing_data_type"
+    },
+    {
+      "id": "manual:rework-data-type-ignores-close",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 270,
+      "old": "CASE WHEN s.unusable AND NOT s.price_not_positive THEN",
+      "new": "CASE WHEN s.unusable THEN"
+    },
+    {
+      "id": "manual:rework-data-type-ignores-payload",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 270,
+      "old": "CASE WHEN s.unusable AND NOT s.price_not_positive THEN",
+      "new": "CASE WHEN NOT s.price_not_positive THEN"
+    },
+    {
+      "id": "manual:rework-data-type-fundamentals",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/momentum_inputs.sql",
+      "line": 270,
+      "old": "THEN 'corporate_actions'",
+      "new": "THEN 'fundamentals'"
+    }
+  ]
+}

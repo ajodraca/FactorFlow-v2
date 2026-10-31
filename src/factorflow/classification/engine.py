@@ -36,6 +36,8 @@ _STATEMENTS_SQL: Final = (_SQL_DIR / "statements.sql").read_text()
 _VALUE_INPUTS_SQL: Final = (_SQL_DIR / "value_inputs.sql").read_text()
 _GROWTH_INPUTS_SQL: Final = (_SQL_DIR / "growth_inputs.sql").read_text()
 _INSERT_INPUTS_SQL: Final = (_SQL_DIR / "insert_inputs.sql").read_text()
+# The momentum stage (CAP-002-E2-S4).
+_MOMENTUM_INPUTS_SQL: Final = (_SQL_DIR / "momentum_inputs.sql").read_text()
 _QUALIFIED_COUNTS_SQL: Final = (
     "SELECT factor, qualified_count FROM classification_set_factor WHERE set_id = %(set_id)s"
 )
@@ -207,6 +209,31 @@ def _fundamental_inputs_stage(conn: psycopg.Connection, ctx: BuildContext) -> No
 # Input-producing stages are registered here, above CAP-002-E2-S5's classification stage
 # when it is present (DEC-0121): fundamentals, then CAP-002-E2-S4's momentum.
 _STAGES.append(_fundamental_inputs_stage)
+
+
+def _momentum_inputs_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:
+    """Derive the three momentum inputs of every active instrument and append them.
+
+    Implements factor-engine design 2.4 for the momentum factor (CAP-002-E2-S4;
+    DEC-0055 (3) to (5), DEC-0117, DEC-0118, DEC-0241): ``momentum_inputs.sql`` adds its rows to
+    the ``inputs`` table the fundamentals stage creates, so it runs after that stage, and
+    ``insert_inputs.sql`` writes the momentum rows to ``factor_input`` (DEC-0115).
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            _MOMENTUM_INPUTS_SQL,
+            {
+                "active_ids": list(ctx.active_ids),
+                "classification_date": ctx.classification_date,
+                "latest_trading_day": ctx.latest_trading_day,
+                "momentum_lag_months": constants.MOMENTUM_LAG_MONTHS,
+                "momentum_windows": list(constants.MOMENTUM_WINDOWS_MONTHS),
+            },
+        )
+        cur.execute(_INSERT_INPUTS_SQL, {"set_id": ctx.set_id, "factors": ["momentum"]})
+
+
+_STAGES.append(_momentum_inputs_stage)
 
 
 def _classification_stage(conn: psycopg.Connection, ctx: BuildContext) -> None:

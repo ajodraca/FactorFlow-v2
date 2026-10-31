@@ -1,0 +1,25 @@
+# RED evidence, CAP-002-E2-S4 cycle-3 (review v2 rework, test-only)
+# HEAD 41bc50e976492beea88445721059fd8dd6036f3a
+# HEAD src/factorflow/classification/sql/momentum_inputs.sql sha256 84067ea7a757e6def459999d22ec1a14d686ea0d7c82d1535879463db2170de9 (the cycle does not change it)
+# HEAD tests/integration/test_engine_inputs_momentum.py sha256 cff1380206673ca9e9939e14edfabb41d73c780cc1c869ac210dffeeadb243b8
+# cycle-3 tests/integration/test_engine_inputs_momentum.py sha256 1c0e0c3c4addc1aa95ed53668c3ac4cd4f39a71a785422a5e4f2308e07ebf8f9
+# review mutants: CAP-002-E2-S4-implementation-review-v2-mutation.json sha256 b6d9bdca80c24f115ab4f9f1150d47caa1589eb125a418d81d34deb999dd402e
+# mutant manual:review2-known-on-outdated-e at src/factorflow/classification/sql/momentum_inputs.sql:241
+#   old: CASE WHEN s.status <> 'missing' THEN s.known_on END AS known_on,
+#   new: CASE s.status WHEN 'present' THEN s.known_on WHEN 'outdated' THEN s.e_session END AS known_on,
+# command per copy: python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rf --tb=no tests/integration/test_engine_inputs_momentum.py, PYTHONPATH=<copy>/src
+
+== A  HEAD src + HEAD tests + manual:review2-known-on-outdated-e
+   exit 0: 74 passed in 15.51s
+
+== B  HEAD src + cycle-3 tests + manual:review2-known-on-outdated-e
+   exit 1: 5 failed, 74 passed in 16.35s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[E bar]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[S bar]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[dividend]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[prior bar]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[split]
+
+== C  HEAD src + cycle-3 tests, unmutated
+   exit 0: 79 passed in 16.29s
+

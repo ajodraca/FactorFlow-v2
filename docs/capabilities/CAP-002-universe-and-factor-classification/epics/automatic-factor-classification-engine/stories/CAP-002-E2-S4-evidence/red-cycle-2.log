@@ -1,0 +1,107 @@
+# RED evidence, CAP-002-E2-S4 cycle-2 (review v1 rework)
+# HEAD 234563db56d16d35b8afdd11d7a78962d5a27bb6
+# HEAD src/factorflow/classification/sql/momentum_inputs.sql sha256 5b9b0c3485cc1aa251e3ac2ccc97206b43dffce78fc8ea776f4eb690f4077428
+# cycle-2 src/factorflow/classification/sql/momentum_inputs.sql sha256 84067ea7a757e6def459999d22ec1a14d686ea0d7c82d1535879463db2170de9
+# HEAD tests/integration/test_engine_inputs_momentum.py sha256 8a409901c2a8bcd038b096864b89b99cd1af700de466d007b56df0d603f27153
+# cycle-2 tests/integration/test_engine_inputs_momentum.py sha256 cff1380206673ca9e9939e14edfabb41d73c780cc1c869ac210dffeeadb243b8
+# review mutants: CAP-002-E2-S4-implementation-review-v1-mutation.json sha256 373ffe811de62571a55ee63a879895fc3d325a025ce6c46af10a0f469fd7198b
+# command per copy: python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider -rf --tb=no tests/integration/test_engine_inputs_momentum.py, PYTHONPATH=<copy>/src
+
+== A  HEAD src + HEAD tests + manual:review-split-set-any-instrument
+   exit 0: 67 passed in 11.60s
+
+== A  HEAD src + HEAD tests + manual:review-prior-any-instrument
+   exit 0: 67 passed in 11.66s
+
+== A  HEAD src + HEAD tests + manual:review-known-on-prior-min
+   exit 0: 67 passed in 11.52s
+
+== A  HEAD src + HEAD tests + manual:review-close-factor-max
+   exit 0: 67 passed in 11.52s
+
+== A  HEAD src + HEAD tests + manual:review-cash-factor-max
+   exit 0: 67 passed in 10.46s
+
+== A  HEAD src + HEAD tests + manual:review-unusable-bool-and
+   exit 0: 67 passed in 10.35s
+
+== A  HEAD src + HEAD tests + manual:review-cash-regex-allows-plus
+   exit 0: 67 passed in 10.39s
+
+== A  HEAD src + HEAD tests + manual:review-non-positive-ignores-unusable
+   exit 0: 67 passed in 10.35s
+
+== B1 HEAD src + cycle-2 tests
+   exit 1: 22 failed, 52 passed in 10.83s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[e-zero]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-negative]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-zero]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[s3-zero]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[s6-negative]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_dividend_over_a_non_positive_prior_close_is_missing_for_the_close
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-absent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-boolean]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-exponent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-negative]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-not-numeric]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-object]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-plus-sign]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-negative]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-not-numeric]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-zero]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-absent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-exponent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-null]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-zero]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_names_the_corporate_actions_acquisition
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-split-set-any-instrument
+   exit 1: 1 failed, 73 passed in 10.92s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_each_stock_is_adjusted_by_its_own_corporate_actions_and_prior_sessions
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-prior-any-instrument
+   exit 1: 1 failed, 73 passed in 10.88s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_each_stock_is_adjusted_by_its_own_corporate_actions_and_prior_sessions
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-known-on-prior-min
+   exit 1: 2 failed, 72 passed in 10.77s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_covers_the_prior_session_of_every_dividend_in_the_window[earlier prior bar]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_covers_the_prior_session_of_every_dividend_in_the_window[later prior bar]
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-close-factor-max
+   exit 1: 1 failed, 73 passed in 11.03s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividends_split_factors_are_the_product_of_every_later_split
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-cash-factor-max
+   exit 1: 1 failed, 73 passed in 11.00s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividends_split_factors_are_the_product_of_every_later_split
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-unusable-bool-and
+   exit 1: 14 failed, 60 passed in 11.14s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-absent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-boolean]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-exponent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-negative]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-not-numeric]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-object]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-plus-sign]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-negative]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-not-numeric]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-zero]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-absent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-exponent]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-null]
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-zero]
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-cash-regex-allows-plus
+   exit 1: 1 failed, 73 passed in 11.05s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-plus-sign]
+
+== B2 cycle-2 src + cycle-2 tests + manual:review-non-positive-ignores-unusable
+   exit 1: 1 failed, 73 passed in 9.92s
+   FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_dividend_over_a_non_positive_prior_close_is_missing_for_the_close
+
+== C  cycle-2 src + cycle-2 tests, unmutated
+   exit 0: 74 passed in 9.92s
+

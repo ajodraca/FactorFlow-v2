@@ -1,0 +1,41 @@
+...F
+=================================== FAILURES ===================================
+__________________ test_only_the_rows_an_input_reads_mark_it ___________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55681 user=test database=test_e65852ee69b640ea9492a6c7c73998a7) at 0x10cb0d940>, set_id=UUID('0cd9bf0b-67bf-4270-96d8-2a2dc1fd8f12'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb0ddf0>
+
+    def test_only_the_rows_an_input_reads_mark_it(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-23, DEC-0122: a backfilled ninth quarter outside both windows marks nothing; the
+        same kind of row inside a window marks exactly the inputs that read it."""
+        conn, set_id = store
+        stocks = build_fixture(
+            conn,
+            {
+                "B": {("income_statement", 7)},  # the oldest prior-year quarter
+                "C": {("income_statement", 3)},  # the oldest trailing quarter
+            },
+            extra_old=("A",),
+        )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        flags = classification_flags(conn, set_id)
+        a, b, c, d = (stocks[s] for s in SYMBOLS)
+        assert input_flags(conn, set_id, a) == expect()
+>       assert input_flags(conn, set_id, b) == expect(*GROWTH)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         {'eps_growth': False} != {'eps_growth': True}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:298: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_only_the_rows_an_input_reads_mark_it
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 passed in 3.21s

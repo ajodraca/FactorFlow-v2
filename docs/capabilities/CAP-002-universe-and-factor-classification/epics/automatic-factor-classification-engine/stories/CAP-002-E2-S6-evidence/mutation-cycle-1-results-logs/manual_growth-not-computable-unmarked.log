@@ -1,0 +1,61 @@
+.........F
+=================================== FAILURES ===================================
+___ test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark ____
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=56135 user=test database=test_35245cd736eb4be49354b464791a1fb2) at 0x10b3884a0>, set_id=UUID('46b49e14-b738-45e5-9cf3-01b0c635fc70'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b389f70>
+
+    def test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A's shares outstanding are negative, so its market capitalisation is not
+        positive and its three value inputs are not computable, and its prior-year revenue
+        sums below zero, so revenue_growth is not computable too. Each lists its periods, and
+        exactly those that list one of A's backfilled income statements are marked, as are
+        A's input_not_computable value and growth rows."""
+        conn, set_id = store
+        stocks = build_fixture(conn, {}, statement_types={"A": ("cash_flow_statement",)})
+        a = stocks["A"]
+        for k, end in enumerate(PERIOD_ENDS):
+            balance_sheet = statement_payload(a, "balance_sheet", k)
+            balance_sheet[TEST_KEYS["shares_outstanding"]] = Decimal(-100)
+            income = statement_payload(a, "income_statement", k)
+            if k >= 4:  # the prior-year window
+                income[TEST_KEYS["revenue"]] = Decimal(-100)
+            for statement_type, payload, filed in (
+                ("balance_sheet", balance_sheet, FIRST),  # not backfilled
+                ("income_statement", income, FIRST - BACKFILL_LEAD),  # backfilled
+            ):
+                add_statement(
+                    conn,
+                    a,
+                    end,
+                    statement_type,
+                    payload,
+                    observed_on=FIRST,
+                    provider_filing_date=filed,
+                )
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        statuses = {name: row["status"] for name, row in inputs_for(conn, set_id, a).items()}
+        assert statuses == {
+            "book_to_price": "not_computable",
+            "earnings_yield": "not_computable",
+            "fcf_yield": "not_computable",
+            "revenue_growth": "not_computable",
+            "eps_growth": "present",
+        }
+>       assert input_flags(conn, set_id, a) == expect("earnings_yield", *GROWTH)
+E       AssertionError: assert {'book_to_pri...': False, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'revenue_growth': False} != {'revenue_growth': True}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:524: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 9 passed in 4.01s

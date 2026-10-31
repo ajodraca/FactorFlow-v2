@@ -1,0 +1,35 @@
+..........F
+=================================== FAILURES ===================================
+____________________ test_a_split_on_e_is_inside_the_window ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=50239 user=test database=test_4889fdb676a24ae5a946784d7b8e26b...add0aa0>, stock=1, set_id=UUID('56dae5ca-90b3-4317-b12b-ba535f9e743f'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10add1430>
+
+    def test_a_split_on_e_is_inside_the_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): the window is (S_k, E], so a split effective on E adjusts every earlier
+        price."""
+        add_close_series(env.conn, env.stock, {S12: 100, S6: 100, S3: 100, E: 60, L: 60})
+        add_corporate_action(env.conn, env.stock, "split", E, SPLIT_2_FOR_1)
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+>           assert_close(rows[name]["value"], ret(60, 50))
+
+tests/integration/test_engine_inputs_momentum.py:390: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('-0.4000000000'), expected = Decimal('0.2')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('-0.4000000000'), Decimal('0.2'))
+E       assert Decimal('0.6000000000') <= Decimal('1E-8')
+E        +  where Decimal('0.6000000000') = abs((Decimal('-0.4000000000') - Decimal('0.2')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_on_e_is_inside_the_window
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 10 passed in 3.73s
