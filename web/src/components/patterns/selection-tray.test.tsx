@@ -40,6 +40,14 @@ function tray(): HTMLElement {
   return screen.getByRole("region", { name: REGIONS.selection });
 }
 
+/** The delivered `button` `outline` classes (`screens/instruments/start-action.tsx`; UX design 1.1). */
+const OUTLINE_BUTTON = ["w-fit", "rounded", "border", "border-border", "px-3", "py-2", "text-sm"];
+
+/** Whether `earlier` comes before `later` in document order. */
+function precedes(earlier: Element, later: Element): boolean {
+  return (earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+}
+
 describe("TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1)", () => {
   // Implements TC-COMP-140
   describe.each([1, 7, 8])("with %i checked", (count) => {
@@ -93,6 +101,7 @@ describe("TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 
       expect(compare).not.toHaveAttribute("data-variant", "blocked");
       expect(compare).not.toHaveAttribute("aria-disabled");
       expect(compare).not.toHaveAttribute("aria-describedby");
+      expect(compare).toHaveClass(...OUTLINE_BUTTON);
       expect(
         within(tray()).queryByRole("button", { name: SELECTION.compareSideBySide }),
       ).toBeNull();
@@ -137,6 +146,20 @@ describe("the tray appears at one checked row and announces {n} selected (AC-16,
     // The same live region is updated, not replaced, so the change is announced.
     expect(grown).toBe(count);
   });
+
+  it.each([1, 3, 7])(
+    "with %i checked, puts the count on the left, before Compare and Add to universe…",
+    (count) => {
+      renderTray(SYMBOLS.slice(0, count), vi.fn());
+      const region = tray();
+      const selected = within(region).getByText(SELECTION.selected(count));
+      const compare = within(region).getByText(SELECTION.compareSideBySide);
+      const add = within(region).getByRole("button", { name: SELECTION.addToUniverse });
+      expect(region.firstElementChild).toBe(selected);
+      expect(precedes(selected, compare)).toBe(true);
+      expect(precedes(compare, add)).toBe(true);
+    },
+  );
 
   it("counts what it is given, a duplicate included", () => {
     renderTray(["AAPL", "AAPL", "MSFT"]);
@@ -184,6 +207,7 @@ describe("Add to universe… is the optional seam to the add dialog (DEC-0163)",
       const add = within(tray()).getByRole("button", { name: SELECTION.addToUniverse });
       expect(add).toHaveAttribute("type", "button");
       expect(add).toHaveAttribute("data-variant", "outline");
+      expect(add).toHaveClass(...OUTLINE_BUTTON);
       expect(add).toBeEnabled();
       expect(add).not.toHaveAttribute("aria-disabled");
       await user.click(add);

@@ -1,0 +1,378 @@
+{
+ "schema": 1,
+ "repo_head": "260139f9882e02bf7603e4097bb5e2ab88cec5ee",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:316:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 316,
+   "original": "  if (settled.symbol !== symbol || settled.attempt !== attempt) {",
+   "mutated": "  if (settled.symbol !== symbol && settled.attempt !== attempt) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:361:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 361,
+   "original": "            setAttempt((count) => count + 1);",
+   "mutated": "            setAttempt((count) => count + 2);"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:385:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 385,
+   "original": "      tabIndex={-1}",
+   "mutated": "      tabIndex={-2}"
+  },
+  {
+   "id": "manual:cycle-4:review-compare-link-no-variant",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
+   "new": "          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}"
+  },
+  {
+   "id": "manual:cycle-4:review-compare-link-unstyled",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
+   "new": "          data-variant=\"outline\"\n        >\n          {SELECTION.compareSideBySide}"
+  },
+  {
+   "id": "manual:cycle-4:review-add-before-count",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:review-no-cancel-flag",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      cancelled = true;\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:review-fail-unguarded",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "          if (!cancelled) {\n            setState({ kind: \"failed\"",
+   "new": "          if (true) {\n            setState({ kind: \"failed\""
+  },
+  {
+   "id": "manual:cycle-4:review-load-unguarded",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "          if (!cancelled) {\n            setState({ kind: \"loaded\"",
+   "new": "          if (true) {\n            setState({ kind: \"loaded\""
+  },
+  {
+   "id": "manual:cycle-4:review-reason-no-hasown",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "return code !== null && Object.hasOwn(CELL.incompleteStatus, code);",
+   "new": "return code !== null;"
+  },
+  {
+   "id": "manual:cycle-4:review-sentence-for-retired",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
+   "new": "  if (cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {"
+  },
+  {
+   "id": "manual:cycle-4:review-sentence-for-nes",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
+   "new": "  if (cell.reasonCode === \"retired\" || isScored(cell)) {"
+  },
+  {
+   "id": "manual:cycle-4:review-sentence-for-scored",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
+   "new": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\") {"
+  },
+  {
+   "id": "manual:cycle-4:review-mark-unscored",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "cell.restatedPossible && isScored(cell);",
+   "new": "cell.restatedPossible;"
+  },
+  {
+   "id": "manual:cycle-4:review-line-always",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      {line === null ? null : (",
+   "new": "      {false ? null : ("
+  },
+  {
+   "id": "manual:cycle-4:review-box-always",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      {sentences.length === 0 ? null : (",
+   "new": "      {false ? null : ("
+  },
+  {
+   "id": "manual:cycle-4:review-generic-code",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "failureSentence({ operation: \"get-stock-evidence\", resource: \"classification\", code: null })",
+   "new": "failureSentence({ operation: \"get-stock-evidence\", resource: \"classification\", code: \"instrument_not_found\" })"
+  },
+  {
+   "id": "manual:cycle-4:review-swap-dates",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "SELECTION.inputsLine(labels, formatDate(asOf), formatDate(knownOn))",
+   "new": "SELECTION.inputsLine(labels, formatDate(knownOn), formatDate(asOf))"
+  },
+  {
+   "id": "manual:cycle-4:review-box-after-link",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      {sentences.length === 0 ? null : (\n        <div\n          data-testid=\"explanation\"\n          className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"\n        >\n          {sentences.map((sentence) => (\n            <p key={sentence}>{sentence}</p>\n          ))}\n        </div>\n      )}\n      <Link\n        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}\n        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}\n      </Link>\n",
+   "new": "      <Link\n        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}\n        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}\n      </Link>\n      {sentences.length === 0 ? null : (\n        <div\n          data-testid=\"explanation\"\n          className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"\n        >\n          {sentences.map((sentence) => (\n            <p key={sentence}>{sentence}</p>\n          ))}\n        </div>\n      )}\n"
+  },
+  {
+   "id": "manual:cycle-4:review-memberships-after-blocks",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      <MembershipsLine memberships={evidence.memberships} />\n      <dl className=\"flex flex-col gap-3\">\n        {FACTORS.map((factor) => (\n          <FactorBlock key={factor} evidence={evidence} factor={factor} />\n        ))}\n      </dl>\n",
+   "new": "      <dl className=\"flex flex-col gap-3\">\n        {FACTORS.map((factor) => (\n          <FactorBlock key={factor} evidence={evidence} factor={factor} />\n        ))}\n      </dl>\n      <MembershipsLine memberships={evidence.memberships} />\n"
+  },
+  {
+   "id": "manual:cycle-4:review-see-link-no-variant",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
+   "new": "        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}"
+  },
+  {
+   "id": "manual:cycle-4:review-see-link-unstyled",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
+   "new": "      >\n        {SELECTION.seeEveryInput}"
+  },
+  {
+   "id": "manual:cycle-4:review-card-no-variant",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      data-variant=\"summary\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:review-card-no-classes",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "className=\"flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground\"",
+   "new": "className=\"flex flex-col gap-3 p-4\""
+  },
+  {
+   "id": "manual:cycle-4:review-null-no-return",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    if (symbol === null) {\n      return;\n    }\n",
+   "new": "    if (symbol === null) {\n    }\n"
+  },
+  {
+   "id": "manual:cycle-4:review-retry-no-type",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        <button\n          type=\"button\"\n          onClick={() => {",
+   "new": "        <button\n          onClick={() => {"
+  },
+  {
+   "id": "manual:cycle-4:review-name-dropped-class",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<p className=\"text-sm\">{evidence.name}</p>",
+   "new": "<p className=\"text-sm\">{evidence.symbol}</p>"
+  },
+  {
+   "id": "manual:cycle-4:review-explanation-reversed",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  return sentences;\n}",
+   "new": "  return sentences.reverse();\n}"
+  },
+  {
+   "id": "manual:cycle-4:review-list-comma-copy",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "  listComma: \", \",",
+   "new": "  listComma: \"; \","
+  },
+  {
+   "id": "manual:cycle-4:review-add-unstyled",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          onClick={() => onAddToUniverse(checked)}\n          className={BUTTON}\n",
+   "new": "          onClick={() => onAddToUniverse(checked)}\n"
+  },
+  {
+   "id": "manual:cycle-4:review-blocked-unstyled",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n",
+   "new": "            // carries no handler, so activating it does nothing.\n"
+  },
+  {
+   "id": "manual:cycle-4:review-count-after-compare",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n      {canCompare ? (\n        <Link\n          to={`/research/compare?symbols=${checked.map(encodeURIComponent).join(\",\")}`}\n          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}\n        </Link>\n      ) : (\n        <>\n          <button\n            type=\"button\"\n            data-variant=\"blocked\"\n            aria-disabled=\"true\"\n            aria-describedby={reasonId}\n            // Never `disabled`: a disabled control takes no focus, so its\n            // reason would never reach a keyboard or screen-reader user. It\n            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n          >\n            {SELECTION.compareSideBySide}\n          </button>\n          <span id={reasonId} className=\"text-sm\">\n            {SELECTION.compareBlocked}\n          </span>\n        </>\n      )}\n",
+   "new": "      {canCompare ? (\n        <Link\n          to={`/research/compare?symbols=${checked.map(encodeURIComponent).join(\",\")}`}\n          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}\n        </Link>\n      ) : (\n        <>\n          <button\n            type=\"button\"\n            data-variant=\"blocked\"\n            aria-disabled=\"true\"\n            aria-describedby={reasonId}\n            // Never `disabled`: a disabled control takes no focus, so its\n            // reason would never reach a keyboard or screen-reader user. It\n            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n          >\n            {SELECTION.compareSideBySide}\n          </button>\n          <span id={reasonId} className=\"text-sm\">\n            {SELECTION.compareBlocked}\n          </span>\n        </>\n      )}\n      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n"
+  },
+  {
+   "id": "manual:cycle-4:review-name-above-symbol",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        <p className=\"flex items-center gap-2\">\n          <span className=\"font-numeric text-xl\">{evidence.symbol}</span>\n          {evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}\n        </p>\n        <p className=\"text-sm\">{evidence.name}</p>\n",
+   "new": "        <p className=\"text-sm\">{evidence.name}</p>\n        <p className=\"flex items-center gap-2\">\n          <span className=\"font-numeric text-xl\">{evidence.symbol}</span>\n          {evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}\n        </p>\n"
+  },
+  {
+   "id": "manual:cycle-4:review-inputs-before-cell",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      <dd>\n        {cell === undefined ? (\n          CELL.absentValue\n        ) : (\n          <FactorCell cell={cell} factor={factor} showScore />\n        )}\n      </dd>\n      {line === null ? null : (\n        <dd data-testid=\"inputs-line\" className=\"text-xs\">\n          {line}\n        </dd>\n      )}\n",
+   "new": "      {line === null ? null : (\n        <dd data-testid=\"inputs-line\" className=\"text-xs\">\n          {line}\n        </dd>\n      )}\n      <dd>\n        {cell === undefined ? (\n          CELL.absentValue\n        ) : (\n          <FactorCell cell={cell} factor={factor} showScore />\n        )}\n      </dd>\n"
+  },
+  {
+   "id": "manual:cycle-4:focus-dropped",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "            sectionRef.current?.focus();\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:tab-stop",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      tabIndex={-1}\n",
+   "new": "      tabIndex={0}\n"
+  },
+  {
+   "id": "manual:cycle-4:no-tabindex",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      tabIndex={-1}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:no-ref",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      ref={sectionRef}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-4:initial-idle",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "useState<InspectorState>(symbol === null ? IDLE : LOADING)",
+   "new": "useState<InspectorState>(IDLE)"
+  },
+  {
+   "id": "manual:cycle-4:initial-loading",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "useState<InspectorState>(symbol === null ? IDLE : LOADING)",
+   "new": "useState<InspectorState>(LOADING)"
+  },
+  {
+   "id": "manual:cycle-4:reset-skipped",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    setState(symbol === null ? IDLE : LOADING);\n  }\n",
+   "new": "  }\n"
+  },
+  {
+   "id": "manual:cycle-4:reset-always-loading",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    setState(symbol === null ? IDLE : LOADING);\n  }\n",
+   "new": "    setState(LOADING);\n  }\n"
+  },
+  {
+   "id": "manual:cycle-4:reset-ignores-attempt",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "settled.symbol !== symbol || settled.attempt !== attempt",
+   "new": "settled.symbol !== symbol"
+  },
+  {
+   "id": "manual:cycle-4:reset-ignores-symbol",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "settled.symbol !== symbol || settled.attempt !== attempt",
+   "new": "settled.attempt !== attempt"
+  },
+  {
+   "id": "manual:cycle-4:skeleton-literal",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<output className=\"block h-8 w-full",
+   "new": "<output className=\"block h-24 w-full"
+  },
+  {
+   "id": "manual:cycle-4:swatch-literal",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "className=\"inline-block h-2 w-2 rounded\"",
+   "new": "className=\"inline-block h-2 w-2 rounded-sm\""
+  }
+ ]
+}

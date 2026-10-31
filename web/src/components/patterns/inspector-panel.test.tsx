@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import type { JSX } from "react";
+import { type JSX, Profiler, useLayoutEffect } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
@@ -85,6 +85,24 @@ function inspector(): HTMLElement {
   return screen.getByRole("region", { name: REGIONS.selectedStock });
 }
 
+/** The delivered `button` `outline` classes (`screens/instruments/start-action.tsx`; UX design 1.1). */
+const OUTLINE_BUTTON = ["w-fit", "rounded", "border", "border-border", "px-3", "py-2", "text-sm"];
+
+/** The delivered `card` `summary` classes (classification-ui section 2.5; UX design 1.1). */
+const SUMMARY_CARD = [
+  "rounded",
+  "border",
+  "border-border",
+  "bg-card",
+  "p-4",
+  "text-card-foreground",
+];
+
+/** Whether `earlier` comes before `later` in document order. */
+function precedes(earlier: Element, later: Element): boolean {
+  return (earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+}
+
 async function advance(ms: number): Promise<void> {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(ms);
@@ -162,6 +180,7 @@ describe("TC-COMP-142: nothing selected reads the empty sentence (DAC-E4-S7-3)",
     render(panel(null));
     const section = inspector();
     expect(section.tagName).toBe("SECTION");
+    expect(section).toHaveClass(...SUMMARY_CARD);
     expect(section).toHaveTextContent(/^Select a stock to see why it scores as it does\.$/);
     expect(section).toHaveTextContent(SELECTION.inspectorEmpty);
     await advance(1_000);
@@ -216,9 +235,17 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
       await advance(ms);
       const status = within(inspector()).getByRole("status");
       expect(status).toHaveTextContent(LOADING);
+      expect(inspector()).toHaveClass(...SUMMARY_CARD);
       expect(inspector()).not.toHaveTextContent(SELECTION.inspectorEmpty);
       expect(inspector()).not.toHaveTextContent(SELECTION.inNoUniverse);
     }
+  });
+
+  it("sizes the skeleton from the theme's spacing scale (STD-UI-29)", async () => {
+    read.mockReturnValue(deferred<StockEvidence>().promise);
+    render(panel("AAPL"));
+    const status = within(inspector()).getByRole("status");
+    expect(status).toHaveClass("h-8", "w-full", "rounded", "bg-secondary");
   });
 
   it("takes the loading sentence from copy.ts", () => {
@@ -235,6 +262,7 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
     render(panel("ZZZZ"));
     await advance(150);
     const section = inspector();
+    expect(section).toHaveClass(...SUMMARY_CARD);
     expect(section).toHaveTextContent(failureSentence(refusal));
     expect(section).toHaveTextContent("FactorFlow doesn't follow that stock.");
     expect(section).not.toHaveTextContent("internal text");
@@ -284,6 +312,79 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
     expect(within(inspector()).queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
     await advance(10_000);
     expect(read).toHaveBeenCalledTimes(2);
+  });
+
+  it("moves focus to the Selected stock section when Try again is activated", async () => {
+    read.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(panel("AAPL"));
+    await advance(150);
+    const tryAgain = within(inspector()).getByRole("button", { name: RESULTS.tryAgain });
+    tryAgain.focus();
+    read.mockResolvedValueOnce(evidence());
+    fireEvent.click(tryAgain);
+    expect(tryAgain).not.toBeInTheDocument();
+    expect(inspector()).toHaveFocus();
+    expect(inspector()).toHaveAttribute("tabindex", "-1");
+    await advance(150);
+    expect(inspector()).toHaveTextContent("Apple Inc.");
+    expect(inspector()).toHaveFocus();
+  });
+
+  it("never commits the failure again once Try again is activated", async () => {
+    const committed: string[] = [];
+    const failure = failureSentence({
+      operation: "get-stock-evidence",
+      resource: "classification",
+      code: null,
+    });
+    read.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(
+      <MemoryRouter>
+        {/* A Profiler reports each commit of the panel as it lands, so it sees what the commit put on the page. */}
+        <Profiler id="inspector" onRender={() => committed.push(inspector().textContent ?? "")}>
+          <InspectorPanel symbol="AAPL" />
+        </Profiler>
+      </MemoryRouter>,
+    );
+    await advance(150);
+    expect(inspector()).toHaveTextContent(failure);
+    committed.length = 0;
+    read.mockReturnValueOnce(deferred<StockEvidence>().promise);
+    fireEvent.click(within(inspector()).getByRole("button", { name: RESULTS.tryAgain }));
+    expect(committed).toEqual([LOADING]);
+  });
+
+  it("never commits the previous stock under a new selection", async () => {
+    const committed: string[] = [];
+    function CommitProbe({ symbol }: { symbol: string | null }): null {
+      // A layout effect runs after the DOM is updated and before passive
+      // effects, so it sees exactly what this commit put on the page.
+      useLayoutEffect(() => {
+        committed.push(`${symbol}:${inspector().textContent ?? ""}`);
+      }, [symbol]);
+      return null;
+    }
+    function tree(symbol: string | null): JSX.Element {
+      return (
+        <MemoryRouter>
+          <InspectorPanel symbol={symbol} />
+          <CommitProbe symbol={symbol} />
+        </MemoryRouter>
+      );
+    }
+    read.mockImplementation(async (symbol) =>
+      evidence({ symbol, name: symbol === "AAPL" ? "Apple Inc." : "Microsoft Corp." }),
+    );
+    const { rerender } = render(tree("AAPL"));
+    await advance(150);
+    expect(inspector()).toHaveTextContent("Apple Inc.");
+    rerender(tree("MSFT"));
+    rerender(tree(null));
+    expect(committed).toEqual([
+      `AAPL:${LOADING}`,
+      `MSFT:${LOADING}`,
+      `null:${SELECTION.inspectorEmpty}`,
+    ]);
   });
 
   it("never renders a read that resolves after the selection moved on", async () => {
@@ -487,7 +588,57 @@ describe("the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166)", () => {
     const section = await loaded(evidence());
     const symbol = within(section).getByText("AAPL");
     expect(symbol).toHaveClass("font-numeric", "text-xl");
-    expect(within(section).getByText("Apple Inc.")).toBeInTheDocument();
+    const name = within(section).getByText("Apple Inc.");
+    expect(precedes(symbol, name)).toBe(true);
+  });
+
+  it("orders the loaded inspector top to bottom as UX design 1.1 does", async () => {
+    const retired = cell({ status: "not_classified", reasonCode: "retired" });
+    const section = await loaded(
+      evidence({
+        lifecycle: "retired",
+        memberships: [{ universeId: "u-1", name: "Tech" }],
+        factors: { value: retired, growth: retired, momentum: retired },
+      }),
+    );
+    const parts = [
+      within(section).getByText("AAPL"),
+      within(section).getByText("Apple Inc."),
+      within(section).getByTestId("memberships"),
+      within(section).getAllByRole("term")[0],
+      explanation(section),
+      within(section).getByRole("link", { name: SELECTION.seeEveryInput }),
+      within(section).getByText(SELECTION.footnote),
+    ];
+    for (const part of parts) {
+      expect(part).not.toBeNull();
+    }
+    for (let index = 1; index < parts.length; index += 1) {
+      expect(precedes(parts[index - 1] as Element, parts[index] as Element)).toBe(true);
+    }
+  });
+
+  it("orders each factor block as the term, then the cell, then the inputs line", async () => {
+    const section = await loaded(
+      evidence({
+        inputs: [
+          input("value", "book-to-price", "2025-06-27", "2026-10-14"),
+          input("growth", "revenue growth", "2025-06-27", "2026-10-14"),
+          input("momentum", "12-month return", "2025-06-27", "2026-10-14"),
+        ],
+      }),
+    );
+    for (const name of ["Value", "Growth", "Momentum"]) {
+      const children = Array.from(block(section, name).children);
+      expect(children.map((child) => child.tagName)).toEqual(["DT", "DD", "DD"]);
+      expect(within(children[1] as HTMLElement).getByTestId("factor-cell")).toBeInTheDocument();
+      expect(children[2]).toHaveAttribute("data-testid", "inputs-line");
+    }
+  });
+
+  it("is the summary card when loaded", async () => {
+    const section = await loaded(evidence());
+    expect(section).toHaveClass(...SUMMARY_CARD);
   });
 
   it("renders one block per factor in the order Value, Growth, Momentum with an identity swatch", async () => {
@@ -498,6 +649,7 @@ describe("the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166)", () => {
     for (const swatch of swatches) {
       expect(swatch.tagName).toBe("SPAN");
       expect(swatch).toHaveAttribute("aria-hidden", "true");
+      expect(swatch).toHaveClass("h-2", "w-2", "rounded");
     }
     expect(swatches.map((swatch) => swatch.style.backgroundColor)).toEqual([
       "hsl(var(--factor-value))",
@@ -819,6 +971,7 @@ describe("the explanation box, the evidence link and the footnote (AC-16; classi
     const link = within(section).getByRole("link", { name: SELECTION.seeEveryInput });
     expect(link.tagName).toBe("A");
     expect(link).toHaveAttribute("href", "/research/stocks/BRK%2FB");
+    expect(link).toHaveClass(...OUTLINE_BUTTON);
     expect(within(section).queryByRole("button", { name: SELECTION.seeEveryInput })).toBeNull();
   });
 

@@ -151,7 +151,8 @@ cycles:
       failed, 21 passed (red-cycle-3.log); the three that passed are absence assertions (no box) the placeholder
       satisfies vacuously.
     green_evidence: >
-      inspector-panel.test.tsx 56 passed and copy.test.ts 312 passed, 368 in all (green-cycle-3.log); full web suite
+      inspector-panel.test.tsx 51 passed and copy.test.ts 317 passed, 368 in all (green-cycle-3.log; counts corrected in
+      review rework, IR-008); full web suite
       1147 passed in 55 files (full-suite.log); npm run format, npm run lint, npx tsc --noEmit and npm run build
       clean. The first mutation run left five real survivors (the box's and the mark's rule against a retired, a
       not-enough, a classified-without-percentile and a not-classified-with-percentile cell, and an unrecognised
@@ -188,3 +189,97 @@ cycles:
             The cycle-2 retry step (count + 1 to count + 2), on a line cycle 3 re-touched when the Try again button
             took the shared BUTTON classes. Any step produces a new effect dependency, so each Try again re-reads
             exactly once, as in cycle 2.
+
+  # Review-rework cycle against CAP-002-E4-S7-implementation-review-v1.md (CHANGES-REQUIRED). The driver owns the
+  # commit; the rework below is recorded against the staged, uncommitted tree on usr/alvaro-de-jodra/CAP-002-E4-S7.
+  # Decisions: DEC-0249 (IR-003, owner-decided: no tray change; E4-S9 announces the first selection); recorded in this
+  # rework under docs/unattended-mode.md: DEC-0250 (IR-007, Try again focuses the section; PROVISIONAL) and DEC-0251
+  # (IR-004, h-8 and rounded; PROVISIONAL). Decision-Id trailers for the stage commit: DEC-0249, DEC-0250, DEC-0251.
+  - id: cycle-4
+    tasks: [T001, T002, T004, T006, T007, T008, T011, T012]
+    description: >
+      Rework of implementation review v1. IR-001 (tests): the tray's count is its first child and precedes Compare,
+      which precedes Add to universe..., at 1, 3 and 7 checked; the symbol precedes the name; the loaded inspector's
+      parts (symbol, name, memberships line, first factor term, explanation box, See every input and its date,
+      footnote) are in document order; each factor block's children are dt, the FactorCell dd, then the inputs-line
+      dd. IR-002 (tests): the button outline classes on the enabled Compare link, Add to universe... and See every
+      input and its date; the card summary classes on the section when empty, loading, failed and loaded. IR-003: no
+      change (DEC-0249). IR-004 (production, DEC-0251): the skeleton is h-8 (var(--space-8)) and the swatch rounded,
+      both asserted; neither h-24 nor rounded-sm remains in web/src. IR-005: no change; follow-up for a story that may
+      edit factor-cell.tsx to export its state selector and title builder. IR-006 (production): the reset to idle or
+      loading is derived during render from the (symbol, attempt) it was last settled for, so a new selection or a
+      retry never commits the previous content; the effect now only schedules and guards the read; pinned by a
+      layout-effect commit probe across AAPL to MSFT to null and a Profiler commit probe across Try again. IR-007
+      (production, DEC-0250): Try again focuses the Selected stock section (tabIndex -1, no tab stop), which keeps
+      focus through the skeleton and the loaded stock. IR-008: cycle 3's green_evidence counts corrected.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-4.log
+    red_log_sha256: fd2d5e7292b9e7da1c9adf564ed9dae37b4fb235dad7d53c7375b4ef297ab4d7
+    red_evidence: >
+      With the final cycle-4 tests and HEAD's production inspector-panel.tsx, the three focused suites ran 5 failed,
+      394 passed (red-cycle-4.log): the skeleton token, the Try again focus, the two commit probes (the old code
+      committed the previous stock under MSFT and the failure after Try again) and the swatch radius. The IR-001 and
+      IR-002 tests pin behaviour the code already had; their RED is the review's ten non-equivalent survivors, each
+      now killed in this cycle's mutation run (manual:cycle-4:review-*).
+    green_evidence: >
+      Focused suites 399 passed in 3 files: selection-tray.test.tsx 24, inspector-panel.test.tsx 58, copy.test.ts 317
+      (green-cycle-4.log); full web suite 1157 passed in 55 files (full-suite-cycle-4.log); npm run format (check),
+      npm run lint, tsc --noEmit and npm run build clean; the built CSS maps h-8 to var(--space-8) and holds neither
+      .h-24 nor .rounded-sm. Code review (independent subagent) APPROVED with LOW notes: a retry commit probe was added
+      and a vacuous tab-stop test removed in response; the default focus outline is accepted (no delivered component
+      styles focus; DEC-0250); the casts in the order loop were left. Spec drift (independent subagent): none; it noted
+      that rounded is still Tailwind's default radius, not tied to --radius, a codebase-wide gap for the owner, and
+      that T008/T011 still describe the reset as part of the effect.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-4.log
+        sha256: 1b2747bea51a416bfc8b1322931a953bdbf6566801b24bdf6138082021439e2c
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-4.log
+        sha256: 4b1ef21421ecf7451409a60edd203b4f7b6726dec10f87149592748b614d5dec
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 169808dc959a63711a9061b8d039b1a4bae2c1e0d84d15eddd4206cde8b85e60
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-4-results.json
+      results_sha256: c5acbf02ceeb5848387061451991bf7ad6f19daf05865841de95a172550158cb
+      generated: 46
+      killed: 40
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/components/patterns/inspector-panel.tsx:361:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The retry step (count + 1 to count + 2), on the line this cycle re-touched. Any step yields a new effect
+            dependency and a new settled key, so each Try again resets once and re-reads once, as in cycles 2 and 3.
+        - id: manual:cycle-4:review-compare-link-no-variant
+          disposition: equivalent
+          reason: >
+            Drops data-variant="outline" from the Compare link. No CSS in web/src keys on data-variant="outline" (only
+            blocked and secondary), and T001 requires only that it is not blocked; review v1 judged it equivalent.
+        - id: manual:cycle-4:review-see-link-no-variant
+          disposition: equivalent
+          reason: >
+            The same attribute on See every input and its date; T012 names the classes, which are asserted, not the
+            attribute; review v1 judged it equivalent.
+        - id: manual:cycle-4:review-card-no-variant
+          disposition: equivalent
+          reason: >
+            Drops data-variant="summary" from the section; no CSS consumes it and T011 names the classes, now asserted
+            in every state; review v1 judged it equivalent.
+        - id: manual:cycle-4:review-sentence-for-scored
+          disposition: equivalent
+          reason: >
+            Needs a classified cell with a percentile and a reasonDetail or incomplete reasonCode, which
+            research-store 2.4 factor_classification_shape and factor-engine 2.5 rule out; review v1 judged it
+            equivalent.
+        - id: manual:cycle-4:review-blocked-unstyled
+          disposition: equivalent
+          reason: >
+            Drops the classes from the blocked Compare button. The button design spec gives blocked no visual tokens and
+            T010 names no classes for it; review v1 judged it equivalent.

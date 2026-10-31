@@ -1,0 +1,1943 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-4.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-4.log
+new file mode 100644
+index 0000000..ba3a78f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-4.log
+@@ -0,0 +1,221 @@
++
++> factorflow-web@0.1.0 test
++> vitest run
++
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/api/research-query.test.ts (82 tests) 14ms
++ ✓ src/api/client.runs.test.ts (20 tests) 16ms
++ ✓ src/api/classification-client.test.ts (55 tests) 32ms
++ ✓ src/screens/research/copy.test.ts (317 tests) 38ms
++stderr | src/components/patterns/inspector-panel.test.tsx > TC-COMP-141: the inspector waits 150 ms, then issues one read (DAC-E4-S7-2; DEC-0164) > issues no read before 150 ms and exactly one at 150 ms, then none
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/research/filters-pane.test.tsx > TC-COMP-135: one list request per filter change, URL updated > issues exactly one request per change, each carrying the mapped parameters of every change so far
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/factor-cell.test.tsx > state selection > refuses a date that is not an ISO-8601 calendar date rather than print it
++Error: Uncaught [RangeError: Not an ISO-8601 date: "30/09/2026"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: "30/09/2026"
++    at Module.formatDate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/format.ts:139:11)
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:118:78)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [RangeError: Not an ISO-8601 date: "30/09/2026"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: "30/09/2026"
++    at Module.formatDate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/format.ts:139:11)
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:118:78)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <NotFollowedBadge> component:
++
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:125:29)
++    at FactorCell (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:210:3)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ✓ src/components/patterns/factor-cell.test.tsx (90 tests) 134ms
++stderr | src/screens/coverage/coverage.test.tsx > TC-COMP-007: each instrument shows presence, covered range and last acquired (AC-7) > renders the row's presence badges, range and Chicago last-acquired under the 11 headers
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (24 tests) 316ms
++ ✓ src/screens/research/use-score-set-poll.test.ts (33 tests) 366ms
++stderr | src/screens/runs/run-detail.test.tsx > Roster at 3000 instruments (DAC-E7-9) > collapses to one row per instrument and expands to four data types in fixed order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/status-region.test.tsx (23 tests) 630ms
++stderr | src/screens/runs/cancel.test.tsx > Cancel confirmation copy follows the run's state (DAC-E5-S6-5) > states the cooperative effect for a running run, as confirm, never destructive
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/not-current-banner.test.tsx (16 tests) 39ms
++stderr | src/screens/coverage/coverage-table.test.tsx > TC-COMP-008: the gap count sits in the row, dates behind expansion (AC-8) > shows counts, fetches dates once on Enter, caches them, and never fetches for a zero
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/runs-screen.test.tsx > Runs list — outcomes render honestly (AC-9) > shows each terminal outcome as recorded, partial as a warning
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/inspector-panel.test.tsx (58 tests) 755ms
++ ✓ src/screens/coverage/coverage.test.tsx (10 tests) 693ms
++   ✓ TC-COMP-062: never-acquired and nothing-matched read differently (DAC-E6-S4-4) > (b) a filter matching nothing has its own copy, and Reset filter refetches unfiltered 332ms
++stderr | src/components/patterns/selection-tray.test.tsx > TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1) > with 1 checked > renders Compare as a focusable blocked button carrying its reason
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/run-controls.test.tsx > StartRunControl — after a 202 > calls onStarted once, then routes to the run's detail when nothing is queued
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/runs/cancel.test.tsx (18 tests) 503ms
++ ✓ src/screens/runs/runs-screen.test.tsx (10 tests) 436ms
++ ✓ src/screens/research/format.test.ts (41 tests) 35ms
++stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no fifth rail item when a run detail route opens
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/selection-tray.test.tsx (24 tests) 400ms
++ ✓ src/screens/runs/run-controls.test.tsx (12 tests) 409ms
++stderr | src/screens/research/use-research-query.test.tsx > useResearchQuery (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156) > reads the query as decodeResearchQuery reads the location search
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/use-research-query.test.tsx (8 tests) 34ms
++ ✓ src/screens/research/threshold-sentence.test.tsx (63 tests) 1502ms
++ ✓ src/app/routes.test.tsx (7 tests) 225ms
++ ✓ src/api/client.coverage.test.ts (8 tests) 7ms
++stderr | src/screens/coverage/cells.test.tsx > TC-COMP-059: absent, measured zero and inapplicable render distinctly (DAC-E6-S4-1) > renders a missing value in the range and last-acquired cells of a row with no data
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/cells.test.tsx (6 tests) 143ms
++stderr | src/screens/runs/run-detail.polling.test.tsx > Run detail polling (DAC-E7-S4-6) > polls every 10 000 ms while the run is requested, and stops once it is terminal
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/instrument-table.test.tsx (8 tests) 619ms
++   ✓ InstrumentTable > issues a server-side request when the symbol filter changes 369ms
++ ✓ src/screens/coverage/coverage-table.test.tsx (4 tests) 1303ms
++   ✓ TC-COMP-063: search and filter stay usable at volume (DAC-E6-S4-5) > filters server-side, scrolls in its own container, and replaces pages 952ms
++ ✓ src/screens/runs/run-detail.polling.test.tsx (9 tests) 279ms
++ ✓ src/screens/instruments/bulk-add.test.tsx (4 tests) 261ms
++ ✓ src/screens/runs/run-detail.test.tsx (36 tests) 1756ms
++   ✓ Roster at 3000 instruments (DAC-E7-9) > collapses to one row per instrument and expands to four data types in fixed order 541ms
++stderr | src/screens/runs/runs-screen.polling.test.tsx > Runs screen polling (DAC-E5-S6-1) > polls every 10 000 ms while a running run is loaded, and stops once all are terminal
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/filters-pane.test.tsx (41 tests) 1989ms
++   ✓ TC-COMP-135: one list request per filter change, URL updated > issues exactly one request per change, each carrying the mapped parameters of every change so far 386ms
++stderr | src/screens/coverage/start-run.test.tsx > Start is blocked, not disabled > blocks with its own reason when no history depth is set (DAC-E5-S6-3)
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/status-region.integration.test.tsx > StatusRegion — the three health response shapes, end to end (T020) > a successful response with the product answering renders the answering state
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/status-region.a11y.test.tsx (7 tests) 180ms
++ ✓ src/screens/runs/runs-screen.polling.test.tsx (6 tests) 244ms
++ ✓ src/screens/coverage/badges.test.tsx (5 tests) 27ms
++ ✓ src/screens/coverage/start-run.test.tsx (4 tests) 212ms
++stderr | src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > replaces the main region with the designed state on /coverage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/status-region.integration.test.tsx (4 tests) 149ms
++ ✓ src/app/shell.unreachable.test.tsx (9 tests) 267ms
++ ✓ src/screens/settings/history-depth-form.test.tsx (5 tests) 330ms
++ ✓ src/components/patterns/restated-mark.test.tsx (8 tests) 27ms
++stderr | src/app/shell.test.tsx > Shell — no principal is assumed (AC-14) > renders no element matching sign-in, account, or user-menu semantics
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/retire-dialog.test.tsx (7 tests) 139ms
++stderr | src/screens/coverage/coverage.polling.test.tsx > TC-COMP-039: coverage never auto-polls and shows when it was loaded (DAC-E6-13) > fetches once over ten minutes, and again only on Refresh, keeping rows while pending
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.test.tsx (3 tests) 132ms
++stderr | src/app/shell.status-region.test.tsx > Shell — the status region is mounted on every destination (DAC-E1-13, AC-18) > renders the region inside the rail on the initial route
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.tokens.test.tsx (2 tests) 6ms
++ ✓ src/screens/instruments/add-field.test.tsx (5 tests) 226ms
++ ✓ src/screens/coverage/coverage.polling.test.tsx (1 test) 193ms
++ ✓ src/screens/settings/credential-badge.test.tsx (3 tests) 67ms
++ ✓ src/screens/runs/outcome-badge.test.tsx (21 tests) 110ms
++stderr | src/screens/runs/run-detail.reason.test.tsx > A reason shows its data type and request id, never a credential (DAC-E7-S4-5) > renders through the real client mapping, as text only
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.status-region.test.tsx (3 tests) 280ms
++ ✓ src/screens/runs/detail/result-outcome-badge.test.tsx (9 tests) 21ms
++ ✓ src/screens/runs/run-detail.reason.test.tsx (1 test) 135ms
++stderr | src/app/shell.layout.test.tsx > Shell — layout contract (UX design section 0) > renders a fixed left rail containing navigation and the status-region slot
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.layout.test.tsx (3 tests) 155ms
++ ✓ src/screens/settings/credential-status.test.tsx (4 tests) 22ms
++stderr | src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/parse-bulk-symbols.test.ts (5 tests) 2ms
++ ✓ src/screens/coverage/uniform-shortfall.test.ts (4 tests) 2ms
++ ✓ src/app/shell.a11y.test.tsx (2 tests) 128ms
++ ✓ src/api/render.test.tsx (1 test) 11ms
++ ✓ src/screens/instruments/empty-states.test.tsx (2 tests) 67ms
++ ✓ src/screens/instruments/start-action.test.tsx (2 tests) 37ms
++ ✓ src/screens/instruments/badges.test.tsx (2 tests) 14ms
++ ✓ src/app/build-output.test.tsx (2 tests) 1049ms
++   ✓ Build output — lands in the API static directory (DAC-E1-S4-6) > a real build places index.html in the static directory and leaves its tracked marker intact 1004ms
++
++ Test Files  55 passed (55)
++      Tests  1157 passed (1157)
++   Start at  10:15:40
++   Duration  5.51s (transform 2.32s, setup 3.04s, collect 8.90s, tests 17.17s, environment 18.25s, prepare 3.12s)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-4.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-4.log
+new file mode 100644
+index 0000000..3c52bd2
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-4.log
+@@ -0,0 +1,20 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/copy.test.ts (317 tests) 25ms
++stderr | src/components/patterns/inspector-panel.test.tsx > TC-COMP-141: the inspector waits 150 ms, then issues one read (DAC-E4-S7-2; DEC-0164) > issues no read before 150 ms and exactly one at 150 ms, then none
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/selection-tray.test.tsx > TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1) > with 1 checked > renders Compare as a focusable blocked button carrying its reason
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/selection-tray.test.tsx (24 tests) 226ms
++ ✓ src/components/patterns/inspector-panel.test.tsx (58 tests) 282ms
++
++ Test Files  3 passed (3)
++      Tests  399 passed (399)
++   Start at  10:15:38
++   Duration  916ms (transform 206ms, setup 128ms, collect 352ms, tests 533ms, environment 698ms, prepare 192ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutants-cycle-4.json
+new file mode 100644
+index 0000000..da682cf
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutants-cycle-4.json
+@@ -0,0 +1,378 @@
++{
++ "schema": 1,
++ "repo_head": "260139f9882e02bf7603e4097bb5e2ab88cec5ee",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/components/patterns/inspector-panel.tsx:316:negate-boolean:1",
++   "cycle": "cycle-4",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "line": 316,
++   "original": "  if (settled.symbol !== symbol || settled.attempt !== attempt) {",
++   "mutated": "  if (settled.symbol !== symbol && settled.attempt !== attempt) {"
++  },
++  {
++   "id": "web/src/components/patterns/inspector-panel.tsx:361:off-by-one:1",
++   "cycle": "cycle-4",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "line": 361,
++   "original": "            setAttempt((count) => count + 1);",
++   "mutated": "            setAttempt((count) => count + 2);"
++  },
++  {
++   "id": "web/src/components/patterns/inspector-panel.tsx:385:off-by-one:1",
++   "cycle": "cycle-4",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "line": 385,
++   "original": "      tabIndex={-1}",
++   "mutated": "      tabIndex={-2}"
++  },
++  {
++   "id": "manual:cycle-4:review-compare-link-no-variant",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/selection-tray.tsx",
++   "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
++   "new": "          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}"
++  },
++  {
++   "id": "manual:cycle-4:review-compare-link-unstyled",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/selection-tray.tsx",
++   "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
++   "new": "          data-variant=\"outline\"\n        >\n          {SELECTION.compareSideBySide}"
++  },
++  {
++   "id": "manual:cycle-4:review-add-before-count",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/selection-tray.tsx",
++   "old": "      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-4:review-no-cancel-flag",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      cancelled = true;\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-4:review-fail-unguarded",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "          if (!cancelled) {\n            setState({ kind: \"failed\"",
++   "new": "          if (true) {\n            setState({ kind: \"failed\""
++  },
++  {
++   "id": "manual:cycle-4:review-load-unguarded",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "          if (!cancelled) {\n            setState({ kind: \"loaded\"",
++   "new": "          if (true) {\n            setState({ kind: \"loaded\""
++  },
++  {
++   "id": "manual:cycle-4:review-reason-no-hasown",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "return code !== null && Object.hasOwn(CELL.incompleteStatus, code);",
++   "new": "return code !== null;"
++  },
++  {
++   "id": "manual:cycle-4:review-sentence-for-retired",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++   "new": "  if (cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {"
++  },
++  {
++   "id": "manual:cycle-4:review-sentence-for-nes",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++   "new": "  if (cell.reasonCode === \"retired\" || isScored(cell)) {"
++  },
++  {
++   "id": "manual:cycle-4:review-sentence-for-scored",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++   "new": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\") {"
++  },
++  {
++   "id": "manual:cycle-4:review-mark-unscored",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "cell.restatedPossible && isScored(cell);",
++   "new": "cell.restatedPossible;"
++  },
++  {
++   "id": "manual:cycle-4:review-line-always",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      {line === null ? null : (",
++   "new": "      {false ? null : ("
++  },
++  {
++   "id": "manual:cycle-4:review-box-always",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      {sentences.length === 0 ? null : (",
++   "new": "      {false ? null : ("
++  },
++  {
++   "id": "manual:cycle-4:review-generic-code",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "failureSentence({ operation: \"get-stock-evidence\", resource: \"classification\", code: null })",
++   "new": "failureSentence({ operation: \"get-stock-evidence\", resource: \"classification\", code: \"instrument_not_found\" })"
++  },
++  {
++   "id": "manual:cycle-4:review-swap-dates",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "SELECTION.inputsLine(labels, formatDate(asOf), formatDate(knownOn))",
++   "new": "SELECTION.inputsLine(labels, formatDate(knownOn), formatDate(asOf))"
++  },
++  {
++   "id": "manual:cycle-4:review-box-after-link",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      {sentences.length === 0 ? null : (\n        <div\n          data-testid=\"explanation\"\n          className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"\n        >\n          {sentences.map((sentence) => (\n            <p key={sentence}>{sentence}</p>\n          ))}\n        </div>\n      )}\n      <Link\n        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}\n        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}\n      </Link>\n",
++   "new": "      <Link\n        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}\n        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}\n      </Link>\n      {sentences.length === 0 ? null : (\n        <div\n          data-testid=\"explanation\"\n          className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"\n        >\n          {sentences.map((sentence) => (\n            <p key={sentence}>{sentence}</p>\n          ))}\n        </div>\n      )}\n"
++  },
++  {
++   "id": "manual:cycle-4:review-memberships-after-blocks",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      <MembershipsLine memberships={evidence.memberships} />\n      <dl className=\"flex flex-col gap-3\">\n        {FACTORS.map((factor) => (\n          <FactorBlock key={factor} evidence={evidence} factor={factor} />\n        ))}\n      </dl>\n",
++   "new": "      <dl className=\"flex flex-col gap-3\">\n        {FACTORS.map((factor) => (\n          <FactorBlock key={factor} evidence={evidence} factor={factor} />\n        ))}\n      </dl>\n      <MembershipsLine memberships={evidence.memberships} />\n"
++  },
++  {
++   "id": "manual:cycle-4:review-see-link-no-variant",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
++   "new": "        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}"
++  },
++  {
++   "id": "manual:cycle-4:review-see-link-unstyled",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
++   "new": "      >\n        {SELECTION.seeEveryInput}"
++  },
++  {
++   "id": "manual:cycle-4:review-card-no-variant",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      data-variant=\"summary\"\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-4:review-card-no-classes",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "className=\"flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground\"",
++   "new": "className=\"flex flex-col gap-3 p-4\""
++  },
++  {
++   "id": "manual:cycle-4:review-null-no-return",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "    if (symbol === null) {\n      return;\n    }\n",
++   "new": "    if (symbol === null) {\n    }\n"
++  },
++  {
++   "id": "manual:cycle-4:review-retry-no-type",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "        <button\n          type=\"button\"\n          onClick={() => {",
++   "new": "        <button\n          onClick={() => {"
++  },
++  {
++   "id": "manual:cycle-4:review-name-dropped-class",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "<p className=\"text-sm\">{evidence.name}</p>",
++   "new": "<p className=\"text-sm\">{evidence.symbol}</p>"
++  },
++  {
++   "id": "manual:cycle-4:review-explanation-reversed",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "  return sentences;\n}",
++   "new": "  return sentences.reverse();\n}"
++  },
++  {
++   "id": "manual:cycle-4:review-list-comma-copy",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/screens/research/copy.ts",
++   "old": "  listComma: \", \",",
++   "new": "  listComma: \"; \","
++  },
++  {
++   "id": "manual:cycle-4:review-add-unstyled",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/selection-tray.tsx",
++   "old": "          onClick={() => onAddToUniverse(checked)}\n          className={BUTTON}\n",
++   "new": "          onClick={() => onAddToUniverse(checked)}\n"
++  },
++  {
++   "id": "manual:cycle-4:review-blocked-unstyled",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/selection-tray.tsx",
++   "old": "            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n",
++   "new": "            // carries no handler, so activating it does nothing.\n"
++  },
++  {
++   "id": "manual:cycle-4:review-count-after-compare",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/selection-tray.tsx",
++   "old": "      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n      {canCompare ? (\n        <Link\n          to={`/research/compare?symbols=${checked.map(encodeURIComponent).join(\",\")}`}\n          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}\n        </Link>\n      ) : (\n        <>\n          <button\n            type=\"button\"\n            data-variant=\"blocked\"\n            aria-disabled=\"true\"\n            aria-describedby={reasonId}\n            // Never `disabled`: a disabled control takes no focus, so its\n            // reason would never reach a keyboard or screen-reader user. It\n            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n          >\n            {SELECTION.compareSideBySide}\n          </button>\n          <span id={reasonId} className=\"text-sm\">\n            {SELECTION.compareBlocked}\n          </span>\n        </>\n      )}\n",
++   "new": "      {canCompare ? (\n        <Link\n          to={`/research/compare?symbols=${checked.map(encodeURIComponent).join(\",\")}`}\n          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}\n        </Link>\n      ) : (\n        <>\n          <button\n            type=\"button\"\n            data-variant=\"blocked\"\n            aria-disabled=\"true\"\n            aria-describedby={reasonId}\n            // Never `disabled`: a disabled control takes no focus, so its\n            // reason would never reach a keyboard or screen-reader user. It\n            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n          >\n            {SELECTION.compareSideBySide}\n          </button>\n          <span id={reasonId} className=\"text-sm\">\n            {SELECTION.compareBlocked}\n          </span>\n        </>\n      )}\n      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n"
++  },
++  {
++   "id": "manual:cycle-4:review-name-above-symbol",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "        <p className=\"flex items-center gap-2\">\n          <span className=\"font-numeric text-xl\">{evidence.symbol}</span>\n          {evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}\n        </p>\n        <p className=\"text-sm\">{evidence.name}</p>\n",
++   "new": "        <p className=\"text-sm\">{evidence.name}</p>\n        <p className=\"flex items-center gap-2\">\n          <span className=\"font-numeric text-xl\">{evidence.symbol}</span>\n          {evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}\n        </p>\n"
++  },
++  {
++   "id": "manual:cycle-4:review-inputs-before-cell",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      <dd>\n        {cell === undefined ? (\n          CELL.absentValue\n        ) : (\n          <FactorCell cell={cell} factor={factor} showScore />\n        )}\n      </dd>\n      {line === null ? null : (\n        <dd data-testid=\"inputs-line\" className=\"text-xs\">\n          {line}\n        </dd>\n      )}\n",
++   "new": "      {line === null ? null : (\n        <dd data-testid=\"inputs-line\" className=\"text-xs\">\n          {line}\n        </dd>\n      )}\n      <dd>\n        {cell === undefined ? (\n          CELL.absentValue\n        ) : (\n          <FactorCell cell={cell} factor={factor} showScore />\n        )}\n      </dd>\n"
++  },
++  {
++   "id": "manual:cycle-4:focus-dropped",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "            sectionRef.current?.focus();\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-4:tab-stop",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      tabIndex={-1}\n",
++   "new": "      tabIndex={0}\n"
++  },
++  {
++   "id": "manual:cycle-4:no-tabindex",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      tabIndex={-1}\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-4:no-ref",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "      ref={sectionRef}\n",
++   "new": ""
++  },
++  {
++   "id": "manual:cycle-4:initial-idle",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "useState<InspectorState>(symbol === null ? IDLE : LOADING)",
++   "new": "useState<InspectorState>(IDLE)"
++  },
++  {
++   "id": "manual:cycle-4:initial-loading",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "useState<InspectorState>(symbol === null ? IDLE : LOADING)",
++   "new": "useState<InspectorState>(LOADING)"
++  },
++  {
++   "id": "manual:cycle-4:reset-skipped",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "    setState(symbol === null ? IDLE : LOADING);\n  }\n",
++   "new": "  }\n"
++  },
++  {
++   "id": "manual:cycle-4:reset-always-loading",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "    setState(symbol === null ? IDLE : LOADING);\n  }\n",
++   "new": "    setState(LOADING);\n  }\n"
++  },
++  {
++   "id": "manual:cycle-4:reset-ignores-attempt",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "settled.symbol !== symbol || settled.attempt !== attempt",
++   "new": "settled.symbol !== symbol"
++  },
++  {
++   "id": "manual:cycle-4:reset-ignores-symbol",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "settled.symbol !== symbol || settled.attempt !== attempt",
++   "new": "settled.attempt !== attempt"
++  },
++  {
++   "id": "manual:cycle-4:skeleton-literal",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "<output className=\"block h-8 w-full",
++   "new": "<output className=\"block h-24 w-full"
++  },
++  {
++   "id": "manual:cycle-4:swatch-literal",
++   "cycle": "cycle-4",
++   "operator": "manual",
++   "file": "web/src/components/patterns/inspector-panel.tsx",
++   "old": "className=\"inline-block h-2 w-2 rounded\"",
++   "new": "className=\"inline-block h-2 w-2 rounded-sm\""
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-4-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-4-results.json
+new file mode 100644
+index 0000000..1c4bd49
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-4-results.json
+@@ -0,0 +1,690 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run web/src/components/patterns/selection-tray.test.tsx web/src/components/patterns/inspector-panel.test.tsx web/src/screens/research/copy.test.ts",
++  "repo_head": "260139f9882e02bf7603e4097bb5e2ab88cec5ee",
++  "tree_patch_sha256": "c94ef9858b4f034a6ed0278193155100dab54b3d566da719c3038042d09ce755",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/mutants.json",
++  "mutants_sha256": "639ce9d39b97bf53a68b61e7583d06da0c5121a4813b814e5006989c453201a7",
++  "jobs": 4,
++  "started": "2026-10-31T15:16:07Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 8.1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/baseline-w2.log",
++      "log_sha256": "cf21dc23875c1d0398391a3620fa28016f1d86700156be35cc3319442e47c7f8"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 8.1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/baseline-w1.log",
++      "log_sha256": "3b5474387594a1555eb88bf40d12107a719f27852fa9bb9b3893415ea5a1d1e6"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 8.1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/baseline-w3.log",
++      "log_sha256": "3b7984810831bacc01a25c88082f5780b8c22368c45629deaf6a7d8f2b7f6e20"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 8.2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/baseline-w0.log",
++      "log_sha256": "b93d0cd8eed16d4f1da634d967ae06998750874dd1623f22d0e39fb138bd2c6f"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/inspector-panel.tsx:316:negate-boolean:1",
++      "cycle": "cycle-4",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "line": 316,
++      "original": "  if (settled.symbol !== symbol || settled.attempt !== attempt) {",
++      "mutated": "  if (settled.symbol !== symbol && settled.attempt !== attempt) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.1,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/web_src_components_patterns_inspector-panel.tsx_316_negate-boolean_1.log",
++      "log_sha256": "d02f25321593feb2567902c2dc29ea9025eae71c6885cc636721afff57aee3ea"
++    },
++    {
++      "id": "web/src/components/patterns/inspector-panel.tsx:361:off-by-one:1",
++      "cycle": "cycle-4",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "line": 361,
++      "original": "            setAttempt((count) => count + 1);",
++      "mutated": "            setAttempt((count) => count + 2);",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/web_src_components_patterns_inspector-panel.tsx_361_off-by-one_1.log",
++      "log_sha256": "b01f189dc191ab30afefb345cfa4ab213d77b5d92bc627f3ec7a0c469eb70496"
++    },
++    {
++      "id": "web/src/components/patterns/inspector-panel.tsx:385:off-by-one:1",
++      "cycle": "cycle-4",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "line": 385,
++      "original": "      tabIndex={-1}",
++      "mutated": "      tabIndex={-2}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/web_src_components_patterns_inspector-panel.tsx_385_off-by-one_1.log",
++      "log_sha256": "dc7b89f94242a602cfda91541f680e89e265d4395fe6881e6162af32a524e1d6"
++    },
++    {
++      "id": "manual:cycle-4:review-compare-link-no-variant",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/selection-tray.tsx",
++      "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
++      "new": "          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 2.0,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-compare-link-no-variant.log",
++      "log_sha256": "b278ee0a03c465c76744fc23b1b473ba6b0bc5b7da34217af33b9cfbd91049ef"
++    },
++    {
++      "id": "manual:cycle-4:review-compare-link-unstyled",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/selection-tray.tsx",
++      "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
++      "new": "          data-variant=\"outline\"\n        >\n          {SELECTION.compareSideBySide}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-compare-link-unstyled.log",
++      "log_sha256": "d1f645ef80fa6c921449959c7a4e63b3862d904647abcaa0bbbd218e09214dc7"
++    },
++    {
++      "id": "manual:cycle-4:review-add-before-count",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/selection-tray.tsx",
++      "old": "      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-add-before-count.log",
++      "log_sha256": "8afa704988c6f3ef27f939a8125c6f55df1fbcf7a196a8b5fbd9b0ff84aee6d5"
++    },
++    {
++      "id": "manual:cycle-4:review-no-cancel-flag",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      cancelled = true;\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-no-cancel-flag.log",
++      "log_sha256": "d6fb7d542d92e5d926d2d48061939619936232c097544857452aae02da2cebec"
++    },
++    {
++      "id": "manual:cycle-4:review-fail-unguarded",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "          if (!cancelled) {\n            setState({ kind: \"failed\"",
++      "new": "          if (true) {\n            setState({ kind: \"failed\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-fail-unguarded.log",
++      "log_sha256": "46d8b3a6573ee5fe37671d1c1c9c3953c36c9eae06c4e73d0f8728fecb416d92"
++    },
++    {
++      "id": "manual:cycle-4:review-load-unguarded",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "          if (!cancelled) {\n            setState({ kind: \"loaded\"",
++      "new": "          if (true) {\n            setState({ kind: \"loaded\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-load-unguarded.log",
++      "log_sha256": "b269f4361d41e980795021ebd896efb8cd8f7babc84cbb2f1e43eeb4feb207ca"
++    },
++    {
++      "id": "manual:cycle-4:review-reason-no-hasown",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "return code !== null && Object.hasOwn(CELL.incompleteStatus, code);",
++      "new": "return code !== null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-reason-no-hasown.log",
++      "log_sha256": "28084ab72bbc5de2a3033ba65c77bbc85f2f9ac889e4ad84f9169cfa64fb5cb1"
++    },
++    {
++      "id": "manual:cycle-4:review-sentence-for-retired",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++      "new": "  if (cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-sentence-for-retired.log",
++      "log_sha256": "0732a49fe7c8fa7b2f05e1afd0f8932ff7a784487490cbf0037f43ff5471c22a"
++    },
++    {
++      "id": "manual:cycle-4:review-sentence-for-nes",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++      "new": "  if (cell.reasonCode === \"retired\" || isScored(cell)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-sentence-for-nes.log",
++      "log_sha256": "98465190aade0a312c117627ee5eeb90e7d75d6574d7f228156d773aa2c11942"
++    },
++    {
++      "id": "manual:cycle-4:review-sentence-for-scored",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
++      "new": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\") {",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-sentence-for-scored.log",
++      "log_sha256": "b1a4f2bd3058c3b0a7a3ca20b2d08270a772b3d4e0ae9af248055cc81685a346"
++    },
++    {
++      "id": "manual:cycle-4:review-mark-unscored",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "cell.restatedPossible && isScored(cell);",
++      "new": "cell.restatedPossible;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-mark-unscored.log",
++      "log_sha256": "d14c97419754441e2059b53aa333fdbb2fd21e1056e527fa51e70f38e43c113b"
++    },
++    {
++      "id": "manual:cycle-4:review-line-always",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      {line === null ? null : (",
++      "new": "      {false ? null : (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-line-always.log",
++      "log_sha256": "dd0cb0243a690a65cef7210e0e061bff6976ddb0c6cd06720c7b1e74bb3717b9"
++    },
++    {
++      "id": "manual:cycle-4:review-box-always",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      {sentences.length === 0 ? null : (",
++      "new": "      {false ? null : (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-box-always.log",
++      "log_sha256": "72f9c2d7cad1ea5f68c8ced82e692f84784e61ec7aff8d951f5a9848f5ea1341"
++    },
++    {
++      "id": "manual:cycle-4:review-generic-code",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "failureSentence({ operation: \"get-stock-evidence\", resource: \"classification\", code: null })",
++      "new": "failureSentence({ operation: \"get-stock-evidence\", resource: \"classification\", code: \"instrument_not_found\" })",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-generic-code.log",
++      "log_sha256": "bb78ab2f1f5c85f8f0398f36058119b5b311fd245d87d0d8793c2780b4797a35"
++    },
++    {
++      "id": "manual:cycle-4:review-swap-dates",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "SELECTION.inputsLine(labels, formatDate(asOf), formatDate(knownOn))",
++      "new": "SELECTION.inputsLine(labels, formatDate(knownOn), formatDate(asOf))",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-swap-dates.log",
++      "log_sha256": "2c8a957ed12d4b79d1aedaf48b32bc7f629aba8e8a4fa2b9e6d98b3bae5520ec"
++    },
++    {
++      "id": "manual:cycle-4:review-box-after-link",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      {sentences.length === 0 ? null : (\n        <div\n          data-testid=\"explanation\"\n          className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"\n        >\n          {sentences.map((sentence) => (\n            <p key={sentence}>{sentence}</p>\n          ))}\n        </div>\n      )}\n      <Link\n        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}\n        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}\n      </Link>\n",
++      "new": "      <Link\n        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}\n        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}\n      </Link>\n      {sentences.length === 0 ? null : (\n        <div\n          data-testid=\"explanation\"\n          className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"\n        >\n          {sentences.map((sentence) => (\n            <p key={sentence}>{sentence}</p>\n          ))}\n        </div>\n      )}\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-box-after-link.log",
++      "log_sha256": "cbff2a156d8eb098a9138e13fa1afa242b9613ff558fdce513c98ab79e1b3a28"
++    },
++    {
++      "id": "manual:cycle-4:review-memberships-after-blocks",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      <MembershipsLine memberships={evidence.memberships} />\n      <dl className=\"flex flex-col gap-3\">\n        {FACTORS.map((factor) => (\n          <FactorBlock key={factor} evidence={evidence} factor={factor} />\n        ))}\n      </dl>\n",
++      "new": "      <dl className=\"flex flex-col gap-3\">\n        {FACTORS.map((factor) => (\n          <FactorBlock key={factor} evidence={evidence} factor={factor} />\n        ))}\n      </dl>\n      <MembershipsLine memberships={evidence.memberships} />\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-memberships-after-blocks.log",
++      "log_sha256": "bd5c6a5768b584e6a9a14e81c9f8047304fc38fedc1be18a1eaac61dc0647307"
++    },
++    {
++      "id": "manual:cycle-4:review-see-link-no-variant",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "        data-variant=\"outline\"\n        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
++      "new": "        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-see-link-no-variant.log",
++      "log_sha256": "97a6c90d357dd4c2e190737e6d22e30abdd5db282208d3a8437bb6fbb95dba15"
++    },
++    {
++      "id": "manual:cycle-4:review-see-link-unstyled",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "        className={BUTTON}\n      >\n        {SELECTION.seeEveryInput}",
++      "new": "      >\n        {SELECTION.seeEveryInput}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-see-link-unstyled.log",
++      "log_sha256": "fbf33d65e428bceab4126525d03a2ec752844be35b826beddd7ba44a9b75668c"
++    },
++    {
++      "id": "manual:cycle-4:review-card-no-variant",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      data-variant=\"summary\"\n",
++      "new": "",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 2.0,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-card-no-variant.log",
++      "log_sha256": "5a58548b322653fbbf7711969d073e909ccf99b7f5ef6d6193fe40fd772fe7f9"
++    },
++    {
++      "id": "manual:cycle-4:review-card-no-classes",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "className=\"flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground\"",
++      "new": "className=\"flex flex-col gap-3 p-4\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-card-no-classes.log",
++      "log_sha256": "8b3fb80c350ac1e960ed3dd6668f205657c6a76e192020caa5e4869c65991cb9"
++    },
++    {
++      "id": "manual:cycle-4:review-null-no-return",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "    if (symbol === null) {\n      return;\n    }\n",
++      "new": "    if (symbol === null) {\n    }\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-null-no-return.log",
++      "log_sha256": "9c134aad0e50ac8457e7af4681770be3e42b1a1f71377cda75142c869ab72ef3"
++    },
++    {
++      "id": "manual:cycle-4:review-retry-no-type",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "        <button\n          type=\"button\"\n          onClick={() => {",
++      "new": "        <button\n          onClick={() => {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-retry-no-type.log",
++      "log_sha256": "c197958ebedf7d3bbc43586de0001eb359fc26cb8e8004908e448e6e1294cd7f"
++    },
++    {
++      "id": "manual:cycle-4:review-name-dropped-class",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "<p className=\"text-sm\">{evidence.name}</p>",
++      "new": "<p className=\"text-sm\">{evidence.symbol}</p>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-name-dropped-class.log",
++      "log_sha256": "07cf174492b2019d391f88a508705738e9a804e47e60840c2e059391a33d3238"
++    },
++    {
++      "id": "manual:cycle-4:review-explanation-reversed",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "  return sentences;\n}",
++      "new": "  return sentences.reverse();\n}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-explanation-reversed.log",
++      "log_sha256": "df9eb11c2b551e14853b8267f5347fddd948f07eefc249cb8a5f359b427303d4"
++    },
++    {
++      "id": "manual:cycle-4:review-list-comma-copy",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/screens/research/copy.ts",
++      "old": "  listComma: \", \",",
++      "new": "  listComma: \"; \",",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-list-comma-copy.log",
++      "log_sha256": "e008d4804917daed896a80c7372cd46c248150110062709002e8e9c83b3e6451"
++    },
++    {
++      "id": "manual:cycle-4:review-add-unstyled",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/selection-tray.tsx",
++      "old": "          onClick={() => onAddToUniverse(checked)}\n          className={BUTTON}\n",
++      "new": "          onClick={() => onAddToUniverse(checked)}\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-add-unstyled.log",
++      "log_sha256": "1c2bc4ce4ac36b700d084ef7fdbd525b547b8195ad964abc5a2f3d80ab576846"
++    },
++    {
++      "id": "manual:cycle-4:review-blocked-unstyled",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/selection-tray.tsx",
++      "old": "            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n",
++      "new": "            // carries no handler, so activating it does nothing.\n",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-blocked-unstyled.log",
++      "log_sha256": "01c5b05c9b707c5ea1a57eb98a22855472ebaef7d36484be8c7d915a271153da"
++    },
++    {
++      "id": "manual:cycle-4:review-count-after-compare",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/selection-tray.tsx",
++      "old": "      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n      {canCompare ? (\n        <Link\n          to={`/research/compare?symbols=${checked.map(encodeURIComponent).join(\",\")}`}\n          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}\n        </Link>\n      ) : (\n        <>\n          <button\n            type=\"button\"\n            data-variant=\"blocked\"\n            aria-disabled=\"true\"\n            aria-describedby={reasonId}\n            // Never `disabled`: a disabled control takes no focus, so its\n            // reason would never reach a keyboard or screen-reader user. It\n            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n          >\n            {SELECTION.compareSideBySide}\n          </button>\n          <span id={reasonId} className=\"text-sm\">\n            {SELECTION.compareBlocked}\n          </span>\n        </>\n      )}\n",
++      "new": "      {canCompare ? (\n        <Link\n          to={`/research/compare?symbols=${checked.map(encodeURIComponent).join(\",\")}`}\n          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}\n        </Link>\n      ) : (\n        <>\n          <button\n            type=\"button\"\n            data-variant=\"blocked\"\n            aria-disabled=\"true\"\n            aria-describedby={reasonId}\n            // Never `disabled`: a disabled control takes no focus, so its\n            // reason would never reach a keyboard or screen-reader user. It\n            // carries no handler, so activating it does nothing.\n            className={BUTTON}\n          >\n            {SELECTION.compareSideBySide}\n          </button>\n          <span id={reasonId} className=\"text-sm\">\n            {SELECTION.compareBlocked}\n          </span>\n        </>\n      )}\n      <p aria-live=\"polite\" className=\"text-sm\">\n        {SELECTION.selected(checked.length)}\n      </p>\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-count-after-compare.log",
++      "log_sha256": "ba6a574dcdbb67c339f86e8d03009cceba9b3dc2085d08e332b7a6d0df58023c"
++    },
++    {
++      "id": "manual:cycle-4:review-name-above-symbol",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "        <p className=\"flex items-center gap-2\">\n          <span className=\"font-numeric text-xl\">{evidence.symbol}</span>\n          {evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}\n        </p>\n        <p className=\"text-sm\">{evidence.name}</p>\n",
++      "new": "        <p className=\"text-sm\">{evidence.name}</p>\n        <p className=\"flex items-center gap-2\">\n          <span className=\"font-numeric text-xl\">{evidence.symbol}</span>\n          {evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}\n        </p>\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-name-above-symbol.log",
++      "log_sha256": "e541d5b32465cad74829cd5a99066f588f70e7a391fd92da91bb18f8f2ec4ad6"
++    },
++    {
++      "id": "manual:cycle-4:review-inputs-before-cell",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      <dd>\n        {cell === undefined ? (\n          CELL.absentValue\n        ) : (\n          <FactorCell cell={cell} factor={factor} showScore />\n        )}\n      </dd>\n      {line === null ? null : (\n        <dd data-testid=\"inputs-line\" className=\"text-xs\">\n          {line}\n        </dd>\n      )}\n",
++      "new": "      {line === null ? null : (\n        <dd data-testid=\"inputs-line\" className=\"text-xs\">\n          {line}\n        </dd>\n      )}\n      <dd>\n        {cell === undefined ? (\n          CELL.absentValue\n        ) : (\n          <FactorCell cell={cell} factor={factor} showScore />\n        )}\n      </dd>\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_review-inputs-before-cell.log",
++      "log_sha256": "6e9e0c0eebf0ad911e606c2e77482a8bec996b5dec010990e35fae36b2bcdb39"
++    },
++    {
++      "id": "manual:cycle-4:focus-dropped",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "            sectionRef.current?.focus();\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_focus-dropped.log",
++      "log_sha256": "7afac8a7d3b8e2c1f436290a2a37f162dc0b0c115fdae1a1b6bbfbf39c30f0ba"
++    },
++    {
++      "id": "manual:cycle-4:tab-stop",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      tabIndex={-1}\n",
++      "new": "      tabIndex={0}\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_tab-stop.log",
++      "log_sha256": "b655fd75ca81ac4da01d56a6714ca8e2382a55c8ca714074a2d5163244270378"
++    },
++    {
++      "id": "manual:cycle-4:no-tabindex",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      tabIndex={-1}\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_no-tabindex.log",
++      "log_sha256": "d762df1b465e4e74bb8b21bdba2e37aa6bc28cc81ca015ea1333c991f0220120"
++    },
++    {
++      "id": "manual:cycle-4:no-ref",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "      ref={sectionRef}\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_no-ref.log",
++      "log_sha256": "05b23453f75b26f31ecd004327fb2b0dd55e90d3d6d7a139b5722601194ca554"
++    },
++    {
++      "id": "manual:cycle-4:initial-idle",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "useState<InspectorState>(symbol === null ? IDLE : LOADING)",
++      "new": "useState<InspectorState>(IDLE)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_initial-idle.log",
++      "log_sha256": "171e4aade8cda074fd1d44371e974ee948dd08509ebc0f8b4f48c3f6b4a071b2"
++    },
++    {
++      "id": "manual:cycle-4:initial-loading",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "useState<InspectorState>(symbol === null ? IDLE : LOADING)",
++      "new": "useState<InspectorState>(LOADING)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_initial-loading.log",
++      "log_sha256": "2e1fdeaa1b112c2479954335953ddab044855bc1f28dbfd37652c4ef8fc377cc"
++    },
++    {
++      "id": "manual:cycle-4:reset-skipped",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "    setState(symbol === null ? IDLE : LOADING);\n  }\n",
++      "new": "  }\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_reset-skipped.log",
++      "log_sha256": "f38acca74ef52c645f791dc5d9ebc910e5df2fccb961e73bfa2a2ef590c230de"
++    },
++    {
++      "id": "manual:cycle-4:reset-always-loading",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "    setState(symbol === null ? IDLE : LOADING);\n  }\n",
++      "new": "    setState(LOADING);\n  }\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.1,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_reset-always-loading.log",
++      "log_sha256": "5ed1522aa492f1f13b9a8db2fd45b3329c5461b47c495072624386f68b873a59"
++    },
++    {
++      "id": "manual:cycle-4:reset-ignores-attempt",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "settled.symbol !== symbol || settled.attempt !== attempt",
++      "new": "settled.symbol !== symbol",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_reset-ignores-attempt.log",
++      "log_sha256": "25ed9708afe93a10794bb085f70d77adbde5d3654f4d82f979dcec7e40b502b3"
++    },
++    {
++      "id": "manual:cycle-4:reset-ignores-symbol",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "settled.symbol !== symbol || settled.attempt !== attempt",
++      "new": "settled.attempt !== attempt",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_reset-ignores-symbol.log",
++      "log_sha256": "9574526147ffc51cddb1321a5efcd770124b70e527479c1977c7be8665d60490"
++    },
++    {
++      "id": "manual:cycle-4:skeleton-literal",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "<output className=\"block h-8 w-full",
++      "new": "<output className=\"block h-24 w-full",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_skeleton-literal.log",
++      "log_sha256": "5568184814ce99b82183bfd0a77f5161acf4283370facbef2f5916ef0fdb0516"
++    },
++    {
++      "id": "manual:cycle-4:swatch-literal",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "web/src/components/patterns/inspector-panel.tsx",
++      "old": "className=\"inline-block h-2 w-2 rounded\"",
++      "new": "className=\"inline-block h-2 w-2 rounded-sm\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/rework-s7/results-logs/manual_cycle-4_swatch-literal.log",
++      "log_sha256": "67caf6a7affb35b1bf3835ed29ece293af33395a39c05080c89767c8b364c75e"
++    }
++  ],
++  "finished": "2026-10-31T15:16:38Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-4.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-4.log
+new file mode 100644
+index 0000000..5b0d962
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-4.log
+@@ -0,0 +1,208 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/copy.test.ts (317 tests) 29ms
++stderr | src/components/patterns/inspector-panel.test.tsx > TC-COMP-141: the inspector waits 150 ms, then issues one read (DAC-E4-S7-2; DEC-0164) > issues no read before 150 ms and exactly one at 150 ms, then none
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/selection-tray.test.tsx > TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1) > with 1 checked > renders Compare as a focusable blocked button carrying its reason
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/inspector-panel.test.tsx (58 tests | 5 failed) 275ms
++   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > sizes the skeleton from the theme's spacing scale (STD-UI-29) 6ms
++     → expect(element).toHaveClass("h-8 w-full rounded bg-secondary")
++
++Expected the element to have class:
++  h-8 w-full rounded bg-secondary
++Received:
++  block h-24 w-full animate-pulse rounded bg-secondary
++   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > moves focus to the Selected stock section when Try again is activated 6ms
++     → expect(element).toHaveFocus()
++
++Expected element with focus:
++  <section
++  aria-label="Selected stock"
++  class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
++  data-variant="summary"
++>
++  <output
++    class="block h-24 w-full animate-pulse rounded bg-secondary"
++  >
++    <span
++      class="sr-only"
++    >
++      Loading the selected stock.
++    </span>
++  </output>
++</section>
++Received element with focus:
++  <body>
++  <div>
++    <section
++      aria-label="Selected stock"
++      class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
++      data-variant="summary"
++    >
++      <output
++        class="block h-24 w-full animate-pulse rounded bg-secondary"
++      >
++        <span
++          class="sr-only"
++        >
++          Loading the selected stock.
++        </span>
++      </output>
++    </section>
++  </div>
++</body>
++   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the failure again once Try again is activated 7ms
++     → expected [ …(2) ] to deeply equal [ 'Loading the selected stock.' ]
++   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the previous stock under a new selection 7ms
++     → expected [ …(3) ] to deeply equal [ …(3) ]
++   × the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166) > renders one block per factor in the order Value, Growth, Momentum with an identity swatch 4ms
++     → expect(element).toHaveClass("h-2 w-2 rounded")
++
++Expected the element to have class:
++  h-2 w-2 rounded
++Received:
++  inline-block h-2 w-2 rounded-sm
++ ✓ src/components/patterns/selection-tray.test.tsx (24 tests) 215ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > sizes the skeleton from the theme's spacing scale (STD-UI-29)
++Error: expect(element).toHaveClass("h-8 w-full rounded bg-secondary")
++
++Expected the element to have class:
++  h-8 w-full rounded bg-secondary
++Received:
++  block h-24 w-full animate-pulse rounded bg-secondary
++ ❯ src/components/patterns/inspector-panel.test.tsx:248:20
++    246|     render(panel("AAPL"));
++    247|     const status = within(inspector()).getByRole("status");
++    248|     expect(status).toHaveClass("h-8", "w-full", "rounded", "bg-seconda…
++       |                    ^
++    249|   });
++    250| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > moves focus to the Selected stock section when Try again is activated
++Error: expect(element).toHaveFocus()
++
++Expected element with focus:
++  <section
++  aria-label="Selected stock"
++  class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
++  data-variant="summary"
++>
++  <output
++    class="block h-24 w-full animate-pulse rounded bg-secondary"
++  >
++    <span
++      class="sr-only"
++    >
++      Loading the selected stock.
++    </span>
++  </output>
++</section>
++Received element with focus:
++  <body>
++  <div>
++    <section
++      aria-label="Selected stock"
++      class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
++      data-variant="summary"
++    >
++      <output
++        class="block h-24 w-full animate-pulse rounded bg-secondary"
++      >
++        <span
++          class="sr-only"
++        >
++          Loading the selected stock.
++        </span>
++      </output>
++    </section>
++  </div>
++</body>
++ ❯ src/components/patterns/inspector-panel.test.tsx:326:25
++    324|     fireEvent.click(tryAgain);
++    325|     expect(tryAgain).not.toBeInTheDocument();
++    326|     expect(inspector()).toHaveFocus();
++       |                         ^
++    327|     expect(inspector()).toHaveAttribute("tabindex", "-1");
++    328|     await advance(150);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the failure again once Try again is activated
++AssertionError: expected [ …(2) ] to deeply equal [ 'Loading the selected stock.' ]
++
++- Expected
+++ Received
++
++  Array [
+++   "Could not load the stock's scores and inputs: FactorFlow hit an unexpected problem. Try again.Try again",
++    "Loading the selected stock.",
++  ]
++
++ ❯ src/components/patterns/inspector-panel.test.tsx:354:23
++    352|     read.mockReturnValueOnce(deferred<StockEvidence>().promise);
++    353|     fireEvent.click(within(inspector()).getByRole("button", { name: RE…
++    354|     expect(committed).toEqual([LOADING]);
++       |                       ^
++    355|   });
++    356| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the previous stock under a new selection
++AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
++
++- Expected
+++ Received
++
++  Array [
++-   "AAPL:Loading the selected stock.",
++-   "MSFT:Loading the selected stock.",
++-   "null:Select a stock to see why it scores as it does.",
+++   "AAPL:Select a stock to see why it scores as it does.",
+++   "MSFT:AAPLApple Inc.In no universeValue88+1.27Growth40-0.25Momentum610.00See every input and its datePercentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.",
+++   "null:Loading the selected stock.",
++  ]
++
++ ❯ src/components/patterns/inspector-panel.test.tsx:383:23
++    381|     rerender(tree("MSFT"));
++    382|     rerender(tree(null));
++    383|     expect(committed).toEqual([
++       |                       ^
++    384|       `AAPL:${LOADING}`,
++    385|       `MSFT:${LOADING}`,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
++
++ FAIL  src/components/patterns/inspector-panel.test.tsx > the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166) > renders one block per factor in the order Value, Growth, Momentum with an identity swatch
++Error: expect(element).toHaveClass("h-2 w-2 rounded")
++
++Expected the element to have class:
++  h-2 w-2 rounded
++Received:
++  inline-block h-2 w-2 rounded-sm
++ ❯ src/components/patterns/inspector-panel.test.tsx:652:22
++    650|       expect(swatch.tagName).toBe("SPAN");
++    651|       expect(swatch).toHaveAttribute("aria-hidden", "true");
++    652|       expect(swatch).toHaveClass("h-2", "w-2", "rounded");
++       |                      ^
++    653|     }
++    654|     expect(swatches.map((swatch) => swatch.style.backgroundColor)).toE…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  5 failed | 394 passed (399)
++   Start at  10:15:36
++   Duration  1.67s (transform 250ms, setup 446ms, collect 848ms, tests 519ms, environment 1.19s, prepare 790ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-tasks.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-tasks.md
+index 7fe1b9d..6dfba0d 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-tasks.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-tasks.md
+@@ -7,7 +7,8 @@ status: draft
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-17
+-updated: 2026-10-18
++updated: 2026-10-31
++last_reworked_review: CAP-002-E4-S7-implementation-review-v1.md
+ ai_provenance:
+   agent_id: implementation-planning-agent
+   agent_version: "1.0"
+diff --git a/web/src/components/patterns/inspector-panel.test.tsx b/web/src/components/patterns/inspector-panel.test.tsx
+index 3595f4c..87f0a98 100644
+--- a/web/src/components/patterns/inspector-panel.test.tsx
++++ b/web/src/components/patterns/inspector-panel.test.tsx
+@@ -1,5 +1,5 @@
+ import { act, fireEvent, render, screen, within } from "@testing-library/react";
+-import type { JSX } from "react";
++import { type JSX, Profiler, useLayoutEffect } from "react";
+ import { MemoryRouter } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
+@@ -85,6 +85,24 @@ function inspector(): HTMLElement {
+   return screen.getByRole("region", { name: REGIONS.selectedStock });
+ }
+ 
++/** The delivered `button` `outline` classes (`screens/instruments/start-action.tsx`; UX design 1.1). */
++const OUTLINE_BUTTON = ["w-fit", "rounded", "border", "border-border", "px-3", "py-2", "text-sm"];
++
++/** The delivered `card` `summary` classes (classification-ui section 2.5; UX design 1.1). */
++const SUMMARY_CARD = [
++  "rounded",
++  "border",
++  "border-border",
++  "bg-card",
++  "p-4",
++  "text-card-foreground",
++];
++
++/** Whether `earlier` comes before `later` in document order. */
++function precedes(earlier: Element, later: Element): boolean {
++  return (earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
++}
++
+ async function advance(ms: number): Promise<void> {
+   await act(async () => {
+     await vi.advanceTimersByTimeAsync(ms);
+@@ -162,6 +180,7 @@ describe("TC-COMP-142: nothing selected reads the empty sentence (DAC-E4-S7-3)",
+     render(panel(null));
+     const section = inspector();
+     expect(section.tagName).toBe("SECTION");
++    expect(section).toHaveClass(...SUMMARY_CARD);
+     expect(section).toHaveTextContent(/^Select a stock to see why it scores as it does\.$/);
+     expect(section).toHaveTextContent(SELECTION.inspectorEmpty);
+     await advance(1_000);
+@@ -216,11 +235,19 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
+       await advance(ms);
+       const status = within(inspector()).getByRole("status");
+       expect(status).toHaveTextContent(LOADING);
++      expect(inspector()).toHaveClass(...SUMMARY_CARD);
+       expect(inspector()).not.toHaveTextContent(SELECTION.inspectorEmpty);
+       expect(inspector()).not.toHaveTextContent(SELECTION.inNoUniverse);
+     }
+   });
+ 
++  it("sizes the skeleton from the theme's spacing scale (STD-UI-29)", async () => {
++    read.mockReturnValue(deferred<StockEvidence>().promise);
++    render(panel("AAPL"));
++    const status = within(inspector()).getByRole("status");
++    expect(status).toHaveClass("h-8", "w-full", "rounded", "bg-secondary");
++  });
++
+   it("takes the loading sentence from copy.ts", () => {
+     expect(SELECTION.inspectorLoading).toBe(LOADING);
+   });
+@@ -235,6 +262,7 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
+     render(panel("ZZZZ"));
+     await advance(150);
+     const section = inspector();
++    expect(section).toHaveClass(...SUMMARY_CARD);
+     expect(section).toHaveTextContent(failureSentence(refusal));
+     expect(section).toHaveTextContent("FactorFlow doesn't follow that stock.");
+     expect(section).not.toHaveTextContent("internal text");
+@@ -286,6 +314,79 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
+     expect(read).toHaveBeenCalledTimes(2);
+   });
+ 
++  it("moves focus to the Selected stock section when Try again is activated", async () => {
++    read.mockRejectedValueOnce(new TypeError("Failed to fetch"));
++    render(panel("AAPL"));
++    await advance(150);
++    const tryAgain = within(inspector()).getByRole("button", { name: RESULTS.tryAgain });
++    tryAgain.focus();
++    read.mockResolvedValueOnce(evidence());
++    fireEvent.click(tryAgain);
++    expect(tryAgain).not.toBeInTheDocument();
++    expect(inspector()).toHaveFocus();
++    expect(inspector()).toHaveAttribute("tabindex", "-1");
++    await advance(150);
++    expect(inspector()).toHaveTextContent("Apple Inc.");
++    expect(inspector()).toHaveFocus();
++  });
++
++  it("never commits the failure again once Try again is activated", async () => {
++    const committed: string[] = [];
++    const failure = failureSentence({
++      operation: "get-stock-evidence",
++      resource: "classification",
++      code: null,
++    });
++    read.mockRejectedValueOnce(new TypeError("Failed to fetch"));
++    render(
++      <MemoryRouter>
++        {/* A Profiler reports each commit of the panel as it lands, so it sees what the commit put on the page. */}
++        <Profiler id="inspector" onRender={() => committed.push(inspector().textContent ?? "")}>
++          <InspectorPanel symbol="AAPL" />
++        </Profiler>
++      </MemoryRouter>,
++    );
++    await advance(150);
++    expect(inspector()).toHaveTextContent(failure);
++    committed.length = 0;
++    read.mockReturnValueOnce(deferred<StockEvidence>().promise);
++    fireEvent.click(within(inspector()).getByRole("button", { name: RESULTS.tryAgain }));
++    expect(committed).toEqual([LOADING]);
++  });
++
++  it("never commits the previous stock under a new selection", async () => {
++    const committed: string[] = [];
++    function CommitProbe({ symbol }: { symbol: string | null }): null {
++      // A layout effect runs after the DOM is updated and before passive
++      // effects, so it sees exactly what this commit put on the page.
++      useLayoutEffect(() => {
++        committed.push(`${symbol}:${inspector().textContent ?? ""}`);
++      }, [symbol]);
++      return null;
++    }
++    function tree(symbol: string | null): JSX.Element {
++      return (
++        <MemoryRouter>
++          <InspectorPanel symbol={symbol} />
++          <CommitProbe symbol={symbol} />
++        </MemoryRouter>
++      );
++    }
++    read.mockImplementation(async (symbol) =>
++      evidence({ symbol, name: symbol === "AAPL" ? "Apple Inc." : "Microsoft Corp." }),
++    );
++    const { rerender } = render(tree("AAPL"));
++    await advance(150);
++    expect(inspector()).toHaveTextContent("Apple Inc.");
++    rerender(tree("MSFT"));
++    rerender(tree(null));
++    expect(committed).toEqual([
++      `AAPL:${LOADING}`,
++      `MSFT:${LOADING}`,
++      `null:${SELECTION.inspectorEmpty}`,
++    ]);
++  });
++
+   it("never renders a read that resolves after the selection moved on", async () => {
+     const aapl = deferred<StockEvidence>();
+     const msft = deferred<StockEvidence>();
+@@ -487,7 +588,57 @@ describe("the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166)", () => {
+     const section = await loaded(evidence());
+     const symbol = within(section).getByText("AAPL");
+     expect(symbol).toHaveClass("font-numeric", "text-xl");
+-    expect(within(section).getByText("Apple Inc.")).toBeInTheDocument();
++    const name = within(section).getByText("Apple Inc.");
++    expect(precedes(symbol, name)).toBe(true);
++  });
++
++  it("orders the loaded inspector top to bottom as UX design 1.1 does", async () => {
++    const retired = cell({ status: "not_classified", reasonCode: "retired" });
++    const section = await loaded(
++      evidence({
++        lifecycle: "retired",
++        memberships: [{ universeId: "u-1", name: "Tech" }],
++        factors: { value: retired, growth: retired, momentum: retired },
++      }),
++    );
++    const parts = [
++      within(section).getByText("AAPL"),
++      within(section).getByText("Apple Inc."),
++      within(section).getByTestId("memberships"),
++      within(section).getAllByRole("term")[0],
++      explanation(section),
++      within(section).getByRole("link", { name: SELECTION.seeEveryInput }),
++      within(section).getByText(SELECTION.footnote),
++    ];
++    for (const part of parts) {
++      expect(part).not.toBeNull();
++    }
++    for (let index = 1; index < parts.length; index += 1) {
++      expect(precedes(parts[index - 1] as Element, parts[index] as Element)).toBe(true);
++    }
++  });
++
++  it("orders each factor block as the term, then the cell, then the inputs line", async () => {
++    const section = await loaded(
++      evidence({
++        inputs: [
++          input("value", "book-to-price", "2025-06-27", "2026-10-14"),
++          input("growth", "revenue growth", "2025-06-27", "2026-10-14"),
++          input("momentum", "12-month return", "2025-06-27", "2026-10-14"),
++        ],
++      }),
++    );
++    for (const name of ["Value", "Growth", "Momentum"]) {
++      const children = Array.from(block(section, name).children);
++      expect(children.map((child) => child.tagName)).toEqual(["DT", "DD", "DD"]);
++      expect(within(children[1] as HTMLElement).getByTestId("factor-cell")).toBeInTheDocument();
++      expect(children[2]).toHaveAttribute("data-testid", "inputs-line");
++    }
++  });
++
++  it("is the summary card when loaded", async () => {
++    const section = await loaded(evidence());
++    expect(section).toHaveClass(...SUMMARY_CARD);
+   });
+ 
+   it("renders one block per factor in the order Value, Growth, Momentum with an identity swatch", async () => {
+@@ -498,6 +649,7 @@ describe("the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166)", () => {
+     for (const swatch of swatches) {
+       expect(swatch.tagName).toBe("SPAN");
+       expect(swatch).toHaveAttribute("aria-hidden", "true");
++      expect(swatch).toHaveClass("h-2", "w-2", "rounded");
+     }
+     expect(swatches.map((swatch) => swatch.style.backgroundColor)).toEqual([
+       "hsl(var(--factor-value))",
+@@ -819,6 +971,7 @@ describe("the explanation box, the evidence link and the footnote (AC-16; classi
+     const link = within(section).getByRole("link", { name: SELECTION.seeEveryInput });
+     expect(link.tagName).toBe("A");
+     expect(link).toHaveAttribute("href", "/research/stocks/BRK%2FB");
++    expect(link).toHaveClass(...OUTLINE_BUTTON);
+     expect(within(section).queryByRole("button", { name: SELECTION.seeEveryInput })).toBeNull();
+   });
+ 
+diff --git a/web/src/components/patterns/inspector-panel.tsx b/web/src/components/patterns/inspector-panel.tsx
+index 71edc6e..afc6e9e 100644
+--- a/web/src/components/patterns/inspector-panel.tsx
++++ b/web/src/components/patterns/inspector-panel.tsx
+@@ -1,4 +1,4 @@
+-import { Fragment, type JSX, type ReactNode, useEffect, useState } from "react";
++import { Fragment, type JSX, type ReactNode, useEffect, useRef, useState } from "react";
+ import { Link } from "react-router-dom";
+ import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
+ import type {
+@@ -212,7 +212,7 @@ function FactorBlock({
+       <dt className="flex items-center gap-2 text-sm">
+         <span
+           aria-hidden="true"
+-          className="inline-block h-2 w-2 rounded-sm"
++          className="inline-block h-2 w-2 rounded"
+           style={{ backgroundColor: SWATCH[factor] }}
+         />
+         {FACTOR_LABELS[factor]}
+@@ -283,7 +283,8 @@ function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
+  * Each settled symbol is read once with `getStockEvidence` (CAP-002-E4-S1):
+  * no polling, no cache and no prefetch. A response for a symbol that is no
+  * longer current is dropped, and a failure offers **Try again**, which reads
+- * the same symbol once more after the same wait (DEC-0165). With `symbol`
++ * the same symbol once more after the same wait (DEC-0165) and moves focus
++ * to this section, the one part that stays (DEC-0250). With `symbol`
+  * null it reads the empty sentence and issues nothing.
+  *
+  * Loaded, top to bottom (DAC-E4-S7-2, DAC-E4-S7-4): the symbol and name, with
+@@ -304,18 +305,26 @@ function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
+  * percentile, the score and `RestatedMark` (`factor-cell.tsx`), CAP-002-E4-S3.
+  */
+ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Element {
+-  const [state, setState] = useState<InspectorState>(IDLE);
++  const [state, setState] = useState<InspectorState>(symbol === null ? IDLE : LOADING);
+   const [attempt, setAttempt] = useState(0);
++  const [settled, setSettled] = useState({ symbol, attempt });
++  const sectionRef = useRef<HTMLElement>(null);
++
++  // A new selection or a retry resets the panel during render, before the
++  // commit, so the previous stock's content is never put on the page under
++  // the new selection (T008; React's "adjusting state when a prop changes").
++  if (settled.symbol !== symbol || settled.attempt !== attempt) {
++    setSettled({ symbol, attempt });
++    setState(symbol === null ? IDLE : LOADING);
++  }
+ 
+   // `attempt` is a dependency it does not read: Try again re-runs the read.
+   // biome-ignore lint/correctness/useExhaustiveDependencies: see above
+   useEffect(() => {
+     if (symbol === null) {
+-      setState(IDLE);
+       return;
+     }
+     let cancelled = false;
+-    setState(LOADING);
+     const timer = setTimeout(() => {
+       getStockEvidence(symbol).then(
+         (evidence) => {
+@@ -343,15 +352,25 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
+     body = (
+       <>
+         <p className="text-sm">{state.sentence}</p>
+-        <button type="button" onClick={() => setAttempt((count) => count + 1)} className={BUTTON}>
++        <button
++          type="button"
++          onClick={() => {
++            // The button leaves with the failure, so focus moves to the
++            // section that stays rather than falling to the document (DEC-0250).
++            sectionRef.current?.focus();
++            setAttempt((count) => count + 1);
++          }}
++          className={BUTTON}
++        >
+           {RESULTS.tryAgain}
+         </button>
+       </>
+     );
+   } else if (state.kind === "loading") {
+     body = (
+-      // An `output` carries `role="status"` implicitly (as `as-of-line.tsx`).
+-      <output className="block h-24 w-full animate-pulse rounded bg-secondary">
++      // An `output` carries `role="status"` implicitly (as `as-of-line.tsx`);
++      // its height is a spacing token, never a literal (STD-UI-29; DEC-0251).
++      <output className="block h-8 w-full animate-pulse rounded bg-secondary">
+         <span className="sr-only">{SELECTION.inspectorLoading}</span>
+       </output>
+     );
+@@ -361,6 +380,9 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
+ 
+   return (
+     <section
++      ref={sectionRef}
++      // Focusable by script only, for Try again (DEC-0250); never a tab stop.
++      tabIndex={-1}
+       aria-label={REGIONS.selectedStock}
+       data-variant="summary"
+       className="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
+diff --git a/web/src/components/patterns/selection-tray.test.tsx b/web/src/components/patterns/selection-tray.test.tsx
+index a783f0a..ddcd502 100644
+--- a/web/src/components/patterns/selection-tray.test.tsx
++++ b/web/src/components/patterns/selection-tray.test.tsx
+@@ -40,6 +40,14 @@ function tray(): HTMLElement {
+   return screen.getByRole("region", { name: REGIONS.selection });
+ }
+ 
++/** The delivered `button` `outline` classes (`screens/instruments/start-action.tsx`; UX design 1.1). */
++const OUTLINE_BUTTON = ["w-fit", "rounded", "border", "border-border", "px-3", "py-2", "text-sm"];
++
++/** Whether `earlier` comes before `later` in document order. */
++function precedes(earlier: Element, later: Element): boolean {
++  return (earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
++}
++
+ describe("TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1)", () => {
+   // Implements TC-COMP-140
+   describe.each([1, 7, 8])("with %i checked", (count) => {
+@@ -93,6 +101,7 @@ describe("TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to
+       expect(compare).not.toHaveAttribute("data-variant", "blocked");
+       expect(compare).not.toHaveAttribute("aria-disabled");
+       expect(compare).not.toHaveAttribute("aria-describedby");
++      expect(compare).toHaveClass(...OUTLINE_BUTTON);
+       expect(
+         within(tray()).queryByRole("button", { name: SELECTION.compareSideBySide }),
+       ).toBeNull();
+@@ -138,6 +147,20 @@ describe("the tray appears at one checked row and announces {n} selected (AC-16,
+     expect(grown).toBe(count);
+   });
+ 
++  it.each([1, 3, 7])(
++    "with %i checked, puts the count on the left, before Compare and Add to universe…",
++    (count) => {
++      renderTray(SYMBOLS.slice(0, count), vi.fn());
++      const region = tray();
++      const selected = within(region).getByText(SELECTION.selected(count));
++      const compare = within(region).getByText(SELECTION.compareSideBySide);
++      const add = within(region).getByRole("button", { name: SELECTION.addToUniverse });
++      expect(region.firstElementChild).toBe(selected);
++      expect(precedes(selected, compare)).toBe(true);
++      expect(precedes(compare, add)).toBe(true);
++    },
++  );
++
+   it("counts what it is given, a duplicate included", () => {
+     renderTray(["AAPL", "AAPL", "MSFT"]);
+     expect(within(tray()).getByText(SELECTION.selected(3))).toBeInTheDocument();
+@@ -184,6 +207,7 @@ describe("Add to universe… is the optional seam to the add dialog (DEC-0163)",
+       const add = within(tray()).getByRole("button", { name: SELECTION.addToUniverse });
+       expect(add).toHaveAttribute("type", "button");
+       expect(add).toHaveAttribute("data-variant", "outline");
++      expect(add).toHaveClass(...OUTLINE_BUTTON);
+       expect(add).toBeEnabled();
+       expect(add).not.toHaveAttribute("aria-disabled");
+       await user.click(add);

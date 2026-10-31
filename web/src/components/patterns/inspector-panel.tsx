@@ -1,4 +1,4 @@
-import { Fragment, type JSX, type ReactNode, useEffect, useState } from "react";
+import { Fragment, type JSX, type ReactNode, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
 import type {
@@ -212,7 +212,7 @@ function FactorBlock({
       <dt className="flex items-center gap-2 text-sm">
         <span
           aria-hidden="true"
-          className="inline-block h-2 w-2 rounded-sm"
+          className="inline-block h-2 w-2 rounded"
           style={{ backgroundColor: SWATCH[factor] }}
         />
         {FACTOR_LABELS[factor]}
@@ -283,7 +283,8 @@ function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
  * Each settled symbol is read once with `getStockEvidence` (CAP-002-E4-S1):
  * no polling, no cache and no prefetch. A response for a symbol that is no
  * longer current is dropped, and a failure offers **Try again**, which reads
- * the same symbol once more after the same wait (DEC-0165). With `symbol`
+ * the same symbol once more after the same wait (DEC-0165) and moves focus
+ * to this section, the one part that stays (DEC-0250). With `symbol`
  * null it reads the empty sentence and issues nothing.
  *
  * Loaded, top to bottom (DAC-E4-S7-2, DAC-E4-S7-4): the symbol and name, with
@@ -304,18 +305,26 @@ function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
  * percentile, the score and `RestatedMark` (`factor-cell.tsx`), CAP-002-E4-S3.
  */
 export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Element {
-  const [state, setState] = useState<InspectorState>(IDLE);
+  const [state, setState] = useState<InspectorState>(symbol === null ? IDLE : LOADING);
   const [attempt, setAttempt] = useState(0);
+  const [settled, setSettled] = useState({ symbol, attempt });
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // A new selection or a retry resets the panel during render, before the
+  // commit, so the previous stock's content is never put on the page under
+  // the new selection (T008; React's "adjusting state when a prop changes").
+  if (settled.symbol !== symbol || settled.attempt !== attempt) {
+    setSettled({ symbol, attempt });
+    setState(symbol === null ? IDLE : LOADING);
+  }
 
   // `attempt` is a dependency it does not read: Try again re-runs the read.
   // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(() => {
     if (symbol === null) {
-      setState(IDLE);
       return;
     }
     let cancelled = false;
-    setState(LOADING);
     const timer = setTimeout(() => {
       getStockEvidence(symbol).then(
         (evidence) => {
@@ -343,15 +352,25 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
     body = (
       <>
         <p className="text-sm">{state.sentence}</p>
-        <button type="button" onClick={() => setAttempt((count) => count + 1)} className={BUTTON}>
+        <button
+          type="button"
+          onClick={() => {
+            // The button leaves with the failure, so focus moves to the
+            // section that stays rather than falling to the document (DEC-0250).
+            sectionRef.current?.focus();
+            setAttempt((count) => count + 1);
+          }}
+          className={BUTTON}
+        >
           {RESULTS.tryAgain}
         </button>
       </>
     );
   } else if (state.kind === "loading") {
     body = (
-      // An `output` carries `role="status"` implicitly (as `as-of-line.tsx`).
-      <output className="block h-24 w-full animate-pulse rounded bg-secondary">
+      // An `output` carries `role="status"` implicitly (as `as-of-line.tsx`);
+      // its height is a spacing token, never a literal (STD-UI-29; DEC-0251).
+      <output className="block h-8 w-full animate-pulse rounded bg-secondary">
         <span className="sr-only">{SELECTION.inspectorLoading}</span>
       </output>
     );
@@ -361,6 +380,9 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
 
   return (
     <section
+      ref={sectionRef}
+      // Focusable by script only, for Try again (DEC-0250); never a tab stop.
+      tabIndex={-1}
       aria-label={REGIONS.selectedStock}
       data-variant="summary"
       className="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
