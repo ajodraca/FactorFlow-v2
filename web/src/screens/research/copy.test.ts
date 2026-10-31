@@ -59,6 +59,7 @@ const CALLS: Record<string, unknown[][]> = {
   ],
   savedFromFilter: [["2026-10-15", SAMPLE_QUERY]],
   "SELECTION.inUniverses": [[["Tech", "Dividend growers"]]],
+  "SELECTION.inputsLineAsOf": [[["book-to-price", "earnings yield"], "2025-06-27"]],
   "SELECTION.inputsLine": [
     [["book-to-price", "earnings yield", "free-cash-flow yield"], "2025-06-27", "2026-10-14"],
   ],
@@ -529,6 +530,19 @@ describe("copy.ts completeness and keying", () => {
       "In Tech, Value and Dividend growers",
     );
     expect(copy.SELECTION.inUniverses(["Tech"])).toBe("In Tech");
+    // CAP-002-E4-S7 T009 (DEC-0165): the inputs clause without a known_on, its separator, the line's lead.
+    expect(copy.SELECTION.inputsLineAsOf(["12-month return"], "2026-10-14")).toBe(
+      "From 12-month return, as of 2026-10-14",
+    );
+    expect(copy.SELECTION.inputsLineSeparator).toBe("; ");
+    expect(copy.SELECTION.inUniversesLead).toBe("In ");
+    expect(copy.SELECTION.listComma).toBe(", ");
+    expect(copy.SELECTION.listAnd).toBe(" and ");
+    expect(copy.SELECTION.inUniverses(["A", "B", "C"])).toBe(
+      `${copy.SELECTION.inUniversesLead}A${copy.SELECTION.listComma}B${copy.SELECTION.listAnd}C`,
+    );
+    // CAP-002-E4-S7 T009 (DEC-0165): the inspector skeleton's text.
+    expect(copy.SELECTION.inspectorLoading).toBe("Loading the selected stock.");
     expect(
       copy.SELECTION.inputsLine(
         ["book-to-price", "earnings yield", "free-cash-flow yield"],

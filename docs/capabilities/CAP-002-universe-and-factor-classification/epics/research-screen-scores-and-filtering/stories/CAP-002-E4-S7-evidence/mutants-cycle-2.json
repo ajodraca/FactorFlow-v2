@@ -1,0 +1,190 @@
+{
+ "schema": 1,
+ "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+ "range": "2d547646c91aaefa3739a3aacae3d4e0c5ba142b..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:11:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 11,
+   "original": "export const INSPECT_DEBOUNCE_MS = 150;",
+   "mutated": "export const INSPECT_DEBOUNCE_MS = 151;"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:62:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 62,
+   "original": "  const [attempt, setAttempt] = useState(0);",
+   "mutated": "  const [attempt, setAttempt] = useState(1);"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:71:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 71,
+   "original": "    let cancelled = false;",
+   "mutated": "    let cancelled = true;"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:76:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 76,
+   "original": "          if (!cancelled) {",
+   "mutated": "          if (cancelled) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:81:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 81,
+   "original": "          if (!cancelled) {",
+   "mutated": "          if (cancelled) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:88:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 88,
+   "original": "      cancelled = true;",
+   "mutated": "      cancelled = false;"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:102:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 102,
+   "original": "          onClick={() => setAttempt((count) => count + 1)}",
+   "mutated": "          onClick={() => setAttempt((count) => count + 2)}"
+  },
+  {
+   "id": "manual:cycle-2:no-null-guard-reset",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    if (symbol === null) {\n      setState(IDLE);\n      return;\n    }\n",
+   "new": "    if (symbol === null) {\n      return;\n    }\n"
+  },
+  {
+   "id": "manual:cycle-2:no-loading-at-start",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    let cancelled = false;\n    setState(LOADING);\n",
+   "new": "    let cancelled = false;\n"
+  },
+  {
+   "id": "manual:cycle-2:no-clear-timeout",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      clearTimeout(timer);\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:no-debounce",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    }, INSPECT_DEBOUNCE_MS);",
+   "new": "    }, 0);"
+  },
+  {
+   "id": "manual:cycle-2:no-attempt-dep",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  }, [symbol, attempt]);",
+   "new": "  }, [symbol]);"
+  },
+  {
+   "id": "manual:cycle-2:retry-no-op",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "onClick={() => setAttempt((count) => count + 1)}",
+   "new": "onClick={() => undefined}"
+  },
+  {
+   "id": "manual:cycle-2:message-shown",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  return cause instanceof ClassificationApiError\n    ? failureSentence(cause)\n",
+   "new": "  return cause instanceof Error\n    ? cause.message\n"
+  },
+  {
+   "id": "manual:cycle-2:generic-for-refusal",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  return cause instanceof ClassificationApiError\n    ? failureSentence(cause)\n",
+   "new": "  return false\n    ? failureSentence(cause)\n"
+  },
+  {
+   "id": "manual:cycle-2:failed-no-button",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        <button\n          type=\"button\"\n          onClick={() => setAttempt",
+   "new": "        <button\n          type=\"submit\"\n          onClick={() => setAttempt"
+  },
+  {
+   "id": "manual:cycle-2:no-aria-label",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      aria-label={REGIONS.selectedStock}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:loading-as-empty",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  } else if (state.kind === \"loading\") {",
+   "new": "  } else if (false) {"
+  },
+  {
+   "id": "manual:cycle-2:failed-as-loading",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  } else if (state.kind === \"failed\") {",
+   "new": "  } else if (false) {"
+  },
+  {
+   "id": "manual:cycle-2:loading-no-text",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        <span className=\"sr-only\">{SELECTION.inspectorLoading}</span>\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:no-name",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      <p>{evidence.name}</p>\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:loading-copy",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "  inspectorLoading: \"Loading the selected stock.\",",
+   "new": "  inspectorLoading: \"Loading.\","
+  }
+ ]
+}

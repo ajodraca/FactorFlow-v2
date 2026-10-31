@@ -1,0 +1,495 @@
+{
+ "schema": 1,
+ "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+ "range": "dfbd6845823923ab361a18ccddb2e5b7d7cd8057..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:78:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 78,
+   "original": "    if (row.factor !== factor || row.asOf === null) {",
+   "mutated": "    if (row.factor !== factor && row.asOf === null) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:82:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 82,
+   "original": "      (candidate) => candidate.asOf === row.asOf && candidate.knownOn === row.knownOn,",
+   "mutated": "      (candidate) => candidate.asOf === row.asOf || candidate.knownOn === row.knownOn,"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:85:drop-field-copy:1",
+   "cycle": "cycle-3",
+   "operator": "drop-field-copy",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 85,
+   "original": "      groups.push({ asOf: row.asOf, knownOn: row.knownOn, labels: [row.label] });",
+   "mutated": "      groups.push({ asOf: nil, knownOn: row.knownOn, labels: [row.label] });"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:85:drop-field-copy:2",
+   "cycle": "cycle-3",
+   "operator": "drop-field-copy",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 85,
+   "original": "      groups.push({ asOf: row.asOf, knownOn: row.knownOn, labels: [row.label] });",
+   "mutated": "      groups.push({ asOf: row.asOf, knownOn: nil, labels: [row.label] });"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:90:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 90,
+   "original": "  if (groups.length === 0) {",
+   "mutated": "  if (groups.length === 1) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:103:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 103,
+   "original": "  return code !== null && Object.hasOwn(CELL.incompleteStatus, code);",
+   "mutated": "  return code !== null || Object.hasOwn(CELL.incompleteStatus, code);"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:123:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 123,
+   "original": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
+   "mutated": "  if (cell.reasonCode === \"retired\" && cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:123:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 123,
+   "original": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" || isScored(cell)) {",
+   "mutated": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\" && isScored(cell)) {"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:136:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 136,
+   "original": "  return cell !== undefined && factor !== \"momentum\" && cell.restatedPossible && isScored(cell);",
+   "mutated": "  return cell !== undefined || factor !== \"momentum\" && cell.restatedPossible && isScored(cell);"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:136:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 136,
+   "original": "  return cell !== undefined && factor !== \"momentum\" && cell.restatedPossible && isScored(cell);",
+   "mutated": "  return cell !== undefined && factor !== \"momentum\" || cell.restatedPossible && isScored(cell);"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:136:negate-boolean:3",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 136,
+   "original": "  return cell !== undefined && factor !== \"momentum\" && cell.restatedPossible && isScored(cell);",
+   "mutated": "  return cell !== undefined && factor !== \"momentum\" && cell.restatedPossible || isScored(cell);"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:178:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 178,
+   "original": "      {memberships.length === 0 ? (",
+   "mutated": "      {memberships.length === 1 ? ("
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:185:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 185,
+   "original": "              {index === 0",
+   "mutated": "              {index === 1"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:187:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 187,
+   "original": "                : index === memberships.length - 1",
+   "mutated": "                : index === memberships.length - 2"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:254:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 254,
+   "original": "      {sentences.length === 0 ? null : (",
+   "mutated": "      {sentences.length === 1 ? null : ("
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:346:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 346,
+   "original": "        <button type=\"button\" onClick={() => setAttempt((count) => count + 1)} className={BUTTON}>",
+   "mutated": "        <button type=\"button\" onClick={() => setAttempt((count) => count + 2)} className={BUTTON}>"
+  },
+  {
+   "id": "manual:cycle-3:swatch-not-hidden",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        <span\n          aria-hidden=\"true\"\n          className=\"inline-block h-2 w-2 rounded-sm\"",
+   "new": "        <span\n          className=\"inline-block h-2 w-2 rounded-sm\""
+  },
+  {
+   "id": "manual:cycle-3:swatch-one-token",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "style={{ backgroundColor: SWATCH[factor] }}",
+   "new": "style={{ backgroundColor: SWATCH.value }}"
+  },
+  {
+   "id": "manual:cycle-3:growth-token",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  growth: \"hsl(var(--factor-growth))\",",
+   "new": "  growth: \"hsl(var(--growth))\","
+  },
+  {
+   "id": "manual:cycle-3:no-show-score",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<FactorCell cell={cell} factor={factor} showScore />",
+   "new": "<FactorCell cell={cell} factor={factor} />"
+  },
+  {
+   "id": "manual:cycle-3:momentum-as-value",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<FactorCell cell={cell} factor={factor} showScore />",
+   "new": "<FactorCell cell={cell} factor=\"value\" showScore />"
+  },
+  {
+   "id": "manual:cycle-3:factor-order",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "const FACTORS: readonly FactorName[] = [\"value\", \"growth\", \"momentum\"];",
+   "new": "const FACTORS: readonly FactorName[] = [\"value\", \"momentum\", \"growth\"];"
+  },
+  {
+   "id": "manual:cycle-3:absent-blank",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "          CELL.absentValue\n",
+   "new": "          null\n"
+  },
+  {
+   "id": "manual:cycle-3:inputs-line-size",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<dd data-testid=\"inputs-line\" className=\"text-xs\">",
+   "new": "<dd data-testid=\"inputs-line\" className=\"text-sm\">"
+  },
+  {
+   "id": "manual:cycle-3:symbol-face",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<span className=\"font-numeric text-xl\">{evidence.symbol}</span>",
+   "new": "<span className=\"text-xl\">{evidence.symbol}</span>"
+  },
+  {
+   "id": "manual:cycle-3:symbol-size",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<span className=\"font-numeric text-xl\">{evidence.symbol}</span>",
+   "new": "<span className=\"font-numeric text-lg\">{evidence.symbol}</span>"
+  },
+  {
+   "id": "manual:cycle-3:no-retired-badge",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "{evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}",
+   "new": "{null}"
+  },
+  {
+   "id": "manual:cycle-3:badge-always",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "{evidence.lifecycle === \"retired\" ? <NotFollowedBadge /> : null}",
+   "new": "<NotFollowedBadge />"
+  },
+  {
+   "id": "manual:cycle-3:badge-no-shape",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      <svg aria-hidden=\"true\" focusable=\"false\" viewBox=\"0 0 12 12\" className=\"h-3 w-3 shrink-0\">\n        <circle cx=\"6\" cy=\"6\" r=\"4.5\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"1.5\" />\n        <line x1=\"3.5\" y1=\"6\" x2=\"8.5\" y2=\"6\" stroke=\"currentColor\" strokeWidth=\"1.5\" />\n      </svg>\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:badge-no-variant",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      data-variant=\"status-neutral\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:no-retired-sentence",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (evidence.lifecycle === \"retired\") {\n    sentences.push(CELL.notFollowedNoDate);\n  }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:no-restated-sentence",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    sentences.push(CELL.restatedExplanation);\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:restated-every",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (FACTORS.some((factor) => showsMark(evidence.factors[factor], factor))) {\n    sentences.push(CELL.restatedExplanation);\n  }",
+   "new": "  for (const factor of FACTORS) {\n    if (showsMark(evidence.factors[factor], factor)) {\n      sentences.push(CELL.restatedExplanation);\n    }\n  }"
+  },
+  {
+   "id": "manual:cycle-3:no-incomplete",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    return sentence === null ? [] : [sentence];",
+   "new": "    return [];"
+  },
+  {
+   "id": "manual:cycle-3:detail-ignored",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (cell.reasonDetail !== null) {\n    return CELL.incompleteDetail(cell.reasonDetail, factor);\n  }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:generic-ignored",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  return isIncompleteReason(cell.reasonCode)\n    ? CELL.incompleteGeneric(cell.reasonCode, factor)\n    : null;",
+   "new": "  return null;"
+  },
+  {
+   "id": "manual:cycle-3:is-scored-percentile",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    cell.status === \"classified\" &&\n    cell.percentile !== null\n",
+   "new": "    cell.status === \"classified\"\n"
+  },
+  {
+   "id": "manual:cycle-3:is-scored-status",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    cell.status === \"classified\" &&\n    cell.percentile !== null\n",
+   "new": "    cell.percentile !== null\n"
+  },
+  {
+   "id": "manual:cycle-3:is-scored-retired",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    cell.reasonCode !== \"retired\" &&\n    cell.reasonCode !== \"not_enough_stocks\" &&\n    cell.status",
+   "new": "    cell.reasonCode !== \"not_enough_stocks\" &&\n    cell.status"
+  },
+  {
+   "id": "manual:cycle-3:is-scored-nes",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    cell.reasonCode !== \"retired\" &&\n    cell.reasonCode !== \"not_enough_stocks\" &&\n    cell.status",
+   "new": "    cell.reasonCode !== \"retired\" &&\n    cell.status"
+  },
+  {
+   "id": "manual:cycle-3:mark-momentum",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "cell !== undefined && factor !== \"momentum\" && cell.restatedPossible",
+   "new": "cell !== undefined && cell.restatedPossible"
+  },
+  {
+   "id": "manual:cycle-3:box-no-border",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"",
+   "new": "className=\"flex flex-col gap-2 rounded p-3 text-sm\""
+  },
+  {
+   "id": "manual:cycle-3:no-membership-encode",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "to={`/research/universes/${encodeURIComponent(membership.universeId)}`}",
+   "new": "to={`/research/universes/${membership.universeId}`}"
+  },
+  {
+   "id": "manual:cycle-3:membership-not-link",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "to={`/research/universes/${encodeURIComponent(membership.universeId)}`}",
+   "new": "to={`/research/universes/u1`}"
+  },
+  {
+   "id": "manual:cycle-3:no-lead",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "          {SELECTION.inUniversesLead}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:comma-for-and",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "                  ? SELECTION.listAnd\n",
+   "new": "                  ? SELECTION.listComma\n"
+  },
+  {
+   "id": "manual:cycle-3:no-stock-encode",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}",
+   "new": "to={`/research/stocks/${evidence.symbol}`}"
+  },
+  {
+   "id": "manual:cycle-3:footnote-muted",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<p className=\"text-xs text-muted-foreground\">{SELECTION.footnote}</p>",
+   "new": "<p className=\"text-xs\">{SELECTION.footnote}</p>"
+  },
+  {
+   "id": "manual:cycle-3:no-footnote",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "<p className=\"text-xs text-muted-foreground\">{SELECTION.footnote}</p>",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:no-link",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "        {SELECTION.seeEveryInput}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:no-memberships",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      <MembershipsLine memberships={evidence.memberships} />\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-3:as-of-for-all",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      knownOn === null\n        ? SELECTION.inputsLineAsOf",
+   "new": "      true\n        ? SELECTION.inputsLineAsOf"
+  },
+  {
+   "id": "manual:cycle-3:separator-comma",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "    .join(SELECTION.inputsLineSeparator);",
+   "new": "    .join(\", \");"
+  },
+  {
+   "id": "manual:cycle-3:no-format-date",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "SELECTION.inputsLineAsOf(labels, formatDate(asOf))",
+   "new": "SELECTION.inputsLineAsOf(labels, asOf.slice(0, 7))"
+  },
+  {
+   "id": "manual:cycle-3:label-is-key",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "labels: [row.label] });",
+   "new": "labels: [row.inputName] });"
+  },
+  {
+   "id": "manual:cycle-3:separator-copy",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "  inputsLineSeparator: \"; \",",
+   "new": "  inputsLineSeparator: \", \","
+  },
+  {
+   "id": "manual:cycle-3:as-of-copy",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "    `From ${listOf(inputs)}, as of ${asOf}`,",
+   "new": "    `From ${listOf(inputs)} as of ${asOf}`,"
+  },
+  {
+   "id": "manual:cycle-3:lead-copy",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "  inUniversesLead: \"In \",",
+   "new": "  inUniversesLead: \"In\","
+  },
+  {
+   "id": "manual:cycle-3:and-copy",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "  listAnd: \" and \",",
+   "new": "  listAnd: \" & \","
+  }
+ ]
+}

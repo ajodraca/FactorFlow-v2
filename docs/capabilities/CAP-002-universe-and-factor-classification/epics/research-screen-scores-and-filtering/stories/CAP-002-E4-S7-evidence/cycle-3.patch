@@ -1,0 +1,878 @@
+diff --git a/web/src/components/patterns/inspector-panel.test.tsx b/web/src/components/patterns/inspector-panel.test.tsx
+index 72e1a34..3595f4c 100644
+--- a/web/src/components/patterns/inspector-panel.test.tsx
++++ b/web/src/components/patterns/inspector-panel.test.tsx
+@@ -3,8 +3,13 @@ import type { JSX } from "react";
+ import { MemoryRouter } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
+-import type { FactorCell as FactorCellData, StockEvidence } from "../../api/classification-types";
+-import { REGIONS, RESULTS, SELECTION, failureSentence } from "../../screens/research/copy";
++import type {
++  FactorCell as FactorCellData,
++  FactorName,
++  InputRow,
++  StockEvidence,
++} from "../../api/classification-types";
++import { CELL, REGIONS, RESULTS, SELECTION, failureSentence } from "../../screens/research/copy";
+ import { INSPECT_DEBOUNCE_MS, InspectorPanel } from "./inspector-panel";
+ 
+ vi.mock("../../api/classification-client", async (importOriginal) => {
+@@ -351,3 +356,481 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
+     expect(read).toHaveBeenCalledTimes(3);
+   });
+ });
++
++/** One `factor_input` row (classification-api section 2.7) with the wire-only fields set to tell-tale values. */
++function input(
++  factor: FactorName,
++  label: string,
++  asOf: string | null,
++  knownOn: string | null,
++): InputRow {
++  return {
++    factor,
++    inputName: `wire_key_${label.replace(/\W/g, "_")}`,
++    label,
++    status: "present",
++    value: "0.0412",
++    asOf,
++    knownOn,
++    restatedPossible: false,
++    detail: { tellTale: "DETAIL_PAYLOAD" },
++  };
++}
++
++async function loaded(data: StockEvidence): Promise<HTMLElement> {
++  read.mockResolvedValue(data);
++  render(panel(data.symbol));
++  await advance(150);
++  return inspector();
++}
++
++/** The visible words: the text with `aria-hidden` descendants dropped. */
++function label(element: Element): string {
++  const clone = element.cloneNode(true) as Element;
++  for (const hidden of clone.querySelectorAll("[aria-hidden='true']")) {
++    hidden.remove();
++  }
++  return (clone.textContent ?? "").trim();
++}
++
++/** The block of one factor: the `div` holding its term. */
++function block(section: HTMLElement, name: string): HTMLElement {
++  const term = within(section)
++    .getAllByRole("term")
++    .find((candidate) => label(candidate) === name);
++  if (term === undefined) {
++    throw new Error(`no block for ${name}`);
++  }
++  return term.parentElement as HTMLElement;
++}
++
++function inputsLine(blockElement: HTMLElement): HTMLElement | null {
++  return blockElement.querySelector("[data-testid='inputs-line']");
++}
++
++function explanation(section: HTMLElement): HTMLElement | null {
++  return section.querySelector("[data-testid='explanation']");
++}
++
++describe("TC-COMP-141: each input is shown with its as_of and known_on dates (DAC-E4-S7-2)", () => {
++  // Implements TC-COMP-141
++  it("prints the inputs' dates as given in the factor's line", async () => {
++    const section = await loaded(
++      evidence({
++        inputs: [
++          input("value", "book-to-price", "2025-06-27", "2026-10-14"),
++          input("value", "earnings yield", "2025-06-27", "2026-10-14"),
++        ],
++      }),
++    );
++    expect(inputsLine(block(section, "Value"))).toHaveTextContent(
++      /^From book-to-price and earnings yield, as of 2025-06-27, known 2026-10-14$/,
++    );
++  });
++});
++
++describe("TC-COMP-143: the memberships line reads In no universe or links each universe (DAC-E4-S7-4)", () => {
++  // Implements TC-COMP-143
++  function line(section: HTMLElement): HTMLElement {
++    return within(section).getByTestId("memberships");
++  }
++
++  it("reads In no universe with no link for a stock in no universe", async () => {
++    const section = await loaded(evidence({ memberships: [] }));
++    expect(line(section)).toHaveTextContent(/^In no universe$/);
++    expect(within(line(section)).queryByRole("link")).toBeNull();
++  });
++
++  it("links each universe in the order the read gave them", async () => {
++    const section = await loaded(
++      evidence({
++        memberships: [
++          { universeId: "u1", name: "Tech" },
++          { universeId: "u2", name: "Dividend growers" },
++        ],
++      }),
++    );
++    expect(line(section).textContent).toBe("In Tech and Dividend growers");
++    expect(line(section).textContent).toBe(SELECTION.inUniverses(["Tech", "Dividend growers"]));
++    const links = within(line(section)).getAllByRole("link");
++    expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
++      ["Tech", "/research/universes/u1"],
++      ["Dividend growers", "/research/universes/u2"],
++    ]);
++    expect(section).not.toHaveTextContent(SELECTION.inNoUniverse);
++  });
++
++  it.each([
++    [["A"], "In A"],
++    [["A", "B", "C"], "In A, B and C"],
++    [["A", "B", "C", "D"], "In A, B, C and D"],
++  ])("joins %j as %s", async (names, text) => {
++    const section = await loaded(
++      evidence({ memberships: names.map((name, index) => ({ universeId: `u${index}`, name })) }),
++    );
++    expect(line(section).textContent).toBe(text);
++    expect(within(line(section)).getAllByRole("link")).toHaveLength(names.length);
++  });
++
++  it("prints a universe name as text and encodes its id in the address", async () => {
++    const section = await loaded(
++      evidence({ memberships: [{ universeId: "a b/c&d", name: "R&D / <Labs>" }] }),
++    );
++    const link = within(line(section)).getByRole("link", { name: "R&D / <Labs>" });
++    expect(link).toHaveAttribute("href", "/research/universes/a%20b%2Fc%26d");
++    expect(line(section).textContent).toBe("In R&D / <Labs>");
++  });
++});
++
++describe("the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166)", () => {
++  it("shows the symbol in the numeric face at text-xl, then the name", async () => {
++    const section = await loaded(evidence());
++    const symbol = within(section).getByText("AAPL");
++    expect(symbol).toHaveClass("font-numeric", "text-xl");
++    expect(within(section).getByText("Apple Inc.")).toBeInTheDocument();
++  });
++
++  it("renders one block per factor in the order Value, Growth, Momentum with an identity swatch", async () => {
++    const section = await loaded(evidence());
++    const terms = within(section).getAllByRole("term");
++    expect(terms.map(label)).toEqual(["Value", "Growth", "Momentum"]);
++    const swatches = terms.map((term) => term.firstElementChild as HTMLElement);
++    for (const swatch of swatches) {
++      expect(swatch.tagName).toBe("SPAN");
++      expect(swatch).toHaveAttribute("aria-hidden", "true");
++    }
++    expect(swatches.map((swatch) => swatch.style.backgroundColor)).toEqual([
++      "hsl(var(--factor-value))",
++      "hsl(var(--factor-growth))",
++      "hsl(var(--factor-momentum))",
++    ]);
++    expect(terms.map((term) => term.textContent)).toEqual(["Value", "Growth", "Momentum"]);
++  });
++
++  it("prints the percentile and the signed standardised score, a measured zero as 0.00", async () => {
++    const section = await loaded(evidence());
++    const percentiles = within(section).getAllByTestId("factor-percentile");
++    const scores = within(section).getAllByTestId("factor-score");
++    expect(percentiles.map((element) => element.textContent)).toEqual(["88", "40", "61"]);
++    expect(scores.map((element) => element.textContent)).toEqual(["+1.27", "-0.25", "0.00"]);
++    expect(within(block(section, "Momentum")).getByTestId("factor-score")).toHaveTextContent(
++      /^0\.00$/,
++    );
++  });
++
++  it("puts the restated mark on value and growth only", async () => {
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27", { restatedPossible: true }),
++          growth: scored("40", "-0.25", { restatedPossible: true }),
++          momentum: scored("61", "0.00", { restatedPossible: true }),
++        },
++      }),
++    );
++    expect(within(block(section, "Value")).getByText(CELL.possiblyRestated)).toBeInTheDocument();
++    expect(within(block(section, "Growth")).getByText(CELL.possiblyRestated)).toBeInTheDocument();
++    expect(within(block(section, "Momentum")).queryByText(CELL.possiblyRestated)).toBeNull();
++  });
++
++  it("shows an absent value for a factor the read sent no cell for", async () => {
++    const section = await loaded(
++      evidence({ factors: { value: scored("88", "1.27") } as StockEvidence["factors"] }),
++    );
++    expect(within(section).getAllByRole("term").map(label)).toEqual([
++      "Value",
++      "Growth",
++      "Momentum",
++    ]);
++    for (const name of ["Growth", "Momentum"]) {
++      const element = block(section, name);
++      expect(within(element).getByRole("definition")).toHaveTextContent(/^—$/);
++      expect(within(element).queryByTestId("factor-cell")).toBeNull();
++    }
++    expect(within(block(section, "Value")).getByTestId("factor-percentile")).toHaveTextContent(
++      "88",
++    );
++  });
++
++  it("groups each factor's dated inputs by their dates", async () => {
++    const section = await loaded(
++      evidence({
++        inputs: [
++          input("value", "book-to-price", "2025-06-27", "2026-10-14"),
++          input("growth", "revenue growth", "2025-06-27", "2026-10-14"),
++          input("value", "earnings yield", "2025-06-27", "2026-10-14"),
++          input("growth", "earnings growth", "2025-03-28", "2026-10-01"),
++          input("value", "free-cash-flow yield", "2025-06-27", "2026-10-14"),
++          input("momentum", "12-month return", "2026-10-14", null),
++          input("growth", "sales growth", "2025-03-28", "2026-10-01"),
++        ],
++      }),
++    );
++    const value = inputsLine(block(section, "Value"));
++    expect(value?.textContent).toBe(
++      "From book-to-price, earnings yield and free-cash-flow yield, as of 2025-06-27, known 2026-10-14",
++    );
++    expect(value).toHaveClass("text-xs");
++    expect(inputsLine(block(section, "Growth"))?.textContent).toBe(
++      "From revenue growth, as of 2025-06-27, known 2026-10-14; From earnings growth and sales growth, as of 2025-03-28, known 2026-10-01",
++    );
++    expect(inputsLine(block(section, "Momentum"))?.textContent).toBe(
++      "From 12-month return, as of 2026-10-14",
++    );
++  });
++
++  it("separates inputs that share an as_of but not a known_on", async () => {
++    const section = await loaded(
++      evidence({
++        inputs: [
++          input("value", "book-to-price", "2025-06-27", "2026-10-14"),
++          input("value", "earnings yield", "2025-06-27", "2026-10-15"),
++          input("value", "free-cash-flow yield", "2025-06-27", null),
++        ],
++      }),
++    );
++    expect(inputsLine(block(section, "Value"))?.textContent).toBe(
++      "From book-to-price, as of 2025-06-27, known 2026-10-14; From earnings yield, as of 2025-06-27, known 2026-10-15; From free-cash-flow yield, as of 2025-06-27",
++    );
++  });
++
++  it("prints no line for a factor whose inputs carry no as_of, and none for a factor with no input", async () => {
++    const section = await loaded(
++      evidence({
++        inputs: [
++          input("value", "book-to-price", null, "2026-10-14"),
++          input("value", "earnings yield", null, null),
++          input("growth", "revenue growth", "2025-06-27", "2026-10-14"),
++        ],
++      }),
++    );
++    expect(inputsLine(block(section, "Value"))).toBeNull();
++    expect(inputsLine(block(section, "Momentum"))).toBeNull();
++    expect(inputsLine(block(section, "Growth"))?.textContent).toBe(
++      "From revenue growth, as of 2025-06-27, known 2026-10-14",
++    );
++  });
++
++  it("never prints a wire key or an input's detail (STD-UI-1)", async () => {
++    const section = await loaded(
++      evidence({ inputs: [input("value", "book-to-price", "2025-06-27", "2026-10-14")] }),
++    );
++    expect(section.outerHTML).not.toContain("wire_key");
++    expect(section.outerHTML).not.toContain("DETAIL_PAYLOAD");
++    expect(section.outerHTML).not.toContain("0.0412");
++  });
++});
++
++describe("the explanation box, the evidence link and the footnote (AC-16; classification-ui 2.5)", () => {
++  it("carries one Incomplete sentence per incomplete factor, the cell's own title", async () => {
++    const detail = "revenue for the quarter ending 2025-06-27 missing";
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27"),
++          growth: cell({ reasonCode: "input_missing", reasonDetail: detail }),
++          momentum: cell({ reasonCode: "input_outdated" }),
++        },
++      }),
++    );
++    const box = explanation(section);
++    expect(box).not.toBeNull();
++    expect(box).toHaveClass("border", "border-border");
++    const sentences = Array.from(box?.querySelectorAll("p") ?? []).map((p) => p.textContent);
++    expect(sentences).toEqual([
++      CELL.incompleteDetail(detail, "growth"),
++      CELL.incompleteGeneric("input_outdated", "momentum"),
++    ]);
++    expect(sentences[0]).toBe(
++      "Incomplete: revenue for the quarter ending 2025-06-27 missing, so growth can't be compared fairly. It isn't guessed.",
++    );
++    expect(within(block(section, "Growth")).getByTestId("factor-cell")).toHaveAttribute(
++      "title",
++      sentences[0],
++    );
++    expect(within(block(section, "Momentum")).getByTestId("factor-cell")).toHaveAttribute(
++      "title",
++      sentences[1],
++    );
++  });
++
++  it.each([
++    ["a classified cell with no percentile", cell({ status: "classified", score: "1.0" })],
++    ["a not-classified cell with a percentile", cell({ percentile: "50" })],
++  ])("explains %s, which the cell draws as Incomplete", async (_name, growth) => {
++    const detail = "revenue missing";
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27"),
++          growth: { ...growth, reasonCode: "input_missing", reasonDetail: detail },
++          momentum: scored("61", "0.00"),
++        },
++      }),
++    );
++    expect(within(block(section, "Growth")).getByText(CELL.incomplete)).toBeInTheDocument();
++    expect(explanation(section)).toHaveTextContent(CELL.incompleteDetail(detail, "growth"));
++  });
++
++  it("opens no box for an incomplete factor whose reason is unrecognised", async () => {
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27"),
++          growth: cell({ reasonCode: "a_future_reason" as FactorCellData["reasonCode"] }),
++          momentum: scored("61", "0.00"),
++        },
++      }),
++    );
++    expect(within(block(section, "Growth")).getByText(CELL.incomplete)).toBeInTheDocument();
++    expect(explanation(section)).toBeNull();
++  });
++
++  it("opens no box for an incomplete factor that names no cause", async () => {
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27"),
++          growth: cell(),
++          momentum: scored("61", "0.00"),
++        },
++      }),
++    );
++    expect(within(block(section, "Growth")).getByText(CELL.incomplete)).toBeInTheDocument();
++    expect(explanation(section)).toBeNull();
++  });
++
++  it("shows Not enough to rank with no count and adds nothing to the box", async () => {
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: cell({
++            reasonCode: "not_enough_stocks",
++            reasonDetail: "18 of 30 stocks qualified",
++          }),
++          growth: scored("40", "-0.25"),
++          momentum: scored("61", "0.00"),
++        },
++        inputs: [input("value", "book-to-price", null, null)],
++      }),
++    );
++    const value = block(section, "Value");
++    expect(value).toHaveTextContent(CELL.notEnoughToRank);
++    expect(value.textContent).not.toMatch(/\d/);
++    expect(section).not.toHaveTextContent("18 qualified, 30 needed");
++    expect(section).not.toHaveTextContent("18 of 30 stocks qualified");
++    expect(explanation(section)).toBeNull();
++  });
++
++  it("marks a stock no longer followed and says its earlier scores stand", async () => {
++    const retired = cell({
++      status: "classified",
++      percentile: "70",
++      score: "0.5",
++      reasonCode: "retired",
++      reasonDetail: "no longer followed",
++    });
++    const section = await loaded(
++      evidence({
++        lifecycle: "retired",
++        factors: { value: retired, growth: retired, momentum: retired },
++      }),
++    );
++    const symbol = within(section).getByText("AAPL");
++    const badge = symbol.nextElementSibling as HTMLElement;
++    expect(badge).toHaveAttribute("data-variant", "status-neutral");
++    expect(badge).toHaveClass("bg-status-neutral-muted", "text-status-neutral");
++    expect(label(badge)).toBe(CELL.notFollowed);
++    expect(badge.querySelector("svg[aria-hidden='true']")).not.toBeNull();
++    const box = explanation(section);
++    expect(Array.from(box?.querySelectorAll("p") ?? []).map((p) => p.textContent)).toEqual([
++      CELL.notFollowedNoDate,
++    ]);
++    expect(CELL.notFollowedNoDate).toBe("Not followed. Earlier scores stand.");
++  });
++
++  it("shows no Not followed badge for a followed stock", async () => {
++    const section = await loaded(evidence());
++    expect(within(section).getByText("AAPL").nextElementSibling).toBeNull();
++    expect(section).not.toHaveTextContent(CELL.notFollowed);
++  });
++
++  it("states the restatement sentence once however many marks appear", async () => {
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27", { restatedPossible: true }),
++          growth: scored("40", "-0.25", { restatedPossible: true }),
++          momentum: scored("61", "0.00"),
++        },
++      }),
++    );
++    const box = explanation(section);
++    expect(Array.from(box?.querySelectorAll("p") ?? []).map((p) => p.textContent)).toEqual([
++      CELL.restatedExplanation,
++    ]);
++    expect(section.textContent?.split(CELL.restatedExplanation)).toHaveLength(2);
++  });
++
++  it.each([
++    ["growth only", { growth: scored("40", "-0.25", { restatedPossible: true }) }],
++    [
++      "an incomplete value cell",
++      { value: cell({ reasonCode: "input_missing", restatedPossible: true }) },
++    ],
++    [
++      "a classified value cell with no percentile",
++      { value: cell({ status: "classified", score: "1.0", restatedPossible: true }) },
++    ],
++    [
++      "a not-followed value cell",
++      {
++        value: scored("88", "1.27", { reasonCode: "retired", restatedPossible: true }),
++      },
++    ],
++    [
++      "a value cell not enough to rank",
++      {
++        value: scored("88", "1.27", { reasonCode: "not_enough_stocks", restatedPossible: true }),
++      },
++    ],
++  ])("states the restatement sentence only where a mark appears: %s", async (name, factors) => {
++    const section = await loaded(
++      evidence({
++        factors: {
++          value: scored("88", "1.27"),
++          growth: scored("40", "-0.25"),
++          momentum: scored("61", "0.00", { restatedPossible: true }),
++          ...factors,
++        },
++      }),
++    );
++    const marked = name === "growth only";
++    expect(section.textContent?.includes(CELL.restatedExplanation)).toBe(marked);
++  });
++
++  it("opens no box for a followed stock scored on every factor", async () => {
++    const section = await loaded(evidence());
++    expect(explanation(section)).toBeNull();
++  });
++
++  it("links to the stock's evidence page", async () => {
++    const section = await loaded(evidence({ symbol: "BRK/B" }));
++    const link = within(section).getByRole("link", { name: SELECTION.seeEveryInput });
++    expect(link.tagName).toBe("A");
++    expect(link).toHaveAttribute("href", "/research/stocks/BRK%2FB");
++    expect(within(section).queryByRole("button", { name: SELECTION.seeEveryInput })).toBeNull();
++  });
++
++  it("ends with the footnote and has no holdings line or strategy action", async () => {
++    const section = await loaded(evidence());
++    const footnote = within(section).getByText(SELECTION.footnote);
++    expect(footnote).toHaveClass("text-xs", "text-muted-foreground");
++    expect(footnote.textContent).toBe(
++      "Percentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.",
++    );
++    expect(section.lastElementChild).toBe(footnote);
++    expect(section).not.toHaveTextContent(/holding/i);
++    expect(section).not.toHaveTextContent("Start a strategy from this screen");
++  });
++});
+diff --git a/web/src/components/patterns/inspector-panel.tsx b/web/src/components/patterns/inspector-panel.tsx
+index 0241efa..71edc6e 100644
+--- a/web/src/components/patterns/inspector-panel.tsx
++++ b/web/src/components/patterns/inspector-panel.tsx
+@@ -1,7 +1,25 @@
+-import { type JSX, type ReactNode, useEffect, useState } from "react";
++import { Fragment, type JSX, type ReactNode, useEffect, useState } from "react";
++import { Link } from "react-router-dom";
+ import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
+-import type { StockEvidence } from "../../api/classification-types";
+-import { REGIONS, RESULTS, SELECTION, failureSentence } from "../../screens/research/copy";
++import type {
++  FactorCell as FactorCellData,
++  FactorName,
++  InputRow,
++  Membership,
++  ReasonCode,
++  StockEvidence,
++} from "../../api/classification-types";
++import {
++  CELL,
++  FACTOR_LABELS,
++  type IncompleteReasonCode,
++  REGIONS,
++  RESULTS,
++  SELECTION,
++  failureSentence,
++} from "../../screens/research/copy";
++import { formatDate } from "../../screens/research/format";
++import { FactorCell } from "./factor-cell";
+ 
+ /**
+  * How long a selection must settle before the inspector reads it
+@@ -19,6 +37,22 @@ type InspectorState =
+ const IDLE: InspectorState = { kind: "idle" };
+ const LOADING: InspectorState = { kind: "loading" };
+ 
++const FACTORS: readonly FactorName[] = ["value", "growth", "momentum"];
++
++/**
++ * Each factor's identity swatch, the `--factor-*` token as an inline style
++ * because the Tailwind config maps no `factor` colour (UX design 1.1 item 3;
++ * DEC-0166). Full literal strings, never assembled.
++ */
++const SWATCH: Record<FactorName, string> = {
++  value: "hsl(var(--factor-value))",
++  growth: "hsl(var(--factor-growth))",
++  momentum: "hsl(var(--factor-momentum))",
++};
++
++/** The delivered button size and border (`screens/instruments/start-action.tsx`). */
++const BUTTON = "w-fit rounded border border-border px-3 py-2 text-sm";
++
+ /**
+  * The STD-UI-19 sentence for a failed read, built by `copy.ts` from the
+  * error's code alone, never from its `message` (classification-ui 2.4). A
+@@ -31,15 +65,214 @@ function failureOf(cause: unknown): string {
+     : failureSentence({ operation: "get-stock-evidence", resource: "classification", code: null });
+ }
+ 
+-function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
++/**
++ * One factor's inputs line (DEC-0165): its inputs with an `asOf`, grouped by
++ * identical `(asOf, knownOn)` in the order first seen, one clause per group
++ * joined by `; `, a group with no `knownOn` printing no *known*. `null` when
++ * no input of the factor is dated. Only `label` is printed, never the wire's
++ * `inputName` or `detail` (STD-UI-1).
++ */
++function inputsLine(inputs: readonly InputRow[], factor: FactorName): string | null {
++  const groups: { asOf: string; knownOn: string | null; labels: string[] }[] = [];
++  for (const row of inputs) {
++    if (row.factor !== factor || row.asOf === null) {
++      continue;
++    }
++    const group = groups.find(
++      (candidate) => candidate.asOf === row.asOf && candidate.knownOn === row.knownOn,
++    );
++    if (group === undefined) {
++      groups.push({ asOf: row.asOf, knownOn: row.knownOn, labels: [row.label] });
++    } else {
++      group.labels.push(row.label);
++    }
++  }
++  if (groups.length === 0) {
++    return null;
++  }
++  return groups
++    .map(({ asOf, knownOn, labels }) =>
++      knownOn === null
++        ? SELECTION.inputsLineAsOf(labels, formatDate(asOf))
++        : SELECTION.inputsLine(labels, formatDate(asOf), formatDate(knownOn)),
++    )
++    .join(SELECTION.inputsLineSeparator);
++}
++
++function isIncompleteReason(code: ReasonCode | null): code is IncompleteReasonCode {
++  return code !== null && Object.hasOwn(CELL.incompleteStatus, code);
++}
++
++/** Whether `FactorCell` draws this cell scored, the state its choice of rendering ends on (DEC-0151). */
++function isScored(cell: FactorCellData): boolean {
++  return (
++    cell.reasonCode !== "retired" &&
++    cell.reasonCode !== "not_enough_stocks" &&
++    cell.status === "classified" &&
++    cell.percentile !== null
++  );
++}
++
++/**
++ * An incomplete factor's sentence, the one `FactorCell` puts in its
++ * *Incomplete* badge's `title` (DEC-0151): from `reasonDetail`, else from the
++ * input reason code. `null` for a cell `FactorCell` does not draw
++ * *Incomplete*, and for one that names no cause (DEC-0229, DEC-0247).
++ */
++function incompleteSentence(cell: FactorCellData, factor: FactorName): string | null {
++  if (cell.reasonCode === "retired" || cell.reasonCode === "not_enough_stocks" || isScored(cell)) {
++    return null;
++  }
++  if (cell.reasonDetail !== null) {
++    return CELL.incompleteDetail(cell.reasonDetail, factor);
++  }
++  return isIncompleteReason(cell.reasonCode)
++    ? CELL.incompleteGeneric(cell.reasonCode, factor)
++    : null;
++}
++
++/** Whether `FactorCell` draws the *Possibly restated* mark: a scored value or growth cell that carries it (DEC-0247). */
++function showsMark(cell: FactorCellData | undefined, factor: FactorName): boolean {
++  return cell !== undefined && factor !== "momentum" && cell.restatedPossible && isScored(cell);
++}
++
++/**
++ * The explanation box's sentences, in the order incomplete factors, not
++ * followed, restated; the box opens whenever there is one (DEC-0247).
++ */
++function explanations(evidence: StockEvidence): string[] {
++  const sentences = FACTORS.flatMap((factor) => {
++    const cell = evidence.factors[factor];
++    const sentence = cell === undefined ? null : incompleteSentence(cell, factor);
++    return sentence === null ? [] : [sentence];
++  });
++  if (evidence.lifecycle === "retired") {
++    sentences.push(CELL.notFollowedNoDate);
++  }
++  if (FACTORS.some((factor) => showsMark(evidence.factors[factor], factor))) {
++    sentences.push(CELL.restatedExplanation);
++  }
++  return sentences;
++}
++
++/** The `badge` `status-neutral` *Not followed*, a word plus a shape, as `FactorCell` draws it (DEC-0073). */
++function NotFollowedBadge(): JSX.Element {
++  return (
++    <span
++      data-variant="status-neutral"
++      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs bg-status-neutral-muted text-status-neutral"
++    >
++      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
++        <circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
++        <line x1="3.5" y1="6" x2="8.5" y2="6" stroke="currentColor" strokeWidth="1.5" />
++      </svg>
++      {CELL.notFollowed}
++    </span>
++  );
++}
++
++/** *In Tech and Dividend growers*, each name a link to its universe, or *In no universe* (DEC-0071). */
++function MembershipsLine({ memberships }: { memberships: readonly Membership[] }): JSX.Element {
+   return (
+-    <div>
+-      <p>{evidence.symbol}</p>
+-      <p>{evidence.name}</p>
++    <p data-testid="memberships" className="text-sm">
++      {memberships.length === 0 ? (
++        SELECTION.inNoUniverse
++      ) : (
++        <>
++          {SELECTION.inUniversesLead}
++          {memberships.map((membership, index) => (
++            <Fragment key={membership.universeId}>
++              {index === 0
++                ? null
++                : index === memberships.length - 1
++                  ? SELECTION.listAnd
++                  : SELECTION.listComma}
++              <Link
++                to={`/research/universes/${encodeURIComponent(membership.universeId)}`}
++                className="underline"
++              >
++                {membership.name}
++              </Link>
++            </Fragment>
++          ))}
++        </>
++      )}
++    </p>
++  );
++}
++
++function FactorBlock({
++  evidence,
++  factor,
++}: { evidence: StockEvidence; factor: FactorName }): JSX.Element {
++  const cell = evidence.factors[factor];
++  const line = inputsLine(evidence.inputs, factor);
++  return (
++    <div className="flex flex-col gap-1">
++      <dt className="flex items-center gap-2 text-sm">
++        <span
++          aria-hidden="true"
++          className="inline-block h-2 w-2 rounded-sm"
++          style={{ backgroundColor: SWATCH[factor] }}
++        />
++        {FACTOR_LABELS[factor]}
++      </dt>
++      <dd>
++        {cell === undefined ? (
++          CELL.absentValue
++        ) : (
++          <FactorCell cell={cell} factor={factor} showScore />
++        )}
++      </dd>
++      {line === null ? null : (
++        <dd data-testid="inputs-line" className="text-xs">
++          {line}
++        </dd>
++      )}
+     </div>
+   );
+ }
+ 
++/** The loaded inspector, top to bottom as UX design 1.1 orders it. */
++function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
++  const sentences = explanations(evidence);
++  return (
++    <>
++      <div>
++        <p className="flex items-center gap-2">
++          <span className="font-numeric text-xl">{evidence.symbol}</span>
++          {evidence.lifecycle === "retired" ? <NotFollowedBadge /> : null}
++        </p>
++        <p className="text-sm">{evidence.name}</p>
++      </div>
++      <MembershipsLine memberships={evidence.memberships} />
++      <dl className="flex flex-col gap-3">
++        {FACTORS.map((factor) => (
++          <FactorBlock key={factor} evidence={evidence} factor={factor} />
++        ))}
++      </dl>
++      {sentences.length === 0 ? null : (
++        <div
++          data-testid="explanation"
++          className="flex flex-col gap-2 rounded border border-border p-3 text-sm"
++        >
++          {sentences.map((sentence) => (
++            <p key={sentence}>{sentence}</p>
++          ))}
++        </div>
++      )}
++      <Link
++        to={`/research/stocks/${encodeURIComponent(evidence.symbol)}`}
++        data-variant="outline"
++        className={BUTTON}
++      >
++        {SELECTION.seeEveryInput}
++      </Link>
++      <p className="text-xs text-muted-foreground">{SELECTION.footnote}</p>
++    </>
++  );
++}
++
+ /**
+  * The inspector (classification-ui section 2.5; blueprint 4.5; UX design
+  * 1.1), DAC-E4-S7-2 and DAC-E4-S7-3. A pattern the Research screen
+@@ -50,12 +283,25 @@ function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
+  * Each settled symbol is read once with `getStockEvidence` (CAP-002-E4-S1):
+  * no polling, no cache and no prefetch. A response for a symbol that is no
+  * longer current is dropped, and a failure offers **Try again**, which reads
+- * the same symbol once more after the same wait (DEC-0165). With `symbol` null it reads the empty
+- * sentence and issues nothing.
++ * the same symbol once more after the same wait (DEC-0165). With `symbol`
++ * null it reads the empty sentence and issues nothing.
++ *
++ * Loaded, top to bottom (DAC-E4-S7-2, DAC-E4-S7-4): the symbol and name, with
++ * *Not followed* for a retired stock; the memberships line, or *In no
++ * universe*; one block per factor (the swatch and name as its term, then
++ * `FactorCell` with the standardised score, then the inputs line with each
++ * input's `as_of` and `known_on`); the explanation box when it has a
++ * sentence; **See every input and its date**; the footnote. *Not enough to
++ * rank* prints no count (Open Gap 7), and the holdings line and **Start a
++ * strategy from this screen** are M2 and absent.
+  *
+- * Strings: `REGIONS.selectedStock`, `SELECTION.inspectorEmpty` and
+- * `inspectorLoading`, `RESULTS.tryAgain` and `failureSentence` from
+- * `screens/research/copy.ts` (CAP-002-E4-S2).
++ * Exports used: `getStockEvidence` and `ClassificationApiError`
++ * (`api/classification-client.ts`) and `StockEvidence`, `InputRow`,
++ * `Membership`, `FactorName` (`api/classification-types.ts`), CAP-002-E4-S1;
++ * `REGIONS`, `SELECTION`, `RESULTS.tryAgain`, `CELL`, `FACTOR_LABELS` and
++ * `failureSentence` (`screens/research/copy.ts`) and `formatDate`
++ * (`format.ts`), CAP-002-E4-S2; `FactorCell`, which draws the
++ * percentile, the score and `RestatedMark` (`factor-cell.tsx`), CAP-002-E4-S3.
+  */
+ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Element {
+   const [state, setState] = useState<InspectorState>(IDLE);
+@@ -97,11 +343,7 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
+     body = (
+       <>
+         <p className="text-sm">{state.sentence}</p>
+-        <button
+-          type="button"
+-          onClick={() => setAttempt((count) => count + 1)}
+-          className="w-fit rounded border border-border px-3 py-2 text-sm"
+-        >
++        <button type="button" onClick={() => setAttempt((count) => count + 1)} className={BUTTON}>
+           {RESULTS.tryAgain}
+         </button>
+       </>
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index abd2595..26c95af 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -59,6 +59,7 @@ const CALLS: Record<string, unknown[][]> = {
+   ],
+   savedFromFilter: [["2026-10-15", SAMPLE_QUERY]],
+   "SELECTION.inUniverses": [[["Tech", "Dividend growers"]]],
++  "SELECTION.inputsLineAsOf": [[["book-to-price", "earnings yield"], "2025-06-27"]],
+   "SELECTION.inputsLine": [
+     [["book-to-price", "earnings yield", "free-cash-flow yield"], "2025-06-27", "2026-10-14"],
+   ],
+@@ -529,6 +530,17 @@ describe("copy.ts completeness and keying", () => {
+       "In Tech, Value and Dividend growers",
+     );
+     expect(copy.SELECTION.inUniverses(["Tech"])).toBe("In Tech");
++    // CAP-002-E4-S7 T009 (DEC-0165): the inputs clause without a known_on, its separator, the line's lead.
++    expect(copy.SELECTION.inputsLineAsOf(["12-month return"], "2026-10-14")).toBe(
++      "From 12-month return, as of 2026-10-14",
++    );
++    expect(copy.SELECTION.inputsLineSeparator).toBe("; ");
++    expect(copy.SELECTION.inUniversesLead).toBe("In ");
++    expect(copy.SELECTION.listComma).toBe(", ");
++    expect(copy.SELECTION.listAnd).toBe(" and ");
++    expect(copy.SELECTION.inUniverses(["A", "B", "C"])).toBe(
++      `${copy.SELECTION.inUniversesLead}A${copy.SELECTION.listComma}B${copy.SELECTION.listAnd}C`,
++    );
+     // CAP-002-E4-S7 T009 (DEC-0165): the inspector skeleton's text.
+     expect(copy.SELECTION.inspectorLoading).toBe("Loading the selected stock.");
+     expect(
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 41ea694..0b2fc6a 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -498,6 +498,22 @@ export const SELECTION = {
+   /** *From book-to-price, earnings yield and free-cash-flow yield, as of 2025-06-27, known 2026-10-14* */
+   inputsLine: (inputs: readonly string[], asOf: string, knownOn: string): string =>
+     `From ${listOf(inputs)}, as of ${asOf}, known ${knownOn}`,
++  /**
++   * The inspector's inputs clause when the inputs carry no `known_on`, and the
++   * separator between clauses of differing dates (UX 1.1 gives one example
++   * only; CAP-002-E4-S7 Open Gap 3, DEC-0165). No design states either.
++   */
++  inputsLineAsOf: (inputs: readonly string[], asOf: string): string =>
++    `From ${listOf(inputs)}, as of ${asOf}`,
++  inputsLineSeparator: "; ",
++  /**
++   * The words before the linked universe names, so the rendered line reads
++   * as `inUniverses` does (UX 1.1; CAP-002-E4-S7 T012).
++   */
++  inUniversesLead: "In ",
++  /** The separators `inUniverses` joins names with, for the linked rendering of the same line. */
++  listComma: ", ",
++  listAnd: " and ",
+   seeEveryInput: "See every input and its date",
+   footnote:
+     "Percentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.",
