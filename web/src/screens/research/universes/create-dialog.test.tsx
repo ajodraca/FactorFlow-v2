@@ -297,6 +297,16 @@ describe("CreateDialog: parsing, focus, field errors and in-flight state", () =>
     expect(createUniverse).not.toHaveBeenCalled();
   });
 
+  it("(a) a paste that replaces a selected range counts the text the paste leaves", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+    await user.type(stocksField(), "AAPL, MSFT, TSLA");
+    stocksField().setSelectionRange(6, 16);
+    await user.paste("NVDA");
+    expect(stocksField().value).toBe("AAPL, NVDA");
+    expect(screen.getByText("2 symbols recognised, 0 not recognised")).toBeInTheDocument();
+  });
+
   it("(b) upper-cases one entry per line on blur, never while typing", async () => {
     const user = userEvent.setup();
     renderDialog();

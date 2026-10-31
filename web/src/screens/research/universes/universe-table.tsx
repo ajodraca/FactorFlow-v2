@@ -1,4 +1,4 @@
-import { type JSX, useId, useState } from "react";
+import { type JSX, type ReactNode, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ClassificationApiError, listUniverseEvents } from "../../../api/classification-client";
 import type { UniverseSummary } from "../../../api/classification-types";
@@ -16,6 +16,11 @@ export function universeDetailPath(universeId: string): string {
   return `/research/universes/${encodeURIComponent(universeId)}`;
 }
 
+/**
+ * The factors in origin-line order. Their `FactorName` identifiers are the
+ * owner-facing labels, as `copy.ts`'s `sentenceClause` prints them, so they
+ * have no keyed entry of their own (CAP-002-E1-S7 T011).
+ */
 const FACTORS = ["value", "growth", "momentum"] as const;
 
 const MEASURES = [
@@ -141,13 +146,32 @@ type OriginEntry =
 
 type Sort = "none" | "ascending" | "descending";
 
+/** `data-table` section 4: a sort control cycles ascending, descending, unsorted. */
+const NEXT_SORT: Record<Sort, Sort> = {
+  none: "ascending",
+  ascending: "descending",
+  descending: "none",
+};
+
 /**
  * The universes `data-table` `expandable` (UX design 1.3; classification-ui
  * 2.7; AC-3, DAC-E1-S7-4, DAC-E1-S7-5), in the pattern of the delivered
  * coverage table. Name sorts in the browser over the loaded rows (DEC-0101).
  * Expanding a row reads its origin once and keeps it while the table lives.
+ * The header row is always rendered (`data-table` section 3): `body`, when
+ * given, replaces the rows (the nothing-found and error states; DEC-0255), and
+ * `busy` keeps the rows visible and dimmed while a new selection loads
+ * (`data-table` section 4).
  */
-export function UniverseTable({ universes }: { universes: UniverseSummary[] }): JSX.Element {
+export function UniverseTable({
+  universes,
+  body,
+  busy,
+}: {
+  universes: UniverseSummary[];
+  body?: ReactNode;
+  busy: boolean;
+}): JSX.Element {
   const [sort, setSort] = useState<Sort>("none");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [origins, setOrigins] = useState<Record<string, OriginEntry>>({});
@@ -184,14 +208,11 @@ export function UniverseTable({ universes }: { universes: UniverseSummary[] }): 
         });
 
   return (
-    <table data-variant="expandable" className="w-full text-sm">
+    <table data-variant="expandable" aria-busy={busy} className="w-full text-sm">
       <thead>
         <tr>
           <th scope="col" aria-sort={sort} className="text-left text-muted-foreground">
-            <button
-              type="button"
-              onClick={() => setSort(sort === "ascending" ? "descending" : "ascending")}
-            >
+            <button type="button" onClick={() => setSort(NEXT_SORT[sort])}>
               {UNIVERSES.columns.name}
             </button>
           </th>
@@ -206,17 +227,23 @@ export function UniverseTable({ universes }: { universes: UniverseSummary[] }): 
           </th>
         </tr>
       </thead>
-      <tbody>
-        {rows.map((universe) => (
-          <UniverseRow
-            key={universe.universeId}
-            universe={universe}
-            expanded={expanded[universe.universeId] === true}
-            origin={origins[universe.universeId]}
-            onToggle={() => toggle(universe.universeId)}
-            onRetry={() => loadOrigin(universe.universeId)}
-          />
-        ))}
+      <tbody className={busy ? "opacity-50" : undefined}>
+        {body === undefined ? (
+          rows.map((universe) => (
+            <UniverseRow
+              key={universe.universeId}
+              universe={universe}
+              expanded={expanded[universe.universeId] === true}
+              origin={origins[universe.universeId]}
+              onToggle={() => toggle(universe.universeId)}
+              onRetry={() => loadOrigin(universe.universeId)}
+            />
+          ))
+        ) : (
+          <tr>
+            <td colSpan={4}>{body}</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );
@@ -259,12 +286,14 @@ function UniverseRow({
   onRetry: () => void;
 }): JSX.Element {
   const detailId = useId();
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const retired = universe.lifecycle === "retired";
   return (
     <>
       <tr>
         <th scope="row" className={`text-left ${retired ? "text-muted-foreground" : ""}`}>
           <button
+            ref={toggleRef}
             type="button"
             aria-expanded={expanded}
             aria-controls={detailId}
@@ -292,11 +321,18 @@ function UniverseRow({
         <tr id={detailId}>
           <td colSpan={4}>
             <div aria-live="polite" className="flex flex-col gap-1">
-              <p>{`${UNIVERSES.columns.created} ${formatTimestamp(universe.createdAt)}`}</p>
+              <p>{UNIVERSES.createdAt(formatTimestamp(universe.createdAt))}</p>
               {universe.retiredAt === null ? null : (
-                <p>{`${UNIVERSE_LIFECYCLE.retiredLabel} ${formatTimestamp(universe.retiredAt)}`}</p>
+                <p>{UNIVERSE_LIFECYCLE.retiredAt(formatTimestamp(universe.retiredAt))}</p>
               )}
-              <OriginLine origin={origin} onRetry={onRetry} />
+              <OriginLine
+                origin={origin}
+                onRetry={() => {
+                  // The alert unmounts on retry; focus stays on the row (STD-UI-24; DEC-0256).
+                  toggleRef.current?.focus();
+                  onRetry();
+                }}
+              />
             </div>
           </td>
         </tr>

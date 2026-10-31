@@ -110,6 +110,11 @@ function rowOf(name: string): HTMLElement {
   return screen.getByRole("link", { name }).closest("tr") as HTMLElement;
 }
 
+/** The universes table's column header row (data-table section 3: always rendered with the table). */
+function columnHeaders(): string[] {
+  return screen.getAllByRole("columnheader").map((header) => header.textContent ?? "");
+}
+
 function rowNames(): string[] {
   return screen
     .getAllByRole("row")
@@ -129,7 +134,9 @@ describe("TC-COMP-020: retired universes appear only under the lifecycle select"
     expect(listUniverses).toHaveBeenNthCalledWith(1, { lifecycle: "active", limit: 500 });
     expect(screen.queryByText("Old ideas")).not.toBeInTheDocument();
     expect(screen.getByText("2 active, 1 retired")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Universes" })).toBeInTheDocument();
     const select = screen.getByRole("combobox", { name: "Show: Active" });
+    expect(select).toHaveAttribute("data-variant", "inline");
     expect(
       within(select)
         .getAllByRole("option")
@@ -261,6 +268,10 @@ describe("TC-COMP-021: the origin line names each clause only when it applied", 
     expect(toggle).toHaveAccessibleName(`Hide details for ${name}`);
 
     const line = await screen.findByText(expected);
+    // T012: the expander's aria-controls names the detail row it reveals.
+    const controlled = document.getElementById(toggle.getAttribute("aria-controls") ?? "");
+    expect(controlled?.tagName).toBe("TR");
+    expect(controlled).toContainElement(line);
     expect(line.childNodes).toHaveLength(1);
     expect(line.firstChild?.nodeType).toBe(Node.TEXT_NODE);
     expect(line.textContent).not.toMatch(/−|bogus/);
@@ -325,11 +336,19 @@ describe("TC-COMP-022: never populated is distinct from a lifecycle filter that 
     expect(screen.getByRole("heading", { name: "Universes" })).toBeInTheDocument();
     expect(screen.getByText("2 active, 0 retired")).toBeInTheDocument();
     expect(screen.queryByText(/No universes yet/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    // DEC-0255: the table keeps its column header row; the sentence and its reset replace the body.
+    const table = screen.getByRole("table");
+    expect(columnHeaders()).toEqual(["Name", "Lifecycle", "Members", "Created"]);
+    expect(table).toContainElement(screen.getByText("No retired universes."));
+    expect(screen.getByText("No retired universes.").closest("td")).toHaveAttribute("colspan", "4");
+    expect(table).toContainElement(screen.getByRole("button", { name: "Reset filter" }));
+    expect(within(table).queryAllByRole("link")).toHaveLength(0);
+    expect(within(table).queryAllByRole("rowheader")).toHaveLength(0);
     expect(screen.getByRole("button", { name: "New universe…" })).not.toHaveFocus();
 
     await user.click(screen.getByRole("button", { name: "Reset filter" }));
     expect(lifecycleSelect().value).toBe("active");
+    expect(lifecycleSelect()).toHaveFocus();
     await screen.findByRole("link", { name: "Tech" });
     expect(listUniverses).toHaveBeenCalledTimes(3);
     expect(listUniverses).toHaveBeenLastCalledWith({ lifecycle: "active", limit: 500 });
@@ -346,8 +365,13 @@ describe("TC-COMP-022: never populated is distinct from a lifecycle filter that 
     expect(await screen.findByText("No active universes.")).toBeInTheDocument();
     expect(screen.queryByText(/No universes yet/)).not.toBeInTheDocument();
     expect(screen.queryByText("No retired universes.")).not.toBeInTheDocument();
+    const table = screen.getByRole("table");
+    expect(columnHeaders()).toEqual(["Name", "Lifecycle", "Members", "Created"]);
+    expect(table).toContainElement(screen.getByText("No active universes."));
+    expect(within(table).queryAllByRole("rowheader")).toHaveLength(0);
     await user.click(screen.getByRole("button", { name: "Reset filter" }));
     expect(lifecycleSelect().value).toBe("all");
+    expect(lifecycleSelect()).toHaveFocus();
     await screen.findByRole("link", { name: "Old ideas" });
     expect(listUniverses).toHaveBeenLastCalledWith({ lifecycle: "all", limit: 500 });
   });
@@ -380,9 +404,13 @@ describe("UniversesScreen: loading, errors, paging, columns, sort and expansion"
     expect(screen.queryByText("Loading…")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Universes" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "New universe…" })).toBeInTheDocument();
+    // data-table section 4 and UX 1.3 States: the header row stays, the error replaces the body.
+    expect(columnHeaders()).toEqual(["Name", "Lifecycle", "Members", "Created"]);
+    expect(screen.getByRole("table")).toContainElement(alert);
 
     answerByLifecycle();
     await user.click(within(alert).getByRole("button", { name: "Try again" }));
+    expect(lifecycleSelect()).toHaveFocus();
     await screen.findByRole("link", { name: "Tech" });
     expect(listUniverses).toHaveBeenCalledTimes(2);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -429,7 +457,7 @@ describe("UniversesScreen: loading, errors, paging, columns, sort and expansion"
     expect(screen.getByRole("table")).toHaveAttribute("data-variant", "expandable");
   });
 
-  it("(d) sorts Name in the browser, ascending then descending, with no request", async () => {
+  it("(d) sorts Name in the browser, ascending, descending, then unsorted, with no request", async () => {
     const user = userEvent.setup();
     listUniverses.mockResolvedValue(
       page(
@@ -454,8 +482,13 @@ describe("UniversesScreen: loading, errors, paging, columns, sort and expansion"
     await user.click(within(header).getByRole("button", { name: "Name" }));
     expect(header).toHaveAttribute("aria-sort", "descending");
     expect(rowNames()).toEqual(["gamma", "Beta2", "beta", "Beta", "Alpha"]);
+    // data-table section 4: a third activation returns to the loaded order.
+    await user.click(within(header).getByRole("button", { name: "Name" }));
+    expect(header).toHaveAttribute("aria-sort", "none");
+    expect(rowNames()).toEqual(["beta", "Alpha", "gamma", "Beta2", "Beta"]);
     await user.click(within(header).getByRole("button", { name: "Name" }));
     expect(header).toHaveAttribute("aria-sort", "ascending");
+    expect(rowNames()).toEqual(["Alpha", "beta", "Beta", "Beta2", "gamma"]);
     expect(listUniverses).toHaveBeenCalledTimes(1);
   });
 
@@ -500,6 +533,7 @@ describe("UniversesScreen: loading, errors, paging, columns, sort and expansion"
       nextCursor: null,
     });
     await user.click(within(alert).getByRole("button", { name: "Try again" }));
+    expect(screen.getByRole("button", { name: "Hide details for Tech" })).toHaveFocus();
     expect(await screen.findByText("Created by hand")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
@@ -515,6 +549,48 @@ describe("UniversesScreen: loading, errors, paging, columns, sort and expansion"
     await user.click(await screen.findByRole("button", { name: "Show details for Tech" }));
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(screen.queryByText(/Saved from a filter/)).not.toBeInTheDocument();
+  });
+
+  it("keeps the loaded rows, dimmed and busy, while a new selection loads (data-table section 4)", async () => {
+    const user = userEvent.setup();
+    let answerRetired: (value: UniverseList) => void = () => undefined;
+    listUniverses.mockImplementation((params = {}) =>
+      params.lifecycle === "retired"
+        ? new Promise<UniverseList>((settle) => {
+            answerRetired = settle;
+          })
+        : Promise.resolve(page([TECH, DIVIDEND], { active: 2, retired: 1 })),
+    );
+    renderScreen();
+    await screen.findByRole("link", { name: "Tech" });
+    expect(screen.getByRole("table")).not.toHaveAttribute("aria-busy", "true");
+
+    await user.selectOptions(lifecycleSelect(), "retired");
+    expect(screen.getByText("Loading…")).toHaveAttribute("aria-live", "polite");
+    const table = screen.getByRole("table");
+    expect(table).toHaveAttribute("aria-busy", "true");
+    expect(within(table).getByRole("link", { name: "Tech" })).toBeInTheDocument();
+    expect(rowOf("Tech").closest("tbody")).toHaveClass("opacity-50");
+
+    answerRetired(page([OLD], { active: 2, retired: 1 }));
+    await screen.findByRole("link", { name: "Old ideas" });
+    expect(screen.getByRole("table")).not.toHaveAttribute("aria-busy", "true");
+    expect(rowOf("Old ideas").closest("tbody")).not.toHaveClass("opacity-50");
+    expect(screen.queryByText("Loading…")).not.toBeInTheDocument();
+  });
+
+  it("drops the kept rows when a read finds no universe at all (T008(a): never populated has no table)", async () => {
+    const user = userEvent.setup();
+    listUniverses.mockImplementation(async (params = {}) =>
+      params.lifecycle === "retired"
+        ? page([], { active: 0, retired: 0 })
+        : page([TECH], { active: 1, retired: 0 }),
+    );
+    renderScreen();
+    await screen.findByRole("link", { name: "Tech" });
+    await user.selectOptions(lifecycleSelect(), "retired");
+    expect(await screen.findByText(/^No universes yet\./)).toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
   it("ignores a slower read for a selection the owner has already left", async () => {
