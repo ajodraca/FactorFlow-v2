@@ -1,0 +1,45 @@
+# GREEN cycle-4 (T004, T005); command: uv run pytest tests/integration/test_engine_transaction.py tests/integration/test_engine_volume_population.py tests/integration/test_engine_volume.py -m 'postgres or not postgres' -v
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python3
+hypothesis profile 'default'
+rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 34 items
+
+tests/integration/test_engine_transaction.py::test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set PASSED [  2%]
+tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[no-stage] PASSED [  5%]
+tests/integration/test_engine_transaction.py::test_completing_an_already_failed_set_updates_no_row_and_rolls_back[stage-wrote-rows] PASSED [  8%]
+tests/integration/test_engine_transaction.py::test_set_failed_by_another_writer_mid_build_is_left_untouched PASSED [ 11%]
+tests/integration/test_engine_transaction.py::test_build_timeout_fails_the_set_with_a_timeout_reason PASSED [ 14%]
+tests/integration/test_engine_transaction.py::test_success_with_no_stages_completes_the_set PASSED [ 17%]
+tests/integration/test_engine_transaction.py::test_completed_set_is_sized_by_the_active_roster_only PASSED [ 20%]
+tests/integration/test_engine_transaction.py::test_qualified_counts_are_this_sets_classification_set_factor_rows PASSED [ 23%]
+tests/integration/test_engine_transaction.py::test_stages_run_in_list_order PASSED [ 26%]
+tests/integration/test_engine_transaction.py::test_unknown_set_is_reported_as_missing_not_as_a_type_error PASSED [ 29%]
+tests/integration/test_engine_transaction.py::test_empty_active_roster_fails_with_the_no_price_data_reason PASSED [ 32%]
+tests/integration/test_engine_transaction.py::test_inputs_are_read_from_one_snapshot PASSED [ 35%]
+tests/integration/test_engine_transaction.py::test_build_transaction_runs_at_repeatable_read PASSED [ 38%]
+tests/integration/test_engine_transaction.py::test_no_price_data_held_fails_the_set_with_a_reason PASSED [ 41%]
+tests/integration/test_engine_transaction.py::test_non_positive_timeout_is_refused_before_touching_the_database[0] PASSED [ 44%]
+tests/integration/test_engine_transaction.py::test_non_positive_timeout_is_refused_before_touching_the_database[-1] PASSED [ 47%]
+tests/integration/test_engine_transaction.py::test_non_positive_timeout_is_refused_before_touching_the_database[0.0] PASSED [ 50%]
+tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0004-1] PASSED [ 52%]
+tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0015-2] PASSED [ 55%]
+tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[0.0012-2] PASSED [ 58%]
+tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[30-30000] PASSED [ 61%]
+tests/integration/test_engine_transaction.py::test_timeout_is_sent_in_whole_milliseconds_rounded_up_never_to_zero[300.0004-300001] PASSED [ 64%]
+tests/integration/test_engine_transaction.py::test_timeout_is_converted_to_whole_milliseconds PASSED [ 67%]
+tests/integration/test_engine_transaction.py::test_timeout_is_local_to_the_build_transaction PASSED [ 70%]
+tests/integration/test_engine_transaction.py::test_autocommit_or_open_transaction_connection_is_refused PASSED [ 73%]
+tests/integration/test_engine_transaction.py::test_connection_with_an_aborted_transaction_is_refused PASSED [ 76%]
+tests/integration/test_engine_transaction.py::test_failure_reason_is_one_line PASSED [ 79%]
+tests/integration/test_engine_transaction.py::test_failure_with_an_empty_message_is_recorded_with_its_class PASSED [ 82%]
+tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged PASSED [ 85%]
+tests/integration/test_engine_transaction.py::test_revised_close_after_completion_leaves_the_set_unchanged PASSED [ 88%]
+tests/integration/test_engine_transaction.py::test_backfill_before_the_build_is_seen_by_that_set PASSED [ 91%]
+tests/integration/test_engine_volume_population.py::test_volume_sessions_reach_the_12_month_window PASSED [ 94%]
+tests/integration/test_engine_volume_population.py::test_forty_stock_population_builds_with_every_input_present PASSED [ 97%]
+tests/integration/test_engine_volume.py::test_3000_instruments_build_within_the_budget PASSED [100%]
+
+============================= 34 passed in 15.66s ==============================

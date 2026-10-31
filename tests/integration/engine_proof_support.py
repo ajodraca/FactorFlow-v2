@@ -1,0 +1,354 @@
+"""Populations and snapshots for the whole-build proofs (CAP-002-E2-S7).
+
+A plain module rather than ``conftest.py``. It builds on CAP-002-E2-S2's ``engine_support``
+and CAP-002-E2-S3's ``engine_inputs_support`` without editing either, and defines no pytest
+fixture. Every writing helper commits, so the build's connection sees what a test wrote, and
+every reading helper ends its transaction, so ``engine.build`` is handed an idle connection.
+
+The populations are written by set-based ``INSERT ... SELECT`` statements whose dates, keys
+and counts are bound parameters (the precedent is ``test_coverage_volume.py``). Statement
+payloads use the test keys of ``engine_inputs_support`` and hold JSON numbers, which the
+DEC-0116 (4) guard reads; the real Massive keys are still the owner's question.
+"""
+
+import calendar
+import hashlib
+from dataclasses import dataclass
+from datetime import date, timedelta
+from decimal import Decimal
+from typing import Any
+from uuid import UUID
+
+import psycopg
+from psycopg.types.string import TextLoader
+
+from tests.integration.engine_inputs_support import (
+    STATEMENT_TYPES,
+    TEST_KEYS,
+    add_statement,
+    months_before,
+)
+from tests.integration.engine_support import add_building_set, add_instrument, add_run
+
+SESSIONS = 273  # design section 5: 273 bars per instrument
+QUARTERS = 8  # design section 5: 8 quarters of each statement type
+BACKDATING_STOCKS = 31  # 30 with eight quarters, the growth floor, and stock A with seven
+
+_INSTRUMENTS_SQL = """
+INSERT INTO instrument (symbol, lifecycle)
+SELECT concat('V', lpad(g::text, 5, '0')), 'active' FROM generate_series(1, %(n)s) AS g
+RETURNING instrument_id
+"""
+
+# One bar per instrument per session, observed on its own session date. The close varies by
+# instrument and by session, so the momentum returns and their dispersion are not degenerate.
+_BARS_SQL = """
+INSERT INTO daily_bar (instrument_id, session_date, observed_on, value_hash, open_price,
+                       high_price, low_price, close_price, volume)
+SELECT i.id, s.session_date, s.session_date,
+       sha256(convert_to(concat(i.id, s.session_date), 'UTF8')),
+       c.close, c.close, c.close, c.close, 1000
+  FROM unnest(%(ids)s::bigint[]) AS i (id)
+ CROSS JOIN unnest(%(sessions)s::date[]) WITH ORDINALITY AS s (session_date, ord)
+ CROSS JOIN LATERAL (
+       SELECT round(20 + i.id %% 37 + ((i.id * 7 + s.ord * (i.id %% 11 + 1)) %% 29) / 10.0, 6)
+              AS close) c
+"""
+
+# Quarterly statements keyed by the test keys, observed and filed on one day, so none is
+# backfilled. k = 1 is the newest quarter. Every value is positive and varies by stock and
+# quarter, except capital expenditure, which is reported as an outflow (negative), as
+# engine_inputs_support's test signs expect; the prior-year bases are positive.
+_STATEMENTS_SQL = """
+INSERT INTO fundamental_observation (instrument_id, fiscal_period_end, fiscal_period,
+                                     statement_type, observed_on, value_hash,
+                                     provider_filing_date, payload)
+SELECT i.id, q.period_end, q.fiscal_period, t.statement_type, %(observed_on)s::date,
+       sha256(convert_to(concat(i.id, ':', q.period_end, ':', t.statement_type), 'UTF8')),
+       %(observed_on)s::date,
+       CASE t.statement_type
+            WHEN 'balance_sheet' THEN jsonb_build_object(
+                %(book_equity)s::text, 500 + (i.id %% 101) * 3 + q.k * 7,
+                %(shares_outstanding)s::text, 100 + i.id %% 53 + q.k)
+            WHEN 'income_statement' THEN jsonb_build_object(
+                %(net_income)s::text, 10 + i.id %% 61 + q.k,
+                %(diluted_eps)s::text, round(1 + (i.id %% 97) / 40.0 + (9 - q.k) / 20.0, 4),
+                %(revenue)s::text, 100 + (i.id %% 89) * 2 + (9 - q.k) * (i.id %% 7 + 1))
+            ELSE jsonb_build_object(
+                %(operating_cash_flow)s::text, 30 + i.id %% 41 + q.k,
+                %(capital_expenditure)s::text, -(5 + i.id %% 13 + q.k))
+       END
+  FROM unnest(%(ids)s::bigint[]) AS i (id)
+ CROSS JOIN unnest(%(period_ends)s::date[], %(fiscal_periods)s::text[]) WITH ORDINALITY
+       AS q (period_end, fiscal_period, k)
+ CROSS JOIN unnest(%(statement_types)s::text[]) AS t (statement_type)
+"""
+
+# One cash dividend per instrument, its ex-date one of the sessions passed, chosen by
+# instrument; the cash amount is a JSON string, the stored form DEC-0117 accepts.
+_DIVIDENDS_SQL = """
+INSERT INTO corporate_action (instrument_id, action_type, effective_on, observed_on,
+                              value_hash, payload)
+SELECT i.id, 'dividend', d.effective_on, d.effective_on,
+       sha256(convert_to(concat(i.id, ':dividend:', d.effective_on), 'UTF8')),
+       jsonb_build_object('cash_amount', %(cash_amount)s::text)
+  FROM unnest(%(ids)s::bigint[]) AS i (id)
+ CROSS JOIN LATERAL (
+       SELECT (%(days)s::date[])[1 + i.id %% cardinality(%(days)s::date[])] AS effective_on) d
+"""
+
+# A 2-for-1 split (price factor split_from / split_to = 1/2) for every tenth instrument of the
+# roster, by position.
+_SPLITS_SQL = """
+INSERT INTO corporate_action (instrument_id, action_type, effective_on, observed_on,
+                              value_hash, payload)
+SELECT i.id, 'split', d.effective_on, d.effective_on,
+       sha256(convert_to(concat(i.id, ':split:', d.effective_on), 'UTF8')),
+       jsonb_build_object('split_from', '1', 'split_to', '2')
+  FROM unnest(%(ids)s::bigint[]) WITH ORDINALITY AS i (id, pos)
+ CROSS JOIN LATERAL (
+       SELECT (%(days)s::date[])[1 + i.id %% cardinality(%(days)s::date[])] AS effective_on) d
+ WHERE i.pos %% 10 = 0
+"""
+
+# Planner statistics a long-lived store holds and a fresh bulk load lacks (DEC-0123).
+_ANALYZE_SQL = "ANALYZE daily_bar, fundamental_observation, corporate_action, instrument"
+
+_SNAPSHOT_SQL = {
+    "classification_set": "SELECT * FROM classification_set WHERE set_id = %s ORDER BY set_id",
+    "classification_set_factor": (
+        "SELECT * FROM classification_set_factor WHERE set_id = %s ORDER BY set_id, factor"
+    ),
+    "factor_input": (
+        "SELECT * FROM factor_input WHERE set_id = %s "
+        "ORDER BY set_id, instrument_id, factor, input_name"
+    ),
+    "factor_classification": (
+        "SELECT * FROM factor_classification WHERE set_id = %s "
+        "ORDER BY set_id, instrument_id, factor"
+    ),
+}
+
+
+@dataclass(frozen=True)
+class BackdatingPopulation:
+    classification_date: date
+    instrument_ids: tuple[int, ...]
+    a_id: int  # the stock missing its oldest income-statement quarter
+    other_id: int  # a stock with all eight quarters, used by the price case
+    missing_period_end: date  # the quarter A lacks
+    first_observed_on: date  # every statement row's observed_on and filing date
+
+
+def volume_sessions(last_session: date, count: int = SESSIONS) -> list[date]:
+    """``count`` weekdays, ascending, ending on ``last_session`` and spanning over 13 months.
+
+    Every weekday from the weekday on or before ``last_session`` less 13 months and 7 days
+    through ``last_session``, with evenly spaced interior weekdays dropped, standing in for
+    market holidays, until ``count`` remain. 273 consecutive weekdays would span about 12.6
+    months and leave ``return_12m`` without its start bar, which lies on or before the
+    classification date less 1 month less 12 months (DEC-0055 (3)).
+    """
+    assert last_session.weekday() < 5, "the last session must be a weekday"
+    start = months_before(last_session, 13) - timedelta(days=7)
+    while start.weekday() >= 5:
+        start -= timedelta(days=1)
+    span = (last_session - start).days + 1
+    weekdays = [start + timedelta(days=n) for n in range(span)]
+    weekdays = [day for day in weekdays if day.weekday() < 5]
+    surplus = len(weekdays) - count
+    assert surplus >= 0, f"only {len(weekdays)} weekdays for {count} sessions"
+    last = len(weekdays) - 1
+    dropped = {round(j * last / (surplus + 1)) for j in range(1, surplus + 1)}
+    assert len(dropped) == surplus and 0 not in dropped and last not in dropped
+    sessions = [day for index, day in enumerate(weekdays) if index not in dropped]
+    assert len(sessions) == count
+    assert sessions[0] <= months_before(months_before(last_session, 1), 12)
+    return sessions
+
+
+def _quarter_ends(day: date, n: int) -> list[date]:
+    """The ``n`` calendar quarter ends on or before ``day``, newest first."""
+    ends: list[date] = []
+    index = day.year * 4 + (day.month - 1) // 3
+    while len(ends) < n:
+        year, quarter = divmod(index, 4)
+        month = 3 * quarter + 3
+        end = date(year, month, calendar.monthrange(year, month)[1])
+        if end <= day:
+            ends.append(end)
+        index -= 1
+    return ends
+
+
+def _fiscal_period(period_end: date) -> str:
+    """The quarter label of a calendar quarter end; never ``FY``."""
+    return f"Q{(period_end.month - 1) // 3 + 1}"
+
+
+def _insert_statements(
+    cur: psycopg.Cursor[Any],
+    ids: list[int],
+    period_ends: list[date],
+    observed_on: date,
+    statement_types: tuple[str, ...] = STATEMENT_TYPES,
+) -> None:
+    # A statement is observed after its period ends, as a provider can report it.
+    assert observed_on > max(period_ends), (
+        f"statements observed on {observed_on}, not after their period end {max(period_ends)}"
+    )
+    cur.execute(
+        _STATEMENTS_SQL,
+        {
+            "ids": ids,
+            "period_ends": period_ends,
+            "fiscal_periods": [_fiscal_period(end) for end in period_ends],
+            "statement_types": list(statement_types),
+            "observed_on": observed_on,
+            **TEST_KEYS,
+        },
+    )
+
+
+def populate_volume(
+    conn: psycopg.Connection, n: int = 3000, *, last_session: date
+) -> tuple[list[int], date]:
+    """``n`` active instruments, each with every input of the three factors present.
+
+    Per instrument: 273 bars (``volume_sessions``), eight quarters of each statement type
+    observed and filed 30 days before ``last_session``, one cash dividend inside the momentum
+    windows, and for every tenth a 2-for-1 split, then ``ANALYZE`` (DEC-0123). Returns the
+    instrument ids, ascending, and the classification date, which is ``last_session``.
+    """
+    sessions = volume_sessions(last_session)
+    # Ex-dates between 3 and 2 months before the last session, inside (S_3, E] of every
+    # window; split dates between 6 and 5 months before, inside the 6- and 12-month windows.
+    dividend_days = [
+        day
+        for day in sessions
+        if months_before(last_session, 3) < day <= months_before(last_session, 2)
+    ]
+    split_days = [
+        day
+        for day in sessions
+        if months_before(last_session, 6) < day <= months_before(last_session, 5)
+    ]
+    assert dividend_days and split_days
+    with conn.cursor() as cur:
+        cur.execute(_INSTRUMENTS_SQL, {"n": n})
+        ids = sorted(int(row[0]) for row in cur.fetchall())
+        cur.execute(_BARS_SQL, {"ids": ids, "sessions": sessions})
+        _insert_statements(
+            cur, ids, _quarter_ends(last_session, QUARTERS), last_session - timedelta(days=30)
+        )
+        cur.execute(_DIVIDENDS_SQL, {"ids": ids, "days": dividend_days, "cash_amount": "0.25"})
+        cur.execute(_SPLITS_SQL, {"ids": ids, "days": split_days})
+        cur.execute(_ANALYZE_SQL)
+    conn.commit()
+    return ids, last_session
+
+
+def _insert_bar(
+    conn: psycopg.Connection,
+    instrument_id: int,
+    session_date: date,
+    close: Decimal,
+    observed_on: date,
+) -> None:
+    """One ``daily_bar`` row; its hash covers the close and ``observed_on``, so a revised
+    close for the same session is a distinct row."""
+    digest = hashlib.sha256(
+        f"{instrument_id}|{session_date}|{close}|{observed_on}".encode()
+    ).digest()
+    conn.execute(
+        "INSERT INTO daily_bar (instrument_id, session_date, observed_on, value_hash, "
+        "open_price, high_price, low_price, close_price, volume) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 1000)",
+        (instrument_id, session_date, observed_on, digest, close, close, close, close),
+    )
+    conn.commit()
+
+
+def populate_backdating(
+    conn: psycopg.Connection, *, classification_date: date
+) -> BackdatingPopulation:
+    """31 active stocks with distinct values and one bar each on ``classification_date``,
+    observed that day. Thirty hold eight quarters of the three statement types; the last,
+    stock A, lacks its oldest income-statement quarter, so its growth inputs are ``missing``
+    and the growth peer set is exactly the floor of 30 (DEC-0124). Every statement row is
+    observed and filed 30 days before ``classification_date``.
+    """
+    ids = [add_instrument(conn, f"P{k:02d}") for k in range(1, BACKDATING_STOCKS)]
+    a_id = add_instrument(conn, "A")
+    for position, instrument_id in enumerate([*ids, a_id]):
+        _insert_bar(
+            conn, instrument_id, classification_date, Decimal(20 + position), classification_date
+        )
+    period_ends = _quarter_ends(classification_date, QUARTERS)
+    first_observed_on = classification_date - timedelta(days=30)
+    with conn.cursor() as cur:
+        _insert_statements(cur, ids, period_ends, first_observed_on)
+        _insert_statements(
+            cur, [a_id], period_ends, first_observed_on, ("balance_sheet", "cash_flow_statement")
+        )
+        _insert_statements(cur, [a_id], period_ends[:-1], first_observed_on, ("income_statement",))
+    conn.commit()
+    return BackdatingPopulation(
+        classification_date=classification_date,
+        instrument_ids=(*ids, a_id),
+        a_id=a_id,
+        other_id=ids[0],
+        missing_period_end=period_ends[-1],
+        first_observed_on=first_observed_on,
+    )
+
+
+def backfill_statement(conn: psycopg.Connection, pop: BackdatingPopulation) -> date:
+    """Insert A's missing oldest income statement, observed the day after the classification
+    date and filed 60 days before A's first fundamentals ``observed_on``, so it is backfilled
+    (DEC-0056). Returns its ``observed_on``."""
+    observed_on = pop.classification_date + timedelta(days=1)
+    add_statement(
+        conn,
+        pop.a_id,
+        pop.missing_period_end,
+        "income_statement",
+        {TEST_KEYS["revenue"]: Decimal(150), TEST_KEYS["diluted_eps"]: Decimal("1.5")},
+        _fiscal_period(pop.missing_period_end),
+        observed_on,
+        pop.first_observed_on - timedelta(days=60),
+        numbers=True,
+    )
+    return observed_on
+
+
+def revise_close(
+    conn: psycopg.Connection,
+    instrument_id: int,
+    session_date: date,
+    new_close: Decimal,
+    observed_on: date,
+) -> None:
+    """A second bar for an existing session with a different close. The caller passes an
+    ``observed_on`` later than every row of the population, so the revision is the session's
+    latest observation, the one the engine reads (DEC-0117 (1))."""
+    _insert_bar(conn, instrument_id, session_date, new_close, observed_on)
+
+
+def snapshot_set(conn: psycopg.Connection, set_id: UUID) -> dict[str, list[tuple[Any, ...]]]:
+    """Every column of the set's row and of its rows in the three child tables, each table
+    ordered by its primary key, for exact comparison (DEC-0124). ``jsonb`` is kept as the
+    text the store returns, so a difference no parsed value shows still compares unequal."""
+    snapshot: dict[str, list[tuple[Any, ...]]] = {}
+    with conn.cursor() as cur:
+        cur.adapters.register_loader("jsonb", TextLoader)
+        for table, query in _SNAPSHOT_SQL.items():
+            cur.execute(query, (set_id,))
+            snapshot[table] = cur.fetchall()
+    conn.commit()
+    return snapshot
+
+
+def complete_and_open_next(conn: psycopg.Connection, classification_date: date) -> UUID:
+    """A terminal (succeeded) run and a ``building`` set for it; returns the set id."""
+    return add_building_set(conn, add_run(conn), classification_date)

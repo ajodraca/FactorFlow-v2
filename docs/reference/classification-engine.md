@@ -53,7 +53,9 @@ Otherwise it runs one transaction, in this order:
 4. Each stage in `_STAGES` runs in list order (see [Stages](#stages)).
 5. `complete_set.sql` moves the set from `building` to `complete`. It sets
    `ended_at`, `latest_trading_day` and `active_instruments`, the size of the
-   active roster. When the guard `state = 'building'` matches no row because
+   active roster. `ended_at` is `now()`, which PostgreSQL fixes at the start
+   of the transaction, so it records when the build began, not when it
+   committed. When the guard `state = 'building'` matches no row because
    another writer already ended the set, `build` raises
    `RuntimeError("classification set is no longer building")` inside the
    transaction.
@@ -86,7 +88,8 @@ That covers a stage's own exception, `QueryCanceled` from the timeout, and the
    The traceback goes to the log only.
 4. In a new transaction, at the connection's default isolation level and
    without the build's timeout, `fail_set.sql` moves the set from `building`
-   to `failed`, sets `ended_at` and stores the reason, then commits. A set
+   to `failed`, sets `ended_at` to the start of this new transaction and
+   stores the reason, then commits. A set
    another writer already ended keeps that writer's reason and `ended_at`, and
    an unknown `set_id` updates no row.
 5. `build` returns a `BuildResult` with `state="failed"`, the reason,
@@ -581,7 +584,7 @@ a `%(name)s` parameter.
 | Statement | Effect |
 |---|---|
 | `set_context.sql` | One row: the set's id, run and classification date, the latest trading day, and the active and retired rosters. No row for an unknown set |
-| `complete_set.sql` | `building` to `complete`, with `ended_at = now()`, `latest_trading_day` and `active_instruments`. Guarded by `set_id` and `state = 'building'` |
+| `complete_set.sql` | `building` to `complete`, with `ended_at = now()` (the build transaction's start), `latest_trading_day` and `active_instruments`. Guarded by `set_id` and `state = 'building'` |
 | `fail_set.sql` | `building` to `failed`, with `ended_at = now()` and `failure_reason`. Guarded by `set_id` and `state = 'building'` |
 | `statements.sql` | Creates the temporary table `stmt`: the latest observation of each quarterly statement period on or before the classification date, with `backfilled`, `period_rank`, `ttm_slot` and `prior_slot`. Writes no stored table |
 | `value_inputs.sql` | Creates the temporary table `inputs` holding the three value inputs of every active instrument. Writes no stored table |
@@ -652,6 +655,14 @@ guessed.
   unresolved, the suite reports it as an expected failure (`xfailed`). Once
   every key is resolved, the strict XPASS fails the suite until the marker is
   removed.
+- `test_unresolved_line_items_still_classify_momentum` in
+  `tests/integration/test_engine_inputs_fundamentals.py` (CAP-002-E2-S7;
+  TC-COMP-059, DAC-E2-S2-5) builds 40 stocks with the real `LINE_ITEMS`,
+  `_STAGES` and `MIN_PEER_SET_SIZE`. Every value and growth input is `missing`
+  with this cause, value and growth are `not_enough_stocks`, momentum is
+  ranked and every stock is classified on it, and the set is `complete`. It
+  first asserts that all seven keys are unresolved, so it fails as soon as any
+  key is resolved.
 
 ## Safety rules
 
@@ -675,3 +686,76 @@ builds a statement with `.format(`. The engine's statements use only
 `%(name)s` parameters, never braces or `||` concatenation. Each engine file is
 checked once it exists, so a later story's files are covered without editing
 the test.
+
+## Whole-build proofs
+
+Two promises of the whole build are proved by tests (CAP-002-E2-S7): 3000
+instruments build within the budget, and later data never changes a completed
+set. Both proofs run the real `_STAGES` and `MIN_PEER_SET_SIZE`, build their
+populations with `tests/integration/engine_proof_support.py`, and install the
+test line items, because the real ones are unresolved (see
+[Line items](#line-items)).
+
+### Volume budget
+
+`tests/integration/test_engine_volume.py` (TC-COMP-091; AC-11, DAC-E2-5,
+DEC-0123) builds 3000 active instruments. Each has 273 daily bars, 8 quarters
+of each statement type and one dividend, and every tenth has a 2-for-1 split.
+The test times the one `engine.build` call, given `timeout_seconds` 300.0, and
+fails unless the set is `complete` within `BUDGET_SECONDS`, 295: AC-11's 300
+seconds less one 5-second poll interval (DEC-0054). `statement_timeout` bounds
+each statement, not the whole build, so nothing at runtime holds a whole
+build to the budget. The
+test also asserts 3 `classification_set_factor`, 24,000 `factor_input` and
+9,000 `factor_classification` rows, with all 9,000 classifications
+`classified`.
+
+It is marked `slow` and `postgres`, so the full suite and `-m postgres` run
+it. To run it alone and see the build time it prints:
+
+```bash
+uv run pytest tests/integration/test_engine_volume.py -s
+```
+
+Two more tests keep the proof from passing by proving less:
+
+- `tests/integration/test_engine_volume_population.py` builds the same
+  population at 40 stocks in the ordinary `postgres` run. Every input is
+  `present` and every stock is classified on every factor. Each stock's
+  dividend is applied in all three momentum windows, and every tenth stock's
+  split in the 6- and 12-month ones, so the volume test cannot meet its budget
+  by doing less work.
+- `tests/unit/test_engine_volume_static.py` needs no database. It reads the
+  volume test with `ast` and fails when the module holds other than one test
+  function, or the test loses its `slow` or `postgres` mark or is skipped or
+  expected to fail. It also fails when the module references `_STAGES` or
+  `MIN_PEER_SET_SIZE`, rebinds or changes `BUDGET_SECONDS` (295) or
+  `TIMEOUT_SECONDS` (300.0), calls `engine.build` other than once or without
+  `TIMEOUT_SECONDS`, or holds other than one `assert ... <= BUDGET_SECONDS`.
+
+### No backdating
+
+The no-backdating cases are at the end of
+`tests/integration/test_engine_transaction.py` (TC-COMP-162; AC-19, DAC-E2-9,
+DEC-0124). The first two compare every row of a completed set in
+`classification_set`, `classification_set_factor`, `factor_input` and
+`factor_classification`, column by column, before the later data is recorded,
+after it, and again after the next set completes.
+
+- `test_backfill_after_completion_leaves_the_set_unchanged`: a backfilled
+  income statement, filling the quarter one stock lacked, is recorded after
+  set 1 completes. Set 1 is unchanged. Set 2 reads the statement: the stock's
+  growth inputs are `present` and marked `restated_possible`, and their
+  `known_on` is the statement's `observed_on`, not its filing date or period
+  end. No `factor_input` row of set 1 is known on or after that date.
+- `test_revised_close_after_completion_leaves_the_set_unchanged`: the same for
+  a close revised after set 1 completes. Set 2 prices market capitalisation
+  from the revised close, known on the revision's `observed_on`.
+- `test_backfill_before_the_build_is_seen_by_that_set` is the control: the
+  same statement, recorded before set 1 builds, is read by set 1. Rows are
+  read as the build's snapshot holds them, with no bound on `observed_on`, so
+  an input's `known_on` can be later than its set's `classification_date`.
+
+A completed set's rows are never rewritten: the research tables are appended
+to only, and `classification_set` is updated only while `building` (see
+[Safety rules](#safety-rules)).

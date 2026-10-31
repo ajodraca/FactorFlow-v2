@@ -1,0 +1,76 @@
+# RED cycle-5 (T014, and the cycle-4 review notes): falsification runs on HEAD f4deee3 plus the cycle-1 to cycle-5 test files; each perturbs one test file and is reverted after its run
+# engine_proof_support.py sha256 6c615099a2c0caa65adfa14ed559ac2d5ace632b67ad3fc50122c3c68a171586
+# tests/integration/test_engine_inputs_fundamentals.py (unperturbed) sha256 97d0745caa51d9e5be445e4733508a04e5955ff2b38a5d41e1a902d7a4b8feff
+
+# run: T014: populate_volume given 29 stocks instead of 40 (T013's perturbation; 29 is below the floor of 30)
+# command: uv run pytest tests/integration/test_engine_inputs_fundamentals.py::test_unresolved_line_items_still_classify_momentum -q -p no:cacheprovider
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_unresolved_line_items_still_classify_momentum ______________
+
+postgres_connection_string = 'postgresql://test:test@localhost:51795/test_5277cc0282354d5686268714bc50cfbd'
+
+    def test_unresolved_line_items_still_classify_momentum(postgres_connection_string: str) -> None:
+        """TC-COMP-059's end-to-end clause, shared with CAP-002-E2-S2 (DAC-E2-S2-5; factor-engine
+        section 8 acceptance criterion 13 and section 7 row "Unresolved line items"). With the real,
+        unresolved ``LINE_ITEMS``, the real stages and the real peer-set floor, the value and growth
+        inputs are missing with the unresolved cause, momentum is ranked and every stock classified
+        on it, value and growth are unranked, and the set completes (AC-7, AC-12, AC-14). An
+        unranked factor's reason wins over the input's (factor-engine 2.5), and factor_classification
+        has no detail, so the cause is asserted on factor_input only."""
+        conn = migrate_through_classification(postgres_connection_string)
+        try:
+            ids, classification_date = populate_volume(conn, 29, last_session=date(2026, 11, 13))
+            set_id = complete_and_open_next(conn, classification_date)
+            assert line_items.unresolved() == list(line_items.LINE_ITEMS)
+            assert len(line_items.unresolved()) == 7
+    
+            result = engine.build(conn, set_id, 60)
+    
+            assert result.state == "complete"
+            assert result.failure_reason is None
+>           assert result.qualified_counts == {"value": 0, "growth": 0, "momentum": 40}
+E           AssertionError: assert {'growth': 0,...9, 'value': 0} == {'value': 0, ...momentum': 40}
+E             
+E             Omitting 2 identical items, use -vv to show
+E             Differing items:
+E             {'momentum': 29} != {'momentum': 40}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_fundamentals.py:1406: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_fundamentals.py::test_unresolved_line_items_still_classify_momentum
+1 failed in 2.62s
+# tests/integration/test_engine_transaction.py (unperturbed) sha256 4f317aca000a21ffb9275a8de7296ea9577156cb7c40b41bc7903e7bfacf0863
+
+# run: T004 (cycle-4 review note): the set-1 snapshot emptied, so the non-empty check must fail
+# command: uv run pytest tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged -q -p no:cacheprovider
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_backfill_after_completion_leaves_the_set_unchanged ____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=51853 user=test database=test_3cfce04ff346470d871cbcc3ee8526f9) at 0x10abc7e90>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10abc4c50>
+
+    def test_backfill_after_completion_leaves_the_set_unchanged(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S7-2, DAC-E2-9, AC-19, DEC-0124: a backfilled statement recorded after a set
+        completes changes no row of that set, in any of its four tables or columns; the next set
+        sees it, known on the day it was observed and never earlier."""
+        pop = populate_backdating(conn, classification_date=PROOF_DATE)
+        install_test_line_items(monkeypatch)
+        set_1 = complete_and_open_next(conn, PROOF_DATE)
+        build_complete(conn, set_1)
+        before = {table: [] for table in snapshot_set(conn, set_1)}
+>       assert all(before.values())  # every table holds rows, so equality is not vacuous
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert False
+E        +  where False = all(dict_values([[], [], [], []]))
+E        +    where dict_values([[], [], [], []]) = <built-in method values of dict object at 0x10afca880>()
+E        +      where <built-in method values of dict object at 0x10afca880> = {'classification_set': [], 'classification_set_factor': [], 'factor_input': [], 'factor_classification': []}.values
+
+tests/integration/test_engine_transaction.py:703: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged
+1 failed in 2.56s

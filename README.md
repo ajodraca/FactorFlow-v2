@@ -2170,7 +2170,9 @@ instruments, is also marked `slow`, as is
 `test_api_coverage.py::test_volume_read_of_3000_instruments` (CAP-001-E6-S3),
 which does the same through `GET /api/coverage`. `test_universe_volume.py`
 (CAP-002-E1-S3), which builds a 3000-member universe in three calls and
-replays it, is marked `slow` as well.
+replays it, is marked `slow` as well, and so is `test_engine_volume.py`
+(CAP-002-E2-S7), which times one classification build over 3000 instruments
+(see [Whole-build proofs](docs/reference/classification-engine.md#whole-build-proofs)).
 
 The interface suite is Vitest with React Testing Library, run from the
 repository root:
