@@ -9,6 +9,8 @@
 # cycle-2 reworks implementation review v1 (IR-001 to IR-006; IR-007 is carried to the design's next revision) and
 # applies two owner decisions that supersede plan T010's wording: DEC-0242 (known_on null on every missing momentum
 # input) and DEC-0243 (missing_data_type corporate_actions for an unusable corporate-action payload).
+# cycle-3 reworks implementation review v2 (IR-001), test-only: an outdated input's known_on is pinned where it differs
+# from E (DEC-0242, DEC-0118 (1)).
 
 cycles:
   - id: cycle-1
@@ -586,3 +588,80 @@ cycles:
             the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments),
             which PostgreSQL discards; it adds no %, brace or || that the SQL safety test scans for, and no test
             reads that text
+  - id: cycle-3
+    tasks: [T007]
+    decisions: [DEC-0118, DEC-0242]
+    description: >
+      Review rework of CAP-002-E2-S4-implementation-review-v2 (CHANGES-REQUIRED), test-only; no production file
+      changes. IR-001: an outdated input's known_on was asserted only in TC-COMP-102, where it equals the E session
+      date, so review v2's mutant review2-known-on-outdated-e (line 241 writing e_session for an outdated input)
+      survived. DEC-0242 keeps DEC-0118 (1) for present and outdated inputs. The new test in
+      tests/integration/test_engine_inputs_momentum.py, test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used,
+      builds a stale stock (latest bar 2026-10-15, before the latest trading day 2026-10-16) whose E bar, S_3 bar,
+      split in (S_3, E], dividend and that dividend's prior-session bar are all usable. Each row is observed on its
+      own date except one, observed on 2026-10-05, in turn over five parameters; return_3m must be outdated with
+      value null, as_of E and known_on 2026-10-05. The latest bar, observed later still, judges currency and feeds
+      no figure, so it does not move known_on. No existing test or assertion changed. IR-002 (the T009 (c) note
+      recording DEC-0243) is plan text outside this diff; IR-003 is carried to the design's next revision.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-3.log
+    red_log_sha256: f3529b49fdc1da36c4233cf64eb30c6d1b26817188cdb63daed7cea98442870b
+    red_evidence: >
+      red-cycle-3.log, written by red-cycle-3.py, runs test_engine_inputs_momentum.py in scratch copies of the
+      component, never the working tree, each imported first through PYTHONPATH (the log header holds the sha256 of
+      HEAD's SQL and of HEAD's and the cycle's test module). The cycle changes no production code, so its RED is
+      observed against review v2's survivor. A: HEAD 41bc50e's src and tests with review2-known-on-outdated-e
+      applied pass 74 of 74, so the survivor is reproduced. B: HEAD's src and the cycle's tests with the survivor
+      applied: 5 failed, 74 passed, and the 5 failures are exactly the new test's five parameters (E bar, S bar,
+      split, dividend, prior bar), each reading 2026-09-17 for 2026-10-05. C: HEAD's src and the cycle's tests
+      unmutated pass 79 of 79.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/red-cycle-3.py
+        sha256: 5cdefe30dfd5e7b45f275faa954871bf8286b4054a072b88e823cccbb289207d
+    green_evidence: >
+      The new test passes on HEAD's production code (5 passed). Focused suite (test_engine_inputs_momentum.py,
+      test_engine_sql_safety.py, test_classification_stage_order.py, test_classification_sql_ships.py): 116 passed
+      in each of the four mutation baselines. The full validation on the final tree is recorded in the stage report.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    code_review: >
+      One fresh independent code-review subagent judged cycle-3.patch: APPROVED, no blocking finding. It confirmed
+      the input is outdated and not missing, that each parameter moves known_on past E only through a row the
+      3-month input uses, that 2026-10-05 is right in every case and the 2026-10-15 bar feeds no figure, and that
+      the test is isolated, deterministic and ruff-clean. It reproduced the kill in its own scratch copy (5 failed)
+      and killed a mutant of its own, the outdated arm as greatest(known_on, latest_session), with all five
+      parameters. Non-blocking: "latest" names both the parameter and the stale bar in the comment, as in
+      TC-COMP-066; only return_3m is asserted, which suffices because line 241 applies per row.
+    spec_drift:
+      drift_detected: false
+      notes: >
+        One fresh independent spec-drift subagent: no drift. outdated rests on DAC-E2-S4-5, DAC-E2-6, DEC-0055 (5)
+        and DEC-0116 (2); value null on DEC-0116 (5); as_of E on DEC-0118 (4); known_on 2026-10-05 on DEC-0242 and
+        DEC-0118 (1), DAC-E2-S4-4 and TC-COMP-066; the latest bar not moving known_on on DEC-0118 (1). Authorized
+        but worth noting: design 2.4 does not list the rows DEC-0118 (1) counts and does not yet carry DEC-0242's
+        null known_on for missing rows; DAC-E2-S4-4 and TC-COMP-066 word known_on without that exception;
+        DEC-0241, DEC-0242 and DEC-0243 are untracked in the harness until the driver commits them, open and
+        owner_reviewed false.
+    diff_sha256: 8c10deb9667469201d3949877704031695aa8eb7449f0a524e344509fefaba83
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 020f41c5ec058fa8f6a42375e6f1ff959b2ba7134cef43db64a310ea2e07abf3
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      manual_mutants: >
+        mutants-cycle-3.json: generate --against HEAD derives no catalogue mutant, the cycle changing no production
+        line. It holds every hand-written mutant on line 241 from review v2's run, re-tagged cycle-3: review v2's
+        survivor review2-known-on-outdated-e, its review2-known-on-not-boundary, -missing-e-bar and
+        -missing-applied-bars, and cycle-2's rework-known-on-unguarded, -present-only and -never; and 2 new
+        mutants of the outdated arm, rework3-known-on-outdated-latest-session (the latest bar's session date) and
+        rework3-known-on-outdated-bars-only (the E and S bars' observations alone). All 9 are killed, the three
+        outdated-arm mutants each by the new test. The run used review v2's focused command over four clones, from
+        a scratch directory; the results file, its logs (mutation-cycle-3-results-logs) and the mutants file are
+        copied beside this evidence, so the paths recorded inside the results name the scratch run.
+      survivors: []

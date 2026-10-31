@@ -8,7 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
 updated: 2026-10-30
-last_reworked_review: CAP-002-E2-S4-implementation-review-v1.md
+last_reworked_review: CAP-002-E2-S4-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -81,6 +81,7 @@ Database tests are marked `@pytest.mark.postgres`, carry `# Implements TC-COMP-n
 ### Additional Unit Tests
 
 - [x] T009 Add to `tests/integration/test_engine_inputs_momentum.py` (same file, not parallel) the cases no mapped TC names: (a) reason precedence (DEC-0116 (1), DEC-0118): a stale stock lacking the S_12 bar has `return_12m` `missing` and the other two `outdated`; a stock with no bar at all is `missing` for all three; (b) supporting case for TC-COMP-059 (no `# Implements` tag; it shows only that the momentum inputs stay `present`, and the "momentum still classifies" clause is asserted by CAP-002-E2-S7 T014): with the real `LINE_ITEMS` (every key `REQUIRES_INPUT`) value and growth inputs are `missing` and the three momentum inputs of a complete stock are `present`, `build` returns `complete`; (c) a retired instrument gets no momentum row and an active one exactly three, named per `constants.INPUT_NAMES["momentum"]`, each with `factor == "momentum"`, `restated_possible` false and the `acquisition_state` `prices` outcome in `detail.last_acquisition` only when `missing`; (d) revision handling (DEC-0117): a bar re-acquired for the same session with a later `observed_on` is used and the earlier row is untouched; on equal `observed_on` the later `recorded_at` wins; a revised dividend (same `effective_on`, later `observed_on`, different amount) is applied once with the later amount; (e) unusable payloads (DEC-0117): a split with `split_to` of `"0"`, a non-numeric string, a missing key or a negative `cash_amount` in the window makes the inputs whose window contains it `missing` with `detail.cause == "corporate_action_payload_unusable"` naming the action, the other windows are unaffected and the set completes; (f) snapshot: a stage injected before the momentum stage commits a newer bar on a second connection; the first set does not see it and a second set does (DAC-E2-9, AC-19, DEC-0111); (g) a stock with exactly one bar has all three inputs `missing` (S_k cannot resolve) rather than a zero return (AC-7, AC-13) (depends on T008)
+  - Note (review v2 rework, 2026-10-30): an owner decision supersedes (c)'s wording on one point. **DEC-0243** (review v1 IR-006): a momentum input missing with `detail.cause = 'corporate_action_payload_unusable'` carries the `acquisition_state` `corporate_actions` outcome in `detail.last_acquisition`, in place of `prices`; every other missing momentum input, a missing boundary and DEC-0241's `price_not_positive` among them, keeps `prices`. T010's note records the same supersession.
 
 **Checkpoint**: All tests are written and fail (no `_momentum_inputs_stage`, no SQL yet).
 

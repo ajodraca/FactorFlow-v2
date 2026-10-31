@@ -1,0 +1,45 @@
+..................................F
+=================================== FAILURES ===================================
+_ test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[E bar] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=57301 user=test database=test_2cc1e5ae483e4945b9ea10af7acf0a4...8a3d4f0>, stock=1, set_id=UUID('1d631a1e-592c-4088-81d3-8bf800cbfde5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a3fc50>
+latest = 'E bar'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        """DEC-0242, DEC-0118 (1), DAC-E2-S4-4: an outdated input keeps a present one's known_on,
+        the latest observed_on over the rows it uses. Each row is observed on its own date except
+        one, observed after E, so known_on is that observation, not the E session date (review v2
+        IR-001)."""
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        observed = {"E bar": E, "S bar": S3, "split": split_on, "dividend": ex_date, "prior bar": prior}
+        observed[latest] = date(2026, 10, 5)
+        # The latest bar precedes the latest trading day, so the stock is stale. It judges currency
+        # and feeds no figure, so its later observation does not move known_on.
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, date(2026, 10, 15): 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        row = rows["return_3m"]
+        assert row["status"] == "outdated"
+        assert row["value"] is None
+        assert row["as_of"] == E
+>       assert row["known_on"] == date(2026, 10, 5)
+E       assert datetime.date(2026, 10, 15) == datetime.date(2026, 10, 5)
+E        +  where datetime.date(2026, 10, 5) = date(2026, 10, 5)
+
+tests/integration/test_engine_inputs_momentum.py:921: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_outdated_inputs_known_on_is_the_latest_observation_of_the_rows_used[E bar]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 passed in 5.97s

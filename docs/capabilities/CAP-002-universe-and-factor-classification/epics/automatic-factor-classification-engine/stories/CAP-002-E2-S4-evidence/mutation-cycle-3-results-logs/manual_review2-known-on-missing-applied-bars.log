@@ -1,0 +1,75 @@
+.....................................................F
+=================================== FAILURES ===================================
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56932 user=test database=test_e89a0ff4367a403f82c14763910af54...b271400>, stock=1, set_id=UUID('6461e686-519d-4996-beff-66ed1fa0e49d'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b2708f0>
+action_type = 'split', payload = {'split_from': '1', 'split_to': '0'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-100"}),
+            ("dividend", {"cash_amount": "abc"}),
+            ("dividend", {"cash_amount": "1e0"}),
+            ("dividend", {"cash_amount": "+1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-not-numeric",
+            "cash-exponent",
+            "cash-plus-sign",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it and not the usable dividend beside it, and never fails the
+        set; a sign-prefixed string is not a plain decimal. DEC-0242: a missing input has no
+        known_on. The 3-month window holds only the usable dividend and is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(
+            env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90, date(2026, 7, 31): 100}
+        )
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+        # A usable dividend in every window (review v1 IR-004).
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_3m"]["status"] == "present"
+        assert_close(rows["return_3m"]["value"], ret(120, 100, Decimal("1.01")))
+        for name in ("return_6m", "return_12m"):
+            row = rows[name]
+            assert row["status"] == "missing", name
+            assert row["value"] is None
+            assert row["as_of"] == E
+>           assert row["known_on"] is None
+E           assert datetime.date(2026, 9, 17) is None
+
+tests/integration/test_engine_inputs_momentum.py:1297: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-zero]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 53 passed in 9.94s
