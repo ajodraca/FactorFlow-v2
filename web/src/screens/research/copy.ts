@@ -536,6 +536,37 @@ export const UNIVERSES = {
   create: "Create",
   enterAtLeastOne: "Enter at least one stock.",
   tooMany: "Up to 1000 stocks can be added in one request.",
+  /** UX 1.3 Accessibility: the expander's name once open, as the delivered coverage table. */
+  hideDetailsFor: (name: string): string => `Hide details for ${name}`,
+  /** The list's loading state, the delivered screens' idiom (CAP-002-E1-S7 T014). */
+  loading: "Loading…",
+  /**
+   * The nothing-found state under *Active* when every universe is retired
+   * (DEC-0103, PROVISIONAL). No design contains it.
+   */
+  noActive: "No active universes.",
+  /** The nothing-found reset control, the delivered screens' label (CAP-002-E1-S7; DEC-0254). */
+  resetFilter: "Reset filter",
+  /** The words of `noUniversesYet` that link to `/research` (DEC-0254). */
+  researchLink: "Research",
+  /**
+   * The words of the create refusal `instrument_not_acquired` that link to
+   * the followed-stocks page (UX 1.3; DEC-0254).
+   */
+  followThemLink: "Follow them on Data health",
+  /** The Name field's error for a name empty after trimming (DEC-0104; DEC-0254). No design contains it. */
+  nameRequired: "Enter a name for the universe.",
+  /**
+   * The `universe_name_in_use` field error on the create dialog's and the
+   * rename field's Name, `{name}` the trimmed name submitted (DEC-0109).
+   */
+  nameInUse: (name: string): string => `Another active universe is already named ${name}.`,
+  /** UX 1.3: the origin line's lead for a universe saved from a filter (DEC-0102). */
+  originLead: (date: string): string => `Saved from a filter on ${date}`,
+  /** UX 1.3: the origin line's search clause. */
+  originSearch: (prefix: string): string => `search "${prefix}"`,
+  /** UX 1.3: the origin line's hidden-incomplete clause. */
+  originHidden: "stocks with an incomplete score hidden",
 } as const;
 
 /** One universe's detail: header, members, history and the maintenance dialogs (UX 1.4). */

@@ -1,0 +1,146 @@
+# TDD evidence for CAP-002-E1-S7 - Universes list screen and create-by-hand dialog.
+# Two cycles, grouping the plan's suggested T017 cycles by file: (1) the create dialog - T003, T004, T009 with
+# T011's copy.ts strings and T013 (suggested cycles 1, 2 and the dialog half of 7); (2) the list screen, table and
+# navigation - T005, T006, T007, T008, T010 with T012 and T014 (suggested cycles 3 to 6 and the list half of 7).
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is its
+# own staged diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch the diff between the index trees after
+# cycles 1 and 2, so the two apply in order onto the stage parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began; the verdicts below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (node_modules symlinked into each clone);
+# generated operators plus hand-written mutants ("operator": "manual").
+# Decisions applied: DEC-0101, DEC-0102, DEC-0103, DEC-0104, DEC-0108, DEC-0109, DEC-0145 (all owner-upheld) and
+# DEC-0254 (recorded during this coding run, agent-decided, provisional).
+
+cycles:
+  - id: cycle-1
+    tasks: [T003, T004, T009, T011, T013]
+    description: >
+      TC-COMP-042 (Create blocked, focusable and described at zero, malformed-only and 1001 recognised entries,
+      duplicates counted per entry, not blocked and sending 1000 at exactly 1000), TC-COMP-006 (instrument_not_acquired
+      names every symbol in an assertive alert whose phrase "Follow them on Data health" links to
+      SHELL_ROUTES.followedStocks, keeps both fields, never renders the envelope message; one symbol has no comma; an
+      empty symbols list falls back to the generic sentence) and T009 (polite counter on paste and blur, never per
+      keystroke, paste at the cursor; upper-case one entry per line on blur; initial focus, DOM order, Tab trap and
+      Esc; focus restored to the opener; universe_name_in_use as the Name field error with the trimmed name, cleared
+      on edit; empty trimmed name refused on the field; generic sentence for other codes and transport failures;
+      one request in flight with Cancel, Esc and re-submit inert; re-parse on submit; dialog semantics and the
+      --popover, --destructive and --status-warning tokens). Production: web/src/screens/research/universes/create-dialog.tsx
+      (CreateDialog, withLink) and the T011 additions to copy.ts's UNIVERSES group (hideDetailsFor, loading,
+      noActive, resetFilter, researchLink, followThemLink, nameRequired, nameInUse, originLead, originSearch,
+      originHidden); E4-S2's UNIVERSES, UNIVERSE_LIFECYCLE, DIALOGS and failureSentence reused.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/red-cycle-1.log
+    red_log_sha256: e4c690408d535e9fee7f62c24b74f21055b0cb7f49e4c19f9cade59cdc6efa5e
+    red_evidence: >
+      With create-dialog.test.tsx written and no create-dialog.tsx, the file failed to load: Failed to resolve
+      import "./create-dialog" (no tests ran).
+    green_evidence: >
+      create-dialog.test.tsx 22 passed and copy.test.ts 322 passed, unchanged (green-cycle-1.log); tsc --noEmit,
+      biome lint and biome format clean. The first code review (APPROVED with one MEDIUM: focus lost after a failed
+      create) and the first spec-drift check (two LOW drifts: --destructive and --popover tokens) were fixed with
+      tests and the patch re-reviewed: APPROVED, no drift. Carried LOW follow-ups: no test asserts focus on Name
+      after the empty-name error, no paste test replaces a selected range, the not-followed alert stays until the
+      next submit after the Stocks field is edited.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/green-cycle-1.log
+        sha256: f7c5d3af509ca813f83e17c688952cf045c422a814170149f154e2b50188dedc
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f5db0664bd8ed9e724ea13aefd0c7e0a5f152541004c9c5221432c0f2ffd9f4e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/mutation-cycle-1-results.json
+      results_sha256: caadbb726f00c3791599d2a68fc5935ea315b2bd2c7b39425983183754e10172
+      generated: 43
+      killed: 42
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/universes/create-dialog.tsx:189:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The focus trap's guard `first === null || last === null` reads two refs attached to the Name input and
+            the Create button, both rendered unconditionally; a keydown can only reach the dialog while it is
+            mounted, when both refs are set, so `&&` and `||` take the same branch on every reachable input. The
+            guard exists only to narrow the types.
+
+  - id: cycle-2
+    tasks: [T005, T006, T007, T008, T010, T012, T014]
+    description: >
+      TC-COMP-020 (active by default at limit 500; Show: {option} select with Active, Retired, All; Retired shows
+      only the retired universe with a secondary Retired badge, All shows the badge on it alone; counts unchanged;
+      the retired name muted), TC-COMP-021 (the origin line in the all-clauses, thresholds-only, hidden-only,
+      ordered maxima, every-bound, one-bound, no-thresholds-object and by-hand cases, unknown bound keys dropped,
+      ASCII minus, plain text; events paged at limit 500 to the created event and read once per expansion; paging
+      stops at the created event), TC-COMP-022 (never populated with the Research link and focus on New universe…;
+      No retired universes. resetting to Active; No active universes. resetting to All, DEC-0103), TC-COMP-007
+      (one {name, symbols} request, the detail route rendered, no dialog, status, alert or created/saved text) and
+      T010 (Loading… then the code-keyed error with the header kept and Try again; every list page at limit 500;
+      columns, row-header link and America/Chicago Created date; client-side case-insensitive Name sort with
+      aria-sort; created_at and retired_at with the zone; an inline origin alert with Try again for a failed read, a
+      dateless provenance or a history without a created event; New universe… default variant with focus back on
+      Cancel; unreachable renders nothing; a slower read for a left selection ignored; no delete). Production:
+      web/src/screens/research/universes/universe-table.tsx (UniverseTable, universeDetailPath, the module-scope
+      unexported describeOrigin of DEC-0108) and web/src/screens/research/universes/index.tsx (UniversesScreen).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/red-cycle-2.log
+    red_log_sha256: a1c2c926f9d17161a157e0ad416d1a663517544fd1ca0ea310b2d515cbbbcaa7
+    red_evidence: >
+      With universes.test.tsx and the TC-COMP-007 test written and no index.tsx or universe-table.tsx, both test
+      files failed to load: Failed to resolve import "./index" (no tests ran). Two test expectations were then
+      corrected against delivered behaviour: formatScore signs a positive bound (+1.00, per DEC-0102 and
+      classification-ui 2.4), and the never-populated sentence is split by its Research link.
+    green_evidence: >
+      universes.test.tsx 25 passed, create-dialog.test.tsx 23 passed, copy.test.ts 322 passed (green-cycle-2.log);
+      tsc --noEmit, biome lint and biome format clean. Code review APPROVED with LOW notes only, spec drift none.
+      Carried LOW follow-ups: the en-CA date pattern could be built from formatToParts; a malformed timestamp would
+      throw in render; All with no rows but non-zero counts would read No active universes.; focus drops to the body
+      after Reset filter and Try again (as on Instruments and Coverage); the plan's T008(b) "table header" is read as
+      the card header, and UX 1.3's Loading skeleton is rendered as Loading… text as T010(a) and T014 direct.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/green-cycle-2.log
+        sha256: 3369746c5e2d6bd93cd97f01fe7179f9ffcbf47bd6391dac68061d7035a52962
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d3ac437d8d5493b49572a747f3e594fbafd56abbb0fb65529ceb094bb5e0d403
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S7-evidence/mutation-cycle-2-results.json
+      results_sha256: 4016a47ac087c193a2f2b29bd17b0cd7550d2925f04459d5cd5e1eecf7e8e0cd
+      generated: 49
+      killed: 45
+      survived: 4
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/universes/index.tsx:53:off-by-one:1
+          disposition: equivalent
+          reason: >
+            reloadToken's initial value is never read; it is only an effect dependency whose change triggers a
+            re-read, so starting at 1 instead of 0 changes no render and no request.
+        - id: web/src/screens/research/universes/index.tsx:161:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Try again bumps reloadToken only to change the effect dependency; adding 2 instead of 1 changes it
+            equally and issues the same single re-read.
+        - id: web/src/screens/research/universes/index.tsx:193:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            onCreated closes the dialog and then navigates to the new universe's detail; the screen is a route
+            element, so the navigation unmounts it with its dialog state whatever value creating holds. The close
+            is kept for the contract (T014) but no render of the screen follows it.
+        - id: web/src/screens/research/universes/universe-table.tsx:81:off-by-one:1
+          disposition: equivalent
+          reason: >
+            A type-only alias (Parameters<typeof describeOrigin>[0]); the mutant changes no emitted JavaScript, and
+            npx tsc --noEmit, part of every validation run, rejects it.
