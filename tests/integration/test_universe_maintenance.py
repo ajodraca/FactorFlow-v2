@@ -187,6 +187,32 @@ def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, nam
     assert count_events(conn) == before
 
 
+def _unknown_or_retired(conn: psycopg.Connection, target: str) -> UUID:
+    if target == "unknown":
+        return UUID(int=7)
+    seed(conn, "AAA", "BBB")
+    uid = _create(conn, "U", "AAA", "BBB")
+    service.retire(conn, uid)
+    conn.commit()
+    return uid
+
+
+@pytest.mark.parametrize("target", ["unknown", "retired"])
+def test_a_blank_rename_is_a_shape_failure_before_the_target_check(
+    conn: psycopg.Connection, target: str
+) -> None:
+    """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
+    uid = _unknown_or_retired(conn, target)
+    before = count_events(conn)
+
+    with pytest.raises(ValueError, match="must not be empty") as excinfo:
+        service.rename(conn, uid, "   ")
+    conn.rollback()
+
+    assert type(excinfo.value) is ValueError
+    assert count_events(conn) == before
+
+
 def test_rename_accepts_a_very_long_name(conn: psycopg.Connection) -> None:
     """No length bound exists yet (system design question 2, abstained)."""
     seed(conn, "AAA")
@@ -244,6 +270,9 @@ def test_retire_appends_one_retired_event_and_data_stays_readable(
     assert page[0].event_type == "retired"
     assert len(page) == len(after_events)
     assert read.created_on is not None
+    # Every event here shares one recorded_on, so the creation day's end-of-day membership is
+    # today's (DEC-0065): this shows an as-of read still replays after retire, not a past
+    # membership that differs. Past-date replay is CAP-002-E1-S2's test_universe_as_of.py.
     on_creation_day = service.get_universe(conn, uid, as_of=read.created_on)
     assert [m.symbol for m in on_creation_day.members] == ["AAA"]
     before_creation = service.get_universe(conn, uid, as_of=read.created_on - timedelta(days=1))
@@ -374,6 +403,22 @@ def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
         service.remove_member(conn, uid, symbol)
     conn.rollback()
 
+    assert count_events(conn) == before
+
+
+@pytest.mark.parametrize("target", ["unknown", "retired"])
+def test_a_malformed_symbol_is_a_shape_failure_before_the_target_check(
+    conn: psycopg.Connection, target: str
+) -> None:
+    """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
+    uid = _unknown_or_retired(conn, target)
+    before = count_events(conn)
+
+    with pytest.raises(ValueError, match="invalid symbol") as excinfo:
+        service.remove_member(conn, uid, "1ABC")
+    conn.rollback()
+
+    assert type(excinfo.value) is ValueError
     assert count_events(conn) == before
 
 
@@ -539,7 +584,11 @@ _OPERATIONS: dict[str, tuple[Callable[[psycopg.Connection, UUID], object], str]]
 def test_each_maintenance_write_waits_on_the_write_lock(
     conn: psycopg.Connection, postgres_connection_string: str, operation: str
 ) -> None:
-    """The write lock is the first statement of every write (design 2.3, DEC-0065)."""
+    """Each write waits on the write lock before it writes (design 2.3, DEC-0065).
+
+    That the lock also precedes the replay checks is pinned by
+    ``test_a_write_waiting_on_the_lock_checks_what_the_holder_committed``.
+    """
     call, event_type = _OPERATIONS[operation]
     seed(conn, "AAA", "BBB")
     uid = _create(conn, "U", "AAA", "BBB")
@@ -617,6 +666,85 @@ def test_a_rename_waiting_on_the_lock_sees_a_create_that_took_the_name(
     assert service.get_universe(conn, u2).name == "U2"
     active, _ = service.list_universes(conn, "active", "Race", 10, None)
     assert [u.name for u in active] == ["Race"]
+
+
+def _retire(c: psycopg.Connection, uid: UUID) -> object:
+    return service.retire(c, uid)
+
+
+# operation -> (the lock holder's change, the waiting write, its refusal, the holder's event)
+_RACES: dict[
+    str,
+    tuple[
+        Callable[[psycopg.Connection, UUID], object],
+        Callable[[psycopg.Connection, UUID], object],
+        type[Exception],
+        str,
+    ],
+] = {
+    "remove_member": (
+        lambda c, uid: service.remove_member(c, uid, "AAA"),
+        lambda c, uid: service.remove_member(c, uid, "BBB"),
+        LastMember,
+        "member_removed",
+    ),
+    "rename": (
+        _retire,
+        lambda c, uid: service.rename(c, uid, "Renamed"),
+        UniverseRetired,
+        "retired",
+    ),
+    "retire": (_retire, _retire, UniverseRetired, "retired"),
+}
+
+
+@pytest.mark.parametrize("operation", sorted(_RACES))
+def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
+    conn: psycopg.Connection, postgres_connection_string: str, operation: str
+) -> None:
+    """The lock precedes the replay checks, so two writes cannot both pass them.
+
+    Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
+    AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
+    holder committed meanwhile, not on the state it could have read before waiting.
+    """
+    holder_change, call, refusal, holder_event = _RACES[operation]
+    seed(conn, "AAA", "BBB")
+    uid = _create(conn, "U", "AAA", "BBB")
+    before = [e["event_type"] for e in event_rows(conn, uid)]
+    conn_b = psycopg.connect(postgres_connection_string)
+    watcher = psycopg.connect(postgres_connection_string, autocommit=True)
+    outcome: list[object] = []
+
+    def writer() -> None:
+        try:
+            call(conn_b, uid)
+            conn_b.commit()
+            outcome.append("done")
+        except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
+            outcome.append(exc)
+
+    thread = threading.Thread(target=writer, daemon=True)
+    try:
+        conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
+        thread.start()
+        waiting = _wait_for_a_lock_waiter(watcher)
+        # the same session holds the lock, so it is re-entrant here
+        holder_change(conn, uid)
+        conn.commit()
+        thread.join(timeout=10)
+        assert not thread.is_alive()
+    finally:
+        conn.rollback()
+        thread.join(timeout=10)
+        conn_b.close()
+        watcher.close()
+
+    assert waiting == 1, f"{operation} never reached the lock"
+    assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
+    assert [e["event_type"] for e in event_rows(conn, uid)] == [*before, holder_event]
+    if operation == "remove_member":
+        assert [m.symbol for m in service.get_universe(conn, uid).members] == ["BBB"]
 
 
 @pytest.mark.parametrize("operation", sorted(_OPERATIONS))

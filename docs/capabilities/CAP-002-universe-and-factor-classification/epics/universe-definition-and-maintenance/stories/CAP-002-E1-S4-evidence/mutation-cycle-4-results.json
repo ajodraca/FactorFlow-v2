@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "command": "uv sync -q --offline --all-extras --all-groups && uv run --offline pytest -m \"postgres or not postgres\" tests/unit/test_universe_sql_safety.py tests/unit/test_universe_service_validation.py tests/integration/test_universe_maintenance.py tests/integration/test_universe_create.py -x -q -p no:cacheprovider",
+  "repo_head": "d137e548c0bf29d5b3ecb39438cb2d7d26055fae",
+  "tree_patch_sha256": "93119354b558958f6cf1a374cc188871f87fa1ddf075c7df66456b8ffe0e61cf",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/mutants.json",
+  "mutants_sha256": "a069b0ce96208077aeb720e733b16eda603cf977e9115a7a2c6a3148513bfdcb",
+  "jobs": 4,
+  "started": "2026-10-31T02:36:25Z",
+  "baselines": [
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 13.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w2.log",
+      "log_sha256": "df7eacd5d9f2b6f5559879c688f186f3b1765a8f246c668a7cd0a35c772fb795"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 13.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w1.log",
+      "log_sha256": "d78ad28d641e9273bb1aef02d7f67ff0addff20880101771c820685f46e7e967"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 13.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w3.log",
+      "log_sha256": "4fa51d763643c0f3f7c1989ae6bd4554359eed867eef9f50d1f3c38479c298d8"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 13.7,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w0.log",
+      "log_sha256": "b1f1ffa59100f9b717d635f86d4fa152120f4a802424d778205ff505b1cbe73a"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "review:remove-lock-after-replay",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        [clean_symbol] = _normalise_symbols([symbol])\n        universe = _require_active(conn, universe_id)\n",
+      "new": "        [clean_symbol] = _normalise_symbols([symbol])\n        universe = _require_active(conn, universe_id)\n        _take_lock(conn)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.6,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_remove-lock-after-replay.log",
+      "log_sha256": "e080651222a7ec8585e245e01a049e90e7f2377d7121e6c9aea8bffefedf09ca"
+    },
+    {
+      "id": "review:retire-lock-after-replay",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        _require_active(conn, universe_id)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))\n",
+      "new": "        _require_active(conn, universe_id)\n        _take_lock(conn)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.9,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_retire-lock-after-replay.log",
+      "log_sha256": "df1c56fd84e65217ac986926f1fd5d27597a1f5b194ec791986c3ba0be99b8a3"
+    },
+    {
+      "id": "review:rename-lock-after-replay",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n",
+      "new": "        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n        _take_lock(conn)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_rename-lock-after-replay.log",
+      "log_sha256": "83453d8f61d35269f2fa73bef6393b412caa68a759cc4ce714150fb4de1339aa"
+    },
+    {
+      "id": "review:rename-target-before-shape",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n",
+      "new": "        _require_active(conn, universe_id)\n        new_name = _normalise_name(name)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 4.4,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_rename-target-before-shape.log",
+      "log_sha256": "57881a0693e0c82b0b04eeeda7871ac0243cfbae29a5228f5a5878d6a4068ace"
+    },
+    {
+      "id": "review:remove-target-before-shape",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        [clean_symbol] = _normalise_symbols([symbol])\n        universe = _require_active(conn, universe_id)\n",
+      "new": "        universe = _require_active(conn, universe_id)\n        [clean_symbol] = _normalise_symbols([symbol])\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.4,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_remove-target-before-shape.log",
+      "log_sha256": "07ffe85f6876129a8b7bb5846c99b7a978a5f3d908db44718cc572341896e7ef"
+    }
+  ],
+  "finished": "2026-10-31T02:36:48Z"
+}
