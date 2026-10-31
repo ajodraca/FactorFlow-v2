@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/results-table.test.tsx src/screens/research/results-window.test.ts src/screens/research/copy.test.ts",
+  "repo_head": "8cdd61f03042172c44e6e353c43ceb913479cab4",
+  "tree_patch_sha256": "8b147aa2a9d777717d2eff4c4a7dc2854ec33d3c5aa77408410307abf2d23209",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/mutants-r2.json",
+  "mutants_sha256": "e806baf3c50064be4c082ec49a70afde5a1970beec5f6e223e40d22d90e2c1c1",
+  "jobs": 2,
+  "started": "2026-10-30T23:31:26Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 4.2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r2-logs/baseline-w0.log",
+      "log_sha256": "f6076059f4d3eaea06a32f0bfe1672eabe37aaf6d03a2ee29695079b8904b654"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 4.2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r2-logs/baseline-w1.log",
+      "log_sha256": "4f6d00330ed6137610f94bd02be5c9941a45b803f77acf5c286604dcd9f1e7bb"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:rework-2:announce-on-later-page",
+      "cycle": "rework-2",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "                  nextCursor: page.nextCursor,\n                },\n          );\n          setPagePending(false);",
+      "new": "                  nextCursor: page.nextCursor,\n                },\n          );\n          setAnnouncement((previous) => ({ text: matchLabelRef.current(page.matchCount), serial: previous.serial + 1 }));\n          setPagePending(false);",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r2-logs/manual_rework-2_announce-on-later-page.log",
+      "log_sha256": "c7c5693290186b7fca83efee78676e277cad7dbadd08f38313f77abf4ff60a5d"
+    },
+    {
+      "id": "manual:rework-2:focus-row-only",
+      "cycle": "rework-2",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "const row = document.activeElement?.closest<HTMLTableRowElement>(\"tr[data-symbol]\");",
+      "new": "const active = document.activeElement;\n  const row = active instanceof HTMLTableRowElement && active.matches(\"tr[data-symbol]\") ? active : null;",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.8,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r2-logs/manual_rework-2_focus-row-only.log",
+      "log_sha256": "0af240a8ea53de24c954f1b2a1ceaacd8edb29bcb3e6c84216d50cda54eafd01"
+    }
+  ],
+  "finished": "2026-10-30T23:31:34Z"
+}

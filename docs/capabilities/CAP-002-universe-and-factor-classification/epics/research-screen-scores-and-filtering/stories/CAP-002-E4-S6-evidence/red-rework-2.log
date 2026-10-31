@@ -1,0 +1,2999 @@
+# RED rework-2: results-table.test.tsx with the v2 review's two non-equivalent survivors applied to results-table.tsx
+# manual:review-v2:focus-row-only and manual:review-v2:announce-on-later-page; production restored afterwards
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/results-table.test.tsx (90 tests | 2 failed) 2616ms
+   × T006: keyset paging and the request lifecycle > leaves the polite region untouched when a later page lands: only a first page announces 50ms
+     → expected [ MutationRecord{ …(1) }, …(1) ] to have a length of +0 but got 2
+   × T006: keyset paging and the request lifecycle > keeps focus on a row's checkbox past the first window across a refresh-once that keeps the row 271ms
+     → Unable to find an accessible element with the role "checkbox" and name "Select SYM0040"
+
+Here are the accessible roles:
+
+  status:
+
+  Name "":
+  [36m<output[39m
+    [33mdata-testid[39m=[32m"host-checked"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<output[39m
+    [33mdata-testid[39m=[32m"host-selected"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<output[39m
+    [33maria-live[39m=[32m"polite"[39m
+    [33mclass[39m=[32m"sr-only"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"sr-only"[39m
+    [33mid[39m=[32m":ro:"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33maria-busy[39m=[32m"false"[39m
+    [33maria-rowcount[39m=[32m"51"[39m
+    [33mclass[39m=[32m"w-full text-sm"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead[39m
+    [33mclass[39m=[32m"sticky top-0 bg-background"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Symbol Name Value Growth Momentum":
+  [36m<tr />[39m
+
+  Name "Select SYM0000 SYM0000 SYM0000 Incorporated 0 0 0":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"2"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0000"[39m
+    [33mtabindex[39m=[32m"0"[39m
+  [36m/>[39m
+
+  Name "Select SYM0001 SYM0001 SYM0001 Incorporated 1 7 13":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"3"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0001"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0002 SYM0002 SYM0002 Incorporated 2 14 26":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"4"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0002"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0003 SYM0003 SYM0003 Incorporated 3 21 39":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"5"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0003"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0004 SYM0004 SYM0004 Incorporated 4 28 52":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"6"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0004"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0005 SYM0005 SYM0005 Incorporated 5 35 65":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"7"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0005"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0006 SYM0006 SYM0006 Incorporated 6 42 78":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"8"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0006"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0007 SYM0007 SYM0007 Incorporated 7 49 91":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"9"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0007"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0008 SYM0008 SYM0008 Incorporated 8 56 3":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"10"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0008"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0009 SYM0009 SYM0009 Incorporated 9 63 16":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"11"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0009"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0010 SYM0010 SYM0010 Incorporated 10 70 29":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"12"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0010"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0011 SYM0011 SYM0011 Incorporated 11 77 42":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"13"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0011"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0012 SYM0012 SYM0012 Incorporated 12 84 55":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"14"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0012"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0013 SYM0013 SYM0013 Incorporated 13 91 68":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"15"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0013"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0014 SYM0014 SYM0014 Incorporated 14 98 81":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"16"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0014"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0015 SYM0015 SYM0015 Incorporated 15 4 94":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"17"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0015"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0016 SYM0016 SYM0016 Incorporated 16 11 6":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"18"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0016"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0017 SYM0017 SYM0017 Incorporated 17 18 19":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"19"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0017"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0018 SYM0018 SYM0018 Incorporated 18 25 32":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"20"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0018"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0019 SYM0019 SYM0019 Incorporated 19 32 45":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"21"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0019"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0020 SYM0020 SYM0020 Incorporated 20 39 58":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"22"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0020"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0021 SYM0021 SYM0021 Incorporated 21 46 71":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"23"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0021"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0022 SYM0022 SYM0022 Incorporated 22 53 84":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"24"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0022"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0023 SYM0023 SYM0023 Incorporated 23 60 97":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"25"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0023"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0024 SYM0024 SYM0024 Incorporated 24 67 9":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"26"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0024"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "":
+  [36m<th[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Symbol":
+  [36m<th[39m
+    [33maria-sort[39m=[32m"ascending"[39m
+    [33mclass[39m=[32m"text-left align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Name":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Value":
+  [36m<th[39m
+    [33maria-describedby[39m=[32m":ro:"[39m
+    [33mclass[39m=[32m"text-right align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Growth":
+  [36m<th[39m
+    [33maria-describedby[39m=[32m":ro:"[39m
+    [33mclass[39m=[32m"text-right align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Momentum":
+  [36m<th[39m
+    [33maria-describedby[39m=[32m":ro:"[39m
+    [33mclass[39m=[32m"text-right align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Sort by symbol":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by symbol"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by value percentile":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by value percentile"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by value standardised score":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by value standardised score"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by growth percentile":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by growth percentile"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by growth standardised score":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by growth standardised score"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by momentum percentile":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by momentum percentile"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by momentum standardised score":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by momentum standardised score"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  cell:
+
+  Name "Select SYM0000":
+  [36m<td />[39m
+
+  Name "SYM0000 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0000 Incorporated"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0001":
+  [36m<td />[39m
+
+  Name "SYM0001 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0001 Incorporated"[39m
+  [36m/>[39m
+
+  Name "1":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "7":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "13":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0002":
+  [36m<td />[39m
+
+  Name "SYM0002 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0002 Incorporated"[39m
+  [36m/>[39m
+
+  Name "2":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "14":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "26":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0003":
+  [36m<td />[39m
+
+  Name "SYM0003 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0003 Incorporated"[39m
+  [36m/>[39m
+
+  Name "3":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "21":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "39":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0004":
+  [36m<td />[39m
+
+  Name "SYM0004 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0004 Incorporated"[39m
+  [36m/>[39m
+
+  Name "4":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "28":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "52":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0005":
+  [36m<td />[39m
+
+  Name "SYM0005 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0005 Incorporated"[39m
+  [36m/>[39m
+
+  Name "5":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "35":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "65":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0006":
+  [36m<td />[39m
+
+  Name "SYM0006 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0006 Incorporated"[39m
+  [36m/>[39m
+
+  Name "6":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "42":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "78":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0007":
+  [36m<td />[39m
+
+  Name "SYM0007 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0007 Incorporated"[39m
+  [36m/>[39m
+
+  Name "7":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "49":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "91":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0008":
+  [36m<td />[39m
+
+  Name "SYM0008 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0008 Incorporated"[39m
+  [36m/>[39m
+
+  Name "8":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "56":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "3":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0009":
+  [36m<td />[39m
+
+  Name "SYM0009 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0009 Incorporated"[39m
+  [36m/>[39m
+
+  Name "9":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "63":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "16":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0010":
+  [36m<td />[39m
+
+  Name "SYM0010 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0010 Incorporated"[39m
+  [36m/>[39m
+
+  Name "10":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "70":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "29":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0011":
+  [36m<td />[39m
+
+  Name "SYM0011 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0011 Incorporated"[39m
+  [36m/>[39m
+
+  Name "11":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "77":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "42":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0012":
+  [36m<td />[39m
+
+  Name "SYM0012 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0012 Incorporated"[39m
+  [36m/>[39m
+
+  Name "12":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "84":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "55":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0013":
+  [36m<td />[39m
+
+  Name "SYM0013 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0013 Incorporated"[39m
+  [36m/>[39m
+
+  Name "13":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "91":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "68":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0014":
+  [36m<td />[39m
+
+  Name "SYM0014 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0014 Incorporated"[39m
+  [36m/>[39m
+
+  Name "14":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "98":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "81":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0015":
+  [36m<td />[39m
+
+  Name "SYM0015 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0015 Incorporated"[39m
+  [36m/>[39m
+
+  Name "15":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "4":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "94":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0016":
+  [36m<td />[39m
+
+  Name "SYM0016 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0016 Incorporated"[39m
+  [36m/>[39m
+
+  Name "16":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "11":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "6":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0017":
+  [36m<td />[39m
+
+  Name "SYM0017 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0017 Incorporated"[39m
+  [36m/>[39m
+
+  Name "17":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "18":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "19":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0018":
+  [36m<td />[39m
+
+  Name "SYM0018 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0018 Incorporated"[39m
+  [36m/>[39m
+
+  Name "18":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "25":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "32":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0019":
+  [36m<td />[39m
+
+  Name "SYM0019 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0019 Incorporated"[39m
+  [36m/>[39m
+
+  Name "19":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "32":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "45":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0020":
+  [36m<td />[39m
+
+  Name "SYM0020 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0020 Incorporated"[39m
+  [36m/>[39m
+
+  Name "20":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "39":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "58":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0021":
+  [36m<td />[39m
+
+  Name "SYM0021 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0021 Incorporated"[39m
+  [36m/>[39m
+
+  Name "21":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "46":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "71":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0022":
+  [36m<td />[39m
+
+  Name "SYM0022 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0022 Incorporated"[39m
+  [36m/>[39m
+
+  Name "22":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "53":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "84":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0023":
+  [36m<td />[39m
+
+  Name "SYM0023 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0023 Incorporated"[39m
+  [36m/>[39m
+
+  Name "23":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "60":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "97":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0024":
+  [36m<td />[39m
+
+  Name "SYM0024 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0024 Incorporated"[39m
+  [36m/>[39m
+
+  Name "24":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "67":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "9":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  checkbox:
+
+  Name "Select SYM0000":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0000"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0001":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0001"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0002":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0002"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0003":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0003"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0004":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0004"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0005":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0005"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0006":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0006"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0007":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0007"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0008":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0008"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0009":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0009"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0010":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0010"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0011":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0011"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0012":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0012"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0013":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0013"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0014":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0014"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0015":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0015"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0016":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0016"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0017":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0017"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0018":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0018"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0019":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0019"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0020":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0020"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0021":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0021"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0022":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0022"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0023":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0023"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0024":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0024"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowheader:
+
+  Name "SYM0000":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0001":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0002":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0003":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0004":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0005":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0006":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0007":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0008":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0009":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0010":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0011":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0012":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0013":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0014":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0015":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0016":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0017":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0018":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0019":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0020":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0021":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0022":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0023":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0024":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<output[39m
+      [33mdata-testid[39m=[32m"host-checked"[39m
+    [36m>[39m
+      [0mSYM0040[0m
+    [36m</output>[39m
+    [36m<output[39m
+      [33mdata-testid[39m=[32m"host-selected"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-2"[39m
+    [36m>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span>[39m
+          [0m50 stocks match[0m
+        [36m</span>[39m
+      [36m</output>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"results-scroll"[39m
+        [33mstyle[39m=[32m"height: 544px; overflow-y: auto; overflow-x: hidden;"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"sr-only"[39m
+          [33mid[39m=[32m":ro:"[39m
+        [36m>[39m
+          [0mStocks with an incomplete score are listed last, whether sorted up or down.[0m
+        [36m</p>[39m
+        [36m<table[39m
+          [33maria-busy[39m=[32m"false"[39m
+          [33maria-rowcount[39m=[32m"51"[39m
+          [33mclass[39m=[32m"w-full text-sm"[39m
+        [36m>[39m
+          [36m<thead[39m
+            [33mclass[39m=[32m"sticky top-0 bg-background"[39m
+          [36m>[39m
+            [36m<tr>[39m
+              [36m<th[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m/>[39m
+              [36m<th[39m
+                [33maria-sort[39m=[32m"ascending"[39m
+                [33mclass[39m=[32m"text-left align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [0mSymbol[0m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by symbol"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m▲[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                [36m</span>[39m
+              [36m</th>[39m
+              [36m<th[39m
+                [33mclass[39m=[32m"text-left align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [0mName[0m
+              [36m</th>[39m
+              [36m<th[39m
+                [33maria-describedby[39m=[32m":ro:"[39m
+                [33mclass[39m=[32m"text-right align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"inline-block h-2 w-2 rounded"[39m
+                    [33mdata-testid[39m=[32m"factor-swatch"[39m
+                    [33mstyle[39m=[32m"background: hsl(var(--factor-value));"[39m
+                  [36m/>[39m
+                  [0mValue[0m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by value percentile"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by value standardised score"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                [36m</span>[39m
+              [36m</th>[39m
+              [36m<th[39m
+                [33maria-describedby[39m=[32m":ro:"[39m
+                [33mclass[39m=[32m"text-right align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"inline-block h-2 w-2 rounded"[39m
+                    [33mdata-testid[39m=[32m"factor-swatch"[39m
+                    [33mstyle[39m=[32m"background: hsl(var(--factor-growth));"[39m
+                  [36m/>[39m
+                  [0mGrowth[0m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by growth percentile"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by growth standardised score"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                [36m</span>[39m
+              [36m</th>[39m
+              [36m<th[39m
+                [33maria-describedby[39m=[32m":ro:"[39m
+                [33mclass[39m=[32m"text-right align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"inline-block h-...
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > leaves the polite region untouched when a later page lands: only a first page announces
+AssertionError: expected [ MutationRecord{ …(1) }, …(1) ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ src/screens/research/results-table.test.tsx:436:30
+    434|     scrollToRow(50);
+    435|     expect(screen.getByText("PG20000")).toBeInTheDocument();
+    436|     expect(observer.records).toHaveLength(0);
+       |                              ^
+    437|     observer.disconnect();
+    438|     expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(120));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > keeps focus on a row's checkbox past the first window across a refresh-once that keeps the row
+TestingLibraryElementError: Unable to find an accessible element with the role "checkbox" and name "Select SYM0040"
+
+Here are the accessible roles:
+
+  status:
+
+  Name "":
+  [36m<output[39m
+    [33mdata-testid[39m=[32m"host-checked"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<output[39m
+    [33mdata-testid[39m=[32m"host-selected"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<output[39m
+    [33maria-live[39m=[32m"polite"[39m
+    [33mclass[39m=[32m"sr-only"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"sr-only"[39m
+    [33mid[39m=[32m":ro:"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33maria-busy[39m=[32m"false"[39m
+    [33maria-rowcount[39m=[32m"51"[39m
+    [33mclass[39m=[32m"w-full text-sm"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead[39m
+    [33mclass[39m=[32m"sticky top-0 bg-background"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Symbol Name Value Growth Momentum":
+  [36m<tr />[39m
+
+  Name "Select SYM0000 SYM0000 SYM0000 Incorporated 0 0 0":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"2"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0000"[39m
+    [33mtabindex[39m=[32m"0"[39m
+  [36m/>[39m
+
+  Name "Select SYM0001 SYM0001 SYM0001 Incorporated 1 7 13":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"3"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0001"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0002 SYM0002 SYM0002 Incorporated 2 14 26":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"4"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0002"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0003 SYM0003 SYM0003 Incorporated 3 21 39":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"5"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0003"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0004 SYM0004 SYM0004 Incorporated 4 28 52":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"6"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0004"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0005 SYM0005 SYM0005 Incorporated 5 35 65":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"7"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0005"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0006 SYM0006 SYM0006 Incorporated 6 42 78":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"8"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0006"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0007 SYM0007 SYM0007 Incorporated 7 49 91":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"9"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0007"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0008 SYM0008 SYM0008 Incorporated 8 56 3":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"10"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0008"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0009 SYM0009 SYM0009 Incorporated 9 63 16":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"11"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0009"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0010 SYM0010 SYM0010 Incorporated 10 70 29":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"12"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0010"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0011 SYM0011 SYM0011 Incorporated 11 77 42":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"13"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0011"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0012 SYM0012 SYM0012 Incorporated 12 84 55":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"14"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0012"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0013 SYM0013 SYM0013 Incorporated 13 91 68":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"15"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0013"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0014 SYM0014 SYM0014 Incorporated 14 98 81":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"16"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0014"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0015 SYM0015 SYM0015 Incorporated 15 4 94":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"17"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0015"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0016 SYM0016 SYM0016 Incorporated 16 11 6":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"18"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0016"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0017 SYM0017 SYM0017 Incorporated 17 18 19":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"19"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0017"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0018 SYM0018 SYM0018 Incorporated 18 25 32":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"20"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0018"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0019 SYM0019 SYM0019 Incorporated 19 32 45":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"21"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0019"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0020 SYM0020 SYM0020 Incorporated 20 39 58":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"22"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0020"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0021 SYM0021 SYM0021 Incorporated 21 46 71":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"23"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0021"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0022 SYM0022 SYM0022 Incorporated 22 53 84":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"24"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0022"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0023 SYM0023 SYM0023 Incorporated 23 60 97":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"25"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0023"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Select SYM0024 SYM0024 SYM0024 Incorporated 24 67 9":
+  [36m<tr[39m
+    [33maria-rowindex[39m=[32m"26"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"h-row border-t border-border border-l-4 border-l-transparent"[39m
+    [33mdata-symbol[39m=[32m"SYM0024"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "":
+  [36m<th[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Symbol":
+  [36m<th[39m
+    [33maria-sort[39m=[32m"ascending"[39m
+    [33mclass[39m=[32m"text-left align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Name":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Value":
+  [36m<th[39m
+    [33maria-describedby[39m=[32m":ro:"[39m
+    [33mclass[39m=[32m"text-right align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Growth":
+  [36m<th[39m
+    [33maria-describedby[39m=[32m":ro:"[39m
+    [33mclass[39m=[32m"text-right align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Momentum":
+  [36m<th[39m
+    [33maria-describedby[39m=[32m":ro:"[39m
+    [33mclass[39m=[32m"text-right align-top"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Sort by symbol":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by symbol"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by value percentile":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by value percentile"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by value standardised score":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by value standardised score"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by growth percentile":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by growth percentile"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by growth standardised score":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by growth standardised score"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by momentum percentile":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by momentum percentile"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sort by momentum standardised score":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sort by momentum standardised score"[39m
+    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  cell:
+
+  Name "Select SYM0000":
+  [36m<td />[39m
+
+  Name "SYM0000 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0000 Incorporated"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0001":
+  [36m<td />[39m
+
+  Name "SYM0001 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0001 Incorporated"[39m
+  [36m/>[39m
+
+  Name "1":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "7":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "13":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0002":
+  [36m<td />[39m
+
+  Name "SYM0002 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0002 Incorporated"[39m
+  [36m/>[39m
+
+  Name "2":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "14":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "26":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0003":
+  [36m<td />[39m
+
+  Name "SYM0003 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0003 Incorporated"[39m
+  [36m/>[39m
+
+  Name "3":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "21":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "39":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0004":
+  [36m<td />[39m
+
+  Name "SYM0004 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0004 Incorporated"[39m
+  [36m/>[39m
+
+  Name "4":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "28":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "52":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0005":
+  [36m<td />[39m
+
+  Name "SYM0005 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0005 Incorporated"[39m
+  [36m/>[39m
+
+  Name "5":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "35":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "65":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0006":
+  [36m<td />[39m
+
+  Name "SYM0006 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0006 Incorporated"[39m
+  [36m/>[39m
+
+  Name "6":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "42":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "78":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0007":
+  [36m<td />[39m
+
+  Name "SYM0007 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0007 Incorporated"[39m
+  [36m/>[39m
+
+  Name "7":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "49":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "91":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0008":
+  [36m<td />[39m
+
+  Name "SYM0008 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0008 Incorporated"[39m
+  [36m/>[39m
+
+  Name "8":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "56":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "3":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0009":
+  [36m<td />[39m
+
+  Name "SYM0009 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0009 Incorporated"[39m
+  [36m/>[39m
+
+  Name "9":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "63":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "16":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0010":
+  [36m<td />[39m
+
+  Name "SYM0010 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0010 Incorporated"[39m
+  [36m/>[39m
+
+  Name "10":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "70":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "29":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0011":
+  [36m<td />[39m
+
+  Name "SYM0011 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0011 Incorporated"[39m
+  [36m/>[39m
+
+  Name "11":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "77":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "42":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0012":
+  [36m<td />[39m
+
+  Name "SYM0012 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0012 Incorporated"[39m
+  [36m/>[39m
+
+  Name "12":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "84":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "55":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0013":
+  [36m<td />[39m
+
+  Name "SYM0013 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0013 Incorporated"[39m
+  [36m/>[39m
+
+  Name "13":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "91":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "68":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0014":
+  [36m<td />[39m
+
+  Name "SYM0014 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0014 Incorporated"[39m
+  [36m/>[39m
+
+  Name "14":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "98":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "81":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0015":
+  [36m<td />[39m
+
+  Name "SYM0015 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0015 Incorporated"[39m
+  [36m/>[39m
+
+  Name "15":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "4":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "94":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0016":
+  [36m<td />[39m
+
+  Name "SYM0016 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0016 Incorporated"[39m
+  [36m/>[39m
+
+  Name "16":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "11":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "6":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0017":
+  [36m<td />[39m
+
+  Name "SYM0017 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0017 Incorporated"[39m
+  [36m/>[39m
+
+  Name "17":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "18":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "19":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0018":
+  [36m<td />[39m
+
+  Name "SYM0018 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0018 Incorporated"[39m
+  [36m/>[39m
+
+  Name "18":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "25":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "32":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0019":
+  [36m<td />[39m
+
+  Name "SYM0019 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0019 Incorporated"[39m
+  [36m/>[39m
+
+  Name "19":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "32":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "45":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0020":
+  [36m<td />[39m
+
+  Name "SYM0020 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0020 Incorporated"[39m
+  [36m/>[39m
+
+  Name "20":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "39":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "58":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0021":
+  [36m<td />[39m
+
+  Name "SYM0021 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0021 Incorporated"[39m
+  [36m/>[39m
+
+  Name "21":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "46":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "71":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0022":
+  [36m<td />[39m
+
+  Name "SYM0022 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0022 Incorporated"[39m
+  [36m/>[39m
+
+  Name "22":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "53":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "84":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0023":
+  [36m<td />[39m
+
+  Name "SYM0023 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0023 Incorporated"[39m
+  [36m/>[39m
+
+  Name "23":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "60":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "97":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "Select SYM0024":
+  [36m<td />[39m
+
+  Name "SYM0024 Incorporated":
+  [36m<td[39m
+    [33mclass[39m=[32m"truncate"[39m
+    [33mtitle[39m=[32m"SYM0024 Incorporated"[39m
+  [36m/>[39m
+
+  Name "24":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "67":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  Name "9":
+  [36m<td[39m
+    [33mclass[39m=[32m"text-right"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  checkbox:
+
+  Name "Select SYM0000":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0000"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0001":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0001"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0002":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0002"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0003":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0003"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0004":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0004"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0005":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0005"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0006":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0006"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0007":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0007"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0008":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0008"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0009":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0009"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0010":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0010"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0011":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0011"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0012":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0012"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0013":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0013"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0014":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0014"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0015":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0015"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0016":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0016"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0017":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0017"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0018":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0018"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0019":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0019"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0020":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0020"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0021":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0021"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0022":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0022"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0023":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0023"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Select SYM0024":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Select SYM0024"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowheader:
+
+  Name "SYM0000":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0001":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0002":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0003":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0004":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0005":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0006":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0007":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0008":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0009":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0010":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0011":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0012":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0013":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0014":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0015":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0016":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0017":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0018":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0019":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0020":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0021":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0022":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0023":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  Name "SYM0024":
+  [36m<th[39m
+    [33mclass[39m=[32m"text-left font-numeric"[39m
+    [33mscope[39m=[32m"row"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<output[39m
+      [33mdata-testid[39m=[32m"host-checked"[39m
+    [36m>[39m
+      [0mSYM0040[0m
+    [36m</output>[39m
+    [36m<output[39m
+      [33mdata-testid[39m=[32m"host-selected"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-2"[39m
+    [36m>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span>[39m
+          [0m50 stocks match[0m
+        [36m</span>[39m
+      [36m</output>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"results-scroll"[39m
+        [33mstyle[39m=[32m"height: 544px; overflow-y: auto; overflow-x: hidden;"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"sr-only"[39m
+          [33mid[39m=[32m":ro:"[39m
+        [36m>[39m
+          [0mStocks with an incomplete score are listed last, whether sorted up or down.[0m
+        [36m</p>[39m
+        [36m<table[39m
+          [33maria-busy[39m=[32m"false"[39m
+          [33maria-rowcount[39m=[32m"51"[39m
+          [33mclass[39m=[32m"w-full text-sm"[39m
+        [36m>[39m
+          [36m<thead[39m
+            [33mclass[39m=[32m"sticky top-0 bg-background"[39m
+          [36m>[39m
+            [36m<tr>[39m
+              [36m<th[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m/>[39m
+              [36m<th[39m
+                [33maria-sort[39m=[32m"ascending"[39m
+                [33mclass[39m=[32m"text-left align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [0mSymbol[0m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by symbol"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m▲[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                [36m</span>[39m
+              [36m</th>[39m
+              [36m<th[39m
+                [33mclass[39m=[32m"text-left align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [0mName[0m
+              [36m</th>[39m
+              [36m<th[39m
+                [33maria-describedby[39m=[32m":ro:"[39m
+                [33mclass[39m=[32m"text-right align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"inline-block h-2 w-2 rounded"[39m
+                    [33mdata-testid[39m=[32m"factor-swatch"[39m
+                    [33mstyle[39m=[32m"background: hsl(var(--factor-value));"[39m
+                  [36m/>[39m
+                  [0mValue[0m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by value percentile"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by value standardised score"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                [36m</span>[39m
+              [36m</th>[39m
+              [36m<th[39m
+                [33maria-describedby[39m=[32m":ro:"[39m
+                [33mclass[39m=[32m"text-right align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"inline-block h-2 w-2 rounded"[39m
+                    [33mdata-testid[39m=[32m"factor-swatch"[39m
+                    [33mstyle[39m=[32m"background: hsl(var(--factor-growth));"[39m
+                  [36m/>[39m
+                  [0mGrowth[0m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by growth percentile"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33maria-label[39m=[32m"Sort by growth standardised score"[39m
+                    [33mclass[39m=[32m"inline-flex h-5 w-5 items-center justify-center rounded"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                    [36m>[39m
+                      [0m↕[0m
+                    [36m</span>[39m
+                  [36m</button>[39m
+                [36m</span>[39m
+              [36m</th>[39m
+              [36m<th[39m
+                [33maria-describedby[39m=[32m":ro:"[39m
+                [33mclass[39m=[32m"text-right align-top"[39m
+                [33mscope[39m=[32m"col"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"inline-block h-...
+ ❯ Object.getElementError ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/research/results-table.test.tsx:804:48
+    802|       reload.resolve(list(generated(50)));
+    803|     });
+    804|     expect(document.activeElement).toBe(screen.getByRole("checkbox", {…
+       |                                                ^
+    805|     expect(document.activeElement).toBe(checkbox);
+    806|     expect(scroller().scrollTop).toBe(30 * ROW_HEIGHT_PX);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 88 passed (90)
+   Start at  18:30:38
+   Duration  3.81s (transform 141ms, setup 63ms, collect 218ms, tests 2.62s, environment 387ms, prepare 385ms)
+

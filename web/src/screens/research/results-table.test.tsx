@@ -416,6 +416,28 @@ describe("T006: keyset paging and the request lifecycle", () => {
     expect(listMock).toHaveBeenCalledTimes(2);
   });
 
+  it("leaves the polite region untouched when a later page lands: only a first page announces", async () => {
+    listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 120, nextCursor: "c1" }));
+    render(<Host />);
+    await screen.findByText("SYM0000");
+    const region = statusRegion();
+    expect(region).toHaveTextContent(RESULTS.stocksMatch(120));
+    const observer = observeRegion(region);
+
+    const second = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(second.promise);
+    scrollToRow(10);
+    expect(listMock).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      second.resolve(list(generated(50, "PG2"), { matchCount: 120, nextCursor: null }));
+    });
+    scrollToRow(50);
+    expect(screen.getByText("PG20000")).toBeInTheDocument();
+    expect(observer.records).toHaveLength(0);
+    observer.disconnect();
+    expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(120));
+  });
+
   it("pages on through a third page once the second has arrived", async () => {
     listMock.mockResolvedValueOnce(list(generated(50), { matchCount: 150, nextCursor: "c1" }));
     render(<Host />);
@@ -761,6 +783,30 @@ describe("T006: keyset paging and the request lifecycle", () => {
     expect(screen.queryByText("SYM0000")).not.toBeInTheDocument();
   });
 
+  it("keeps focus on a row's checkbox past the first window across a refresh-once that keeps the row", async () => {
+    const user = userEvent.setup();
+    listMock.mockResolvedValueOnce(list(generated(50)));
+    const { rerender } = render(<Host />);
+    await screen.findByText("SYM0000");
+    scrollToRow(30);
+    // Checking leaves a keyboard user on the checkbox (DAC-E4-S6-4): a control inside the row, not the row.
+    const checkbox = screen.getByRole("checkbox", { name: "Select SYM0040" });
+    await user.click(checkbox);
+    expect(document.activeElement).toBe(checkbox);
+
+    const reload = deferred<ClassificationList>();
+    listMock.mockReturnValueOnce(reload.promise);
+    rerender(<Host refreshKey={1} />);
+    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      reload.resolve(list(generated(50)));
+    });
+    expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Select SYM0040" }));
+    expect(document.activeElement).toBe(checkbox);
+    expect(scroller().scrollTop).toBe(30 * ROW_HEIGHT_PX);
+    expect(screen.queryByText("SYM0000")).not.toBeInTheDocument();
+  });
+
   it("keeps focus on the focused row when a refresh-once reorders the rows around it", async () => {
     const user = userEvent.setup();
     listMock.mockResolvedValueOnce(list(generated(50)));
@@ -778,8 +824,9 @@ describe("T006: keyset paging and the request lifecycle", () => {
     expect(document.activeElement).toBe(rowOf("SYM0040"));
 
     // A new score set (DEC-0062) ranks the neighbours differently: the focused row moves in the DOM.
-    // A browser blurs a focused node that is moved (the DOM's removing steps run the focus fixup);
-    // jsdom does not when React moves it, so the move is shimmed to blur as a browser would.
+    // Moving a focused node runs the DOM's removing steps: jsdom drops document.activeElement then,
+    // but fires no blur event. The shim adds only that blur event, so the test also covers a
+    // blur handler running mid-move; React's commit restores focus to the moved row either way.
     const blurMoved = (node: Node): void => {
       if (node.isConnected && node.contains(document.activeElement)) {
         (document.activeElement as HTMLElement).blur();
@@ -880,6 +927,8 @@ describe("T006: keyset paging and the request lifecycle", () => {
     await screen.findByText("GONE0000");
     expect(scroller().scrollTop).toBe(0);
     expect(rowOf("NEW0030")).toBeNull();
+    // Its element is gone, so focus returns to the document (recorded for the owner in DEC-0244).
+    expect(document.activeElement).toBe(document.body);
   });
 
   it("ignores a later page of a superseded query that lands after the new page one", async () => {

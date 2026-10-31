@@ -401,7 +401,8 @@ cycles:
       longer holds still resets the window to 0. The reviewed probe (50 rows, scrolled to row 30, SYM0040
       focused, refresh with the same rows) now keeps focus and scrollTop; a refresh that reorders the rows
       around the focused one (a new score set under a factor sort) is tested with Node.prototype.insertBefore
-      and appendChild shimmed to blur a moved node as a browser does, which jsdom does not under React's move;
+      and appendChild shimmed to fire a blur event on a moved focused node (jsdom drops activeElement on the
+      move but fires no blur; corrected in rework-2, review v2 IR-004);
       a refresh that moves the row to the top scrolls to it; a refresh that drops it resets. IR-008 (doc): the
       ResultsTable contract comment says query is compared by identity, so a host keeps one object per URL
       state. IR-009 (LOW, disposed with a recorded reason): DEC-0240 is amended to record that the selection
@@ -477,3 +478,57 @@ cycles:
           reason: >
             The serial bumped by 2 instead of 1 on each first page. Identity only, as above: any bump replaces
             the span and re-announces; the tests assert the mutation and the unchanged text, which hold.
+  - id: rework-2
+    tasks: [T006]
+    addresses_review: CAP-002-E4-S6-implementation-review-v2.md
+    findings: [IR-001, IR-002, IR-003, IR-004]
+    description: >
+      Test-only rework; results-table.tsx is unchanged. IR-001 (HIGH): a T006 test loads 50 rows, scrolls to
+      row 30, clicks the checkbox Select SYM0040 (focus on a control inside the row, where checking leaves a
+      keyboard user) and resolves a refresh-once with the same rows; focus stays on that checkbox element and
+      scrollTop stays at row 30, which pins focusedSymbolIn's closest("tr[data-symbol]") lookup. IR-002 (MEDIUM):
+      the "resets when it is gone" test now asserts that focus returns to document.body when the focused row is
+      not in the refreshed page one, and the behaviour is recorded for the owner in DEC-0244 (provisional,
+      owner_reviewed false) with the alternative of focusing the table's tab stop. IR-003 (MEDIUM): a T006
+      test watches the polite region with a MutationObserver while a later page lands and asserts no mutation
+      and the same sentence. IR-004 (LOW): the reorder test's comment now says jsdom drops activeElement on the
+      move without a blur event and that the shim adds only that event; rework-1's description is corrected to
+      match.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-2.log
+    red_log_sha256: b33b348c60bac8ec1b1555196abd441a5a05d0a573aaf8618e20555b6fe4ea63
+    red_evidence: >
+      The production code was already correct for IR-001 and IR-003, so the RED is the review's two
+      non-equivalent survivors applied to results-table.tsx (manual:review-v2:focus-row-only and
+      manual:review-v2:announce-on-later-page): results-table.test.tsx ran 90 tests, 2 failed (the checkbox
+      focus test and the later-page region test), 88 passed; production was restored byte-for-byte afterwards.
+      The IR-002 assertion characterises the recorded behaviour and passes on the reviewed code by design.
+    green_evidence: >
+      results-table.test.tsx 90, results-window.test.ts 17 and copy.test.ts passed, 434 in all
+      (green-rework-2.log); the full web suite 1192 passed in 55 files after the origin/main merge
+      (full-suite-rework-2.log, npm run test); npm run lint, npm run format, npx tsc --noEmit and npm run build
+      exit 0; npm run test:e2e not run (the plan excludes it). Mutation: the catalogue yields nothing (no
+      production line changed); the two review survivors, re-run as manual:rework-2 mutants, are both killed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-2.log
+        sha256: 61e30b1e6dc652ba0c24737f3e3b2961a0fbc9e12f61c08bdccd0db5b8e775b1
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-2.log
+        sha256: 07965e632a10fb77d7b101fed2a41981486968940d8e46b4e08f58894de40e8c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 693f9892f3ac8caa4450ce02c50b4685b763a7765435ca33a2b309e83e357b4f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-2.patch
+    commit_hash: stage
+    decisions: [DEC-0244]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-2-results.json
+      results_sha256: 1f06278a98edd6db5cc88e25a76bdd9221e8ec86dcdd371dc5b397d84abf6e90
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
