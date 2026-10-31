@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "repo_head": "2cc906d6bf204c8c77ffd4cf5ca696b75c2c4fa8",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "manual:review-value-own-observed-rule",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/value_inputs.sql",
+      "line": 29,
+      "old": "s.observed_on, s.period_rank, s.payload, s.backfilled,",
+      "new": "s.observed_on, s.period_rank, s.payload, coalesce(s.provider_filing_date < s.observed_on, false) AS backfilled,"
+    },
+    {
+      "id": "manual:review-growth-own-observed-rule",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/classification/sql/growth_inputs.sql",
+      "line": 24,
+      "old": "s.fiscal_period_end, s.observed_on, s.backfilled,",
+      "new": "s.fiscal_period_end, s.observed_on, coalesce(s.provider_filing_date < s.observed_on, false) AS backfilled,"
+    }
+  ]
+}

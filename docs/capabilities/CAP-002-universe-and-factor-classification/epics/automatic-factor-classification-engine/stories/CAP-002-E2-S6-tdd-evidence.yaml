@@ -1,5 +1,5 @@
 # TDD evidence for CAP-002-E2-S6 - Possibly-restated mark for value and growth classifications.
-# One cycle: the three SQL edits only work together for the end-to-end tests (TC-COMP-186, 188),
+# cycle-1 is the whole implementation: the three SQL edits only work together for the end-to-end tests (TC-COMP-186, 188),
 # as the plan's Parallel Opportunities note says, and the new tests failed on one missing
 # behaviour, the constant false that CAP-002-E2-S3 and CAP-002-E2-S5 wrote until this story.
 # Decisions applied: DEC-0056 (backfill rule), DEC-0119 (classify.sql reads factor_input),
@@ -8,6 +8,7 @@
 # lists a backfilled row (BLOCKING); the spec-drift review found no drift. The tests were added, the
 # catalogue gained the mutants the reviewer named, the RED, the mutation run and the fingerprint were
 # redone on the final tests, and both reviews then judged the final patch.
+# cycle-2 is the rework of implementation review v1 (IR-001): tests only, no production change.
 
 cycles:
   - id: cycle-1
@@ -189,3 +190,69 @@ cycles:
             active all come from the unnest of active_ids), and bool_or under GROUP BY is unchanged
             by a duplicate id, so no stored row can differ; the join is kept because DEC-0119 and
             T011 restrict the statement's reads to the roster, as peer_ids does
+  - id: cycle-2
+    tasks: [T006, T007]
+    decisions: [DEC-0056, DEC-0122]
+    description: >
+      Review rework for implementation review v1. Tests only; no production file changes. IR-001 (HIGH): no story test
+      told DEC-0056's rule (filed before the instrument's first fundamentals observed_on) from the rule it rejects
+      (filed before the row's own observed_on), because every not-backfilled row the fixtures wrote was filed on the
+      day it was observed. Two rows that the rules disagree on are now asserted to mark nothing, both in
+      tests/integration/test_engine_restatement.py. TC-COMP-188 (T006): set 2's fresh quarter P0 is filed 2027-01-05,
+      after FIRST and before its own observed_on 2027-01-10. Set 2 now asserts that B, C and D have no marked input and
+      no marked classification, that A's book_to_price (which reads only the newest balance sheet, P0) is unmarked
+      while A's earnings_yield, fcf_yield and growth inputs still read backfilled quarters, and that every stock's
+      column agrees with its detail (assert_column_agrees_with_detail). T007 (c): a fourth stock D has its newest
+      balance sheet and income statement observed again on FIRST + 1 and filed on FIRST, before their own
+      observed_on but not before the stock's first. D's five inputs and its value and growth classifications are
+      false, the column agrees with detail for A to D, and D's book_to_price detail shows that the later observation
+      was read (observed_on FIRST + 1, filed FIRST, backfilled false). No assertion was removed or weakened.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/red-cycle-2-rework.log
+    red_log_sha256: 886e0b53b738a66387c7247aaece50498014808f30c2cd3de2578eed1fb06ccd
+    red_evidence: >
+      The two mutants review v1 named (mutants-cycle-2.json, the reviewer's ids and edits) were first reproduced as
+      survivors of the cycle-1 tests, on the clean tree before any cycle-2 edit, with the story's two test files only:
+      26 passed under each (2 of 2 survived). Without the S3 tests, the growth twin survives too; review v1 saw it
+      killed only by S3's test_engine_inputs_fundamentals.py:181. Then the two strengthened tests were run under one
+      mutant at a time. manual:review-value-own-observed-rule fails TC-COMP-188 on A's set-2 book_to_price (true where
+      false is expected) and T007 (c) on D's three value inputs. manual:review-growth-own-observed-rule fails
+      TC-COMP-188 on B's set-2 revenue_growth and eps_growth and T007 (c) on D's. Each run: 2 failed. Unmutated, both
+      pass (2 passed, two workers).
+    green_evidence: >
+      The story's two test files: 26 passed in both mutation baselines (mutation-cycle-2-results.json), whose command
+      is those two files alone, so both mutants are killed by S6's own tests with no S3 test in the run. On 2cc906d
+      plus the staged cycle-2 tree, uv run pytest gave 1638 passed, 1 xfailed (full-suite-cycle-2.log under logs; the
+      count is cycle-1's, since the cycle adds assertions, not tests). ruff check and ruff format --check are clean on
+      the changed file; strict mypy over it reports only the pre-existing engine_inputs_support.py:194 error outside
+      this story. The tech-stack validation ran before hand-off; its counts are in the completion summary. The code
+      review (APPROVED) and the spec-drift review (no drift) judged cycle-2.patch and asked for no change. The code
+      reviewer re-ran both mutants in a throwaway clone (each fails the same two tests) and one more probe, the rejected
+      rule written into statements.sql so the column and detail agree, which fails the same two tests too. Their
+      non-blocking notes, recorded here: the explicit B, C and D classification check in TC-COMP-188 repeats what the
+      loop after it already forces, and is kept because IR-001's remediation names it; the comment on D's two
+      re-observed statement types says both are read by value and growth, which is true of the pair, not of the
+      balance sheet alone; TC-COMP-186 itself is unchanged, so the discrimination lives in TC-COMP-188 and T007 (c),
+      two of the three remedies IR-001 lists; the TC-COMP-188 test now also pins DEC-0056, within T006's "whatever set
+      2's own inputs give"; and T002's list of rows written outside add_fundamentals does not name D's re-observation,
+      which follows T002's rule (both dates explicit, observed_on no earlier than FIRST).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/full-suite-cycle-2.log
+        sha256: 54fd43f6c04c034e5bed70ffdd28a200388215ee422cff6b6f84235e53c3caf3
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ece54e37779c45ae8fbf3eacfc4e46f2e7dbfb19e2eaa9e71397391bad596744
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S6-evidence/mutation-cycle-2-results.json
+      results_sha256: acbf3165a85579b6a95b6f0b7cf12ab199c789e5ec059f335b2c4c4fae55cbd5
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

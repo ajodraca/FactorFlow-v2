@@ -228,7 +228,7 @@ D2 = date(2027, 1, 17)  # the later set's classification date
 L2 = date(2027, 1, 15)
 P0 = date(2026, 12, 31)  # a fresh quarter, newer than P1
 P0_OBSERVED = date(2027, 1, 10)
-P0_FILED = date(2027, 1, 5)  # after FIRST, so not backfilled
+P0_FILED = date(2027, 1, 5)  # after FIRST, so not backfilled, though before P0_OBSERVED
 
 
 # Implements TC-COMP-188
@@ -264,12 +264,21 @@ def test_a_later_set_leaves_the_earlier_sets_mark_unchanged(
     flags_2 = classification_flags(conn, set_2)
     assert set(flags_2) == set(flags_1)  # set 2 holds its own rows for the same keys
     assert classification_flags(conn, set_1)[(a, "value")] is True
-    # Set 2's mark is what set 2's own inputs give, not a copy of set 1's.
+    # Set 2's mark is what set 2's own inputs give, not a copy of set 1's. The fresh quarter
+    # was filed before its own observed_on but after the stocks' first one, so it is not
+    # backfilled (DEC-0056) and marks nothing: A's book_to_price, which reads only the newest
+    # balance sheet, is unmarked, while A's other inputs still read backfilled quarters.
+    assert input_flags(conn, set_2, a) == expect("earnings_yield", "fcf_yield", *GROWTH)
+    for symbol in "BCD":
+        stock = stocks[symbol]
+        assert input_flags(conn, set_2, stock) == expect(), symbol
+        assert {flags_2[(stock, f)] for f in FACTORS} == {False}, symbol
     for symbol, stock in stocks.items():
         marks = input_flags(conn, set_2, stock)
         assert flags_2[(stock, "value")] is any(marks[name] for name in VALUE), symbol
         assert flags_2[(stock, "growth")] is any(marks[name] for name in GROWTH), symbol
         assert flags_2[(stock, "momentum")] is False
+        assert_column_agrees_with_detail(conn, set_2, stock)
 
 
 # --- T007 ---------------------------------------------------------------------------------
@@ -336,28 +345,35 @@ def test_filing_date_boundary_and_null_filing_date(
     store: Store, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """DEC-0056: filed on the first observed_on is not backfilled, one day earlier is, and a
-    null filing date is not."""
+    null filing date is not. The first observed_on decides, not the row's own: a row
+    observed later and filed on the first observed_on, before its own, is not backfilled."""
     conn, set_id = store
     # A's rows are all filed on FIRST itself.
     stocks = build_fixture(conn, {"C": {("balance_sheet", 0)}})
-    a, b, c = stocks["A"], stocks["B"], stocks["C"]
+    a, b, c, d = (stocks[s] for s in SYMBOLS)
     reobserve(conn, b, "balance_sheet", 0, FIRST - timedelta(days=1))
     reobserve(conn, c, "balance_sheet", 0, None)  # C's backfilled row, re-filed as null
+    for statement_type in ("balance_sheet", "income_statement"):  # read by value and growth
+        reobserve(conn, d, statement_type, 0, FIRST)
 
     assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
 
     assert input_flags(conn, set_id, a) == expect()
     assert input_flags(conn, set_id, b) == expect(*VALUE)  # every value input reads it
     assert input_flags(conn, set_id, c) == expect()
+    assert input_flags(conn, set_id, d) == expect()
     flags = classification_flags(conn, set_id)
-    assert [flags[(s, "value")] for s in (a, b, c)] == [False, True, False]
+    assert [flags[(s, "value")] for s in (a, b, c, d)] == [False, True, False, False]
+    assert [flags[(s, "growth")] for s in (a, b, c, d)] == [False, False, False, False]
+    for stock in (a, b, c, d):
+        assert_column_agrees_with_detail(conn, set_id, stock)
     balance_sheet = {
         stock: next(
             p
             for p in inputs_for(conn, set_id, stock)["book_to_price"]["detail"]["periods"]
             if p["statement_type"] == "balance_sheet"
         )
-        for stock in (a, b, c)
+        for stock in (a, b, c, d)
     }
     assert (balance_sheet[a]["provider_filing_date"], balance_sheet[a]["backfilled"]) == (
         str(FIRST),
@@ -371,6 +387,12 @@ def test_filing_date_boundary_and_null_filing_date(
         None,
         False,
     )
+    # D's inputs read the later observation, filed on FIRST, before its own observed_on.
+    assert (
+        balance_sheet[d]["observed_on"],
+        balance_sheet[d]["provider_filing_date"],
+        balance_sheet[d]["backfilled"],
+    ) == (str(FIRST + timedelta(days=1)), str(FIRST), False)
 
 
 def test_a_not_classified_row_for_a_missing_input_carries_the_mark(
