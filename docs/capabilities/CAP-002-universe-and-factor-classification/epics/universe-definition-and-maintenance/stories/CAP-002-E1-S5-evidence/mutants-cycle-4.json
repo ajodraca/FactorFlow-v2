@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+  "range": "manual",
+  "mutants": [
+    {
+      "id": "manual:skip-lock",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        clean_name = _normalise_name(name)\n        current = current_set(conn)\n",
+      "new": "        clean_name = _normalise_name(name)\n        current = current_set(conn)\n"
+    },
+    {
+      "id": "manual:lock-after-reads",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        clean_name = _normalise_name(name)\n        current = current_set(conn)\n        if current is None or current.set_id != set_id:\n            raise ClassificationSetChanged(set_id, None if current is None else current.set_id)\n        instrument_ids = evaluate_filter(conn, set_id, thresholds)\n        if not instrument_ids:\n            raise EmptyUniverse(\"the filter matches no stock\")\n        if _name_in_use(conn, clean_name):",
+      "new": "        clean_name = _normalise_name(name)\n        current = current_set(conn)\n        if current is None or current.set_id != set_id:\n            raise ClassificationSetChanged(set_id, None if current is None else current.set_id)\n        instrument_ids = evaluate_filter(conn, set_id, thresholds)\n        if not instrument_ids:\n            raise EmptyUniverse(\"the filter matches no stock\")\n        if _name_in_use(conn, clean_name) or _take_lock(conn):"
+    },
+    {
+      "id": "manual:no-name-check",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        if _name_in_use(conn, clean_name):\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute(",
+      "new": "        if False:\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute("
+    },
+    {
+      "id": "manual:name-check-untrimmed",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        if _name_in_use(conn, clean_name):\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute(",
+      "new": "        if _name_in_use(conn, name):\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute("
+    },
+    {
+      "id": "manual:name-shape-after-reader",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        clean_name = _normalise_name(name)\n        current = current_set(conn)\n",
+      "new": "        current = current_set(conn)\n        clean_name = _normalise_name(name)\n"
+    },
+    {
+      "id": "manual:commits-itself",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            cur.executemany(_INSERT_EVENT_SQL, events)\n        return _replayed(conn, universe_id)\n\n\ndef get_universe(",
+      "new": "            cur.executemany(_INSERT_EVENT_SQL, events)\n        conn.commit()\n        return _replayed(conn, universe_id)\n\n\ndef get_universe("
+    },
+    {
+      "id": "manual:swallow-insert-error",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        with conn.cursor() as cur:\n            cur.executemany(_INSERT_EVENT_SQL, events)\n        return _replayed(conn, universe_id)\n\n\ndef get_universe(",
+      "new": "        with conn.cursor() as cur:\n            try:\n                cur.executemany(_INSERT_EVENT_SQL, events)\n            except psycopg.OperationalError:\n                pass\n        return _replayed(conn, universe_id)\n\n\ndef get_universe("
+    }
+  ]
+}

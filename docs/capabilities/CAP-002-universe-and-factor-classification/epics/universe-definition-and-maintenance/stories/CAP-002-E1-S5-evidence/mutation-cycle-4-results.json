@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "command": "cd {workdir} && PYTHONPATH={workdir}/src /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python -m pytest -q -x -p no:cacheprovider -m 'postgres or not postgres' tests/integration/test_universe_filter_snapshot.py tests/unit/test_universe_filter_provenance.py",
+  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+  "tree_patch_sha256": "7a0dd3a760d2b54db08b7ebaaff43a08b1e7f1e87217c6fa13423920e47f732b",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutants-cycle-4.json",
+  "mutants_sha256": "dce1a9c5a6fe5b3ad7401cfe7442ae85ee21baa616c4612fe08521467fd73341",
+  "jobs": 4,
+  "started": "2026-10-31T14:53:32Z",
+  "baselines": [
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 8.9,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/baseline-w2.log",
+      "log_sha256": "468655690e814b1998a57aa0203e41c5970ffb1f836a0be2b76bd43369380cb0"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 9.0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/baseline-w1.log",
+      "log_sha256": "ef39d6c834ca3ae8e552da0ac5b66e3dccac861c45bff5b02ae79f0be27d4bff"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 9.0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/baseline-w3.log",
+      "log_sha256": "6b1590c5075fe25d119d6e4aef7b8865197753e2c9bacd66b62e97bf71b655e5"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 9.1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/baseline-w0.log",
+      "log_sha256": "3af506926b7d9f681c75f751d96f614c1878ae13c89c0efac441de9d1dc9e50f"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:skip-lock",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        clean_name = _normalise_name(name)\n        current = current_set(conn)\n",
+      "new": "        clean_name = _normalise_name(name)\n        current = current_set(conn)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 12.9,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_skip-lock.log",
+      "log_sha256": "af70d57b40d457d3b6e14a0debd43124258d38e437a0f392aaea2e2532888938"
+    },
+    {
+      "id": "manual:lock-after-reads",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        _take_lock(conn)\n        clean_name = _normalise_name(name)\n        current = current_set(conn)\n        if current is None or current.set_id != set_id:\n            raise ClassificationSetChanged(set_id, None if current is None else current.set_id)\n        instrument_ids = evaluate_filter(conn, set_id, thresholds)\n        if not instrument_ids:\n            raise EmptyUniverse(\"the filter matches no stock\")\n        if _name_in_use(conn, clean_name):",
+      "new": "        clean_name = _normalise_name(name)\n        current = current_set(conn)\n        if current is None or current.set_id != set_id:\n            raise ClassificationSetChanged(set_id, None if current is None else current.set_id)\n        instrument_ids = evaluate_filter(conn, set_id, thresholds)\n        if not instrument_ids:\n            raise EmptyUniverse(\"the filter matches no stock\")\n        if _name_in_use(conn, clean_name) or _take_lock(conn):",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 8.1,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_lock-after-reads.log",
+      "log_sha256": "4e338a3de002c1e3c3e39e7086e04ef0a2759fa72cd6d97c4bc6d240a0ac84b8"
+    },
+    {
+      "id": "manual:no-name-check",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        if _name_in_use(conn, clean_name):\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute(",
+      "new": "        if False:\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute(",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_no-name-check.log",
+      "log_sha256": "5d9b210be698d5e2ac05d121772f1c3d57f1701988def1aab79d1cceb1b34d1a"
+    },
+    {
+      "id": "manual:name-check-untrimmed",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        if _name_in_use(conn, clean_name):\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute(",
+      "new": "        if _name_in_use(conn, name):\n            raise UniverseNameInUse(f\"an active universe is already named {clean_name!r}\")\n        members = conn.execute(",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.6,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_name-check-untrimmed.log",
+      "log_sha256": "295c03efdf068934db6ea38c796ff747d5da6dff9a5ac8800841f29024c73bcf"
+    },
+    {
+      "id": "manual:name-shape-after-reader",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        clean_name = _normalise_name(name)\n        current = current_set(conn)\n",
+      "new": "        current = current_set(conn)\n        clean_name = _normalise_name(name)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 6.4,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_name-shape-after-reader.log",
+      "log_sha256": "65a2ff01bd205bcde2c7ece2075a93aa7a695df90124d4c941827785e85b5a66"
+    },
+    {
+      "id": "manual:commits-itself",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            cur.executemany(_INSERT_EVENT_SQL, events)\n        return _replayed(conn, universe_id)\n\n\ndef get_universe(",
+      "new": "            cur.executemany(_INSERT_EVENT_SQL, events)\n        conn.commit()\n        return _replayed(conn, universe_id)\n\n\ndef get_universe(",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.1,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_commits-itself.log",
+      "log_sha256": "58d5109ed9580797544019154144e28e700d491738b62600880bacdec7c4b264"
+    },
+    {
+      "id": "manual:swallow-insert-error",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        with conn.cursor() as cur:\n            cur.executemany(_INSERT_EVENT_SQL, events)\n        return _replayed(conn, universe_id)\n\n\ndef get_universe(",
+      "new": "        with conn.cursor() as cur:\n            try:\n                cur.executemany(_INSERT_EVENT_SQL, events)\n            except psycopg.OperationalError:\n                pass\n        return _replayed(conn, universe_id)\n\n\ndef get_universe(",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 7.3,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/ev/mutation-cycle-4-results-logs/manual_swallow-insert-error.log",
+      "log_sha256": "d8f4bccd8d2d98fce4994f5ae95aabeb6daa9b1e1ce412c4994ea0c3360eaa5c"
+    }
+  ],
+  "finished": "2026-10-31T14:53:56Z"
+}
