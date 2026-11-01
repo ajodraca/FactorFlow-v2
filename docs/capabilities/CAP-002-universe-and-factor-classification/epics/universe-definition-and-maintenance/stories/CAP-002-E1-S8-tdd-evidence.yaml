@@ -1,0 +1,263 @@
+# TDD evidence for CAP-002-E1-S8 - universe Members and History tabs, as-of view and remove dialog.
+# Three cycles, one per component file: (1) the remove dialog and row action - T006, T007, T012 with their
+# T010 strings; (2) the History tab - T008, T009, T013 with theirs; (3) the Members tab - T002 to T005, T011
+# (a no-op: both seams were delivered) and T014 with theirs. T001 (verification), T015 and T016 (integration
+# and whole-suite validation) change no code; T017 is this file.
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch
+# is the diff between the index trees before and after that cycle, so the three apply in order onto the stage
+# parent (the frozen integration base).
+# Reviews: each cycle's patch was judged by an independent code-review agent and an independent spec-drift
+# agent (fresh `claude -p` processes restricted to read-only tools) before the next cycle began; the verdicts
+# below are the final reviews of the patches cited, earlier rounds' findings having been fixed with tests.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (node_modules symlinked into each clone);
+# generated operators plus hand-written mutants ("operator": "manual"). Every survivor is disposed of as
+# equivalent with its reason; none by exception.
+# T001 findings: E4-S1 types members[].factors and members[].name as nullable (DEC-0097); format.ts has no
+# Chicago calendar-date helper, so the tab uses Intl.DateTimeFormat("en-CA", America/Chicago) (DEC-0105);
+# research-query.ts holds no as_of, which the host keeps (T014); FactorCell renders reasonCode retired as Not
+# followed; FiltersPane has showLookIn and children and is its own <section aria-label="Filters">;
+# ResultsTable has extraColumns with placement afterName and end, rows addressed as tr[data-symbol] with
+# aria-rowindex, and leaves the heading to its host.
+# Decisions applied: DEC-0097, DEC-0105, DEC-0106, DEC-0107, DEC-0145, DEC-0159 (all owner-upheld). No
+# decision was recorded during this coding run.
+
+cycles:
+  - id: cycle-1
+    tasks: [T006, T007, T010, T012]
+    description: >
+      TC-COMP-043 (the sole member's Remove… blocked, focusable, described by the last-member reason, inert, with
+      Retire… adjacent; the ghost Remove… named for its row otherwise; clicks never reach the row; the last_member
+      backstop keeping the dialog with its own alert and Retire… in place of the confirm) and TC-COMP-057 (the
+      confirm variant, never destructive; the history-stays description; initial focus on Cancel; Esc cancels; a
+      two-way Tab trap; focus restored on unmount; the confirm natively disabled while pending, never Cancel; the
+      generic and universe_retired alerts keeping the confirm; focus moved to Cancel when the focused confirm becomes
+      pending and to Retire… when last_member arrives with focus outside). Production:
+      web/src/screens/research/universes/detail/remove-dialog.tsx (RemoveDialog, RemoveAction) and T010's
+      UNIVERSE_LIFECYCLE.lastMemberRefused and UNIVERSE_DETAIL.removeAction in copy.ts; every other string reused.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/red-cycle-1.log
+    red_log_sha256: 5e0cf9894b9eb974d9a1a3d6c26a33b4984cbdd6389a9f981fd3acb787ec4e2f
+    red_evidence: >
+      With remove-dialog.test.tsx written and no remove-dialog.tsx, the file failed to load: Failed to resolve
+      import "./remove-dialog" (no tests ran).
+    green_evidence: >
+      remove-dialog.test.tsx 20 passed and copy.test.ts (TC-COMP-072 scan unchanged) passed (green-cycle-1.log);
+      tsc --noEmit, biome lint and biome format clean. Three review rounds: round 1 code review APPROVED with two
+      MEDIUM (focus dropped from the dialog when the confirm is disabled or replaced) and a LOW (inline error colour),
+      round 2 APPROVED with one MEDIUM (the effect ran while focus was still on the disabling confirm); both fixed with
+      tests and the patch re-reviewed: round 3 APPROVED with LOW notes only, spec drift none in every round. Carried
+      LOW follow-ups: aria-modal on a non-modal <dialog open> as in retire-dialog.tsx; the confirm kept on
+      universe_retired although a retry cannot succeed (T005 f only asks for the sentence).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/green-cycle-1.log
+        sha256: 00033726821c53b7b5d577ab3fe75f6da42aa7aa496bcae8f80542acb7f42a32
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f80e515f031d2661492a32e911a80cbfcd9b6ce27850a2ceb2c14b3fa5b3a0f2
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/mutation-cycle-1-results.json
+      results_sha256: 5cb386f308c35b8db5a32f407bdc35c104c0251032636e0f88317faad00c8c1d
+      generated: 35
+      killed: 34
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.971
+      survivors:
+        - id: web/src/screens/research/universes/detail/remove-dialog.tsx:95:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The Tab trap's guard reads the Cancel and last-control refs, both attached to buttons rendered unconditionally while the dialog is mounted, and a keydown reaches the dialog only while it is mounted; `||` and `&&` take the same branch on every reachable input. The guard only narrows the types.
+
+  - id: cycle-2
+    tasks: [T008, T009, T010, T013]
+    description: >
+      TC-COMP-029 (newest first as returned; Recorded at through formatTimestamp with the zone; Event labels
+      Created, Renamed, Stock added, Stock removed, Retired; a rename's Detail old → new from the nearest older created
+      or renamed event; data-variant history with Recorded at, Event, Detail) and T009 (symbol links to
+      /research/stocks/{symbol}; View members as of this event on created and member rows only, passing recorded_on;
+      Retired with no detail; paging at limit 50 with Load more appended in order; the next page read without a click
+      while a rename's old name is not loaded, stopping at the end; any failed read replacing the body with the
+      code-keyed sentence and Try again, which reads from page one; universe_not_found with a link to Universes; a busy
+      skeleton output while loading; Load more kept mounted and inert while its page is read, focus moved to the table
+      when the last page removes it; superseded reads ignored). Production:
+      web/src/screens/research/universes/detail/history-tab.tsx (HistoryTab) and T010's
+      UNIVERSE_DETAIL.renamedDetail and loadMore in copy.ts. The state is a local union, not ScreenState, whose error
+      variant carries a message this tab must never render (classification-ui 2.4); recorded here as a deviation from
+      T013's wording.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/red-cycle-2.log
+    red_log_sha256: 60efffaa841a08e9790fb537e11cbe28a3469e0793423b09315867e68050c079
+    red_evidence: >
+      With history-tab.test.tsx written and no history-tab.tsx, the file failed to load: Failed to resolve import
+      "./history-tab" (no tests ran).
+    green_evidence: >
+      history-tab.test.tsx 20 passed, copy.test.ts and render.test.tsx passed (green-cycle-2.log); tsc --noEmit,
+      biome lint and biome format clean. Round 1: code review APPROVED with two MEDIUM (focus lost when Load more
+      unmounts; Try again retried a refused cursor) and spec drift DETECTED (MEDIUM: a failed later page kept the rows
+      instead of replacing the body, T009 f, UX 1.4 States); fixed with tests, round 2: APPROVED with LOW notes only,
+      drift none. Carried LOW follow-ups: an unreachable API is stated by the operation sentence in the panel (the
+      shell owns the unreachable state); focus is not moved when the body is replaced by an error; each rename row's
+      lookup slices the loaded list.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/green-cycle-2.log
+        sha256: 7a377d44fc1474666cdebee2cebeaee59c9e43fb9745f72f52dac480883d2017
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 80987ebcd15372f4ea59b003e597b4b2eb0582954cfeff8072f99d6ff2e4d232
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/mutation-cycle-2-results.json
+      results_sha256: d7977e25c095f8705edc1cda1c53d3dfc58f4cc90015ce931ae1c2269fa5174f
+      generated: 50
+      killed: 40
+      survived: 10
+      stillborn: 0
+      timeout: 0
+      score: 0.8
+      survivors:
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:83:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            pagePending's initial value is never read: the first render is the loading body, and the first-page effect sets it false in the same commit before any loaded body renders.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:85:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            focusTable's initial true is consumed by its effect on mount, which resets it and focuses tableRef, null while the loading skeleton is shown, so nothing is focused.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:89:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt is a re-read trigger: only its change matters (an effect dependency or a state bump), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:91:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation is only compared with a value read from itself, so its starting value is irrelevant.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:95:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation is only compared for equality with a captured value; any increment invalidates the earlier reads alike.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:102:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation is only compared for equality with a captured value; any increment invalidates the earlier reads alike.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:144:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            On a failed page the body becomes the error state, which renders no Load more and stops the automatic read before pagePending is read; leaving it requires Try again, whose first-page effect resets pagePending to false.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:164:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            Setting focusTable to true when it is already true bails out of the re-render, so the effect does not run again; the flag is only set again by a last page, which a mount reaches once (after it nothing more is read until a remount).
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:191:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt is a re-read trigger: only its change matters (an effect dependency or a state bump), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/history-tab.tsx:230:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Any negative tabIndex makes the table focusable by script and absent from the Tab order; -1 and -2 behave identically.
+
+  - id: cycle-3
+    tasks: [T002, T003, T004, T005, T010, T011, T014]
+    description: >
+      TC-COMP-055 (a typed date and Enter call onAsOfChange; with asOf the universe read is called with it, the
+      polite line reads Members as of {date}. Scores shown are from the current set. plus, once, Filters and sorting
+      apply to current members only., the members render in the order returned with Member since after Name and no
+      Remove…, Show current members calls onAsOfChange(null); malformed dates, impossible calendar dates included, are
+      the field error Enter a date as YYYY-MM-DD. with aria-invalid, an alert and no request; an empty submit is
+      nothing; a 422 is the same field error keeping the previous table, never another universe's; other errors
+      replace the as-of body with the sentence and Try again; a member with null factors or name keeps its row with
+      the em dash in text-value-missing), TC-COMP-056 (the did-not-exist sentence with the America/Chicago creation
+      date, no table), TC-COMP-119 (a retired member in the table with three status-neutral Not followed badges,
+      every list read scoped to the universe, removable) and T005 (column order with Member since after Name and
+      Remove… last; the h2 {n} of {m} members match; named Remove… actions; none on a retired universe; the remove
+      flow re-reading the list and the universe, calling onMembershipChanged once, announcing Removed {symbol} from
+      {name} and focusing the row taking the removed row's place, below the first window too, or the heading;
+      universe_retired and last_member keeping the dialog; not_a_member taking the success path with its own line;
+      search, sort and Clear filters through the URL with the scope left alone; the sole member blocked; one Filters
+      region holding the as-of field). T011 found both seams delivered (FiltersPane showLookIn and children,
+      ResultsTable extraColumns with placement) and edited neither file. Production:
+      web/src/screens/research/universes/detail/members-tab.tsx (MembersTab) and T010's UNIVERSE_DETAIL.asOfFiltersNote,
+      malformedDate and noLongerMember in copy.ts.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/red-cycle-3.log
+    red_log_sha256: 5a686836418ed3a4d5712e620a688515eb00d94d9a9f01b7c8b077b125f985f3
+    red_evidence: >
+      With members-tab.test.tsx written and no members-tab.tsx, the file failed to load: Failed to resolve import
+      "./members-tab" (no tests ran).
+    green_evidence: >
+      members-tab.test.tsx 45 passed, with the remove dialog and history tab suites, copy.test.ts, render.test.tsx,
+      and results-table.test.tsx and filters-pane.test.tsx unchanged (green-cycle-3.log, 582 tests); tsc --noEmit,
+      biome lint and biome format clean. Round 1: code review APPROVED with one MEDIUM (focus after a removal could
+      not reach the row taking its place below the first window) and LOWs; spec drift none. Fixed with tests (focus
+      moves to the next row before the re-read, which the table keeps in its window), round 2: APPROVED with LOW
+      notes only, drift none. Carried LOW follow-ups: formatTimestamp throws on a malformed server timestamp (no
+      error boundary in this story); the empty-state Clear filters duplicates the pane's; the no-match body's
+      Clear filters is a second control beside the pane's (UX 1.4 States pairs them).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/green-cycle-3.log
+        sha256: 18ef056e4c4a83a71e0ec18b65a19f574c161ae58d551cd5278fc0a81d0a23ff
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c326b8f4ab023409cbc57aa6a42f3678900c4e353e4aa652cdc8571bfb018964
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S8-evidence/mutation-cycle-3-results.json
+      results_sha256: d3087b34528d8f1106a9366d4a764047d3296318b46462456b2d3e59f87dd3ee
+      generated: 84
+      killed: 74
+      survived: 10
+      stillborn: 0
+      timeout: 0
+      score: 0.881
+      survivors:
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:146:off-by-one:1
+          disposition: equivalent
+          reason: >
+            refreshKey is a re-read trigger: only its change matters (an effect dependency or a state bump), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:164:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The [asOf] effect sets fieldError false on mount, in the same mount commit, before any interaction; the tests observe the field after mount and see no error (a browser could paint one frame first, which no test or user action can observe).
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:168:off-by-one:1
+          disposition: equivalent
+          reason: >
+            asOfAttempt is a re-read trigger: only its change matters (an effect dependency or a state bump), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:274:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: >
+            Dropping `pending: false` leaves it undefined, which every reader treats as false (`removal.pending` in a condition and `disabled={pending}`); npx tsc --noEmit, part of every validation run, rejects the mutant since the field is required.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:290:off-by-one:1
+          disposition: equivalent
+          reason: >
+            refreshKey is a re-read trigger: only its change matters (an effect dependency or a state bump), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:295:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            confirmRemoval is only reachable from the dialog's confirm, rendered only while removal is non-null and natively disabled while pending, so neither operand of the guard is ever true when it runs.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:308:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: >
+            `current` was captured before pending was set, so spreading it already carries `pending: false`; the explicit field repeats it.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:330:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: >
+            An undefined header renders the same empty <th> as the empty string; npx tsc --noEmit rejects the mutant since ExtraColumn.header is a required string.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:396:off-by-one:1
+          disposition: equivalent
+          reason: >
+            asOfAttempt is a re-read trigger: only its change matters (an effect dependency or a state bump), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/members-tab.tsx:430:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Any negative tabIndex makes the heading focusable by script and absent from the Tab order; -1 and -2 behave identically.

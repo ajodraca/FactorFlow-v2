@@ -1,0 +1,627 @@
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 9952eb2..6242d6c 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -72,6 +72,14 @@ export const UNIVERSE_LIFECYCLE = {
+     "This universe is retired and can't be changed. Its members and history are still viewable.",
+   /** UX 1.4: the sole member's blocked Remove…, and the `last_member` refusal. */
+   lastMember: "This is the last member. Retire the universe instead.",
++  /**
++   * The `409 last_member` backstop alert in the remove dialog, which says the
++   * removal was refused (DEC-0107, PROVISIONAL; CAP-002-E1-S8 T010). UX 1.4
++   * fixes the behaviour but gives no sentence. A standalone string selected by
++   * code, not `failureSentence` output.
++   */
++  lastMemberRefused:
++    "This is the last member, so it can't be removed. Retire the universe instead.",
+   /** UX 1.3: the universes card header's count. */
+   counts: (active: number, retired: number): string => `${active} active, ${retired} retired`,
+   /** UX 1.3: the lifecycle filter matches none. */
+@@ -677,6 +685,8 @@ export const UNIVERSE_DETAIL = {
+   removeDescription:
+     "Its membership until today stays in the universe's history. Its scores are not affected.",
+   removeConfirm: "Remove from universe",
++  /** UX 1.4: the in-row action's visible label; its accessible name is `remove`. */
++  removeAction: "Remove…",
+   removed: (symbol: string, name: string): string => `Removed ${symbol} from ${name}`,
+   membersAsOf: "Members as of",
+   membersAsOfLine: (date: string): string =>
+diff --git a/web/src/screens/research/universes/detail/remove-dialog.test.tsx b/web/src/screens/research/universes/detail/remove-dialog.test.tsx
+new file mode 100644
+index 0000000..1755bae
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/remove-dialog.test.tsx
+@@ -0,0 +1,347 @@
++import { render, screen } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { useState } from "react";
++import { describe, expect, it, vi } from "vitest";
++import { RemoveAction, RemoveDialog } from "./remove-dialog";
++
++const LAST_MEMBER_BLOCKED = "This is the last member. Retire the universe instead.";
++const LAST_MEMBER_REFUSED =
++  "This is the last member, so it can't be removed. Retire the universe instead.";
++
++function dialogProps(overrides: Partial<Parameters<typeof RemoveDialog>[0]> = {}) {
++  return {
++    symbol: "AAPL",
++    universeName: "Tech",
++    error: null,
++    pending: false,
++    onConfirm: vi.fn(),
++    onCancel: vi.fn(),
++    onRetire: vi.fn(),
++    ...overrides,
++  };
++}
++
++describe("RemoveAction", () => {
++  // Implements TC-COMP-043 (T006 a): DAC-E1-S8-4, DAC-E1-7, AC-5, AC-6.
++  it("renders the sole member's Remove… blocked, focusable and described, with Retire… adjacent", async () => {
++    const user = userEvent.setup();
++    const onRemove = vi.fn();
++    const onRetire = vi.fn();
++    render(
++      <RemoveAction
++        symbol="AAPL"
++        universeName="Tech"
++        soleMember
++        onRemove={onRemove}
++        onRetire={onRetire}
++      />,
++    );
++
++    const remove = screen.getByRole("button", { name: "Remove AAPL from Tech" });
++    expect(remove).toHaveAttribute("data-variant", "blocked");
++    expect(remove).toBeEnabled();
++    expect(remove).not.toHaveAttribute("disabled");
++    expect(remove).toHaveAttribute("tabindex", "0");
++    const describedBy = remove.getAttribute("aria-describedby");
++    expect(describedBy).not.toBeNull();
++    expect(document.getElementById(describedBy as string)).toHaveTextContent(LAST_MEMBER_BLOCKED);
++    expect(remove).toHaveAccessibleDescription(LAST_MEMBER_BLOCKED);
++
++    await user.click(remove);
++    expect(onRemove).not.toHaveBeenCalled();
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++
++    const retire = screen.getByRole("button", { name: "Retire…" });
++    expect(retire.parentElement).toBe(remove.parentElement);
++    remove.focus();
++    await user.tab();
++    expect(retire).toHaveFocus();
++
++    await user.click(retire);
++    expect(onRetire).toHaveBeenCalledTimes(1);
++    expect(onRemove).not.toHaveBeenCalled();
++  });
++
++  it("ignores Enter and Space on the blocked Remove…", async () => {
++    const user = userEvent.setup();
++    const onRemove = vi.fn();
++    render(
++      <RemoveAction
++        symbol="AAPL"
++        universeName="Tech"
++        soleMember
++        onRemove={onRemove}
++        onRetire={vi.fn()}
++      />,
++    );
++    screen.getByRole("button", { name: "Remove AAPL from Tech" }).focus();
++    await user.keyboard("{Enter} ");
++    expect(onRemove).not.toHaveBeenCalled();
++  });
++
++  it("renders the ghost Remove… named for its row when the member is not the sole one", async () => {
++    const user = userEvent.setup();
++    const onRemove = vi.fn();
++    const onRetire = vi.fn();
++    render(
++      <RemoveAction
++        symbol="AAPL"
++        universeName="Tech"
++        soleMember={false}
++        onRemove={onRemove}
++        onRetire={onRetire}
++      />,
++    );
++
++    const remove = screen.getByRole("button", { name: "Remove AAPL from Tech" });
++    expect(remove).toHaveAttribute("data-variant", "ghost");
++    expect(remove).toHaveTextContent("Remove…");
++    expect(remove).not.toHaveAttribute("aria-describedby");
++    expect(screen.queryByRole("button", { name: "Retire…" })).not.toBeInTheDocument();
++    expect(screen.queryByText(LAST_MEMBER_BLOCKED)).not.toBeInTheDocument();
++
++    await user.click(remove);
++    expect(onRemove).toHaveBeenCalledTimes(1);
++    expect(onRetire).not.toHaveBeenCalled();
++  });
++
++  it("stops a click from reaching the row it sits in", async () => {
++    const user = userEvent.setup();
++    const onRow = vi.fn();
++    render(
++      // biome-ignore lint/a11y/useKeyWithClickEvents: a stand-in for the results table's selectable row
++      <div onClick={onRow}>
++        <RemoveAction
++          symbol="AAPL"
++          universeName="Tech"
++          soleMember={false}
++          onRemove={vi.fn()}
++          onRetire={vi.fn()}
++        />
++        <RemoveAction
++          symbol="MSFT"
++          universeName="Tech"
++          soleMember
++          onRemove={vi.fn()}
++          onRetire={vi.fn()}
++        />
++      </div>,
++    );
++    await user.click(screen.getByRole("button", { name: "Remove AAPL from Tech" }));
++    await user.click(screen.getByRole("button", { name: "Remove MSFT from Tech" }));
++    await user.click(screen.getByRole("button", { name: "Retire…" }));
++    expect(onRow).not.toHaveBeenCalled();
++  });
++});
++
++describe("RemoveDialog", () => {
++  // Implements TC-COMP-043 (T006 b): DAC-E1-S8-4, DAC-E1-7, AC-5.
++  it("keeps the dialog open on last_member with the backstop alert and Retire… in place of the confirm", async () => {
++    const user = userEvent.setup();
++    const props = dialogProps({ error: "last_member" });
++    render(<RemoveDialog {...props} />);
++
++    expect(screen.getByRole("dialog")).toBeInTheDocument();
++    expect(screen.getByRole("alert")).toHaveTextContent(LAST_MEMBER_REFUSED);
++    expect(screen.queryByRole("button", { name: "Remove from universe" })).not.toBeInTheDocument();
++    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
++
++    await user.click(screen.getByRole("button", { name: "Retire…" }));
++    expect(props.onRetire).toHaveBeenCalledTimes(1);
++    expect(props.onConfirm).not.toHaveBeenCalled();
++  });
++
++  // Implements TC-COMP-057 (T007): DAC-E1-S8-5, AC-6.
++  it("is the confirm variant, states that history stays, and opens on Cancel", () => {
++    render(<RemoveDialog {...dialogProps()} />);
++
++    const dialog = screen.getByRole("dialog", { name: "Remove AAPL from Tech" });
++    expect(dialog).toHaveAttribute("data-variant", "confirm");
++    expect(dialog).not.toHaveAttribute("data-variant", "destructive");
++    expect(dialog).toHaveAttribute("aria-modal", "true");
++    expect(dialog.querySelector('[data-variant="destructive"]')).toBeNull();
++    expect(dialog).toHaveTextContent(
++      "Its membership until today stays in the universe's history. Its scores are not affected.",
++    );
++    expect(dialog).toHaveAccessibleDescription(
++      "Its membership until today stays in the universe's history. Its scores are not affected.",
++    );
++    expect(screen.getByRole("button", { name: "Remove from universe" })).toBeEnabled();
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("calls onConfirm from Remove from universe and onCancel from Cancel and Esc", async () => {
++    const user = userEvent.setup();
++    const props = dialogProps();
++    render(<RemoveDialog {...props} />);
++
++    await user.click(screen.getByRole("button", { name: "Remove from universe" }));
++    expect(props.onConfirm).toHaveBeenCalledTimes(1);
++    expect(props.onCancel).not.toHaveBeenCalled();
++
++    await user.click(screen.getByRole("button", { name: "Cancel" }));
++    expect(props.onCancel).toHaveBeenCalledTimes(1);
++
++    screen.getByRole("button", { name: "Cancel" }).focus();
++    await user.keyboard("{Escape}");
++    expect(props.onCancel).toHaveBeenCalledTimes(2);
++    expect(props.onConfirm).toHaveBeenCalledTimes(1);
++  });
++
++  it("traps Tab between Cancel and the last control in both directions", async () => {
++    const user = userEvent.setup();
++    render(<RemoveDialog {...dialogProps()} />);
++    const cancel = screen.getByRole("button", { name: "Cancel" });
++    const confirm = screen.getByRole("button", { name: "Remove from universe" });
++
++    await user.tab();
++    expect(confirm).toHaveFocus();
++    await user.tab();
++    expect(cancel).toHaveFocus();
++    await user.tab({ shift: true });
++    expect(confirm).toHaveFocus();
++    // Inside the cycle Shift+Tab moves back as the browser would.
++    await user.tab({ shift: true });
++    expect(cancel).toHaveFocus();
++  });
++
++  it("traps Tab onto Retire… when it replaces the confirm", async () => {
++    const user = userEvent.setup();
++    render(<RemoveDialog {...dialogProps({ error: "last_member" })} />);
++    const cancel = screen.getByRole("button", { name: "Cancel" });
++    const retire = screen.getByRole("button", { name: "Retire…" });
++
++    expect(cancel).toHaveFocus();
++    await user.tab({ shift: true });
++    expect(retire).toHaveFocus();
++    await user.tab();
++    expect(cancel).toHaveFocus();
++  });
++
++  it("leaves other keys alone", async () => {
++    const user = userEvent.setup();
++    const props = dialogProps();
++    render(<RemoveDialog {...props} />);
++    await user.keyboard("a");
++    expect(props.onCancel).not.toHaveBeenCalled();
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++  });
++
++  it("returns focus to the element focused before it opened", async () => {
++    const user = userEvent.setup();
++    function Host() {
++      const [open, setOpen] = useState(false);
++      return (
++        <>
++          <button type="button" onClick={() => setOpen(true)}>
++            Opener
++          </button>
++          {open ? <RemoveDialog {...dialogProps({ onCancel: () => setOpen(false) })} /> : null}
++        </>
++      );
++    }
++    render(<Host />);
++    const opener = screen.getByRole("button", { name: "Opener" });
++    await user.click(opener);
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++    await user.click(screen.getByRole("button", { name: "Cancel" }));
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++    expect(opener).toHaveFocus();
++  });
++
++  it("natively disables the confirm, never Cancel, while pending", () => {
++    render(<RemoveDialog {...dialogProps({ pending: true })} />);
++    expect(screen.getByRole("button", { name: "Remove from universe" })).toBeDisabled();
++    expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
++    expect(screen.getByRole("dialog")).toHaveAttribute("aria-busy", "true");
++  });
++
++  it("keeps focus in the dialog through pending and a last_member refusal", async () => {
++    const user = userEvent.setup();
++    const props = dialogProps();
++    const { rerender } = render(<RemoveDialog {...props} />);
++    const confirm = screen.getByRole("button", { name: "Remove from universe" });
++    await user.click(confirm);
++    expect(confirm).toHaveFocus();
++
++    // A browser drops focus from a control it disables; jsdom does not, so the test does.
++    confirm.blur();
++    rerender(<RemoveDialog {...props} pending />);
++    const dialog = screen.getByRole("dialog");
++    expect(dialog).toContainElement(document.activeElement as HTMLElement);
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++    // The disabled confirm is no stop: Tab stays on Cancel.
++    await user.tab();
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++    await user.tab({ shift: true });
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++
++    rerender(<RemoveDialog {...props} pending={false} error="last_member" />);
++    expect(dialog).toContainElement(document.activeElement as HTMLElement);
++    await user.keyboard("{Escape}");
++    expect(props.onCancel).toHaveBeenCalledTimes(1);
++  });
++
++  it("moves focus to Cancel when the focused confirm becomes pending", async () => {
++    const user = userEvent.setup();
++    const props = dialogProps();
++    const { rerender } = render(<RemoveDialog {...props} />);
++    const confirm = screen.getByRole("button", { name: "Remove from universe" });
++    await user.click(confirm);
++    expect(confirm).toHaveFocus();
++    rerender(<RemoveDialog {...props} pending />);
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++  });
++
++  it("keeps focus on Retire… when last_member replaces the focused confirm", async () => {
++    const user = userEvent.setup();
++    const props = dialogProps();
++    const { rerender } = render(<RemoveDialog {...props} />);
++    await user.click(screen.getByRole("button", { name: "Remove from universe" }));
++    rerender(<RemoveDialog {...props} error="last_member" />);
++    expect(screen.getByRole("button", { name: "Retire…" })).toHaveFocus();
++  });
++
++  it("moves focus to Retire… when last_member arrives with focus outside the dialog", () => {
++    const props = dialogProps();
++    const { rerender } = render(<RemoveDialog {...props} />);
++    screen.getByRole("button", { name: "Cancel" }).blur();
++    rerender(<RemoveDialog {...props} error="last_member" />);
++    expect(screen.getByRole("button", { name: "Retire…" })).toHaveFocus();
++  });
++
++  it("leaves focus where it is when it is already inside the dialog", () => {
++    const props = dialogProps();
++    const { rerender } = render(<RemoveDialog {...props} />);
++    const confirm = screen.getByRole("button", { name: "Remove from universe" });
++    confirm.focus();
++    rerender(<RemoveDialog {...props} error="generic" />);
++    expect(confirm).toHaveFocus();
++  });
++
++  it("is not busy when nothing is pending", () => {
++    render(<RemoveDialog {...dialogProps()} />);
++    expect(screen.getByRole("dialog")).not.toHaveAttribute("aria-busy");
++  });
++
++  it("renders the generic failure as an alert and keeps the confirm", () => {
++    render(<RemoveDialog {...dialogProps({ error: "generic" })} />);
++    const alert = screen.getByRole("alert");
++    expect(alert).toHaveTextContent(
++      "Could not remove the stock from the universe: FactorFlow hit an unexpected problem. Try again.",
++    );
++    expect(alert).toHaveClass("text-[hsl(var(--destructive))]");
++    expect(screen.getByRole("button", { name: "Remove from universe" })).toBeEnabled();
++    expect(screen.queryByRole("button", { name: "Retire…" })).not.toBeInTheDocument();
++  });
++
++  it("renders universe_retired as the retired refusal and keeps the confirm", () => {
++    render(<RemoveDialog {...dialogProps({ error: "universe_retired" })} />);
++    expect(screen.getByRole("alert")).toHaveTextContent(
++      "This universe is retired and can't be changed. Its members and history are still viewable.",
++    );
++    expect(screen.getByRole("button", { name: "Remove from universe" })).toBeInTheDocument();
++    expect(screen.queryByRole("button", { name: "Retire…" })).not.toBeInTheDocument();
++  });
++});
+diff --git a/web/src/screens/research/universes/detail/remove-dialog.tsx b/web/src/screens/research/universes/detail/remove-dialog.tsx
+new file mode 100644
+index 0000000..c3ca963
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/remove-dialog.tsx
+@@ -0,0 +1,240 @@
++import { type JSX, type KeyboardEvent, type MouseEvent, useEffect, useId, useRef } from "react";
++import { DIALOGS, UNIVERSE_DETAIL, UNIVERSE_LIFECYCLE, failureSentence } from "../../copy";
++
++/** The refusals the dialog states by code (classification-ui 2.7; DEC-0107). */
++export type RemoveError = "last_member" | "universe_retired" | "generic";
++
++const BUTTON = "rounded px-3 py-2 text-sm";
++
++/** The alert sentence per refusal, selected by code and never by an envelope message. */
++function errorSentence(error: RemoveError): string {
++  switch (error) {
++    case "last_member":
++      return UNIVERSE_LIFECYCLE.lastMemberRefused;
++    case "universe_retired":
++      return UNIVERSE_LIFECYCLE.retiredRefusal;
++    case "generic":
++      return failureSentence({
++        operation: "remove-universe-member",
++        resource: "universe-member",
++        code: null,
++      });
++  }
++}
++
++export interface RemoveDialogProps {
++  symbol: string;
++  universeName: string;
++  error: RemoveError | null;
++  pending: boolean;
++  onConfirm: () => void;
++  onCancel: () => void;
++  onRetire: () => void;
++}
++
++/**
++ * The `dialog` `confirm` remove confirmation (UX design 1.4; classification-ui
++ * 2.7; DAC-E1-S8-4, DAC-E1-S8-5). `confirm`, never `destructive`: a removal
++ * discards nothing, the membership until today stays in the history
++ * (STD-UI-2). The structure is `screens/instruments/retire-dialog.tsx`'s: a
++ * native `<dialog open>` with its own Tab cycle between **Cancel** and the
++ * last control, Escape cancelling, initial focus on **Cancel** and focus
++ * restored to the trigger on unmount. On `last_member` the confirm is
++ * replaced by **Retire…** (DEC-0107).
++ */
++export function RemoveDialog({
++  symbol,
++  universeName,
++  error,
++  pending,
++  onConfirm,
++  onCancel,
++  onRetire,
++}: RemoveDialogProps): JSX.Element {
++  const titleId = useId();
++  const descriptionId = useId();
++  const dialogRef = useRef<HTMLDialogElement>(null);
++  const cancelRef = useRef<HTMLButtonElement>(null);
++  const lastRef = useRef<HTMLButtonElement>(null);
++
++  useEffect(() => {
++    const previouslyFocused = document.activeElement as HTMLElement | null;
++    cancelRef.current?.focus();
++    return () => {
++      previouslyFocused?.focus?.();
++    };
++  }, []);
++
++  // The confirm is disabled while pending, and a browser either drops focus
++  // from a control it disables or leaves it there with no Tab stop. Either
++  // way focus is moved to Cancel (to Retire… on `last_member`), so Escape and
++  // the Tab cycle keep working. The effect runs in the commit that sets
++  // `pending`, while focus is still on the confirm, hence the explicit check.
++  useEffect(() => {
++    const active = document.activeElement;
++    const strandedOnConfirm = pending && active !== null && active === lastRef.current;
++    if (dialogRef.current?.contains(active) && !strandedOnConfirm) {
++      return;
++    }
++    (error === "last_member" ? lastRef : cancelRef).current?.focus();
++  }, [pending, error]);
++
++  function handleKeyDown(event: KeyboardEvent<HTMLDialogElement>): void {
++    if (event.key === "Escape") {
++      event.preventDefault();
++      onCancel();
++      return;
++    }
++    if (event.key !== "Tab") {
++      return;
++    }
++    // Manual focus trap: `<dialog open>` gives none, and jsdom has no `showModal()`.
++    const first = cancelRef.current;
++    // A disabled confirm takes no focus, so Cancel is then the cycle's only stop.
++    const last = lastRef.current?.disabled ? first : lastRef.current;
++    if (first === null || last === null) {
++      return;
++    }
++    if (event.shiftKey && document.activeElement === first) {
++      event.preventDefault();
++      last.focus();
++    } else if (!event.shiftKey && document.activeElement === last) {
++      event.preventDefault();
++      first.focus();
++    }
++  }
++
++  const refusedLast = error === "last_member";
++
++  return (
++    <dialog
++      ref={dialogRef}
++      open
++      aria-modal="true"
++      aria-labelledby={titleId}
++      aria-describedby={descriptionId}
++      aria-busy={pending ? "true" : undefined}
++      onKeyDown={handleKeyDown}
++      data-variant="confirm"
++      className="fixed inset-0 m-auto flex flex-col gap-3 rounded border border-border bg-[hsl(var(--popover))] p-5 text-[hsl(var(--popover-foreground))]"
++    >
++      <h2 id={titleId} className="text-lg">
++        {UNIVERSE_DETAIL.remove(symbol, universeName)}
++      </h2>
++      <p id={descriptionId}>{UNIVERSE_DETAIL.removeDescription}</p>
++      {error !== null ? (
++        <p role="alert" className="text-[hsl(var(--destructive))] text-sm">
++          {errorSentence(error)}
++        </p>
++      ) : null}
++      <div className="flex justify-end gap-2">
++        <button
++          ref={cancelRef}
++          type="button"
++          onClick={onCancel}
++          className={`${BUTTON} border border-border`}
++        >
++          {DIALOGS.cancel}
++        </button>
++        {/* The two share one position, so React keeps one node and swaps its
++            props: focus on the confirm stays on Retire… when it replaces it. */}
++        {refusedLast ? (
++          <button
++            ref={lastRef}
++            type="button"
++            data-variant="secondary"
++            onClick={onRetire}
++            className={`${BUTTON} bg-secondary text-secondary-foreground`}
++          >
++            {UNIVERSE_LIFECYCLE.retireAction}
++          </button>
++        ) : (
++          <button
++            ref={lastRef}
++            type="button"
++            disabled={pending}
++            onClick={onConfirm}
++            className={`${BUTTON} bg-foreground text-background`}
++          >
++            {UNIVERSE_DETAIL.removeConfirm}
++          </button>
++        )}
++      </div>
++    </dialog>
++  );
++}
++
++export interface RemoveActionProps {
++  symbol: string;
++  universeName: string;
++  /** The member is the universe's only one: removal is blocked and retirement offered (AC-5). */
++  soleMember: boolean;
++  onRemove: () => void;
++  onRetire: () => void;
++}
++
++/**
++ * A member row's **Remove…** (UX design 1.4): `ghost`, named for its row; on
++ * the sole member `blocked` (focusable, described by the reason, inert) with
++ * **Retire…** adjacent (DAC-E1-S8-4). A click never reaches the results
++ * table's row, which would select it (CAP-002-E4-S6 `ExtraColumn`).
++ */
++export function RemoveAction({
++  symbol,
++  universeName,
++  soleMember,
++  onRemove,
++  onRetire,
++}: RemoveActionProps): JSX.Element {
++  const reasonId = useId();
++  const name = UNIVERSE_DETAIL.remove(symbol, universeName);
++
++  function within(handler?: () => void): (event: MouseEvent<HTMLButtonElement>) => void {
++    return (event) => {
++      event.stopPropagation();
++      handler?.();
++    };
++  }
++
++  if (!soleMember) {
++    return (
++      <button
++        type="button"
++        data-variant="ghost"
++        aria-label={name}
++        onClick={within(onRemove)}
++        className={BUTTON}
++      >
++        {UNIVERSE_DETAIL.removeAction}
++      </button>
++    );
++  }
++  return (
++    <span className="inline-flex items-center gap-2">
++      <button
++        type="button"
++        data-variant="blocked"
++        aria-label={name}
++        aria-disabled="true"
++        aria-describedby={reasonId}
++        tabIndex={0}
++        // Never `disabled`: the reason must reach a keyboard and screen-reader user.
++        onClick={within()}
++        className={`${BUTTON} text-muted-foreground`}
++      >
++        {UNIVERSE_DETAIL.removeAction}
++      </button>
++      <span id={reasonId} className="text-xs">
++        {UNIVERSE_LIFECYCLE.lastMember}
++      </span>
++      <button
++        type="button"
++        data-variant="secondary"
++        onClick={within(onRetire)}
++        className={`${BUTTON} bg-secondary text-secondary-foreground`}
++      >
++        {UNIVERSE_LIFECYCLE.retireAction}
++      </button>
++    </span>
++  );
++}
