@@ -38,13 +38,19 @@ and the results table with its window arithmetic (CAP-002-E4-S6):
 
 and the first screen, the universes list with its create dialog
 (CAP-002-E1-S7), in `universes/`; see
-[Universes screen](#universes-screen-universes).
+[Universes screen](#universes-screen-universes);
+
+and a universe's Members and History tabs with the remove dialog
+(CAP-002-E1-S8), in `universes/detail/`; see
+[Universe detail tabs](#universe-detail-tabs-universesdetail).
 
 No route mounts any of them yet: `/research/universes` and
 `/research/universes/:universeId` are registered by CAP-002-E4-S10. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
-dialogs and the tests. The results table's only importer is its test
-(CAP-002-E4-S9 and CAP-002-E1-S8 are its planned hosts). The factor cell, the *Possibly
+dialogs and the tests. The results table's importers are its test and the
+Members tab (CAP-002-E4-S9 is its other planned host), which also imports
+`filters-pane.tsx` and `use-research-query.ts`. Nothing imports the detail
+tabs but their tests yet (CAP-002-E1-S9 mounts them). The factor cell, the *Possibly
 restated* mark, the not-current banner, the as-of line, the selection tray
 and the inspector in `web/src/components/patterns/` import `copy.ts`, and
 all but the tray and the mark import `format.ts`
@@ -98,7 +104,7 @@ section 14.
 | Export | Holds |
 |--------|-------|
 | `SHELL_ROUTES` | the delivered CAP-001 routes CAP-002 links to: `download(runId)` gives `/runs/{runId}`, `dataHealth` is `/runs` and `followedStocks` is `/instruments`. When the shell delivers the blueprint's routes, this one map changes |
-| `UNIVERSE_LIFECYCLE` | every universe-lifecycle string containing *retire*, *retired* or *retiring* |
+| `UNIVERSE_LIFECYCLE` | every universe-lifecycle string containing *retire*, *retired* or *retiring*. `lastMemberRefused`, the remove dialog's `last_member` alert, is in no design and carries a doc comment saying so (CAP-002-E1-S8; DEC-0107, provisional) |
 | `ErrorCode` | the error codes of classification-api section 2.5 |
 | `ErrorContext` | what a failure sentence is built from: `action`, `resource`, `symbols`, `universeName` |
 | `OPERATION_LABELS` | one *Could not ...* sentence per `ClassificationOperation` (DEC-0149) |
@@ -114,7 +120,7 @@ section 14.
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history. `RESULTS.columns`, the table's *Symbol* and *Name* headers, is CAP-002-E4-S6's (DEC-0239) |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. `SELECTION` entries no design contains carry a doc comment saying so (CAP-002-E4-S7; DEC-0165): `inspectorLoading`, *Loading the selected stock.*, the inspector skeleton's screen-reader text; `inputsLineAsOf(inputs, asOf)`, the inputs clause with no `known_on`; `inputsLineSeparator`, `; `, between clauses of differing dates. `inUniversesLead`, `listComma` and `listAnd` split `inUniverses` so the inspector can link each name. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
-| `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional) |
+| `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional). CAP-002-E1-S8 added six `UNIVERSE_DETAIL` entries: `removeAction` (*Remove…*) and `renamedDetail(before, after)` (*{before} → {after}*) are UX 1.4's; `asOfFiltersNote` (*Filters and sorting apply to current members only.*; DEC-0105), `malformedDate` (*Enter a date as YYYY-MM-DD.*) and `noLongerMember(symbol, name)` (DEC-0107), and `loadMore` (*Load more*; DEC-0107) are in no design and carry a doc comment saying so |
 | `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels |
 
 ### The retire allow-list
@@ -855,3 +861,184 @@ Open warnings from the story's implementation review v2: the `opacity-50`
 dimming of kept rows falls below STD-UI-24's 4.5:1 contrast (IR-001), and
 the list announces no row count after its rows update, which `data-table`
 section 5 asks for (IR-002).
+
+## Universe detail tabs (`universes/detail/`)
+
+A universe's Members and History tabs and the remove dialog (UX design 1.4;
+classification-ui 2.5, 2.7; AC-4, AC-5, AC-6, AC-15, DAC-E1-7 to DAC-E1-9,
+DAC-E1-S8-1 to DAC-E1-S8-6; CAP-002-E1-S8; DEC-0105, DEC-0107). Three
+modules, all named exports:
+
+- `members-tab.tsx`, `MembersTab`;
+- `history-tab.tsx`, `HistoryTab`;
+- `remove-dialog.tsx`, `RemoveDialog`, `RemoveAction` and the type
+  `RemoveError`.
+
+They build no route, tab container, detail header, add-stocks or retire
+dialog: CAP-002-E1-S9 mounts the tabs and owns those, and the props below
+are the contract it imports.
+
+### Members tab (`members-tab.tsx`)
+
+| Prop | Meaning |
+|------|---------|
+| `universeId`, `universeName`, `lifecycle`, `memberCount` | the universe the host has read |
+| `asOf`, `onAsOfChange` | the *Members as of* date, controlled by the host and kept in its URL; `null` is the current members |
+| `onMembershipChanged` | called once after each removal, so the host re-reads its header and count |
+| `onRetire` | opens the host's retire dialog |
+
+The tab is a `FiltersPane` with `showLookIn={false}`, whose `children` slot
+holds the *Members as of* form, beside a `section` labelled
+`REGIONS.results`. It runs inside a router: the filter, search and sort live
+in the URL through `useResearchQuery`, as on Research.
+
+**Current members** (`asOf` `null`). The section holds an `h2`
+(`RESULTS.membersMatch(matchCount, memberCount)`, *{n} of {m} members
+match*) once the first page has arrived, a polite `output` for the removal
+notice, and the shared `ResultsTable`:
+
+- `query` is the URL's query with `scope` forced to `universeId`, so every
+  list read is scoped to the universe whatever scope the URL carries; a sort
+  written back keeps the URL's own `scope` (DAC-E1-S8-3).
+- `extraColumns`: *Member since* after Name, the America/Chicago timestamp
+  (`formatTimestamp`) of the member's `memberSince`, joined by symbol from one
+  `getUniverse(universeId)` read issued on mount and after each removal; a
+  symbol the read lacks, or a failed read, shows the em dash
+  (`CELL.absentValue`) in `--value-missing`. On an `active` universe, a last
+  column with each row's `RemoveAction`; a retired universe has none.
+- `matchLabel` is `RESULTS.membersMatch`. The bodies are
+  `RESULTS.neverScored`, and `RESULTS.noMembersMatch` with its own **Clear
+  filters**, which writes the default query keeping `sort` and the URL's
+  `scope`.
+- A member no longer followed is a row like any other: each factor cell
+  renders *Not followed* through `FactorCell` (AC-15, DAC-E1-9).
+
+**The *Members as of* field.** A text input labelled `UNIVERSE_DETAIL.membersAsOf`
+with placeholder `YYYY-MM-DD`, submitted with Enter. The trimmed value must
+match `YYYY-MM-DD` and be a calendar date (`2026-02-30` and `2025-02-29` are
+refused, `2024-02-29` accepted), checked before any request. A refused value
+sets `aria-invalid` and a `role="alert"` `UNIVERSE_DETAIL.malformedDate`
+(*Enter a date as YYYY-MM-DD.*) the input is described by, and calls
+nothing; an empty submit clears the error and calls nothing. A valid value
+calls `onAsOfChange(date)`. The draft and the error reset whenever `asOf`
+changes.
+
+**A past date** (`asOf` set). The tab reads `getUniverse(universeId, { asOf
+})`, the only read that accepts the date, and issues no list read
+(DEC-0105). While it is in flight the section shows a busy `output`
+(`UNIVERSES.loading`). Then:
+
+| Result | Shown as |
+|--------|----------|
+| `asOfBeforeCreation` | only a polite `output`: `UNIVERSE_DETAIL.didNotExist(name, date, created)`, where `created` is the America/Chicago date of `createdAt` (DAC-E1-S8-2) |
+| members | a polite `output`, `membersAsOfLine(date)` then `asOfFiltersNote`, over one native table: *Symbol*, *Name*, *Member since*, *Value*, *Growth*, *Momentum*, rows in the order returned, unfiltered and unsorted, with no **Remove…** (DAC-E1-S8-1) |
+| `validation_error` (`422`) | the field error above; the last as-of result shown stays under it, or nothing when there is none |
+| any other failure | `failureSentence` of the `ClassificationApiError`, or of `get-universe` with no code, and **Try again**, which reads again |
+
+In the as-of table a member whose `name` is `null` shows the em dash in place
+of the name, and one whose `factors` is `null` shows it in each factor
+column instead of a factor cell. **Show current members** (`ghost`) calls
+`onAsOfChange(null)`.
+
+**Removal.** A row's **Remove…** opens `RemoveDialog` for its symbol. The
+confirm calls `removeUniverseMember(universeId, symbol)`. On success, or on
+`404 not_a_member`, which takes the same path (DEC-0107), the dialog closes,
+the notice reads `UNIVERSE_DETAIL.removed(symbol, name)` (*Removed {symbol}
+from {name}*) or `noLongerMember(symbol, name)`, the list and *Member since*
+reads are issued again, and `onMembershipChanged` is called once. Focus moves
+to the loaded row after the removed one, or to the `h2` when it was the last.
+`last_member` and `universe_retired` keep the dialog open with their alert;
+any other failure keeps it open with the generic alert. Cancel does nothing
+while the removal is pending. The dialog's **Retire…** closes it and calls
+`onRetire`.
+
+### Remove dialog and action (`remove-dialog.tsx`)
+
+`RemoveAction({ symbol, universeName, soleMember, onRemove, onRetire })` is a
+row's **Remove…** (`UNIVERSE_DETAIL.removeAction`), named
+`UNIVERSE_DETAIL.remove(symbol, universeName)`. Its clicks stop propagating,
+so the results table's row is not selected.
+
+- Without `soleMember` it is a `ghost` button calling `onRemove`.
+- With `soleMember` (the Members tab passes `memberCount === 1`) it is
+  `blocked`: `data-variant="blocked"`, `aria-disabled`, still in the Tab order
+  and never `disabled`, described by `UNIVERSE_LIFECYCLE.lastMember` beside
+  it, and inert to click, Enter and Space. A `secondary` **Retire…**
+  (`UNIVERSE_LIFECYCLE.retireAction`) follows it and calls `onRetire` (AC-5,
+  DAC-E1-S8-4).
+
+`RemoveDialog({ symbol, universeName, error, pending, onConfirm, onCancel,
+onRetire })` is the `dialog` `confirm`, never `destructive`, since the
+membership until today stays in the history (DAC-E1-S8-5; STD-UI-2). It
+follows `screens/instruments/retire-dialog.tsx`:
+
+- a native `<dialog open>`, `aria-modal`, `data-variant="confirm"`, titled
+  `UNIVERSE_DETAIL.remove(symbol, universeName)` and described by
+  `removeDescription`; `aria-busy` while `pending`;
+- initial focus on **Cancel**; on unmount, focus returns to whatever held it
+  before the dialog opened;
+- Escape calls `onCancel`; Tab and Shift+Tab cycle between **Cancel** and
+  the last button, or stay on **Cancel** while the confirm is disabled;
+- the confirm, **Remove from universe**, is `disabled` while `pending`, and
+  focus stranded on it moves to **Cancel**.
+
+`error` is a `RemoveError` the host selected by code, shown as a
+`role="alert"` sentence, never the envelope's message:
+
+| `error` | Sentence | Last button |
+|---------|----------|-------------|
+| `last_member` | `UNIVERSE_LIFECYCLE.lastMemberRefused` (DEC-0107) | **Retire…** in place of the confirm, calling `onRetire`, and focus moved to it (DAC-E1-7) |
+| `universe_retired` | `UNIVERSE_LIFECYCLE.retiredRefusal` | the confirm |
+| `generic` | `failureSentence` of `remove-universe-member` with no code | the confirm |
+
+### History tab (`history-tab.tsx`)
+
+`HistoryTab({ universeId, onViewMembersAsOf })` is the `data-table`
+`history` (`data-variant="history"`) of the universe's events (AC-6,
+DAC-E1-S8-6). It reads `listUniverseEvents(universeId, { limit: 50 })` on
+mount and whenever `universeId` changes, and renders the events in the
+order the API returns them, newest first, never filtering, sorting or
+deleting one. A response from an earlier read, or one settling after
+unmount, is ignored.
+
+| Column | Content |
+|--------|---------|
+| *Recorded at* | `formatTimestamp(recordedAt)`, America/Chicago with the zone |
+| *Event* | `UNIVERSE_DETAIL.events[eventType]`, or `UNIVERSE_LIFECYCLE.retiredLabel` for `retired` |
+| *Detail* | `created`: the name. `renamed`: `renamedDetail(old, new)`, where the old name is that of the nearest older `created` or `renamed` event, or the new name alone while none is loaded. `member_added`, `member_removed`: the symbol, linking to `/research/stocks/{symbol}`. `retired`: nothing |
+
+`created`, `member_added` and `member_removed` rows also carry *View members
+as of this event*, which calls `onViewMembersAsOf(recordedOn)`, the event's
+America/Chicago date (DEC-0065).
+
+Paging (DEC-0107): while a cursor remains, **Load more** reads the next 50
+and appends them. It stays mounted, `aria-disabled` while its page is read,
+and when the last page arrives with focus on it, focus moves to the table.
+While the oldest loaded `created` or `renamed` event is a rename, so its old
+name is not loaded, the next page is read without a click until it is found
+or the history ends.
+
+| State | Renders |
+|-------|---------|
+| loading | a busy `output` with `UNIVERSES.loading` for screen readers and three `aria-hidden` skeleton bars |
+| any failed read, first or later page | the body replaced by `failureSentence` of the `ClassificationApiError` (or of `list-universe-events` with no code) and **Try again**, which reads again from the first page |
+| `universe_not_found` | the sentence and a link to `/research/universes` (`UNIVERSES.title`) in place of **Try again** |
+
+The tab keeps a local state union rather than `ScreenState`, whose error
+variant carries no `code` to select the sentence by.
+
+Tests: `members-tab.test.tsx` (TC-COMP-055, TC-COMP-056, TC-COMP-119),
+`remove-dialog.test.tsx` (TC-COMP-043, TC-COMP-057) and
+`history-tab.test.tsx` (TC-COMP-029), mocking only `classification-client`,
+so the real `ResultsTable`, `FiltersPane` and `FactorCell` run.
+
+Open warnings from the story's implementation review v1:
+
+- The as-of line's polite `output` is mounted together with its text, so a
+  screen reader is not told the table changed date (IR-001).
+- No test pins that only a `422` is the field error (IR-002), or that a
+  History page settling after `universeId` changes is ignored (IR-003); the
+  code does both.
+- After **Show current members**, a later `422` shows the as-of table of an
+  earlier visit under the field error (IR-004).
+- Three Members-tab tests end before their reads settle (IR-005).
