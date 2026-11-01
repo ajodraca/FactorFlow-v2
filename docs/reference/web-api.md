@@ -9,14 +9,17 @@ two layers and one codec:
   `classification-client.ts`, for `/api/universes` and `/api/classifications`
   (CAP-002-E4-S1; `component-design-classification-ui.md` sections 2.1 and
   2.4). Its importers are in `web/src/screens/research/`: the score-set
-  poll, the Filters pane and the Universes screen
-  ([`research-screen.md`](research-screen.md)), none of which a route mounts
-  yet;
+  poll, the Filters pane, the save and add dialogs, the results table and the
+  Universes screen ([`research-screen.md`](research-screen.md)), none of which
+  a route mounts yet;
 - the Research URL codec, `research-query.ts`, between the Research URL query
   and the list read's parameters (CAP-002-E4-S2;
-  `component-design-classification-ui.md` section 2.4). Only
-  `web/src/screens/research/copy.ts` imports it, for the `ResearchQuery` type;
-  no screen reads the URL through it yet.
+  `component-design-classification-ui.md` section 2.4). Its importers are in
+  `web/src/screens/research/`: `copy.ts`, for the `ResearchQuery` type;
+  `use-research-query.ts`, which binds the URL through it; the Filters pane
+  and threshold sentence; the save dialog, for `toThresholds`; and the results
+  table, which reads each page with `toListParams`. No route mounts any of
+  them yet.
 
 Same-origin only: the bundle is served by the API process, so every path is
 relative.

@@ -29,6 +29,13 @@ and the save and add dialogs with their notices (CAP-002-E4-S8):
 - `add-to-universe-dialog.tsx`, the tray's **Add to universe…** dialog
   ([Add to a universe](#add-to-a-universe-add-to-universe-dialogtsx));
 
+and the results table with its window arithmetic (CAP-002-E4-S6):
+
+- `results-window.ts`, the pure window, reveal and paging arithmetic
+  ([Results window](#results-window-results-windowts));
+- `results-table.tsx`, the virtualised results table
+  ([Results table](#results-table-results-tabletsx));
+
 and the first screen, the universes list with its create dialog
 (CAP-002-E1-S7), in `universes/`; see
 [Universes screen](#universes-screen-universes).
@@ -36,7 +43,8 @@ and the first screen, the universes list with its create dialog
 No route mounts any of them yet: `/research/universes` and
 `/research/universes/:universeId` are registered by CAP-002-E4-S10. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
-dialogs and the tests. The factor cell, the *Possibly
+dialogs and the tests. The results table's only importer is its test
+(CAP-002-E4-S9 and CAP-002-E1-S8 are its planned hosts). The factor cell, the *Possibly
 restated* mark, the not-current banner and the as-of line in
 `web/src/components/patterns/` import `format.ts` and `copy.ts`
 (CAP-002-E4-S3, CAP-002-E4-S4); see
@@ -101,7 +109,8 @@ section 14.
 | `FILTERS`, `describeQuery(query)`, `savedFromFilter(date, query)` | the Filters pane, and a `ResearchQuery` in words. Three `FILTERS` entries no design contains carry a doc comment saying so: `valueThresholdFor(factor)`, the growth and momentum rows' value-blank name (DEC-0157); `unavailableUniverse`, the *Look in* option for a scope the loaded list lacks (DEC-0158); `loadingUniverses`, the same option while the list loads (DEC-0237, provisional) |
 | `thresholdFieldError(factor, measure)` | the threshold field's error on blur, *Could not set the {factor} threshold: {rule}.*, where `rule` is *a percentile is a number from 0 to 100* or *a standardised score is a finite number* (DEC-0157, provisional). A standalone string: not `failureSentence` output and no `OPERATION_LABELS` entry |
 | `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
-| `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
+| `SORT` | the results table's sort-button names, `bySymbol` (*Sort by symbol*), `byPercentile(factor)` and `byStandardisedScore(factor)` (*Sort by {factor} percentile*, *Sort by {factor} standardised score*), and `incompleteLast`, the ranked factor headers' description (*Stocks with an incomplete score are listed last, whether sorted up or down.*) (CAP-002-E4-S6; DEC-0161) |
+| `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history. `RESULTS.columns`, the table's *Symbol* and *Name* headers, is CAP-002-E4-S6's (DEC-0239) |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
 | `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional) |
@@ -309,6 +318,166 @@ Its parts, in order, each a `py-3` block separated by a divider:
 
 Tests: `filters-pane.test.tsx` (TC-COMP-135, TC-COMP-136), driven through a
 probe host that issues one `toListParams` request per `query` change.
+
+## Results window (`results-window.ts`)
+
+The window arithmetic of the results table (DAC-E4-S6-5, AC-11; DEC-0160):
+pure functions over numbers, with no React and no import, so the table and
+its tests share one definition. The table is windowed over keyset pages, so
+the scroll height tracks the rows loaded so far, never the server's match
+count: a keyset cursor cannot jump.
+
+| Constant | Value | Meaning |
+|----------|-------|---------|
+| `ROW_HEIGHT_PX` | `32` | one row's height, `--row-height-comfortable` (2rem) |
+| `VIEWPORT_ROWS` | `15` | rows the fixed-height scroll container shows at once |
+| `OVERSCAN_ROWS` | `10` | rows rendered above and below the viewport |
+| `PREFETCH_ROWS` | `20` | the next page is read when the window's end is this close to the loaded end |
+| `PAGE_SIZE` | `50` | rows per keyset page, the API's `DEFAULT_PAGE_SIZE` |
+
+| Function | Returns |
+|----------|---------|
+| `visibleWindow({ scrollTop, loadedCount })` | a `VisibleWindow`, `{ start, end, padTop, padBottom }`: from `OVERSCAN_ROWS` above the first visible row to `OVERSCAN_ROWS` below the viewport, clamped to the loaded rows, with spacer heights that keep the scroll height at `loadedCount * ROW_HEIGHT_PX`. A negative or `NaN` `scrollTop` is the top. At most 35 rows are rendered |
+| `scrollTopToReveal(index, scrollTop)` | `scrollTop` unchanged when row `index` is inside the viewport, its top edge when it is above, its bottom edge when it is below |
+| `needsNextPage({ end, loadedCount, nextCursor, loading })` | true when a cursor exists, no read is in flight and `end + PREFETCH_ROWS >= loadedCount` |
+
+Tests: `results-window.test.ts`.
+
+## Results table (`results-table.tsx`)
+
+`ResultsTable(props)` is the results table of the Research screen
+(CAP-002-E4-S9) and a universe's Members tab (CAP-002-E1-S8)
+(classification-ui 2.5; UX design 1.1; AC-9, AC-11, AC-12, AC-14, AC-16;
+DAC-E4-S6-1 to DAC-E4-S6-5; DEC-0159 to DEC-0162, DEC-0164). It is a native
+`table` windowed over keyset pages: the DOM holds a bounded number of rows
+however many stocks match, and sorting, filtering and counting are the
+server's.
+
+| Prop | Meaning |
+|------|---------|
+| `query`, `onQueryChange` | the effective `ResearchQuery`, controlled by the host and held in the URL (DAC-E4-3). It is compared by identity: a new object reads page one again, so a host keeps one object per URL state, or each `onResult` would start another read |
+| `refreshKey` | bumped by the host to reload page one once with the same query (DEC-0062) |
+| `selected`, `onSelect` | the selected symbol, controlled by the host so it survives sort, filter, scope and refresh; `onSelect` is immediate |
+| `onInspect` | a debounced selection notification (below) |
+| `checked`, `onCheckedChange` | the checked symbols in checking order, controlled by the host; `onCheckedChange` receives the whole list |
+| `onResult` | called once per first page with the response (`FirstPage`, the `ClassificationList`), never for a later page: the host's h1, as-of line and banner read it |
+| `empty` | `(kind: EmptyKind) => ReactNode`, the host's `never-populated` and `no-match` bodies (DAC-E4-S9-1) |
+| `matchLabel` | the sentence announced for a match count; default `RESULTS.stocksMatch`, *{n} stocks match* |
+| `extraColumns` | the host's `ExtraColumn`s, `{ id, header, align?, placement?, cell }`: `placement: "afterName"` between Name and Value (the Members tab's *Member since*), `"end"` (the default) after Momentum (its **Remove…**). Same-placement entries render in array order. A control in such a cell stops the click's propagation when activating it must not select the row |
+
+`onResult`, `matchLabel` and `onInspect` are read through refs, so a changed
+callback identity starts no read. `INSPECT_DEBOUNCE_MS` (`150`) is exported.
+
+### Layout and columns
+
+The table sits in a scroll container `(VIEWPORT_ROWS + 2) * ROW_HEIGHT_PX`
+tall (two row heights for the header), `overflow-y: auto`, with the `thead`
+`sticky`. The columns are a checkbox column with an empty header, *Symbol*,
+*Name* (`RESULTS.columns`), the `afterName` extras, *Value*, *Growth* and
+*Momentum*, then the `end` extras. Each row's symbol is its `th scope="row"`;
+its name is truncated with the full name as `title`. Each factor cell is the
+shared `FactorCell` without `showScore`
+([`component-patterns.md`](component-patterns.md)); the row itself carries no
+state colour (AC-12).
+
+A factor header shows the factor's swatch, filled inline with
+`--factor-{factor}`, and its label. Then:
+
+- **Ranked** (or before the first page, when no summary is known): two sort
+  buttons, `SORT.byPercentile(factor)` and `SORT.byStandardisedScore(factor)`,
+  and the header is described by an `sr-only` `SORT.incompleteLast`. The
+  response's order is rendered as is, so incomplete scores sit last as the
+  server sorted them (DAC-E4-S6-3).
+- **Not ranked** (`summary.ranked` false): no sort button and no `aria-sort`,
+  and the header states `CELL.qualified(qualifiedCount, minPeerSetSize)` once.
+  Every cell of the column then renders *Not enough to rank*, whatever the
+  cell says, except a cell whose `reasonCode` is `retired`, which keeps
+  *Not followed* (AC-14; DAC-E4-S6-1).
+
+### Sorting
+
+A sort button is a 24 px target (`h-5 w-5`) whose accessible name is the
+whole button; its glyph, `▲`, `▼` or `↕`, is `aria-hidden`. Activating one
+calls `onQueryChange` with the next sort (DEC-0161), and the read follows
+from the new `query` (DAC-E4-S6-2):
+
+| Column | Cycle |
+|--------|-------|
+| a factor's percentile or standardised score | ascending, descending, unsorted (`null`); from any other sort, ascending |
+| Symbol | unsorted is the API's symbol-ascending default, so from `null` or ascending it gives descending, and from anything else `null` |
+
+`aria-sort` is set only on the active column and only while the body shows
+rows; with `sort` `null` the Symbol column reads `ascending`.
+
+### Reads
+
+Page one is read with `toListParams(query)` and `limit: PAGE_SIZE` on mount,
+on each new `query`, on each `refreshKey` bump and on each retry. The rows
+shown stay in place, the `tbody` at `opacity-60` and the table `aria-busy`,
+until the response replaces them; a response superseded by a newer read, or
+arriving after unmount, is ignored. On arrival:
+
+- if a row holding focus (or a control in it) is in the new page, the window
+  scrolls only as far as needed to keep it, so its element and its focus
+  persist; otherwise the window returns to the top and focus falls to the
+  document body (DEC-0244);
+- the polite `output` announces `matchLabel(matchCount)`, re-inserted as a new
+  node each time so an unchanged count is read again (DAC-E4-S6-2);
+- `onResult` is called with the page.
+
+Later pages are read with the cursor when `needsNextPage` holds for the
+current window, only for rows read for the current `query`, `refreshKey` and
+attempt, and never while a page has failed. Their rows are appended with any
+symbol already loaded dropped.
+
+| Failure | Shown as |
+|---------|----------|
+| page one | the body's only row: `failureSentence` of the `ClassificationApiError` (or of `list-classifications` with no code for any other cause) and **Try again**, which reads page one again |
+| a later page, `cursor_stale` | page one is read again, once per `query` and `refreshKey`; a second stale cursor in the same epoch is shown as any other page failure |
+| any other later page | the sentence and **Try again** below the table; Try again re-reads the same cursor |
+
+### Bodies
+
+| State | Renders |
+|-------|---------|
+| before the first page | twelve `aria-hidden` skeleton rows |
+| `neverClassified` | `empty("never-populated")` in place of the whole table |
+| no rows | the header row over one cell holding `empty("no-match")`; no `aria-sort` and no `aria-rowcount` |
+| rows | the window's rows between two `aria-hidden` spacer rows of `padTop` and `padBottom`; the table's `aria-rowcount` is `matchCount + 1` and each row's `aria-rowindex` its position in the loaded result plus 2 |
+
+### Selection, checking and the keyboard
+
+DAC-E4-S6-4; DEC-0162, DEC-0164.
+
+- A click anywhere on a row, or Enter on the row, selects it. Space on the
+  row does nothing, not even the page scroll.
+- The row's checkbox, named `CELL.selectRow(symbol)` (*Select {symbol}*),
+  checks and unchecks without selecting: its click does not reach the row. A
+  checked symbol joins the end of `checked`; an unchecked one leaves it, the
+  order of the rest kept.
+- ArrowDown and ArrowUp, from the row or its checkbox, select the next or
+  previous loaded row and move focus to it. A target inside the viewport is
+  focused at once; one outside it is scrolled to (`scrollTopToReveal`) and
+  focused once rendered. An arrow past either end does nothing.
+- The table has one tab stop: the selected row when it is rendered, else the
+  first rendered row.
+- Selecting the already-selected symbol calls nothing. Otherwise `onSelect`
+  is called at once and `onInspect` once, `INSPECT_DEBOUNCE_MS` after the last
+  selection change; the timer is cleared on each new selection and on
+  unmount. `onInspect` is not the inspector's trigger: `InspectorPanel`
+  debounces its own `symbol` prop (DEC-0164), so a host passes it the
+  immediate `selected` and does not wire `onInspect` into it, which would
+  make the wait 300 ms.
+
+A row is `aria-selected` when selected. Every row draws a 4 px left edge,
+transparent unless selected, so selection shifts nothing; the selected row's
+edge is `status-active` over a `status-active-muted` fill. A checked row is
+filled with `--muted` as an inline style (DEC-0240). DEC-0240 and DEC-0239
+(`RESULTS.columns`) are open provisional decisions awaiting the owner.
+
+Tests: `results-table.test.tsx` (TC-COMP-093, TC-COMP-098, TC-COMP-110,
+TC-COMP-138, TC-COMP-139, and the T006 and T008 cases), mocking
+`listClassifications`.
 
 ## Success notices (`notices.tsx`)
 
