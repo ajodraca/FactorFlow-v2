@@ -1,0 +1,162 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-tasks.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-tasks.md
+index 323d68c..5b0abdd 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-tasks.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-tasks.md
+@@ -7,7 +7,8 @@ status: draft
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-17
+-updated: 2026-10-18
++updated: 2026-11-01
++last_reworked_review: CAP-002-E3-S3-implementation-review-v1.md
+ ai_provenance:
+   agent_id: implementation-planning-agent
+   agent_version: "1.0"
+diff --git a/tests/integration/reader_seed.py b/tests/integration/reader_seed.py
+index b192b89..54fb264 100644
+--- a/tests/integration/reader_seed.py
++++ b/tests/integration/reader_seed.py
+@@ -273,19 +273,22 @@ def seed_scored_stock(
+     lifecycle: str = "active",
+     restated: Iterable[str] = (),
+     name: str | None = None,
++    reverse: bool = False,
+ ) -> int:
+     """An instrument and its three ``factor_classification`` rows in one call.
+ 
+     Each factor takes ``(score, percentile)`` for a classified cell or ``(reason_code,
+     reason_input_or_None)`` for a ``not_classified`` one; an input reason gets a
+     ``reason_detail`` naming its input. ``restated`` names the factors whose row carries
+-    ``restated_possible``; ``name`` stores an ``instrument_reference`` company name.
++    ``restated_possible``; ``name`` stores an ``instrument_reference`` company name; ``reverse``
++    inserts the rows against ``FACTORS`` order so a read's ordering is not the storage order.
+     """
+     instrument_id = insert_instrument(conn, symbol, lifecycle)
+     if name is not None:
+         insert_reference(conn, instrument_id, name)
+     marked = set(restated)
+-    for factor, given in zip(FACTORS, (value, growth, momentum), strict=True):
++    cells = list(zip(FACTORS, (value, growth, momentum), strict=True))
++    for factor, given in reversed(cells) if reverse else cells:
+         if isinstance(given[0], str):
+             reason_code, reason_input = given[0], given[1]
+             assert reason_input is None or isinstance(reason_input, str)
+@@ -328,27 +331,29 @@ def seed_inputs(
+     statuses: dict[str, str] | None = None,
+     values: dict[str, Any] | None = None,
+     restated: Iterable[str] = (),
++    reverse: bool = False,
+ ) -> None:
+     """The stock's eight ``factor_input`` rows through ``insert_input``.
+ 
+     Every input is ``present`` unless ``statuses`` names it; ``values`` overrides a present
+-    input's value and ``restated`` names the inputs whose row carries ``restated_possible``.
++    input's value and ``restated`` names the inputs whose row carries ``restated_possible``;
++    ``reverse`` inserts them against definition order so a read's ordering is not storage order.
+     """
+     given = statuses or {}
+     valued = values or {}
+     marked = set(restated)
+-    for factor in FACTORS:
+-        for input_name in INPUT_NAMES[factor]:
+-            insert_input(
+-                conn,
+-                set_id,
+-                instrument_id,
+-                factor,
+-                input_name,
+-                given.get(input_name, "present"),
+-                value=valued.get(input_name),
+-                restated_possible=input_name in marked,
+-            )
++    pairs = [(factor, name) for factor in FACTORS for name in INPUT_NAMES[factor]]
++    for factor, input_name in reversed(pairs) if reverse else pairs:
++        insert_input(
++            conn,
++            set_id,
++            instrument_id,
++            factor,
++            input_name,
++            given.get(input_name, "present"),
++            value=valued.get(input_name),
++            restated_possible=input_name in marked,
++        )
+ 
+ 
+ def rename_universe(conn: psycopg.Connection, universe_id: UUID, name: str) -> None:
+diff --git a/tests/integration/test_reader_compare.py b/tests/integration/test_reader_compare.py
+index e37f3ca..7ce6e1e 100644
+--- a/tests/integration/test_reader_compare.py
++++ b/tests/integration/test_reader_compare.py
+@@ -258,6 +258,9 @@ def test_compare_with_no_complete_set_is_the_never_classified_page(
+     conn = migrated_run_schema_connection
+     insert_instrument(conn, "AAA")
+     insert_instrument(conn, "BBB")
++    run_id = insert_run(conn, "succeeded", started_at=T0 - timedelta(hours=1))
++    insert_set(conn, run_id, "building", started_at=T0)
++    assert reader.read_set_blocks(conn)[1] is not None
+ 
+     counting = CountingConnection(conn)
+     page = reader.compare(counting, ["AAA", "BBB"])  # type: ignore[arg-type]
+diff --git a/tests/integration/test_reader_evidence.py b/tests/integration/test_reader_evidence.py
+index fadf684..5c0663a 100644
+--- a/tests/integration/test_reader_evidence.py
++++ b/tests/integration/test_reader_evidence.py
+@@ -100,7 +100,22 @@ def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
+     """DAC-E3-S3-3: eight input rows in definition order, memberships in name order."""
+     conn = migrated_run_schema_connection
+     set_id = _complete_set(conn)
+-    aapl = seed_scored_stock(conn, set_id, "AAPL", name="Apple Inc.", restated=("value",))
++    # Other stocks' rows sit in the same current set, inserted after AAPL's, with
++    # different cells and values: the read must carry only AAPL's, in definition order, though
++    # AAPL's own rows are stored against that order.
++    other_cell = (D("0.9"), D("90"))
++    own_cell = (D("0.3"), D("30"))
++    aapl = seed_scored_stock(
++        conn,
++        set_id,
++        "AAPL",
++        value=own_cell,
++        growth=own_cell,
++        momentum=own_cell,
++        name="Apple Inc.",
++        restated=("value",),
++        reverse=True,
++    )
+     seed_inputs(
+         conn,
+         set_id,
+@@ -108,7 +123,16 @@ def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
+         statuses={"return_12m": "missing"},
+         values={"book_to_price": D("0.1234567890"), "return_3m": D("-0.25")},
+         restated={"fcf_yield", "eps_growth"},
++        reverse=True,
++    )
++    other_first = seed_scored_stock(
++        conn, set_id, "AAAA", value=other_cell, growth=other_cell, momentum=other_cell
++    )
++    seed_inputs(conn, set_id, other_first, values={"book_to_price": D("9.9")})
++    other_last = seed_scored_stock(
++        conn, set_id, "ZZZZ", value=other_cell, growth=other_cell, momentum=other_cell
+     )
++    seed_inputs(conn, set_id, other_last, values={"return_3m": D("7.7")})
+     zeta = insert_universe(conn, "Zeta", [aapl])
+     alpha = insert_universe(conn, "Alpha", [aapl])
+ 
+@@ -146,6 +170,7 @@ def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
+         "restated_possible FROM factor_classification WHERE set_id = %s AND instrument_id = %s",
+         (set_id, aapl),
+     ).fetchall()
++    assert len(stored) == len(FACTORS)
+     assert list(evidence.factors) == list(FACTORS)
+     for factor, status, score, percentile, code, rinput, detail, restated in stored:
+         assert evidence.factors[factor] == reader.FactorCell(
+@@ -398,6 +423,8 @@ def test_memberships_omit_a_retired_universe_and_keep_a_late_addition(
+ def test_memberships_with_equal_names_order_by_universe_id(
+     migrated_run_schema_connection: psycopg.Connection,
+ ) -> None:
++    """Documents unreachable data: active universes have unique names (DEC-0057), so this holds
++    but cannot fail without the tiebreaker; the statement's total order is its guarantee."""
+     conn = migrated_run_schema_connection
+     set_id = _complete_set(conn)
+     stock = seed_scored_stock(conn, set_id, "AAPL")

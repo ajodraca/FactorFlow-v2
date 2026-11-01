@@ -1,0 +1,47 @@
+# RED, CAP-002-E3-S3 rework-2 (implementation review v2, IR-002).
+# The rework adds one assertion, on the growth cell's stored reason_detail, to
+# test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently. The production code is unchanged and already
+# correct, so the test fails only where the defect it guards is present: review v2's two survivors, which blank the
+# cell's reason_detail in _cell_from_row or in stock_evidence.sql's cell branch. Each is applied and the evidence file
+# runs (PostgreSQL 16 container), first with the tests as reviewed (0231839: both survive), then with the new
+# assertion (rework-2.patch applied: both fail it). Runner: scripts/mutation-run.py run, scratch clones.
+$ uv run --all-extras --offline pytest -q -p no:cacheprovider -p no:randomly -rfE --tb=short tests/integration/test_reader_evidence.py
+
+## tests as reviewed (0231839): tree_patch_sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855; baselines exit [0, 0]
+### manual:v2-cell-reason-detail-dropped -> SURVIVED (exit 0) | src/factorflow/classification/reader.py
+--- old:         reason_detail=row["reason_detail"],\n
++++ new:         reason_detail=None,\n
+19 passed in 9.18s
+
+### manual:v2-evidence-sql-cell-reason-detail-null -> SURVIVED (exit 0) | src/factorflow/classification/sql/stock_evidence.sql
+--- old: c.percentile, c.reason_code, c.reason_input, c.reason_detail, NULL, NULL, NULL,
++++ new: c.percentile, c.reason_code, c.reason_input, NULL, NULL, NULL, NULL,
+19 passed in 8.95s
+
+## with the new assertion (rework-2.patch): tree_patch_sha256 c27e80a96a7a45948c6c966cefa08a60f6804217e3fabf73abec66ccad667e14; baselines exit [0, 0]
+### manual:v2-cell-reason-detail-dropped -> KILLED (exit 1) | src/factorflow/classification/reader.py
+--- old:         reason_detail=row["reason_detail"],\n
++++ new:         reason_detail=None,\n
+=================================== FAILURES ===================================
+____ test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently ____
+tests/integration/test_reader_evidence.py:325: in test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently
+    assert growth.reason_detail == "revenue_growth is input_outdated"
+E   AssertionError: assert None == 'revenue_growth is input_outdated'
+E    +  where None = FactorCell(status='not_classified', score=None, percentile=None, reason_code='input_outdated', reason_input='revenue_growth', reason_detail=None, restated_possible=False).reason_detail
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_evidence.py::test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently
+1 failed, 18 passed in 4.75s
+
+### manual:v2-evidence-sql-cell-reason-detail-null -> KILLED (exit 1) | src/factorflow/classification/sql/stock_evidence.sql
+--- old: c.percentile, c.reason_code, c.reason_input, c.reason_detail, NULL, NULL, NULL,
++++ new: c.percentile, c.reason_code, c.reason_input, NULL, NULL, NULL, NULL,
+=================================== FAILURES ===================================
+____ test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently ____
+tests/integration/test_reader_evidence.py:325: in test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently
+    assert growth.reason_detail == "revenue_growth is input_outdated"
+E   AssertionError: assert None == 'revenue_growth is input_outdated'
+E    +  where None = FactorCell(status='not_classified', score=None, percentile=None, reason_code='input_outdated', reason_input='revenue_growth', reason_detail=None, restated_possible=False).reason_detail
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_evidence.py::test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently
+1 failed, 18 passed in 4.80s
+

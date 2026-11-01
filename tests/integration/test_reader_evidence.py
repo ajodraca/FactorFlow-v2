@@ -321,6 +321,8 @@ def test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently(
 
     growth = evidence.factors["growth"]
     assert (growth.reason_code, growth.reason_input) == ("input_outdated", "revenue_growth")
+    # The cell's detail line as seed_scored_stock stored it; the reader derives nothing.
+    assert growth.reason_detail == "revenue_growth is input_outdated"
     revenue = next(r for r in evidence.inputs if r.input_name == "revenue_growth")
     assert revenue.status == "outdated"
     assert revenue.label == reader.INPUT_LABELS["revenue_growth"] == "revenue growth"

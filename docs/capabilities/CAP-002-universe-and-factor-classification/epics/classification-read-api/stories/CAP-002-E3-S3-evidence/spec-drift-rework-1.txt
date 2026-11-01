@@ -1,0 +1,37 @@
+Independent spec-drift verification, CAP-002-E3-S3 rework-1 (commit 9acfe60; rework-1.patch, sha256
+797a3a2bbc2d30e8409679a488317d845665da444150195eba5c1d979898c21a, plus the cycle-1 survivor-reason line the same commit changed).
+Fresh read-only subagent, no history; it ran no tests.
+
+Every change in rework-1 (commit 9acfe60) traces to one of review v1's findings (IR-001 to IR-004) or to the task plan, and none
+contradicts the design, the test spec or a decision. The corrected equivalence reason is a faithful reading of DEC-0057 and the
+universe-service design. I found no drift; there is one minor bookkeeping point, noted after the table.
+
+| Change | Authority | Drift? |
+|---|---|---|
+| test_reader_evidence.py TC-COMP-146: two other stocks (AAAA, ZZZZ) seeded in the same current set after AAPL, with different cells and input values. AAPL's own cells are set explicitly. | IR-001 remediation. Design 2.6 says "for the instrument". DAC-E3-S3-3 starts "Given a stock". T006 and TC-COMP-146 are unchanged in substance. | No |
+| assert len(stored) == len(FACTORS) added | A check on the test's own seed for IR-001: the stored rows it compares against are AAPL's three. No new contract. | No |
+| reader_seed.py: reverse flag on seed_scored_stock and seed_inputs; TC-COMP-146 uses reverse=True for AAPL. | IR-002 remediation. T006 and T018 ordering; design 2.6 "definition order". Test-only helper. Default False keeps every existing caller's behaviour. | No |
+| test_reader_compare.py never-classified case: seeds a succeeded run with a building first set and asserts read_set_blocks(conn)[1] is not None before the existing later check. | IR-003 remediation. T009, T017, and design 2.7. A succeeded run holding a building set is how the existing seeds already do it. | No |
+| Docstring on test_memberships_with_equal_names_order_by_universe_id saying it documents unreachable data (DEC-0057) | IR-004 remediation option. T011 still asks for the equal-names case. DEC-0134 still governs the total order. | No |
+| Tasks frontmatter: updated, last_reworked_review: CAP-002-E3-S3-implementation-review-v1.md | The story-coding skill's rework bookkeeping. No task entries added, no checkboxes toggled. | No |
+| Evidence YAML, cycle-1, manual:membership-order-id-dropped reason rewritten | IR-004 ("cite the universe-service uniqueness rule") and adversarial-review E.9 | No (see note) |
+| No production code changed | v1 Follow-Up: "No production change is required." | No |
+
+Is the new reason faithful? Yes.
+- DEC-0057 (2): names must be unique among active universes, compared exactly after trimming; a retired universe's name may be reused.
+- Universe-service design section 3 (line 445) states the same rule. Writes are serialised by an advisory lock (DEC-0065).
+- stock_memberships.sql excludes retired universes with NOT EXISTS ... 'retired'.
+- Equal names are therefore unreachable. ORDER BY n.name uses the default collation, which never ties two different strings.
+  With ties impossible among the active universes the read returns, removing u.universe_id from the sort cannot change any
+  result built from data the service writes.
+- The reason is scoped correctly. It says "unreachable in product data". The test builds equal names with direct inserts, which
+  the reason doesn't contradict.
+
+Note (bookkeeping, not spec drift): IR-004 said to correct the reason "in the next cycle's evidence". The commit instead rewrote
+the reason inside cycle-1, which cycle-1's reviews had already judged. Since the YAML is excluded from the fingerprinted patch,
+the review evidence isn't invalidated. But cycle-1 no longer shows the reason that was actually reviewed, so the rework-1 cycle
+entry should mention the change.
+
+Minor wording, also not drift: the docstring phrase "this holds but cannot fail without the tiebreaker" is ambiguous.
+
+DRIFT: none
