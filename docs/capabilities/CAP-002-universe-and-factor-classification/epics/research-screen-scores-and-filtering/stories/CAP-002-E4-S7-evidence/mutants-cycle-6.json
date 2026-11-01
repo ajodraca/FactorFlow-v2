@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "repo_head": "14c45223985aab0eda8b0f79cb2d0f5202b820a3",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:cycle-6:fail-unguarded",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "          if (!cancelled) {\n            setState({ kind: \"failed\"",
+   "new": "          if (true) {\n            setState({ kind: \"failed\""
+  },
+  {
+   "id": "manual:cycle-6:load-unguarded",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "          if (!cancelled) {\n            setState({ kind: \"loaded\"",
+   "new": "          if (true) {\n            setState({ kind: \"loaded\""
+  },
+  {
+   "id": "manual:cycle-6:box-rounded-4px",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "gap-2 rounded-[var(--radius)] border",
+   "new": "gap-2 rounded border"
+  },
+  {
+   "id": "manual:cycle-6:box-unrounded",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "gap-2 rounded-[var(--radius)] border",
+   "new": "gap-2 border"
+  },
+  {
+   "id": "manual:cycle-6:no-key-check",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  const current =\n    (state.kind === \"loaded\" || state.kind === \"failed\") &&\n    (state.symbol !== symbol || state.attempt !== attempt)\n      ? symbol === null\n        ? IDLE\n        : LOADING\n      : state;",
+   "new": "  const current = state;"
+  }
+ ]
+}

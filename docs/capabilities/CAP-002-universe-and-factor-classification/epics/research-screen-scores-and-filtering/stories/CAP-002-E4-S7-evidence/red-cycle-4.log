@@ -1,0 +1,208 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ✓ src/screens/research/copy.test.ts (317 tests) 29ms
+stderr | src/components/patterns/inspector-panel.test.tsx > TC-COMP-141: the inspector waits 150 ms, then issues one read (DAC-E4-S7-2; DEC-0164) > issues no read before 150 ms and exactly one at 150 ms, then none
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/components/patterns/selection-tray.test.tsx > TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1) > with 1 checked > renders Compare as a focusable blocked button carrying its reason
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/inspector-panel.test.tsx (58 tests | 5 failed) 275ms
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > sizes the skeleton from the theme's spacing scale (STD-UI-29) 6ms
+     → expect(element).toHaveClass("h-8 w-full rounded bg-secondary")
+
+Expected the element to have class:
+  h-8 w-full rounded bg-secondary
+Received:
+  block h-24 w-full animate-pulse rounded bg-secondary
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > moves focus to the Selected stock section when Try again is activated 6ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <section
+  aria-label="Selected stock"
+  class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
+  data-variant="summary"
+>
+  <output
+    class="block h-24 w-full animate-pulse rounded bg-secondary"
+  >
+    <span
+      class="sr-only"
+    >
+      Loading the selected stock.
+    </span>
+  </output>
+</section>
+Received element with focus:
+  <body>
+  <div>
+    <section
+      aria-label="Selected stock"
+      class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
+      data-variant="summary"
+    >
+      <output
+        class="block h-24 w-full animate-pulse rounded bg-secondary"
+      >
+        <span
+          class="sr-only"
+        >
+          Loading the selected stock.
+        </span>
+      </output>
+    </section>
+  </div>
+</body>
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the failure again once Try again is activated 7ms
+     → expected [ …(2) ] to deeply equal [ 'Loading the selected stock.' ]
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the previous stock under a new selection 7ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+   × the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166) > renders one block per factor in the order Value, Growth, Momentum with an identity swatch 4ms
+     → expect(element).toHaveClass("h-2 w-2 rounded")
+
+Expected the element to have class:
+  h-2 w-2 rounded
+Received:
+  inline-block h-2 w-2 rounded-sm
+ ✓ src/components/patterns/selection-tray.test.tsx (24 tests) 215ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > sizes the skeleton from the theme's spacing scale (STD-UI-29)
+Error: expect(element).toHaveClass("h-8 w-full rounded bg-secondary")
+
+Expected the element to have class:
+  h-8 w-full rounded bg-secondary
+Received:
+  block h-24 w-full animate-pulse rounded bg-secondary
+ ❯ src/components/patterns/inspector-panel.test.tsx:248:20
+    246|     render(panel("AAPL"));
+    247|     const status = within(inspector()).getByRole("status");
+    248|     expect(status).toHaveClass("h-8", "w-full", "rounded", "bg-seconda…
+       |                    ^
+    249|   });
+    250| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > moves focus to the Selected stock section when Try again is activated
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <section
+  aria-label="Selected stock"
+  class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
+  data-variant="summary"
+>
+  <output
+    class="block h-24 w-full animate-pulse rounded bg-secondary"
+  >
+    <span
+      class="sr-only"
+    >
+      Loading the selected stock.
+    </span>
+  </output>
+</section>
+Received element with focus:
+  <body>
+  <div>
+    <section
+      aria-label="Selected stock"
+      class="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
+      data-variant="summary"
+    >
+      <output
+        class="block h-24 w-full animate-pulse rounded bg-secondary"
+      >
+        <span
+          class="sr-only"
+        >
+          Loading the selected stock.
+        </span>
+      </output>
+    </section>
+  </div>
+</body>
+ ❯ src/components/patterns/inspector-panel.test.tsx:326:25
+    324|     fireEvent.click(tryAgain);
+    325|     expect(tryAgain).not.toBeInTheDocument();
+    326|     expect(inspector()).toHaveFocus();
+       |                         ^
+    327|     expect(inspector()).toHaveAttribute("tabindex", "-1");
+    328|     await advance(150);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the failure again once Try again is activated
+AssertionError: expected [ …(2) ] to deeply equal [ 'Loading the selected stock.' ]
+
+- Expected
++ Received
+
+  Array [
++   "Could not load the stock's scores and inputs: FactorFlow hit an unexpected problem. Try again.Try again",
+    "Loading the selected stock.",
+  ]
+
+ ❯ src/components/patterns/inspector-panel.test.tsx:354:23
+    352|     read.mockReturnValueOnce(deferred<StockEvidence>().promise);
+    353|     fireEvent.click(within(inspector()).getByRole("button", { name: RE…
+    354|     expect(committed).toEqual([LOADING]);
+       |                       ^
+    355|   });
+    356| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > never commits the previous stock under a new selection
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "AAPL:Loading the selected stock.",
+-   "MSFT:Loading the selected stock.",
+-   "null:Select a stock to see why it scores as it does.",
++   "AAPL:Select a stock to see why it scores as it does.",
++   "MSFT:AAPLApple Inc.In no universeValue88+1.27Growth40-0.25Momentum610.00See every input and its datePercentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.",
++   "null:Loading the selected stock.",
+  ]
+
+ ❯ src/components/patterns/inspector-panel.test.tsx:383:23
+    381|     rerender(tree("MSFT"));
+    382|     rerender(tree(null));
+    383|     expect(committed).toEqual([
+       |                       ^
+    384|       `AAPL:${LOADING}`,
+    385|       `MSFT:${LOADING}`,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > the factor blocks (DAC-E4-S7-2, AC-16; DEC-0165, DEC-0166) > renders one block per factor in the order Value, Growth, Momentum with an identity swatch
+Error: expect(element).toHaveClass("h-2 w-2 rounded")
+
+Expected the element to have class:
+  h-2 w-2 rounded
+Received:
+  inline-block h-2 w-2 rounded-sm
+ ❯ src/components/patterns/inspector-panel.test.tsx:652:22
+    650|       expect(swatch.tagName).toBe("SPAN");
+    651|       expect(swatch).toHaveAttribute("aria-hidden", "true");
+    652|       expect(swatch).toHaveClass("h-2", "w-2", "rounded");
+       |                      ^
+    653|     }
+    654|     expect(swatches.map((swatch) => swatch.style.backgroundColor)).toE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  5 failed | 394 passed (399)
+   Start at  10:15:36
+   Duration  1.67s (transform 250ms, setup 446ms, collect 848ms, tests 519ms, environment 1.19s, prepare 790ms)
+

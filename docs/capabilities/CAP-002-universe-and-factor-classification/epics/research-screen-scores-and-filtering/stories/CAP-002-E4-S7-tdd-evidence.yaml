@@ -1,0 +1,434 @@
+# TDD evidence for CAP-002-E4-S7 - Selection tray and inspector panel.
+# Three cycles, as the task plan's Other Notes lay out, with two recorded adjustments: all of T008 (failure, retry,
+# stale reads, unmount) runs in cycle 2 rather than half of it, because T011 implements that logic and its mutants
+# would otherwise go unscored; and T003's "each input with as_of and known_on" assertion runs in cycle 3, with the
+# rendering it needs (T012). T013 and T014 change no behaviour and were run inside cycle 3 before its review.
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is its
+# own staged diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch and cycle-3.patch are the diffs between
+# the index trees after each cycle (2d54764..dfbd684, dfbd684..47b1340), so the three apply in order onto the stage
+# parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began; the verdicts below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (each clone links the main checkout's
+# node_modules); generated operators plus hand-written mutants ("operator": "manual") for the JSX the operators do
+# not reach.
+# Decisions applied: DEC-0070, DEC-0163, DEC-0164, DEC-0165, DEC-0166 (owner-upheld), DEC-0151, DEC-0152, DEC-0229;
+# recorded in this run: DEC-0247 (PROVISIONAL, the explanation box's sentences).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T009, T010]
+    description: >
+      TC-COMP-140 (Compare is a focusable blocked button with aria-disabled, its visible reason read through
+      aria-describedby and no navigation on click, Enter or Space at 1, 7 and 8 checked; a link to
+      /research/compare?symbols= with the checked symbols at 2, 3 and 6) and the T002 tray behaviour (nothing at 0
+      checked; a region named Selection on bg-foreground text-background; a polite live count updated in place;
+      the count is checked.length, duplicates included; each symbol encodeURIComponent-encoded, commas literal, in
+      the order checked; Add to universe... only with a handler, enabled from 1 and handing over the checked
+      symbols once; count and reason separate elements). Production: web/src/components/patterns/selection-tray.tsx
+      (SelectionTray, COMPARE_MIN, COMPARE_MAX). T009 for the tray: every string already in copy.ts (REGIONS.selection,
+      SELECTION.*), nothing added. The region is a `section` with aria-label (implicit role region) because biome's
+      useSemanticElements rejects `div role="region"`; the blocked button carries no handler, so activating it does
+      nothing.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-1.log
+    red_log_sha256: 551e36038799edda0a897baeab711d937c65fbb2a3dbe4ddddc7e946b6373cff
+    red_evidence: >
+      With selection-tray.test.tsx written and no selection-tray.tsx, the file failed to load: Failed to resolve
+      import "./selection-tray" (no tests ran).
+    green_evidence: >
+      selection-tray.test.tsx 21 passed (green-cycle-1.log); tsc --noEmit, biome lint and biome format clean. The
+      code review's LOW (the rerender test remounted rather than updated the tray) was fixed by rerendering the same
+      tree and asserting the live region is the same node, and Add to universe... was given data-variant="outline"
+      like the Compare link; the patch was re-reviewed. Carried: the review's MEDIUM that the live region mounts
+      already holding "1 selected", so some screen readers may not announce the first count; T002 requires an empty
+      container at 0 checked, so changing it is the owner's call (also to check in the E2E accessibility pass).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-1.log
+        sha256: 06c80d5ba23813546a3f2c83ecd6804c99bfd0066ec0caf4460de4563469bd0e
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c602a9af2b6667e3d4d9f024d79d805bca980da9f3362ea2542762f6f33dd46b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-1-results.json
+      results_sha256: 0ba39c544bbe20c150799e565158ac1e44020554110b3362840dd38e1ac62bbb
+      generated: 29
+      killed: 29
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T004, T008, T009, T011]
+    description: >
+      TC-COMP-141's read half (no read at 0 and 149 ms, exactly one at 150 ms for the symbol, none over 10 s or on
+      re-render; a burst of three selections under 150 ms apart issues one read, for the last), TC-COMP-142 (a section
+      named Selected stock holding exactly the empty sentence, no read, no link, status, button, footnote or In no
+      universe; back to it from a loaded stock; a read or failure in flight when the selection clears is dropped)
+      and all of T008 (the skeleton, an `output` with role status and "Loading the selected stock.", from selection
+      through the pending read; a refused read shows failureSentence of the error and a network failure the
+      operation's generic sentence, never the message, code or request id, plus Try again, which re-reads the same
+      symbol once after the same 150 ms wait; out-of-order and stale reads and failures never render; unmounting
+      before the wait issues nothing; returning to a symbol already read reads it again). Production:
+      web/src/components/patterns/inspector-panel.tsx (INSPECT_DEBOUNCE_MS, InspectorPanel, data half with a
+      placeholder loaded body) and the T009 string SELECTION.inspectorLoading in copy.ts with its copy.test.ts anchor.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-2.log
+    red_log_sha256: 748ddb4e9cf18cc44bdc2eb997da4b4ed788c896b8a2ba3a68919b32502d2c4d
+    red_evidence: >
+      With inspector-panel.test.tsx written and no inspector-panel.tsx, the file failed to load: Failed to resolve
+      import "./inspector-panel" (no tests ran).
+    green_evidence: >
+      inspector-panel.test.tsx 18 passed and copy.test.ts 312 passed (green-cycle-2.log); tsc --noEmit, biome lint
+      and biome format clean. The code review's LOW (the retry's 150 ms wait was kept but not pinned) was fixed in the
+      test and the doc comment and the patch re-reviewed. Carried: a selection change paints the previous stock for
+      one frame because the reset runs in useEffect (not observable in jsdom); the plan's T011/T012 wording still
+      says "the loading half of T008".
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-2.log
+        sha256: cf8a2d56fba6aebc18d651696ea762b204bcf6327ef08c53a4dc107114fe6a9c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8229192d319434524a927776a9f75dc5beb0e768844e3975cc9c86ae785cca1d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-2-results.json
+      results_sha256: c7d03674f127f80bcb6cd31471e39ca39c7147bb09d4bcbf7001c9c35b0cd71d
+      generated: 22
+      killed: 20
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.909
+      survivors:
+        - id: web/src/components/patterns/inspector-panel.tsx:62:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The mutant starts the retry counter at 1 instead of 0. `attempt` is read only as an effect dependency,
+            whose contract is to change on every Try again so the read re-runs; its starting value is never
+            rendered, compared or sent, so no input distinguishes the two.
+        - id: web/src/components/patterns/inspector-panel.tsx:102:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The mutant steps the retry counter by 2 instead of 1. Any step produces a new dependency value, so each
+            Try again still re-runs the effect exactly once; a non-changing step (count or count + 0) would be killed
+            by the Try again test.
+
+  - id: cycle-3
+    tasks: [T003, T005, T006, T007, T009, T012, T013, T014]
+    description: >
+      TC-COMP-141's dates half (each input's as_of and known_on printed as given in its factor's line), TC-COMP-143
+      (In no universe with no link; one link per universe to /research/universes/{encoded id} in the read's order,
+      the line's text equal to SELECTION.inUniverses for one to four names; names printed as text), the T006 factor
+      blocks (symbol font-numeric text-xl and name; terms Value, Growth, Momentum with an aria-hidden swatch whose
+      inline background is hsl(var(--factor-*)); FactorCell with the score, 0.00 for a measured zero; the mark on
+      value and growth only; "—" for a factor the read sent no cell for; the inputs line grouped by identical
+      (asOf, knownOn), "; " between groups, no "known" for a null known_on, no line without a dated input; text-xs;
+      no wire key, detail or value printed) and T007 (the bordered explanation box with each incomplete factor's
+      sentence equal to its cell's title, none for a cause-less or unrecognised-code cell; Not enough to rank with no
+      digit and no count anywhere; Not followed badge after the symbol and the dateless sentence for a retired
+      stock; the STD-UI-17 sentence once, only where a mark is drawn; no box for a followed, scored, unmarked stock;
+      See every input and its date an anchor to /research/stocks/{encoded symbol}; the footnote last, text-xs
+      text-muted-foreground; no holdings line or strategy action). Production: the loaded rendering in
+      inspector-panel.tsx and the T009 strings SELECTION.inputsLineAsOf, inputsLineSeparator, inUniversesLead,
+      listComma and listAnd in copy.ts with copy.test.ts anchors. T013: the full web suite green, only the four
+      pattern files, copy.ts and copy.test.ts changed, nothing imports the two patterns, no dangerouslySetInnerHTML,
+      no results-table import. T014: format, lint, tsc, test and build clean; the built CSS carries every class the
+      two patterns use and defines --factor-value, --factor-growth and --factor-momentum.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-3.log
+    red_log_sha256: 7ab2228d4c1feb0a8f76006fee13ec333fc2df440a6d7383b5c45b541e8261b9
+    red_evidence: >
+      With the cycle-3 tests added and the placeholder loaded body of cycle 2, inspector-panel.test.tsx ran 24
+      failed, 21 passed (red-cycle-3.log); the three that passed are absence assertions (no box) the placeholder
+      satisfies vacuously.
+    green_evidence: >
+      inspector-panel.test.tsx 51 passed and copy.test.ts 317 passed, 368 in all (green-cycle-3.log; counts corrected in
+      review rework, IR-008); full web suite
+      1147 passed in 55 files (full-suite.log); npm run format, npm run lint, npx tsc --noEmit and npm run build
+      clean. The first mutation run left five real survivors (the box's and the mark's rule against a retired, a
+      not-enough, a classified-without-percentile and a not-classified-with-percentile cell, and an unrecognised
+      reason code), all killed by new tests. The spec-drift review found the box's rules unrecorded; they are now
+      DEC-0247 (PROVISIONAL), cited in the code, and the re-review found no drift. Carried from the code review: the
+      inspector's isScored and Not followed badge restate FactorCell's private logic and markup, which factor-cell.tsx
+      (not editable here) could export.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-3.log
+        sha256: 4a2432d9aeeb4b42982647f93f483fa6cb6ebe843fd477690b26b36484cf0fce
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite.log
+        sha256: 88d8dbacdec9de4aba3363f48b0f40eab71173c055e49b8ca234c131714f7e3f
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 675104311a6c8f03f6484ba9f187af7217556fea7a0f9b45b4aa54accf9680aa
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-3-results.json
+      results_sha256: 1165561933c381f3ad5e450b2cf700eb97792c43b302ee0d29994913021713c6
+      generated: 59
+      killed: 58
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.983
+      survivors:
+        - id: web/src/components/patterns/inspector-panel.tsx:346:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The cycle-2 retry step (count + 1 to count + 2), on a line cycle 3 re-touched when the Try again button
+            took the shared BUTTON classes. Any step produces a new effect dependency, so each Try again re-reads
+            exactly once, as in cycle 2.
+
+  # Review-rework cycle against CAP-002-E4-S7-implementation-review-v1.md (CHANGES-REQUIRED). The driver owns the
+  # commit; the rework below is recorded against the staged, uncommitted tree on usr/alvaro-de-jodra/CAP-002-E4-S7.
+  # Decisions: DEC-0249 (IR-003, owner-decided: no tray change; E4-S9 announces the first selection); recorded in this
+  # rework under docs/unattended-mode.md: DEC-0250 (IR-007, Try again focuses the section; PROVISIONAL) and DEC-0251
+  # (IR-004, h-8 and rounded; PROVISIONAL). Decision-Id trailers for the stage commit: DEC-0249, DEC-0250, DEC-0251.
+  - id: cycle-4
+    tasks: [T001, T002, T004, T006, T007, T008, T011, T012]
+    description: >
+      Rework of implementation review v1. IR-001 (tests): the tray's count is its first child and precedes Compare,
+      which precedes Add to universe..., at 1, 3 and 7 checked; the symbol precedes the name; the loaded inspector's
+      parts (symbol, name, memberships line, first factor term, explanation box, See every input and its date,
+      footnote) are in document order; each factor block's children are dt, the FactorCell dd, then the inputs-line
+      dd. IR-002 (tests): the button outline classes on the enabled Compare link, Add to universe... and See every
+      input and its date; the card summary classes on the section when empty, loading, failed and loaded. IR-003: no
+      change (DEC-0249). IR-004 (production, DEC-0251): the skeleton is h-8 (var(--space-8)) and the swatch rounded,
+      both asserted; neither h-24 nor rounded-sm remains in web/src. IR-005: no change; follow-up for a story that may
+      edit factor-cell.tsx to export its state selector and title builder. IR-006 (production): the reset to idle or
+      loading is derived during render from the (symbol, attempt) it was last settled for, so a new selection or a
+      retry never commits the previous content; the effect now only schedules and guards the read; pinned by a
+      layout-effect commit probe across AAPL to MSFT to null and a Profiler commit probe across Try again. IR-007
+      (production, DEC-0250): Try again focuses the Selected stock section (tabIndex -1, no tab stop), which keeps
+      focus through the skeleton and the loaded stock. IR-008: cycle 3's green_evidence counts corrected.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-4.log
+    red_log_sha256: fd2d5e7292b9e7da1c9adf564ed9dae37b4fb235dad7d53c7375b4ef297ab4d7
+    red_evidence: >
+      With the final cycle-4 tests and HEAD's production inspector-panel.tsx, the three focused suites ran 5 failed,
+      394 passed (red-cycle-4.log): the skeleton token, the Try again focus, the two commit probes (the old code
+      committed the previous stock under MSFT and the failure after Try again) and the swatch radius. The IR-001 and
+      IR-002 tests pin behaviour the code already had; their RED is the review's ten non-equivalent survivors, each
+      now killed in this cycle's mutation run (manual:cycle-4:review-*).
+    green_evidence: >
+      Focused suites 399 passed in 3 files: selection-tray.test.tsx 24, inspector-panel.test.tsx 58, copy.test.ts 317
+      (green-cycle-4.log); full web suite 1157 passed in 55 files (full-suite-cycle-4.log); npm run format (check),
+      npm run lint, tsc --noEmit and npm run build clean; the built CSS maps h-8 to var(--space-8) and holds neither
+      .h-24 nor .rounded-sm. Code review (independent subagent) APPROVED with LOW notes: a retry commit probe was added
+      and a vacuous tab-stop test removed in response; the default focus outline is accepted (no delivered component
+      styles focus; DEC-0250); the casts in the order loop were left. Spec drift (independent subagent): none; it noted
+      that rounded is still Tailwind's default radius, not tied to --radius, a codebase-wide gap for the owner, and
+      that T008/T011 still describe the reset as part of the effect.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-4.log
+        sha256: 1b2747bea51a416bfc8b1322931a953bdbf6566801b24bdf6138082021439e2c
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-4.log
+        sha256: 4b1ef21421ecf7451409a60edd203b4f7b6726dec10f87149592748b614d5dec
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 169808dc959a63711a9061b8d039b1a4bae2c1e0d84d15eddd4206cde8b85e60
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-4-results.json
+      results_sha256: c5acbf02ceeb5848387061451991bf7ad6f19daf05865841de95a172550158cb
+      generated: 46
+      killed: 40
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/components/patterns/inspector-panel.tsx:361:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The retry step (count + 1 to count + 2), on the line this cycle re-touched. Any step yields a new effect
+            dependency and a new settled key, so each Try again resets once and re-reads once, as in cycles 2 and 3.
+        - id: manual:cycle-4:review-compare-link-no-variant
+          disposition: equivalent
+          reason: >
+            Drops data-variant="outline" from the Compare link. No CSS in web/src keys on data-variant="outline" (only
+            blocked and secondary), and T001 requires only that it is not blocked; review v1 judged it equivalent.
+        - id: manual:cycle-4:review-see-link-no-variant
+          disposition: equivalent
+          reason: >
+            The same attribute on See every input and its date; T012 names the classes, which are asserted, not the
+            attribute; review v1 judged it equivalent.
+        - id: manual:cycle-4:review-card-no-variant
+          disposition: equivalent
+          reason: >
+            Drops data-variant="summary" from the section; no CSS consumes it and T011 names the classes, now asserted
+            in every state; review v1 judged it equivalent.
+        - id: manual:cycle-4:review-sentence-for-scored
+          disposition: equivalent
+          reason: >
+            Needs a classified cell with a percentile and a reasonDetail or incomplete reasonCode, which
+            research-store 2.4 factor_classification_shape and factor-engine 2.5 rule out; review v1 judged it
+            equivalent.
+        - id: manual:cycle-4:review-blocked-unstyled
+          disposition: equivalent
+          reason: >
+            Drops the classes from the blocked Compare button. The button design spec gives blocked no visual tokens and
+            T010 names no classes for it; review v1 judged it equivalent.
+
+  # Review-rework cycle against CAP-002-E4-S7-implementation-review-v2.md (CHANGES-REQUIRED). The driver owns the
+  # commit; the rework is recorded against the staged, uncommitted tree on usr/alvaro-de-jodra/CAP-002-E4-S7 after
+  # origin/main (8ec2a73) was merged in as 46ff3cd. Finding responses:
+  #   IR-001 (HIGH): fixed in code and pinned by tests (below).
+  #   IR-002 (MEDIUM): answered by owner decision DEC-0251 (owner_reviewed: true, owner_verdict: upheld, blind review
+  #     agreed): the skeleton stays the single h-8 bar, so no change. The owner's answer is the accepted departure from
+  #     card design-spec section 4 that IR-002's remediation asks to have recorded.
+  #   IR-003 (LOW): the box keeps the delivered rounded class (the corner DEC-0251 chose for the swatch), now pinned, which
+  #     kills the late survivor box-unrounded. Mapping --radius in tailwind.config.js is outside DEC-0084's edit set and
+  #     is carried as an owner theme follow-up, as the review directs.
+  #   IR-004 (LOW): no change. The review requires none in this story. Follow-up: a story that may edit factor-cell.tsx
+  #     exports its state selector and Not followed badge.
+  # Decisions applied: DEC-0165 (owner-upheld) and DEC-0251 (owner-upheld). No new decision was recorded. Decision-Id
+  # trailer for the stage commit: DEC-0251.
+  - id: cycle-5
+    tasks: [T008, T011]
+    description: >
+      Rework of implementation review v2. IR-001: a settled read now carries the (symbol, attempt) it was issued for,
+      and the panel renders a loaded or failed state only while that key is still the current one; otherwise it shows
+      the skeleton, or the empty sentence when the selection is null. A read for a stock that is no longer selected is
+      therefore never shown, even when it settles between the new selection's commit and the previous effect's
+      cleanup, before the cancelled flag flips. The cancelled flag and the render-phase reset stay as they were. The
+      effect now reads attempt, so its biome-ignore suppression is removed. Four new T008 tests drive that gap without
+      act(): a concurrent root with real timers, the selection moved in a transition, and a sibling layout effect that
+      settles AAPL's read during the new commit and holds the commit past the scheduler's 5 ms frame. They cover a
+      stale success and a stale failure under MSFT, a stale success after the selection is cleared, and MSFT's own read
+      still rendering afterwards. A transition is used because jsdom leaves window.event set to an earlier test's
+      click, which would put a plain root.render on the discrete lane, where passive effects flush synchronously and
+      the gap closes. IR-003: the explanation box's rounded class is asserted. IR-002 and IR-004: no change (see the
+      comment above).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-5.log
+    red_log_sha256: e6996d9af2c24274db352b8cf97645462667926e3cd365720241324a67b62901
+    red_evidence: >
+      With the four gap tests written and HEAD's production inspector-panel.tsx, the three focused suites ran 3 failed,
+      417 passed (red-cycle-5.log). The failures were the stale success (AAPL rendered under MSFT), the stale failure
+      (Try again rendered under MSFT) and the stale success after clearing (AAPL rendered under null). The fourth test,
+      MSFT's own read, passes before and after the fix as a regression guard. The box's rounded assertion pins a class
+      the code already had; its RED is the review's late non-equivalent survivor box-unrounded, now killed
+      (manual:cycle-5:box-unrounded).
+    green_evidence: >
+      Focused suites 420 passed in 3 files: inspector-panel.test.tsx 62, selection-tray.test.tsx 24, copy.test.ts 334 (copy.test.ts
+      grew from 317 with the origin/main merge) (green-cycle-5.log). Full web suite 1333 passed in 60 files
+      (full-suite-cycle-5.log). npm run lint, npm run format (check), tsc --noEmit and npm run build clean.
+      inspector-panel.test.tsx passed 5 runs in a row here, and 8 in the code reviewer's run. Code review (independent
+      subagent): APPROVED with two optional LOWs. The first suggested replacing the render-phase reset with the key
+      check alone; declined, because the reset and its commit probes are reviewed, pinned behaviour and the change
+      would widen the rework. The second noted that the mutation results cite absolute scratch paths for the runner's
+      own logs, as earlier cycles do; only the hashes bind. Spec drift (independent subagent): none. It noted that
+      DEC-0251's text names the swatch, not the box, so the test comment was reworded to cite it only for the swatch.
+      It also noted that the --radius follow-up has no record; it is carried here for the owner. The re-check of the
+      final patch also found no drift.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-5.log
+        sha256: 35cf5887cda33773474f251bbe86f5fc38395f7fcdf2bf19ba3420f3d5216bee
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-5.log
+        sha256: 01a28a99cd9056d21e637bd458fc5bab88ffb7843dc981f5905ed4af9622b62c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 20489dd3100994dd17c994f2cebd2cc261d1c7cae389f1ed79a94965a846ddec
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-5-results.json
+      results_sha256: 51eb349cab476333e8fd5a93cc696570f36ef7e927189e04d130ddd70c889277
+      generated: 14
+      killed: 13
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: manual:cycle-5:key-ignores-attempt
+          disposition: equivalent
+          reason: >
+            Drops the attempt half of the key check. A settled read's attempt can differ from the current one only for
+            the same symbol after Try again. Try again is offered only once that symbol's read has settled, so no read
+            for the old attempt is in flight. Try again is also a discrete click, so React flushes its passive effects
+            synchronously and no gap opens. The render-phase reset already replaces the failure with loading on that
+            commit (pinned by the Try again Profiler probe). No input tells the two apart. The attempt half is kept
+            because review v2 IR-001 names the (symbol, attempt) key.
+
+  # Review-rework cycle against CAP-002-E4-S7-implementation-review-v3.md (CHANGES-REQUIRED; review commit 14c4522 over
+  # rework 9deeeef). This is the run's final rework attempt (the owner lifted the one-rework cap). The driver owns the
+  # commit. Finding responses:
+  #   IR-001 (HIGH): tests only, no production change, as the review requires.
+  #   IR-002 (LOW): every gap test now asserts the gap opened.
+  #   IR-003 (LOW): owner decision DEC-0262: the explanation box takes rounded-[var(--radius)], as CAP-002-E4-S8's
+  #     notices do. The swatch keeps rounded (DEC-0251). No theme.css or tailwind.config.js change.
+  #   IR-004 (LOW): no change. The carried follow-up stands for a story that may edit factor-cell.tsx.
+  # Decisions applied: DEC-0165, DEC-0251 and DEC-0262 (owner-decided). No new decision recorded. Decision-Id trailer
+  # for the stage commit: DEC-0262.
+  - id: cycle-6
+    tasks: [T007, T008, T012]
+    description: >
+      Rework of implementation review v3. IR-001: two T008 tests in which the previous stock's read fails after the
+      current read has settled. In the first, AAPL moves to MSFT, MSFT loads, then AAPL's read rejects: Microsoft stays
+      on screen with no skeleton and no Try again. In the second, AAPL moves to MSFT and back to AAPL within the 150 ms
+      wait, the fresh AAPL read loads, then the first AAPL read rejects: Apple stays with no Try again. In the second
+      test both reads carry the same (AAPL, 0) key, so only the cancelled guard can drop the late failure. IR-002: a
+      Profiler around the panel counts its commits after the move, and each of the four act()-free gap tests requires
+      exactly two: the move's commit and the stale read's state update. That update happens only while cancelled is
+      still false, which is the gap. IR-003 (DEC-0262): the box's class is rounded-[var(--radius)], with a code comment
+      citing the decision. The box test asserts that class and the absence of the plain rounded class.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-6.log
+    red_log_sha256: 12b97174f8ea3f07922af9c0987a70b758ac5fa44491ab8033b7d8cf5ff5eb73
+    red_evidence: >
+      With the cycle-6 tests and HEAD's production inspector-panel.tsx, the three focused suites ran 1 failed, 421
+      passed (red-cycle-6.log). The failure is the box corner, which still had rounded. The two IR-001 tests pin
+      behaviour HEAD already has. Their RED is review v3's survivor manual:review:fail-unguarded, rerun here as
+      manual:cycle-6:fail-unguarded: both new tests fail with it applied (the mutant's log names exactly those two).
+      The IR-002 assertion's RED was checked by temporarily replacing startTransition with flushSync, which closes the
+      gap. All four gap tests then failed with "expected 1 to be 2", and the file was restored. The code reviewer
+      reproduced the same result independently.
+    green_evidence: >
+      Focused suites 422 passed in 3 files: inspector-panel.test.tsx 64, selection-tray.test.tsx 24, copy.test.ts 334
+      (green-cycle-6.log). Full web suite 1335 passed in 60 files (full-suite-cycle-6.log). npm run lint, npm run format
+      (check), tsc --noEmit and npm run build are clean, and the built CSS has
+      .rounded-\[var\(--radius\)\]{border-radius:var(--radius)}. inspector-panel.test.tsx passed 5 runs in a row here
+      and 8 in the code reviewer's run. Code review (independent subagent): APPROVED, with two optional LOWs: a
+      redundant commits reset in beforeEach, and the exact toBe(2) count, which fails loudly rather than passing wrongly
+      if React adds a commit. Both were left as they are. Spec drift (independent subagent): none. It noted that
+      DEC-0262 is still status open with commits empty, which the record will need once this cycle is committed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-6.log
+        sha256: 0e5b8471012b813fcaa91cb11e3c7f4f20c55738014786481e5d99b540840fa2
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-6.log
+        sha256: 7a120f016e59e7cbf4f5fa6d20a56f1f95d3574b30937ef0adaaf685edf26326
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4389dd164af2e614490a3f3d5b61c8c1e8759b347e97ef283e85acb011be31ca
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-6-results.json
+      results_sha256: 0074ca2519ea4d4c006c7203fc9881b81936361ff065c87f282cb02ede987df9
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

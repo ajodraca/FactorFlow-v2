@@ -512,12 +512,34 @@ export const SELECTION = {
   compareBlocked: "Check 2 to 6 stocks to compare them.",
   addToUniverse: "Add to universe…",
   inspectorEmpty: "Select a stock to see why it scores as it does.",
+  /**
+   * The inspector skeleton's text while its one read is pending (UX 1.1
+   * Loading, *inspector skeleton*; classification-ui 2.5). No design states
+   * the words (CAP-002-E4-S7 Open Gap 3, DEC-0165).
+   */
+  inspectorLoading: "Loading the selected stock.",
   inNoUniverse: "In no universe",
   /** *In Tech and Dividend growers* */
   inUniverses: (names: readonly string[]): string => `In ${listOf(names)}`,
   /** *From book-to-price, earnings yield and free-cash-flow yield, as of 2025-06-27, known 2026-10-14* */
   inputsLine: (inputs: readonly string[], asOf: string, knownOn: string): string =>
     `From ${listOf(inputs)}, as of ${asOf}, known ${knownOn}`,
+  /**
+   * The inspector's inputs clause when the inputs carry no `known_on`, and the
+   * separator between clauses of differing dates (UX 1.1 gives one example
+   * only; CAP-002-E4-S7 Open Gap 3, DEC-0165). No design states either.
+   */
+  inputsLineAsOf: (inputs: readonly string[], asOf: string): string =>
+    `From ${listOf(inputs)}, as of ${asOf}`,
+  inputsLineSeparator: "; ",
+  /**
+   * The words before the linked universe names, so the rendered line reads
+   * as `inUniverses` does (UX 1.1; CAP-002-E4-S7 T012).
+   */
+  inUniversesLead: "In ",
+  /** The separators `inUniverses` joins names with, for the linked rendering of the same line. */
+  listComma: ", ",
+  listAnd: " and ",
   seeEveryInput: "See every input and its date",
   footnote:
     "Percentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.",

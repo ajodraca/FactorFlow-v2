@@ -1,0 +1,245 @@
+{
+ "schema": 1,
+ "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/selection-tray.tsx:9:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "line": 9,
+   "original": "export const COMPARE_MIN = 2;",
+   "mutated": "export const COMPARE_MIN = 3;"
+  },
+  {
+   "id": "web/src/components/patterns/selection-tray.tsx:10:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "line": 10,
+   "original": "export const COMPARE_MAX = 6;",
+   "mutated": "export const COMPARE_MAX = 7;"
+  },
+  {
+   "id": "web/src/components/patterns/selection-tray.tsx:48:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "line": 48,
+   "original": "  if (checked.length === 0) {",
+   "mutated": "  if (checked.length === 1) {"
+  },
+  {
+   "id": "web/src/components/patterns/selection-tray.tsx:51:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "line": 51,
+   "original": "  const canCompare = checked.length >= COMPARE_MIN && checked.length <= COMPARE_MAX;",
+   "mutated": "  const canCompare = checked.length >= COMPARE_MIN || checked.length <= COMPARE_MAX;"
+  },
+  {
+   "id": "web/src/components/patterns/selection-tray.tsx:51:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "line": 51,
+   "original": "  const canCompare = checked.length >= COMPARE_MIN && checked.length <= COMPARE_MAX;",
+   "mutated": "  const canCompare = checked.length >= COMPARE_MIN && checked.length < COMPARE_MAX;"
+  },
+  {
+   "id": "web/src/components/patterns/selection-tray.tsx:51:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "line": 51,
+   "original": "  const canCompare = checked.length >= COMPARE_MIN && checked.length <= COMPARE_MAX;",
+   "mutated": "  const canCompare = checked.length > COMPARE_MIN && checked.length <= COMPARE_MAX;"
+  },
+  {
+   "id": "manual:cycle-1:no-empty-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "  if (checked.length === 0) {\n    return null;\n  }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:no-aria-label",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "      aria-label={REGIONS.selection}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:no-foreground-fill",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "bg-foreground p-3 text-background",
+   "new": "p-3"
+  },
+  {
+   "id": "manual:cycle-1:assertive-live",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "aria-live=\"polite\"",
+   "new": "aria-live=\"assertive\""
+  },
+  {
+   "id": "manual:cycle-1:no-live",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": " aria-live=\"polite\"",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:no-encode",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "checked.map(encodeURIComponent).join(\",\")",
+   "new": "checked.join(\",\")"
+  },
+  {
+   "id": "manual:cycle-1:encode-joined",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "checked.map(encodeURIComponent).join(\",\")",
+   "new": "encodeURIComponent(checked.join(\",\"))"
+  },
+  {
+   "id": "manual:cycle-1:sorted-symbols",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "checked.map(encodeURIComponent).join(\",\")",
+   "new": "[...checked].sort().map(encodeURIComponent).join(\",\")"
+  },
+  {
+   "id": "manual:cycle-1:link-blocked-variant",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          data-variant=\"outline\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}",
+   "new": "          data-variant=\"blocked\"\n          className={BUTTON}\n        >\n          {SELECTION.compareSideBySide}"
+  },
+  {
+   "id": "manual:cycle-1:no-blocked-variant",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            data-variant=\"blocked\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:no-aria-disabled",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            aria-disabled=\"true\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:no-describedby",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            aria-describedby={reasonId}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:disabled-not-blocked",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            aria-disabled=\"true\"\n",
+   "new": "            disabled\n"
+  },
+  {
+   "id": "manual:cycle-1:no-reason",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            {SELECTION.compareBlocked}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:reason-hidden",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "<span id={reasonId} className=\"text-sm\">",
+   "new": "<span id={reasonId} className=\"text-sm\" hidden>"
+  },
+  {
+   "id": "manual:cycle-1:always-add",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "onAddToUniverse === undefined ? null : (",
+   "new": "false ? null : ("
+  },
+  {
+   "id": "manual:cycle-1:add-empty",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "onClick={() => onAddToUniverse(checked)}",
+   "new": "onClick={() => onAddToUniverse([])}"
+  },
+  {
+   "id": "manual:cycle-1:add-twice",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "onClick={() => onAddToUniverse(checked)}",
+   "new": "onClick={() => { onAddToUniverse(checked); onAddToUniverse(checked); }}"
+  },
+  {
+   "id": "manual:cycle-1:add-no-type",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          type=\"button\"\n          data-variant=\"outline\"\n          onClick",
+   "new": "          data-variant=\"outline\"\n          onClick"
+  },
+  {
+   "id": "manual:cycle-1:blocked-no-type",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          <button\n            type=\"button\"\n",
+   "new": "          <button\n"
+  },
+  {
+   "id": "manual:cycle-1:tabindex-minus",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "            data-variant=\"blocked\"\n",
+   "new": "            data-variant=\"blocked\"\n            tabIndex={-1}\n"
+  },
+  {
+   "id": "manual:cycle-1:count-constant",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "{SELECTION.selected(checked.length)}",
+   "new": "{SELECTION.selected(new Set(checked).size)}"
+  },
+  {
+   "id": "manual:cycle-1:add-no-variant",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/selection-tray.tsx",
+   "old": "          data-variant=\"outline\"\n          onClick",
+   "new": "          onClick"
+  }
+ ]
+}

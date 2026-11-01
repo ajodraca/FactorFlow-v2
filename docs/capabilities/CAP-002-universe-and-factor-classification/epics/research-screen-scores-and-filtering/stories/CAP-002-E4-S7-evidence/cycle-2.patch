@@ -1,0 +1,524 @@
+diff --git a/web/src/components/patterns/inspector-panel.test.tsx b/web/src/components/patterns/inspector-panel.test.tsx
+new file mode 100644
+index 0000000..72e1a34
+--- /dev/null
++++ b/web/src/components/patterns/inspector-panel.test.tsx
+@@ -0,0 +1,353 @@
++import { act, fireEvent, render, screen, within } from "@testing-library/react";
++import type { JSX } from "react";
++import { MemoryRouter } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
++import type { FactorCell as FactorCellData, StockEvidence } from "../../api/classification-types";
++import { REGIONS, RESULTS, SELECTION, failureSentence } from "../../screens/research/copy";
++import { INSPECT_DEBOUNCE_MS, InspectorPanel } from "./inspector-panel";
++
++vi.mock("../../api/classification-client", async (importOriginal) => {
++  const actual = await importOriginal<typeof import("../../api/classification-client")>();
++  return { ...actual, getStockEvidence: vi.fn() };
++});
++
++const read = vi.mocked(getStockEvidence);
++
++const LOADING = "Loading the selected stock.";
++
++/** A `FactorCell` response value (classification-api section 2.7) with the unused fields null and false. */
++function cell(overrides: Partial<FactorCellData> = {}): FactorCellData {
++  return {
++    status: "not_classified",
++    score: null,
++    percentile: null,
++    reasonCode: null,
++    reasonInput: null,
++    reasonDetail: null,
++    restatedPossible: false,
++    ...overrides,
++  };
++}
++
++function scored(percentile: string, score: string, overrides: Partial<FactorCellData> = {}) {
++  return cell({ status: "classified", percentile, score, ...overrides });
++}
++
++/** A `StockEvidence` read (classification-api section 2.7): scored on all three factors, in no universe. */
++function evidence(overrides: Partial<StockEvidence> = {}): StockEvidence {
++  return {
++    symbol: "AAPL",
++    name: "Apple Inc.",
++    lifecycle: "active",
++    set: null,
++    factors: {
++      value: scored("88", "1.27"),
++      growth: scored("40", "-0.25"),
++      momentum: scored("61", "0.00"),
++    },
++    inputs: [],
++    memberships: [],
++    ...overrides,
++  };
++}
++
++interface Deferred<T> {
++  promise: Promise<T>;
++  resolve: (value: T) => void;
++  reject: (cause: unknown) => void;
++}
++
++function deferred<T>(): Deferred<T> {
++  let resolve: (value: T) => void = () => undefined;
++  let reject: (cause: unknown) => void = () => undefined;
++  const promise = new Promise<T>((onResolve, onReject) => {
++    resolve = onResolve;
++    reject = onReject;
++  });
++  return { promise, resolve, reject };
++}
++
++function panel(symbol: string | null): JSX.Element {
++  return (
++    <MemoryRouter>
++      <InspectorPanel symbol={symbol} />
++    </MemoryRouter>
++  );
++}
++
++function inspector(): HTMLElement {
++  return screen.getByRole("region", { name: REGIONS.selectedStock });
++}
++
++async function advance(ms: number): Promise<void> {
++  await act(async () => {
++    await vi.advanceTimersByTimeAsync(ms);
++  });
++}
++
++/** Settles a read the test controls, flushing the state update it causes. */
++async function settle(action: () => void): Promise<void> {
++  await act(async () => {
++    action();
++    await Promise.resolve();
++  });
++}
++
++beforeEach(() => {
++  vi.useFakeTimers();
++  read.mockReset();
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++describe("TC-COMP-141: the inspector waits 150 ms, then issues one read (DAC-E4-S7-2; DEC-0164)", () => {
++  // Implements TC-COMP-141
++  it("exports the 150 ms wait", () => {
++    expect(INSPECT_DEBOUNCE_MS).toBe(150);
++  });
++
++  it("issues no read before 150 ms and exactly one at 150 ms, then none", async () => {
++    read.mockReturnValue(deferred<StockEvidence>().promise);
++    const { rerender } = render(panel("AAPL"));
++    expect(read).not.toHaveBeenCalled();
++    await advance(149);
++    expect(read).not.toHaveBeenCalled();
++    await advance(1);
++    expect(read).toHaveBeenCalledTimes(1);
++    expect(read).toHaveBeenCalledWith("AAPL");
++
++    rerender(panel("AAPL"));
++    await advance(10_000);
++    expect(read).toHaveBeenCalledTimes(1);
++  });
++
++  it("issues no further read once the read has settled, even on re-render", async () => {
++    read.mockResolvedValue(evidence());
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    expect(within(inspector()).getByText("Apple Inc.")).toBeInTheDocument();
++    rerender(panel("AAPL"));
++    await advance(10_000);
++    expect(read).toHaveBeenCalledTimes(1);
++  });
++
++  it("issues one read for a burst of selections, for the last, 150 ms after it", async () => {
++    read.mockReturnValue(deferred<StockEvidence>().promise);
++    const { rerender } = render(panel("AAPL"));
++    await advance(50);
++    rerender(panel("MSFT"));
++    await advance(50);
++    rerender(panel("NVDA"));
++    await advance(149);
++    expect(read).not.toHaveBeenCalled();
++    await advance(1);
++    expect(read).toHaveBeenCalledTimes(1);
++    expect(read).toHaveBeenCalledWith("NVDA");
++    await advance(1_000);
++    expect(read).toHaveBeenCalledTimes(1);
++  });
++});
++
++describe("TC-COMP-142: nothing selected reads the empty sentence (DAC-E4-S7-3)", () => {
++  // Implements TC-COMP-142
++  it("renders the Selected stock section with the empty sentence alone and issues no read", async () => {
++    render(panel(null));
++    const section = inspector();
++    expect(section.tagName).toBe("SECTION");
++    expect(section).toHaveTextContent(/^Select a stock to see why it scores as it does\.$/);
++    expect(section).toHaveTextContent(SELECTION.inspectorEmpty);
++    await advance(1_000);
++    expect(read).not.toHaveBeenCalled();
++    expect(within(section).queryByRole("link")).toBeNull();
++    expect(within(section).queryByRole("status")).toBeNull();
++    expect(within(section).queryByRole("button")).toBeNull();
++    expect(section).not.toHaveTextContent(SELECTION.inNoUniverse);
++    expect(section).not.toHaveTextContent(SELECTION.footnote);
++    expect(section).not.toHaveTextContent(LOADING);
++  });
++
++  it("returns to the empty sentence from a loaded stock", async () => {
++    read.mockResolvedValue(evidence());
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    expect(inspector()).toHaveTextContent("Apple Inc.");
++    rerender(panel(null));
++    expect(inspector()).toHaveTextContent(/^Select a stock to see why it scores as it does\.$/);
++    await advance(1_000);
++    expect(read).toHaveBeenCalledTimes(1);
++  });
++
++  it("discards a read still in flight when the selection is cleared", async () => {
++    const pending = deferred<StockEvidence>();
++    read.mockReturnValue(pending.promise);
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    rerender(panel(null));
++    await settle(() => pending.resolve(evidence()));
++    expect(inspector()).toHaveTextContent(/^Select a stock to see why it scores as it does\.$/);
++    expect(inspector()).not.toHaveTextContent("Apple Inc.");
++  });
++
++  it("discards a failure still in flight when the selection is cleared", async () => {
++    const pending = deferred<StockEvidence>();
++    read.mockReturnValue(pending.promise);
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    rerender(panel(null));
++    await settle(() => pending.reject(new TypeError("Failed to fetch")));
++    expect(inspector()).toHaveTextContent(/^Select a stock to see why it scores as it does\.$/);
++    expect(within(inspector()).queryByRole("button")).toBeNull();
++  });
++});
++
++describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
++  it("shows the loading skeleton while waiting and while the read is pending", async () => {
++    read.mockReturnValue(deferred<StockEvidence>().promise);
++    render(panel("AAPL"));
++    for (const ms of [0, 150, 1_000]) {
++      await advance(ms);
++      const status = within(inspector()).getByRole("status");
++      expect(status).toHaveTextContent(LOADING);
++      expect(inspector()).not.toHaveTextContent(SELECTION.inspectorEmpty);
++      expect(inspector()).not.toHaveTextContent(SELECTION.inNoUniverse);
++    }
++  });
++
++  it("takes the loading sentence from copy.ts", () => {
++    expect(SELECTION.inspectorLoading).toBe(LOADING);
++  });
++
++  it("replaces the block with the code's sentence and Try again on a refused read", async () => {
++    const refusal = new ClassificationApiError("No instrument ZZZZ (internal text)", "req-1", {
++      code: "instrument_not_found",
++      operation: "get-stock-evidence",
++      resource: "classification",
++    });
++    read.mockRejectedValueOnce(refusal);
++    render(panel("ZZZZ"));
++    await advance(150);
++    const section = inspector();
++    expect(section).toHaveTextContent(failureSentence(refusal));
++    expect(section).toHaveTextContent("FactorFlow doesn't follow that stock.");
++    expect(section).not.toHaveTextContent("internal text");
++    expect(section).not.toHaveTextContent("instrument_not_found");
++    expect(section).not.toHaveTextContent("req-1");
++    expect(within(section).queryByRole("status")).toBeNull();
++    expect(section).not.toHaveTextContent(SELECTION.inspectorEmpty);
++    expect(within(section).getByRole("button", { name: RESULTS.tryAgain })).toHaveAttribute(
++      "type",
++      "button",
++    );
++  });
++
++  it("replaces the block with the operation's generic sentence on a network failure", async () => {
++    read.mockRejectedValueOnce(new TypeError("Failed to fetch"));
++    render(panel("AAPL"));
++    await advance(150);
++    const section = inspector();
++    expect(section).toHaveTextContent(
++      "Could not load the stock's scores and inputs: FactorFlow hit an unexpected problem. Try again.",
++    );
++    expect(section).toHaveTextContent(
++      failureSentence({ operation: "get-stock-evidence", resource: "classification", code: null }),
++    );
++    expect(section).not.toHaveTextContent("Failed to fetch");
++    expect(within(section).getByRole("button", { name: RESULTS.tryAgain })).toBeInTheDocument();
++  });
++
++  it("re-reads the same symbol once when Try again is activated, and shows it", async () => {
++    read.mockRejectedValueOnce(new TypeError("Failed to fetch"));
++    render(panel("AAPL"));
++    await advance(150);
++    expect(read).toHaveBeenCalledTimes(1);
++    await advance(10_000);
++    expect(read).toHaveBeenCalledTimes(1);
++
++    read.mockResolvedValueOnce(evidence());
++    fireEvent.click(within(inspector()).getByRole("button", { name: RESULTS.tryAgain }));
++    expect(within(inspector()).getByRole("status")).toHaveTextContent(LOADING);
++    // A retry takes the same 150 ms wait as a selection, then reads once.
++    await advance(149);
++    expect(read).toHaveBeenCalledTimes(1);
++    await advance(1);
++    expect(read).toHaveBeenCalledTimes(2);
++    expect(read).toHaveBeenLastCalledWith("AAPL");
++    expect(inspector()).toHaveTextContent("Apple Inc.");
++    expect(within(inspector()).queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
++    await advance(10_000);
++    expect(read).toHaveBeenCalledTimes(2);
++  });
++
++  it("never renders a read that resolves after the selection moved on", async () => {
++    const aapl = deferred<StockEvidence>();
++    const msft = deferred<StockEvidence>();
++    read.mockReturnValueOnce(aapl.promise).mockReturnValueOnce(msft.promise);
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    rerender(panel("MSFT"));
++    await advance(150);
++    expect(read).toHaveBeenNthCalledWith(2, "MSFT");
++
++    await settle(() => aapl.resolve(evidence()));
++    expect(inspector()).not.toHaveTextContent("Apple Inc.");
++    expect(within(inspector()).getByRole("status")).toHaveTextContent(LOADING);
++
++    await settle(() => msft.resolve(evidence({ symbol: "MSFT", name: "Microsoft Corp." })));
++    expect(inspector()).toHaveTextContent("Microsoft Corp.");
++    expect(inspector()).not.toHaveTextContent("Apple Inc.");
++  });
++
++  it("never renders an earlier read that resolves last", async () => {
++    const aapl = deferred<StockEvidence>();
++    const msft = deferred<StockEvidence>();
++    read.mockReturnValueOnce(aapl.promise).mockReturnValueOnce(msft.promise);
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    rerender(panel("MSFT"));
++    await advance(150);
++    await settle(() => msft.resolve(evidence({ symbol: "MSFT", name: "Microsoft Corp." })));
++    await settle(() => aapl.resolve(evidence()));
++    expect(inspector()).toHaveTextContent("Microsoft Corp.");
++    expect(inspector()).not.toHaveTextContent("Apple Inc.");
++  });
++
++  it("never renders a stale failure", async () => {
++    const aapl = deferred<StockEvidence>();
++    const msft = deferred<StockEvidence>();
++    read.mockReturnValueOnce(aapl.promise).mockReturnValueOnce(msft.promise);
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    rerender(panel("MSFT"));
++    await advance(150);
++    await settle(() => aapl.reject(new TypeError("Failed to fetch")));
++    expect(within(inspector()).queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
++    expect(within(inspector()).getByRole("status")).toHaveTextContent(LOADING);
++  });
++
++  it("issues no read when unmounted before the wait ends", async () => {
++    const { unmount } = render(panel("AAPL"));
++    await advance(100);
++    unmount();
++    await advance(1_000);
++    expect(read).not.toHaveBeenCalled();
++  });
++
++  it("reads again when the selection returns to a stock already read", async () => {
++    read.mockImplementation(async (symbol) =>
++      evidence({ symbol, name: symbol === "AAPL" ? "Apple Inc." : "Microsoft Corp." }),
++    );
++    const { rerender } = render(panel("AAPL"));
++    await advance(150);
++    rerender(panel("MSFT"));
++    await advance(150);
++    rerender(panel("AAPL"));
++    await advance(150);
++    expect(read.mock.calls.map(([symbol]) => symbol)).toEqual(["AAPL", "MSFT", "AAPL"]);
++    expect(inspector()).toHaveTextContent("Apple Inc.");
++    await advance(10_000);
++    expect(read).toHaveBeenCalledTimes(3);
++  });
++});
+diff --git a/web/src/components/patterns/inspector-panel.tsx b/web/src/components/patterns/inspector-panel.tsx
+new file mode 100644
+index 0000000..0241efa
+--- /dev/null
++++ b/web/src/components/patterns/inspector-panel.tsx
+@@ -0,0 +1,129 @@
++import { type JSX, type ReactNode, useEffect, useState } from "react";
++import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
++import type { StockEvidence } from "../../api/classification-types";
++import { REGIONS, RESULTS, SELECTION, failureSentence } from "../../screens/research/copy";
++
++/**
++ * How long a selection must settle before the inspector reads it
++ * (classification-ui section 2.5; DAC-E4-S7-2). The inspector owns this one
++ * wait (DEC-0164).
++ */
++export const INSPECT_DEBOUNCE_MS = 150;
++
++type InspectorState =
++  | { kind: "idle" }
++  | { kind: "loading" }
++  | { kind: "loaded"; evidence: StockEvidence }
++  | { kind: "failed"; sentence: string };
++
++const IDLE: InspectorState = { kind: "idle" };
++const LOADING: InspectorState = { kind: "loading" };
++
++/**
++ * The STD-UI-19 sentence for a failed read, built by `copy.ts` from the
++ * error's code alone, never from its `message` (classification-ui 2.4). A
++ * failure that is not an API refusal, a network error say, takes the
++ * operation's generic sentence.
++ */
++function failureOf(cause: unknown): string {
++  return cause instanceof ClassificationApiError
++    ? failureSentence(cause)
++    : failureSentence({ operation: "get-stock-evidence", resource: "classification", code: null });
++}
++
++function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
++  return (
++    <div>
++      <p>{evidence.symbol}</p>
++      <p>{evidence.name}</p>
++    </div>
++  );
++}
++
++/**
++ * The inspector (classification-ui section 2.5; blueprint 4.5; UX design
++ * 1.1), DAC-E4-S7-2 and DAC-E4-S7-3. A pattern the Research screen
++ * (CAP-002-E4-S9) and a universe's Members tab mount beside their results.
++ *
++ * The host passes the immediate selected symbol, not the results table's
++ * debounced `onInspect` value, so only one 150 ms wait exists (DEC-0164).
++ * Each settled symbol is read once with `getStockEvidence` (CAP-002-E4-S1):
++ * no polling, no cache and no prefetch. A response for a symbol that is no
++ * longer current is dropped, and a failure offers **Try again**, which reads
++ * the same symbol once more after the same wait (DEC-0165). With `symbol` null it reads the empty
++ * sentence and issues nothing.
++ *
++ * Strings: `REGIONS.selectedStock`, `SELECTION.inspectorEmpty` and
++ * `inspectorLoading`, `RESULTS.tryAgain` and `failureSentence` from
++ * `screens/research/copy.ts` (CAP-002-E4-S2).
++ */
++export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Element {
++  const [state, setState] = useState<InspectorState>(IDLE);
++  const [attempt, setAttempt] = useState(0);
++
++  // `attempt` is a dependency it does not read: Try again re-runs the read.
++  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
++  useEffect(() => {
++    if (symbol === null) {
++      setState(IDLE);
++      return;
++    }
++    let cancelled = false;
++    setState(LOADING);
++    const timer = setTimeout(() => {
++      getStockEvidence(symbol).then(
++        (evidence) => {
++          if (!cancelled) {
++            setState({ kind: "loaded", evidence });
++          }
++        },
++        (cause: unknown) => {
++          if (!cancelled) {
++            setState({ kind: "failed", sentence: failureOf(cause) });
++          }
++        },
++      );
++    }, INSPECT_DEBOUNCE_MS);
++    return () => {
++      cancelled = true;
++      clearTimeout(timer);
++    };
++  }, [symbol, attempt]);
++
++  let body: ReactNode;
++  if (state.kind === "loaded") {
++    body = <Loaded evidence={state.evidence} />;
++  } else if (state.kind === "failed") {
++    body = (
++      <>
++        <p className="text-sm">{state.sentence}</p>
++        <button
++          type="button"
++          onClick={() => setAttempt((count) => count + 1)}
++          className="w-fit rounded border border-border px-3 py-2 text-sm"
++        >
++          {RESULTS.tryAgain}
++        </button>
++      </>
++    );
++  } else if (state.kind === "loading") {
++    body = (
++      // An `output` carries `role="status"` implicitly (as `as-of-line.tsx`).
++      <output className="block h-24 w-full animate-pulse rounded bg-secondary">
++        <span className="sr-only">{SELECTION.inspectorLoading}</span>
++      </output>
++    );
++  } else {
++    body = <p className="text-sm">{SELECTION.inspectorEmpty}</p>;
++  }
++
++  return (
++    <section
++      aria-label={REGIONS.selectedStock}
++      data-variant="summary"
++      className="flex flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground"
++    >
++      {body}
++    </section>
++  );
++}
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 0f39d81..abd2595 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -529,6 +529,8 @@ describe("copy.ts completeness and keying", () => {
+       "In Tech, Value and Dividend growers",
+     );
+     expect(copy.SELECTION.inUniverses(["Tech"])).toBe("In Tech");
++    // CAP-002-E4-S7 T009 (DEC-0165): the inspector skeleton's text.
++    expect(copy.SELECTION.inspectorLoading).toBe("Loading the selected stock.");
+     expect(
+       copy.SELECTION.inputsLine(
+         ["book-to-price", "earnings yield", "free-cash-flow yield"],
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 2567247..41ea694 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -486,6 +486,12 @@ export const SELECTION = {
+   compareBlocked: "Check 2 to 6 stocks to compare them.",
+   addToUniverse: "Add to universe…",
+   inspectorEmpty: "Select a stock to see why it scores as it does.",
++  /**
++   * The inspector skeleton's text while its one read is pending (UX 1.1
++   * Loading, *inspector skeleton*; classification-ui 2.5). No design states
++   * the words (CAP-002-E4-S7 Open Gap 3, DEC-0165).
++   */
++  inspectorLoading: "Loading the selected stock.",
+   inNoUniverse: "In no universe",
+   /** *In Tech and Dividend growers* */
+   inUniverses: (names: readonly string[]): string => `In ${listOf(names)}`,
