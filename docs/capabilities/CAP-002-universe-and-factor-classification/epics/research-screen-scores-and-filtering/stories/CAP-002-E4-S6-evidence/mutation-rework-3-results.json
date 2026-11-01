@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/results-table.test.tsx src/screens/research/results-window.test.ts src/screens/research/copy.test.ts",
+  "repo_head": "f8ac5ea904c1aaeb1b1ec32cdd544a93a95c721e",
+  "tree_patch_sha256": "3875a2a4dc31b9c271c18ba2674ff26ed7cdad55af8e89b5d70603a4cf833e8f",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/mutants-r3.json",
+  "mutants_sha256": "1349d37201608876115be41077173564794403dce45ade2a9f1dc8f7d845bfcb",
+  "jobs": 3,
+  "started": "2026-10-31T01:42:06Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 3.9,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/baseline-w0.log",
+      "log_sha256": "a2efcfbc1336dc8e60cd5630a60bb534daa0f357a52cb1d24d04ea54e67d8790"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 3.9,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/baseline-w1.log",
+      "log_sha256": "0ab15cc711f69dd62d93d1a241e5c1b9eb6ee7c75c6027bf5ad4af4b905716f8"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 4.0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/baseline-w2.log",
+      "log_sha256": "d57cc2e775ce1fae102d5ebef427db6a8dc1fcde774426c335dfffd5f58dae41"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:rework-3:defect-restored",
+      "cycle": "rework-3",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "    const symbol = loaded.stocks[target].symbol;\n    select(symbol);\n    const revealed = scrollTopToReveal(target, scrollTop);\n    if (revealed === scrollTop) {\n      // In the viewport, so already rendered: focus it now. A request here\n      // could outlive the press when the target is already selected, since\n      // nothing re-renders, and a later unrelated render would act on it.\n      pendingFocus.current = null;\n      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n      return;\n    }\n    // The scroll's own render brings the row into the window and consumes the request.\n    pendingFocus.current = symbol;\n    if (scrollRef.current !== null) {\n      scrollRef.current.scrollTop = revealed;\n    }\n    setScrollTop(revealed);\n  }\n",
+      "new": "    select(loaded.stocks[target].symbol);\n    pendingFocus.current = loaded.stocks[target].symbol;\n    const revealed = scrollTopToReveal(target, scrollTop);\n    if (revealed !== scrollTop) {\n      if (scrollRef.current !== null) {\n        scrollRef.current.scrollTop = revealed;\n      }\n      setScrollTop(revealed);\n    }\n  }\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_defect-restored.log",
+      "log_sha256": "2ecdccbedf75a2d540386aa304079598d95022154aa744f7f0db868ca8a9d134"
+    },
+    {
+      "id": "manual:rework-3:direct-focus-dropped",
+      "cycle": "rework-3",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n",
+      "new": "",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_direct-focus-dropped.log",
+      "log_sha256": "988e7d2f3a69cc00b3f4ee661aada253d6c9cecaea41009208c0490fb7f14eb5"
+    },
+    {
+      "id": "manual:rework-3:scroll-request-dropped",
+      "cycle": "rework-3",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "    pendingFocus.current = symbol;\n    if (scrollRef.current !== null) {",
+      "new": "    if (scrollRef.current !== null) {",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.5,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_scroll-request-dropped.log",
+      "log_sha256": "0e8df4303c2bd7fcecec9ec3b1e4defedc6c88e5935f1f5ae2ec85bc8290ed18"
+    },
+    {
+      "id": "manual:rework-3:request-left-on-direct",
+      "cycle": "rework-3",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "      pendingFocus.current = null;\n      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n",
+      "new": "      pendingFocus.current = symbol;\n      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.2,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_request-left-on-direct.log",
+      "log_sha256": "c70f02dcc056c399f69c897d2710f53034e1c0858837af76aaa958264ab4d258"
+    },
+    {
+      "id": "manual:rework-3:direct-branch-always",
+      "cycle": "rework-3",
+      "operator": "manual",
+      "file": "web/src/screens/research/results-table.tsx",
+      "old": "    if (revealed === scrollTop) {",
+      "new": "    if (revealed === scrollTop || target >= 0) {",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.3,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_direct-branch-always.log",
+      "log_sha256": "b67eeee726f2be836bfaf7b860ca5a415716cebdd0f3a95d06255736e90635b1"
+    }
+  ],
+  "finished": "2026-10-31T01:42:17Z"
+}
