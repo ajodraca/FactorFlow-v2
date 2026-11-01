@@ -98,4 +98,4 @@ cycles:
           reason: EXISTS ignores its subquery's select list, so SELECT 2 and SELECT 1 test the same rows
         - id: manual:membership-order-id-dropped
           disposition: equivalent
-          reason: the DISTINCT ON feeds the final sort in universe_id order and PostgreSQL keeps presorted equal keys in place, so no result can distinguish the tiebreaker, which makes the order a guarantee of the statement rather than of the plan
+          reason: the tiebreaker is unreachable in product data, since universe names are unique among active universes (DEC-0057, universe-service design section 3) and stock_memberships.sql leaves retired ones out, so no stored state can distinguish it; the order stays a guarantee of the statement

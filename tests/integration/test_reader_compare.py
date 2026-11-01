@@ -258,6 +258,9 @@ def test_compare_with_no_complete_set_is_the_never_classified_page(
     conn = migrated_run_schema_connection
     insert_instrument(conn, "AAA")
     insert_instrument(conn, "BBB")
+    run_id = insert_run(conn, "succeeded", started_at=T0 - timedelta(hours=1))
+    insert_set(conn, run_id, "building", started_at=T0)
+    assert reader.read_set_blocks(conn)[1] is not None
 
     counting = CountingConnection(conn)
     page = reader.compare(counting, ["AAA", "BBB"])  # type: ignore[arg-type]

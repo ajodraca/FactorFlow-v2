@@ -273,19 +273,22 @@ def seed_scored_stock(
     lifecycle: str = "active",
     restated: Iterable[str] = (),
     name: str | None = None,
+    reverse: bool = False,
 ) -> int:
     """An instrument and its three ``factor_classification`` rows in one call.
 
     Each factor takes ``(score, percentile)`` for a classified cell or ``(reason_code,
     reason_input_or_None)`` for a ``not_classified`` one; an input reason gets a
     ``reason_detail`` naming its input. ``restated`` names the factors whose row carries
-    ``restated_possible``; ``name`` stores an ``instrument_reference`` company name.
+    ``restated_possible``; ``name`` stores an ``instrument_reference`` company name; ``reverse``
+    inserts the rows against ``FACTORS`` order so a read's ordering is not the storage order.
     """
     instrument_id = insert_instrument(conn, symbol, lifecycle)
     if name is not None:
         insert_reference(conn, instrument_id, name)
     marked = set(restated)
-    for factor, given in zip(FACTORS, (value, growth, momentum), strict=True):
+    cells = list(zip(FACTORS, (value, growth, momentum), strict=True))
+    for factor, given in reversed(cells) if reverse else cells:
         if isinstance(given[0], str):
             reason_code, reason_input = given[0], given[1]
             assert reason_input is None or isinstance(reason_input, str)
@@ -328,27 +331,29 @@ def seed_inputs(
     statuses: dict[str, str] | None = None,
     values: dict[str, Any] | None = None,
     restated: Iterable[str] = (),
+    reverse: bool = False,
 ) -> None:
     """The stock's eight ``factor_input`` rows through ``insert_input``.
 
     Every input is ``present`` unless ``statuses`` names it; ``values`` overrides a present
-    input's value and ``restated`` names the inputs whose row carries ``restated_possible``.
+    input's value and ``restated`` names the inputs whose row carries ``restated_possible``;
+    ``reverse`` inserts them against definition order so a read's ordering is not storage order.
     """
     given = statuses or {}
     valued = values or {}
     marked = set(restated)
-    for factor in FACTORS:
-        for input_name in INPUT_NAMES[factor]:
-            insert_input(
-                conn,
-                set_id,
-                instrument_id,
-                factor,
-                input_name,
-                given.get(input_name, "present"),
-                value=valued.get(input_name),
-                restated_possible=input_name in marked,
-            )
+    pairs = [(factor, name) for factor in FACTORS for name in INPUT_NAMES[factor]]
+    for factor, input_name in reversed(pairs) if reverse else pairs:
+        insert_input(
+            conn,
+            set_id,
+            instrument_id,
+            factor,
+            input_name,
+            given.get(input_name, "present"),
+            value=valued.get(input_name),
+            restated_possible=input_name in marked,
+        )
 
 
 def rename_universe(conn: psycopg.Connection, universe_id: UUID, name: str) -> None:

@@ -100,7 +100,22 @@ def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
     """DAC-E3-S3-3: eight input rows in definition order, memberships in name order."""
     conn = migrated_run_schema_connection
     set_id = _complete_set(conn)
-    aapl = seed_scored_stock(conn, set_id, "AAPL", name="Apple Inc.", restated=("value",))
+    # Other stocks' rows sit in the same current set, inserted after AAPL's, with
+    # different cells and values: the read must carry only AAPL's, in definition order, though
+    # AAPL's own rows are stored against that order.
+    other_cell = (D("0.9"), D("90"))
+    own_cell = (D("0.3"), D("30"))
+    aapl = seed_scored_stock(
+        conn,
+        set_id,
+        "AAPL",
+        value=own_cell,
+        growth=own_cell,
+        momentum=own_cell,
+        name="Apple Inc.",
+        restated=("value",),
+        reverse=True,
+    )
     seed_inputs(
         conn,
         set_id,
@@ -108,7 +123,16 @@ def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
         statuses={"return_12m": "missing"},
         values={"book_to_price": D("0.1234567890"), "return_3m": D("-0.25")},
         restated={"fcf_yield", "eps_growth"},
+        reverse=True,
     )
+    other_first = seed_scored_stock(
+        conn, set_id, "AAAA", value=other_cell, growth=other_cell, momentum=other_cell
+    )
+    seed_inputs(conn, set_id, other_first, values={"book_to_price": D("9.9")})
+    other_last = seed_scored_stock(
+        conn, set_id, "ZZZZ", value=other_cell, growth=other_cell, momentum=other_cell
+    )
+    seed_inputs(conn, set_id, other_last, values={"return_3m": D("7.7")})
     zeta = insert_universe(conn, "Zeta", [aapl])
     alpha = insert_universe(conn, "Alpha", [aapl])
 
@@ -146,6 +170,7 @@ def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
         "restated_possible FROM factor_classification WHERE set_id = %s AND instrument_id = %s",
         (set_id, aapl),
     ).fetchall()
+    assert len(stored) == len(FACTORS)
     assert list(evidence.factors) == list(FACTORS)
     for factor, status, score, percentile, code, rinput, detail, restated in stored:
         assert evidence.factors[factor] == reader.FactorCell(
@@ -398,6 +423,8 @@ def test_memberships_omit_a_retired_universe_and_keep_a_late_addition(
 def test_memberships_with_equal_names_order_by_universe_id(
     migrated_run_schema_connection: psycopg.Connection,
 ) -> None:
+    """Documents unreachable data: active universes have unique names (DEC-0057), so this holds
+    but cannot fail without the tiebreaker; the statement's total order is its guarantee."""
     conn = migrated_run_schema_connection
     set_id = _complete_set(conn)
     stock = seed_scored_stock(conn, set_id, "AAPL")
