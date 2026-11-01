@@ -1,0 +1,260 @@
+# RED rework-4: results-table.test.tsx with each of the v4 review's three non-equivalent survivors applied to results-table.tsx in turn
+# manual:review-v4:scroll-state-not-set, manual:review-v4:direct-branch-above-too and manual:review-v4:move-guard-dropped, re-derived from
+# CAP-002-E4-S6-implementation-review-v4-mutation.json; production restored byte-for-byte after each run
+
+## manual:review-v4:scroll-state-not-set
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/results-table.test.tsx (97 tests | 2 failed) 2680ms
+   × TC-COMP-139: selection and checking never interfere > scrolls a row into the window before focusing it: twelve ArrowUps from the first visible row 119ms
+     → expected [] to deeply equal [ 'SYM0028' ]
+   × TC-COMP-139: selection and checking never interfere > scrolls the already-selected row in and focuses it when an arrow targets it above the viewport, and a later query change leaves an outside control alone 33ms
+     → expected <input type="checkbox" …(2)></input> to be <tr data-symbol="SYM0005" …(4)>…(6)</tr> // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > scrolls a row into the window before focusing it: twelve ArrowUps from the first visible row
+AssertionError: expected [] to deeply equal [ 'SYM0028' ]
+
+- Expected
++ Received
+
+- Array [
+-   "SYM0028",
+- ]
++ Array []
+
+ ❯ src/screens/research/results-table.test.tsx:2158:31
+    2156|       await user.keyboard("{ArrowUp}");
+    2157|     }
+    2158|     expect(selectedSymbols()).toEqual(["SYM0028"]);
+       |                               ^
+    2159|     expect(document.activeElement).toBe(rowOf("SYM0028"));
+    2160|     expect(rowOf("SYM0028").tabIndex).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > scrolls the already-selected row in and focuses it when an arrow targets it above the viewport, and a later query change leaves an outside control alone
+AssertionError: expected <input type="checkbox" …(2)></input> to be <tr data-symbol="SYM0005" …(4)>…(6)</tr> // Object.is equality
+
+- Expected
++ Received
+
+- <tr
+-   aria-rowindex="7"
+-   aria-selected="true"
+-   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
+-   data-symbol="SYM0005"
+-   tabindex="0"
+- >
+-   <td>
+  <input
+-       aria-label="Select SYM0005"
++   aria-label="Select SYM0006"
+    class="h-5 w-5"
+    type="checkbox"
+-     />
+-   </td>
+-   <th
+-     class="text-left font-numeric"
+-     scope="row"
+-   >
+-     SYM0005
+-   </th>
+-   <td
+-     class="truncate"
+-     title="SYM0005 Incorporated"
+-   >
+-     SYM0005 Incorporated
+-   </td>
+-   <td
+-     class="text-right"
+-   >
+-     <span
+-       class="inline-flex items-center gap-1"
+-       data-testid="factor-cell"
+-     >
+-       <span
+-         class="inline-block w-5 text-right font-numeric font-semibold"
+-         data-testid="factor-percentile"
+-       >
+-         5
+-       </span>
+-       <span
+-         aria-hidden="true"
+-         class="inline-block h-2 w-7 overflow-hidden"
+-         data-testid="factor-bar"
+-         style="background: hsl(var(--seq-1));"
+-       >
+-         <span
+-           class="block h-full"
+-           style="width: 5%; background: hsl(var(--seq-4));"
+-         />
+-       </span>
+-     </span>
+-   </td>
+-   <td
+-     class="text-right"
+-   >
+-     <span
+-       class="inline-flex items-center gap-1"
+-       data-testid="factor-cell"
+-     >
+-       <span
+-         class="inline-block w-5 text-right font-numeric font-semibold"
+-         data-testid="factor-percentile"
+-       >
+-         35
+-       </span>
+-       <span
+-         aria-hidden="true"
+-         class="inline-block h-2 w-7 overflow-hidden"
+-         data-testid="factor-bar"
+-         style="background: hsl(var(--seq-1));"
+-       >
+-         <span
+-           class="block h-full"
+-           style="width: 35%; background: hsl(var(--seq-4));"
+-         />
+-       </span>
+-     </span>
+-   </td>
+-   <td
+-     class="text-right"
+-   >
+-     <span
+-       class="inline-flex items-center gap-1"
+-       data-testid="factor-cell"
+-     >
+-       <span
+-         class="inline-block w-5 text-right font-numeric font-semibold"
+-         data-testid="factor-percentile"
+-       >
+-         65
+-       </span>
+-       <span
+-         aria-hidden="true"
+-         class="inline-block h-2 w-7 overflow-hidden"
+-         data-testid="factor-bar"
+-         style="background: hsl(var(--seq-1));"
+-       >
+-         <span
+-           class="block h-full"
+-           style="width: 65%; background: hsl(var(--seq-4));"
+  />
+-       </span>
+-     </span>
+-   </td>
+- </tr>
+
+ ❯ src/screens/research/results-table.test.tsx:2278:36
+    2276|     expect(scroller().scrollTop).toBe(scrollTopToReveal(5, 6 * ROW_HEI…
+    2277|     expect(scroller().scrollTop).toBe(5 * ROW_HEIGHT_PX);
+    2278|     expect(document.activeElement).toBe(rowOf("SYM0005"));
+       |                                    ^
+    2279|     const outside = document.createElement("input");
+    2280|     outside.setAttribute("aria-label", "Host filter");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 95 passed (97)
+   Start at  19:19:40
+   Duration  3.50s (transform 136ms, setup 47ms, collect 208ms, tests 2.68s, environment 268ms, prepare 164ms)
+
+
+## manual:review-v4:direct-branch-above-too
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/results-table.test.tsx (97 tests | 2 failed) 2760ms
+   × TC-COMP-139: selection and checking never interfere > scrolls a row into the window before focusing it: twelve ArrowUps from the first visible row 131ms
+     → expected [] to deeply equal [ 'SYM0028' ]
+   × TC-COMP-139: selection and checking never interfere > scrolls the already-selected row in and focuses it when an arrow targets it above the viewport, and a later query change leaves an outside control alone 36ms
+     → expected 192 to be 160 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > scrolls a row into the window before focusing it: twelve ArrowUps from the first visible row
+AssertionError: expected [] to deeply equal [ 'SYM0028' ]
+
+- Expected
++ Received
+
+- Array [
+-   "SYM0028",
+- ]
++ Array []
+
+ ❯ src/screens/research/results-table.test.tsx:2158:31
+    2156|       await user.keyboard("{ArrowUp}");
+    2157|     }
+    2158|     expect(selectedSymbols()).toEqual(["SYM0028"]);
+       |                               ^
+    2159|     expect(document.activeElement).toBe(rowOf("SYM0028"));
+    2160|     expect(rowOf("SYM0028").tabIndex).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > scrolls the already-selected row in and focuses it when an arrow targets it above the viewport, and a later query change leaves an outside control alone
+AssertionError: expected 192 to be 160 // Object.is equality
+
+- Expected
++ Received
+
+- 160
++ 192
+
+ ❯ src/screens/research/results-table.test.tsx:2276:34
+    2274|     await user.keyboard("{ArrowUp}");
+    2275|     expect(selectedSymbols()).toEqual(["SYM0005"]);
+    2276|     expect(scroller().scrollTop).toBe(scrollTopToReveal(5, 6 * ROW_HEI…
+       |                                  ^
+    2277|     expect(scroller().scrollTop).toBe(5 * ROW_HEIGHT_PX);
+    2278|     expect(document.activeElement).toBe(rowOf("SYM0005"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 95 passed (97)
+   Start at  19:19:44
+   Duration  3.38s (transform 142ms, setup 31ms, collect 193ms, tests 2.76s, environment 198ms, prepare 49ms)
+
+
+## manual:review-v4:move-guard-dropped
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/results-table.test.tsx (97 tests | 1 failed) 2723ms
+   × TC-COMP-139: selection and checking never interfere > stays put on an arrow past either end pressed from an end row or its checkbox while another row is selected 25ms
+     → expected [ 'NVDA' ] to deeply equal [ 'MSFT' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > stays put on an arrow past either end pressed from an end row or its checkbox while another row is selected
+AssertionError: expected [ 'NVDA' ] to deeply equal [ 'MSFT' ]
+
+- Expected
++ Received
+
+  Array [
+-   "MSFT",
++   "NVDA",
+  ]
+
+ ❯ src/screens/research/results-table.test.tsx:1973:31
+    1971|     checkboxOf("NVDA").focus();
+    1972|     await user.keyboard("{ArrowDown}");
+    1973|     expect(selectedSymbols()).toEqual(["MSFT"]);
+       |                               ^
+    1974|     expect(document.activeElement).toBe(checkboxOf("NVDA"));
+    1975|     rowOf("NVDA").focus();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 96 passed (97)
+   Start at  19:19:47
+   Duration  3.28s (transform 132ms, setup 27ms, collect 181ms, tests 2.72s, environment 145ms, prepare 60ms)
+

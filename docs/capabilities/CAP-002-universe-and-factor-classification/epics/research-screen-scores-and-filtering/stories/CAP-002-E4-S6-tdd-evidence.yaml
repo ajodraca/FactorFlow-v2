@@ -8,7 +8,9 @@
 # trees written after each cycle (git write-tree), so the four apply in order onto the stage parent. The
 # evidence logs and patches of earlier cycles appear in a later patch as added files; they are documentation.
 # Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
-# subagent before the next cycle began. The verdicts below are the final reviews of the patches cited.
+# subagent before the next cycle began, with one exception: rework-3's spec drift was first assessed by the coding
+# agent, and its independent spec-drift review was run afterwards, in rework-4, over rework-3.patch (recorded in
+# rework-3's description). The verdicts below are the final reviews of the patches cited.
 # Mutation: scripts/mutation-run.py with each cycle's focused suite (vitest compiles with esbuild and does not
 # type-check, so a mutant runs on its runtime behaviour). The operator catalogue derives negate-boolean and
 # off-by-one mutants from TypeScript; JSX yields nothing, so hand-written mutants ("operator": "manual") cover
@@ -549,8 +551,12 @@ cycles:
       deferred page arrives. TC-COMP-138 arms from SYM0001's checkbox onto the selected SYM0000, activates Sort
       by value percentile, and asserts the request and focus on the button before and after the deferred page.
       DEC-0244 (focus falls to document.body when a refresh drops the focused row) is unchanged. Code review by
-      an independent subagent (APPROVED, read-only, over the code diff); spec drift was assessed by the coding
-      agent, since the change restores T013 and DAC-E4-S6-2 as written and touches no specification.
+      an independent subagent (APPROVED, read-only, over the code diff); spec drift was first assessed by the coding
+      agent, since the change restores T013 and DAC-E4-S6-2 as written and touches no specification. Review v4
+      IR-003 noted that this broke T017's independence; in rework-4 an independent, read-only spec-drift subagent
+      judged rework-3.patch against the story, T003, T004, T013, component-design-classification-ui, ux-design and
+      the TC-COMP-138/139 test specification and returned drift_detected false, so the spec_drift below is now
+      that independent verdict.
     red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-3.log
     red_log_sha256: aac0157bf199e61c811b5c6b1e74543a2cb7d82a1294a952410750d173ddc3ff
     red_evidence: >
@@ -589,3 +595,72 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: rework-4
+    tasks: [T004, T017]
+    addresses_review: CAP-002-E4-S6-implementation-review-v4.md
+    findings: [IR-001, IR-002, IR-003]
+    description: >
+      Test-only rework; results-table.tsx is unchanged, as the review's remediation states. IR-001 (HIGH): two
+      TC-COMP-139 tests. "Twelve ArrowUps from the first visible row" scrolls 100 rows to row 40, clicks SYM0040
+      and presses ArrowUp twelve times, two more than OVERSCAN_ROWS, so the target leaves the rendered window;
+      it asserts SYM0028 selected, focused and the tab stop, and scrollTop equal to scrollTopToReveal (28 *
+      ROW_HEIGHT_PX). The second starts with SYM0005 selected and the list scrolled to row 6, presses ArrowUp
+      from SYM0006's checkbox onto the already-selected row above the viewport, and asserts the selection, the
+      reveal (5 * ROW_HEIGHT_PX) and focus on the SYM0005 row; then a controlled-query change (hideIncomplete)
+      with a deferred page leaves focus on an input outside the table before and after the page lands
+      (DAC-E4-S6-2). IR-002 (HIGH): a TC-COMP-139 test selects MSFT, then presses ArrowDown from NVDA's checkbox
+      and from the NVDA row, and ArrowUp from AAPL's checkbox and from the AAPL row; the selection stays on MSFT,
+      focus stays where it was, and nothing is checked. IR-003 (LOW): this cycle's patch was judged by an
+      independent code-review subagent and an independent spec-drift subagent, as T017 requires; the same
+      spec-drift subagent judged rework-3.patch, and the header and rework-3's description now say so.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-4.log
+    red_log_sha256: 84c790f364a274bdc6e902a5217cbd224adcba050ba6eefb198247d4fd5771c2
+    red_evidence: >
+      The production code was already correct, so the RED is each of the review's three non-equivalent survivors,
+      re-derived from CAP-002-E4-S6-implementation-review-v4-mutation.json and applied to results-table.tsx in
+      turn: results-table.test.tsx ran 97 tests each time. manual:review-v4:scroll-state-not-set and
+      manual:review-v4:direct-branch-above-too each fail the two IR-001 tests (2 failed, 95 passed);
+      manual:review-v4:move-guard-dropped fails the IR-002 test (1 failed, 96 passed). Production was restored
+      byte-for-byte after each run (sha256 b4201f1f9e8bfe8aa13535405743f6c9730279376928ca370bb9b2f083a0bac2 before
+      and after). On the reviewed code the three tests pass by design.
+    green_evidence: >
+      results-table.test.tsx 97, results-window.test.ts 17 and copy.test.ts 344 passed, 458 in all
+      (green-rework-4.log); the full web suite 1371 passed in 60 files after the origin/main merge 81ab214
+      (full-suite-rework-4.log, npm run test); npm run lint, npm run format, npx tsc --noEmit and npm run build
+      exit 0; npm run test:e2e not run (the plan excludes it). Mutation: the catalogue yields nothing (no
+      production line changed); the review's fourteen hand-written mutants of move(), re-run as manual:rework-4
+      mutants, give 13 killed, including the three survivors IR-001 and IR-002 name, and 1 survivor,
+      direct-clear-dropped, which review v4 judged equivalent; its disposition is below.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-4.log
+        sha256: ed72979d6b7207b3265c4e95a254a4363a0785def0c2572497361851e7216081
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-4.log
+        sha256: 2f860bd55fd1c31a0f5d02a4fc71f5b58b3066c1acfdba912920d0968f522b5d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e9ae22de3517c13414f453bfd7a721b19dd6e2791220f5c717c51bd9b5508d92
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-4.patch
+    commit_hash: stage
+    decisions: [DEC-0244]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-4-results.json
+      results_sha256: fafdf5e2114238ce6685ca071421c2b52288031d264ddcd37c139ae1f5143036
+      generated: 14
+      killed: 13
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.929
+      survivors:
+        - id: manual:rework-4:direct-clear-dropped
+          disposition: equivalent
+          reason: >
+            Drops `pendingFocus.current = null` from move()'s direct branch. The line matters only if a request is
+            still set when move() starts. Only the scroll branch sets one, and it always hands setScrollTop a value
+            different from the rendered scrollTop, so a render follows whose window holds the target
+            (scrollTopToReveal places it in the viewport); React 18 flushes that discrete event's passive effects
+            before the next event, so the pending-focus effect consumes the request first. T013 specifies only that
+            the request is consumed in an effect. Review v4 judged it equivalent on the same grounds.
