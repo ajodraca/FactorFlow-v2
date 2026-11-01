@@ -72,6 +72,14 @@ export const UNIVERSE_LIFECYCLE = {
     "This universe is retired and can't be changed. Its members and history are still viewable.",
   /** UX 1.4: the sole member's blocked Remove…, and the `last_member` refusal. */
   lastMember: "This is the last member. Retire the universe instead.",
+  /**
+   * The `409 last_member` backstop alert in the remove dialog, which says the
+   * removal was refused (DEC-0107, PROVISIONAL; CAP-002-E1-S8 T010). UX 1.4
+   * fixes the behaviour but gives no sentence. A standalone string selected by
+   * code, not `failureSentence` output.
+   */
+  lastMemberRefused:
+    "This is the last member, so it can't be removed. Retire the universe instead.",
   /** UX 1.3: the universes card header's count. */
   counts: (active: number, retired: number): string => `${active} active, ${retired} retired`,
   /** UX 1.3: the lifecycle filter matches none. */
@@ -677,6 +685,8 @@ export const UNIVERSE_DETAIL = {
   removeDescription:
     "Its membership until today stays in the universe's history. Its scores are not affected.",
   removeConfirm: "Remove from universe",
+  /** UX 1.4: the in-row action's visible label; its accessible name is `remove`. */
+  removeAction: "Remove…",
   removed: (symbol: string, name: string): string => `Removed ${symbol} from ${name}`,
   membersAsOf: "Members as of",
   membersAsOfLine: (date: string): string =>
@@ -684,6 +694,25 @@ export const UNIVERSE_DETAIL = {
   showCurrentMembers: "Show current members",
   didNotExist: (name: string, date: string, created: string): string =>
     `${name} did not exist on ${date}. It was created on ${created}.`,
+  /**
+   * The as-of line's second sentence: a past date's members are shown as the
+   * universe read returns them, unfiltered and unsorted (DEC-0105,
+   * PROVISIONAL; CAP-002-E1-S8 T010). No design contains it.
+   */
+  asOfFiltersNote: "Filters and sorting apply to current members only.",
+  /**
+   * The *Members as of* field error for a malformed date, client-side or a
+   * `422` (DEC-0107, PROVISIONAL). UX 1.4 asks for the ISO-8601 shape but
+   * gives no sentence. A standalone string, not `failureSentence` output.
+   */
+  malformedDate: "Enter a date as YYYY-MM-DD.",
+  /**
+   * The polite status line when a removal finds the stock already gone
+   * (`404 not_a_member`), which takes the success path (DEC-0107,
+   * PROVISIONAL). No design contains it.
+   */
+  noLongerMember: (symbol: string, name: string): string =>
+    `${symbol} is no longer a member of ${name}.`,
   historyColumns: { recordedAt: "Recorded at", event: "Event", detail: "Detail" },
   events: {
     created: "Created",
@@ -692,6 +721,13 @@ export const UNIVERSE_DETAIL = {
     member_removed: "Stock removed",
   },
   viewMembersAsOf: "View members as of this event",
+  /** UX 1.4: a *Renamed* event's Detail, the old name then the new (DAC-E1-S8-6). */
+  renamedDetail: (before: string, after: string): string => `${before} → ${after}`,
+  /**
+   * The History panel's next keyset page (DEC-0107, PROVISIONAL; CAP-002-E1-S8
+   * T010). UX 1.4 says only "keyset paged".
+   */
+  loadMore: "Load more",
 } as const;
 
 /** Compare (UX 1.5; DEC-0070). */

@@ -1,0 +1,1502 @@
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index f1c0b64..345cb7a 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -694,6 +694,25 @@ export const UNIVERSE_DETAIL = {
+   showCurrentMembers: "Show current members",
+   didNotExist: (name: string, date: string, created: string): string =>
+     `${name} did not exist on ${date}. It was created on ${created}.`,
++  /**
++   * The as-of line's second sentence: a past date's members are shown as the
++   * universe read returns them, unfiltered and unsorted (DEC-0105,
++   * PROVISIONAL; CAP-002-E1-S8 T010). No design contains it.
++   */
++  asOfFiltersNote: "Filters and sorting apply to current members only.",
++  /**
++   * The *Members as of* field error for a malformed date, client-side or a
++   * `422` (DEC-0107, PROVISIONAL). UX 1.4 asks for the ISO-8601 shape but
++   * gives no sentence. A standalone string, not `failureSentence` output.
++   */
++  malformedDate: "Enter a date as YYYY-MM-DD.",
++  /**
++   * The polite status line when a removal finds the stock already gone
++   * (`404 not_a_member`), which takes the success path (DEC-0107,
++   * PROVISIONAL). No design contains it.
++   */
++  noLongerMember: (symbol: string, name: string): string =>
++    `${symbol} is no longer a member of ${name}.`,
+   historyColumns: { recordedAt: "Recorded at", event: "Event", detail: "Detail" },
+   events: {
+     created: "Created",
+diff --git a/web/src/screens/research/universes/detail/members-tab.test.tsx b/web/src/screens/research/universes/detail/members-tab.test.tsx
+new file mode 100644
+index 0000000..8319bae
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/members-tab.test.tsx
+@@ -0,0 +1,908 @@
++import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { MemoryRouter, useLocation } from "react-router-dom";
++import { beforeEach, describe, expect, it, vi } from "vitest";
++import * as classificationClient from "../../../../api/classification-client";
++import type {
++  ClassificationList,
++  FactorCell,
++  StockRow,
++  UniverseDetail,
++  UniverseMember,
++} from "../../../../api/classification-types";
++import { ROW_HEIGHT_PX } from "../../results-window";
++import { MembersTab, type MembersTabProps } from "./members-tab";
++
++vi.mock("../../../../api/classification-client", async () => ({
++  ...(await vi.importActual<typeof import("../../../../api/classification-client")>(
++    "../../../../api/classification-client",
++  )),
++  getUniverse: vi.fn(),
++  listClassifications: vi.fn(),
++  removeUniverseMember: vi.fn(),
++  listUniverses: vi.fn(),
++}));
++
++const { ClassificationApiError } = classificationClient;
++const getUniverse = vi.mocked(classificationClient.getUniverse);
++const listClassifications = vi.mocked(classificationClient.listClassifications);
++const removeUniverseMember = vi.mocked(classificationClient.removeUniverseMember);
++const listUniverses = vi.mocked(classificationClient.listUniverses);
++
++const AS_OF_LINE = "Members as of 2026-09-30. Scores shown are from the current set.";
++const FILTERS_NOTE = "Filters and sorting apply to current members only.";
++const MALFORMED = "Enter a date as YYYY-MM-DD.";
++
++function scored(percentile: string): FactorCell {
++  return {
++    status: "classified",
++    score: "0.50",
++    percentile,
++    reasonCode: null,
++    reasonInput: null,
++    reasonDetail: null,
++    restatedPossible: false,
++  };
++}
++
++function notFollowed(): FactorCell {
++  return {
++    status: "not_classified",
++    score: null,
++    percentile: null,
++    reasonCode: "retired",
++    reasonInput: null,
++    reasonDetail: null,
++    restatedPossible: false,
++  };
++}
++
++function row(symbol: string, overrides: Partial<StockRow> = {}): StockRow {
++  return {
++    symbol,
++    name: `${symbol} Inc.`,
++    lifecycle: "active",
++    factors: { value: scored("88"), growth: scored("42"), momentum: scored("67") },
++    ...overrides,
++  };
++}
++
++const OLD = row("OLD", {
++  lifecycle: "retired",
++  factors: { value: notFollowed(), growth: notFollowed(), momentum: notFollowed() },
++});
++
++function list(stocks: StockRow[], matchCount = stocks.length): ClassificationList {
++  const summary = { qualifiedCount: 120, ranked: true, minPeerSetSize: 30 };
++  return {
++    neverClassified: false,
++    set: null,
++    later: null,
++    factors: { value: summary, growth: summary, momentum: summary },
++    matchCount,
++    stocks,
++    unknownSymbols: [],
++    nextCursor: null,
++  };
++}
++
++function member(symbol: string, overrides: Partial<UniverseMember> = {}): UniverseMember {
++  return {
++    symbol,
++    name: `${symbol} Inc.`,
++    lifecycle: "active",
++    memberSince: "2026-10-16T15:00:00Z",
++    factors: { value: scored("88"), growth: scored("42"), momentum: scored("67") },
++    ...overrides,
++  };
++}
++
++function universe(
++  members: UniverseMember[],
++  overrides: Partial<UniverseDetail> = {},
++): UniverseDetail {
++  return {
++    universeId: "u-tech",
++    name: "Tech",
++    lifecycle: "active",
++    createdAt: "2026-10-15T14:20:00Z",
++    retiredAt: null,
++    memberCount: members.length,
++    asOf: "2026-10-20",
++    asOfBeforeCreation: false,
++    origin: {
++      kind: "by_hand",
++      setId: null,
++      classificationDate: null,
++      thresholds: null,
++      hideIncomplete: null,
++      symbol: null,
++    },
++    members,
++    set: null,
++    ...overrides,
++  };
++}
++
++function apiError(code: string, operation: "get-universe" | "remove-universe-member") {
++  return new ClassificationApiError("never shown", "req-1", {
++    code,
++    operation,
++    resource: operation === "get-universe" ? "universe" : "universe-member",
++  });
++}
++
++function props(overrides: Partial<MembersTabProps> = {}): MembersTabProps {
++  return {
++    universeId: "u-tech",
++    universeName: "Tech",
++    lifecycle: "active",
++    memberCount: 3,
++    asOf: null,
++    onAsOfChange: vi.fn(),
++    onMembershipChanged: vi.fn(),
++    onRetire: vi.fn(),
++    ...overrides,
++  };
++}
++
++/** Prints the URL search, so a test can see what the tab writes there. */
++function LocationProbe() {
++  return <p data-testid="location">{useLocation().search}</p>;
++}
++
++function renderTab(tabProps: MembersTabProps, initialEntry = "/research/universes/u-tech") {
++  const view = render(
++    <MemoryRouter initialEntries={[initialEntry]}>
++      <MembersTab {...tabProps} />
++      <LocationProbe />
++    </MemoryRouter>,
++  );
++  return {
++    ...view,
++    rerenderTab: (next: MembersTabProps) =>
++      view.rerender(
++        <MemoryRouter initialEntries={[initialEntry]}>
++          <MembersTab {...next} />
++          <LocationProbe />
++        </MemoryRouter>,
++      ),
++  };
++}
++
++function statusWith(text: string): HTMLElement | undefined {
++  return screen.queryAllByRole("status").find((element) => element.textContent?.includes(text));
++}
++
++function results(): HTMLElement {
++  return screen.getByRole("region", { name: "Results" });
++}
++
++function memberRows(): HTMLElement[] {
++  return within(results())
++    .getAllByRole("row")
++    .filter((element) => element.querySelector('th[scope="row"]') !== null);
++}
++
++function rowFor(symbol: string): HTMLElement {
++  const found = memberRows().find(
++    (element) => element.querySelector('th[scope="row"]')?.textContent === symbol,
++  );
++  if (found === undefined) {
++    throw new Error(`no row for ${symbol}`);
++  }
++  return found;
++}
++
++const CURRENT = [row("AAPL"), row("MSFT"), OLD];
++const CURRENT_MEMBERS = [
++  member("AAPL", { memberSince: "2026-10-16T15:00:00Z" }),
++  member("MSFT", { memberSince: "2026-10-17T03:30:00Z" }),
++  member("OLD", { lifecycle: "retired", memberSince: "2026-10-15T14:20:00Z", factors: null }),
++];
++
++beforeEach(() => {
++  getUniverse.mockReset();
++  listClassifications.mockReset();
++  removeUniverseMember.mockReset();
++  listUniverses.mockReset();
++  getUniverse.mockResolvedValue(universe(CURRENT_MEMBERS));
++  listClassifications.mockResolvedValue(list(CURRENT));
++});
++
++describe("MembersTab: as of a date", () => {
++  // Implements TC-COMP-055 (T002 a): DAC-E1-S8-1, DAC-E1-8, AC-6.
++  it("requests as_of for a typed date and labels the table with it", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    const view = renderTab(tab);
++
++    await user.type(screen.getByLabelText("Members as of"), "2026-09-30{Enter}");
++    expect(tab.onAsOfChange).toHaveBeenCalledTimes(1);
++    expect(tab.onAsOfChange).toHaveBeenCalledWith("2026-09-30");
++
++    getUniverse.mockResolvedValue(
++      universe([member("AAPL", { memberSince: "2026-09-01T15:00:00Z" }), member("NVDA")], {
++        asOf: "2026-09-30",
++      }),
++    );
++    listClassifications.mockClear();
++    view.rerenderTab({ ...tab, asOf: "2026-09-30" });
++
++    await waitFor(() => expect(memberRows()).toHaveLength(2));
++    expect(getUniverse).toHaveBeenCalledWith("u-tech", { asOf: "2026-09-30" });
++    const line = statusWith(AS_OF_LINE);
++    expect(line).toBeDefined();
++    expect(line).toHaveAttribute("aria-live", "polite");
++    const cells = within(rowFor("AAPL")).getAllByRole("cell");
++    expect(cells.map((cell) => cell.textContent)).toEqual([
++      "AAPL Inc.",
++      "2026-09-01 10:00 CDT",
++      expect.stringContaining("88"),
++      expect.stringContaining("42"),
++      expect.stringContaining("67"),
++    ]);
++    expect(
++      within(results())
++        .getAllByRole("columnheader")
++        .map((th) => th.textContent),
++    ).toEqual(["Symbol", "Name", "Member since", "Value", "Growth", "Momentum"]);
++    expect(within(results()).queryByRole("button", { name: /^Remove / })).toBeNull();
++
++    const user2 = userEvent.setup();
++    await user2.click(screen.getByRole("button", { name: "Show current members" }));
++    expect(tab.onAsOfChange).toHaveBeenLastCalledWith(null);
++  });
++
++  // Implements TC-COMP-055 (T002 b): a malformed date is a field error and requests nothing.
++  it.each(["2026-13-40", "30/09/2026", "abc", "2026-02-30", "2026-13-01", "2025-02-29"])(
++    "refuses %s as a field error with no request",
++    async (typed) => {
++      const user = userEvent.setup();
++      const tab = props();
++      renderTab(tab);
++      await waitFor(() => expect(listClassifications).toHaveBeenCalled());
++      getUniverse.mockClear();
++
++      const field = screen.getByLabelText("Members as of");
++      await user.type(field, `${typed}{Enter}`);
++
++      expect(field).toHaveAttribute("aria-invalid", "true");
++      expect(field).toHaveAccessibleDescription(MALFORMED);
++      expect(screen.getByRole("alert")).toHaveTextContent(MALFORMED);
++      expect(tab.onAsOfChange).not.toHaveBeenCalled();
++      expect(getUniverse.mock.calls.filter((call) => call.length > 1)).toEqual([]);
++
++      await user.clear(field);
++      await user.type(field, "2026-09-30{Enter}");
++      expect(field).not.toHaveAttribute("aria-invalid");
++      expect(screen.queryByText(MALFORMED)).not.toBeInTheDocument();
++      expect(tab.onAsOfChange).toHaveBeenCalledWith("2026-09-30");
++    },
++  );
++
++  it("accepts a leap day", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++    await user.type(screen.getByLabelText("Members as of"), "2024-02-29{Enter}");
++    expect(tab.onAsOfChange).toHaveBeenCalledWith("2024-02-29");
++  });
++
++  it("treats an empty date submitted as nothing: no error, no change", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++
++    const field = screen.getByLabelText("Members as of");
++    expect(field).not.toHaveAttribute("aria-invalid");
++    await user.type(field, "{Enter}");
++    expect(field).not.toHaveAttribute("aria-invalid");
++    expect(screen.queryByText(MALFORMED)).not.toBeInTheDocument();
++    expect(tab.onAsOfChange).not.toHaveBeenCalled();
++  });
++
++  it("shows the as-of date in the field when the host sets it, and clears it with the date", async () => {
++    const tab = props({ asOf: "2026-09-30" });
++    const view = renderTab(tab);
++    const field = screen.getByLabelText("Members as of");
++    expect(field).toHaveValue("2026-09-30");
++    expect(field).not.toHaveAttribute("aria-invalid");
++    view.rerenderTab({ ...tab, asOf: null });
++    expect(field).toHaveValue("");
++  });
++
++  it("ignores a slower read for a date it no longer shows", async () => {
++    let settleFirst: (value: UniverseDetail) => void = () => {};
++    getUniverse
++      .mockReturnValueOnce(
++        new Promise((done) => {
++          settleFirst = done;
++        }),
++      )
++      .mockResolvedValueOnce(universe([member("NVDA")], { asOf: "2026-08-31" }));
++    const tab = props({ asOf: "2026-09-30" });
++    const view = renderTab(tab);
++    view.rerenderTab({ ...tab, asOf: "2026-08-31" });
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++
++    await act(async () => settleFirst(universe([member("AAPL"), member("MSFT")])));
++    expect(memberRows()).toHaveLength(1);
++    expect(rowFor("NVDA")).toBeInTheDocument();
++  });
++
++  // Implements TC-COMP-055 (T002 c): a server 422 is the same field error; the previous table stays.
++  it("shows a 422 on the as-of read as the field error and keeps the previous table", async () => {
++    const tab = props({ asOf: "2026-09-30" });
++    getUniverse.mockResolvedValueOnce(universe([member("AAPL")], { asOf: "2026-09-30" }));
++    const view = renderTab(tab);
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++
++    getUniverse.mockRejectedValueOnce(apiError("validation_error", "get-universe"));
++    view.rerenderTab({ ...tab, asOf: "2099-01-01" });
++
++    const field = screen.getByLabelText("Members as of");
++    await waitFor(() => expect(field).toHaveAttribute("aria-invalid", "true"));
++    expect(field).toHaveAccessibleDescription(MALFORMED);
++    expect(memberRows()).toHaveLength(1);
++    expect(rowFor("AAPL")).toBeInTheDocument();
++    expect(statusWith(AS_OF_LINE)).toBeDefined();
++  });
++
++  it("shows only the field error when the first as-of read is a 422", async () => {
++    getUniverse.mockRejectedValue(apiError("validation_error", "get-universe"));
++    renderTab(props({ asOf: "2099-01-01" }));
++
++    const field = screen.getByLabelText("Members as of");
++    await waitFor(() => expect(field).toHaveAttribute("aria-invalid", "true"));
++    expect(within(results()).queryByRole("table")).not.toBeInTheDocument();
++    expect(within(results()).queryByText("Loading…")).not.toBeInTheDocument();
++    expect(statusWith(AS_OF_LINE)).toBeUndefined();
++  });
++
++  it("shows Loading… rather than an earlier date's members while a new date is read", async () => {
++    const tab = props({ asOf: "2026-09-30" });
++    getUniverse.mockResolvedValueOnce(universe([member("AAPL")], { asOf: "2026-09-30" }));
++    const view = renderTab(tab);
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++
++    getUniverse.mockReturnValueOnce(new Promise(() => {}));
++    view.rerenderTab({ ...tab, asOf: "2026-08-31" });
++    expect(await within(results()).findByText("Loading…")).toHaveAttribute("aria-busy", "true");
++    expect(within(results()).queryByRole("table")).not.toBeInTheDocument();
++  });
++
++  it("never keeps another universe's as-of table under a 422", async () => {
++    const tab = props({ asOf: "2026-09-30" });
++    getUniverse.mockResolvedValueOnce(universe([member("AAPL")], { asOf: "2026-09-30" }));
++    const view = renderTab(tab);
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++
++    getUniverse.mockRejectedValueOnce(apiError("validation_error", "get-universe"));
++    view.rerenderTab({ ...tab, universeId: "u-other" });
++    await waitFor(() =>
++      expect(screen.getByLabelText("Members as of")).toHaveAttribute("aria-invalid", "true"),
++    );
++    expect(within(results()).queryByRole("table")).not.toBeInTheDocument();
++  });
++
++  it("replaces the as-of table with the failure sentence and Try again on another error", async () => {
++    const user = userEvent.setup();
++    getUniverse
++      .mockRejectedValueOnce(apiError("internal_error", "get-universe"))
++      .mockResolvedValueOnce(universe([member("AAPL")], { asOf: "2026-09-30" }));
++    renderTab(props({ asOf: "2026-09-30" }));
++
++    expect(
++      await screen.findByText(
++        "Could not load the universe: FactorFlow hit an unexpected problem. Try again.",
++      ),
++    ).toBeInTheDocument();
++    expect(screen.queryByText("never shown")).not.toBeInTheDocument();
++    await user.click(screen.getByRole("button", { name: "Try again" }));
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++    expect(getUniverse).toHaveBeenCalledTimes(2);
++  });
++
++  // Implements TC-COMP-055 (T002 d): filters are not applied to a past date, and the line says so.
++  it("does not read the list or apply filters in the as-of view, and says so once", async () => {
++    getUniverse.mockResolvedValue(
++      universe([member("MSFT"), member("AAPL")], { asOf: "2026-09-30" }),
++    );
++    renderTab(
++      props({ asOf: "2026-09-30" }),
++      "/research/universes/u-tech?symbol=AA&sort=symbol&value.measure=percentile&value.direction=atLeast&value.value=90",
++    );
++
++    await waitFor(() => expect(memberRows()).toHaveLength(2));
++    expect(listClassifications).not.toHaveBeenCalled();
++    expect(getUniverse).toHaveBeenCalledTimes(1);
++    expect(memberRows().map((element) => element.querySelector("th")?.textContent)).toEqual([
++      "MSFT",
++      "AAPL",
++    ]);
++    const line = statusWith(AS_OF_LINE);
++    expect(line).toHaveTextContent(FILTERS_NOTE);
++    expect(line?.textContent?.split(FILTERS_NOTE)).toHaveLength(2);
++  });
++
++  // Implements TC-COMP-055 (T002 e): a member with no cells keeps its row with em dashes (DEC-0105, DEC-0097).
++  it("renders a member with null factors and a null name with em dashes, never a badge", async () => {
++    const gone = {
++      symbol: "GONE",
++      name: null,
++      lifecycle: "active",
++      memberSince: "2026-09-01T15:00:00Z",
++      factors: null,
++    } satisfies UniverseMember;
++    getUniverse.mockResolvedValue(universe([member("AAPL"), gone], { asOf: "2026-09-30" }));
++    renderTab(props({ asOf: "2026-09-30" }));
++
++    await waitFor(() => expect(memberRows()).toHaveLength(2));
++    expect(memberRows().map((element) => element.querySelector("th")?.textContent)).toEqual([
++      "AAPL",
++      "GONE",
++    ]);
++    const cells = within(rowFor("GONE")).getAllByRole("cell");
++    expect(cells[0].textContent).toBe("—");
++    expect(cells[0].querySelector(".text-value-missing")).not.toBeNull();
++    expect(cells[1].textContent).toBe("2026-09-01 10:00 CDT");
++    for (const cell of cells.slice(2)) {
++      expect(cell.textContent).toBe("—");
++      expect(cell.querySelector(".text-value-missing")).not.toBeNull();
++      expect(cell.querySelector("[data-variant]")).toBeNull();
++      expect(cell.querySelector('[data-testid="factor-bar"]')).toBeNull();
++      expect(cell.textContent).not.toMatch(/Incomplete|Not enough to rank|Not followed/);
++    }
++    expect(
++      within(within(rowFor("AAPL")).getAllByRole("cell")[2]).getByTestId("factor-percentile"),
++    ).toHaveTextContent("88");
++  });
++
++  it("renders a returned retired cell through the factor cell as Not followed", async () => {
++    getUniverse.mockResolvedValue(
++      universe(
++        [
++          member("OLD", {
++            lifecycle: "retired",
++            factors: { value: notFollowed(), growth: notFollowed(), momentum: notFollowed() },
++          }),
++        ],
++        { asOf: "2026-09-30" },
++      ),
++    );
++    renderTab(props({ asOf: "2026-09-30" }));
++
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++    const badges = within(rowFor("OLD")).getAllByText("Not followed");
++    expect(badges).toHaveLength(3);
++  });
++
++  // Implements TC-COMP-056 (T003): DAC-E1-S8-2, DAC-E1-8, AC-6.
++  it("states that the universe did not exist before its creation date", async () => {
++    getUniverse.mockResolvedValue(
++      universe([], {
++        asOf: "2026-01-01",
++        asOfBeforeCreation: true,
++        createdAt: "2026-10-15T14:20:00Z",
++      }),
++    );
++    renderTab(props({ asOf: "2026-01-01" }));
++
++    expect(
++      await screen.findByText("Tech did not exist on 2026-01-01. It was created on 2026-10-15."),
++    ).toBeInTheDocument();
++    expect(within(results()).queryByRole("table")).not.toBeInTheDocument();
++    expect(screen.queryByText("No members match these filters.")).not.toBeInTheDocument();
++  });
++
++  it("dates the creation in America/Chicago, not UTC", async () => {
++    getUniverse.mockResolvedValue(
++      universe([], {
++        name: "Tech",
++        asOf: "2026-01-01",
++        asOfBeforeCreation: true,
++        createdAt: "2026-10-16T03:30:00Z",
++      }),
++    );
++    renderTab(props({ asOf: "2026-01-01" }));
++
++    expect(
++      await screen.findByText("Tech did not exist on 2026-01-01. It was created on 2026-10-15."),
++    ).toBeInTheDocument();
++  });
++});
++
++describe("MembersTab: current members", () => {
++  // Implements TC-COMP-119 (T004): DAC-E1-S8-3, DAC-E1-9, AC-15.
++  it("keeps a member no longer followed in the table, Not followed on every factor", async () => {
++    renderTab(props());
++
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++    const old = rowFor("OLD");
++    const badges = within(old).getAllByText("Not followed");
++    expect(badges).toHaveLength(3);
++    for (const badge of badges) {
++      expect(badge.closest("[data-variant]")).toHaveAttribute("data-variant", "status-neutral");
++    }
++    expect(within(old).queryByTestId("factor-percentile")).toBeNull();
++    expect(within(old).queryByTestId("factor-bar")).toBeNull();
++    expect(within(old).getByRole("button", { name: "Remove OLD from Tech" })).toBeInTheDocument();
++    expect(listClassifications).toHaveBeenCalled();
++    for (const [params] of listClassifications.mock.calls) {
++      expect(params?.universeId).toBe("u-tech");
++    }
++  });
++
++  it("scopes the list read to the universe whatever scope the URL carries", async () => {
++    renderTab(props(), "/research/universes/u-tech?scope=u-other");
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++    for (const [params] of listClassifications.mock.calls) {
++      expect(params?.universeId).toBe("u-tech");
++    }
++  });
++
++  // Implements T005 (a): Member since after Name, Remove… last.
++  it("orders the columns with Member since after Name and Remove… last", async () => {
++    renderTab(props());
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++
++    const headers = within(results())
++      .getAllByRole("columnheader")
++      .map((th) => th.textContent?.replace(/[▲▼↕]/g, "").trim());
++    expect(headers.slice(1, 7)).toEqual([
++      "Symbol",
++      "Name",
++      "Member since",
++      "Value",
++      "Growth",
++      "Momentum",
++    ]);
++    expect(headers).toHaveLength(8);
++    const cells = within(rowFor("MSFT")).getAllByRole("cell");
++    expect(cells[2]).toHaveTextContent("2026-10-16 22:30 CDT");
++    expect(within(cells[cells.length - 1]).getByRole("button")).toHaveAccessibleName(
++      "Remove MSFT from Tech",
++    );
++    expect(within(rowFor("AAPL")).getAllByRole("cell")[2]).toHaveTextContent(
++      "2026-10-16 10:00 CDT",
++    );
++    expect(getUniverse).toHaveBeenCalledWith("u-tech");
++  });
++
++  it("ignores a slower Member since read for a universe it no longer shows", async () => {
++    let settleFirst: (value: UniverseDetail) => void = () => {};
++    getUniverse
++      .mockReturnValueOnce(
++        new Promise((done) => {
++          settleFirst = done;
++        }),
++      )
++      .mockResolvedValueOnce(
++        universe([member("AAPL", { memberSince: "2026-10-18T15:00:00Z" })], {
++          universeId: "u-other",
++        }),
++      );
++    const tab = props();
++    const view = renderTab(tab);
++    view.rerenderTab({ ...tab, universeId: "u-other" });
++    await waitFor(() =>
++      expect(within(rowFor("AAPL")).getAllByRole("cell")[2]).toHaveTextContent(
++        "2026-10-18 10:00 CDT",
++      ),
++    );
++
++    await act(async () => settleFirst(universe(CURRENT_MEMBERS)));
++    expect(within(rowFor("AAPL")).getAllByRole("cell")[2]).toHaveTextContent(
++      "2026-10-18 10:00 CDT",
++    );
++  });
++
++  it("shows an em dash for Member since until the universe read answers", async () => {
++    getUniverse.mockReturnValue(new Promise(() => {}));
++    renderTab(props());
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++    expect(within(rowFor("AAPL")).getAllByRole("cell")[2].textContent).toBe("—");
++  });
++
++  // Implements T005 (b): the heading counts matches against members.
++  it("heads the results with {n} of {m} members match, never an h1", async () => {
++    listClassifications.mockResolvedValue(list([row("AAPL"), row("MSFT")], 2));
++    renderTab(props({ memberCount: 3 }));
++
++    const heading = await screen.findByRole("heading", { name: "2 of 3 members match" });
++    expect(heading.tagName).toBe("H2");
++    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
++  });
++
++  it("states No members match these filters. with Clear filters when nothing matches", async () => {
++    const user = userEvent.setup();
++    listClassifications.mockResolvedValue(list([], 0));
++    renderTab(props(), "/research/universes/u-tech?scope=u-x&symbol=ZZ&sort=symbol&order=desc");
++
++    expect(await screen.findByText("No members match these filters.")).toBeInTheDocument();
++    listClassifications.mockResolvedValue(list(CURRENT));
++    const clearButtons = within(results()).getAllByRole("button", { name: "Clear filters" });
++    await user.click(clearButtons[0]);
++    await waitFor(() =>
++      expect(listClassifications).toHaveBeenLastCalledWith(
++        expect.not.objectContaining({ symbol: "ZZ" }),
++      ),
++    );
++    // As the pane's own Clear filters does on universe detail, the URL's scope is left alone.
++    expect(screen.getByTestId("location").textContent).toBe("?scope=u-x&sort=symbol&order=desc");
++  });
++
++  it("drops the count heading while a past date is shown, until the list answers again", async () => {
++    const tab = props();
++    const view = renderTab(tab);
++    await screen.findByRole("heading", { name: "3 of 3 members match" });
++
++    getUniverse.mockResolvedValue(universe([member("AAPL")], { asOf: "2026-09-30" }));
++    view.rerenderTab({ ...tab, asOf: "2026-09-30" });
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++    listClassifications.mockReturnValue(new Promise(() => {}));
++    view.rerenderTab({ ...tab, asOf: null });
++    expect(screen.queryByRole("heading", { name: /members match/ })).not.toBeInTheDocument();
++  });
++
++  it("states that nothing has been scored when no set exists", async () => {
++    listClassifications.mockResolvedValue({ ...list([], 0), neverClassified: true });
++    renderTab(props());
++    expect(await screen.findByText("No stocks have been scored yet.")).toBeInTheDocument();
++  });
++
++  // Implements T005 (d): a retired universe offers no Remove… but stays readable as of a date.
++  it("renders no Remove… on a retired universe and keeps the as-of field", async () => {
++    const user = userEvent.setup();
++    const tab = props({ lifecycle: "retired" });
++    renderTab(tab);
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++
++    expect(screen.queryByRole("button", { name: /^Remove / })).not.toBeInTheDocument();
++    expect(within(results()).getAllByRole("columnheader")).toHaveLength(7);
++    const field = screen.getByLabelText("Members as of");
++    expect(field).toBeEnabled();
++    await user.type(field, "2026-09-30{Enter}");
++    expect(tab.onAsOfChange).toHaveBeenCalledWith("2026-09-30");
++  });
++
++  // Implements T005 (i): the sole member's Remove… is blocked with Retire… beside it.
++  it("blocks the sole member's Remove… and offers Retire…", async () => {
++    const user = userEvent.setup();
++    listClassifications.mockResolvedValue(list([row("AAPL")]));
++    const tab = props({ memberCount: 1 });
++    renderTab(tab);
++    await waitFor(() => expect(memberRows()).toHaveLength(1));
++
++    const remove = screen.getByRole("button", { name: "Remove AAPL from Tech" });
++    expect(remove).toHaveAttribute("data-variant", "blocked");
++    await user.click(remove);
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++    await user.click(screen.getByRole("button", { name: "Retire…" }));
++    expect(tab.onRetire).toHaveBeenCalledTimes(1);
++  });
++
++  // Implements T005 (j): one Filters landmark, holding the as-of field.
++  it("has exactly one Filters region, with Members as of inside it", async () => {
++    renderTab(props());
++    const regions = screen.getAllByRole("region", { name: "Filters" });
++    expect(regions).toHaveLength(1);
++    expect(within(regions[0]).getByLabelText("Members as of")).toBeInTheDocument();
++    expect(within(regions[0]).queryByText("Look in")).not.toBeInTheDocument();
++    expect(listUniverses).not.toHaveBeenCalled();
++  });
++
++  // Implements T005 (h): filters and search go through the pane and the URL.
++  it("reads the list again with the search typed in the pane", async () => {
++    const user = userEvent.setup();
++    renderTab(props());
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++
++    await user.type(screen.getByLabelText("Find a stock"), "AA{Enter}");
++    await waitFor(() =>
++      expect(listClassifications).toHaveBeenLastCalledWith(
++        expect.objectContaining({ universeId: "u-tech", symbol: "AA" }),
++      ),
++    );
++  });
++
++  it("sorts through the URL and keeps the universe scope", async () => {
++    const user = userEvent.setup();
++    renderTab(props());
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++
++    await user.click(screen.getByRole("button", { name: "Sort by value percentile" }));
++    await waitFor(() =>
++      expect(listClassifications).toHaveBeenLastCalledWith(
++        expect.objectContaining({ universeId: "u-tech", sort: "value_percentile", order: "asc" }),
++      ),
++    );
++    expect(screen.getByTestId("location")).toHaveTextContent("?sort=value_percentile");
++    expect(screen.getByTestId("location").textContent).not.toContain("scope");
++  });
++});
++
++describe("MembersTab: removing a member", () => {
++  async function openRemove(user: ReturnType<typeof userEvent.setup>, symbol: string) {
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++    await user.click(screen.getByRole("button", { name: `Remove ${symbol} from Tech` }));
++    return screen.getByRole("dialog", { name: `Remove ${symbol} from Tech` });
++  }
++
++  // Implements T005 (c): every Remove… names its row.
++  it("names every Remove… for its row, never a bare Remove", async () => {
++    renderTab(props());
++    await waitFor(() => expect(memberRows()).toHaveLength(3));
++    for (const symbol of ["AAPL", "MSFT", "OLD"]) {
++      expect(
++        within(rowFor(symbol)).getByRole("button", { name: `Remove ${symbol} from Tech` }),
++      ).toBeInTheDocument();
++    }
++    expect(screen.queryByRole("button", { name: /^Remove…?$/ })).not.toBeInTheDocument();
++  });
++
++  // Implements T005 (e): confirm removes, re-reads, announces and moves focus to the next row.
++  it("removes on confirm, re-reads, announces and focuses the row now in its place", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++    const dialog = await openRemove(user, "AAPL");
++    expect(within(dialog).getByRole("button", { name: "Cancel" })).toHaveFocus();
++
++    removeUniverseMember.mockResolvedValue({ removedAt: "2026-10-20T15:00:00Z" });
++    listClassifications.mockResolvedValue(list([row("MSFT"), OLD]));
++    getUniverse.mockResolvedValue(universe(CURRENT_MEMBERS.slice(1)));
++    const listCalls = listClassifications.mock.calls.length;
++    const universeCalls = getUniverse.mock.calls.length;
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    expect(removeUniverseMember).toHaveBeenCalledWith("u-tech", "AAPL");
++    await waitFor(() => expect(memberRows()).toHaveLength(2));
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++    expect(listClassifications.mock.calls.length).toBe(listCalls + 1);
++    expect(getUniverse.mock.calls.length).toBe(universeCalls + 1);
++    expect(tab.onMembershipChanged).toHaveBeenCalledTimes(1);
++    expect(statusWith("Removed AAPL from Tech")).toBeDefined();
++    await waitFor(() => expect(rowFor("MSFT")).toHaveFocus());
++  });
++
++  it("focuses the row taking a removed row's place below the first window, keeping the scroll", async () => {
++    const user = userEvent.setup();
++    const many = Array.from({ length: 40 }, (_, index) =>
++      row(`S${String(index).padStart(2, "0")}`),
++    );
++    listClassifications.mockResolvedValue(list(many));
++    renderTab(props({ memberCount: 40 }));
++    await waitFor(() => expect(rowFor("S00")).toBeInTheDocument());
++
++    const scroller = screen.getByTestId("results-scroll");
++    scroller.scrollTop = 30 * ROW_HEIGHT_PX;
++    fireEvent.scroll(scroller);
++    await user.click(await screen.findByRole("button", { name: "Remove S30 from Tech" }));
++
++    removeUniverseMember.mockResolvedValue({ removedAt: "2026-10-20T15:00:00Z" });
++    listClassifications.mockResolvedValue(list(many.filter((stock) => stock.symbol !== "S30")));
++    await user.click(screen.getByRole("button", { name: "Remove from universe" }));
++
++    await waitFor(() => expect(screen.queryByText("S30")).not.toBeInTheDocument());
++    expect(rowFor("S31")).toHaveFocus();
++    expect(rowFor("S31")).toHaveAttribute("aria-rowindex", "32");
++  });
++
++  it("focuses the heading when the removed row was the last", async () => {
++    const user = userEvent.setup();
++    renderTab(props());
++    const dialog = await openRemove(user, "OLD");
++
++    removeUniverseMember.mockResolvedValue({ removedAt: "2026-10-20T15:00:00Z" });
++    listClassifications.mockResolvedValue(list([row("AAPL"), row("MSFT")]));
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    await waitFor(() => expect(memberRows()).toHaveLength(2));
++    await waitFor(() =>
++      expect(screen.getByRole("heading", { name: "2 of 3 members match" })).toHaveFocus(),
++    );
++  });
++
++  it("closes on Cancel without removing", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++    const dialog = await openRemove(user, "MSFT");
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++    expect(removeUniverseMember).not.toHaveBeenCalled();
++    expect(tab.onMembershipChanged).not.toHaveBeenCalled();
++    expect(screen.getByRole("button", { name: "Remove MSFT from Tech" })).toHaveFocus();
++  });
++
++  it("disables the confirm while the removal is in flight and ignores Cancel then", async () => {
++    const user = userEvent.setup();
++    renderTab(props());
++    const dialog = await openRemove(user, "MSFT");
++    let settle: (value: { removedAt: string }) => void = () => {};
++    removeUniverseMember.mockReturnValue(
++      new Promise((done) => {
++        settle = done;
++      }),
++    );
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    expect(within(dialog).getByRole("button", { name: "Remove from universe" })).toBeDisabled();
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++    expect(screen.getByRole("dialog")).toBeInTheDocument();
++    await act(async () => settle({ removedAt: "2026-10-20T15:00:00Z" }));
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++  });
++
++  // Implements T005 (f): universe_retired keeps the dialog with the refusal.
++  it("keeps the dialog open with the retired refusal on universe_retired", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++    const dialog = await openRemove(user, "MSFT");
++    removeUniverseMember.mockRejectedValue(apiError("universe_retired", "remove-universe-member"));
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
++      "This universe is retired and can't be changed. Its members and history are still viewable.",
++    );
++    expect(screen.getByRole("dialog")).toBeInTheDocument();
++    expect(tab.onMembershipChanged).not.toHaveBeenCalled();
++    expect(within(dialog).getByRole("button", { name: "Remove from universe" })).toBeEnabled();
++  });
++
++  it("keeps the dialog open with Retire… on the last_member backstop", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++    const dialog = await openRemove(user, "MSFT");
++    removeUniverseMember.mockRejectedValue(apiError("last_member", "remove-universe-member"));
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
++      "This is the last member, so it can't be removed. Retire the universe instead.",
++    );
++    await user.click(within(dialog).getByRole("button", { name: "Retire…" }));
++    expect(tab.onRetire).toHaveBeenCalledTimes(1);
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++  });
++
++  it("states a generic failure for any other error and keeps the confirm", async () => {
++    const user = userEvent.setup();
++    renderTab(props());
++    const dialog = await openRemove(user, "MSFT");
++    removeUniverseMember.mockRejectedValue(new Error("offline"));
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
++      "Could not remove the stock from the universe: FactorFlow hit an unexpected problem. Try again.",
++    );
++    expect(within(dialog).getByRole("button", { name: "Remove from universe" })).toBeEnabled();
++  });
++
++  // Implements T005 (g): not_a_member takes the success path with its own status line.
++  it("treats not_a_member as already removed: re-reads and says so, with no alert", async () => {
++    const user = userEvent.setup();
++    const tab = props();
++    renderTab(tab);
++    const dialog = await openRemove(user, "AAPL");
++    removeUniverseMember.mockRejectedValue(apiError("not_a_member", "remove-universe-member"));
++    listClassifications.mockResolvedValue(list([row("MSFT"), OLD]));
++    const listCalls = listClassifications.mock.calls.length;
++    const universeCalls = getUniverse.mock.calls.length;
++    await user.click(within(dialog).getByRole("button", { name: "Remove from universe" }));
++
++    await waitFor(() => expect(memberRows()).toHaveLength(2));
++    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++    expect(listClassifications.mock.calls.length).toBe(listCalls + 1);
++    expect(getUniverse.mock.calls.length).toBe(universeCalls + 1);
++    expect(tab.onMembershipChanged).toHaveBeenCalledTimes(1);
++    expect(statusWith("AAPL is no longer a member of Tech.")).toBeDefined();
++    expect(statusWith("Removed AAPL from Tech")).toBeUndefined();
++    await waitFor(() => expect(rowFor("MSFT")).toHaveFocus());
++  });
++});
+diff --git a/web/src/screens/research/universes/detail/members-tab.tsx b/web/src/screens/research/universes/detail/members-tab.tsx
+new file mode 100644
+index 0000000..138e98e
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/members-tab.tsx
+@@ -0,0 +1,552 @@
++import {
++  type FormEvent,
++  type JSX,
++  type ReactNode,
++  useCallback,
++  useEffect,
++  useId,
++  useMemo,
++  useRef,
++  useState,
++} from "react";
++import {
++  ClassificationApiError,
++  getUniverse,
++  removeUniverseMember,
++} from "../../../../api/classification-client";
++import type {
++  FactorName,
++  Lifecycle,
++  StockRow,
++  UniverseDetail,
++  UniverseMember,
++} from "../../../../api/classification-types";
++import { DEFAULT_RESEARCH_QUERY, type ResearchQuery } from "../../../../api/research-query";
++import { FactorCell } from "../../../../components/patterns/factor-cell";
++import {
++  CELL,
++  FACTOR_LABELS,
++  FILTERS,
++  REGIONS,
++  RESULTS,
++  UNIVERSES,
++  UNIVERSE_DETAIL,
++  failureSentence,
++} from "../../copy";
++import { FiltersPane } from "../../filters-pane";
++import { formatTimestamp } from "../../format";
++import {
++  type EmptyKind,
++  type ExtraColumn,
++  type FirstPage,
++  ResultsTable,
++} from "../../results-table";
++import { useResearchQuery } from "../../use-research-query";
++import { RemoveAction, RemoveDialog, type RemoveError } from "./remove-dialog";
++
++const FACTORS: readonly FactorName[] = ["value", "growth", "momentum"];
++
++/** `YYYY-MM-DD`, checked as a real calendar date before any request (UX design 1.4). */
++const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
++
++/** The America/Chicago calendar date of an instant (DEC-0105; the rule of `recorded_on`, DEC-0065). */
++const CHICAGO_DATE = new Intl.DateTimeFormat("en-CA", {
++  timeZone: "America/Chicago",
++  year: "numeric",
++  month: "2-digit",
++  day: "2-digit",
++});
++
++function isCalendarDate(value: string): boolean {
++  const match = ISO_DATE.exec(value);
++  if (match === null) {
++    return false;
++  }
++  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
++  const date = new Date(Date.UTC(year, month - 1, day));
++  return date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
++}
++
++/** An absent value: the em dash in `--value-missing` (UX design section 0; STD-UI-4; DEC-0105). */
++function Missing(): JSX.Element {
++  return <span className="text-value-missing">{CELL.absentValue}</span>;
++}
++
++function isValidationError(error: unknown): boolean {
++  return error instanceof ClassificationApiError && error.code === "validation_error";
++}
++
++function removeErrorFor(error: unknown): RemoveError | "not_a_member" {
++  const code = error instanceof ClassificationApiError ? error.code : null;
++  if (code === "last_member" || code === "universe_retired" || code === "not_a_member") {
++    return code;
++  }
++  return "generic";
++}
++
++type AsOfRead =
++  | { kind: "loading" }
++  | { kind: "loaded"; detail: UniverseDetail }
++  | { kind: "error"; error: unknown };
++
++interface Removal {
++  symbol: string;
++  pending: boolean;
++  error: RemoveError | null;
++}
++
++export interface MembersTabProps {
++  universeId: string;
++  universeName: string;
++  lifecycle: Lifecycle;
++  memberCount: number;
++  /** The `as_of` date, controlled by the host and kept in its URL; `null` is the current members. */
++  asOf: string | null;
++  onAsOfChange: (asOf: string | null) => void;
++  /** Called after each removal, so the host re-reads its header and count. */
++  onMembershipChanged: () => void;
++  /** Opens the host's retire dialog. */
++  onRetire: () => void;
++}
++
++/**
++ * A universe's Members panel (UX design 1.4; classification-ui 2.5;
++ * DAC-E1-S8-1 to DAC-E1-S8-5). The Filters pane without *Look in*, holding
++ * the *Members as of* field, beside the Results section.
++ *
++ * With no `asOf` the table is the Research results table on the list read
++ * scoped to the universe, with *Member since* after Name (joined by symbol
++ * from the universe read) and **Remove…** last; the filter, search and sort
++ * live in the URL as on Research. A member no longer followed is a row like
++ * any other, *Not followed* on every factor (AC-15).
++ *
++ * With `asOf` the universe read is the only one that takes the date, so its
++ * members are shown in one native table, in the order returned, unfiltered
++ * and unsorted, under a polite line saying so; a date before creation states
++ * the creation date instead (DEC-0105). A member without cells or a name
++ * shows the em dash. No **Remove…** is offered there.
++ */
++export function MembersTab({
++  universeId,
++  universeName,
++  lifecycle,
++  memberCount,
++  asOf,
++  onAsOfChange,
++  onMembershipChanged,
++  onRetire,
++}: MembersTabProps): JSX.Element {
++  const { query, setQuery } = useResearchQuery();
++  const scopedQuery = useMemo(() => ({ ...query, scope: universeId }), [query, universeId]);
++  const onQueryChange = useCallback(
++    (next: ResearchQuery): void => setQuery({ ...next, scope: query.scope }),
++    [query.scope, setQuery],
++  );
++
++  const [refreshKey, setRefreshKey] = useState(0);
++  const [selected, setSelected] = useState<string | null>(null);
++  const [checked, setChecked] = useState<string[]>([]);
++  const [matchCount, setMatchCount] = useState<number | null>(null);
++  const [memberSince, setMemberSince] = useState<ReadonlyMap<string, string>>(new Map());
++  const [removal, setRemoval] = useState<Removal | null>(null);
++  const [notice, setNotice] = useState("");
++  /**
++   * Where focus goes once the dialog has closed on a removal: the row after
++   * the removed one, which takes its place, or the heading when it was last.
++   */
++  const [focusAfterRemoval, setFocusAfterRemoval] = useState<{ symbol: string | null } | null>(
++    null,
++  );
++  const resultsRef = useRef<HTMLElement>(null);
++  const headingRef = useRef<HTMLHeadingElement>(null);
++
++  const [draft, setDraft] = useState(asOf ?? "");
++  const [fieldError, setFieldError] = useState(false);
++  const [asOfRead, setAsOfRead] = useState<AsOfRead>({ kind: "loading" });
++  /** The last as-of result shown, kept under a `422` field error. */
++  const [lastAsOf, setLastAsOf] = useState<UniverseDetail | null>(null);
++  const [asOfAttempt, setAsOfAttempt] = useState(0);
++  const fieldId = useId();
++  const fieldErrorId = useId();
++
++  useEffect(() => {
++    setDraft(asOf ?? "");
++    setFieldError(false);
++  }, [asOf]);
++
++  // Member since for the current view: one universe read, again after each removal.
++  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is the re-read trigger.
++  useEffect(() => {
++    if (asOf !== null) {
++      return;
++    }
++    let cancelled = false;
++    getUniverse(universeId)
++      .then((detail) => {
++        if (!cancelled) {
++          setMemberSince(
++            new Map(detail.members.map((member) => [member.symbol, member.memberSince])),
++          );
++        }
++      })
++      .catch(() => {
++        // Member since stays the em dash; the table's own read reports failures.
++      });
++    return () => {
++      cancelled = true;
++    };
++  }, [universeId, asOf, refreshKey]);
++
++  // The as-of view: the universe read with the date (DEC-0105).
++  // biome-ignore lint/correctness/useExhaustiveDependencies: asOfAttempt is the Try again trigger.
++  useEffect(() => {
++    if (asOf === null) {
++      return;
++    }
++    let cancelled = false;
++    setAsOfRead({ kind: "loading" });
++    setMatchCount(null);
++    getUniverse(universeId, { asOf })
++      .then((detail) => {
++        if (!cancelled) {
++          setAsOfRead({ kind: "loaded", detail });
++          setLastAsOf(detail);
++        }
++      })
++      .catch((error: unknown) => {
++        if (cancelled) {
++          return;
++        }
++        if (isValidationError(error)) {
++          setFieldError(true);
++        }
++        setAsOfRead({ kind: "error", error });
++      });
++    return () => {
++      cancelled = true;
++    };
++  }, [universeId, asOf, asOfAttempt]);
++
++  // A kept as-of result belongs to one universe.
++  // biome-ignore lint/correctness/useExhaustiveDependencies: universeId is the reset trigger.
++  useEffect(() => {
++    setLastAsOf(null);
++  }, [universeId]);
++
++  // After a removal the row that takes the removed row's place, else the
++  // heading, takes focus. This runs after the dialog's unmount has returned
++  // focus to the removed row's Remove…, and before the list is read again:
++  // the results table keeps a focused row it still holds in its window, so
++  // the row keeps its place and focus when the re-read rows arrive.
++  useEffect(() => {
++    if (focusAfterRemoval === null) {
++      return;
++    }
++    setFocusAfterRemoval(null);
++    const { symbol } = focusAfterRemoval;
++    const next =
++      symbol === null
++        ? null
++        : resultsRef.current?.querySelector<HTMLElement>(`tr[data-symbol="${CSS.escape(symbol)}"]`);
++    (next ?? headingRef.current)?.focus();
++  }, [focusAfterRemoval]);
++
++  const onResult = useCallback((page: FirstPage): void => {
++    setMatchCount(page.matchCount);
++  }, []);
++
++  function submitAsOf(event: FormEvent<HTMLFormElement>): void {
++    event.preventDefault();
++    const value = draft.trim();
++    if (value === "") {
++      setFieldError(false);
++      return;
++    }
++    if (!isCalendarDate(value)) {
++      setFieldError(true);
++      return;
++    }
++    setFieldError(false);
++    onAsOfChange(value);
++  }
++
++  function openRemoval(symbol: string): void {
++    setRemoval({ symbol, pending: false, error: null });
++  }
++
++  /** The symbol of the loaded row after `symbol`'s, or null when it is the last. */
++  function nextRowSymbol(symbol: string): string | null {
++    const rowElement = resultsRef.current?.querySelector<HTMLElement>(
++      `tr[data-symbol="${CSS.escape(symbol)}"]`,
++    );
++    const next = rowElement?.nextElementSibling;
++    return next instanceof HTMLElement ? (next.dataset.symbol ?? null) : null;
++  }
++
++  function removed(current: Removal, message: string): void {
++    setFocusAfterRemoval({ symbol: nextRowSymbol(current.symbol) });
++    setRemoval(null);
++    setNotice(message);
++    setRefreshKey((key) => key + 1);
++    onMembershipChanged();
++  }
++
++  function confirmRemoval(): void {
++    if (removal === null || removal.pending) {
++      return;
++    }
++    const current = removal;
++    setRemoval({ ...current, pending: true, error: null });
++    removeUniverseMember(universeId, current.symbol)
++      .then(() => removed(current, UNIVERSE_DETAIL.removed(current.symbol, universeName)))
++      .catch((error: unknown) => {
++        const code = removeErrorFor(error);
++        if (code === "not_a_member") {
++          removed(current, UNIVERSE_DETAIL.noLongerMember(current.symbol, universeName));
++          return;
++        }
++        setRemoval({ ...current, pending: false, error: code });
++      });
++  }
++
++  const extraColumns: ExtraColumn[] = [
++    {
++      id: "memberSince",
++      header: UNIVERSE_DETAIL.memberSince,
++      placement: "afterName",
++      cell: (row: StockRow) => {
++        const since = memberSince.get(row.symbol);
++        return since === undefined ? (
++          <Missing />
++        ) : (
++          <span className="text-xs">{formatTimestamp(since)}</span>
++        );
++      },
++    },
++  ];
++  if (lifecycle === "active") {
++    extraColumns.push({
++      id: "remove",
++      header: "",
++      placement: "end",
++      cell: (row: StockRow) => (
++        <RemoveAction
++          symbol={row.symbol}
++          universeName={universeName}
++          soleMember={memberCount === 1}
++          onRemove={() => openRemoval(row.symbol)}
++          onRetire={onRetire}
++        />
++      ),
++    });
++  }
++
++  const empty = (kind: EmptyKind): ReactNode =>
++    kind === "never-populated" ? (
++      <p className="text-sm">{RESULTS.neverScored}</p>
++    ) : (
++      <p className="flex items-center gap-2 text-sm">
++        {RESULTS.noMembersMatch}
++        <button
++          type="button"
++          onClick={() =>
++            setQuery({ ...DEFAULT_RESEARCH_QUERY, sort: query.sort, scope: query.scope })
++          }
++          className="rounded px-3 py-2 text-sm"
++        >
++          {FILTERS.clearFilters}
++        </button>
++      </p>
++    );
++
++  const asOfForm = (
++    <form onSubmit={submitAsOf} data-variant="inline" className="flex flex-col gap-2 py-3">
++      <label htmlFor={fieldId} className="text-sm">
++        {UNIVERSE_DETAIL.membersAsOf}
++      </label>
++      <input
++        id={fieldId}
++        type="text"
++        value={draft}
++        placeholder="YYYY-MM-DD"
++        aria-invalid={fieldError ? "true" : undefined}
++        aria-describedby={fieldError ? fieldErrorId : undefined}
++        onChange={(event) => setDraft(event.target.value)}
++        className="rounded border border-input p-2 font-numeric"
++      />
++      {fieldError ? (
++        <p id={fieldErrorId} role="alert" className="text-[hsl(var(--destructive))] text-sm">
++          {UNIVERSE_DETAIL.malformedDate}
++        </p>
++      ) : null}
++    </form>
++  );
++
++  function asOfBody(): ReactNode {
++    if (asOfRead.kind === "error" && !isValidationError(asOfRead.error)) {
++      return (
++        <div className="flex flex-col gap-2 text-sm">
++          <p>
++            {asOfRead.error instanceof ClassificationApiError
++              ? failureSentence(asOfRead.error)
++              : failureSentence({ operation: "get-universe", resource: "universe", code: null })}
++          </p>
++          <button
++            type="button"
++            onClick={() => setAsOfAttempt((count) => count + 1)}
++            className="w-fit rounded border border-border px-3 py-2"
++          >
++            {RESULTS.tryAgain}
++          </button>
++        </div>
++      );
++    }
++    if (asOfRead.kind === "loading") {
++      return (
++        <output aria-busy="true" className="text-sm">
++          {UNIVERSES.loading}
++        </output>
++      );
++    }
++    // Under a `422` field error the last result shown stays (T002 c).
++    const detail = asOfRead.kind === "loaded" ? asOfRead.detail : lastAsOf;
++    if (detail === null) {
++      return null;
++    }
++    return <AsOfMembers detail={detail} />;
++  }
++
++  return (
++    <div className="flex flex-col gap-5 md:flex-row">
++      <FiltersPane showLookIn={false}>{asOfForm}</FiltersPane>
++      <section
++        ref={resultsRef}
++        aria-label={REGIONS.results}
++        className="flex min-w-0 flex-1 flex-col gap-3"
++      >
++        {asOf === null ? (
++          <>
++            {matchCount === null ? null : (
++              <h2 ref={headingRef} tabIndex={-1} className="text-lg">
++                {RESULTS.membersMatch(matchCount, memberCount)}
++              </h2>
++            )}
++            <output aria-live="polite" className="text-sm">
++              {notice}
++            </output>
++            <ResultsTable
++              query={scopedQuery}
++              onQueryChange={onQueryChange}
++              refreshKey={refreshKey}
++              selected={selected}
++              onSelect={setSelected}
++              onInspect={() => {}}
++              checked={checked}
++              onCheckedChange={setChecked}
++              onResult={onResult}
++              empty={empty}
++              matchLabel={(count) => RESULTS.membersMatch(count, memberCount)}
++              extraColumns={extraColumns}
++            />
++          </>
++        ) : (
++          <>
++            {asOfBody()}
++            <button
++              type="button"
++              data-variant="ghost"
++              onClick={() => onAsOfChange(null)}
++              className="w-fit rounded px-3 py-2 text-sm"
++            >
++              {UNIVERSE_DETAIL.showCurrentMembers}
++            </button>
++          </>
++        )}
++      </section>
++      {removal !== null ? (
++        <RemoveDialog
++          symbol={removal.symbol}
++          universeName={universeName}
++          error={removal.error}
++          pending={removal.pending}
++          onConfirm={confirmRemoval}
++          onCancel={() => {
++            if (!removal.pending) {
++              setRemoval(null);
++            }
++          }}
++          onRetire={() => {
++            setRemoval(null);
++            onRetire();
++          }}
++        />
++      ) : null}
++    </div>
++  );
++}
++
++/** One past date's membership as the universe read returns it (DEC-0105). */
++function AsOfMembers({ detail }: { detail: UniverseDetail }): JSX.Element {
++  const date = detail.asOf;
++  if (detail.asOfBeforeCreation) {
++    return (
++      <output aria-live="polite" className="text-sm">
++        {UNIVERSE_DETAIL.didNotExist(
++          detail.name,
++          date,
++          CHICAGO_DATE.format(new Date(detail.createdAt)),
++        )}
++      </output>
++    );
++  }
++  return (
++    <>
++      <output aria-live="polite" className="text-sm">
++        {`${UNIVERSE_DETAIL.membersAsOfLine(date)} ${UNIVERSE_DETAIL.asOfFiltersNote}`}
++      </output>
++      <table className="w-full text-sm">
++        <thead>
++          <tr>
++            <th scope="col" className="text-left">
++              {RESULTS.columns.symbol}
++            </th>
++            <th scope="col" className="text-left">
++              {RESULTS.columns.name}
++            </th>
++            <th scope="col" className="text-left">
++              {UNIVERSE_DETAIL.memberSince}
++            </th>
++            {FACTORS.map((factor) => (
++              <th key={factor} scope="col" className="text-right">
++                {FACTOR_LABELS[factor]}
++              </th>
++            ))}
++          </tr>
++        </thead>
++        <tbody>
++          {detail.members.map((member) => (
++            <AsOfRow key={member.symbol} member={member} />
++          ))}
++        </tbody>
++      </table>
++    </>
++  );
++}
++
++function AsOfRow({ member }: { member: UniverseMember }): JSX.Element {
++  const factors = member.factors;
++  return (
++    <tr className="h-row border-t border-border">
++      <th scope="row" className="text-left font-numeric">
++        {member.symbol}
++      </th>
++      <td className="truncate">{member.name === null ? <Missing /> : member.name}</td>
++      <td className="text-xs">{formatTimestamp(member.memberSince)}</td>
++      {FACTORS.map((factor) => (
++        <td key={factor} className="text-right">
++          {factors === null ? <Missing /> : <FactorCell cell={factors[factor]} factor={factor} />}
++        </td>
++      ))}
++    </tr>
++  );
++}

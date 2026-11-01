@@ -37,7 +37,8 @@ formatting and owner-facing strings from `web/src/screens/research/`
 ([`research-screen.md`](research-screen.md)); no string shown to the owner is
 written in any of them. No route mounts any of them yet. Outside the
 directory, only `web/src/screens/research/results-table.tsx` (CAP-002-E4-S6)
-imports one, the factor cell; otherwise their importers are each other
+and `web/src/screens/research/universes/detail/members-tab.tsx`
+(CAP-002-E1-S8, for its as-of table) import one, the factor cell; otherwise their importers are each other
 (`status-badge.tsx` is imported by the banner and the line, `factor-cell.tsx`
 by the inspector) and their own tests beside them (`factor-cell.test.tsx`,
 `restated-mark.test.tsx`, `not-current-banner.test.tsx`,
