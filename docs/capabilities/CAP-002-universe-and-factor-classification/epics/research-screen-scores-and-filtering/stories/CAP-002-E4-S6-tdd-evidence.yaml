@@ -1,0 +1,666 @@
+# TDD evidence for CAP-002-E4-S6 - the virtualised results table with server-side sort and selection.
+# Four cycles, as the task plan's Other Notes lay out: (1) T007 then T010 (results-window.ts, pure);
+# (2) T005, T006 and the loading half of T008 then T009 and T011 (data, paging, windowing); (3) T001, T002,
+# T003 and the header half of T008 then T012 (header and sort); (4) T004 and the remainder of T008 then T013
+# (rows, selection, checking). T014 to T016 change no behaviour.
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is
+# its own diff: cycle-1.patch is HEAD..index after cycle 1, and each later patch is the diff between the index
+# trees written after each cycle (git write-tree), so the four apply in order onto the stage parent. The
+# evidence logs and patches of earlier cycles appear in a later patch as added files; they are documentation.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began, with one exception: rework-3's spec drift was first assessed by the coding
+# agent, and its independent spec-drift review was run afterwards, in rework-4, over rework-3.patch (recorded in
+# rework-3's description). The verdicts below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (vitest compiles with esbuild and does not
+# type-check, so a mutant runs on its runtime behaviour). The operator catalogue derives negate-boolean and
+# off-by-one mutants from TypeScript; JSX yields nothing, so hand-written mutants ("operator": "manual") cover
+# each cycle's rendering and handlers.
+# Decisions applied: DEC-0159 (props and empty-state shapes), DEC-0160 (windowing constants), DEC-0161 (sort
+# controls, header sentence, checkbox name), DEC-0162 and DEC-0164 (onInspect debounce); all owner-upheld.
+# Decisions recorded by this run are named in the cycle that applies them.
+
+cycles:
+  - id: cycle-1
+    tasks: [T007, T010]
+    description: >
+      T007: the window arithmetic of results-window.ts. The five constants (ROW_HEIGHT_PX 32, VIEWPORT_ROWS 15,
+      OVERSCAN_ROWS 10, PREFETCH_ROWS 20, PAGE_SIZE 50); visibleWindow's start, end, padTop and padBottom with
+      the floor within a row, the clamp at the first row, the bound end - start <= VIEWPORT_ROWS +
+      2 * OVERSCAN_ROWS for 0, 1, 50 and 3000 loaded rows, the clamp beyond the end, negative and NaN scrollTop
+      as 0, and all zeros for nothing loaded; scrollTopToReveal's three cases; needsNextPage's boundary, its
+      missing cursor and its in-flight read. Production: web/src/screens/research/results-window.ts, no
+      React and no import (DEC-0160).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-cycle-1.log
+    red_log_sha256: 0c07127f24cc3185b44b4d078cbd845e29c2bdd333751ded36d17ba1a4b489f7
+    red_evidence: >
+      With results-window.test.ts written and no results-window.ts, the file failed to load: Failed to resolve
+      import "./results-window" (no tests ran).
+    green_evidence: >
+      results-window.test.ts 17 passed (green-cycle-1.log); tsc --noEmit, biome lint and biome format clean.
+      Thirty mutants (16 from the operator catalogue, 14 hand-written: floor swapped for round and ceil, the
+      start clamp and the end clamp dropped, the overscan dropped from the end, the pads miscomputed, each
+      scrollTopToReveal branch broken, the viewport height widened by the overscan, each needsNextPage term
+      dropped, the NaN guard dropped): 26 killed, 4 survived, each an equivalent boundary flip disposed of
+      below and confirmed equivalent by the cycle's code review.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-cycle-1.log
+        sha256: 797cf58a7896f3177808525c9aa306d6a86fa381409a0b83174a54cc0db835f6
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: de3dcaa35ad5ce813056edc573468b8dfcfdcaf1158c300011160538db6bc6e9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-cycle-1-results.json
+      results_sha256: 2bcaeb90660319f99e25c54e366e220cc418d461e03b639308ec8833740dcb7d
+      generated: 30
+      killed: 26
+      survived: 4
+      stillborn: 0
+      timeout: 0
+      score: 0.867
+      survivors:
+        - id: web/src/screens/research/results-window.ts:37:off-by-one:1
+          disposition: equivalent
+          reason: >
+            `scrollTop < 0` becomes `scrollTop <= 0` in firstVisibleRow. At scrollTop 0 both branches return
+            0, because floor(0 / ROW_HEIGHT_PX) is 0; every other input takes the same branch as before. The
+            contract (T007: a negative or NaN scrollTop behaves as 0) is unchanged.
+        - id: web/src/screens/research/results-window.ts:37:off-by-one:2
+          disposition: equivalent
+          reason: >
+            `scrollTop < 0` becomes `scrollTop < 1`. For 0 <= scrollTop < 1 the original returns
+            floor(scrollTop / 32), which is 0, the mutant's value; every other input is unchanged.
+        - id: web/src/screens/research/results-window.ts:73:off-by-one:1
+          disposition: equivalent
+          reason: >
+            `top < scrollTop` becomes `top <= scrollTop` in scrollTopToReveal. When top equals scrollTop the
+            original falls through to the inside-viewport case and returns scrollTop, which equals top, the
+            mutant's return. T007's three cases yield the same number.
+        - id: web/src/screens/research/results-window.ts:76:off-by-one:1
+          disposition: equivalent
+          reason: >
+            `top + ROW_HEIGHT_PX > scrollTop + viewportHeight` becomes `>=`. At equality the mutant returns
+            top + ROW_HEIGHT_PX - viewportHeight, which is scrollTop, the original's return for a row inside
+            the viewport. The last visible row (index 100 + VIEWPORT_ROWS - 1 in the test) is that boundary.
+
+  - id: cycle-2
+    tasks: [T005, T006, T008, T009, T011]
+    description: >
+      TC-COMP-093 (T005: 3000 rows render at most VIEWPORT_ROWS + 2 * OVERSCAN_ROWS stock rows and a bounded
+      number of cells, aria-rowcount matchCount + 1 and aria-rowindex position + 2, the window follows scrollTop
+      with the spacer heights of visibleWindow, the same bound for 50 rows, overflow-x hidden and w-full), T006
+      (page one with toListParams plus limit PAGE_SIZE and no cursor; the next page once as the window nears the
+      loaded end, appended without duplicates, none while in flight or without a cursor, a third page after the
+      second; a changed query discards rows and cursor, reads page one, keeps the old rows dimmed and busy
+      meanwhile, never sends the old cursor under the new query even when a page lands in the same render as the
+      change, and ignores a superseded late response; the 12-row skeleton; refreshKey reloads page one once
+      without moving focus; one stale-cursor restart per epoch, a stale page one as the error body; a failed
+      first page replaces the body with failureSentence by code and keeps the header, Try again repeats the
+      read, a non-ClassificationApiError falls back to the generic sentence; a failed later page keeps the rows
+      and offers Try again for that cursor, not busy meanwhile; onResult once per first page; the polite status
+      region announces matchLabel(matchCount), never the row count; the never-populated return replaces the
+      whole table and stays while a reload is pending, a failed reload replaces it with the error body; the
+      no-match return is the body's only row with colSpan = column count, no aria-sort and no aria-rowcount) and
+      the loading half of T008 (native table, column order, th scopes, Symbol row header in font-numeric as
+      plain text, Name truncated with title, FactorCell per factor with no score, Not followed on a retired
+      stock, the aria-hidden swatch painting the identity token, alignment, no polarity class, no
+      dangerouslySetInnerHTML). Production: web/src/screens/research/results-table.tsx (loading, keyset paging,
+      windowing, empty states, errors, live region; DEC-0159, DEC-0160) and copy.ts (T009: SORT.bySymbol,
+      SORT.byPercentile, SORT.byStandardisedScore, SORT.incompleteLast per DEC-0161, and RESULTS.columns per
+      DEC-0239, recorded by this run) with copy.test.ts anchors; CELL.selectRow and FACTOR_LABELS reused (Open
+      Gap 10). The header's sort controls (T012) and the rows' selection and checking (T013) are cycles 3 and 4.
+      Decisions recorded in this cycle: DEC-0239 (the Symbol and Name column headers live in copy.ts) and
+      DEC-0240 (the checked-row fill paints --muted inline; applied in cycle 4).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-cycle-2.log
+    red_log_sha256: e75b29d5a06d0c19143f7b8ff101d247b8e5cbecaac04ff13909f2a09c4b5541
+    red_evidence: >
+      With results-table.test.tsx written and no results-table.tsx, the file failed to load: Failed to resolve
+      import "./results-table" (no tests ran).
+    green_evidence: >
+      results-table.test.tsx 31, copy.test.ts 319 and results-window.test.ts 17 passed, 367 in all
+      (green-cycle-2.log); tsc --noEmit, biome lint and biome format clean. The first green run found one real
+      defect: after a stale-cursor restart the paging effect re-issued the old cursor before the page-one state
+      settled, because `busy` was read from the previous render; the rows now carry the epoch (query,
+      refreshKey, attempt) they were read for and page only in that epoch. Three test defects (assertions on
+      rows outside the rendered window) were corrected. Seventy-seven mutants (47 from the operator catalogue,
+      30 hand-written over the rendering and handlers): 66 killed, 11 survived, each an initial value, counter
+      identity or sub-row scroll offset disposed of below; the code review judged each equivalent. A manual
+      mutant dropping the query term of the epoch check survived the first run and is now killed by the test
+      that lands a page response and a query change in one render.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-cycle-2.log
+        sha256: 6d2537f9cbb8ab425e50e8ed729d6dd3287d8162a0a843d7de43bc6f65a1f435
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 782af279eb4984bf9bd8b0b929d801e380d13de774749db54574031dbef85ddd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/cycle-2.patch
+    commit_hash: stage
+    decisions: [DEC-0239, DEC-0240]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-cycle-2-results.json
+      results_sha256: fd54744021acb735d890c0d4e391fd090d6e4267dbf7275a161666eedb424378
+      generated: 77
+      killed: 66
+      survived: 11
+      stillborn: 0
+      timeout: 0
+      score: 0.857
+      survivors:
+        - id: web/src/screens/research/results-table.tsx:158:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            firstPending's initial value flipped to false. The page-one effect sets it true in the mount
+            commit, before any render a test or the owner can observe; the skeleton's aria-busy (T006) is
+            asserted after mount and holds.
+        - id: web/src/screens/research/results-table.tsx:159:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            pagePending's initial value flipped to true. The mount effect sets it false in the same commit,
+            busy is already true through firstPending, and the paging effect bails on loaded === null, so no
+            read and no attribute differ.
+        - id: web/src/screens/research/results-table.tsx:163:off-by-one:1
+          disposition: equivalent
+          reason: >
+            scrollTop's initial value 1 instead of 0. Every consumer floors scrollTop to a row
+            (visibleWindow, needsNextPage through it), so 1 px selects the same window as 0; the first page
+            resets it to 0 on arrival.
+        - id: web/src/screens/research/results-table.tsx:165:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt's initial value 1 instead of 0. attempt is only ever compared for identity with the
+            epoch a page was read for, and bumped; its magnitude is never read.
+        - id: web/src/screens/research/results-table.tsx:166:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation's initial value 1 instead of 0. The generation is compared for identity only; any
+            distinct sequence of values behaves the same.
+        - id: web/src/screens/research/results-table.tsx:174:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The unmount cleanup bumps the generation by 2 instead of 1. Any bump invalidates every in-flight
+            response, which is all the cleanup is for.
+        - id: web/src/screens/research/results-table.tsx:184:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The page-one effect bumps the generation by 2 instead of 1. Identity comparison only; every
+            earlier generation is still stale.
+        - id: web/src/screens/research/results-table.tsx:202:off-by-one:1
+          disposition: equivalent
+          reason: >
+            setScrollTop(1) instead of 0 when a first page arrives. The DOM scrollTop is reset to 0 separately
+            (asserted by T006), and the 1 px state value floors to row 0 in every consumer, so the window and
+            the paging decision are identical.
+        - id: web/src/screens/research/results-table.tsx:250:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The stale-cursor restart bumps attempt by 2 instead of 1. attempt is compared for identity only
+            (the epoch check and the effect dependency); any change restarts page one exactly once.
+        - id: web/src/screens/research/results-table.tsx:259:off-by-one:1
+          disposition: equivalent
+          reason: >
+            loadedCount falls back to 1 instead of 0 when nothing is loaded. loadedCount is read only behind
+            currentEpoch (which requires loaded !== null) and in the rows branch of the body, which renders
+            only with loaded rows, so the fallback is never consumed.
+        - id: web/src/screens/research/results-table.tsx:297:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Try again on a first page bumps attempt by 2 instead of 1. Identity comparison only; one click
+            still issues exactly one page-one read (asserted by T006).
+
+  - id: cycle-3
+    tasks: [T001, T002, T003, T008, T012]
+    description: >
+      TC-COMP-110 (T001: the Growth header carries {n} qualified, {m} needed from qualifiedCount and
+      minPeerSetSize exactly once in the document, 3/25 included; every Growth cell is Not enough to rank with
+      coverage-unknown, no count, no title and no digit; the Growth header has no button, no aria-sort and no
+      description while Value and Momentum keep their buttons and Value its aria-sort; a cell arriving
+      classified in an unranked column still reads Not enough to rank and never its percentile; a retired stock
+      in that column keeps Not followed), TC-COMP-098 (T002: two percentiles and one Incomplete, never 0, no
+      aria-invalid or failure class; the response's order kept with the incomplete stock last or first; every
+      ranked factor header described by the incomplete-last sentence through aria-describedby; hideIncomplete
+      true reaches the read and the table renders what the response holds; a threshold with hide-incomplete off
+      keeps the incomplete row), TC-COMP-138 (T003: the Value percentile button requests value_percentile asc,
+      then desc, then no sort and no order, aria-sort following and Symbol's default ascending returning; the
+      standardised-score button requests growth_score; the Symbol button cycles desc then back to the default;
+      the rest of the query survives a sort; focus stays on the activated button before and after the rows
+      arrive, the old rows busy and no progressbar meanwhile; the DOM order is the response order; the status
+      region announces the server's matchCount; Enter and Space each activate once) and the header half of T008
+      (seven uniquely named sort buttons at h-5 w-5 with an aria-hidden arrow, the factor name as header text
+      beside them). Also pinned: no th carries aria-sort over the skeleton or the no-match body, Symbol
+      included. Production: web/src/screens/research/results-table.tsx, T012 (SortButton, FactorHeader with
+      its two controls and the unranked sentence, nextSort and ariaSortFor, the Symbol control whose unsorted
+      default is ascending, the sr-only description, the cellFor guard; DEC-0161).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-cycle-3.log
+    red_log_sha256: 30dde1ccf6d84a3b4225782867223d685f6e82d186facae72e29ac40f8a16b21
+    red_evidence: >
+      With the eighteen cycle-3 tests written against the cycle-2 table (no sort control, no header sentence,
+      no description, no guard), results-table.test.tsx ran 49 tests: 12 failed, 37 passed. The six that
+      passed by the existing behaviour (the Not enough to rank cells the response already carried, the
+      Incomplete cell, the response order, the hideIncomplete read and the threshold row) assert what cycle 2
+      built; the twelve failures are the header sentence, the controls, aria-sort, the description, the
+      guard and the sort requests.
+    green_evidence: >
+      results-table.test.tsx 51, copy.test.ts 319 and results-window.test.ts 17 passed, 387 in all
+      (green-cycle-3.log); tsc --noEmit, biome lint and biome format clean. Two test helpers were corrected to
+      read a header's text without its buttons' aria-hidden arrows. Thirty-five mutants (8 from the operator
+      catalogue, 27 hand-written over the cycle, the arrow directions, the button names and targets, the
+      description, the guard and the host hand-off): the first run left two survivors; a test now pins that
+      the Symbol header has no aria-sort while no row is listed, and the second is disposed of below. Final
+      run 34 killed, 1 survived.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-cycle-3.log
+        sha256: affe9e6905115de5dbcd66a55d617b24acb95992108a6c56c9c070fbc186b212
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b9a948a2710084c94d5700159b9ae21d70f0ba159fe2852d6ad1ec2a91694a01
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-cycle-3-results.json
+      results_sha256: 04f45e18d26234ee9203e47e867133dd7a226f158485f35a0d0f3ac38df2ade6
+      generated: 35
+      killed: 34
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.971
+      survivors:
+        - id: manual:cycle-3:guard-keeps-percentile
+          disposition: equivalent
+          reason: >
+            The cellFor guard stops nulling `percentile` on the cell it forces to not_enough_stocks. The
+            guarded cell reaches only FactorCell, which renders Not enough to rank by reasonCode before any
+            branch reads the percentile (DEC-0151's state-selection order, pinned by S3's tests), so the
+            rendering is identical; AC-14's "never a percentile on an unranked factor" is pinned by T001's
+            classified-while-unranked test. The null is defence in depth, as the cycle's code review judged.
+
+  - id: cycle-4
+    tasks: [T004, T008, T011, T013, T016]
+    description: >
+      TC-COMP-139 (T004: a click of the Symbol cell or Enter on the focused row selects with aria-selected on
+      that row only and never checks; Enter on the checkbox does nothing; Space on the checkbox and a click of it
+      check without selecting; a second check leaves the selection and a third selection leaves both checks; the
+      selected row carries border-l-status-active and bg-status-active-muted over the always-drawn border-l-4,
+      a checked row the inline --muted fill (DEC-0240), both on a row that is both; every checkbox is named
+      Select {SYMBOL} at h-5 w-5; ArrowDown and ArrowUp move aria-selected and DOM focus from the row or its
+      checkbox and stay put at either end, Space on the row does nothing; the selected row is the tab stop, else
+      the first rendered row, one tab stop when the selected row has scrolled out of the window; a host control
+      in an extra column keeps the arrow keys; an arrow-selected row is focused once, not on every render;
+      onInspect fires once with the final symbol 150 ms after the last of three ArrowDowns 50 ms apart, not
+      before, after a click selection, never for checking or an unchanged selection, and not after unmount;
+      ten ArrowDowns from the last visible row of the 3000-row fixture keep aria-selected, focus and the tab
+      stop on the same row with the container scrolled by scrollTopToReveal and the DOM still bounded; checked
+      symbols survive in the host across a sort, a refreshKey bump and a scope change that replaces every row,
+      an absent symbol not unchecked; the selected row stays marked across a reload), the remainder of T008
+      (extraColumns: Member since afterName between Name and Value and Trailing last, right and left alignment,
+      two cells per row, two afterName entries in array order, the no-match colSpan counting them, the seven
+      sort buttons and checkbox names unchanged) and the cycle-3 review's note that no th carries aria-sort
+      while the body shows a first-page error over kept rows. Production: web/src/screens/research/
+      results-table.tsx, T013 (StockTableRow with its checkbox, roving tabIndex, click and key handlers; select
+      with the one INSPECT_DEBOUNCE_MS timer cleared on each new selection and on unmount; toggle preserving
+      order; move with scrollTopToReveal and the pending-focus effect; extraColumns by placement in the header,
+      the rows and the column count; aria-sort gated on showRows; the window local renamed range), the
+      INSPECT_DEBOUNCE_MS export T011 lists, and T016's doc comments on every export naming the DAC served and
+      the ResultsTable contract (onInspect a debounced notification and not the inspector's trigger, DEC-0164;
+      selected and checked controlled; empty and onResult the host's seams). DEC-0240 is amended to record the
+      precedence on a row that is both selected and checked, as both reviews asked.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-cycle-4.log
+    red_log_sha256: b047058bf063a1e250179e0a0921995717b9ab40b65ebc6171e087165740f5f1
+    red_evidence: >
+      With the cycle-4 tests written against the cycle-3 table (no checkbox, no selection, no extraColumns,
+      no INSPECT_DEBOUNCE_MS export), results-table.test.tsx ran 66 tests: 17 failed, 49 passed. Two of the
+      failures are cycle-3 tests whose headerOf helper now matches a header's text exactly; the other fifteen
+      are every T004 and extraColumns test and the aria-sort-over-error test.
+    green_evidence: >
+      results-table.test.tsx 69, copy.test.ts 319 and results-window.test.ts 17 passed, 405 in all
+      (green-cycle-4.log); the full web suite 978 passed in 49 files (full-suite.log, npm run test); npm run
+      lint, npm run format, npx tsc --noEmit and npm run build clean; the built CSS carries every class the
+      table writes as a literal (bg-status-active-muted, border-l-status-active, border-l-transparent,
+      border-l-4, opacity-60, sr-only, font-numeric, h-row, h-5, w-5, truncate, bg-secondary, bg-background,
+      sticky, top-0 and the alignment and spacing utilities) and the --factor-value, --factor-growth,
+      --factor-momentum, --muted and --row-height definitions (T015). Three timing tests first used
+      user-event under fake timers and hung on its internal waits; they now fake the clock after the
+      real-timer render and drive keys and clicks with fireEvent. One test asserted a tab-stop row's absence
+      through text the host also prints; it now asserts on the row. A duplicate dangerouslySetInnerHTML scan
+      test was removed because the delivered render.test.tsx scan covers the clause and tripped on the
+      literal. Forty-seven mutants (16 from the operator catalogue, 31 hand-written over the handlers, the
+      debounce, the marks, the checkbox, the arrows and the placements): the first run left five survivors,
+      four of them non-equivalent and now killed by the out-of-window tab stop, host-control arrow, focus-once
+      and Symbol-on-error tests, the fifth removed by simplifying the window computation; the final run
+      killed all 47. A rerun of the same 47 mutants against the final tree (after T016's comments and the
+      test removal) also killed all 47 (scratchpad results sha256
+      845062c76529c5c5ce7f2a854d983e2b2f97c9e2b72a964d4f167a25ba5b82c6).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-cycle-4.log
+        sha256: 9cbb3b87a53808b829d7a4e48f6448686189c20029500bfafe2f73e5a29b363d
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite.log
+        sha256: c1ac78a21a00923c17176b8980020eb20f5670e2362d2e139f111895d95b6084
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 91bfdabeceda897deb2f751a23242e2d21ef66792cf71d9fbdf858374c52aa09
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/cycle-4.patch
+    commit_hash: stage
+    decisions: [DEC-0240]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-cycle-4-results.json
+      results_sha256: 5f25c75474e6cdc09ffb2f0a0d772a4bb3fbb67191a1df3b98c76988fbd5ec82
+      generated: 47
+      killed: 47
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  # Rework of implementation review v1 (CHANGES-REQUIRED: IR-001 to IR-010). One cycle: the tests that pin
+  # each finding first (red-rework-1.log: the five behaviour findings fail, the test-only findings pass on the
+  # reviewed code and are RED through the review's own surviving mutants, all carried below), then the
+  # smallest production change per finding. Reviewed by the same two independent subagents as cycles 1 to 4.
+  - id: rework-1
+    tasks: [T001, T002, T003, T004, T005, T006, T011, T012, T013, T016]
+    addresses_review: CAP-002-E4-S6-implementation-review-v1.md
+    findings: [IR-001, IR-002, IR-003, IR-004, IR-005, IR-006, IR-007, IR-008, IR-009, IR-010]
+    description: >
+      IR-001 (DAC-E4-S6-2, production): the polite region keeps its text, matchLabel(page.matchCount), and
+      renders it inside a span keyed by a serial that every first page bumps, so a sort or a refresh-once whose
+      count is unchanged still inserts a new node, which is the change a polite live region announces; the
+      TC-COMP-138 and T006 tests watch the region with a MutationObserver across a sort and a refresh whose
+      matchCount stays 2846, assert a change after the page lands and none before, and that the region is the
+      same element holding the same sentence. IR-002 (test): TC-COMP-110 sorts by growth_percentile and
+      growth_score while Growth is unranked and asserts no header carries aria-sort. IR-003 (tests): seven T006
+      lifecycle tests, one per probe L1 to L7: a later page of a superseded query landing after the new page
+      one; a later page in flight on a query change (the new rows are not busy and page on); a later-page
+      error dropped on a query change; a refreshKey bump in the same batch as a later page never sends the
+      old cursor; a superseded page one and a superseded later page that fail late; a page one landing after
+      unmount reaching no onResult. IR-004 (test): TC-COMP-139 presses ArrowDown on the last row and ArrowUp on
+      the first, then activates a sort button and asserts focus stays on the button after the rows arrive.
+      IR-005 (tests): both spacer rows aria-hidden (the tbody exposes only the stock rows as rows), the live
+      region and the incomplete-last description sr-only, and the sort arrow glyph following aria-sort through
+      the cycle (up, down, both) on the factor and Symbol buttons. IR-006 (production): nextSort for the
+      Symbol column returns the unsorted default (symbol A to Z, no sort or order) from any state other than
+      that default, and symbol descending from the default (null or an explicit symbol ascending in the URL),
+      which is DEC-0161's ascending(default), descending, ascending(default) entered at its first state from a
+      factor sort, as data-table section 4 starts every column not currently sorted at ascending; two tests pin
+      the entry from value_percentile desc and from an explicit symbol asc. IR-007 (production): on each first
+      page the table reads the symbol of the row holding focus inside its own scroll container
+      (focusedSymbolIn); when that symbol is in the new page the scroll position becomes
+      scrollTopToReveal(index, current scrollTop) instead of 0, so the row stays in the window, its element
+      persists (rows are keyed by symbol) and React's commit-time focus restoration keeps focus on it; focus
+      outside the table, on a host row with a listed symbol outside the container, or on a row the page no
+      longer holds still resets the window to 0. The reviewed probe (50 rows, scrolled to row 30, SYM0040
+      focused, refresh with the same rows) now keeps focus and scrollTop; a refresh that reorders the rows
+      around the focused one (a new score set under a factor sort) is tested with Node.prototype.insertBefore
+      and appendChild shimmed to fire a blur event on a moved focused node (jsdom drops activeElement on the
+      move but fires no blur; corrected in rework-2, review v2 IR-004);
+      a refresh that moves the row to the top scrolls to it; a refresh that drops it resets. IR-008 (doc): the
+      ResultsTable contract comment says query is compared by identity, so a host keeps one object per URL
+      state. IR-009 (LOW, disposed with a recorded reason): DEC-0240 is amended to record that the selection
+      edge is border-l-4 because Tailwind's border-width scale and tailwind.config.js map no 3 px step, that an
+      arbitrary 3px literal would breach STD-UI-29 and the config is outside CAP-002's edit set (DEC-0084), and
+      what the owner's fix is if 3 px must hold; no code change. IR-010 (production): Space with the row itself
+      as target calls preventDefault, so a browser does not scroll the container; Space from the checkbox and
+      Enter from the row are left to their defaults, asserted through fireEvent's return value. Not reworked:
+      nothing; every finding is addressed or disposed above. Two test-hygiene notes from the cycle's code
+      review were applied before the final mutation run and fingerprint: the in-flight-page test awaits the
+      page it resolves, and the DOM shim and the host table are restored in finally blocks.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-1.log
+    red_log_sha256: ffdfd122c6be885f1245cf2594c3f01638acf609e1c1bac252909a04fd3998fb
+    red_evidence: >
+      With the rework tests written against the reviewed table (HEAD 95828f6, production unchanged),
+      results-table.test.tsx ran 86 tests: 5 failed, 81 passed. The five are the behaviour findings: the
+      unchanged-count announcement after a sort and after a refresh-once (IR-001, "expected 0 to be greater
+      than 0" mutation records), focus on SYM0040 across a refresh past the first window (IR-007), Sort by
+      symbol from a factor sort requesting the default (IR-006), and Space on the row prevented (IR-010). The
+      test-only findings (IR-002 to IR-005) pass on the reviewed code by design; their RED is the review's
+      fourteen surviving mutants, carried into this cycle's mutants file and all killed below.
+    green_evidence: >
+      results-table.test.tsx 88, copy.test.ts 319 and results-window.test.ts 17 passed, 424 in all
+      (green-rework-1.log); the full web suite 997 passed in 49 files (full-suite-rework-1.log, npm run test);
+      npm run lint, npm run format, npx tsc --noEmit and npm run build exit 0; npm run test:e2e not run (the
+      plan excludes it). Thirty-eight mutants: 11 from the operator catalogue over the rework's changed
+      lines and 27 hand-written: the review's 14 non-equivalent survivors
+      (page-error-kept-on-new-query, page-pending-kept-on-new-query, epoch-ignores-refresh,
+      later-page-then-unguarded, later-page-catch-unguarded, first-page-catch-unguarded,
+      unmount-generation-not-bumped, top-spacer-not-hidden, bottom-spacer-not-hidden, live-region-visible,
+      description-visible, sort-arrows-swapped, unranked-header-keeps-aria-sort, move-guard-dropped) and 13
+      over the rework code (the Symbol cycle reverted to descending-first and never clearing; the announcement
+      serial not bumped, the span unkeyed, the row count announced; the focused row ignored, the reveal
+      ignoring the current scroll, the DOM and the state scroll reset anyway, the symbol never read, the
+      container check dropped; Space not prevented, and prevented from the checkbox too). 36 killed, 2
+      survived, both the serial's magnitude, disposed of below as equivalent. The first run of this set left
+      the container check and a no-pending-focus mutant alive: the host-row test's fixture had replaced every
+      symbol, so the kept index was -1 under both; its page now keeps the symbols, which killed the container
+      check, and the pending-focus write was removed as redundant (React restores focus to the persisted row
+      element itself, which the reorder test demonstrates under the browser-blur shim).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-1.log
+        sha256: e5436d795d2c9b3bf24d539d24c44a0c9dddcbf7a9edb659abcea4a89527a1e9
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-1.log
+        sha256: 53bf88086de0cc68b6207dcb726d3d7a1d3c6ba41241451c35b0121902d5d4cb
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 187d3ec44bd9cc4c960ba9097f74e39346b954db1653558af239fbf268d0c9c9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-1.patch
+    commit_hash: stage
+    decisions: [DEC-0240]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-1-results.json
+      results_sha256: 88342c1e9693d5cc3b11a01d9f6112ed95c0cce9a5027d704f2bd05be4299391
+      generated: 38
+      killed: 36
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.947
+      survivors:
+        - id: web/src/screens/research/results-table.tsx:390:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The announcement serial's initial value 1 instead of 0. The serial is only ever a React key on the
+            region's span; what matters is that each first page changes it, never its magnitude, so the same
+            nodes are inserted at the same moments.
+        - id: web/src/screens/research/results-table.tsx:463:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The serial bumped by 2 instead of 1 on each first page. Identity only, as above: any bump replaces
+            the span and re-announces; the tests assert the mutation and the unchanged text, which hold.
+  - id: rework-2
+    tasks: [T006]
+    addresses_review: CAP-002-E4-S6-implementation-review-v2.md
+    findings: [IR-001, IR-002, IR-003, IR-004]
+    description: >
+      Test-only rework; results-table.tsx is unchanged. IR-001 (HIGH): a T006 test loads 50 rows, scrolls to
+      row 30, clicks the checkbox Select SYM0040 (focus on a control inside the row, where checking leaves a
+      keyboard user) and resolves a refresh-once with the same rows; focus stays on that checkbox element and
+      scrollTop stays at row 30, which pins focusedSymbolIn's closest("tr[data-symbol]") lookup. IR-002 (MEDIUM):
+      the "resets when it is gone" test now asserts that focus returns to document.body when the focused row is
+      not in the refreshed page one, and the behaviour is recorded for the owner in DEC-0244 (provisional,
+      owner_reviewed false) with the alternative of focusing the table's tab stop. IR-003 (MEDIUM): a T006
+      test watches the polite region with a MutationObserver while a later page lands and asserts no mutation
+      and the same sentence. IR-004 (LOW): the reorder test's comment now says jsdom drops activeElement on the
+      move without a blur event and that the shim adds only that event; rework-1's description is corrected to
+      match.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-2.log
+    red_log_sha256: b33b348c60bac8ec1b1555196abd441a5a05d0a573aaf8618e20555b6fe4ea63
+    red_evidence: >
+      The production code was already correct for IR-001 and IR-003, so the RED is the review's two
+      non-equivalent survivors applied to results-table.tsx (manual:review-v2:focus-row-only and
+      manual:review-v2:announce-on-later-page): results-table.test.tsx ran 90 tests, 2 failed (the checkbox
+      focus test and the later-page region test), 88 passed; production was restored byte-for-byte afterwards.
+      The IR-002 assertion characterises the recorded behaviour and passes on the reviewed code by design.
+    green_evidence: >
+      results-table.test.tsx 90, results-window.test.ts 17 and copy.test.ts passed, 434 in all
+      (green-rework-2.log); the full web suite 1192 passed in 55 files after the origin/main merge
+      (full-suite-rework-2.log, npm run test); npm run lint, npm run format, npx tsc --noEmit and npm run build
+      exit 0; npm run test:e2e not run (the plan excludes it). Mutation: the catalogue yields nothing (no
+      production line changed); the two review survivors, re-run as manual:rework-2 mutants, are both killed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-2.log
+        sha256: 61e30b1e6dc652ba0c24737f3e3b2961a0fbc9e12f61c08bdccd0db5b8e775b1
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-2.log
+        sha256: 07965e632a10fb77d7b101fed2a41981486968940d8e46b4e08f58894de40e8c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 693f9892f3ac8caa4450ce02c50b4685b763a7765435ca33a2b309e83e357b4f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-2.patch
+    commit_hash: stage
+    decisions: [DEC-0244]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-2-results.json
+      results_sha256: 1f06278a98edd6db5cc88e25a76bdd9221e8ec86dcdd371dc5b397d84abf6e90
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: rework-3
+    tasks: [T003, T004, T013]
+    addresses_review: CAP-002-E4-S6-implementation-review-v3.md
+    findings: [IR-001]
+    description: >
+      IR-001 (CRITICAL, production): move() no longer leaves a focus request that no render consumes. When the
+      arrow target is already inside the viewport (scrollTopToReveal returns the current scrollTop, so the row
+      is rendered: the viewport lies within visibleWindow's overscan), the row is focused directly and the
+      pending-focus ref is cleared; this covers the already-selected target, where select() returns early and
+      nothing re-renders. Only when a scroll is needed is the request set, and then setScrollTop with a new
+      value guarantees the render that brings the row into the window and consumes it. Four tests: TC-COMP-139
+      selects AAPL, tabs twice to MSFT's checkbox and presses ArrowUp, then asserts focus on the AAPL row; after
+      the same arming, Space on MSFT's checkbox checks it and keeps focus on it; after the same arming, a
+      controlled-query change (hideIncomplete) keeps focus on an input outside the table before and after the
+      deferred page arrives. TC-COMP-138 arms from SYM0001's checkbox onto the selected SYM0000, activates Sort
+      by value percentile, and asserts the request and focus on the button before and after the deferred page.
+      DEC-0244 (focus falls to document.body when a refresh drops the focused row) is unchanged. Code review by
+      an independent subagent (APPROVED, read-only, over the code diff); spec drift was first assessed by the coding
+      agent, since the change restores T013 and DAC-E4-S6-2 as written and touches no specification. Review v4
+      IR-003 noted that this broke T017's independence; in rework-4 an independent, read-only spec-drift subagent
+      judged rework-3.patch against the story, T003, T004, T013, component-design-classification-ui, ux-design and
+      the TC-COMP-138/139 test specification and returned drift_detected false, so the spec_drift below is now
+      that independent verdict.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-3.log
+    red_log_sha256: aac0157bf199e61c811b5c6b1e74543a2cb7d82a1294a952410750d173ddc3ff
+    red_evidence: >
+      With the four tests written against the reviewed table (HEAD f8ac5ea, results-table.tsx unchanged),
+      results-table.test.tsx ran 94 tests: 4 failed, 90 passed. The failures are the review's probes: focus
+      stays on MSFT's checkbox instead of the AAPL row (T013); Space moves focus to the AAPL row (P4); the sort
+      button loses focus to the SYM0000 row (P5); the outside input loses focus to the AAPL row (P7).
+    green_evidence: >
+      results-table.test.tsx 94, results-window.test.ts 17 and copy.test.ts 327 passed, 438 in all
+      (green-rework-3.log); the full web suite 1196 passed in 55 files (full-suite-rework-3.log, npm run test);
+      npm run lint, npm run format, tsc --noEmit and npm run build exit 0; npm run test:e2e not run (the plan
+      excludes it). Mutation: the catalogue yields no mutant over the changed lines; five hand-written mutants
+      (the v3 defect restored, the direct focus dropped, the scroll branch's request dropped, a request left
+      behind beside the direct focus, the direct branch taken on every press) are all killed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-3.log
+        sha256: 8cda1636dbfebff0ab34fc6051296320f4a16bb10c7408de5e26b5d255b2d070
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-3.log
+        sha256: a9d94ddd2c5421fcf9887a9d97cee43408be45979b2e812b05ad560022022432
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3ffa81f4b57dad42487ef377e291d92e4edfd26722beaba52ce31b7e3f36bb01
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-3.patch
+    commit_hash: stage
+    decisions: [DEC-0244]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-3-results.json
+      results_sha256: 139eb4f726a41e144561d12aa9ab5d996773658a973078a3e5e394ff8b8389ea
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: rework-4
+    tasks: [T004, T017]
+    addresses_review: CAP-002-E4-S6-implementation-review-v4.md
+    findings: [IR-001, IR-002, IR-003]
+    description: >
+      Test-only rework; results-table.tsx is unchanged, as the review's remediation states. IR-001 (HIGH): two
+      TC-COMP-139 tests. "Twelve ArrowUps from the first visible row" scrolls 100 rows to row 40, clicks SYM0040
+      and presses ArrowUp twelve times, two more than OVERSCAN_ROWS, so the target leaves the rendered window;
+      it asserts SYM0028 selected, focused and the tab stop, and scrollTop equal to scrollTopToReveal (28 *
+      ROW_HEIGHT_PX). The second starts with SYM0005 selected and the list scrolled to row 6, presses ArrowUp
+      from SYM0006's checkbox onto the already-selected row above the viewport, and asserts the selection, the
+      reveal (5 * ROW_HEIGHT_PX) and focus on the SYM0005 row; then a controlled-query change (hideIncomplete)
+      with a deferred page leaves focus on an input outside the table before and after the page lands
+      (DAC-E4-S6-2). IR-002 (HIGH): a TC-COMP-139 test selects MSFT, then presses ArrowDown from NVDA's checkbox
+      and from the NVDA row, and ArrowUp from AAPL's checkbox and from the AAPL row; the selection stays on MSFT,
+      focus stays where it was, and nothing is checked. IR-003 (LOW): this cycle's patch was judged by an
+      independent code-review subagent and an independent spec-drift subagent, as T017 requires; the same
+      spec-drift subagent judged rework-3.patch, and the header and rework-3's description now say so.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-4.log
+    red_log_sha256: 84c790f364a274bdc6e902a5217cbd224adcba050ba6eefb198247d4fd5771c2
+    red_evidence: >
+      The production code was already correct, so the RED is each of the review's three non-equivalent survivors,
+      re-derived from CAP-002-E4-S6-implementation-review-v4-mutation.json and applied to results-table.tsx in
+      turn: results-table.test.tsx ran 97 tests each time. manual:review-v4:scroll-state-not-set and
+      manual:review-v4:direct-branch-above-too each fail the two IR-001 tests (2 failed, 95 passed);
+      manual:review-v4:move-guard-dropped fails the IR-002 test (1 failed, 96 passed). Production was restored
+      byte-for-byte after each run (sha256 b4201f1f9e8bfe8aa13535405743f6c9730279376928ca370bb9b2f083a0bac2 before
+      and after). On the reviewed code the three tests pass by design.
+    green_evidence: >
+      results-table.test.tsx 97, results-window.test.ts 17 and copy.test.ts 344 passed, 458 in all
+      (green-rework-4.log); the full web suite 1371 passed in 60 files after the origin/main merge 81ab214
+      (full-suite-rework-4.log, npm run test); npm run lint, npm run format, npx tsc --noEmit and npm run build
+      exit 0; npm run test:e2e not run (the plan excludes it). Mutation: the catalogue yields nothing (no
+      production line changed); the review's fourteen hand-written mutants of move(), re-run as manual:rework-4
+      mutants, give 13 killed, including the three survivors IR-001 and IR-002 name, and 1 survivor,
+      direct-clear-dropped, which review v4 judged equivalent; its disposition is below.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-4.log
+        sha256: ed72979d6b7207b3265c4e95a254a4363a0785def0c2572497361851e7216081
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-4.log
+        sha256: 2f860bd55fd1c31a0f5d02a4fc71f5b58b3066c1acfdba912920d0968f522b5d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e9ae22de3517c13414f453bfd7a721b19dd6e2791220f5c717c51bd9b5508d92
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/rework-4.patch
+    commit_hash: stage
+    decisions: [DEC-0244]
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-4-results.json
+      results_sha256: fafdf5e2114238ce6685ca071421c2b52288031d264ddcd37c139ae1f5143036
+      generated: 14
+      killed: 13
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.929
+      survivors:
+        - id: manual:rework-4:direct-clear-dropped
+          disposition: equivalent
+          reason: >
+            Drops `pendingFocus.current = null` from move()'s direct branch. The line matters only if a request is
+            still set when move() starts. Only the scroll branch sets one, and it always hands setScrollTop a value
+            different from the rendered scrollTop, so a render follows whose window holds the target
+            (scrollTopToReveal places it in the viewport); React 18 flushes that discrete event's passive effects
+            before the next event, so the pending-focus effect consumes the request first. T013 specifies only that
+            the request is consumed in an effect. Review v4 judged it equivalent on the same grounds.

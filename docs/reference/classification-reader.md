@@ -8,7 +8,10 @@ predicate (CAP-002-E3-S2, design sections 2.5 and 2.7). Its four statements are
 in `classification/sql/`. The compare, evidence and history reads are later
 stories.
 
-No route calls the reader yet. Its one caller under `src/` is the universe
+Its callers under `src/` are the classification API's `/api/universes`
+routes, which page `list_classifications` scoped to a universe to fill each
+member's name and cells (CAP-002-E1-S6; see
+[`classification-api.md`](classification-api.md#responses)), and the universe
 service, whose `create_from_filter` imports `Thresholds`, `current_set` and
 `evaluate_filter` (CAP-002-E1-S5; see
 [`universe-service.md`](universe-service.md#create-from-a-filter)). The reader

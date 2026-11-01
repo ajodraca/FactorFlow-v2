@@ -1,0 +1,104 @@
+diff --git a/web/src/screens/research/results-table.test.tsx b/web/src/screens/research/results-table.test.tsx
+index 659d49d..15d7ff6 100644
+--- a/web/src/screens/research/results-table.test.tsx
++++ b/web/src/screens/research/results-table.test.tsx
+@@ -1965,6 +1965,28 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
+     expect(document.activeElement).toBe(symbolButton);
+   });
+ 
++  it("stays put on an arrow past either end pressed from an end row or its checkbox while another row is selected", async () => {
++    const user = await renderRows();
++    await user.click(screen.getByRole("rowheader", { name: "MSFT" }));
++    checkboxOf("NVDA").focus();
++    await user.keyboard("{ArrowDown}");
++    expect(selectedSymbols()).toEqual(["MSFT"]);
++    expect(document.activeElement).toBe(checkboxOf("NVDA"));
++    rowOf("NVDA").focus();
++    await user.keyboard("{ArrowDown}");
++    expect(selectedSymbols()).toEqual(["MSFT"]);
++    expect(document.activeElement).toBe(rowOf("NVDA"));
++    checkboxOf("AAPL").focus();
++    await user.keyboard("{ArrowUp}");
++    expect(selectedSymbols()).toEqual(["MSFT"]);
++    expect(document.activeElement).toBe(checkboxOf("AAPL"));
++    rowOf("AAPL").focus();
++    await user.keyboard("{ArrowUp}");
++    expect(selectedSymbols()).toEqual(["MSFT"]);
++    expect(document.activeElement).toBe(rowOf("AAPL"));
++    expect(hostChecked()).toBe("");
++  });
++
+   it("prevents the browser's default for Space on the row, and leaves it to the checkbox", async () => {
+     await renderRows();
+     rowOf("MSFT").focus();
+@@ -2122,6 +2144,26 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
+     expect(stockRows().length).toBeLessThanOrEqual(MAX_RENDERED);
+   });
+ 
++  it("scrolls a row into the window before focusing it: twelve ArrowUps from the first visible row", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(100)));
++    render(<Host />);
++    await screen.findByText("SYM0000");
++    scrollToRow(40);
++    await user.click(screen.getByRole("rowheader", { name: "SYM0040" }));
++    expect(document.activeElement).toBe(rowOf("SYM0040"));
++    for (let press = 0; press < 12; press += 1) {
++      await user.keyboard("{ArrowUp}");
++    }
++    expect(selectedSymbols()).toEqual(["SYM0028"]);
++    expect(document.activeElement).toBe(rowOf("SYM0028"));
++    expect(rowOf("SYM0028").tabIndex).toBe(0);
++    // Each press reveals the row above at the viewport's top edge.
++    expect(scroller().scrollTop).toBe(scrollTopToReveal(28, 29 * ROW_HEIGHT_PX));
++    expect(scroller().scrollTop).toBe(28 * ROW_HEIGHT_PX);
++    expect(stockRows().length).toBeLessThanOrEqual(MAX_RENDERED);
++  });
++
+   it("keeps checked symbols in the host across a sort, a refresh and a scope change that replaces every row", async () => {
+     const user = userEvent.setup();
+     listMock.mockResolvedValueOnce(list(THREE));
+@@ -2221,6 +2263,43 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
+       outside.remove();
+     }
+   });
++
++  it("scrolls the already-selected row in and focuses it when an arrow targets it above the viewport, and a later query change leaves an outside control alone", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(generated(100)));
++    const { rerender } = render(<Host query={DEFAULT_RESEARCH_QUERY} initialSelected="SYM0005" />);
++    await screen.findByText("SYM0000");
++    scrollToRow(6);
++    checkboxOf("SYM0006").focus();
++    await user.keyboard("{ArrowUp}");
++    expect(selectedSymbols()).toEqual(["SYM0005"]);
++    expect(scroller().scrollTop).toBe(scrollTopToReveal(5, 6 * ROW_HEIGHT_PX));
++    expect(scroller().scrollTop).toBe(5 * ROW_HEIGHT_PX);
++    expect(document.activeElement).toBe(rowOf("SYM0005"));
++    const outside = document.createElement("input");
++    outside.setAttribute("aria-label", "Host filter");
++    document.body.append(outside);
++    try {
++      outside.focus();
++      const pending = deferred<ClassificationList>();
++      listMock.mockReturnValueOnce(pending.promise);
++      rerender(
++        <Host
++          query={{ ...DEFAULT_RESEARCH_QUERY, hideIncomplete: true }}
++          initialSelected="SYM0005"
++        />,
++      );
++      expect(listMock).toHaveBeenCalledTimes(2);
++      expect(document.activeElement).toBe(outside);
++      await act(async () => {
++        pending.resolve(list(generated(100)));
++      });
++      expect(table()).not.toHaveAttribute("aria-busy", "true");
++      expect(document.activeElement).toBe(outside);
++    } finally {
++      outside.remove();
++    }
++  });
+ });
+ 
+ // T008, the remainder: extraColumns placement (Open Gap 1, DEC-0159 as amended by E4-F02).

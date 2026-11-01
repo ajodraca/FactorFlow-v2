@@ -1,0 +1,125 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > drops a later page in flight when the query changes: the new rows are not busy and page on
+Warning: An update to ResultsTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ResultsTable (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.tsx:181:5)
+    at Host (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.test.tsx:141:10)
+Warning: An update to ResultsTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ResultsTable (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.tsx:181:5)
+    at Host (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/pipeline-factorflow-v2-cap-002-e4-84bf08/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/results-table.test.tsx:141:10)
+
+ ❯ src/screens/research/results-table.test.tsx (86 tests | 5 failed) 1867ms
+   × T006: keyset paging and the request lifecycle > announces the match count again after a refresh-once that leaves it unchanged 15ms
+     → expected 0 to be greater than 0
+   × T006: keyset paging and the request lifecycle > keeps focus on a focused row past the first window across a refresh-once that keeps it 44ms
+     → expected null not to be null
+   × TC-COMP-138: sorting is a request > starts the Symbol sort at its A to Z default when a factor sort is active 16ms
+     → expected { sort: 'symbol', order: 'desc', …(1) } to deeply equal { limit: 50 }
+   × TC-COMP-138: sorting is a request > announces the match count again after a sort that leaves it unchanged 16ms
+     → expected 0 to be greater than 0
+   × TC-COMP-139: selection and checking never interfere > prevents the browser's default for Space on the row, and leaves it to the checkbox 7ms
+     → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > announces the match count again after a refresh-once that leaves it unchanged
+AssertionError: expected 0 to be greater than 0
+ ❯ src/screens/research/results-table.test.tsx:734:43
+    732|     await screen.findByText("NEW0000");
+    733|     // The text is the same sentence, and the region changed, which is…
+    734|     expect(observer.takeRecords().length).toBeGreaterThan(0);
+       |                                           ^
+    735|     observer.disconnect();
+    736|     expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > T006: keyset paging and the request lifecycle > keeps focus on a focused row past the first window across a refresh-once that keeps it
+AssertionError: expected null not to be null
+ ❯ src/screens/research/results-table.test.tsx:756:34
+    754|       reload.resolve(list(generated(50)));
+    755|     });
+    756|     expect(rowOf("SYM0040")).not.toBeNull();
+       |                                  ^
+    757|     expect(document.activeElement).toBe(rowOf("SYM0040"));
+    758|     expect(selectedSymbols()).toEqual(["SYM0040"]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-138: sorting is a request > starts the Symbol sort at its A to Z default when a factor sort is active
+AssertionError: expected { sort: 'symbol', order: 'desc', …(1) } to deeply equal { limit: 50 }
+
+- Expected
++ Received
+
+  Object {
+    "limit": 50,
++   "order": "desc",
++   "sort": "symbol",
+  }
+
+ ❯ src/screens/research/results-table.test.tsx:1509:39
+    1507|     listMock.mockResolvedValueOnce(list(generated(3, "AZ"), { matchCou…
+    1508|     await user.click(sortButton(SORT.bySymbol));
+    1509|     expect(listMock.mock.calls[1][0]).toEqual({ limit: PAGE_SIZE });
+       |                                       ^
+    1510|     expect(listMock.mock.calls[1][0]).not.toHaveProperty("sort");
+    1511|     expect(listMock.mock.calls[1][0]).not.toHaveProperty("order");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-138: sorting is a request > announces the match count again after a sort that leaves it unchanged
+AssertionError: expected 0 to be greater than 0
+ ❯ src/screens/research/results-table.test.tsx:1579:43
+    1577|     expect(observer.takeRecords()).toHaveLength(0);
+    1578|     await screen.findByText("S0000");
+    1579|     expect(observer.takeRecords().length).toBeGreaterThan(0);
+       |                                           ^
+    1580|     observer.disconnect();
+    1581|     expect(region.textContent?.trim()).toBe(RESULTS.stocksMatch(2846));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > prevents the browser's default for Space on the row, and leaves it to the checkbox
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/screens/research/results-table.test.tsx:1795:60
+    1793|     await renderRows();
+    1794|     rowOf("MSFT").focus();
+    1795|     expect(fireEvent.keyDown(rowOf("MSFT"), { key: " " })).toBe(false);
+       |                                                            ^
+    1796|     expect(hostChecked()).toBe("");
+    1797|     expect(selectedSymbols()).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 81 passed (86)
+   Start at  23:35:57
+   Duration  2.63s (transform 133ms, setup 60ms, collect 198ms, tests 1.87s, environment 244ms, prepare 140ms)
+

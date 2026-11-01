@@ -1,0 +1,1498 @@
+diff --git a/src/factorflow/api/app.py b/src/factorflow/api/app.py
+index cb11778..ce2c855 100644
+--- a/src/factorflow/api/app.py
++++ b/src/factorflow/api/app.py
+@@ -25,7 +25,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
+ from starlette.responses import FileResponse
+ 
+ from factorflow.api.errors import error_response, internal_error_handler
+-from factorflow.api.routes import coverage, health, instruments, runs, settings
++from factorflow.api.routes import coverage, health, instruments, runs, settings, universes
+ from factorflow.config.settings import (
+     ApiSettings,
+     DatabaseSettings,
+@@ -459,6 +459,7 @@ def create_app() -> FastAPI:
+     app.include_router(settings.router)
+     app.include_router(runs.router)
+     app.include_router(coverage.router)
++    app.include_router(universes.router)
+ 
+     _add_host_origin_middleware(app)
+     _add_request_id_middleware(app)
+diff --git a/src/factorflow/api/routes/universes.py b/src/factorflow/api/routes/universes.py
+new file mode 100644
+index 0000000..503a1d1
+--- /dev/null
++++ b/src/factorflow/api/routes/universes.py
+@@ -0,0 +1,403 @@
++"""The universes router: the nine local HTTP operations over `universe-service`.
++
++Component design: `component-design-classification-api.md` sections 2.1, 2.5 (error
++mapping), 2.6 (write request flow), 2.7 (response shapes) and 11; story CAP-002-E1-S6.
++Routes validate (the bounds are the models' and the query parameters', checked before
++the service is called), delegate to `factorflow.universes.service` and the reader, map
++the service's typed refusals to the stable error envelope and shape the response. They
++hold no universe rule. The service is reached through its module (`service.<fn>`), so
++one place decides what is called.
++
++Each handler opens one `with pool.connection()`: the pool commits on a normal exit and
++rolls back on an exception, which is the "caller commits" the service expects. Typed
++refusals are caught outside that block, so the transaction has rolled back before the
++envelope is built. Anything the table does not map propagates to the delivered `500`.
++
++Provisional (task plan Open Gaps; DEC-0097, DEC-0098): a member's `name` and `factors`
++come from the reader's row for it and are null when the reader has none (no complete set,
++no row in the current set, or, on an `as_of` read, a member removed since, because the
++reader scopes a universe by today's membership); the list's
++`active_count` and `retired_count` page `replay.list_universe_rows` to exhaustion; the
++envelope's `resource` is `universe-member` for the member refusals and `universe`
++otherwise; a malformed path symbol is `422 validation_error` before the service.
++"""
++
++import json
++from datetime import date
++from typing import Annotated, Final, Literal
++from uuid import UUID
++
++import psycopg
++from fastapi import APIRouter, Query, Request
++from fastapi.responses import JSONResponse
++from pydantic import BaseModel
++
++from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
++from factorflow.api.classification_models import (
++    AddMembersRequest,
++    AddMembersResponse,
++    CreateUniverseRequest,
++    FactorsResponse,
++    MemberResponse,
++    OriginResponse,
++    RemoveMemberResponse,
++    RenameUniverseRequest,
++    RetireUniverseResponse,
++    SetBlock,
++    UniverseEventResponse,
++    UniverseEventsResponse,
++    UniverseListItem,
++    UniverseListResponse,
++    UniverseResponse,
++)
++from factorflow.api.errors import error_response
++from factorflow.classification import reader
++from factorflow.instruments.symbols import is_valid, normalise
++from factorflow.runs.queries import CursorError
++from factorflow.universes import replay, service
++
++router = APIRouter()
++
++REFUSALS: Final[dict[type[Exception], tuple[int, str]]] = {
++    service.UniverseNotFound: (404, "universe_not_found"),
++    service.UniverseRetired: (409, "universe_retired"),
++    service.UniverseNameInUse: (409, "universe_name_in_use"),
++    service.EmptyUniverse: (422, "empty_universe"),
++    service.LastMember: (409, "last_member"),
++    service.NotAMember: (404, "not_a_member"),
++    service.InstrumentNotAcquired: (409, "instrument_not_acquired"),
++    service.ClassificationSetChanged: (409, "classification_set_changed"),
++    CursorError: (422, "cursor_invalid"),
++}
++"""Design 2.5: every refusal the universes routes can meet, keyed by exception class."""
++
++_REFUSABLE: Final = tuple(REFUSALS)
++_UNIVERSE: Final = "universe"
++_MEMBER: Final = "universe-member"
++
++
++def _reason(
++    exc: Exception,
++    *,
++    universe_id: UUID | None,
++    name: str | None,
++    symbol: str | None,
++    from_filter: bool,
++) -> str:
++    """The reason clause; built only from the request and the exception's own attributes."""
++    if isinstance(exc, service.InstrumentNotAcquired):
++        return "these stocks are not followed: " + ", ".join(exc.symbols)
++    if isinstance(exc, service.EmptyUniverse):
++        return "the filter matched no stock" if from_filter else "no symbol was given"
++    if isinstance(exc, service.UniverseNameInUse):
++        return f"an active universe is already named {name!r}"
++    if isinstance(exc, service.ClassificationSetChanged):
++        current = exc.current_set_id if exc.current_set_id is not None else "none is complete"
++        return (
++            f"classification set {exc.requested_set_id} is no longer the current set "
++            f"(current: {current})"
++        )
++    if isinstance(exc, service.UniverseNotFound):
++        return f"no universe has the id {universe_id}"
++    if isinstance(exc, service.UniverseRetired):
++        # By id: the exception carries no name and messages use no other source (DEC-0260).
++        return f"universe {universe_id} is retired and takes no further change"
++    if isinstance(exc, service.NotAMember):
++        return f"{symbol} is not a current member of universe {universe_id}"
++    if isinstance(exc, service.LastMember):
++        return f"{symbol} is the last member of universe {universe_id}; retire the universe instead"
++    return "the cursor is not one this list issued"  # CursorError
++
++
++def _refuse(
++    request: Request,
++    exc: Exception,
++    *,
++    operation: str,
++    member_route: bool = False,
++    universe_id: UUID | None = None,
++    name: str | None = None,
++    symbol: str | None = None,
++    from_filter: bool = False,
++) -> JSONResponse:
++    """The design 2.5 envelope for a typed refusal; `symbols` is added for coverage."""
++    status, code = next(entry for cls, entry in REFUSALS.items() if isinstance(exc, cls))
++    member_refusal = isinstance(exc, service.NotAMember | service.LastMember) or (
++        member_route and isinstance(exc, service.InstrumentNotAcquired | service.UniverseRetired)
++    )
++    reason = _reason(
++        exc, universe_id=universe_id, name=name, symbol=symbol, from_filter=from_filter
++    )
++    response = error_response(
++        status_code=status,
++        code=code,
++        message=f"Could not {operation}: {reason}.",
++        request_id=getattr(request.state, "request_id", "unknown"),
++        resource=_MEMBER if member_refusal else _UNIVERSE,
++    )
++    if isinstance(exc, service.InstrumentNotAcquired):
++        content = json.loads(bytes(response.body))
++        content["error"]["symbols"] = exc.symbols
++        response = JSONResponse(status_code=status, content=content)
++    return response
++
++
++def _json(model: BaseModel, status_code: int = 200) -> JSONResponse:
++    """Decimals stay decimal strings: the model's own JSON mode, not the encoder's."""
++    return JSONResponse(status_code=status_code, content=model.model_dump(mode="json"))
++
++
++def _count(conn: psycopg.Connection, lifecycle: str) -> int:
++    """Universes in one lifecycle, by paging the list read to its end (DEC-0098)."""
++    total, cursor = 0, None
++    while True:
++        rows, cursor = replay.list_universe_rows(conn, lifecycle, None, MAX_PAGE_SIZE, cursor)
++        total += len(rows)
++        if cursor is None:
++            return total
++
++
++def _universe_response(conn: psycopg.Connection, universe: service.Universe) -> UniverseResponse:
++    """The universe with each member's reader row: name and cells, or null (DEC-0097)."""
++    rows: dict[str, reader.StockRow] = {}
++    current: reader.CurrentSet | None = None
++    cursor: str | None = None
++    while True:
++        page = reader.list_classifications(
++            conn,
++            reader.ListFilters(
++                universe_id=universe.universe_id, limit=MAX_PAGE_SIZE, cursor=cursor
++            ),
++        )
++        current = page.set  # one set for every page: the cursor is bound to it
++        rows.update((stock.symbol, stock) for stock in page.stocks)
++        cursor = page.next_cursor
++        if cursor is None:
++            break
++    members = []
++    for member in universe.members:
++        row = rows.get(member.symbol)
++        members.append(
++            MemberResponse(
++                symbol=member.symbol,
++                name=None if row is None else row.name,
++                lifecycle=member.lifecycle,
++                member_since=member.member_since,
++                factors=None if row is None else FactorsResponse.from_reader(row.factors),
++            )
++        )
++    origin = universe.origin
++    return UniverseResponse(
++        universe_id=universe.universe_id,
++        name=universe.name,
++        lifecycle=universe.lifecycle,
++        created_at=universe.created_at,
++        retired_at=universe.retired_at,
++        member_count=len(members),
++        as_of=universe.as_of,
++        as_of_before_creation=universe.as_of_before_creation,
++        origin=OriginResponse(
++            kind=origin.kind,
++            set_id=origin.set_id,
++            classification_date=origin.classification_date,
++            thresholds=origin.thresholds,
++            hide_incomplete=origin.hide_incomplete,
++            symbol=origin.symbol,
++        ),
++        members=members,
++        set=None if current is None else SetBlock.from_reader(current),
++    )
++
++
++# --- reads --------------------------------------------------------------------------------
++
++
++@router.get("/api/universes")
++def list_universes(
++    request: Request,
++    lifecycle: Literal["active", "retired", "all"] = Query(default="active"),
++    name: str | None = Query(default=None),
++    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),
++    cursor: str | None = Query(default=None),
++) -> JSONResponse:
++    """`GET /api/universes`: one page, newest first, with the active and retired counts."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            page, next_cursor = service.list_universes(conn, lifecycle, name, limit, cursor)
++            active_count = _count(conn, "active")
++            retired_count = _count(conn, "retired")
++    except _REFUSABLE as exc:
++        return _refuse(request, exc, operation="list universes")
++    return _json(
++        UniverseListResponse(
++            universes=[
++                UniverseListItem(
++                    universe_id=universe.universe_id,
++                    name=universe.name,
++                    lifecycle=universe.lifecycle,
++                    member_count=len(universe.members),
++                    created_at=universe.created_at,
++                    retired_at=universe.retired_at,
++                )
++                for universe in page
++            ],
++            active_count=active_count,
++            retired_count=retired_count,
++            next_cursor=next_cursor,
++        )
++    )
++
++
++@router.get("/api/universes/{universe_id}")
++def get_universe(
++    request: Request, universe_id: UUID, as_of: Annotated[date | None, Query()] = None
++) -> JSONResponse:
++    """`GET /api/universes/{id}`: the universe as of `as_of` (default today), with cells."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            universe = service.get_universe(conn, universe_id, as_of)
++            body = _universe_response(conn, universe)
++    except _REFUSABLE as exc:
++        return _refuse(request, exc, operation="read the universe", universe_id=universe_id)
++    return _json(body)
++
++
++@router.get("/api/universes/{universe_id}/events")
++def list_events(
++    request: Request,
++    universe_id: UUID,
++    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),
++    cursor: str | None = Query(default=None),
++) -> JSONResponse:
++    """`GET /api/universes/{id}/events`: one page of the history, newest first."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            events, next_cursor = service.list_events(conn, universe_id, limit, cursor)
++    except _REFUSABLE as exc:
++        return _refuse(
++            request, exc, operation="list the universe's events", universe_id=universe_id
++        )
++    return _json(
++        UniverseEventsResponse(
++            events=[
++                UniverseEventResponse(
++                    event_id=event.event_id,
++                    event_type=event.event_type,
++                    name=event.name,
++                    symbol=event.symbol,
++                    recorded_at=event.recorded_at,
++                    recorded_on=event.recorded_on,
++                    filter_provenance=event.filter_provenance,
++                )
++                for event in events
++            ],
++            next_cursor=next_cursor,
++        )
++    )
++
++
++# --- writes -------------------------------------------------------------------------------
++
++
++@router.post("/api/universes")
++def create_universe(request: Request, body: CreateUniverseRequest) -> JSONResponse:
++    """`POST /api/universes`: by hand from `symbols`, or from a reviewed filter result."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            if body.filter is not None and body.set_id is not None:
++                universe = service.create_from_filter(
++                    conn, body.name, body.set_id, body.filter.to_reader()
++                )
++            else:
++                universe = service.create_by_hand(conn, body.name, body.symbols or [])
++            created = _universe_response(conn, universe)
++    except _REFUSABLE as exc:
++        return _refuse(
++            request,
++            exc,
++            operation="create a universe",
++            name=body.name,
++            from_filter=body.filter is not None,
++        )
++    return _json(created, status_code=201)
++
++
++@router.patch("/api/universes/{universe_id}")
++def rename_universe(
++    request: Request, universe_id: UUID, body: RenameUniverseRequest
++) -> JSONResponse:
++    """`PATCH /api/universes/{id}`: a new name; the id and the history are unchanged."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            universe = service.rename(conn, universe_id, body.name)
++            renamed = _universe_response(conn, universe)
++    except _REFUSABLE as exc:
++        return _refuse(
++            request, exc, operation="rename the universe", universe_id=universe_id, name=body.name
++        )
++    return _json(renamed)
++
++
++@router.delete("/api/universes/{universe_id}")
++def retire_universe(request: Request, universe_id: UUID) -> JSONResponse:
++    """`DELETE /api/universes/{id}`: retires, never deletes; members and events stay."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            universe = service.retire(conn, universe_id)
++    except _REFUSABLE as exc:
++        return _refuse(request, exc, operation="retire the universe", universe_id=universe_id)
++    if universe.retired_at is None:
++        raise RuntimeError("retire returned a universe with no retired_at")
++    return _json(RetireUniverseResponse(lifecycle="retired", retired_at=universe.retired_at))
++
++
++@router.post("/api/universes/{universe_id}/members")
++def add_members(request: Request, universe_id: UUID, body: AddMembersRequest) -> JSONResponse:
++    """`POST /api/universes/{id}/members`: `already_member` is a 200 field (DAC-E1-6)."""
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            added, already_member = service.add_members(conn, universe_id, body.symbols)
++    except _REFUSABLE as exc:
++        return _refuse(
++            request,
++            exc,
++            operation="add members to the universe",
++            member_route=True,
++            universe_id=universe_id,
++        )
++    return _json(AddMembersResponse(added=added, already_member=already_member))
++
++
++@router.delete("/api/universes/{universe_id}/members/{symbol}")
++def remove_member(request: Request, universe_id: UUID, symbol: str) -> JSONResponse:
++    """`DELETE /api/universes/{id}/members/{symbol}`: the dated record is kept."""
++    clean = normalise(symbol)
++    if not is_valid(clean):
++        return error_response(
++            status_code=422,
++            code="validation_error",
++            message="The request did not match the expected shape: `symbol`.",
++            request_id=getattr(request.state, "request_id", "unknown"),
++            resource=_MEMBER,
++        )
++    pool = request.app.state.db_pool
++    try:
++        with pool.connection() as conn:
++            removed_at = service.remove_member(conn, universe_id, clean)
++    except _REFUSABLE as exc:
++        return _refuse(
++            request,
++            exc,
++            operation="remove a member from the universe",
++            member_route=True,
++            universe_id=universe_id,
++            symbol=clean,
++        )
++    return _json(RemoveMemberResponse(removed_at=removed_at))
+diff --git a/tests/unit/test_api_classification_error_mapping.py b/tests/unit/test_api_classification_error_mapping.py
+new file mode 100644
+index 0000000..6fe97cb
+--- /dev/null
++++ b/tests/unit/test_api_classification_error_mapping.py
+@@ -0,0 +1,285 @@
++"""Service refusals map to the documented status and code (CAP-002-E1-S6; task plan T007).
++
++Component design `component-design-classification-api.md` section 2.5. The universes rows
++are this story's; CAP-002-E3-S5 appends the classification rows. Every service function is
++doubled, so the mapping is pinned without a database; the app is built by `create_app()`
++so the request id and the delivered handlers are the real ones.
++"""
++
++import inspect
++from collections.abc import Iterator
++from contextlib import contextmanager
++from typing import Any
++from uuid import UUID
++
++import pytest
++from fastapi.testclient import TestClient
++
++from factorflow.api.app import create_app
++from factorflow.api.routes import universes
++from factorflow.classification import reader
++from factorflow.runs.queries import CursorError
++from factorflow.universes import service
++
++SENTINEL = "secret-sentinel-4f1c"
++UID = UUID("11111111-2222-3333-4444-555555555555")
++REQUESTED = UUID("aaaaaaaa-0000-0000-0000-000000000001")
++CURRENT = UUID("bbbbbbbb-0000-0000-0000-000000000002")
++
++CREATE = ("POST", "/api/universes", {"name": "Mine", "symbols": ["AAA"]})
++CREATE_FILTER = (
++    "POST",
++    "/api/universes",
++    {"name": "Mine", "filter": {"value_percentile_min": "80"}, "set_id": str(REQUESTED)},
++)
++GET = ("GET", f"/api/universes/{UID}", None)
++RENAME = ("PATCH", f"/api/universes/{UID}", {"name": "Renamed"})
++RETIRE = ("DELETE", f"/api/universes/{UID}", None)
++EVENTS = ("GET", f"/api/universes/{UID}/events", None)
++LIST = ("GET", "/api/universes", None)
++ADD = ("POST", f"/api/universes/{UID}/members", {"symbols": ["AAA"]})
++REMOVE = ("DELETE", f"/api/universes/{UID}/members/AAA", None)
++
++# (request, service function doubled, exception, status, code, resource)
++ROWS: list[tuple[tuple[str, str, Any], str, Exception, int, str, str]] = [
++    (CREATE, "create_by_hand", service.UniverseNameInUse(SENTINEL), 409,
++     "universe_name_in_use", "universe"),
++    (RENAME, "rename", service.UniverseNameInUse(SENTINEL), 409,
++     "universe_name_in_use", "universe"),
++    (REMOVE, "remove_member", service.LastMember(SENTINEL), 409, "last_member",
++     "universe-member"),
++    (RENAME, "rename", service.UniverseRetired(SENTINEL), 409, "universe_retired", "universe"),
++    (ADD, "add_members", service.UniverseRetired(SENTINEL), 409, "universe_retired",
++     "universe-member"),
++    (REMOVE, "remove_member", service.UniverseRetired(SENTINEL), 409, "universe_retired",
++     "universe-member"),
++    (RETIRE, "retire", service.UniverseRetired(SENTINEL), 409, "universe_retired", "universe"),
++    (CREATE, "create_by_hand", service.EmptyUniverse(SENTINEL), 422, "empty_universe",
++     "universe"),
++    (CREATE_FILTER, "create_from_filter", service.EmptyUniverse(SENTINEL), 422,
++     "empty_universe", "universe"),
++    (CREATE_FILTER, "create_from_filter", service.ClassificationSetChanged(REQUESTED, CURRENT),
++     409, "classification_set_changed", "universe"),
++    (CREATE, "create_by_hand", service.InstrumentNotAcquired(["ZZZ", "BBB"]), 409,
++     "instrument_not_acquired", "universe"),
++    (ADD, "add_members", service.InstrumentNotAcquired(["ZZZ", "BBB"]), 409,
++     "instrument_not_acquired", "universe-member"),
++    (GET, "get_universe", service.UniverseNotFound(SENTINEL), 404, "universe_not_found",
++     "universe"),
++    (RENAME, "rename", service.UniverseNotFound(SENTINEL), 404, "universe_not_found",
++     "universe"),
++    (RETIRE, "retire", service.UniverseNotFound(SENTINEL), 404, "universe_not_found",
++     "universe"),
++    (EVENTS, "list_events", service.UniverseNotFound(SENTINEL), 404, "universe_not_found",
++     "universe"),
++    (ADD, "add_members", service.UniverseNotFound(SENTINEL), 404, "universe_not_found",
++     "universe"),
++    (REMOVE, "remove_member", service.UniverseNotFound(SENTINEL), 404, "universe_not_found",
++     "universe"),
++    (REMOVE, "remove_member", service.NotAMember(SENTINEL), 404, "not_a_member",
++     "universe-member"),
++    (LIST, "list_universes", CursorError(SENTINEL), 422, "cursor_invalid", "universe"),
++    (EVENTS, "list_events", CursorError(SENTINEL), 422, "cursor_invalid", "universe"),
++]  # fmt: skip
++
++SERVICE_FUNCTIONS = (
++    "create_by_hand",
++    "create_from_filter",
++    "rename",
++    "retire",
++    "add_members",
++    "remove_member",
++    "get_universe",
++    "list_universes",
++    "list_events",
++)
++
++
++class _FakePool:
++    """Records how each connection block ended: `None`, or the exception that left it."""
++
++    def __init__(self) -> None:
++        self.exits: list[BaseException | None] = []
++
++    @contextmanager
++    def connection(self) -> Iterator[object]:
++        try:
++            yield object()
++        except BaseException as exc:
++            self.exits.append(exc)
++            raise
++        self.exits.append(None)
++
++
++@pytest.fixture
++def pool() -> _FakePool:
++    return _FakePool()
++
++
++@pytest.fixture
++def client(monkeypatch: pytest.MonkeyPatch, pool: _FakePool) -> TestClient:
++    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", f"postgresql://{SENTINEL}@127.0.0.1/unused")
++    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", SENTINEL)
++    for name in SERVICE_FUNCTIONS:
++        monkeypatch.setattr(f"factorflow.universes.service.{name}", _unexpected(name))
++    app = create_app()
++    app.state.db_pool = pool
++    return TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False)
++
++
++def _unexpected(name: str) -> Any:
++    def double(*_args: object, **_kwargs: object) -> None:
++        raise AssertionError(f"service.{name} reached")
++
++    return double
++
++
++def _raising(exc: Exception) -> Any:
++    def double(*_args: object, **_kwargs: object) -> None:
++        raise exc
++
++    return double
++
++
++def _assert_clean(text: str) -> None:
++    assert "Traceback" not in text
++    assert 'File "' not in text
++    assert ".py" not in text
++    assert SENTINEL not in text
++
++
++# Implements TC-COMP-040
++@pytest.mark.parametrize(
++    ("call", "function", "exc", "status", "code", "resource"),
++    ROWS,
++    ids=[f"{row[4]}-{row[1]}" for row in ROWS],
++)
++def test_each_refusal_maps_to_its_status_and_code(
++    client: TestClient,
++    pool: _FakePool,
++    monkeypatch: pytest.MonkeyPatch,
++    call: tuple[str, str, Any],
++    function: str,
++    exc: Exception,
++    status: int,
++    code: str,
++    resource: str,
++) -> None:
++    monkeypatch.setattr(f"factorflow.universes.service.{function}", _raising(exc))
++    method, path, body = call
++
++    response = client.request(method, path, json=body)
++
++    assert response.status_code == status
++    assert pool.exits == [exc], "the refusal left the connection block, so the pool rolled back"
++    error = response.json()["error"]
++    assert error["code"] == code
++    assert error["resource"] == resource
++    assert error["request_id"] == response.headers["X-Request-Id"]
++    assert error["message"]
++    _assert_clean(response.text)
++    assert type(exc).__name__ not in response.text
++    if code == "instrument_not_acquired":
++        assert error["symbols"] == ["BBB", "ZZZ"]
++        assert "BBB" in error["message"] and "ZZZ" in error["message"]
++    else:
++        assert "symbols" not in error
++    if code == "classification_set_changed":
++        assert str(REQUESTED) in error["message"]
++        assert str(CURRENT) in error["message"]
++    message = error["message"]
++    if code in {"universe_not_found", "universe_retired", "not_a_member", "last_member"}:
++        assert str(UID) in message
++    if code in {"not_a_member", "last_member"}:
++        assert "AAA" in message
++    if code == "last_member":
++        assert "retir" in message.lower()
++    if code == "universe_name_in_use":
++        assert body["name"] in message
++    if code == "empty_universe":
++        assert ("filter" in message) == (function == "create_from_filter")
++
++
++# Implements TC-COMP-040
++def test_a_stale_set_with_no_complete_set_names_the_requested_id(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    monkeypatch.setattr(
++        "factorflow.universes.service.create_from_filter",
++        _raising(service.ClassificationSetChanged(REQUESTED, None)),
++    )
++    method, path, body = CREATE_FILTER
++    response = client.request(method, path, json=body)
++    assert response.status_code == 409
++    assert str(REQUESTED) in response.json()["error"]["message"]
++
++
++# Implements TC-COMP-040
++def test_an_unmapped_exception_is_a_bare_internal_error(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    monkeypatch.setattr(
++        "factorflow.universes.service.get_universe",
++        _raising(RuntimeError(f"boom with {SENTINEL}")),
++    )
++
++    response = client.get(f"/api/universes/{UID}")
++
++    assert response.status_code == 500
++    assert response.json() == {
++        "error": {"code": "internal_error", "request_id": response.headers["X-Request-Id"]}
++    }
++    _assert_clean(response.text)
++
++
++# Implements TC-COMP-040
++def test_an_unmapped_value_error_is_not_mistaken_for_a_refusal(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """A plain `ValueError` (the service's shape failures) is no row of the table."""
++    monkeypatch.setattr(
++        "factorflow.universes.service.create_by_hand", _raising(ValueError(SENTINEL))
++    )
++    method, path, body = CREATE
++    response = client.request(method, path, json=body)
++    assert response.status_code == 500
++    assert response.json()["error"]["code"] == "internal_error"
++
++
++# Implements TC-COMP-040
++def test_every_service_exception_is_mapped() -> None:
++    defined = [
++        cls
++        for _, cls in inspect.getmembers(service, inspect.isclass)
++        if issubclass(cls, Exception) and cls.__module__ == service.__name__
++    ]
++    assert len(defined) == 8
++    for cls in defined:
++        assert cls in universes.REFUSALS, f"{cls.__name__} has no row in the mapping table"
++    assert universes.REFUSALS[CursorError] == (422, "cursor_invalid")
++    assert set(universes.REFUSALS) == {*defined, CursorError}
++
++
++def test_the_mapping_table_is_the_design_table() -> None:
++    assert {cls.__name__: entry for cls, entry in universes.REFUSALS.items()} == {
++        "UniverseNotFound": (404, "universe_not_found"),
++        "UniverseRetired": (409, "universe_retired"),
++        "UniverseNameInUse": (409, "universe_name_in_use"),
++        "EmptyUniverse": (422, "empty_universe"),
++        "LastMember": (409, "last_member"),
++        "NotAMember": (404, "not_a_member"),
++        "InstrumentNotAcquired": (409, "instrument_not_acquired"),
++        "ClassificationSetChanged": (409, "classification_set_changed"),
++        "CursorError": (422, "cursor_invalid"),
++    }
++
++
++def test_the_reader_is_not_reached_on_a_refusal(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    monkeypatch.setattr(
++        "factorflow.universes.service.rename", _raising(service.UniverseRetired(SENTINEL))
++    )
++    monkeypatch.setattr(reader, "list_classifications", _unexpected("reader"))
++    method, path, body = RENAME
++    assert client.request(method, path, json=body).status_code == 409
+diff --git a/tests/unit/test_api_universes_routes.py b/tests/unit/test_api_universes_routes.py
+new file mode 100644
+index 0000000..00a346d
+--- /dev/null
++++ b/tests/unit/test_api_universes_routes.py
+@@ -0,0 +1,771 @@
++"""The universes router without a database (CAP-002-E1-S6; task plan T003-T008, T010).
++
++Component design `component-design-classification-api.md` sections 2.4 to 2.7 and 11.
++The app is built by `create_app()`, so the mount, the Host and Origin middleware, the
++request id and the delivered handlers are the real ones. `factorflow.universes.service`,
++`factorflow.universes.replay.list_universe_rows` and
++`factorflow.classification.reader.list_classifications` are doubled through their modules,
++the way the routes call them.
++"""
++
++import ast
++import inspect
++from collections.abc import Iterator
++from contextlib import contextmanager
++from dataclasses import dataclass, field
++from datetime import UTC, date, datetime
++from decimal import Decimal
++from typing import Any
++from uuid import UUID
++
++import pytest
++from fastapi.routing import APIRoute
++from fastapi.testclient import TestClient
++from starlette.routing import Mount
++
++from factorflow.api.app import create_app
++from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
++from factorflow.api.routes import universes
++from factorflow.classification import reader
++from factorflow.classification.reader import (
++    ClassificationPage,
++    CurrentSet,
++    FactorCell,
++    ListFilters,
++    StockRow,
++    Thresholds,
++)
++from factorflow.universes import service
++from factorflow.universes.replay import Member, Origin, Universe, UniverseEvent, UniverseRow
++
++UID = UUID("11111111-2222-3333-4444-555555555555")
++SET_ID = UUID("aaaaaaaa-0000-0000-0000-000000000001")
++T0 = datetime(2026, 10, 15, 21, 0, tzinfo=UTC)
++T1 = datetime(2026, 10, 16, 14, 30, tzinfo=UTC)
++TODAY = date(2026, 10, 16)
++BY_HAND = Origin("by_hand", None, None, None, None, None)
++SERVICE_FUNCTIONS = (
++    "create_by_hand",
++    "create_from_filter",
++    "rename",
++    "retire",
++    "add_members",
++    "remove_member",
++    "get_universe",
++    "list_universes",
++    "list_events",
++)
++
++
++class _FakePool:
++    """A pool that never opens a connection and counts the requests for one."""
++
++    def __init__(self) -> None:
++        self.calls = 0
++
++    @contextmanager
++    def connection(self) -> Iterator[object]:
++        self.calls += 1
++        yield object()
++
++
++@dataclass
++class Spy:
++    """A double recording its calls; returns ``result`` or raises ``raises``."""
++
++    result: Any = None
++    raises: Exception | None = None
++    calls: list[tuple[Any, ...]] = field(default_factory=list)
++
++    def __call__(self, *args: Any) -> Any:
++        self.calls.append(args[1:])  # drop the connection
++        if self.raises is not None:
++            raise self.raises
++        return self.result
++
++
++@pytest.fixture
++def pool() -> _FakePool:
++    return _FakePool()
++
++
++@pytest.fixture
++def client(monkeypatch: pytest.MonkeyPatch, pool: _FakePool) -> TestClient:
++    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
++    for name in SERVICE_FUNCTIONS:
++        monkeypatch.setattr(service, name, Spy(raises=AssertionError(f"service.{name} reached")))
++    monkeypatch.setattr(reader, "list_classifications", Spy(result=_page()))
++    monkeypatch.setattr("factorflow.universes.replay.list_universe_rows", Spy(result=([], None)))
++    app = create_app()
++    app.state.db_pool = pool
++    return TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False)
++
++
++def _double(monkeypatch: pytest.MonkeyPatch, name: str, **kwargs: Any) -> Spy:
++    spy = Spy(**kwargs)
++    monkeypatch.setattr(service, name, spy)
++    return spy
++
++
++def _member(symbol: str, instrument_id: int = 1, lifecycle: str = "active") -> Member:
++    return Member(instrument_id, symbol, lifecycle, T0)
++
++
++def _universe(
++    *symbols: str,
++    name: str = "Mine",
++    retired_at: datetime | None = None,
++    origin: Origin = BY_HAND,
++    as_of: date = TODAY,
++    before_creation: bool = False,
++) -> Universe:
++    return Universe(
++        universe_id=UID,
++        name=name,
++        lifecycle="retired" if retired_at else "active",
++        created_at=T0,
++        retired_at=retired_at,
++        members=[_member(s, i) for i, s in enumerate(symbols, start=1)],
++        origin=origin,
++        as_of=as_of,
++        as_of_before_creation=before_creation,
++        created_on=T0.date(),
++    )
++
++
++def _cell(score: str = "1.250000", percentile: str = "87.50") -> FactorCell:
++    return FactorCell("classified", Decimal(score), Decimal(percentile), None, None, None, False)
++
++
++def _stock(symbol: str, name: str | None = "Company") -> StockRow:
++    return StockRow(
++        instrument_id=1,
++        symbol=symbol,
++        name=name,
++        lifecycle="active",
++        factors={"value": _cell(), "growth": _cell("-0.5", "10"), "momentum": _cell("0", "50")},
++    )
++
++
++CURRENT = CurrentSet(
++    set_id=SET_ID,
++    classification_date=date(2026, 10, 15),
++    run_id=UUID("cccccccc-0000-0000-0000-000000000003"),
++    run_started_at=T0,
++    run_outcome="succeeded",
++    state="complete",
++    started_at=T0,
++    ended_at=T1,
++    latest_trading_day=date(2026, 10, 15),
++    active_instruments=3000,
++    factors={},
++    not_current=True,
++)
++
++
++def _page(
++    *stocks: StockRow, current: CurrentSet | None = None, next_cursor: str | None = None
++) -> ClassificationPage:
++    return ClassificationPage(
++        set=current,
++        never_classified=current is None,
++        later=None,
++        match_count=len(stocks),
++        stocks=list(stocks),
++        unknown_symbols=[],
++        next_cursor=next_cursor,
++    )
++
++
++def _envelope(response: Any) -> dict[str, Any]:
++    error = response.json()["error"]
++    assert error["message"]
++    assert error["resource"]
++    assert error["request_id"] == response.headers["X-Request-Id"]
++    assert "Traceback" not in response.text
++    assert 'File "' not in response.text
++    return dict(error)
++
++
++# --- TC-COMP-004: uncovered symbols on create -------------------------------------------
++
++
++# Implements TC-COMP-004
++def test_create_with_uncovered_symbols_names_every_one_in_a_list_field(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(
++        monkeypatch, "create_by_hand", raises=service.InstrumentNotAcquired(["ZZZ", "BBB"])
++    )
++
++    response = client.post(
++        "/api/universes", json={"name": "Mine", "symbols": ["aaa", "zzz", "bbb", "ccc"]}
++    )
++
++    assert response.status_code == 409
++    error = _envelope(response)
++    assert error["code"] == "instrument_not_acquired"
++    assert error["resource"] == "universe"
++    assert error["symbols"] == ["BBB", "ZZZ"]
++    message = error["message"]
++    assert "create" in message and "universe" in message
++    assert "BBB" in message and "ZZZ" in message
++    assert "AAA" not in message and "CCC" not in message
++    assert spy.calls == [("Mine", ["AAA", "ZZZ", "BBB", "CCC"])]
++
++
++# --- TC-COMP-005: out of bounds is refused before the service ---------------------------
++
++
++OVERSIZE = {"symbols": [f"S{i}" for i in range(1001)]}
++
++
++# Implements TC-COMP-005
++@pytest.mark.parametrize(
++    ("method", "path", "body", "field_name"),
++    [
++        ("POST", "/api/universes", {"name": "U", **OVERSIZE}, "symbols"),
++        ("POST", f"/api/universes/{UID}/members", OVERSIZE, "symbols"),
++        ("GET", "/api/universes?limit=501", None, "limit"),
++        ("GET", "/api/universes?limit=0", None, "limit"),
++        ("GET", f"/api/universes/{UID}/events?limit=501", None, "limit"),
++        ("GET", f"/api/universes/{UID}/events?limit=0", None, "limit"),
++        ("GET", "/api/universes?lifecycle=bogus", None, "lifecycle"),
++        ("GET", f"/api/universes/{UID}?as_of=2026-13-40", None, "as_of"),
++        ("GET", "/api/universes/not-a-uuid", None, "universe_id"),
++        ("PATCH", "/api/universes/not-a-uuid", {"name": "U"}, "universe_id"),
++        ("DELETE", "/api/universes/not-a-uuid", None, "universe_id"),
++        ("GET", "/api/universes/not-a-uuid/events", None, "universe_id"),
++        ("POST", "/api/universes/not-a-uuid/members", {"symbols": ["AAA"]}, "universe_id"),
++        ("DELETE", "/api/universes/not-a-uuid/members/AAA", None, "universe_id"),
++        ("POST", "/api/universes", {"name": "U", "symbols": ["A B"]}, "symbols"),
++        ("POST", f"/api/universes/{UID}/members", {"symbols": []}, "symbols"),
++        ("PATCH", f"/api/universes/{UID}", {"name": "  "}, "name"),
++    ],
++)
++def test_out_of_bounds_requests_never_reach_the_service_or_the_pool(
++    client: TestClient,
++    pool: _FakePool,
++    method: str,
++    path: str,
++    body: dict[str, Any] | None,
++    field_name: str,
++) -> None:
++    response = client.request(method, path, json=body)
++
++    assert response.status_code == 422
++    error = _envelope(response)
++    assert error["code"] == "validation_error"
++    assert f"`{field_name}`" in error["message"]
++    assert pool.calls == 0
++
++
++# --- TC-COMP-027: already_member is a 200 field -----------------------------------------
++
++
++# Implements TC-COMP-027
++def test_already_member_is_reported_in_the_200_body(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(monkeypatch, "add_members", result=(["CCC"], ["AAA"]))
++
++    response = client.post(f"/api/universes/{UID}/members", json={"symbols": ["aaa", "CCC"]})
++
++    assert response.status_code == 200
++    assert response.json() == {"added": ["CCC"], "already_member": ["AAA"]}
++    assert spy.calls == [(UID, ["AAA", "CCC"])]
++
++
++# --- TC-COMP-028: mounted behind the middleware, ahead of static ------------------------
++
++
++# Implements TC-COMP-028
++def test_the_router_is_mounted_behind_the_middleware_and_ahead_of_static(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    _double(monkeypatch, "list_universes", result=([], None))
++    create = _double(monkeypatch, "create_by_hand", raises=AssertionError("reached"))
++
++    listed = client.get("/api/universes")
++    assert listed.status_code == 200
++    assert listed.headers["X-Request-Id"]
++    assert listed.headers["content-type"].startswith("application/json")
++    assert "universes" in listed.json()
++
++    foreign_host = client.get("/api/universes", headers={"Host": "evil.example:8000"})
++    assert foreign_host.status_code == 400
++    assert foreign_host.json()["error"]["code"] == "host_not_allowed"
++    assert foreign_host.headers["X-Request-Id"]
++
++    foreign_origin = client.post(
++        "/api/universes",
++        json={"name": "U", "symbols": ["AAA"]},
++        headers={"Origin": "https://evil.example"},
++    )
++    assert foreign_origin.status_code == 403
++    assert foreign_origin.json()["error"]["code"] == "origin_not_allowed"
++    assert create.calls == []
++
++    unknown = client.get("/api/universes/not-a-uuid/nope")
++    assert unknown.status_code == 404
++    assert unknown.json()["error"]["code"] == "not_found"
++
++
++# Implements TC-COMP-028
++def test_create_app_includes_the_universes_router_before_the_static_mount(
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
++    app = create_app()
++    expected = {
++        (route.path, method)
++        for route in universes.router.routes
++        if isinstance(route, APIRoute)
++        for method in route.methods
++    }
++    assert expected == {
++        ("/api/universes", "GET"),
++        ("/api/universes", "POST"),
++        ("/api/universes/{universe_id}", "GET"),
++        ("/api/universes/{universe_id}", "PATCH"),
++        ("/api/universes/{universe_id}", "DELETE"),
++        ("/api/universes/{universe_id}/events", "GET"),
++        ("/api/universes/{universe_id}/members", "POST"),
++        ("/api/universes/{universe_id}/members/{symbol}", "DELETE"),
++    }
++    # FastAPI keeps an included router as one entry wrapping it (`original_router`).
++    included = [
++        index
++        for index, route in enumerate(app.routes)
++        if getattr(route, "original_router", None) is universes.router
++    ]
++    assert len(included) == 1, "create_app includes the universes router exactly once"
++    mounts = [i for i, route in enumerate(app.routes) if isinstance(route, Mount)]
++    assert mounts, "the static mount is present"
++    assert included[0] < min(mounts)
++
++
++# --- TC-COMP-041: the last member -------------------------------------------------------
++
++
++# Implements TC-COMP-041
++def test_removing_the_sole_member_is_last_member(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(monkeypatch, "remove_member", raises=service.LastMember("x"))
++
++    response = client.delete(f"/api/universes/{UID}/members/aaa")
++
++    assert response.status_code == 409
++    error = _envelope(response)
++    assert error["code"] == "last_member"
++    assert error["resource"] == "universe-member"
++    assert "AAA" in error["message"]
++    assert "retir" in error["message"].lower()
++    assert spy.calls == [(UID, "AAA")]
++
++
++# --- T010 (a): status codes and the write bodies ---------------------------------------
++
++
++def test_create_by_hand_is_201_with_the_replayed_universe(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    _double(monkeypatch, "create_by_hand", result=_universe("AAA", "BBB"))
++
++    response = client.post("/api/universes", json={"name": " Mine ", "symbols": ["AAA", "BBB"]})
++
++    assert response.status_code == 201
++    body = response.json()
++    assert body["universe_id"] == str(UID)
++    assert body["member_count"] == 2
++    assert [m["symbol"] for m in body["members"]] == ["AAA", "BBB"]
++
++
++def test_rename_is_200_with_the_universe(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(monkeypatch, "rename", result=_universe("AAA", name="New"))
++
++    response = client.patch(f"/api/universes/{UID}", json={"name": " New "})
++
++    assert response.status_code == 200
++    assert response.json()["name"] == "New"
++    assert spy.calls == [(UID, "New")]
++
++
++def test_retire_returns_the_services_retired_at(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(monkeypatch, "retire", result=_universe("AAA", retired_at=T1))
++
++    response = client.delete(f"/api/universes/{UID}")
++
++    assert response.status_code == 200
++    assert response.json() == {"lifecycle": "retired", "retired_at": "2026-10-16T14:30:00Z"}
++    assert spy.calls == [(UID,)]
++
++
++def test_remove_member_returns_the_services_removed_at(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(monkeypatch, "remove_member", result=T1)
++
++    response = client.delete(f"/api/universes/{UID}/members/brk.b")
++
++    assert response.status_code == 200
++    assert response.json() == {"removed_at": "2026-10-16T14:30:00Z"}
++    assert spy.calls == [(UID, "BRK.B")]
++
++
++# --- T010 (b): which create the route calls --------------------------------------------
++
++
++def test_a_filter_body_calls_create_from_filter_with_the_reader_thresholds(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    from_filter = _double(monkeypatch, "create_from_filter", result=_universe("AAA"))
++    by_hand = _double(monkeypatch, "create_by_hand", raises=AssertionError("reached"))
++
++    response = client.post(
++        "/api/universes",
++        json={
++            "name": "Mine",
++            "filter": {
++                "value_percentile_min": "80",
++                "growth_score_max": 1.5,
++                "hide_incomplete": True,
++                "symbol": "aa",
++            },
++            "set_id": str(SET_ID),
++        },
++    )
++
++    assert response.status_code == 201
++    assert by_hand.calls == []
++    [(name, set_id, thresholds)] = from_filter.calls
++    assert (name, set_id) == ("Mine", SET_ID)
++    assert isinstance(thresholds, Thresholds)
++    assert thresholds == Thresholds(
++        bounds={"value_percentile_min": Decimal("80"), "growth_score_max": Decimal("1.5")},
++        hide_incomplete=True,
++        symbol="AA",
++    )
++
++
++def test_an_empty_symbols_list_reaches_create_by_hand(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    by_hand = _double(monkeypatch, "create_by_hand", raises=service.EmptyUniverse("x"))
++    from_filter = _double(monkeypatch, "create_from_filter", raises=AssertionError("reached"))
++
++    response = client.post("/api/universes", json={"name": "Empty", "symbols": []})
++
++    assert response.status_code == 422
++    error = _envelope(response)
++    assert error["code"] == "empty_universe"
++    assert "no symbol" in error["message"]
++    assert by_hand.calls == [("Empty", [])]
++    assert from_filter.calls == []
++
++
++# --- T010 (c): the universe response ----------------------------------------------------
++
++
++def test_members_carry_the_readers_name_and_cells_or_null(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    by_filter = Origin(
++        "from_filter",
++        SET_ID,
++        date(2026, 10, 15),
++        {"value_percentile_min": Decimal("80.0")},
++        True,
++        "AA",
++    )
++    _double(monkeypatch, "get_universe", result=_universe("AAA", "BBB", "CCC", origin=by_filter))
++    first = _page(_stock("AAA", "Alpha Inc"), current=CURRENT, next_cursor="p2")
++    second = _page(_stock("CCC", None), current=CURRENT)
++    pages = Spy()
++    results = iter([first, second])
++    monkeypatch.setattr(
++        reader, "list_classifications", lambda conn, filters: pages(conn, filters) or next(results)
++    )
++
++    response = client.get(f"/api/universes/{UID}")
++
++    assert response.status_code == 200
++    body = response.json()
++    assert pages.calls == [
++        (ListFilters(universe_id=UID, limit=MAX_PAGE_SIZE),),
++        (ListFilters(universe_id=UID, limit=MAX_PAGE_SIZE, cursor="p2"),),
++    ]
++    members = {m["symbol"]: m for m in body["members"]}
++    assert members["AAA"]["name"] == "Alpha Inc"
++    assert members["AAA"]["factors"]["value"] == {
++        "status": "classified",
++        "score": "1.250000",
++        "percentile": "87.50",
++        "reason_code": None,
++        "reason_input": None,
++        "reason_detail": None,
++        "restated_possible": False,
++    }
++    assert members["AAA"]["factors"]["growth"]["score"] == "-0.5"
++    assert members["CCC"]["name"] is None
++    assert members["CCC"]["factors"]["momentum"]["percentile"] == "50"
++    assert members["BBB"] == {
++        "symbol": "BBB",
++        "name": None,
++        "lifecycle": "active",
++        "member_since": "2026-10-15T21:00:00Z",
++        "factors": None,
++    }
++    assert body["member_count"] == 3
++    assert body["set"]["set_id"] == str(SET_ID)
++    assert body["set"]["not_current"] is True
++    assert body["set"]["ended_at"] == "2026-10-16T14:30:00Z"
++    assert body["origin"] == {
++        "kind": "from_filter",
++        "set_id": str(SET_ID),
++        "classification_date": "2026-10-15",
++        "thresholds": {"value_percentile_min": "80.0"},
++        "hide_incomplete": True,
++        "symbol": "AA",
++    }
++    assert body["as_of"] == "2026-10-16"
++    assert body["as_of_before_creation"] is False
++    assert body["lifecycle"] == "active"
++    assert body["retired_at"] is None
++    assert body["created_at"] == "2026-10-15T21:00:00Z"
++
++
++def test_a_never_classified_store_gives_a_null_set_and_null_cells(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    _double(monkeypatch, "get_universe", result=_universe("AAA"))
++
++    body = client.get(f"/api/universes/{UID}").json()
++
++    assert body["set"] is None
++    assert body["members"][0]["factors"] is None
++    assert body["members"][0]["name"] is None
++    assert body["origin"] == {
++        "kind": "by_hand",
++        "set_id": None,
++        "classification_date": None,
++        "thresholds": None,
++        "hide_incomplete": None,
++        "symbol": None,
++    }
++
++
++# --- T010 (d): as_of ------------------------------------------------------------------
++
++
++def test_as_of_reaches_get_universe_as_a_date(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    spy = _double(
++        monkeypatch,
++        "get_universe",
++        result=_universe(as_of=date(2020, 1, 1), before_creation=True),
++    )
++
++    body = client.get(f"/api/universes/{UID}?as_of=2020-01-01").json()
++    client.get(f"/api/universes/{UID}")
++
++    assert spy.calls == [(UID, date(2020, 1, 1)), (UID, None)]
++    assert body["members"] == []
++    assert body["member_count"] == 0
++    assert body["as_of_before_creation"] is True
++    assert body["as_of"] == "2020-01-01"
++
++
++# --- T010 (e): the list -----------------------------------------------------------------
++
++
++def _row(n: int) -> UniverseRow:
++    return UniverseRow(UUID(int=n), f"U{n}", "active", T0, None)
++
++
++def test_the_list_passes_its_parameters_and_counts_every_page(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    listed = _double(
++        monkeypatch,
++        "list_universes",
++        result=([_universe("AAA", "BBB"), _universe(name="Gone", retired_at=T1)], "next"),
++    )
++    counted = {
++        ("active", None): ([_row(1), _row(2)], "a2"),
++        ("active", "a2"): ([_row(3)], None),
++        ("retired", None): ([_row(4)], None),
++    }
++    rows = Spy()
++    monkeypatch.setattr(
++        "factorflow.universes.replay.list_universe_rows",
++        lambda conn, lifecycle, prefix, limit, cursor: (
++            rows(conn, lifecycle, prefix, limit, cursor) or counted[(lifecycle, cursor)]
++        ),
++    )
++
++    response = client.get("/api/universes?name=Te&limit=7&cursor=c1&lifecycle=all")
++
++    assert response.status_code == 200
++    body = response.json()
++    assert listed.calls == [("all", "Te", 7, "c1")]
++    assert sorted(rows.calls, key=str) == sorted(
++        [
++            ("active", None, MAX_PAGE_SIZE, None),
++            ("active", None, MAX_PAGE_SIZE, "a2"),
++            ("retired", None, MAX_PAGE_SIZE, None),
++        ],
++        key=str,
++    )
++    assert body["active_count"] == 3
++    assert body["retired_count"] == 1
++    assert body["next_cursor"] == "next"
++    assert body["universes"] == [
++        {
++            "universe_id": str(UID),
++            "name": "Mine",
++            "lifecycle": "active",
++            "member_count": 2,
++            "created_at": "2026-10-15T21:00:00Z",
++            "retired_at": None,
++        },
++        {
++            "universe_id": str(UID),
++            "name": "Gone",
++            "lifecycle": "retired",
++            "member_count": 0,
++            "created_at": "2026-10-15T21:00:00Z",
++            "retired_at": "2026-10-16T14:30:00Z",
++        },
++    ]
++
++
++def test_the_list_defaults(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
++    listed = _double(monkeypatch, "list_universes", result=([], None))
++
++    body = client.get("/api/universes").json()
++
++    assert listed.calls == [("active", None, DEFAULT_PAGE_SIZE, None)]
++    assert body == {"universes": [], "active_count": 0, "retired_count": 0, "next_cursor": None}
++
++
++# --- T010 (f): events -------------------------------------------------------------------
++
++
++PROVENANCE = {
++    "set_id": "aaaaaaaa-0000-0000-0000-000000000001",
++    "classification_date": "2026-10-15",
++    "thresholds": {"value_percentile_min": 80, "growth_score_max": 1.5},
++    "hide_incomplete": True,
++    "symbol": "AA",
++}
++
++
++def test_events_copy_every_field_and_the_raw_provenance(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    created = UniverseEvent(1, "created", "Mine", None, T0, date(2026, 10, 15), PROVENANCE)
++    added = UniverseEvent(2, "member_added", None, "AAA", T1, date(2026, 10, 16), None)
++    spy = _double(monkeypatch, "list_events", result=([added, created], "c2"))
++
++    response = client.get(f"/api/universes/{UID}/events?limit=2&cursor=c1")
++
++    assert response.status_code == 200
++    body = response.json()
++    assert spy.calls == [(UID, 2, "c1")]
++    assert body["next_cursor"] == "c2"
++    assert body["events"] == [
++        {
++            "event_id": 2,
++            "event_type": "member_added",
++            "name": None,
++            "symbol": "AAA",
++            "recorded_at": "2026-10-16T14:30:00Z",
++            "recorded_on": "2026-10-16",
++            "filter_provenance": None,
++        },
++        {
++            "event_id": 1,
++            "event_type": "created",
++            "name": "Mine",
++            "symbol": None,
++            "recorded_at": "2026-10-15T21:00:00Z",
++            "recorded_on": "2026-10-15",
++            "filter_provenance": PROVENANCE,
++        },
++    ]
++    thresholds = body["events"][1]["filter_provenance"]["thresholds"]
++    assert isinstance(thresholds["value_percentile_min"], int)
++    assert isinstance(thresholds["growth_score_max"], float)
++
++
++def test_events_default_page_size(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
++    spy = _double(monkeypatch, "list_events", result=([], None))
++    assert client.get(f"/api/universes/{UID}/events").json() == {"events": [], "next_cursor": None}
++    assert spy.calls == [(UID, DEFAULT_PAGE_SIZE, None)]
++
++
++# --- T010 (g): a malformed path symbol ----------------------------------------------------
++
++
++@pytest.mark.parametrize("symbol", ["1ABC", "A" * 17, "A%20B"])
++def test_a_malformed_path_symbol_is_refused_before_the_service(
++    client: TestClient, pool: _FakePool, symbol: str
++) -> None:
++    response = client.delete(f"/api/universes/{UID}/members/{symbol}")
++
++    assert response.status_code == 422
++    error = _envelope(response)
++    assert error["code"] == "validation_error"
++    assert error["resource"] == "universe-member"
++    assert "`symbol`" in error["message"]
++    assert pool.calls == 0
++
++
++# --- T010 (h): what the route module imports ----------------------------------------------
++
++
++def test_the_route_module_reaches_the_store_only_through_the_domain_modules() -> None:
++    tree = ast.parse(inspect.getsource(universes))
++    imported: set[str] = set()
++    for node in ast.walk(tree):
++        if isinstance(node, ast.ImportFrom) and node.module:
++            imported.add(node.module)
++            imported.update(f"{node.module}.{alias.name}" for alias in node.names)
++        elif isinstance(node, ast.Import):
++            imported.update(alias.name for alias in node.names)
++    assert "factorflow.universes.service" in imported
++    assert "factorflow.classification.reader" in imported
++    # psycopg only for the connection type; no SQL composition and no ingestion client.
++    assert not any(name.startswith(("psycopg.sql", "factorflow.ingestion")) for name in imported)
++    assert "SELECT" not in inspect.getsource(universes)
++
++
++def test_a_retired_universe_reads_with_its_retired_at(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    _double(monkeypatch, "get_universe", result=_universe("AAA", retired_at=T1))
++
++    body = client.get(f"/api/universes/{UID}").json()
++
++    assert body["lifecycle"] == "retired"
++    assert body["retired_at"] == "2026-10-16T14:30:00Z"
++    assert [m["symbol"] for m in body["members"]] == ["AAA"]
++
++
++def test_a_page_of_one_is_accepted(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
++    listed = _double(monkeypatch, "list_universes", result=([], None))
++    events = _double(monkeypatch, "list_events", result=([], None))
++
++    assert client.get("/api/universes?limit=1").status_code == 200
++    assert client.get(f"/api/universes/{UID}/events?limit=500").status_code == 200
++    assert client.get(f"/api/universes/{UID}/events?limit=1").status_code == 200
++    assert client.get("/api/universes?limit=500").status_code == 200
++    assert [call[2] for call in listed.calls] == [1, 500]
++    assert [call[1] for call in events.calls] == [500, 1]

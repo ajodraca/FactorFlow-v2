@@ -1,0 +1,477 @@
+{
+  "schema": 1,
+  "repo_head": "8ec2a736136dd3f743fb22ac1b7eac771e28d032",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/classification_bounds.py:9:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_bounds.py",
+      "line": 9,
+      "original": "MIN_COMPARE_SYMBOLS = 2",
+      "mutated": "MIN_COMPARE_SYMBOLS = 3"
+    },
+    {
+      "id": "src/factorflow/api/classification_bounds.py:12:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_bounds.py",
+      "line": 12,
+      "original": "MAX_COMPARE_SYMBOLS = 6",
+      "mutated": "MAX_COMPARE_SYMBOLS = 7"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:31:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 31,
+      "original": "_PERCENTILE = Field(default=None, ge=0, le=100)",
+      "mutated": "_PERCENTILE = Field(default=None, le=100)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:31:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 31,
+      "original": "_PERCENTILE = Field(default=None, ge=0, le=100)",
+      "mutated": "_PERCENTILE = Field(default=None, ge=1, le=100)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:31:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 31,
+      "original": "_PERCENTILE = Field(default=None, ge=0, le=100)",
+      "mutated": "_PERCENTILE = Field(default=None, ge=0, le=101)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:37:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 37,
+      "original": "    if not trimmed:",
+      "mutated": "    if trimmed:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:40:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 40,
+      "original": "    if limit is not None and len(trimmed) > limit:",
+      "mutated": "    if limit is None and len(trimmed) > limit:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:40:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 40,
+      "original": "    if limit is not None and len(trimmed) > limit:",
+      "mutated": "    if limit is not None and len(trimmed) >= limit:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:48:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 48,
+      "original": "    if not all(is_valid(symbol) for symbol in normalised):",
+      "mutated": "    if all(is_valid(symbol) for symbol in normalised):"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:75:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 75,
+      "original": "    hide_incomplete: bool = False",
+      "mutated": "    hide_incomplete: bool = True"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:78:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 78,
+      "original": "    @field_validator(\"symbol\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:84:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 84,
+      "original": "        if not is_valid(prefix):",
+      "mutated": "        if is_valid(prefix):"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:93:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 93,
+      "original": "            if value is not None",
+      "mutated": "            if value is None"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:96:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 96,
+      "original": "            bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=self.symbol",
+      "mutated": "            bounds=bounds, hide_incomplete=None, symbol=self.symbol"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:114:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 114,
+      "original": "    filter: Thresholds | None = Field(default=None, validate_default=True)",
+      "mutated": "    filter: Thresholds | None = Field(default=None)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:114:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 114,
+      "original": "    filter: Thresholds | None = Field(default=None, validate_default=True)",
+      "mutated": "    filter: Thresholds | None = Field(default=None, validate_default=False)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:115:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 115,
+      "original": "    set_id: UUID | None = Field(default=None, validate_default=True)",
+      "mutated": "    set_id: UUID | None = Field(default=None)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:115:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 115,
+      "original": "    set_id: UUID | None = Field(default=None, validate_default=True)",
+      "mutated": "    set_id: UUID | None = Field(default=None, validate_default=False)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:119:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 119,
+      "original": "    @field_validator(\"symbols\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:124:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 124,
+      "original": "    @field_validator(\"filter\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:129:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 129,
+      "original": "        if \"symbols\" not in info.data:  # `symbols` itself failed and is already reported",
+      "mutated": "        if \"symbols\" in info.data:  # `symbols` itself failed and is already reported"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:131:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 131,
+      "original": "        if (info.data[\"symbols\"] is None) == (value is None):",
+      "mutated": "        if (info.data[\"symbols\"] is None) != (value is None):"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:135:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 135,
+      "original": "    @field_validator(\"set_id\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:138:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 138,
+      "original": "        if \"filter\" not in info.data:  # `filter` failed and is already reported",
+      "mutated": "        if \"filter\" in info.data:  # `filter` failed and is already reported"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:140:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 140,
+      "original": "        if info.data[\"filter\"] is not None and value is None:",
+      "mutated": "        if info.data[\"filter\"] is None and value is None:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:142:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 142,
+      "original": "        if info.data[\"filter\"] is None and value is not None:",
+      "mutated": "        if info.data[\"filter\"] is None and value is None:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:162:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 162,
+      "original": "    symbols: list[str] = Field(min_length=1, max_length=MAX_SYMBOLS_PER_REQUEST)",
+      "mutated": "    symbols: list[str] = Field(min_length=2, max_length=MAX_SYMBOLS_PER_REQUEST)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:164:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 164,
+      "original": "    @field_validator(\"symbols\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:185:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 185,
+      "original": "            status=cell.status,",
+      "mutated": "            status=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:186:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 186,
+      "original": "            score=cell.score,",
+      "mutated": "            score=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:187:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 187,
+      "original": "            percentile=cell.percentile,",
+      "mutated": "            percentile=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:188:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 188,
+      "original": "            reason_code=cell.reason_code,",
+      "mutated": "            reason_code=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:189:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 189,
+      "original": "            reason_input=cell.reason_input,",
+      "mutated": "            reason_input=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:190:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 190,
+      "original": "            reason_detail=cell.reason_detail,",
+      "mutated": "            reason_detail=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:191:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 191,
+      "original": "            restated_possible=cell.restated_possible,",
+      "mutated": "            restated_possible=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:227:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 227,
+      "original": "            set_id=current.set_id,",
+      "mutated": "            set_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:228:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 228,
+      "original": "            classification_date=current.classification_date,",
+      "mutated": "            classification_date=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:229:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 229,
+      "original": "            run_id=current.run_id,",
+      "mutated": "            run_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:230:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 230,
+      "original": "            run_started_at=current.run_started_at,",
+      "mutated": "            run_started_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:231:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 231,
+      "original": "            run_outcome=current.run_outcome,",
+      "mutated": "            run_outcome=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:232:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 232,
+      "original": "            state=current.state,",
+      "mutated": "            state=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:233:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 233,
+      "original": "            started_at=current.started_at,",
+      "mutated": "            started_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:234:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 234,
+      "original": "            ended_at=current.ended_at,",
+      "mutated": "            ended_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:235:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 235,
+      "original": "            latest_trading_day=current.latest_trading_day,",
+      "mutated": "            latest_trading_day=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:236:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 236,
+      "original": "            active_instruments=current.active_instruments,",
+      "mutated": "            active_instruments=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:237:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 237,
+      "original": "            not_current=current.not_current,",
+      "mutated": "            not_current=None,"
+    },
+    {
+      "id": "manual:truthiness-exactly-one",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "if (info.data[\"symbols\"] is None) == (value is None):",
+      "new": "if (not info.data[\"symbols\"]) == (value is None):"
+    },
+    {
+      "id": "manual:to-reader-drops-zero",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "if value is not None\n",
+      "new": "if value\n"
+    },
+    {
+      "id": "manual:name-limit-off-by-one",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "len(trimmed) > limit",
+      "new": "len(trimmed) >= limit"
+    },
+    {
+      "id": "manual:percentile-no-upper",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "_PERCENTILE = Field(default=None, ge=0, le=100)",
+      "new": "_PERCENTILE = Field(default=None, ge=0)"
+    },
+    {
+      "id": "manual:set-id-optional-with-filter",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "if info.data[\"filter\"] is not None and value is None:",
+      "new": "if False:"
+    },
+    {
+      "id": "manual:symbols-not-normalised",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "normalised = [normalise(symbol) for symbol in symbols]",
+      "new": "normalised = list(symbols)"
+    },
+    {
+      "id": "manual:add-members-allows-empty",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "old": "Field(min_length=1, max_length=MAX_SYMBOLS_PER_REQUEST)",
+      "new": "Field(max_length=MAX_SYMBOLS_PER_REQUEST)"
+    }
+  ]
+}

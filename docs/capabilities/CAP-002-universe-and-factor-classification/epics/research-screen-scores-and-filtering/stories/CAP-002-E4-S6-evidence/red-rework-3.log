@@ -1,0 +1,517 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/results-table.test.tsx (94 tests | 4 failed) 2214ms
+   × TC-COMP-138: sorting is a request > keeps focus on a sort button activated after an arrow press onto the already-selected row 35ms
+     → expected <tr data-symbol="SYM0000" …(4)>…(6)</tr> to be <button type="button" …(2)>…(1)</button> // Object.is equality
+   × TC-COMP-139: selection and checking never interfere > focuses the already-selected row when an arrow key from a neighbour's checkbox targets it 30ms
+     → expected <input type="checkbox" …(2)></input> to be <tr data-symbol="AAPL" …(4)>…(6)</tr> // Object.is equality
+   × TC-COMP-139: selection and checking never interfere > keeps focus on a checkbox checked with Space after an arrow press onto the already-selected row 38ms
+     → expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input type="checkbox" …(2)></input> // Object.is equality
+   × TC-COMP-139: selection and checking never interfere > leaves focus on a control outside the table across a query change after an arrow press onto the already-selected row 32ms
+     → expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input aria-label="Host filter"></input> // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-138: sorting is a request > keeps focus on a sort button activated after an arrow press onto the already-selected row
+AssertionError: expected <tr data-symbol="SYM0000" …(4)>…(6)</tr> to be <button type="button" …(2)>…(1)</button> // Object.is equality
+
+- Expected
++ Received
+
+- <button
+-   aria-label="Sort by value percentile"
+-   class="inline-flex h-5 w-5 items-center justify-center rounded"
+-   type="button"
++ <tr
++   aria-rowindex="2"
++   aria-selected="true"
++   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
++   data-symbol="SYM0000"
++   tabindex="0"
++ >
++   <td>
++     <input
++       aria-label="Select SYM0000"
++       class="h-5 w-5"
++       type="checkbox"
++     />
++   </td>
++   <th
++     class="text-left font-numeric"
++     scope="row"
++   >
++     SYM0000
++   </th>
++   <td
++     class="truncate"
++     title="SYM0000 Incorporated"
++   >
++     SYM0000 Incorporated
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
+        >
++         0
++       </span>
+        <span
+          aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
+        >
+-     ▲
++         <span
++           class="block h-full"
++           style="width: 0%; background: hsl(var(--seq-4));"
++         />
+        </span>
+- </button>
++     </span>
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         0
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 0%; background: hsl(var(--seq-4));"
++         />
++       </span>
++     </span>
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         0
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 0%; background: hsl(var(--seq-4));"
++         />
++       </span>
++     </span>
++   </td>
++ </tr>
+
+ ❯ src/screens/research/results-table.test.tsx:1769:36
+    1767|       limit: PAGE_SIZE,
+    1768|     });
+    1769|     expect(document.activeElement).toBe(button);
+       |                                    ^
+    1770|     await act(async () => {
+    1771|       pending.resolve(list(generated(3), { matchCount: 2846 }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > focuses the already-selected row when an arrow key from a neighbour's checkbox targets it
+AssertionError: expected <input type="checkbox" …(2)></input> to be <tr data-symbol="AAPL" …(4)>…(6)</tr> // Object.is equality
+
+- Expected
++ Received
+
+- <tr
+-   aria-rowindex="2"
+-   aria-selected="true"
+-   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
+-   data-symbol="AAPL"
+-   tabindex="0"
+- >
+-   <td>
+  <input
+-       aria-label="Select AAPL"
++   aria-label="Select MSFT"
+    class="h-5 w-5"
+    type="checkbox"
+-     />
+-   </td>
+-   <th
+-     class="text-left font-numeric"
+-     scope="row"
+-   >
+-     AAPL
+-   </th>
+-   <td
+-     class="truncate"
+-     title="AAPL Incorporated"
+-   >
+-     AAPL Incorporated
+-   </td>
+-   <td
+-     class="text-right"
+-   >
+-     <span
+-       class="inline-flex items-center gap-1"
+-       data-testid="factor-cell"
+-     >
+-       <span
+-         class="inline-block w-5 text-right font-numeric font-semibold"
+-         data-testid="factor-percentile"
+-       >
+-         84
+-       </span>
+-       <span
+-         aria-hidden="true"
+-         class="inline-block h-2 w-7 overflow-hidden"
+-         data-testid="factor-bar"
+-         style="background: hsl(var(--seq-1));"
+-       >
+-         <span
+-           class="block h-full"
+-           style="width: 84%; background: hsl(var(--seq-4));"
+-         />
+-       </span>
+-     </span>
+-   </td>
+-   <td
+-     class="text-right"
+-   >
+-     <span
+-       class="inline-flex items-center gap-1"
+-       data-testid="factor-cell"
+-     >
+-       <span
+-         class="inline-block w-5 text-right font-numeric font-semibold"
+-         data-testid="factor-percentile"
+-       >
+-         61
+-       </span>
+-       <span
+-         aria-hidden="true"
+-         class="inline-block h-2 w-7 overflow-hidden"
+-         data-testid="factor-bar"
+-         style="background: hsl(var(--seq-1));"
+-       >
+-         <span
+-           class="block h-full"
+-           style="width: 61%; background: hsl(var(--seq-4));"
+-         />
+-       </span>
+-     </span>
+-   </td>
+-   <td
+-     class="text-right"
+-   >
+-     <span
+-       class="inline-flex items-center gap-1"
+-       data-testid="factor-cell"
+-     >
+-       <span
+-         class="inline-block w-5 text-right font-numeric font-semibold"
+-         data-testid="factor-percentile"
+-       >
+-         27
+-       </span>
+-       <span
+-         aria-hidden="true"
+-         class="inline-block h-2 w-7 overflow-hidden"
+-         data-testid="factor-bar"
+-         style="background: hsl(var(--seq-1));"
+-       >
+-         <span
+-           class="block h-full"
+-           style="width: 27%; background: hsl(var(--seq-4));"
+  />
+-       </span>
+-     </span>
+-   </td>
+- </tr>
+
+ ❯ src/screens/research/results-table.test.tsx:2185:36
+    2183|     await arrowOntoSelected(user);
+    2184|     expect(selectedSymbols()).toEqual(["AAPL"]);
+    2185|     expect(document.activeElement).toBe(rowOf("AAPL"));
+       |                                    ^
+    2186|     expect(hostChecked()).toBe("");
+    2187|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > keeps focus on a checkbox checked with Space after an arrow press onto the already-selected row
+AssertionError: expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input type="checkbox" …(2)></input> // Object.is equality
+
+- Expected
++ Received
+
++ <tr
++   aria-rowindex="2"
++   aria-selected="true"
++   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
++   data-symbol="AAPL"
++   tabindex="0"
++ >
++   <td>
+      <input
+-   aria-label="Select MSFT"
++       aria-label="Select AAPL"
+        class="h-5 w-5"
+        type="checkbox"
++     />
++   </td>
++   <th
++     class="text-left font-numeric"
++     scope="row"
++   >
++     AAPL
++   </th>
++   <td
++     class="truncate"
++     title="AAPL Incorporated"
++   >
++     AAPL Incorporated
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         84
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 84%; background: hsl(var(--seq-4));"
++         />
++       </span>
++     </span>
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         61
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 61%; background: hsl(var(--seq-4));"
++         />
++       </span>
++     </span>
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         27
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 27%; background: hsl(var(--seq-4));"
+          />
++       </span>
++     </span>
++   </td>
++ </tr>
+
+ ❯ src/screens/research/results-table.test.tsx:2196:36
+    2194|     expect(hostChecked()).toBe("MSFT");
+    2195|     expect(selectedSymbols()).toEqual(["AAPL"]);
+    2196|     expect(document.activeElement).toBe(checkboxOf("MSFT"));
+       |                                    ^
+    2197|   });
+    2198| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > leaves focus on a control outside the table across a query change after an arrow press onto the already-selected row
+AssertionError: expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input aria-label="Host filter"></input> // Object.is equality
+
+- Expected
++ Received
+
++ <tr
++   aria-rowindex="2"
++   aria-selected="true"
++   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
++   data-symbol="AAPL"
++   tabindex="0"
++ >
++   <td>
+      <input
+-   aria-label="Host filter"
++       aria-label="Select AAPL"
++       class="h-5 w-5"
++       type="checkbox"
++     />
++   </td>
++   <th
++     class="text-left font-numeric"
++     scope="row"
++   >
++     AAPL
++   </th>
++   <td
++     class="truncate"
++     title="AAPL Incorporated"
++   >
++     AAPL Incorporated
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         84
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 84%; background: hsl(var(--seq-4));"
++         />
++       </span>
++     </span>
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         61
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 61%; background: hsl(var(--seq-4));"
+          />
++       </span>
++     </span>
++   </td>
++   <td
++     class="text-right"
++   >
++     <span
++       class="inline-flex items-center gap-1"
++       data-testid="factor-cell"
++     >
++       <span
++         class="inline-block w-5 text-right font-numeric font-semibold"
++         data-testid="factor-percentile"
++       >
++         27
++       </span>
++       <span
++         aria-hidden="true"
++         class="inline-block h-2 w-7 overflow-hidden"
++         data-testid="factor-bar"
++         style="background: hsl(var(--seq-1));"
++       >
++         <span
++           class="block h-full"
++           style="width: 27%; background: hsl(var(--seq-4));"
++         />
++       </span>
++     </span>
++   </td>
++ </tr>
+
+ ❯ src/screens/research/results-table.test.tsx:2214:38
+    2212|       rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, hideIncomplet…
+    2213|       expect(listMock).toHaveBeenCalledTimes(2);
+    2214|       expect(document.activeElement).toBe(outside);
+       |                                      ^
+    2215|       await act(async () => {
+    2216|         pending.resolve(list(THREE));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 90 passed (94)
+   Start at  20:40:52
+   Duration  2.68s (transform 116ms, setup 24ms, collect 159ms, tests 2.21s, environment 122ms, prepare 38ms)
+

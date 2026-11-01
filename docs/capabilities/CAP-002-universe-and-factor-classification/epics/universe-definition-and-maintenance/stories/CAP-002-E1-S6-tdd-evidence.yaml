@@ -1,0 +1,134 @@
+# TDD evidence for CAP-002-E1-S6 - Universes router, request models, error mapping and mount in the application.
+# Three cycles, grouping the plan's five suggested T022 cycles: (1) bounds and models - suggested cycle 1;
+# (2) routes, error mapping and the mount - suggested cycles 2, 3 and 5, merged because every unit route test
+# builds the app through create_app(), so the router cannot be tested before T019 mounts it; (3) the Postgres
+# integration tests - suggested cycle 4 plus T013 from cycle 5.
+# The driver commits once per stage, so every cycle's commit_hash is `stage`; each reviewed_patch is the
+# canonical diff between the index trees written after consecutive cycles (cycle-1 from HEAD), so the three
+# apply in order onto the stage parent.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle was staged; the verdicts below are the final ones, for the patches cited.
+# Cycle 1 and cycle 2 follow-ups (fixes for review findings) were re-confirmed by the same reviewers.
+# Decisions: DEC-0260 (recorded while coding, agent-decided: the universe_retired message names the universe by
+# id). The code also rests on DEC-0064, DEC-0070, DEC-0076, DEC-0084, DEC-0085, DEC-0086, DEC-0093, DEC-0097,
+# DEC-0098 and DEC-0245 (instrument names, which T012(a)'s test reads from instrument_reference because the
+# instrument table has no name column).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T004, T009, T014, T015]
+    description: >
+      classification_bounds.py (MIN/MAX_COMPARE_SYMBOLS, MAX_UNIVERSE_NAME_LENGTH None with [REQUIRES INPUT]) and
+      classification_models.py: Thresholds (twelve bounds, percentiles 0-100, finite scores, upper-cased prefix,
+      to_reader), CreateUniverseRequest (exactly one of symbols/filter decided with is None, set_id with and only with
+      filter, 0-1000 symbols), RenameUniverseRequest, AddMembersRequest (1-1000), and the design 2.7 response models
+      with from_reader builders. Tests: TC-COMP-005 model half and T009 (a)-(d), plus decimal-string serialisation.
+      T001 verified every producer (service exceptions and functions, replay.list_universe_rows, reader types,
+      CursorError, the S3/S5 test helpers) without editing them.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/red-cycle-1-models.log
+    red_log_sha256: 222a047e987450700c61cf5f5069e68eff602bd72b4b7ead7ded009ed5e2b518
+    red_evidence: >
+      Collection error: ModuleNotFoundError, no module named factorflow.api.classification_models.
+    green_evidence: >
+      tests/unit/test_api_classification_models.py 68 passed; ruff check, ruff format --check and mypy src clean.
+      The code review (APPROVED; one MEDIUM: a vacuous "1000" string assertion, plus three LOWs) was addressed and
+      re-confirmed APPROVED; spec drift false.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8e790aa39922849d6a7b5130cc8e583679ae4231c6ca1c6ec2b0093692fc5c03
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/mutation-cycle-1-results.json
+      results_sha256: 0af5ab8fcae43d0becd47dd5bad8440eed1fc128c8b9f3afad93cfc15047302e
+      generated: 53
+      killed: 53
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T004, T005, T006, T007, T008, T010, T016, T017, T018, T019]
+    decision: DEC-0260
+    description: >
+      routes/universes.py: the REFUSALS table (eight service exceptions plus CursorError), _refuse building the design
+      2.5 envelope through error_response with a fixed message per code and the symbols list field, the three reads
+      (list with active/retired counts by paging replay.list_universe_rows, DEC-0098; get with as_of and members'
+      name and cells from the reader, null when absent, DEC-0097; events with raw filter_provenance) and the five
+      writes (create by hand or from a filter via Thresholds.to_reader, rename, retire with the service's retired_at,
+      add members, remove member with the path symbol shape-checked first). app.py: the universes import and one
+      include_router before the middleware and static mount. Unit tests: TC-COMP-004/027/041 twins, TC-COMP-005 route
+      half, TC-COMP-028, TC-COMP-040 and T010 (a)-(h), all through create_app().
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/red-cycle-2-routes.log
+    red_log_sha256: 7c3683e15ae6373a5aec31563e79e5a27f5609ece397cadf5b51f5054756b666
+    red_evidence: >
+      Both new unit modules failed to collect: ImportError, cannot import name universes from factorflow.api.routes
+      (no router, nothing mounted).
+    green_evidence: >
+      The two route modules and the model module: 134 passed, then 68 route/mapping tests after the follow-ups; the
+      whole non-postgres suite 1426 passed; ruff check, ruff format --check and mypy src clean. Code review APPROVED
+      (one MEDIUM, the documented DEC-0097 as_of gap, now stated in the module docstring; the fake pool now proves
+      each refusal leaves the connection block). The first spec-drift check found one drift (the universe_retired
+      message names the id, design 2.5 says the name), settled by DEC-0260; the re-check reported drift false.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 391fe4c4f246240cb791f28872bc53023a5c9f89e76ea08d5db4364b27a7c105
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/mutation-cycle-2-results.json
+      results_sha256: 0822bcdc0945532089fcfea49017f8a42b039ec1c21aaeea9453fe8d271bb277
+      generated: 75
+      killed: 74
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.987
+      survivors:
+        - id: src/factorflow/api/routes/universes.py:121:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The mutant changes the default of _refuse's from_filter keyword to True. from_filter is read only for
+            EmptyUniverse, which only the two create functions raise, and the one route that calls them
+            (create_universe) always passes from_filter explicitly; every other caller can never reach the
+            EmptyUniverse branch, so no request observes the default.
+
+  - id: cycle-3
+    tasks: [T003, T005, T008, T011, T012, T013]
+    description: >
+      Tests only, against PostgreSQL through create_app(): TC-COMP-004, TC-COMP-027 and TC-COMP-041 integration
+      halves; T011 (a)-(k) lifecycle flows (create, name uniqueness after trimming, rename keeps id and history,
+      add/remove keep the dated record, retire keeps members and events and refuses every write, 404s, as-of,
+      list filters/counts/paging, events paging and a bad cursor, empty create, atomicity); T012 (a)-(g) the filter
+      path with raw-jsonb provenance; T013 the Host and Origin refusals on every universes write and read, each
+      succeeding again from the API's own origin.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/red-cycle-3-integration.log
+    red_log_sha256: f2669bef70642b6602cb6b405526951d793bfcd4f1c5ff40213d256926e113db
+    red_evidence: >
+      The code already satisfied these tests, so two faults were injected for one run each and reverted: (1) the
+      include_router line removed from create_app (the plan's suggested RED for the mount): 26 failed; (2) add_members
+      passing only the first symbol to the service: 1 failed (TC-COMP-027).
+    green_evidence: >
+      Both integration modules: 26 passed; ruff check and ruff format --check clean; app.py and universes.py
+      byte-identical to the staged versions after each revert. Code review APPROVED with four LOW/INFO notes
+      (unbounded paging loops, a duplicated count helper and fixtures, a hard-coded prefix expectation), left as
+      follow-ups; spec drift false.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f7ac00c0d7354534123ed7eb245de775d493c21ece61f48efa4f432fc64f5b6c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S6-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: >
+        The cycle changes test files only; no production line changed. The two injected faults of the RED run act as
+        its hand-written mutants and both were killed.

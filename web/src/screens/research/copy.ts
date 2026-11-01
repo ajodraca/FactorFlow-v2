@@ -408,8 +408,28 @@ export const INPUT_STATUS = {
   not_computable: "Couldn't be computed",
 } as const;
 
+/**
+ * The results table's sort controls and its header description (UX 1.1
+ * Interaction Flows; classification-ui 2.5; CAP-002-E4-S6 Open Gap 3,
+ * DEC-0161). Each ranked factor header has two sort buttons, percentile and
+ * standardised score, and the Symbol header one; the description says where
+ * an incomplete score sorts, so an absent percentile never reads as zero.
+ */
+export const SORT = {
+  /** DEC-0161: the Symbol header's one sort button. */
+  bySymbol: "Sort by symbol",
+  /** DEC-0161: *Sort by value percentile*. */
+  byPercentile: (factor: string): string => `Sort by ${factor} percentile`,
+  /** DEC-0161: *Sort by value standardised score*. */
+  byStandardisedScore: (factor: string): string => `Sort by ${factor} standardised score`,
+  /** DEC-0161: the ranked factor headers' description (UX 1.1, "sort after every scored row in both directions"). */
+  incompleteLast: "Stocks with an incomplete score are listed last, whether sorted up or down.",
+} as const;
+
 /** The results header and the nothing-found and never-scored bodies (UX 1.1, 1.4). */
 export const RESULTS = {
+  /** The results table's two text column headers (UX 1.1 column table; CAP-002-E4-S6, DEC-0239). */
+  columns: { symbol: "Symbol", name: "Name" },
   stocksMatch: (count: number): string => `${count} stocks match`,
   membersMatch: (count: number, members: number): string => `${count} of ${members} members match`,
   saveThese: (count: number): string => `Save these ${count} as a universe…`,

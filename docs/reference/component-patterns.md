@@ -35,13 +35,14 @@ They read their types from `web/src/api/classification-types.ts`
 ([`web-api.md`](web-api.md#types-classification-typests)) and their number
 formatting and owner-facing strings from `web/src/screens/research/`
 ([`research-screen.md`](research-screen.md)); no string shown to the owner is
-written in any of them. No route or screen imports them yet; their only
-importers are each other (`status-badge.tsx` is imported by the banner and
-the line, `factor-cell.tsx` by the inspector) and their own tests beside them
-(`factor-cell.test.tsx`, `restated-mark.test.tsx`,
-`not-current-banner.test.tsx`, `as-of-line.test.tsx`,
-`selection-tray.test.tsx`, `inspector-panel.test.tsx`), which carry
-TC-COMP-073, TC-COMP-074, TC-COMP-097, TC-COMP-109, TC-COMP-140 to
+written in any of them. No route mounts any of them yet. Outside the
+directory, only `web/src/screens/research/results-table.tsx` (CAP-002-E4-S6)
+imports one, the factor cell; otherwise their importers are each other
+(`status-badge.tsx` is imported by the banner and the line, `factor-cell.tsx`
+by the inspector) and their own tests beside them (`factor-cell.test.tsx`,
+`restated-mark.test.tsx`, `not-current-banner.test.tsx`,
+`as-of-line.test.tsx`, `selection-tray.test.tsx`, `inspector-panel.test.tsx`),
+which carry TC-COMP-073, TC-COMP-074, TC-COMP-097, TC-COMP-109, TC-COMP-140 to
 TC-COMP-143, TC-COMP-174, TC-COMP-175, TC-COMP-176 and TC-COMP-179.
 CAP-002-E4-S9 is the first planned consumer of the banner, the line, the
 tray and the inspector.

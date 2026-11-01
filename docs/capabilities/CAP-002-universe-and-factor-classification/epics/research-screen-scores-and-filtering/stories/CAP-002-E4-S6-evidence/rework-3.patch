@@ -1,0 +1,1001 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-3.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-3.log
+new file mode 100644
+index 0000000..c2bfccc
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/full-suite-rework-3.log
+@@ -0,0 +1,212 @@
++
++> factorflow-web@0.1.0 test
++> vitest run
++
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/api/client.runs.test.ts (20 tests) 33ms
++ ✓ src/api/research-query.test.ts (82 tests) 17ms
++ ✓ src/api/classification-client.test.ts (55 tests) 28ms
++ ✓ src/screens/research/copy.test.ts (327 tests) 33ms
++stderr | src/screens/research/filters-pane.test.tsx > TC-COMP-135: one list request per filter change, URL updated > issues exactly one request per change, each carrying the mapped parameters of every change so far
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/factor-cell.test.tsx > state selection > refuses a date that is not an ISO-8601 calendar date rather than print it
++Error: Uncaught [RangeError: Not an ISO-8601 date: "30/09/2026"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: "30/09/2026"
++    at Module.formatDate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/format.ts:139:11)
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:118:78)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [RangeError: Not an ISO-8601 date: "30/09/2026"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: "30/09/2026"
++    at Module.formatDate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/format.ts:139:11)
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:118:78)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <NotFollowedBadge> component:
++
++    at NotFollowedBadge (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:125:29)
++    at FactorCell (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/factor-cell.tsx:210:3)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ✓ src/components/patterns/factor-cell.test.tsx (90 tests) 98ms
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/coverage/coverage.test.tsx > TC-COMP-007: each instrument shows presence, covered range and last acquired (AC-7) > renders the row's presence badges, range and Chicago last-acquired under the 11 headers
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/run-detail.test.tsx > Roster at 3000 instruments (DAC-E7-9) > collapses to one row per instrument and expands to four data types in fixed order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/use-score-set-poll.test.ts (33 tests) 157ms
++ ✓ src/components/patterns/as-of-line.test.tsx (24 tests) 184ms
++stderr | src/screens/runs/cancel.test.tsx > Cancel confirmation copy follows the run's state (DAC-E5-S6-5) > states the cooperative effect for a running run, as confirm, never destructive
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/not-current-banner.test.tsx (16 tests) 38ms
++stderr | src/screens/coverage/coverage-table.test.tsx > TC-COMP-008: the gap count sits in the row, dates behind expansion (AC-8) > shows counts, fetches dates once on Enter, caches them, and never fetches for a zero
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/status-region.test.tsx (23 tests) 556ms
++stderr | src/screens/runs/runs-screen.test.tsx > Runs list — outcomes render honestly (AC-9) > shows each terminal outcome as recorded, partial as a warning
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/coverage.test.tsx (10 tests) 584ms
++   ✓ TC-COMP-062: never-acquired and nothing-matched read differently (DAC-E6-S4-4) > (b) a filter matching nothing has its own copy, and Reset filter refetches unfiltered 333ms
++stderr | src/screens/runs/run-controls.test.tsx > StartRunControl — after a 202 > calls onStarted once, then routes to the run's detail when nothing is queued
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no fifth rail item when a run detail route opens
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/runs/runs-screen.test.tsx (10 tests) 334ms
++ ✓ src/screens/research/format.test.ts (41 tests) 23ms
++ ✓ src/screens/runs/cancel.test.tsx (18 tests) 500ms
++ ✓ src/screens/runs/run-controls.test.tsx (12 tests) 279ms
++ ✓ src/app/routes.test.tsx (7 tests) 172ms
++stderr | src/screens/research/use-research-query.test.tsx > useResearchQuery (T007; DAC-E4-3, DAC-E4-S5-2; DEC-0156) > reads the query as decodeResearchQuery reads the location search
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/use-research-query.test.tsx (8 tests) 24ms
++stderr | src/screens/coverage/cells.test.tsx > TC-COMP-059: absent, measured zero and inapplicable render distinctly (DAC-E6-S4-1) > renders a missing value in the range and last-acquired cells of a row with no data
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/cells.test.tsx (6 tests) 69ms
++ ✓ src/screens/research/results-window.test.ts (17 tests) 9ms
++ ✓ src/screens/instruments/instrument-table.test.tsx (8 tests) 556ms
++   ✓ InstrumentTable > issues a server-side request when the symbol filter changes 331ms
++ ✓ src/screens/research/threshold-sentence.test.tsx (63 tests) 1299ms
++ ✓ src/api/client.coverage.test.ts (8 tests) 7ms
++stderr | src/screens/runs/run-detail.polling.test.tsx > Run detail polling (DAC-E7-S4-6) > polls every 10 000 ms while the run is requested, and stops once it is terminal
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/runs/runs-screen.polling.test.tsx > Runs screen polling (DAC-E5-S6-1) > polls every 10 000 ms while a running run is loaded, and stops once all are terminal
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/coverage-table.test.tsx (4 tests) 985ms
++   ✓ TC-COMP-063: search and filter stay usable at volume (DAC-E6-S4-5) > filters server-side, scrolls in its own container, and replaces pages 707ms
++stderr | src/screens/coverage/start-run.test.tsx > Start is blocked, not disabled > blocks with its own reason when no history depth is set (DAC-E5-S6-3)
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/runs/run-detail.test.tsx (36 tests) 1450ms
++   ✓ Roster at 3000 instruments (DAC-E7-9) > collapses to one row per instrument and expands to four data types in fixed order 400ms
++ ✓ src/screens/runs/runs-screen.polling.test.tsx (6 tests) 175ms
++ ✓ src/screens/runs/run-detail.polling.test.tsx (9 tests) 238ms
++ ✓ src/screens/coverage/start-run.test.tsx (4 tests) 146ms
++ ✓ src/screens/instruments/bulk-add.test.tsx (4 tests) 218ms
++ ✓ src/screens/research/filters-pane.test.tsx (41 tests) 1688ms
++ ✓ src/screens/coverage/badges.test.tsx (5 tests) 25ms
++stderr | src/app/status-region.integration.test.tsx > StatusRegion — the three health response shapes, end to end (T020) > a successful response with the product answering renders the answering state
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/status-region.a11y.test.tsx (7 tests) 77ms
++stderr | src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > replaces the main region with the designed state on /coverage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/status-region.integration.test.tsx (4 tests) 134ms
++ ✓ src/app/shell.unreachable.test.tsx (9 tests) 208ms
++ ✓ src/screens/instruments/retire-dialog.test.tsx (7 tests) 128ms
++ ✓ src/screens/settings/history-depth-form.test.tsx (5 tests) 222ms
++ ✓ src/components/patterns/restated-mark.test.tsx (8 tests) 24ms
++stderr | src/screens/coverage/coverage.polling.test.tsx > TC-COMP-039: coverage never auto-polls and shows when it was loaded (DAC-E6-13) > fetches once over ten minutes, and again only on Refresh, keeping rows while pending
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.test.tsx > Shell — no principal is assumed (AC-14) > renders no element matching sign-in, account, or user-menu semantics
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.status-region.test.tsx > Shell — the status region is mounted on every destination (DAC-E1-13, AC-18) > renders the region inside the rail on the initial route
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/coverage/coverage.polling.test.tsx (1 test) 137ms
++ ✓ src/app/shell.test.tsx (3 tests) 141ms
++ ✓ src/screens/instruments/add-field.test.tsx (5 tests) 228ms
++ ✓ src/screens/runs/outcome-badge.test.tsx (21 tests) 54ms
++stderr | src/screens/runs/run-detail.reason.test.tsx > A reason shows its data type and request id, never a credential (DAC-E7-S4-5) > renders through the real client mapping, as text only
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.tokens.test.tsx (2 tests) 8ms
++ ✓ src/app/shell.status-region.test.tsx (3 tests) 208ms
++ ✓ src/screens/settings/credential-badge.test.tsx (3 tests) 62ms
++ ✓ src/screens/runs/run-detail.reason.test.tsx (1 test) 111ms
++ ✓ src/screens/runs/detail/result-outcome-badge.test.tsx (9 tests) 19ms
++ ✓ src/screens/settings/credential-status.test.tsx (4 tests) 25ms
++stderr | src/app/shell.layout.test.tsx > Shell — layout contract (UX design section 0) > renders a fixed left rail containing navigation and the status-region slot
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.layout.test.tsx (3 tests) 84ms
++ ✓ src/screens/coverage/uniform-shortfall.test.ts (4 tests) 2ms
++stderr | src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/parse-bulk-symbols.test.ts (5 tests) 2ms
++ ✓ src/app/shell.a11y.test.tsx (2 tests) 107ms
++ ✓ src/screens/instruments/start-action.test.tsx (2 tests) 38ms
++ ✓ src/api/render.test.tsx (1 test) 5ms
++ ✓ src/screens/instruments/empty-states.test.tsx (2 tests) 61ms
++ ✓ src/screens/instruments/badges.test.tsx (2 tests) 14ms
++ ✓ src/app/build-output.test.tsx (2 tests) 910ms
++   ✓ Build output — lands in the API static directory (DAC-E1-S4-6) > a real build places index.html in the static directory and leaves its tracked marker intact 881ms
++ ✓ src/screens/research/results-table.test.tsx (94 tests) 3644ms
++
++ Test Files  55 passed (55)
++      Tests  1196 passed (1196)
++   Start at  20:41:15
++   Duration  4.57s (transform 1.65s, setup 2.55s, collect 6.59s, tests 16.58s, environment 13.66s, prepare 2.37s)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-3.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-3.log
+new file mode 100644
+index 0000000..82c7a12
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/green-rework-3.log
+@@ -0,0 +1,12 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/research/results-window.test.ts (17 tests) 5ms
++ ✓ src/screens/research/copy.test.ts (327 tests) 24ms
++ ✓ src/screens/research/results-table.test.tsx (94 tests) 2195ms
++
++ Test Files  3 passed (3)
++      Tests  438 passed (438)
++   Start at  20:41:04
++   Duration  3.00s (transform 200ms, setup 156ms, collect 389ms, tests 2.22s, environment 805ms, prepare 413ms)
++
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-3-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-3-results.json
+new file mode 100644
+index 0000000..d5b6041
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/mutation-rework-3-results.json
+@@ -0,0 +1,106 @@
++{
++  "schema": 1,
++  "command": "test -e node_modules || ln -s /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; ./node_modules/.bin/vitest run src/screens/research/results-table.test.tsx src/screens/research/results-window.test.ts src/screens/research/copy.test.ts",
++  "repo_head": "f8ac5ea904c1aaeb1b1ec32cdd544a93a95c721e",
++  "tree_patch_sha256": "3875a2a4dc31b9c271c18ba2674ff26ed7cdad55af8e89b5d70603a4cf833e8f",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/mutants-r3.json",
++  "mutants_sha256": "1349d37201608876115be41077173564794403dce45ade2a9f1dc8f7d845bfcb",
++  "jobs": 3,
++  "started": "2026-10-31T01:42:06Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 3.9,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/baseline-w0.log",
++      "log_sha256": "a2efcfbc1336dc8e60cd5630a60bb534daa0f357a52cb1d24d04ea54e67d8790"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 3.9,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/baseline-w1.log",
++      "log_sha256": "0ab15cc711f69dd62d93d1a241e5c1b9eb6ee7c75c6027bf5ad4af4b905716f8"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 4.0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/baseline-w2.log",
++      "log_sha256": "d57cc2e775ce1fae102d5ebef427db6a8dc1fcde774426c335dfffd5f58dae41"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "manual:rework-3:defect-restored",
++      "cycle": "rework-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    const symbol = loaded.stocks[target].symbol;\n    select(symbol);\n    const revealed = scrollTopToReveal(target, scrollTop);\n    if (revealed === scrollTop) {\n      // In the viewport, so already rendered: focus it now. A request here\n      // could outlive the press when the target is already selected, since\n      // nothing re-renders, and a later unrelated render would act on it.\n      pendingFocus.current = null;\n      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n      return;\n    }\n    // The scroll's own render brings the row into the window and consumes the request.\n    pendingFocus.current = symbol;\n    if (scrollRef.current !== null) {\n      scrollRef.current.scrollTop = revealed;\n    }\n    setScrollTop(revealed);\n  }\n",
++      "new": "    select(loaded.stocks[target].symbol);\n    pendingFocus.current = loaded.stocks[target].symbol;\n    const revealed = scrollTopToReveal(target, scrollTop);\n    if (revealed !== scrollTop) {\n      if (scrollRef.current !== null) {\n        scrollRef.current.scrollTop = revealed;\n      }\n      setScrollTop(revealed);\n    }\n  }\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_defect-restored.log",
++      "log_sha256": "2ecdccbedf75a2d540386aa304079598d95022154aa744f7f0db868ca8a9d134"
++    },
++    {
++      "id": "manual:rework-3:direct-focus-dropped",
++      "cycle": "rework-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_direct-focus-dropped.log",
++      "log_sha256": "988e7d2f3a69cc00b3f4ee661aada253d6c9cecaea41009208c0490fb7f14eb5"
++    },
++    {
++      "id": "manual:rework-3:scroll-request-dropped",
++      "cycle": "rework-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    pendingFocus.current = symbol;\n    if (scrollRef.current !== null) {",
++      "new": "    if (scrollRef.current !== null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_scroll-request-dropped.log",
++      "log_sha256": "0e8df4303c2bd7fcecec9ec3b1e4defedc6c88e5935f1f5ae2ec85bc8290ed18"
++    },
++    {
++      "id": "manual:rework-3:request-left-on-direct",
++      "cycle": "rework-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "      pendingFocus.current = null;\n      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n",
++      "new": "      pendingFocus.current = symbol;\n      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol=\"${symbol}\"]`)?.focus();\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_request-left-on-direct.log",
++      "log_sha256": "c70f02dcc056c399f69c897d2710f53034e1c0858837af76aaa958264ab4d258"
++    },
++    {
++      "id": "manual:rework-3:direct-branch-always",
++      "cycle": "rework-3",
++      "operator": "manual",
++      "file": "web/src/screens/research/results-table.tsx",
++      "old": "    if (revealed === scrollTop) {",
++      "new": "    if (revealed === scrollTop || target >= 0) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.3,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-001-e1-s1-adversarial-01dc9a/b9ce0a92-19dc-4261-bbaf-64d83f5d3d3e/scratchpad/results-r3-logs/manual_rework-3_direct-branch-always.log",
++      "log_sha256": "b67eeee726f2be836bfaf7b860ca5a415716cebdd0f3a95d06255736e90635b1"
++    }
++  ],
++  "finished": "2026-10-31T01:42:17Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-3.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-3.log
+new file mode 100644
+index 0000000..e684f00
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S6-evidence/red-rework-3.log
+@@ -0,0 +1,517 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/research/results-table.test.tsx (94 tests | 4 failed) 2214ms
++   × TC-COMP-138: sorting is a request > keeps focus on a sort button activated after an arrow press onto the already-selected row 35ms
++     → expected <tr data-symbol="SYM0000" …(4)>…(6)</tr> to be <button type="button" …(2)>…(1)</button> // Object.is equality
++   × TC-COMP-139: selection and checking never interfere > focuses the already-selected row when an arrow key from a neighbour's checkbox targets it 30ms
++     → expected <input type="checkbox" …(2)></input> to be <tr data-symbol="AAPL" …(4)>…(6)</tr> // Object.is equality
++   × TC-COMP-139: selection and checking never interfere > keeps focus on a checkbox checked with Space after an arrow press onto the already-selected row 38ms
++     → expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input type="checkbox" …(2)></input> // Object.is equality
++   × TC-COMP-139: selection and checking never interfere > leaves focus on a control outside the table across a query change after an arrow press onto the already-selected row 32ms
++     → expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input aria-label="Host filter"></input> // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-138: sorting is a request > keeps focus on a sort button activated after an arrow press onto the already-selected row
++AssertionError: expected <tr data-symbol="SYM0000" …(4)>…(6)</tr> to be <button type="button" …(2)>…(1)</button> // Object.is equality
++
++- Expected
+++ Received
++
++- <button
++-   aria-label="Sort by value percentile"
++-   class="inline-flex h-5 w-5 items-center justify-center rounded"
++-   type="button"
+++ <tr
+++   aria-rowindex="2"
+++   aria-selected="true"
+++   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
+++   data-symbol="SYM0000"
+++   tabindex="0"
+++ >
+++   <td>
+++     <input
+++       aria-label="Select SYM0000"
+++       class="h-5 w-5"
+++       type="checkbox"
+++     />
+++   </td>
+++   <th
+++     class="text-left font-numeric"
+++     scope="row"
+++   >
+++     SYM0000
+++   </th>
+++   <td
+++     class="truncate"
+++     title="SYM0000 Incorporated"
+++   >
+++     SYM0000 Incorporated
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
++        >
+++         0
+++       </span>
++        <span
++          aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
++        >
++-     ▲
+++         <span
+++           class="block h-full"
+++           style="width: 0%; background: hsl(var(--seq-4));"
+++         />
++        </span>
++- </button>
+++     </span>
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         0
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 0%; background: hsl(var(--seq-4));"
+++         />
+++       </span>
+++     </span>
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         0
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 0%; background: hsl(var(--seq-4));"
+++         />
+++       </span>
+++     </span>
+++   </td>
+++ </tr>
++
++ ❯ src/screens/research/results-table.test.tsx:1769:36
++    1767|       limit: PAGE_SIZE,
++    1768|     });
++    1769|     expect(document.activeElement).toBe(button);
++       |                                    ^
++    1770|     await act(async () => {
++    1771|       pending.resolve(list(generated(3), { matchCount: 2846 }));
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > focuses the already-selected row when an arrow key from a neighbour's checkbox targets it
++AssertionError: expected <input type="checkbox" …(2)></input> to be <tr data-symbol="AAPL" …(4)>…(6)</tr> // Object.is equality
++
++- Expected
+++ Received
++
++- <tr
++-   aria-rowindex="2"
++-   aria-selected="true"
++-   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
++-   data-symbol="AAPL"
++-   tabindex="0"
++- >
++-   <td>
++  <input
++-       aria-label="Select AAPL"
+++   aria-label="Select MSFT"
++    class="h-5 w-5"
++    type="checkbox"
++-     />
++-   </td>
++-   <th
++-     class="text-left font-numeric"
++-     scope="row"
++-   >
++-     AAPL
++-   </th>
++-   <td
++-     class="truncate"
++-     title="AAPL Incorporated"
++-   >
++-     AAPL Incorporated
++-   </td>
++-   <td
++-     class="text-right"
++-   >
++-     <span
++-       class="inline-flex items-center gap-1"
++-       data-testid="factor-cell"
++-     >
++-       <span
++-         class="inline-block w-5 text-right font-numeric font-semibold"
++-         data-testid="factor-percentile"
++-       >
++-         84
++-       </span>
++-       <span
++-         aria-hidden="true"
++-         class="inline-block h-2 w-7 overflow-hidden"
++-         data-testid="factor-bar"
++-         style="background: hsl(var(--seq-1));"
++-       >
++-         <span
++-           class="block h-full"
++-           style="width: 84%; background: hsl(var(--seq-4));"
++-         />
++-       </span>
++-     </span>
++-   </td>
++-   <td
++-     class="text-right"
++-   >
++-     <span
++-       class="inline-flex items-center gap-1"
++-       data-testid="factor-cell"
++-     >
++-       <span
++-         class="inline-block w-5 text-right font-numeric font-semibold"
++-         data-testid="factor-percentile"
++-       >
++-         61
++-       </span>
++-       <span
++-         aria-hidden="true"
++-         class="inline-block h-2 w-7 overflow-hidden"
++-         data-testid="factor-bar"
++-         style="background: hsl(var(--seq-1));"
++-       >
++-         <span
++-           class="block h-full"
++-           style="width: 61%; background: hsl(var(--seq-4));"
++-         />
++-       </span>
++-     </span>
++-   </td>
++-   <td
++-     class="text-right"
++-   >
++-     <span
++-       class="inline-flex items-center gap-1"
++-       data-testid="factor-cell"
++-     >
++-       <span
++-         class="inline-block w-5 text-right font-numeric font-semibold"
++-         data-testid="factor-percentile"
++-       >
++-         27
++-       </span>
++-       <span
++-         aria-hidden="true"
++-         class="inline-block h-2 w-7 overflow-hidden"
++-         data-testid="factor-bar"
++-         style="background: hsl(var(--seq-1));"
++-       >
++-         <span
++-           class="block h-full"
++-           style="width: 27%; background: hsl(var(--seq-4));"
++  />
++-       </span>
++-     </span>
++-   </td>
++- </tr>
++
++ ❯ src/screens/research/results-table.test.tsx:2185:36
++    2183|     await arrowOntoSelected(user);
++    2184|     expect(selectedSymbols()).toEqual(["AAPL"]);
++    2185|     expect(document.activeElement).toBe(rowOf("AAPL"));
++       |                                    ^
++    2186|     expect(hostChecked()).toBe("");
++    2187|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > keeps focus on a checkbox checked with Space after an arrow press onto the already-selected row
++AssertionError: expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input type="checkbox" …(2)></input> // Object.is equality
++
++- Expected
+++ Received
++
+++ <tr
+++   aria-rowindex="2"
+++   aria-selected="true"
+++   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
+++   data-symbol="AAPL"
+++   tabindex="0"
+++ >
+++   <td>
++      <input
++-   aria-label="Select MSFT"
+++       aria-label="Select AAPL"
++        class="h-5 w-5"
++        type="checkbox"
+++     />
+++   </td>
+++   <th
+++     class="text-left font-numeric"
+++     scope="row"
+++   >
+++     AAPL
+++   </th>
+++   <td
+++     class="truncate"
+++     title="AAPL Incorporated"
+++   >
+++     AAPL Incorporated
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         84
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 84%; background: hsl(var(--seq-4));"
+++         />
+++       </span>
+++     </span>
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         61
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 61%; background: hsl(var(--seq-4));"
+++         />
+++       </span>
+++     </span>
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         27
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 27%; background: hsl(var(--seq-4));"
++          />
+++       </span>
+++     </span>
+++   </td>
+++ </tr>
++
++ ❯ src/screens/research/results-table.test.tsx:2196:36
++    2194|     expect(hostChecked()).toBe("MSFT");
++    2195|     expect(selectedSymbols()).toEqual(["AAPL"]);
++    2196|     expect(document.activeElement).toBe(checkboxOf("MSFT"));
++       |                                    ^
++    2197|   });
++    2198| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/screens/research/results-table.test.tsx > TC-COMP-139: selection and checking never interfere > leaves focus on a control outside the table across a query change after an arrow press onto the already-selected row
++AssertionError: expected <tr data-symbol="AAPL" …(4)>…(6)</tr> to be <input aria-label="Host filter"></input> // Object.is equality
++
++- Expected
+++ Received
++
+++ <tr
+++   aria-rowindex="2"
+++   aria-selected="true"
+++   class="h-row border-t border-border border-l-4 border-l-status-active bg-status-active-muted"
+++   data-symbol="AAPL"
+++   tabindex="0"
+++ >
+++   <td>
++      <input
++-   aria-label="Host filter"
+++       aria-label="Select AAPL"
+++       class="h-5 w-5"
+++       type="checkbox"
+++     />
+++   </td>
+++   <th
+++     class="text-left font-numeric"
+++     scope="row"
+++   >
+++     AAPL
+++   </th>
+++   <td
+++     class="truncate"
+++     title="AAPL Incorporated"
+++   >
+++     AAPL Incorporated
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         84
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 84%; background: hsl(var(--seq-4));"
+++         />
+++       </span>
+++     </span>
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         61
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 61%; background: hsl(var(--seq-4));"
++          />
+++       </span>
+++     </span>
+++   </td>
+++   <td
+++     class="text-right"
+++   >
+++     <span
+++       class="inline-flex items-center gap-1"
+++       data-testid="factor-cell"
+++     >
+++       <span
+++         class="inline-block w-5 text-right font-numeric font-semibold"
+++         data-testid="factor-percentile"
+++       >
+++         27
+++       </span>
+++       <span
+++         aria-hidden="true"
+++         class="inline-block h-2 w-7 overflow-hidden"
+++         data-testid="factor-bar"
+++         style="background: hsl(var(--seq-1));"
+++       >
+++         <span
+++           class="block h-full"
+++           style="width: 27%; background: hsl(var(--seq-4));"
+++         />
+++       </span>
+++     </span>
+++   </td>
+++ </tr>
++
++ ❯ src/screens/research/results-table.test.tsx:2214:38
++    2212|       rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, hideIncomplet…
++    2213|       expect(listMock).toHaveBeenCalledTimes(2);
++    2214|       expect(document.activeElement).toBe(outside);
++       |                                      ^
++    2215|       await act(async () => {
++    2216|         pending.resolve(list(THREE));
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 90 passed (94)
++   Start at  20:40:52
++   Duration  2.68s (transform 116ms, setup 24ms, collect 159ms, tests 2.21s, environment 122ms, prepare 38ms)
++
+diff --git a/web/src/screens/research/results-table.test.tsx b/web/src/screens/research/results-table.test.tsx
+index 8d35b02..659d49d 100644
+--- a/web/src/screens/research/results-table.test.tsx
++++ b/web/src/screens/research/results-table.test.tsx
+@@ -1749,6 +1749,30 @@ describe("TC-COMP-138: sorting is a request", () => {
+     expect(listMock).toHaveBeenCalledTimes(3);
+     expect(listMock.mock.calls[2][0]).toMatchObject({ sort: "value_percentile", order: "desc" });
+   });
++
++  it("keeps focus on a sort button activated after an arrow press onto the already-selected row", async () => {
++    const user = await renderSorted();
++    await user.click(screen.getByRole("rowheader", { name: "SYM0000" }));
++    checkboxOf("SYM0001").focus();
++    await user.keyboard("{ArrowUp}");
++    expect(selectedSymbols()).toEqual(["SYM0000"]);
++
++    const pending = deferred<ClassificationList>();
++    listMock.mockReturnValueOnce(pending.promise);
++    const button = sortButton(SORT.byPercentile("value"));
++    await user.click(button);
++    expect(listMock.mock.calls[1][0]).toEqual({
++      sort: "value_percentile",
++      order: "asc",
++      limit: PAGE_SIZE,
++    });
++    expect(document.activeElement).toBe(button);
++    await act(async () => {
++      pending.resolve(list(generated(3), { matchCount: 2846 }));
++    });
++    expect(table()).not.toHaveAttribute("aria-busy", "true");
++    expect(document.activeElement).toBe(button);
++  });
+ });
+ 
+ // T008, the header half: the sort controls and the header's composition (AC-9, DAC-E4-1; Open Gap 3).
+@@ -2144,6 +2168,59 @@ describe("TC-COMP-139: selection and checking never interfere", () => {
+     expect(selectedSymbols()).toEqual(["MSFT"]);
+     expect(rowOf("MSFT").tabIndex).toBe(0);
+   });
++
++  /** Selects AAPL, tabs to MSFT's checkbox and presses ArrowUp, which targets the selected row. */
++  async function arrowOntoSelected(user: ReturnType<typeof userEvent.setup>): Promise<void> {
++    await user.click(screen.getByRole("rowheader", { name: "AAPL" }));
++    await user.tab();
++    await user.tab();
++    expect(document.activeElement).toBe(checkboxOf("MSFT"));
++    await user.keyboard("{ArrowUp}");
++  }
++
++  it("focuses the already-selected row when an arrow key from a neighbour's checkbox targets it", async () => {
++    const user = await renderRows();
++    await arrowOntoSelected(user);
++    expect(selectedSymbols()).toEqual(["AAPL"]);
++    expect(document.activeElement).toBe(rowOf("AAPL"));
++    expect(hostChecked()).toBe("");
++  });
++
++  it("keeps focus on a checkbox checked with Space after an arrow press onto the already-selected row", async () => {
++    const user = await renderRows();
++    await arrowOntoSelected(user);
++    checkboxOf("MSFT").focus();
++    await user.keyboard(" ");
++    expect(hostChecked()).toBe("MSFT");
++    expect(selectedSymbols()).toEqual(["AAPL"]);
++    expect(document.activeElement).toBe(checkboxOf("MSFT"));
++  });
++
++  it("leaves focus on a control outside the table across a query change after an arrow press onto the already-selected row", async () => {
++    const user = userEvent.setup();
++    listMock.mockResolvedValueOnce(list(THREE));
++    const { rerender } = render(<Host query={DEFAULT_RESEARCH_QUERY} />);
++    await screen.findByText("AAPL");
++    await arrowOntoSelected(user);
++    const outside = document.createElement("input");
++    outside.setAttribute("aria-label", "Host filter");
++    document.body.append(outside);
++    try {
++      outside.focus();
++      const pending = deferred<ClassificationList>();
++      listMock.mockReturnValueOnce(pending.promise);
++      rerender(<Host query={{ ...DEFAULT_RESEARCH_QUERY, hideIncomplete: true }} />);
++      expect(listMock).toHaveBeenCalledTimes(2);
++      expect(document.activeElement).toBe(outside);
++      await act(async () => {
++        pending.resolve(list(THREE));
++      });
++      expect(table()).not.toHaveAttribute("aria-busy", "true");
++      expect(document.activeElement).toBe(outside);
++    } finally {
++      outside.remove();
++    }
++  });
+ });
+ 
+ // T008, the remainder: extraColumns placement (Open Gap 1, DEC-0159 as amended by E4-F02).
+diff --git a/web/src/screens/research/results-table.tsx b/web/src/screens/research/results-table.tsx
+index 4a6c033..1cbd4eb 100644
+--- a/web/src/screens/research/results-table.tsx
++++ b/web/src/screens/research/results-table.tsx
+@@ -585,15 +585,23 @@ export function ResultsTable(props: ResultsTableProps): JSX.Element {
+     if (target === fromIndex) {
+       return;
+     }
+-    select(loaded.stocks[target].symbol);
+-    pendingFocus.current = loaded.stocks[target].symbol;
++    const symbol = loaded.stocks[target].symbol;
++    select(symbol);
+     const revealed = scrollTopToReveal(target, scrollTop);
+-    if (revealed !== scrollTop) {
+-      if (scrollRef.current !== null) {
+-        scrollRef.current.scrollTop = revealed;
+-      }
+-      setScrollTop(revealed);
++    if (revealed === scrollTop) {
++      // In the viewport, so already rendered: focus it now. A request here
++      // could outlive the press when the target is already selected, since
++      // nothing re-renders, and a later unrelated render would act on it.
++      pendingFocus.current = null;
++      scrollRef.current?.querySelector<HTMLTableRowElement>(`tr[data-symbol="${symbol}"]`)?.focus();
++      return;
++    }
++    // The scroll's own render brings the row into the window and consumes the request.
++    pendingFocus.current = symbol;
++    if (scrollRef.current !== null) {
++      scrollRef.current.scrollTop = revealed;
+     }
++    setScrollTop(revealed);
+   }
+ 
+   const renderedSymbols = showRows
