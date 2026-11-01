@@ -1,0 +1,162 @@
+# RED cycle-4 (T004, T005): four falsification runs on HEAD f4deee3 plus the cycle-1 to cycle-4 test files; each perturbs tests/integration/test_engine_transaction.py and is reverted after its run
+# engine_proof_support.py sha256 6c615099a2c0caa65adfa14ed559ac2d5ace632b67ad3fc50122c3c68a171586
+# tests/integration/test_engine_transaction.py (unperturbed) sha256 bc8422612bbf5150719cc5e926d7ec71ccf18496c288631879e9571050ad2853
+
+# run: T004: backfill_statement moved ahead of the set-1 build (T013's perturbation)
+# command: uv run pytest tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged -q -p no:cacheprovider
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_backfill_after_completion_leaves_the_set_unchanged ____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59403 user=test database=test_fac0721f10b349ae9da411909fb8de23) at 0x10ce6bf20>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ce68b60>
+
+    def test_backfill_after_completion_leaves_the_set_unchanged(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S7-2, DAC-E2-9, AC-19, DEC-0124: a backfilled statement recorded after a set
+        completes changes no row of that set, in any of its four tables or columns; the next set
+        sees it, known on the day it was observed and never earlier."""
+        pop = populate_backdating(conn, classification_date=PROOF_DATE)
+        backfill_statement(conn, pop)
+        install_test_line_items(monkeypatch)
+        set_1 = complete_and_open_next(conn, PROOF_DATE)
+        build_complete(conn, set_1)
+        before = snapshot_set(conn, set_1)
+    
+        # Preconditions: A lacks its oldest income statement, so its growth inputs are missing and
+        # the growth peer set is the other 30, exactly the floor.
+        first = inputs_for(conn, set_1, pop.a_id)
+        for name in GROWTH_INPUTS:
+>           assert first[name]["status"] == "missing"
+E           AssertionError: assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_transaction.py:709: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged
+1 failed in 2.37s
+
+# run: T004: one column of one set-1 row changed after the snapshot (the unchanged-set comparison can fail)
+# command: uv run pytest tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged -q -p no:cacheprovider
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_backfill_after_completion_leaves_the_set_unchanged ____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59442 user=test database=test_5ed779c859294c068c5d1ec49700c14c) at 0x10cefbe30>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cef89e0>
+
+    def test_backfill_after_completion_leaves_the_set_unchanged(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S7-2, DAC-E2-9, AC-19, DEC-0124: a backfilled statement recorded after a set
+        completes changes no row of that set, in any of its four tables or columns; the next set
+        sees it, known on the day it was observed and never earlier."""
+        pop = populate_backdating(conn, classification_date=PROOF_DATE)
+        install_test_line_items(monkeypatch)
+        set_1 = complete_and_open_next(conn, PROOF_DATE)
+        build_complete(conn, set_1)
+        before = snapshot_set(conn, set_1)
+    
+        # Preconditions: A lacks its oldest income statement, so its growth inputs are missing and
+        # the growth peer set is the other 30, exactly the floor.
+        first = inputs_for(conn, set_1, pop.a_id)
+        for name in GROWTH_INPUTS:
+            assert first[name]["status"] == "missing"
+            assert len(first[name]["detail"]["periods_found"]) == 7
+        growth = classification_row(conn, set_1, pop.a_id, "growth")
+        assert growth["status"] == "not_classified"
+        assert growth["reason_code"] == "input_missing"
+        assert factor_row(conn, set_1, "growth") == (30, True)
+    
+        backfilled_on = backfill_statement(conn, pop)
+        statement = backfilled_row(conn, pop)
+        ended_at = set_row(conn, set_1)["ended_at"]
+        conn.commit()
+        assert statement["observed_on"] == backfilled_on
+        assert statement["provider_filing_date"] < pop.first_observed_on  # backfilled, DEC-0056
+        assert statement["recorded_at"] > ended_at  # recorded after set 1 completed
+        conn.execute("UPDATE factor_classification SET restated_possible = NOT restated_possible "
+                     "WHERE set_id = %s AND instrument_id = %s AND factor = 'growth'", (set_1, pop.a_id))
+        conn.commit()
+>       assert snapshot_set(conn, set_1) == before
+E       AssertionError: assert {'classificat...), ...), ...]} == {'classificat...), ...), ...]}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'factor_classification': [(UUID('bf4a9c11-0c56-416b-b9d0-ba2fdc63740f'), 1, 'growth', 'classified', Decimal('0.807077...f4a9c11-0c56-416b-b9d0-ba2fdc63740f'), 2, 'value', 'classified', Decimal('1.365296'), Decimal('96.666667'), ...), ...]} != {'factor_classification': [(UUID('bf4a9c11-0c56-416b-b9d0-ba2fdc63740f'), 1, 'growth', 'classified', Decimal('0.807077...f4a9c11-0c56-416b-b9d0-ba2fdc63740f'), 2, 'value', 'classified', Decimal('1.365296'), Decimal('96.666667'), ...), ...]}
+E         Use -v to get more diff
+
+tests/integration/test_engine_transaction.py:725: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_backfill_after_completion_leaves_the_set_unchanged
+1 failed in 2.24s
+
+# run: T005 (a): revise_close moved ahead of the set-1 build
+# command: uv run pytest tests/integration/test_engine_transaction.py::test_revised_close_after_completion_leaves_the_set_unchanged -q -p no:cacheprovider
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_revised_close_after_completion_leaves_the_set_unchanged _________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59494 user=test database=test_79df90e8ddb64daf94fe295f1c5137e9) at 0x10d5f3c20>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d5f08c0>
+
+    def test_revised_close_after_completion_leaves_the_set_unchanged(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-9 ("a fundamental or price"), AC-19, DEC-0124: a close revised after a set
+        completes changes no row of that set; the next set prices market capitalisation from the
+        revision, known on the day it was observed (DEC-0055 (6), (7); DEC-0117 (1))."""
+        pop = populate_backdating(conn, classification_date=PROOF_DATE)
+        revise_close(conn, pop.other_id, PROOF_DATE, Decimal(42), PROOF_DATE + timedelta(days=1))
+        install_test_line_items(monkeypatch)
+        set_1 = complete_and_open_next(conn, PROOF_DATE)
+        build_complete(conn, set_1)
+        before = snapshot_set(conn, set_1)
+        first = inputs_for(conn, set_1, pop.other_id)["book_to_price"]
+        assert first["status"] == "present"
+>       assert first["known_on"] == PROOF_DATE
+E       assert datetime.date(2026, 11, 14) == datetime.date(2026, 11, 13)
+
+tests/integration/test_engine_transaction.py:763: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_revised_close_after_completion_leaves_the_set_unchanged
+1 failed in 2.18s
+
+# run: T005 (b): backfill_statement moved after the set-1 build
+# command: uv run pytest tests/integration/test_engine_transaction.py::test_backfill_before_the_build_is_seen_by_that_set -q -p no:cacheprovider
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_backfill_before_the_build_is_seen_by_that_set ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=59547 user=test database=test_f1326c7586854458b92435d38dfcc9d7) at 0x10b113ec0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b110c50>
+
+    def test_backfill_before_the_build_is_seen_by_that_set(
+        conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-19, DEC-0124: the control for TC-COMP-162. The same backfilled statement recorded
+        before set 1 builds, on the same date, gives A's growth inputs present in set 1: the
+        missing precondition there is the statement's absence, not an artefact of the fixture, so
+        the before-and-after comparison is able to fail. ``known_on`` is still the day the
+        statement was observed."""
+        pop = populate_backdating(conn, classification_date=PROOF_DATE)
+        install_test_line_items(monkeypatch)
+        set_1 = complete_and_open_next(conn, PROOF_DATE)
+        build_complete(conn, set_1)
+        backfilled_on = backfill_statement(conn, pop)
+    
+        inputs = inputs_for(conn, set_1, pop.a_id)
+        for name in GROWTH_INPUTS:
+>           assert inputs[name]["status"] == "present"
+E           AssertionError: assert 'missing' == 'present'
+E             
+E             - present
+E             + missing
+
+tests/integration/test_engine_transaction.py:795: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_transaction.py::test_backfill_before_the_build_is_seen_by_that_set
+1 failed in 2.20s

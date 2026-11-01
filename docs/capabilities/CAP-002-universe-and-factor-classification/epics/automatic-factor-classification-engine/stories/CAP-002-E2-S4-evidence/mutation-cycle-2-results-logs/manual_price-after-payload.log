@@ -1,0 +1,54 @@
+.....................................................................F
+=================================== FAILURES ===================================
+_ test_an_unusable_dividend_over_a_non_positive_prior_close_is_missing_for_the_close _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55703 user=test database=test_746a92aae8ed497f8664c2e29c91eda...c37d040>, stock=1, set_id=UUID('f1c93964-ea8c-4ad6-b355-9644b14849f1'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c37cef0>
+
+    def test_an_unusable_dividend_over_a_non_positive_prior_close_is_missing_for_the_close(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0241 (1), (2), DEC-0243: the prior session of any dividend in the window counts,
+        usable or not, and a non-positive close ranks before an unusable payload, so the inputs
+        name the close and the prices acquisition (review v1 IR-004)."""
+        record_acquisitions(env)
+        prior = date(2026, 7, 31)
+        add_close_series(env.conn, env.stock, STANDARD | {prior: 0})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "abc"})
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            row = rows[name]
+            assert row["status"] == "missing", name
+            assert row["value"] is None
+            assert row["as_of"] == E
+            assert row["known_on"] is None
+            detail = dict(row["detail"])
+            last = detail.pop("last_acquisition")
+            assert (last["data_type"], last["outcome"]) == ("prices", "not_found"), name
+            start = START[name]
+>           assert detail == {
+                "cause": "price_not_positive",
+                "window_months": WINDOW[name],
+                "E": bar(E, 120),
+                "S": bar(start, STANDARD[start]),
+                "dividends": [{"effective_on": "2026-08-03", "prior_session": bar(prior, 0)}],
+            }, name
+E           AssertionError: return_3m
+E           assert {'E': {'close...08-03'}], ...} == {'cause': 'pr...-06-17'}, ...}
+E             
+E             Omitting 3 identical items, use -vv to show
+E             Differing items:
+E             {'cause': 'corporate_action_payload_unusable'} != {'cause': 'price_not_positive'}
+E             Left contains 1 more item:
+E             {'actions': [{'action_type': 'dividend',
+E                           'effective_on': '2026-08-03',...
+E             
+E             ...Full output truncated (10 lines hidden), use '-vv' to show
+
+tests/integration/test_engine_inputs_momentum.py:1395: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_dividend_over_a_non_positive_prior_close_is_missing_for_the_close
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 69 passed in 12.25s

@@ -80,15 +80,28 @@ first_gap AS (
        AND fi.input_name = i.input_name
      WHERE coalesce(fi.status, 'missing') <> 'present'
      ORDER BY a.instrument_id, i.input_order
+),
+marks AS (
+    -- Each active stock's restatement mark: any of its inputs of this factor marked
+    -- (DEC-0119, DEC-0122). The factor guard, not the input rows, is what keeps momentum
+    -- unmarked (AC-23, DAC-E2-11).
+    SELECT fi.instrument_id, bool_or(fi.restated_possible) AS restated
+      FROM factor_input fi
+      JOIN active a USING (instrument_id)
+     WHERE fi.set_id = %(set_id)s::uuid
+       AND fi.factor = %(factor)s::text
+       AND %(factor)s::text IN ('value', 'growth')
+     GROUP BY fi.instrument_id
 )
 INSERT INTO factor_classification
        (set_id, instrument_id, factor, status, score, percentile,
         reason_code, reason_input, reason_detail, restated_possible)
--- restated_possible is the constant false in every row set: CAP-002-E2-S6 carries the
--- restatement mark onto the classification in this statement (DEC-0121).
+-- restated_possible is the stock's mark in the three active-stock row sets, false for a stock
+-- with no input row, and false for a retired stock, which has no input (DEC-0122).
 SELECT %(set_id)s::uuid, r.instrument_id, %(factor)s::text, 'classified',
-       r.score, r.percentile, NULL, NULL, NULL, false
-  FROM ranked_scores r, pf
+       r.score, r.percentile, NULL, NULL, NULL, coalesce(m.restated, false)
+  FROM ranked_scores r
+  LEFT JOIN marks m USING (instrument_id), pf
  WHERE pf.ranked
 UNION ALL
 SELECT %(set_id)s::uuid, g.instrument_id, %(factor)s::text, 'not_classified',
@@ -99,8 +112,9 @@ SELECT %(set_id)s::uuid, g.instrument_id, %(factor)s::text, 'not_classified',
                                           WHEN 'outdated' THEN 'outdated'
                                           WHEN 'not_computable' THEN 'not computable'
                                           END),
-       false
-  FROM first_gap g, pf
+       coalesce(m.restated, false)
+  FROM first_gap g
+  LEFT JOIN marks m USING (instrument_id), pf
  WHERE pf.ranked
 UNION ALL
 SELECT %(set_id)s::uuid, a.instrument_id, %(factor)s::text, 'not_classified',
@@ -108,8 +122,9 @@ SELECT %(set_id)s::uuid, a.instrument_id, %(factor)s::text, 'not_classified',
        'not_enough_stocks',
        NULL,
        concat(pf.qualified_count, ' of ', %(min_peer_set_size)s::int, ' stocks qualified'),
-       false
-  FROM active a, pf
+       coalesce(m.restated, false)
+  FROM active a
+  LEFT JOIN marks m USING (instrument_id), pf
  WHERE NOT pf.ranked
 UNION ALL
 SELECT %(set_id)s::uuid, gone.instrument_id, %(factor)s::text, 'not_classified',

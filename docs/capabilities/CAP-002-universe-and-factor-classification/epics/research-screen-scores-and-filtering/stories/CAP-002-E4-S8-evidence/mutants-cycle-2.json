@@ -1,0 +1,724 @@
+{
+ "schema": 1,
+ "repo_head": "f4deee3e319a7f7ef536df83d85d212b0fbf623f",
+ "range": "c82f516fe0e5c6b485611b1170685e16e8d9764f..61e0ce4b661010b77f71509e4bafea5f9093c576",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/dialog-frame.tsx:65:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "line": 65,
+   "original": "    const first = focusable[0];",
+   "mutated": "    const first = focusable[1];"
+  },
+  {
+   "id": "web/src/screens/research/dialog-frame.tsx:66:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "line": 66,
+   "original": "    const last = focusable[focusable.length - 1];",
+   "mutated": "    const last = focusable[focusable.length - 2];"
+  },
+  {
+   "id": "web/src/screens/research/dialog-frame.tsx:67:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "line": 67,
+   "original": "    if (first === undefined || last === undefined) {",
+   "mutated": "    if (first === undefined && last === undefined) {"
+  },
+  {
+   "id": "web/src/screens/research/dialog-frame.tsx:70:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "line": 70,
+   "original": "    if (event.shiftKey && document.activeElement === first) {",
+   "mutated": "    if (event.shiftKey || document.activeElement === first) {"
+  },
+  {
+   "id": "web/src/screens/research/dialog-frame.tsx:73:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "line": 73,
+   "original": "    } else if (!event.shiftKey && document.activeElement === last) {",
+   "mutated": "    } else if (!event.shiftKey || document.activeElement === last) {"
+  },
+  {
+   "id": "web/src/screens/research/dialog-frame.tsx:73:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "line": 73,
+   "original": "    } else if (!event.shiftKey && document.activeElement === last) {",
+   "mutated": "    } else if (event.shiftKey && document.activeElement === last) {"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:56:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 56,
+   "original": "  const blocked = matchCount === 0 || setId === null;",
+   "mutated": "  const blocked = matchCount === 0 && setId === null;"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:56:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 56,
+   "original": "  const blocked = matchCount === 0 || setId === null;",
+   "mutated": "  const blocked = matchCount === 1 || setId === null;"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:68:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 68,
+   "original": "          if (!blocked) {",
+   "mutated": "          if (blocked) {"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:110:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 110,
+   "original": "  const pendingRef = useRef(false);",
+   "mutated": "  const pendingRef = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:112:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 112,
+   "original": "  const mountedRef = useRef(false);",
+   "mutated": "  const mountedRef = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:116:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 116,
+   "original": "  const [conflict, setConflict] = useState(false);",
+   "mutated": "  const [conflict, setConflict] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:117:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 117,
+   "original": "  const [pending, setPending] = useState(false);",
+   "mutated": "  const [pending, setPending] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:120:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 120,
+   "original": "    mountedRef.current = true;",
+   "mutated": "    mountedRef.current = false;"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:122:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 122,
+   "original": "      mountedRef.current = false;",
+   "mutated": "      mountedRef.current = true;"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:128:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 128,
+   "original": "    ...(incompleteCount !== null && incompleteCount > 0",
+   "mutated": "    ...(incompleteCount !== null || incompleteCount > 0"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:128:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 128,
+   "original": "    ...(incompleteCount !== null && incompleteCount > 0",
+   "mutated": "    ...(incompleteCount !== null && incompleteCount >= 0"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:128:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 128,
+   "original": "    ...(incompleteCount !== null && incompleteCount > 0",
+   "mutated": "    ...(incompleteCount !== null && incompleteCount > 1"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:136:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 136,
+   "original": "    if (pendingRef.current || conflict) {",
+   "mutated": "    if (pendingRef.current && conflict) {"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:145:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 145,
+   "original": "    pendingRef.current = true;",
+   "mutated": "    pendingRef.current = false;"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:146:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 146,
+   "original": "    setPending(true);",
+   "mutated": "    setPending(false);"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:163:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 163,
+   "original": "      pendingRef.current = false;",
+   "mutated": "      pendingRef.current = true;"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:164:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 164,
+   "original": "      setPending(false);",
+   "mutated": "      setPending(true);"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:165:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 165,
+   "original": "      if (!(caught instanceof ClassificationApiError)) {",
+   "mutated": "      if ((caught instanceof ClassificationApiError)) {"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:172:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 172,
+   "original": "            operation: caught.operation,",
+   "mutated": "            operation: nil,"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:173:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 173,
+   "original": "            resource: caught.resource,",
+   "mutated": "            resource: nil,"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:174:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 174,
+   "original": "            code: caught.code,",
+   "mutated": "            code: nil,"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:192:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 192,
+   "original": "      descriptionId={lines.length > 0 ? descriptionId : undefined}",
+   "mutated": "      descriptionId={lines.length >= 0 ? descriptionId : undefined}"
+  },
+  {
+   "id": "web/src/screens/research/save-as-universe-dialog.tsx:192:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "line": 192,
+   "original": "      descriptionId={lines.length > 0 ? descriptionId : undefined}",
+   "mutated": "      descriptionId={lines.length > 1 ? descriptionId : undefined}"
+  },
+  {
+   "id": "manual:cycle-2:scope-ignored",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "  if (query.scope !== null) {\n",
+   "new": "  if (false) {\n"
+  },
+  {
+   "id": "manual:cycle-2:set-null-not-blocked",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "matchCount === 0 || setId === null",
+   "new": "matchCount === 0"
+  },
+  {
+   "id": "manual:cycle-2:blocked-opens",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "          if (!blocked) {\n            setOpened",
+   "new": "          if (true) {\n            setOpened"
+  },
+  {
+   "id": "manual:cycle-2:no-snapshot",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "<SaveDialog snapshot={opened}",
+   "new": "<SaveDialog snapshot={{ query, matchCount, setId: setId ?? \"\", incompleteCount }}"
+  },
+  {
+   "id": "manual:cycle-2:reason-before-button",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      <button\n        type=\"button\"\n        data-variant={blocked ? \"blocked\" : \"outline\"}",
+   "new": "      {blocked ? <span id={reasonId}>{RESULTS.nothingToSave}</span> : null}\n      <button\n        type=\"button\"\n        data-variant={blocked ? \"blocked\" : \"outline\"}"
+  },
+  {
+   "id": "manual:cycle-2:outline-as-default",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "\"blocked\" : \"outline\"",
+   "new": "\"blocked\" : \"default\""
+  },
+  {
+   "id": "manual:cycle-2:row-class-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "<div className=\"flex items-center gap-2\">",
+   "new": "<div>"
+  },
+  {
+   "id": "manual:cycle-2:including-on-zero",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "incompleteCount !== null && incompleteCount > 0",
+   "new": "incompleteCount !== null"
+  },
+  {
+   "id": "manual:cycle-2:lines-swapped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "    ...(incompleteCount !== null && incompleteCount > 0\n      ? [DIALOGS.includingIncomplete(matchCount, incompleteCount)]\n      : []),\n    ...(filterWords === \"\" ? [] : [filterWords]),",
+   "new": "    ...(filterWords === \"\" ? [] : [filterWords]),\n    ...(incompleteCount !== null && incompleteCount > 0\n      ? [DIALOGS.includingIncomplete(matchCount, incompleteCount)]\n      : []),"
+  },
+  {
+   "id": "manual:cycle-2:empty-filter-line-kept",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "...(filterWords === \"\" ? [] : [filterWords]),",
+   "new": "...[filterWords],"
+  },
+  {
+   "id": "manual:cycle-2:no-pending-guard",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "if (pendingRef.current || conflict) {",
+   "new": "if (conflict) {"
+  },
+  {
+   "id": "manual:cycle-2:no-conflict-guard",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "if (pendingRef.current || conflict) {",
+   "new": "if (pendingRef.current) {"
+  },
+  {
+   "id": "manual:cycle-2:untrimmed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "const trimmed = name.trim();",
+   "new": "const trimmed = name;"
+  },
+  {
+   "id": "manual:cycle-2:empty-sent",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "    if (trimmed === \"\") {\n      setFieldError(DIALOGS.enterName);\n      nameRef.current?.focus();\n      return;\n    }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:empty-no-focus",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      setFieldError(DIALOGS.enterName);\n      nameRef.current?.focus();\n",
+   "new": "      setFieldError(DIALOGS.enterName);\n"
+  },
+  {
+   "id": "manual:cycle-2:alert-not-cleared",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "    setAlert(null);\n    try {",
+   "new": "    try {"
+  },
+  {
+   "id": "manual:cycle-2:busy-not-set",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "    pendingRef.current = true;\n    setPending(true);\n",
+   "new": "    pendingRef.current = true;\n"
+  },
+  {
+   "id": "manual:cycle-2:header-count-notified",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "DIALOGS.saved(saved.memberCount, saved.name)",
+   "new": "DIALOGS.saved(matchCount, saved.name)"
+  },
+  {
+   "id": "manual:cycle-2:typed-name-notified",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "DIALOGS.saved(saved.memberCount, saved.name)",
+   "new": "DIALOGS.saved(saved.memberCount, trimmed)"
+  },
+  {
+   "id": "manual:cycle-2:no-link",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "        to: universePath(saved.universeId),\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:closes-reopened",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      if (mountedRef.current) {\n        onClose();\n      }",
+   "new": "      onClose();"
+  },
+  {
+   "id": "manual:cycle-2:no-notify-late",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      onNotify({\n        message",
+   "new": "      if (mountedRef.current) onNotify({\n        message"
+  },
+  {
+   "id": "manual:cycle-2:mounted-never-set",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "    mountedRef.current = true;\n    return () => {",
+   "new": "    return () => {"
+  },
+  {
+   "id": "manual:cycle-2:filter-rederived",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "filter: toThresholds(query), setId",
+   "new": "filter: { ...toThresholds(query), symbol: null }, setId"
+  },
+  {
+   "id": "manual:cycle-2:pending-not-released",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      pendingRef.current = false;\n      setPending(false);\n",
+   "new": "      setPending(false);\n"
+  },
+  {
+   "id": "manual:cycle-2:busy-not-released",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      pendingRef.current = false;\n      setPending(false);\n",
+   "new": "      pendingRef.current = false;\n"
+  },
+  {
+   "id": "manual:cycle-2:network-message-shown",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "        setAlert(\n          failureSentence({ operation: \"create-universe\", resource: \"universe\", code: null }),\n        );",
+   "new": "        setAlert(String(caught));"
+  },
+  {
+   "id": "manual:cycle-2:name-in-use-as-alert",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "} else if (caught.code === \"universe_name_in_use\") {",
+   "new": "} else if (caught.code === \"never\") {"
+  },
+  {
+   "id": "manual:cycle-2:name-in-use-no-name",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "            universeName: trimmed,\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:name-in-use-no-focus",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "          }),\n        );\n        nameRef.current?.focus();",
+   "new": "          }),\n        );"
+  },
+  {
+   "id": "manual:cycle-2:conflict-always",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "setConflict(caught.code === \"classification_set_changed\");",
+   "new": "setConflict(true);"
+  },
+  {
+   "id": "manual:cycle-2:field-error-not-cleared",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "            setName(event.target.value);\n            setFieldError(null);",
+   "new": "            setName(event.target.value);"
+  },
+  {
+   "id": "manual:cycle-2:invalid-not-set",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "aria-invalid={fieldError !== null ? \"true\" : undefined}",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:error-not-described",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "aria-describedby={fieldError !== null ? fieldErrorId : undefined}",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:maxlength-added",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "          type=\"text\"\n          value={name}",
+   "new": "          type=\"text\"\n          maxLength={100}\n          value={name}"
+  },
+  {
+   "id": "manual:cycle-2:review-does-nothing",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "              type=\"button\"\n              onClick={onClose}\n              className=\"rounded bg-foreground px-3 py-2 text-background\"\n            >\n              {DIALOGS.reviewNewResult}",
+   "new": "              type=\"button\"\n              className=\"rounded bg-foreground px-3 py-2 text-background\"\n            >\n              {DIALOGS.reviewNewResult}"
+  },
+  {
+   "id": "manual:cycle-2:save-aria-disabled-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "              aria-disabled={pending ? \"true\" : undefined}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:cancel-after-save",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "          <button\n            type=\"button\"\n            onClick={onClose}\n            className=\"rounded border border-border px-3 py-2 text-base\"\n          >\n            {DIALOGS.cancel}\n          </button>\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:description-unwired",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "      descriptionId={lines.length > 0 ? descriptionId : undefined}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:alert-role-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "<p role=\"alert\" className",
+   "new": "<p className"
+  },
+  {
+   "id": "manual:cycle-2:alert-class-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "          <p role=\"alert\" className=\"text-status-critical text-sm\">",
+   "new": "          <p role=\"alert\">"
+  },
+  {
+   "id": "manual:cycle-2:frame-no-escape",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      event.preventDefault();\n      onCancel();\n      return;",
+   "new": "      return;"
+  },
+  {
+   "id": "manual:cycle-2:frame-no-wrap-forward",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      event.preventDefault();\n      first.focus();",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-no-wrap-back",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      event.preventDefault();\n      last.focus();",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-no-initial-focus",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "    initialFocusRef.current?.focus();\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-no-restore",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      previouslyFocused?.focus?.();\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-no-busy",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      aria-busy={busy ? \"true\" : undefined}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-no-modal",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      aria-modal=\"true\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-no-label",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      aria-labelledby={titleId}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:frame-variant",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      data-variant=\"standard\"\n",
+   "new": "      data-variant=\"confirm\"\n"
+  },
+  {
+   "id": "manual:cycle-2:frame-classes",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "fixed inset-0 m-auto flex flex-col gap-3 rounded border border-border bg-background p-5",
+   "new": "flex flex-col gap-3 p-5"
+  },
+  {
+   "id": "manual:cycle-2:frame-title-class",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "<h2 id={titleId} className=\"text-lg\">",
+   "new": "<h2 id={titleId}>"
+  },
+  {
+   "id": "manual:cycle-2:frame-buttons-only",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "'a[href], button:not([disabled]), input:not([disabled])",
+   "new": "'a[href], button:not([disabled])"
+  },
+  {
+   "id": "manual:cycle-2:frame-not-open",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/dialog-frame.tsx",
+   "old": "      open\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:described-when-empty",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "descriptionId={lines.length > 0 ? descriptionId : undefined}",
+   "new": "descriptionId={descriptionId}"
+  },
+  {
+   "id": "manual:cycle-2:scope-keeps-open",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "    if (opened !== null) {\n      setOpened(null);\n    }\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-2:confirm-remounted",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/save-as-universe-dialog.tsx",
+   "old": "          {conflict ? (\n            <button\n",
+   "new": "          {conflict ? (\n            <button\n              key=\"review\"\n"
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+..............................................................F
+=================================== FAILURES ===================================
+___________________ test_a_positive_close_below_one_is_read ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53864 user=test database=test_575c19703b49432da86313af07ef01f...ac6a2a0>, stock=1, set_id=UUID('5c1cb966-4418-4c99-b86b-4a2317df0346'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b34d310>
+
+    def test_a_positive_close_below_one_is_read(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0241 (1): only a close of zero or less is unusable; a positive close below 1 on the
+        E bar, the S_k bar or a dividend's prior session is read as any other."""
+        prior = date(2026, 7, 31)
+        half = Decimal("0.5")
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: half, S6: half, S3: half, prior: half, E: Decimal("0.6"), L: Decimal("0.6")},
+        )
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "0.005"}
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+>           assert rows[name]["status"] == "present", name
+E           AssertionError: return_3m
+E           assert 'missing' == 'present'
+E             
+E             - present
+E             + missing
+
+tests/integration/test_engine_inputs_momentum.py:1166: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_positive_close_below_one_is_read
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 62 passed in 18.87s

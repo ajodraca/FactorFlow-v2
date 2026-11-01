@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/universes/service.py:182:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/universes/service.py",
+      "line": 182,
+      "original": "        if value == value.to_integral_value():",
+      "mutated": "        if value != value.to_integral_value():"
+    },
+    {
+      "id": "manual:integral-as-float",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            return int(value)\n        return float(value)",
+      "new": "            return float(value)\n        return float(value)"
+    },
+    {
+      "id": "manual:nonintegral-as-string",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            return int(value)\n        return float(value)",
+      "new": "            return int(value)\n        return str(value)"
+    },
+    {
+      "id": "manual:nonintegral-truncated",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            return int(value)\n        return float(value)",
+      "new": "            return int(value)\n        return int(value)"
+    },
+    {
+      "id": "manual:non-decimal-passthrough",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "    raise TypeError(f\"{type(value).__name__} is not JSON serialisable\")",
+      "new": "    return str(value)"
+    },
+    {
+      "id": "manual:dumps-no-default",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "json.dumps(obj, default=_json_default)",
+      "new": "json.dumps(obj, default=str)"
+    },
+    {
+      "id": "manual:alias-bounds",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "\"thresholds\": dict(thresholds.bounds),",
+      "new": "\"thresholds\": thresholds.bounds,"
+    },
+    {
+      "id": "manual:hide-false-dropped",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "\"hide_incomplete\": thresholds.hide_incomplete,",
+      "new": "\"hide_incomplete\": thresholds.hide_incomplete or None,"
+    },
+    {
+      "id": "manual:symbol-empty",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "\"symbol\": thresholds.symbol,",
+      "new": "\"symbol\": thresholds.symbol or \"\","
+    },
+    {
+      "id": "manual:set-id-raw",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "\"set_id\": str(set_id),",
+      "new": "\"set_id\": set_id.hex,"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+..............F
+=================================== FAILURES ===================================
+_ test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-string] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=58646 user=test database=test_af21bdea77c240b782ec185c3b612a0...90fe2d0>, stock=1, set_id=UUID('54283723-668c-4d8d-b27b-f238dbbb766e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1090ffef0>
+dividend = {'cash_amount': '1'}
+
+    @pytest.mark.parametrize(
+        "dividend", [{"cash_amount": "1"}, {"cash_amount": 1}], ids=["json-string", "json-number"]
+    )
+    def test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01(
+        env: Env, monkeypatch: pytest.MonkeyPatch, dividend: dict[str, Any]
+    ) -> None:
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, ex_date: 98, E: 99, L: 99},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, dividend)
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+>           assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01")))
+
+tests/integration/test_engine_inputs_momentum.py:480: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.1000000000'), expected = Decimal('0.111')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.1000000000'), Decimal('0.111'))
+E       assert Decimal('0.0110000000') <= Decimal('1E-8')
+E        +  where Decimal('0.0110000000') = abs((Decimal('0.1000000000') - Decimal('0.111')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-string]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 14 passed in 6.62s

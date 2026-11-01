@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+  "range": "341903f7042510924389ef1a9128216b35e70136..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/universes/service.py:293:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/universes/service.py",
+      "line": 293,
+      "original": "        if current is None or current.set_id != set_id:",
+      "mutated": "        if current is None or current.set_id == set_id:"
+    },
+    {
+      "id": "src/factorflow/universes/service.py:296:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/universes/service.py",
+      "line": 296,
+      "original": "        if not instrument_ids:",
+      "mutated": "        if instrument_ids:"
+    },
+    {
+      "id": "src/factorflow/universes/service.py:306:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/universes/service.py",
+      "line": 306,
+      "original": "        universe_id: UUID = row[0]",
+      "mutated": "        universe_id: UUID = row[1]"
+    },
+    {
+      "id": "src/factorflow/universes/service.py:314:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/universes/service.py",
+      "line": 314,
+      "original": "            _event_row(universe_id, \"member_added\", instrument_id=int(member[0]))",
+      "mutated": "            _event_row(universe_id, \"member_added\", instrument_id=int(member[1]))"
+    },
+    {
+      "id": "manual:currency-ignores-other-set",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "if current is None or current.set_id != set_id:",
+      "new": "if current is None:"
+    },
+    {
+      "id": "manual:current-id-dropped",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "raise ClassificationSetChanged(set_id, None if current is None else current.set_id)",
+      "new": "raise ClassificationSetChanged(set_id, None)"
+    },
+    {
+      "id": "manual:empty-check-dropped",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        if not instrument_ids:\n            raise EmptyUniverse(",
+      "new": "        if not instrument_ids and False:\n            raise EmptyUniverse("
+    },
+    {
+      "id": "manual:no-dedupe",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "{\"instrument_ids\": sorted(set(instrument_ids))}",
+      "new": "{\"instrument_ids\": instrument_ids}"
+    },
+    {
+      "id": "manual:id-order",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "WHERE instrument_id = ANY(%(instrument_ids)s) ORDER BY symbol\"",
+      "new": "WHERE instrument_id = ANY(%(instrument_ids)s) ORDER BY instrument_id\""
+    },
+    {
+      "id": "manual:date-today",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "_filter_provenance(set_id, current.classification_date, thresholds)",
+      "new": "_filter_provenance(set_id, date.today(), thresholds)"
+    },
+    {
+      "id": "manual:default-dumps",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "            dumps=_dump_json,\n",
+      "new": ""
+    },
+    {
+      "id": "manual:no-provenance",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "        created[\"filter_provenance\"] = Jsonb(",
+      "new": "        created[\"unused\"] = Jsonb("
+    },
+    {
+      "id": "manual:own-predicate",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/universes/service.py",
+      "old": "instrument_ids = evaluate_filter(conn, set_id, thresholds)",
+      "new": "instrument_ids = evaluate_filter(conn, set_id, Thresholds(bounds=dict(thresholds.bounds)))"
+    }
+  ]
+}

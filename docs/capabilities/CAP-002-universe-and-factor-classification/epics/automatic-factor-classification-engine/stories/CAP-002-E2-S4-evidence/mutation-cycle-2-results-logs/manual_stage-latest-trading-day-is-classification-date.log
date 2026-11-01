@@ -1,0 +1,38 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56960 user=test database=test_d1c9f82ca2264c0492ef1787f5e5da7...d2ff260>, stock=1, set_id=UUID('c4d2d4d9-e8d7-4e52-a5f8-13c6fcab465c'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d308470>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["value"] is None
+        assert rows["return_12m"]["as_of"] == E
+        # DEC-0242: a missing input has no known_on, although its E bar was read.
+        assert rows["return_12m"]["known_on"] is None
+        assert rows["return_12m"]["detail"] == {
+            "boundary": "S_12",
+            "on_or_before": str(S12),
+            "window_months": 12,
+            "E": bar(E, 120),
+        }
+        for name, expected in (("return_3m", ret(120, 100)), ("return_6m", ret(120, 80))):
+>           assert rows[name]["status"] == "present", name
+E           AssertionError: return_3m
+E           assert 'outdated' == 'present'
+E             
+E             - present
+E             + outdated
+
+tests/integration/test_engine_inputs_momentum.py:153: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.25s

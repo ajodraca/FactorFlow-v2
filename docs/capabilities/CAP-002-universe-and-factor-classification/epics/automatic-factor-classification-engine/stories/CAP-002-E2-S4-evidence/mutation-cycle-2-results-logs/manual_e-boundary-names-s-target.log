@@ -1,0 +1,39 @@
+.....F
+=================================== FAILURES ===================================
+___ test_a_stock_with_no_bar_on_or_before_e_has_every_momentum_input_missing ___
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=56522 user=test database=test_b0b09cf2bfda4535ad8d44136290cb2...cf8d730>, stock=1, set_id=UUID('e4dfc5cc-5f7a-4647-aad5-a66e55e1c7d7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf8ed50>
+
+    def test_a_stock_with_no_bar_on_or_before_e_has_every_momentum_input_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (3), DEC-0118 (4): no bar on or before E's target leaves every window
+        without an end; nothing is dated."""
+        add_close_series(env.conn, env.stock, {date(2026, 9, 20): 100, L: 110})
+    
+        rows = build(env, monkeypatch)
+    
+        assert set(rows) == set(MOMENTUM)
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "missing", name
+            assert rows[name]["value"] is None
+            assert rows[name]["as_of"] is None
+            assert rows[name]["known_on"] is None
+>           assert rows[name]["detail"] == {
+                "boundary": "E",
+                "on_or_before": str(E),
+                "window_months": WINDOW[name],
+            }
+E           AssertionError: assert {'boundary': ...ow_months': 3} == {'boundary': ...ow_months': 3}
+E             
+E             Omitting 2 identical items, use -vv to show
+E             Differing items:
+E             {'on_or_before': None} != {'on_or_before': '2026-09-17'}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:294: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_with_no_bar_on_or_before_e_has_every_momentum_input_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 5 passed in 3.00s

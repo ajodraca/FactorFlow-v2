@@ -1,0 +1,178 @@
+{
+ "schema": 1,
+ "repo_head": "f4deee3e319a7f7ef536df83d85d212b0fbf623f",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/notices.tsx:43:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/notices.tsx",
+   "line": 43,
+   "original": "  const nextId = useRef(0);",
+   "mutated": "  const nextId = useRef(1);"
+  },
+  {
+   "id": "web/src/screens/research/notices.tsx:46:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/notices.tsx",
+   "line": 46,
+   "original": "    nextId.current += 1;",
+   "mutated": "    nextId.current += 2;"
+  },
+  {
+   "id": "web/src/screens/research/notices.tsx:81:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/notices.tsx",
+   "line": 81,
+   "original": "      tabIndex={-1}",
+   "mutated": "      tabIndex={-2}"
+  },
+  {
+   "id": "manual:cycle-1:no-focus-return",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "              regionRef.current?.focus();\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:region-not-focusable",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "      tabIndex={-1}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:atomic-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "      aria-atomic=\"false\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:live-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "      aria-live=\"polite\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:newest-first",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "[...current, { ...notice, id }]",
+   "new": "[{ ...notice, id }, ...current]"
+  },
+  {
+   "id": "manual:cycle-1:constant-id",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "    nextId.current += 1;\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:dismiss-removes-all",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "current.filter((notice) => notice.id !== id)",
+   "new": "[]"
+  },
+  {
+   "id": "manual:cycle-1:no-link",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "          {notice.to === undefined ? (",
+   "new": "          {true ? ("
+  },
+  {
+   "id": "manual:cycle-1:variant-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "          data-variant=\"success\"\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:accent-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "border border-status-good bg-[hsl(var(--popover))]",
+   "new": "border border-border bg-[hsl(var(--popover))]"
+  },
+  {
+   "id": "manual:cycle-1:target-size-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "\"min-h-5 min-w-5 rounded",
+   "new": "\"rounded"
+  },
+  {
+   "id": "manual:cycle-1:dismiss-not-called",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "              onDismiss(notice.id);\n",
+   "new": ""
+  },
+  {
+   "id": "manual:cycle-1:dismiss-label-literal",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "            {NOTICES.dismiss}\n",
+   "new": "            Close\n"
+  },
+  {
+   "id": "manual:cycle-1:path-unencoded",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "${encodeURIComponent(universeId)}",
+   "new": "${universeId}"
+  },
+  {
+   "id": "manual:cycle-1:copy-dismiss-changed",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "old": "  dismiss: \"Dismiss\",\n",
+   "new": "  dismiss: \"Close\",\n"
+  },
+  {
+   "id": "manual:cycle-1:surface-background",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "bg-[hsl(var(--popover))]",
+   "new": "bg-background"
+  },
+  {
+   "id": "manual:cycle-1:radius-default",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "rounded-[var(--radius)]",
+   "new": "rounded"
+  },
+  {
+   "id": "manual:cycle-1:message-as-markup",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/notices.tsx",
+   "old": "            <span>{notice.message}</span>\n",
+   "new": "            <span dangerouslySetInnerHTML={{ __html: notice.message }} />\n"
+  }
+ ]
+}

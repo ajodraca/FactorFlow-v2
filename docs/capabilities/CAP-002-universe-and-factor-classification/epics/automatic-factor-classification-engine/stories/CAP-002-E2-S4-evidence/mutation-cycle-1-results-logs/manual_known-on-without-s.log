@@ -1,0 +1,56 @@
+..........................F
+=================================== FAILURES ===================================
+_ test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[S bar] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=58882 user=test database=test_19008a40dd624791a35a3a8dcbd333a...971e1b0>, stock=1, set_id=UUID('eaa2705a-e9a2-4942-987c-216202be53f5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109720080>
+latest = 'S bar'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        observed = {
+            "E bar": date(2026, 9, 18),
+            "S bar": date(2026, 6, 18),
+            "split": date(2026, 7, 2),
+            "dividend": date(2026, 8, 4),
+            "prior bar": date(2026, 8, 1),
+        }
+        observed[latest] = date(2026, 10, 5)
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, L: 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+        # Rows that feed no 3-month figure, each observed later than every row used.
+        add_bar_observed(env.conn, env.stock, date(2026, 8, 20), 52, date(2026, 10, 12))
+        add_bar_observed(env.conn, env.stock, date(2026, 9, 25), 57, date(2026, 10, 13))
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 9, 21), {"cash_amount": "1"}, date(2026, 10, 14)
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 5, 1),
+            {"split_from": "1", "split_to": "1"},
+            date(2026, 10, 15),
+        )
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_3m"]["status"] == "present"
+>       assert rows["return_3m"]["known_on"] == date(2026, 10, 5)
+E       assert datetime.date(2026, 9, 18) == datetime.date(2026, 10, 5)
+E        +  where datetime.date(2026, 10, 5) = date(2026, 10, 5)
+
+tests/integration/test_engine_inputs_momentum.py:732: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[S bar]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 26 passed in 9.24s

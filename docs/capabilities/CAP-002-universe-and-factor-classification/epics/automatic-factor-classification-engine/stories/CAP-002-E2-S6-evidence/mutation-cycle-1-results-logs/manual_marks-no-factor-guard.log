@@ -1,0 +1,50 @@
+.F
+=================================== FAILURES ===================================
+_________________ test_momentum_classification_is_never_marked _________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55695 user=test database=test_fe7aac9f5cee41c9b295a7a1c386acb7) at 0x10c919070>, set_id=UUID('8e99bc1a-d5f1-4e1c-9173-617e9a0ebfc7'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c919250>
+
+    def test_momentum_classification_is_never_marked(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store
+        stocks = {symbol: add_instrument(conn, symbol) for symbol in SYMBOLS}
+        for symbol, stock in stocks.items():
+            add_bar_for(conn, stock, L)
+            marked = symbol == "A"
+            add_marked_inputs(conn, set_id, stock, "value", restated=marked)
+            add_marked_inputs(conn, set_id, stock, "growth", restated=marked)
+            # A's momentum rows say true too, a state no momentum stage writes, so only the
+            # factor guard in classify.sql can keep its classification unmarked.
+            add_momentum_inputs(conn, set_id, stock, restated=marked)
+        # E is marked on value and growth and has no momentum row, so its momentum row is the
+        # not-classified one of a ranked factor.
+        e = add_instrument(conn, "E")
+        add_bar_for(conn, e, L)
+        add_marked_inputs(conn, set_id, e, "value", restated=True)
+        add_marked_inputs(conn, set_id, e, "growth", restated=True)
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", MIN_FLOOR)
+    
+        result = run_classification_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = classifications_for(conn, set_id)
+        a = stocks["A"]
+        for factor in ("value", "growth"):
+            assert (rows[(a, factor)]["status"], rows[(a, factor)]["restated_possible"]) == (
+                "classified",
+                True,
+            )
+        momentum = rows[(a, "momentum")]
+        assert momentum["status"] == "classified"
+        assert momentum["score"] is not None
+        assert momentum["percentile"] is not None
+>       assert momentum["restated_possible"] is False
+E       assert True is False
+
+tests/integration/test_engine_restatement.py:215: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_momentum_classification_is_never_marked
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 2.48s

@@ -1,0 +1,136 @@
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 2102a8d..e235d1d 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -76,6 +76,12 @@ export const UNIVERSE_LIFECYCLE = {
+   counts: (active: number, retired: number): string => `${active} active, ${retired} retired`,
+   /** UX 1.3: the lifecycle filter matches none. */
+   noRetired: "No retired universes.",
++  /**
++   * A universe's expanded row: when it was retired, `{timestamp}` through
++   * `formatTimestamp`. No design contains it (UX 1.3 gives the line no label;
++   * CAP-002-E1-S7, DEC-0256).
++   */
++  retiredAt: (timestamp: string): string => `Retired ${timestamp}`,
+   /** DEC-0149: the `retire-universe` operation. */
+   retireFailed: "Could not retire the universe",
+ } as const;
+@@ -536,16 +542,28 @@ export const UNIVERSES = {
+   create: "Create",
+   enterAtLeastOne: "Enter at least one stock.",
+   tooMany: "Up to 1000 stocks can be added in one request.",
+-  /** UX 1.3 Accessibility: the expander's name once open, as the delivered coverage table. */
++  /**
++   * The expander's name once open, the delivered coverage table's idiom. No
++   * design contains it: UX 1.3 Accessibility gives only *Show details for
++   * {name}* (CAP-002-E1-S7 T011).
++   */
+   hideDetailsFor: (name: string): string => `Hide details for ${name}`,
+-  /** The list's loading state, the delivered screens' idiom (CAP-002-E1-S7 T014). */
++  /**
++   * The list's loading state, the delivered screens' idiom. No design contains
++   * it: UX 1.3 States shows a skeleton, and CAP-002-E1-S7 T010(a) and T014
++   * direct this text.
++   */
+   loading: "Loading…",
+   /**
+    * The nothing-found state under *Active* when every universe is retired
+    * (DEC-0103, PROVISIONAL). No design contains it.
+    */
+   noActive: "No active universes.",
+-  /** The nothing-found reset control, the delivered screens' label (CAP-002-E1-S7; DEC-0254). */
++  /**
++   * The nothing-found reset control. No design contains the label: UX 1.3 asks
++   * for "a reset to Active", CAP-002-E1-S7 T008(b) names it **Reset**, and
++   * DEC-0254 keeps the delivered screens' *Reset filter*.
++   */
+   resetFilter: "Reset filter",
+   /** The words of `noUniversesYet` that link to `/research` (DEC-0254). */
+   researchLink: "Research",
+@@ -567,6 +585,12 @@ export const UNIVERSES = {
+   originSearch: (prefix: string): string => `search "${prefix}"`,
+   /** UX 1.3: the origin line's hidden-incomplete clause. */
+   originHidden: "stocks with an incomplete score hidden",
++  /**
++   * A universe's expanded row: when it was created, `{timestamp}` through
++   * `formatTimestamp`. No design contains it (UX 1.3 gives the line no label;
++   * CAP-002-E1-S7, DEC-0256).
++   */
++  createdAt: (timestamp: string): string => `Created ${timestamp}`,
+ } as const;
+ 
+ /** One universe's detail: header, members, history and the maintenance dialogs (UX 1.4). */
+diff --git a/web/src/screens/research/universes/create-dialog.test.tsx b/web/src/screens/research/universes/create-dialog.test.tsx
+index 67bb66c..ace3233 100644
+--- a/web/src/screens/research/universes/create-dialog.test.tsx
++++ b/web/src/screens/research/universes/create-dialog.test.tsx
+@@ -297,6 +297,16 @@ describe("CreateDialog: parsing, focus, field errors and in-flight state", () =>
+     expect(createUniverse).not.toHaveBeenCalled();
+   });
+ 
++  it("(a) a paste that replaces a selected range counts the text the paste leaves", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await user.type(stocksField(), "AAPL, MSFT, TSLA");
++    stocksField().setSelectionRange(6, 16);
++    await user.paste("NVDA");
++    expect(stocksField().value).toBe("AAPL, NVDA");
++    expect(screen.getByText("2 symbols recognised, 0 not recognised")).toBeInTheDocument();
++  });
++
+   it("(b) upper-cases one entry per line on blur, never while typing", async () => {
+     const user = userEvent.setup();
+     renderDialog();
+diff --git a/web/src/screens/research/universes/universe-table.tsx b/web/src/screens/research/universes/universe-table.tsx
+index cd2a255..eef88ca 100644
+--- a/web/src/screens/research/universes/universe-table.tsx
++++ b/web/src/screens/research/universes/universe-table.tsx
+@@ -16,6 +16,11 @@ export function universeDetailPath(universeId: string): string {
+   return `/research/universes/${encodeURIComponent(universeId)}`;
+ }
+ 
++/**
++ * The factors in origin-line order. Their `FactorName` identifiers are the
++ * owner-facing labels, as `copy.ts`'s `sentenceClause` prints them, so they
++ * have no keyed entry of their own (CAP-002-E1-S7 T011).
++ */
+ const FACTORS = ["value", "growth", "momentum"] as const;
+ 
+ const MEASURES = [
+@@ -316,9 +321,9 @@ function UniverseRow({
+         <tr id={detailId}>
+           <td colSpan={4}>
+             <div aria-live="polite" className="flex flex-col gap-1">
+-              <p>{`${UNIVERSES.columns.created} ${formatTimestamp(universe.createdAt)}`}</p>
++              <p>{UNIVERSES.createdAt(formatTimestamp(universe.createdAt))}</p>
+               {universe.retiredAt === null ? null : (
+-                <p>{`${UNIVERSE_LIFECYCLE.retiredLabel} ${formatTimestamp(universe.retiredAt)}`}</p>
++                <p>{UNIVERSE_LIFECYCLE.retiredAt(formatTimestamp(universe.retiredAt))}</p>
+               )}
+               <OriginLine
+                 origin={origin}
+diff --git a/web/src/screens/research/universes/universes.test.tsx b/web/src/screens/research/universes/universes.test.tsx
+index 9db20be..bc2cf8b 100644
+--- a/web/src/screens/research/universes/universes.test.tsx
++++ b/web/src/screens/research/universes/universes.test.tsx
+@@ -134,7 +134,9 @@ describe("TC-COMP-020: retired universes appear only under the lifecycle select"
+     expect(listUniverses).toHaveBeenNthCalledWith(1, { lifecycle: "active", limit: 500 });
+     expect(screen.queryByText("Old ideas")).not.toBeInTheDocument();
+     expect(screen.getByText("2 active, 1 retired")).toBeInTheDocument();
++    expect(screen.getByRole("heading", { level: 1, name: "Universes" })).toBeInTheDocument();
+     const select = screen.getByRole("combobox", { name: "Show: Active" });
++    expect(select).toHaveAttribute("data-variant", "inline");
+     expect(
+       within(select)
+         .getAllByRole("option")
+@@ -266,6 +268,10 @@ describe("TC-COMP-021: the origin line names each clause only when it applied",
+     expect(toggle).toHaveAccessibleName(`Hide details for ${name}`);
+ 
+     const line = await screen.findByText(expected);
++    // T012: the expander's aria-controls names the detail row it reveals.
++    const controlled = document.getElementById(toggle.getAttribute("aria-controls") ?? "");
++    expect(controlled?.tagName).toBe("TR");
++    expect(controlled).toContainElement(line);
+     expect(line.childNodes).toHaveLength(1);
+     expect(line.firstChild?.nodeType).toBe(Node.TEXT_NODE);
+     expect(line.textContent).not.toMatch(/−|bogus/);

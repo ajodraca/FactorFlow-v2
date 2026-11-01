@@ -1,0 +1,29 @@
+F
+=================================== FAILURES ===================================
+_ test_statement_filed_before_first_observation_marks_its_inputs_and_classifications _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55801 user=test database=test_e3f2963ab86f40b8b12a58e8a6343a2a) at 0x10b191dc0>, set_id=UUID('7697d0c4-e1ba-4fc9-99ae-41450d8878a0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b191040>
+
+    def test_statement_filed_before_first_observation_marks_its_inputs_and_classifications(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store
+        stocks = build_fixture(conn)
+    
+        result = run_two_stage_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = classifications_for(conn, set_id)
+        a = stocks["A"]
+        assert input_flags(conn, set_id, a) == expect(*FUNDAMENTAL_INPUTS)
+        for factor in ("value", "growth"):
+            assert rows[(a, factor)]["status"] == "classified"
+>           assert rows[(a, factor)]["restated_possible"] is True
+E           assert False is True
+
+tests/integration/test_engine_restatement.py:162: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_statement_filed_before_first_observation_marks_its_inputs_and_classifications
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.37s

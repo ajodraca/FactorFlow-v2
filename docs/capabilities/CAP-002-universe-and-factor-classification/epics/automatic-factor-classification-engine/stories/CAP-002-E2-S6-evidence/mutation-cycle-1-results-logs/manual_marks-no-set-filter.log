@@ -1,0 +1,50 @@
+...........F
+=================================== FAILURES ===================================
+___________________ test_the_mark_changes_no_score_or_reason ___________________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55737 user=test database=test_db2af7708b0a449e99188999c73370c5) at 0x10cb72990>, set_id=UUID('582b6794-c70a-49ee-8e67-a24f4fd32720'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb70050>
+
+    def test_the_mark_changes_no_score_or_reason(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
+        """AC-23, DEC-0056: the same population built with A's rows backfilled and again with
+        them re-observed with no filing date classifies identically; only the mark differs."""
+        conn, set_1 = store
+        stocks = build_fixture(conn)
+        assert run_two_stage_build(conn, set_1, monkeypatch).state == "complete"
+        a = stocks["A"]
+        for statement_type, quarter_index in sorted(all_rows()):
+            reobserve(conn, a, statement_type, quarter_index, None)
+        set_2 = add_building_set(conn, add_run(conn), D)
+    
+        assert run_two_stage_build(conn, set_2, monkeypatch).state == "complete"
+    
+        def classified(set_id: UUID) -> dict[tuple[int, str], tuple[object, ...]]:
+            return {
+                key: (
+                    row["status"],
+                    row["score"],
+                    row["percentile"],
+                    row["reason_code"],
+                    row["reason_input"],
+                    row["reason_detail"],
+                )
+                for key, row in classifications_for(conn, set_id).items()
+            }
+    
+        assert classified(set_2) == classified(set_1)
+        assert {key for key, flag in classification_flags(conn, set_1).items() if flag} == {
+            (a, "value"),
+            (a, "growth"),
+        }
+>       assert set(classification_flags(conn, set_2).values()) == {False}
+E       assert {False, True} == {False}
+E         
+E         Extra items in the left set:
+E         True
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:594: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_the_mark_changes_no_score_or_reason
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 11 passed in 4.72s

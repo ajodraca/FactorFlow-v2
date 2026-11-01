@@ -1,0 +1,41 @@
+.................F
+=================================== FAILURES ===================================
+______________ test_a_dividend_outside_the_window_is_not_applied _______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=64876 user=test database=test_1b9362bcd8d446ef85ef90c7952494f...a867860>, stock=1, set_id=UUID('b02caff8-c63d-4800-bb69-41b15262d8fa'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a869af0>
+
+    def test_a_dividend_outside_the_window_is_not_applied(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (4): the window is (S_k, E]: a dividend on S_3's session or after E is not
+        applied to return_3m; the one on S_3 lies inside the longer windows."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, date(2026, 6, 16): 100, S3: 90, E: 99, date(2026, 9, 19): 99, L: 99},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", S3, {"cash_amount": "5"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 9, 20), {"cash_amount": "5"})
+    
+        rows = build(env, monkeypatch)
+    
+        assert_close(rows["return_3m"]["value"], ret(99, 90))
+        assert rows["return_3m"]["detail"]["dividends"] == []
+        for name in ("return_6m", "return_12m"):
+>           assert_close(rows[name]["value"], ret(99, 90, Decimal("1.05")))
+
+tests/integration/test_engine_inputs_momentum.py:539: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = None, expected = Decimal('0.155')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+>       assert actual is not None
+E       assert None is not None
+
+tests/integration/test_engine_inputs_momentum.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_outside_the_window_is_not_applied
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 17 passed in 5.28s

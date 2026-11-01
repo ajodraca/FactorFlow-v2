@@ -1,0 +1,52 @@
+..F
+=================================== FAILURES ===================================
+___________ test_a_later_set_leaves_the_earlier_sets_mark_unchanged ____________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55766 user=test database=test_79002e4ee3ee4026b4a452c35540e229) at 0x10d776d20>, set_id=UUID('a9b93262-ef77-4c7c-8d9b-7d680ad3ae96'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d775e50>
+
+    def test_a_later_set_leaves_the_earlier_sets_mark_unchanged(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_1 = store
+        stocks = build_fixture(conn)
+        assert run_two_stage_build(conn, set_1, monkeypatch).state == "complete"
+        a = stocks["A"]
+        flags_1 = classification_flags(conn, set_1)
+        assert (flags_1[(a, "value")], flags_1[(a, "growth")]) == (True, True)
+        before, inputs_before = snapshot(conn, set_1), input_snapshot(conn, set_1)
+    
+        set_2 = add_building_set(conn, add_run(conn), D2)
+        for stock in stocks.values():
+            add_bar_for(conn, stock, L2)
+            for statement_type in STATEMENT_TYPES:
+                add_statement(
+                    conn,
+                    stock,
+                    P0,
+                    statement_type,
+                    statement_payload(stock, statement_type, -1),
+                    observed_on=P0_OBSERVED,
+                    provider_filing_date=P0_FILED,
+                )
+        result = run_two_stage_build(conn, set_2, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        assert snapshot(conn, set_1) == before
+        assert input_snapshot(conn, set_1) == inputs_before
+        flags_2 = classification_flags(conn, set_2)
+        assert set(flags_2) == set(flags_1)  # set 2 holds its own rows for the same keys
+        assert classification_flags(conn, set_1)[(a, "value")] is True
+        # Set 2's mark is what set 2's own inputs give, not a copy of set 1's.
+        for symbol, stock in stocks.items():
+            marks = input_flags(conn, set_2, stock)
+>           assert flags_2[(stock, "value")] is any(marks[name] for name in VALUE), symbol
+E           AssertionError: A
+E           assert False is True
+E            +  where True = any(<generator object test_a_later_set_leaves_the_earlier_sets_mark_unchanged.<locals>.<genexpr> at 0x10dfe2670>)
+
+tests/integration/test_engine_restatement.py:270: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_a_later_set_leaves_the_earlier_sets_mark_unchanged
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 2.95s

@@ -1,0 +1,91 @@
+...................................................F
+=================================== FAILURES ===================================
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-not-numeric] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54343 user=test database=test_e10b06d52fb44f0b9927947c36b4aa7...a952a80>, stock=1, set_id=UUID('9933d940-06d8-4d74-8653-44d132c8eafa'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a951910>
+action_type = 'split', payload = {'split_from': 'abc', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-100"}),
+            ("dividend", {"cash_amount": "abc"}),
+            ("dividend", {"cash_amount": "1e0"}),
+            ("dividend", {"cash_amount": "+1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-not-numeric",
+            "cash-exponent",
+            "cash-plus-sign",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it and not the usable dividend beside it, and never fails the
+        set; a sign-prefixed string is not a plain decimal. DEC-0242: a missing input has no
+        known_on. The 3-month window holds only the usable dividend and is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(
+            env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90, date(2026, 7, 31): 100}
+        )
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+        # A usable dividend in every window (review v1 IR-004).
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:1257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=54343 user=test database=test_e10b06d52fb44f0b9927947c36b4aa7...a952a80>, stock=1, set_id=UUID('9933d940-06d8-4d74-8653-44d132c8eafa'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a951910>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> dict[str, dict]:
+        result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: InvalidTextRepresentation: invalid input syntax for type numeric: "abc"
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_momentum.py:105: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:140 classification build failed: InvalidTextRepresentation: invalid input syntax for type numeric: "abc"
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mut2/work/mutation-run-73yuld4p/w2/src/factorflow/classification/engine.py", line 122, in build
+    stage(conn, context)
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mut2/work/mutation-run-73yuld4p/w2/src/factorflow/classification/engine.py", line 223, in _momentum_inputs_stage
+    cur.execute(
+  File "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-feactorflow-v2-cap-002-e2-pipeline-285094/eb76f199-0651-4c35-8624-8658d97e224e/scratchpad/mut2/work/mutation-run-73yuld4p/w2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.InvalidTextRepresentation: invalid input syntax for type numeric: "abc"
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-not-numeric]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 51 passed in 8.82s
