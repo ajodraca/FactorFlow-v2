@@ -1,0 +1,7 @@
+VERDICT: APPROVED
+Independent read-only code review of cycle-1.patch (subagent ac889724fd123c30d, no session history).
+No blocking or major findings. Checked: SQL safety (bound parameters only, orderings via bound arrays), read-only behaviour,
+the one-clause list_classifications.sql edit (DEC-0133), compare (T017), ListFilters re-check (T016), stock_evidence (T018),
+memberships SQL against design 2.6, tests mapped to TC-COMP-123/124/113/146/147 and T008-T012, additive reader_seed.py changes.
+Non-blocking notes: stock_evidence does not shape-check its symbol (bound, so safe; an invalid symbol raises InstrumentNotFound);
+a non-string symbol would raise AttributeError rather than ValueError (the API validates first).

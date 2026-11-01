@@ -17,7 +17,9 @@ WITH scope AS (
              ORDER BY r.recorded_at DESC, r.value_hash DESC
              LIMIT 1) ref ON true
      WHERE ((%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]))
-            OR (NOT %(scoped)s::boolean AND i.lifecycle = 'active'))
+            -- DEC-0133: a compare (symbols set) also reads a retired stock
+            OR (NOT %(scoped)s::boolean
+                AND (i.lifecycle = 'active' OR %(symbols)s::text[] IS NOT NULL)))
        AND (%(symbol_pattern)s::text IS NULL OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE '\')
        AND (%(symbols)s::text[] IS NULL OR i.symbol = ANY(%(symbols)s::text[]))
        AND EXISTS (SELECT 1 FROM factor_classification c

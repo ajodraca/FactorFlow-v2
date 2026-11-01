@@ -1,0 +1,27 @@
+Independent spec-drift verification, CAP-002-E3-S3 rework-2 (implementation review v2, IR-002). Fresh read-only subagent, no
+history; it ran no tests. Two rounds; the second re-checked the final rework-2.patch
+(sha256 c27e80a96a7a45948c6c966cefa08a60f6804217e3fabf73abec66ccad667e14), in which only the comment changed.
+
+Round 1: the change traces to IR-002 and T010/T018 and does not drift from the design, story or test spec.
+- What changed: one added assertion in test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently,
+  growth.reason_detail == "revenue_growth is input_outdated". No production file changed.
+- IR-002 remediation (review v2): asks for an assertion on the stored reason_detail of a not_classified input-reason cell, "for
+  example in the outdated-input test". The patch does exactly that, in the test the review named.
+- T010: the test is T010's "outdated input and reason_input on its cell shows both consistently" check; one more field on the
+  same cell, scope unchanged.
+- T018: _cell_from_row reads the seven columns, reason_detail among them, "by name and derives nothing". The assertion catches
+  manual:v2-cell-reason-detail-dropped and manual:v2-evidence-sql-cell-reason-detail-null.
+- Design 2.3: FactorCell.reason_detail: str | None is a defined field; no new interface.
+- Design 2.6 and section 7 row "Evidence rows and memberships": the evidence read returns the stock's three stored rows.
+- Test spec (classification-reader-tests.md, around line 428): every returned value "is a stored row; nothing is recomputed by the
+  reader (STD-UI-15)". The assertion is a pass-through check of that kind.
+- AC-17: the evidence page needs a cell's reason detail line.
+- The asserted value is what seed_scored_stock (reader_seed.py:303-305) stores; the test expects it returned unchanged.
+- Observation, not drift: factor-engine writes product-vocabulary wording (design 2.6); the assertion pins pass-through, not
+  wording.
+DRIFT: none
+
+Round 2 (final patch): only the comment changed, now "The cell's detail line as seed_scored_stock stored it; the reader derives
+nothing." It states T018's contract and the test spec's stored-row rule more precisely and claims nothing beyond them.
+Traceability as in round 1.
+DRIFT: none

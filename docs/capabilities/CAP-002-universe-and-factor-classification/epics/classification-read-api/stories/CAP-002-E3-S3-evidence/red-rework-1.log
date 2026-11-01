@@ -1,0 +1,114 @@
+# RED, CAP-002-E3-S3 rework-1 (commit 9acfe60, the rework of implementation review v1).
+# The rework changed tests and seed helpers only; the production files are those of 7e9ec3a. Its RED is review v1's
+# five non-equivalent survivors: each is applied to the production code and the story's two integration files run
+# (PostgreSQL 16 container), first with cycle-1's tests (7e9ec3a: every mutant survives), then with the rework's
+# tests (9acfe60: every mutant fails a test written for it). Runner: scripts/mutation-run.py run, scratch clones.
+$ uv run --all-extras --offline pytest -q -p no:cacheprovider -p no:randomly -rfE --tb=short tests/integration/test_reader_compare.py tests/integration/test_reader_evidence.py
+
+## cycle-1 tests (7e9ec3a): baselines exit [0, 0]
+### manual:evidence-input-order-removed -> SURVIVED (exit 0) | src/factorflow/classification/sql/stock_evidence.sql
+--- old: array_position(%(factor_order)s::text[], u.factor),\n          array_position(%(input_order)s::text[], u.input_name);
++++ new: array_position(%(factor_order)s::text[], u.factor);
+30 passed in 6.89s
+
+### manual:evidence-factor-order-removed -> SURVIVED (exit 0) | src/factorflow/classification/sql/stock_evidence.sql
+--- old:  ORDER BY u.row_kind_rank,\n          array_position(%(factor_order)s::text[], u.factor),\n
++++ new:  ORDER BY u.row_kind_rank,\n
+30 passed in 6.97s
+
+### manual:evidence-inputs-any-instrument -> SURVIVED (exit 0) | src/factorflow/classification/sql/stock_evidence.sql
+--- old:   FROM factor_input f\n  JOIN instrument_row i USING (instrument_id)
++++ new:   FROM factor_input f\n  JOIN instrument_row i ON true
+30 passed in 6.57s
+
+### manual:evidence-cells-any-instrument -> SURVIVED (exit 0) | src/factorflow/classification/sql/stock_evidence.sql
+--- old:   FROM factor_classification c\n  JOIN instrument_row i USING (instrument_id)
++++ new:   FROM factor_classification c\n  JOIN instrument_row i ON true
+30 passed in 6.59s
+
+### manual:compare-never-classified-later-dropped -> SURVIVED (exit 0) | src/factorflow/classification/reader.py
+--- old:     if page.never_classified:\n        return page\n
++++ new:     if page.never_classified:\n        return dataclasses.replace(page, later=None)\n
+30 passed in 5.51s
+
+## rework tests (9acfe60): baselines exit [0, 0]
+### manual:evidence-input-order-removed -> KILLED (exit 1) | src/factorflow/classification/sql/stock_evidence.sql
+--- old: array_position(%(factor_order)s::text[], u.factor),\n          array_position(%(input_order)s::text[], u.input_name);
++++ new: array_position(%(factor_order)s::text[], u.factor);
+=================================== FAILURES ===================================
+___ test_evidence_returns_every_input_with_dates_and_universes_in_name_order ___
+tests/integration/test_reader_evidence.py:141: in test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+    assert [(r.factor, r.input_name) for r in evidence.inputs] == DEFINITION_ORDER
+E   AssertionError: assert [('value', 'b...rn_12m'), ...] == [('value', 'b...urn_3m'), ...]
+E     
+E     At index 1 diff: ('value', 'fcf_yield') != ('value', 'earnings_yield')
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_evidence.py::test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+1 failed, 29 passed in 6.48s
+
+### manual:evidence-factor-order-removed -> KILLED (exit 1) | src/factorflow/classification/sql/stock_evidence.sql
+--- old:  ORDER BY u.row_kind_rank,\n          array_position(%(factor_order)s::text[], u.factor),\n
++++ new:  ORDER BY u.row_kind_rank,\n
+=================================== FAILURES ===================================
+___ test_evidence_returns_every_input_with_dates_and_universes_in_name_order ___
+tests/integration/test_reader_evidence.py:174: in test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+    assert list(evidence.factors) == list(FACTORS)
+E   AssertionError: assert ['momentum', ...wth', 'value'] == ['value', 'gr...', 'momentum']
+E     
+E     At index 0 diff: 'momentum' != 'value'
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_evidence.py::test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+1 failed, 29 passed in 6.48s
+
+### manual:evidence-inputs-any-instrument -> KILLED (exit 1) | src/factorflow/classification/sql/stock_evidence.sql
+--- old:   FROM factor_input f\n  JOIN instrument_row i USING (instrument_id)
++++ new:   FROM factor_input f\n  JOIN instrument_row i ON true
+=================================== FAILURES ===================================
+___ test_evidence_returns_every_input_with_dates_and_universes_in_name_order ___
+tests/integration/test_reader_evidence.py:141: in test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+    assert [(r.factor, r.input_name) for r in evidence.inputs] == DEFINITION_ORDER
+E   AssertionError: assert [('value', 'b..._yield'), ...] == [('value', 'b...urn_3m'), ...]
+E     
+E     At index 1 diff: ('value', 'book_to_price') != ('value', 'earnings_yield')
+E     Left contains 16 more items, first extra item: ('value', 'fcf_yield')
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_evidence.py::test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+1 failed, 29 passed in 6.77s
+
+### manual:evidence-cells-any-instrument -> KILLED (exit 1) | src/factorflow/classification/sql/stock_evidence.sql
+--- old:   FROM factor_classification c\n  JOIN instrument_row i USING (instrument_id)
++++ new:   FROM factor_classification c\n  JOIN instrument_row i ON true
+=================================== FAILURES ===================================
+___ test_evidence_returns_every_input_with_dates_and_universes_in_name_order ___
+tests/integration/test_reader_evidence.py:176: in test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+    assert evidence.factors[factor] == reader.FactorCell(
+E   AssertionError: assert FactorCell(st...ossible=False) == FactorCell(st...ossible=False)
+E     
+E     Omitting 5 identical items, use -vv to show
+E     Differing attributes:
+E     ['score', 'percentile']
+E     
+E     Drill down into differing attribute score:
+E       score: Decimal('0.900000') != Decimal('0.300000')...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_evidence.py::test_evidence_returns_every_input_with_dates_and_universes_in_name_order
+1 failed, 29 passed in 6.69s
+
+### manual:compare-never-classified-later-dropped -> KILLED (exit 1) | src/factorflow/classification/reader.py
+--- old:     if page.never_classified:\n        return page\n
++++ new:     if page.never_classified:\n        return dataclasses.replace(page, later=None)\n
+=================================== FAILURES ===================================
+________ test_compare_with_no_complete_set_is_the_never_classified_page ________
+tests/integration/test_reader_compare.py:273: in test_compare_with_no_complete_set_is_the_never_classified_page
+    assert page.later == reader.read_set_blocks(conn)[1]
+E   AssertionError: assert None == LaterSet(set_id=UUID('c10aeabb-8bda-46ad-bd6f-f7cc92e3f0e9'), state='building', run_id=UUID('2f09cbaf-e1be-4f41-a719-0...t=datetime.datetime(2026, 10, 14, 22, 30, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), ended_at=None, failure_reason=None)
+E    +  where None = ClassificationPage(set=None, never_classified=True, later=None, match_count=0, stocks=[], unknown_symbols=[], next_cursor=None).later
+=========================== short test summary info ============================
+FAILED tests/integration/test_reader_compare.py::test_compare_with_no_complete_set_is_the_never_classified_page
+1 failed, 29 passed in 5.46s
+

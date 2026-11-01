@@ -1,0 +1,268 @@
+# TDD evidence for CAP-002-E3-S3 - Compare, stock evidence and stock memberships reads.
+# One cycle: the plan writes every test first (Phase 2, T003-T012), then the scope clause, two statements, models and
+# three reads (Phase 3, T013-T018), so there is a single RED and a single GREEN. The driver commits once per stage:
+# commit_hash is stage.
+# Decisions: this stage recorded none. It applied the plan-time DEC-0127 (compare bound on ListFilters.symbols),
+# DEC-0130 (INPUT_LABELS from constants), DEC-0131 (PROVISIONAL: no row in the current set is reported, not invented),
+# DEC-0132 (symbol normalisation and shape), DEC-0133 (compare also reads a retired stock) and DEC-0134 (memberships
+# statement with a total order), as the plan records them.
+# Reviews: one independent code-review session and one independent spec-drift session (fresh subagents, read-only,
+# no history) judged cycle-1.patch, the staged diff the fingerprint hashes: APPROVED and drift_detected false.
+# Deviation recorded for the reviewer: stock_evidence.sql wraps its UNION ALL in a subquery because PostgreSQL refuses
+# expressions in a UNION's ORDER BY (the plan's T015 wrote them directly); the bound arrays and the ordering are as planned.
+# Validation not excluded: the postgres-marked tests ran against a real PostgreSQL container.
+# Rework cycles (added in the rework of implementation review v2): rework-1 records commit 9acfe60, the rework of review
+# v1, which was committed without a cycle (review v2 IR-001); it names that commit directly, since a `stage` cycle resolves
+# to the commit that adds it to this file. Its reviews and mutation run were made in this rework, against rework-1.patch.
+# 9acfe60 also rewrote cycle-1's manual:membership-order-id-dropped reason in place; that corrected reason is recorded in
+# rework-1, whose reviews judged it, and cycle-1 is left as committed. rework-2 is review v2 IR-002 (commit_hash: stage).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019, T020, T021, T022]
+    description: >
+      src/factorflow/classification/reader.py (compare, stock_evidence, _cell_from_row, _normalise_symbols, Membership,
+      InputRow, StockEvidence, InstrumentNotFound, the ListFilters.symbols size and shape check, EVIDENCE_SQL and
+      MEMBERSHIPS_SQL, INPUT_LABELS re-exported), sql/stock_evidence.sql, sql/stock_memberships.sql and the one-clause
+      scope edit of sql/list_classifications.sql. Tests: tests/integration/reader_seed.py (seed_inputs, rename_universe,
+      insert_input restated_possible and detail), tests/integration/test_reader_compare.py (TC-COMP-123, 124, 113 and
+      the shared-statement, no-set, normalisation, unscored and universe-independence cases),
+      tests/integration/test_reader_evidence.py (TC-COMP-146, 113, 147 and the current-set, restatement, label, name,
+      statement-count and membership cases), tests/unit/test_reader_filters.py (bound, shape, normalisation),
+      tests/unit/test_reader_input_labels.py and the T012 extension of test_reader_sql_read_only.py. The first mutation
+      run left 19 survivors; three tests were added for the frozen models, InstrumentNotFound.symbol, the latest reference
+      name and rows of another set, and the rerun left only the 13 equivalent survivors below.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/red-cycle-1.log
+    red_log_sha256: e2c3de5b66566fdbb4bbc993c8a5410da460ca789a1b16634077b14340cd1c2b
+    red_evidence: >
+      Observed with the test files written and no S3 production code (HEAD 85254d1): 52 failed, 60 passed. The failures
+      are the compare, evidence and membership tests and the new unit tests, on the missing reader names and SQL files;
+      the 60 that passed are the pre-existing reader tests and the unit tests that hold before and after.
+    green_evidence: >
+      The story's five test files: 112 passed, then 115 with the three tests added after the first mutation run. The full
+      suite: 2321 passed, 1 xfailed. ruff check, ruff format --check and mypy src clean.
+      The T020 greps return as the plan states.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/code-review-cycle-1.txt
+        sha256: 97f43e59180b80e2458bbd1499708876604963626012a3acbfe81f9e066e0136
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/spec-drift-cycle-1.txt
+        sha256: 9f629cf797e36352f806238bc1afe08f8f655820230081850b8466f36f49f376
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5e90be3251c087ebc58e19c9d8c84fe0ca0d7235a454e92294160ace88200684
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 5043688080155e270d31c83f667d899239a7c4ff906fb488cac77d4b2b5519be
+      generated: 61
+      killed: 48
+      survived: 13
+      stillborn: 0
+      timeout: 0
+      score: 0.787
+      survivors:
+        - id: src/factorflow/classification/reader.py:606:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:606:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/sql/list_classifications.sql:20:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_evidence.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_evidence.sql:5:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_evidence.sql:26:off-by-one:1
+          disposition: equivalent
+          reason: the row-kind rank only places the instrument row first; the reader partitions the cell and input rows by row_kind, so moving the cell rank to 2 changes no result
+        - id: src/factorflow/classification/sql/stock_evidence.sql:33:off-by-one:1
+          disposition: equivalent
+          reason: the row-kind rank only places the instrument row first; the reader partitions the cell and input rows by row_kind, so moving the input rank to 3 changes no result
+        - id: src/factorflow/classification/sql/stock_memberships.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:2:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:18:off-by-one:1
+          disposition: equivalent
+          reason: EXISTS ignores its subquery's select list, so SELECT 2 and SELECT 1 test the same rows
+        - id: manual:membership-order-id-dropped
+          disposition: equivalent
+          reason: the tiebreaker is unreachable in product data, since universe names are unique among active universes (DEC-0057, universe-service design section 3) and stock_memberships.sql leaves retired ones out, so no stored state can distinguish it; the order stays a guarantee of the statement
+  - id: rework-1
+    tasks: [T002, T006, T009, T011, T022]
+    description: >
+      Rework of CAP-002-E3-S3-implementation-review-v1.md (CHANGES-REQUIRED), committed as 9acfe60; tests and seed helpers
+      only, no production file. IR-001: TC-COMP-146 seeds two other stocks (AAAA, ZZZZ) with different cells and input
+      values in the same current set and compares AAPL's cells with its three stored rows. IR-002: seed_scored_stock and
+      seed_inputs gain a keyword-only reverse=False, and TC-COMP-146 stores AAPL's cells and inputs against definition
+      order. IR-003: the never-classified compare case holds a building first set and asserts the later block is not None
+      before comparing it. IR-004: the equal-names memberships test says in its docstring that it documents unreachable
+      data, and the manual:membership-order-id-dropped equivalence reason cites DEC-0057 and universe-service design
+      section 3 (recorded below; 9acfe60 also wrote it into cycle-1). Review v2 IR-001 found this commit named by no cycle;
+      this entry, its RED, GREEN, reviews and mutation run were produced in the rework of review v2.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/red-rework-1.log
+    red_log_sha256: e44d7233f34159ff633aa130554fd8c8747b248d13685d9e2f94ff9ae7b8a5d8
+    red_evidence: >
+      Review v1's five non-equivalent survivors (manual:evidence-inputs-any-instrument, evidence-cells-any-instrument,
+      evidence-input-order-removed, evidence-factor-order-removed, compare-never-classified-later-dropped), each applied to
+      the unchanged production code in scratch clones with the two integration files run against PostgreSQL 16: with
+      cycle-1's tests (7e9ec3a) all five survive (30 passed each); with the rework's tests (9acfe60) all five fail, each
+      in the test written for it (test_reader_evidence.py:141, :174, :176; test_reader_compare.py:273). The code was
+      correct and the tests were missing, so the RED is the survivors, not a failing build.
+    green_evidence: >
+      The five focused files at 9acfe60 in a clean clone: 115 passed (green-rework-1.log, the mutation run's baseline;
+      all four workers exited 0). Review v2 reran the full suite at 9acfe60: 2321 passed, 1 xfailed; ruff, format and
+      mypy clean. Code review APPROVED with NON-BLOCKING notes only (tie-order dependence of two kills, docstring and
+      reason wording, the in-place cycle-1 edit to be listed here); spec drift none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/green-rework-1.log
+        sha256: b8571c4906beb39d925bc4193dd6cc18fcbccf19c329bf84ec36f01d034b4ac7
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/code-review-rework-1.txt
+        sha256: de5ac2514b72189ba7750e7e7dcafbddfd81b860a17bf1d44759e00905ec7c23
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/spec-drift-rework-1.txt
+        sha256: 030685edc0a4d954a3fa1c7f9351e8bd6f0da4a908838e40842defac014d82b0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 797a3a2bbc2d30e8409679a488317d845665da444150195eba5c1d979898c21a
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/rework-1.patch
+    commit_hash: 9acfe60473c013790e205f342aede7da5807e9f6
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/mutation-rework-1-results.json
+      results_sha256: b110744490f8ab2d2c03420268534d3f7fcae7f43a2238bd86830daa10a57e90
+      generated: 72
+      killed: 58
+      survived: 14
+      stillborn: 0
+      timeout: 0
+      score: 0.806
+      survivors:
+        - id: src/factorflow/classification/reader.py:606:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:606:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/sql/list_classifications.sql:20:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_evidence.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_evidence.sql:5:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_evidence.sql:26:off-by-one:1
+          disposition: equivalent
+          reason: the row-kind rank only places the instrument row first; the reader partitions the cell and input rows by row_kind, so moving the cell rank to 2 changes no result
+        - id: src/factorflow/classification/sql/stock_evidence.sql:33:off-by-one:1
+          disposition: equivalent
+          reason: the row-kind rank only places the instrument row first; the reader partitions the cell and input rows by row_kind, so moving the input rank to 3 changes no result
+        - id: src/factorflow/classification/sql/stock_memberships.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:2:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_memberships.sql:18:off-by-one:1
+          disposition: equivalent
+          reason: EXISTS ignores its subquery's select list, so SELECT 2 and SELECT 1 test the same rows
+        - id: manual:membership-order-id-dropped
+          disposition: equivalent
+          reason: >
+            The tiebreaker is unreachable in product data: universe names are unique among active universes (DEC-0057,
+            universe-service design section 3, enforced by the service at write time) and stock_memberships.sql leaves
+            retired ones out, so no state the product can write gives two returned memberships the same name; the order
+            stays a guarantee of the statement. This is the reason review v1 IR-004 asked for, recorded in this cycle,
+            whose reviews judged it.
+        - id: manual:compare-default-limit
+          disposition: equivalent
+          reason: >
+            As review v1 judged: ListFilters caps symbols at 6 distinct entries and idx_instrument_symbol is unique, so at
+            most 6 rows match under either limit and the page and next_cursor are identical.
+  - id: rework-2
+    tasks: [T010, T022]
+    description: >
+      Review v2 IR-002 (MEDIUM): test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently also asserts the
+      growth cell's stored reason_detail ("revenue_growth is input_outdated", as seed_scored_stock stores it), so a cell
+      whose detail is lost in _cell_from_row or in stock_evidence.sql's cell branch fails. One assertion and its comment;
+      no production change. The code review's first round asked for the comment to say the reader, not the seed, derives
+      nothing; it was reworded, re-fingerprinted, re-mutated and re-reviewed. Its other note, that the seed's detail
+      string can be rebuilt from reason_input and reason_code, is recorded and not taken: the engine's real format
+      differs, and pinning it would need a seed option IR-002 does not ask for.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/red-rework-2.log
+    red_log_sha256: 18de093f2a84d1b2e9ff8afae278f9e4248215c9025e747ffb154089a64c3523
+    red_evidence: >
+      Review v2's two survivors (manual:v2-cell-reason-detail-dropped, manual:v2-evidence-sql-cell-reason-detail-null),
+      each applied in scratch clones with test_reader_evidence.py run against PostgreSQL 16: with the tests as reviewed
+      (0231839) both survive (19 passed); with rework-2.patch applied both fail the new assertion at
+      test_reader_evidence.py:325 (None == 'revenue_growth is input_outdated'). The production code was correct and the
+      assertion was missing, so the RED is the survivors.
+    green_evidence: >
+      The five focused files with the patch staged: 115 passed (green-rework-2.log). Full suite: 2321 passed, 1 xfailed, the
+      postgres-marked tests included; ruff check, ruff format --check and mypy src clean (full-suite-rework-2.log). Code review APPROVED (both rounds, NON-BLOCKING notes only); spec
+      drift none (both rounds).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/green-rework-2.log
+        sha256: bf2f83766ac85e960ca1df8aee206cabfa02845dadea6ccf000e1638d87af7af
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/full-suite-rework-2.log
+        sha256: b427742a50860c7c2d1cab678fc0a58de8e0921d9ad59d177c2fef78e2088218
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/code-review-rework-2.txt
+        sha256: 282f659fb5c65f93604b1acf984958907abec7ecb82e9ee791f269b29beefda6
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/spec-drift-rework-2.txt
+        sha256: 7c2ee26b34d4532fca3aa49df659be202122476326874e546ab7c136ebb7da48
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c27e80a96a7a45948c6c966cefa08a60f6804217e3fabf73abec66ccad667e14
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/rework-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S3-evidence/mutation-rework-2-results.json
+      results_sha256: 4c80d6d15d37b0ab3f06ef2adaed05677921e05f3bc54b2daca3584a8045920b
+      generated: 7
+      killed: 5
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.714
+      survivors:
+        - id: manual:v2-evidence-instrument-check-dropped
+          disposition: equivalent
+          reason: >
+            As review v2 judged: the cell and input branches of stock_evidence.sql both join instrument_row and the
+            rank-0 instrument row sorts first, so a non-empty result always starts with it and dropping the row_kind
+            check leaves only T018's "zero rows raises InstrumentNotFound".
+        - id: manual:v2-evidence-name-hash-tiebreak-asc
+          disposition: equivalent
+          reason: >
+            Equivalent against the contract, an unspecified tie-break: DEC-0245 makes the name that of the most recent
+            instrument_reference row, and value_hash only makes LIMIT 1 deterministic among rows recorded at the same
+            instant, which the decision leaves open; review v2 and the CAP-002-E3-S2 reviews judged the identical mutant
+            the same way.

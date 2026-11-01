@@ -2,8 +2,8 @@
 
 Proves the model half of DAC-E3-S2-7 and DAC-E3-2 (TC-COMP-122): an empty ``Thresholds``
 constrains nothing, and ``Thresholds`` and ``ListFilters`` refuse every value the reader
-design section 4 bounds (SEC-INP-001). ``ListFilters.symbols`` is not size-checked here
-(DEC-0127; CAP-002-E3-S3).
+design section 4 bounds (SEC-INP-001). ``ListFilters.symbols`` is size- and shape-checked by
+CAP-002-E3-S3 (DEC-0127, DEC-0132): DAC-E3-S3-1, TC-COMP-123.
 """
 
 import dataclasses
@@ -169,3 +169,61 @@ def test_list_models_are_frozen(instance: object) -> None:
     field = dataclasses.fields(instance)[0].name  # type: ignore[arg-type]
     with pytest.raises(dataclasses.FrozenInstanceError):
         setattr(instance, field, None)
+
+
+# --- CAP-002-E3-S3: the compare bound, symbol shape and normalisation -------------------------
+
+
+@pytest.mark.parametrize("symbols", [["AAA"], ["A", "B", "C", "D", "E", "F", "G"], []])
+def test_symbols_outside_two_to_six_are_refused(symbols: list[str]) -> None:
+    """DAC-E3-S3-1: fewer than 2 or more than 6 raises before any SQL (DEC-0127)."""
+    with pytest.raises(ValueError):
+        reader.ListFilters(symbols=symbols)
+
+
+@pytest.mark.parametrize("symbols", [["AAA", "BBB"], ["A", "B", "C", "D", "E", "F"], None])
+def test_symbols_two_to_six_or_none_are_accepted(symbols: list[str] | None) -> None:
+    assert reader.ListFilters(symbols=symbols).symbols == symbols
+
+
+@pytest.mark.parametrize(
+    "symbols",
+    [["AAA", "A%"], ["AAA", "a"], ["AAA", "1A"], ["AAA", "A B"], ["AAA", 7], ["AAA", "A" * 17]],
+)
+def test_each_symbol_must_match_the_instrument_symbol_shape(symbols: list[object]) -> None:
+    """Reader design section 4 (SEC-INP-001); DEC-0132: checked as stored, never rewritten."""
+    with pytest.raises(ValueError):
+        reader.ListFilters(symbols=symbols)  # type: ignore[arg-type]
+
+
+def test_the_compare_bound_has_one_definition() -> None:
+    from factorflow.api import classification_bounds
+
+    assert reader.MIN_COMPARE_SYMBOLS is classification_bounds.MIN_COMPARE_SYMBOLS
+    assert reader.MAX_COMPARE_SYMBOLS is classification_bounds.MAX_COMPARE_SYMBOLS
+
+
+class _NoStatementConnection:
+    """A connection that fails the test if the reader touches it."""
+
+    def cursor(self) -> object:
+        raise AssertionError("the reader ran a statement")
+
+    def execute(self, *args: object, **kwargs: object) -> object:
+        raise AssertionError("the reader ran a statement")
+
+
+@pytest.mark.parametrize(
+    "symbols",
+    [["A"], ["A"] * 7, ["aapl", "AAPL"], [], [1, 2], ["AAA", "a b"], ["AAA", "1A"]],
+)
+def test_compare_refuses_a_bad_request_before_any_statement(symbols: list[object]) -> None:
+    with pytest.raises(ValueError):
+        reader.compare(_NoStatementConnection(), symbols)  # type: ignore[arg-type]
+
+
+def test_normalise_symbols_upper_cases_and_deduplicates_in_first_seen_order() -> None:
+    assert reader._normalise_symbols(["b", "a", "B"]) == ["B", "A"]
+    assert reader._normalise_symbols(["AAA", "BBB"]) == ["AAA", "BBB"]
+    with pytest.raises(ValueError):
+        reader._normalise_symbols(["A", 1])  # type: ignore[list-item]

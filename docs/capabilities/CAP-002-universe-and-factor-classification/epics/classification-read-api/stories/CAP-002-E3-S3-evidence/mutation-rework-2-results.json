@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "command": "uv run --all-extras --offline pytest -x -q -p no:cacheprovider -p no:randomly tests/unit/test_reader_filters.py tests/unit/test_reader_input_labels.py tests/unit/test_reader_sql_read_only.py tests/integration/test_reader_compare.py tests/integration/test_reader_evidence.py",
+  "repo_head": "0231839d3578fab94da7bb2596d37d2d9e1252dd",
+  "tree_patch_sha256": "c27e80a96a7a45948c6c966cefa08a60f6804217e3fabf73abec66ccad667e14",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mutants-rework-2.json",
+  "mutants_sha256": "5e513fe308b6f8c28ec0b9430e5912e64300ba6dfeeb2153b808a3dcdb6079ee",
+  "jobs": 2,
+  "started": "2026-11-01T21:28:29Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 8.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/baseline-w1.log",
+      "log_sha256": "fab8d03ed8873866eea0ca14372530b1ba6e3f2e46db4a305411532730f3192d"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 8.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/baseline-w0.log",
+      "log_sha256": "363eb5cb2fdac4aba6979d5dc9654b5319dc5132bbb54604300a1e558d980649"
+    }
+  ],
+  "mutants": [
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-cell-reason-detail-dropped",
+      "operator": "manual",
+      "old": "        reason_detail=row[\"reason_detail\"],\n",
+      "new": "        reason_detail=None,\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 6.0,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-cell-reason-detail-dropped.log",
+      "log_sha256": "5ed9c7d0d189f7c021a3bc0d77ab74737112a4f9bf4637069633621215cdf27e"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/sql/stock_evidence.sql",
+      "id": "manual:v2-evidence-sql-cell-reason-detail-null",
+      "operator": "manual",
+      "old": "c.percentile, c.reason_code, c.reason_input, c.reason_detail, NULL, NULL, NULL,",
+      "new": "c.percentile, c.reason_code, c.reason_input, NULL, NULL, NULL, NULL,",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 6.0,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-evidence-sql-cell-reason-detail-null.log",
+      "log_sha256": "6bf384d5f42de12fd394846e7a31650875beda1075429ae1269ea7486d5adad0"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-cell-reason-input-dropped",
+      "operator": "manual",
+      "old": "        reason_input=row[\"reason_input\"],\n",
+      "new": "        reason_input=None,\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.7,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-cell-reason-input-dropped.log",
+      "log_sha256": "66e18bc4b2c01020f2242e0450bcc77e656e71c0210e7f953a4c0e7ee546de59"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-compare-unknown-from-raw-request",
+      "operator": "manual",
+      "old": "unknown_symbols=[symbol for symbol in normalised if symbol not in found]",
+      "new": "unknown_symbols=[symbol for symbol in symbols if symbol not in found]",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 4.4,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-compare-unknown-from-raw-request.log",
+      "log_sha256": "f13c2ca4c3e096916f899feeb3990438ae1fce7f1fb9034326b09db7bf82fd74"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-filters-isinstance-dropped",
+      "operator": "manual",
+      "old": "if not isinstance(symbol, str) or not is_valid(symbol):",
+      "new": "if not is_valid(symbol):",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.2,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-filters-isinstance-dropped.log",
+      "log_sha256": "30ac478a048fcccac8359dcfc434de3dfa2ce16b59597eb94234858354698935"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-evidence-instrument-check-dropped",
+      "operator": "manual",
+      "old": "if not rows or rows[0][\"row_kind\"] != \"instrument\":",
+      "new": "if not rows:",
+      "state": "survived",
+      "exit_code": 0,
+      "seconds": 7.4,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-evidence-instrument-check-dropped.log",
+      "log_sha256": "5f843e6d0daf35efb193d0c1615c3048a361526e0a3e411b4220d6b61918f962"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/sql/stock_evidence.sql",
+      "id": "manual:v2-evidence-name-hash-tiebreak-asc",
+      "operator": "manual",
+      "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
+      "new": "ORDER BY r.recorded_at DESC, r.value_hash ASC",
+      "state": "survived",
+      "exit_code": 0,
+      "seconds": 7.3,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cap-002-e3-s3-missing-branch-0798a2/fb79659f-f14a-4332-81e5-41a10c9b73eb/scratchpad/mut-rework-2-logs/manual_v2-evidence-name-hash-tiebreak-asc.log",
+      "log_sha256": "d389cf28fc83262ceef4284ec5f02b5576ef238f79fa0be1a8e26c79b296a261"
+    }
+  ],
+  "finished": "2026-11-01T21:28:57Z"
+}

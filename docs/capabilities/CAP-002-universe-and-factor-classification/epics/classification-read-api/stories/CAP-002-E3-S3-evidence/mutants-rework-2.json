@@ -1,0 +1,60 @@
+{
+  "mutants": [
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-cell-reason-detail-dropped",
+      "operator": "manual",
+      "old": "        reason_detail=row[\"reason_detail\"],\n",
+      "new": "        reason_detail=None,\n"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/sql/stock_evidence.sql",
+      "id": "manual:v2-evidence-sql-cell-reason-detail-null",
+      "operator": "manual",
+      "old": "c.percentile, c.reason_code, c.reason_input, c.reason_detail, NULL, NULL, NULL,",
+      "new": "c.percentile, c.reason_code, c.reason_input, NULL, NULL, NULL, NULL,"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-cell-reason-input-dropped",
+      "operator": "manual",
+      "old": "        reason_input=row[\"reason_input\"],\n",
+      "new": "        reason_input=None,\n"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-compare-unknown-from-raw-request",
+      "operator": "manual",
+      "old": "unknown_symbols=[symbol for symbol in normalised if symbol not in found]",
+      "new": "unknown_symbols=[symbol for symbol in symbols if symbol not in found]"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-filters-isinstance-dropped",
+      "operator": "manual",
+      "old": "if not isinstance(symbol, str) or not is_valid(symbol):",
+      "new": "if not is_valid(symbol):"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/reader.py",
+      "id": "manual:v2-evidence-instrument-check-dropped",
+      "operator": "manual",
+      "old": "if not rows or rows[0][\"row_kind\"] != \"instrument\":",
+      "new": "if not rows:"
+    },
+    {
+      "cycle": "rework-2",
+      "file": "src/factorflow/classification/sql/stock_evidence.sql",
+      "id": "manual:v2-evidence-name-hash-tiebreak-asc",
+      "operator": "manual",
+      "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
+      "new": "ORDER BY r.recorded_at DESC, r.value_hash ASC"
+    }
+  ]
+}

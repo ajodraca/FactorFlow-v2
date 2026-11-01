@@ -1,0 +1,39 @@
+Independent code review, CAP-002-E3-S3 rework-2 (implementation review v2, IR-002). Fresh read-only subagent, no history; it
+read the code and logs and ran no tests. Two rounds: the first judged a patch whose comment read "as seed_scored_stock wrote it;
+nothing derives it"; its note 2 was taken, the patch re-fingerprinted, RED and mutation re-run, and the same reviewer re-judged
+the final rework-2.patch (sha256 c27e80a96a7a45948c6c966cefa08a60f6804217e3fabf73abec66ccad667e14).
+
+=== Round 1 (superseded patch; assertion identical) ===
+BLOCKING: none.
+NON-BLOCKING:
+1. test_reader_evidence.py:325: the test cannot tell a stored detail from one the reader builds itself. seed_scored_stock
+   (reader_seed.py:303-305) stores f"{reason_input} is {reason_code}", the text you get by joining two other columns of the row.
+   A reader change to reason_detail=f"{row['reason_input']} is {row['reason_code']}" would still pass, breaking T018's "derives
+   nothing" unnoticed. Unlikely in practice: the engine's real format (classify.sql:111-115) is the label plus a status word, so a
+   realistic derivation would fail. Optional fix: store a value no derivation could produce.
+2. test_reader_evidence.py:324: "nothing derives it" is slightly off; the seed helper builds the string. Suggested: "as
+   seed_scored_stock stored it; the reader derives nothing".
+3. Survivors: manual:v2-evidence-instrument-check-dropped is truly equivalent (both other branches JOIN instrument_row; rank 0
+   sorts first). manual:v2-evidence-name-hash-tiebreak-asc is not strictly equivalent, only unspecified: instrument_reference is
+   unique on (instrument_id, value_hash) only, so two rows sharing recorded_at return different names under ASC and DESC; DEC-0245
+   does not settle the tie and the E3-S2 reviews dismissed the identical mutant. Acceptable; describe it as an unspecified
+   tie-break not observable against the spec. Outside rework-2's scope.
+Confirmed: right reason (RED log: both IR-002 mutants survive at 0231839, both fail at :325 with None == 'revenue_growth is
+input_outdated'); the patch is the staged diff, 2 lines, no production change; honest expected value (a literal written by a
+direct INSERT, passed through by _cell_from_row and stock_evidence.sql:27; before this change it was None on both sides, so not a
+tautology); smallest fix, exactly IR-002's suggested remediation inside T010's test; no coding-rule violation.
+VERDICT: APPROVED
+
+=== Round 2 (final patch c27e80a9...) ===
+Checked: rework-2.patch sha256 equals git diff --cached; 2 lines in tests/integration/test_reader_evidence.py, no production
+change. Only the comment changed (:324), now accurate; resolves note 2. Assertion (:325) unchanged. red-rework-2.log: at 0231839
+both IR-002 mutants SURVIVED (19 passed); with tree_patch_sha256 c27e80a9..., baselines exit 0, both KILLED at :325.
+mutation-rework-2-results.json: repo_head 0231839, tree_patch_sha256 c27e80a9...; 5 killed, 2 survived
+(manual:v2-evidence-instrument-check-dropped, manual:v2-evidence-name-hash-tiebreak-asc).
+BLOCKING: none.
+NON-BLOCKING:
+1. Carried over, not taken: the seed string is derivable from the row's other two columns. Low risk; recording it as a note is
+   acceptable.
+2. instrument-check-dropped is genuinely equivalent. name-hash-tiebreak-asc is acceptable as an unspecified tie-break (DEC-0245
+   leaves it open), consistent with the E3-S2 disposition; record it that way.
+VERDICT: APPROVED

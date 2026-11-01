@@ -1,0 +1,533 @@
+{
+ "schema": 1,
+ "repo_head": "85254d12f58d74865c59c95d9a21e986d6c79713",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/reader.py:350:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 350,
+   "original": "        if self.symbols is not None:",
+   "mutated": "        if self.symbols is None:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:351:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 351,
+   "original": "            if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:",
+   "mutated": "            if MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:351:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 351,
+   "original": "            if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:",
+   "mutated": "            if not MIN_COMPARE_SYMBOLS < len(self.symbols) <= MAX_COMPARE_SYMBOLS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:351:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 351,
+   "original": "            if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:",
+   "mutated": "            if not MIN_COMPARE_SYMBOLS <= len(self.symbols) < MAX_COMPARE_SYMBOLS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:356:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 356,
+   "original": "                if not isinstance(symbol, str) or not is_valid(symbol):",
+   "mutated": "                if isinstance(symbol, str) or not is_valid(symbol):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:356:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 356,
+   "original": "                if not isinstance(symbol, str) or not is_valid(symbol):",
+   "mutated": "                if not isinstance(symbol, str) or is_valid(symbol):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:379:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 379,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:385:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 385,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:398:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 398,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:414:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 414,
+   "original": "        self.symbol = symbol",
+   "mutated": "        pass"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:421:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 421,
+   "original": "        if not isinstance(symbol, str):",
+   "mutated": "        if isinstance(symbol, str):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:424:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 424,
+   "original": "        if upper not in normalised:",
+   "mutated": "        if upper in normalised:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:585:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 585,
+   "original": "        page, unknown_symbols=[symbol for symbol in normalised if symbol not in found]",
+   "mutated": "        page, unknown_symbols=[symbol for symbol in normalised if symbol in found]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:599:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 599,
+   "original": "        \"set_id\": current.set_id if current is not None else None,",
+   "mutated": "        \"set_id\": current.set_id if current is None else None,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:606:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 606,
+   "original": "        rows = [dict(zip(names, row, strict=True)) for row in cur.fetchall()]",
+   "mutated": "        rows = [dict(zip(names, row)) for row in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:606:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 606,
+   "original": "        rows = [dict(zip(names, row, strict=True)) for row in cur.fetchall()]",
+   "mutated": "        rows = [dict(zip(names, row, strict=False)) for row in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:607:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 607,
+   "original": "    if not rows or rows[0][\"row_kind\"] != \"instrument\":",
+   "mutated": "    if not rows or rows[0][\"row_kind\"] == \"instrument\":"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:607:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 607,
+   "original": "    if not rows or rows[0][\"row_kind\"] != \"instrument\":",
+   "mutated": "    if rows or rows[0][\"row_kind\"] != \"instrument\":"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:607:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 607,
+   "original": "    if not rows or rows[0][\"row_kind\"] != \"instrument\":",
+   "mutated": "    if not rows or rows[1][\"row_kind\"] != \"instrument\":"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:609:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 609,
+   "original": "    stock = rows[0]",
+   "mutated": "    stock = rows[1]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:610:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 610,
+   "original": "    factors = {str(r[\"factor\"]): _cell_from_row(r) for r in rows if r[\"row_kind\"] == \"cell\"}",
+   "mutated": "    factors = {str(r[\"factor\"]): _cell_from_row(r) for r in rows if r[\"row_kind\"] != \"cell\"}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:624:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 624,
+   "original": "        if r[\"row_kind\"] == \"input\"",
+   "mutated": "        if r[\"row_kind\"] != \"input\""
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:640:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 640,
+   "original": "        return [Membership(universe_id=row[0], name=str(row[1])) for row in cur.fetchall()]",
+   "mutated": "        return [Membership(universe_id=row[1], name=str(row[1])) for row in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:640:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 640,
+   "original": "        return [Membership(universe_id=row[0], name=str(row[1])) for row in cur.fetchall()]",
+   "mutated": "        return [Membership(universe_id=row[0], name=str(row[2])) for row in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:20:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 20,
+   "original": "            -- DEC-0133: a compare (symbols set) also reads a retired stock",
+   "mutated": "            -- DEC-134: a compare (symbols set) also reads a retired stock"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_evidence.sql:5:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "line": 5,
+   "original": "-- arrays (SEC-INP-002). Every value is a stored row; nothing is recomputed (STD-UI-15).",
+   "mutated": "-- arrays (SEC-INP-3). Every value is a stored row; nothing is recomputed (STD-UI-15)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_evidence.sql:5:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "line": 5,
+   "original": "-- arrays (SEC-INP-002). Every value is a stored row; nothing is recomputed (STD-UI-15).",
+   "mutated": "-- arrays (SEC-INP-002). Every value is a stored row; nothing is recomputed (STD-UI-16)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_evidence.sql:12:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "line": 12,
+   "original": "             LIMIT 1) AS name",
+   "mutated": "             LIMIT 2) AS name"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_evidence.sql:18:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "line": 18,
+   "original": "SELECT 0 AS row_kind_rank, 'instrument'::text AS row_kind, i.instrument_id, i.symbol, i.name,",
+   "mutated": "SELECT 1 AS row_kind_rank, 'instrument'::text AS row_kind, i.instrument_id, i.symbol, i.name,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_evidence.sql:26:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "line": 26,
+   "original": "SELECT 1, 'cell', c.instrument_id, NULL, NULL, NULL, c.factor, NULL, c.status, c.score,",
+   "mutated": "SELECT 2, 'cell', c.instrument_id, NULL, NULL, NULL, c.factor, NULL, c.status, c.score,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_evidence.sql:33:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "line": 33,
+   "original": "SELECT 2, 'input', f.instrument_id, NULL, NULL, NULL, f.factor, f.input_name, f.status, NULL,",
+   "mutated": "SELECT 3, 'input', f.instrument_id, NULL, NULL, NULL, f.factor, f.input_name, f.status, NULL,"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:2:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 2,
+   "original": "-- section 2.6 (DEC-0071, DEC-0079). The latest member event per universe decides membership",
+   "mutated": "-- section 2.6 (DEC-72, DEC-0079). The latest member event per universe decides membership"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:2:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 2,
+   "original": "-- section 2.6 (DEC-0071, DEC-0079). The latest member event per universe decides membership",
+   "mutated": "-- section 2.6 (DEC-0071, DEC-80). The latest member event per universe decides membership"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:3:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 3,
+   "original": "-- (DEC-0057), the latest created or renamed event names it, and a retired universe is left out.",
+   "mutated": "-- (DEC-58), the latest created or renamed event names it, and a retired universe is left out."
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:4:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 4,
+   "original": "-- The order is total: name, then universe_id (DEC-0134).",
+   "mutated": "-- The order is total: name, then universe_id (DEC-135)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:16:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 16,
+   "original": "                  AND event_type IN ('created', 'renamed') ORDER BY event_id DESC LIMIT 1) n ON true",
+   "mutated": "                  AND event_type IN ('created', 'renamed') ORDER BY event_id DESC LIMIT 1) n ON false"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:16:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 16,
+   "original": "                  AND event_type IN ('created', 'renamed') ORDER BY event_id DESC LIMIT 1) n ON true",
+   "mutated": "                  AND event_type IN ('created', 'renamed') ORDER BY event_id DESC LIMIT 2) n ON true"
+  },
+  {
+   "id": "src/factorflow/classification/sql/stock_memberships.sql:18:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "line": 18,
+   "original": "   AND NOT EXISTS (SELECT 1 FROM universe_event r",
+   "mutated": "   AND NOT EXISTS (SELECT 2 FROM universe_event r"
+  },
+  {
+   "id": "manual:compare-scope-always-active",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(i.lifecycle = 'active' OR %(symbols)s::text[] IS NOT NULL)",
+   "new": "(i.lifecycle = 'active')"
+  },
+  {
+   "id": "manual:compare-scope-always-all",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(i.lifecycle = 'active' OR %(symbols)s::text[] IS NOT NULL)",
+   "new": "(true)"
+  },
+  {
+   "id": "manual:membership-order-id-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "old": "ORDER BY n.name, u.universe_id",
+   "new": "ORDER BY n.name"
+  },
+  {
+   "id": "manual:membership-retired-kept",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "old": "AND NOT EXISTS (SELECT 1 FROM universe_event r",
+   "new": "AND NOT NOT EXISTS (SELECT 1 FROM universe_event r"
+  },
+  {
+   "id": "manual:membership-removed-kept",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "old": "WHERE m.event_type = 'member_added'",
+   "new": "WHERE m.event_type IN ('member_added', 'member_removed')"
+  },
+  {
+   "id": "manual:membership-earliest-event",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_memberships.sql",
+   "old": "ORDER BY e.universe_id, e.event_id DESC",
+   "new": "ORDER BY e.universe_id, e.event_id ASC"
+  },
+  {
+   "id": "manual:evidence-input-order-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "old": "array_position(%(input_order)s::text[], u.input_name)",
+   "new": "u.input_name"
+  },
+  {
+   "id": "manual:evidence-factor-order-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "old": "array_position(%(factor_order)s::text[], u.factor),",
+   "new": "u.factor,"
+  },
+  {
+   "id": "manual:evidence-other-set",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "old": "WHERE f.set_id = %(set_id)s::uuid",
+   "new": "WHERE f.set_id IS NOT NULL"
+  },
+  {
+   "id": "manual:evidence-cells-other-set",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_evidence.sql",
+   "old": "WHERE c.set_id = %(set_id)s::uuid",
+   "new": "WHERE c.set_id IS NOT NULL"
+  },
+  {
+   "id": "manual:normalise-no-dedupe",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "        if upper not in normalised:\n            normalised.append(upper)",
+   "new": "        normalised.append(upper)"
+  },
+  {
+   "id": "manual:normalise-no-upper",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "        upper = symbol.upper()\n        if upper not in",
+   "new": "        upper = symbol\n        if upper not in"
+  },
+  {
+   "id": "manual:evidence-no-upper",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    upper = symbol.upper()\n    current, _later",
+   "new": "    upper = symbol\n    current, _later"
+  },
+  {
+   "id": "manual:compare-unknown-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "unknown_symbols=[symbol for symbol in normalised if symbol not in found]",
+   "new": "unknown_symbols=[]"
+  },
+  {
+   "id": "manual:compare-limit",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "limit=MAX_COMPARE_SYMBOLS))",
+   "new": "limit=MAX_COMPARE_SYMBOLS - 1))"
+  },
+  {
+   "id": "manual:label-is-key",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "label=INPUT_LABELS[str(r[\"input_name\"])],",
+   "new": "label=str(r[\"input_name\"]),"
+  },
+  {
+   "id": "manual:detail-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "            detail=r[\"detail\"],",
+   "new": "            detail={},"
+  },
+  {
+   "id": "manual:restated-input-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "            restated_possible=bool(r[\"restated_possible\"]),\n            detail",
+   "new": "            restated_possible=False,\n            detail"
+  },
+  {
+   "id": "manual:cell-restated-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "        restated_possible=bool(row[\"restated_possible\"]),\n    )\n\n\ndef evaluate_filter",
+   "new": "        restated_possible=False,\n    )\n\n\ndef evaluate_filter"
+  },
+  {
+   "id": "manual:set-block-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "    return StockEvidence(\n        set=current,",
+   "new": "    return StockEvidence(\n        set=None,"
+  },
+  {
+   "id": "manual:shape-check-skipped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if not isinstance(symbol, str) or not is_valid(symbol):",
+   "new": "if not isinstance(symbol, str):"
+  },
+  {
+   "id": "manual:count-bound-min",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:",
+   "new": "if not 1 <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:"
+  },
+  {
+   "id": "manual:count-bound-max",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:",
+   "new": "if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS + 1:"
+  }
+ ]
+}

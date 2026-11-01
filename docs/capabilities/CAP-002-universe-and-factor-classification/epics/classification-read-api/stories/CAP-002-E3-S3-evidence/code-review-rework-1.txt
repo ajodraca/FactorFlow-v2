@@ -1,0 +1,65 @@
+Independent code review, CAP-002-E3-S3 rework-1 (commit 9acfe60; rework-1.patch, sha256 797a3a2bbc2d30e8409679a488317d845665da444150195eba5c1d979898c21a,
+plus the cycle-1 survivor-reason line the same commit changed). Fresh read-only subagent, no history; it read the code and logs
+and ran no tests.
+
+No blocking defects. All four v1 findings are resolved by assertions that can fail, the seed-helper change leaves every existing
+caller's behaviour as it was, and all 14 survivors are genuinely equivalent.
+
+How each v1 finding is resolved
+- IR-001: TC-COMP-146 now seeds two more stocks, AAAA and ZZZZ, in the same current set, after AAPL (test_reader_evidence.py:103-135).
+  Their cells (0.9/90) and input values (book_to_price 9.9, return_3m 7.7) differ from AAPL's (0.3/30, 0.1234567890, -0.25).
+  - Leaking other stocks' inputs is caught every time: the list grows to 24 rows (:141).
+  - Leaking other stocks' cells is caught by the new len(stored) == len(FACTORS) guard (:173) and the per-factor FactorCell
+    equality on scores (:176).
+  - Returning a different single stock's rows would also fail, because the values are distinct.
+- IR-002: AAPL's cells and inputs are now inserted in reverse order (reverse=True, :117, :126), so the ordering assertions at :141
+  and :174 depend on the statement's ORDER BY. The table's primary key (set_id, instrument_id, factor, input_name) makes the
+  correct statement's order total for one stock, so the test is deterministic against the real code.
+- IR-003: The test now seeds a building first set and checks read_set_blocks(conn)[1] is not None before comparing
+  (test_reader_compare.py:261-263). The later assertion at :273 therefore compares a real value, not None with None. The RED log
+  shows the mutant failing on exactly this line.
+- IR-004: The equal-names test now has a docstring saying it documents data the product cannot produce
+  (test_reader_evidence.py:426-427). This is the option v1 offered, and the disposition reason was corrected.
+
+Seed helpers (tests/integration/reader_seed.py:276, 290-291, 334, 345-346)
+- reverse comes after *, so it is keyword-only, and it defaults to False. With False, cells and pairs iterate in the same order as
+  before, so rows are stored in the same order and no existing test changes. zip(strict=True) now runs eagerly, but the lengths
+  are always 3 and 3.
+- Only the two new TC-COMP-146 calls pass reverse=True.
+- It matches T002's rule of "optional keyword parameters only, change no existing signature". All lines are within the
+  100-character limit, and I found no coding-rule violation.
+
+The 14 survivors. Each is equivalent:
+- reader.py:606, both mutants: names and row come from the same cursor, so their lengths always match.
+- Seven mutated digits sit inside -- comments (list_classifications.sql:20, stock_evidence.sql:5 twice, stock_memberships.sql:2
+  twice, :3, :4).
+- stock_evidence.sql:26 (cell rank 1->2): cells and inputs then share a rank, but the reader splits rows by row_kind. A cell's
+  NULL input_name sorts last, so the order within each kind is unchanged.
+- stock_evidence.sql:33 (input rank 2->3): inputs still sort after cells.
+- stock_memberships.sql:18: EXISTS ignores its select list.
+- manual:compare-default-limit: at most 6 distinct symbols and a unique symbol index mean at most 6 rows, which is below both the
+  default limit of 50 and 6. The page and next_cursor come out the same.
+- manual:membership-order-id-dropped: see the reason line below.
+
+The cycle-1 reason line (CAP-002-E3-S3-tdd-evidence.yaml:101) is accurate:
+- DEC-0057 decision (2) says names are unique among active universes, compared exactly after trimming. It is applied and the owner
+  upheld it.
+- Universe-service design section 3 ("Constraints and Assumptions") states the same rule at line 445.
+- stock_memberships.sql drops retired universes and uses each universe's latest name.
+- No migration declares a collation, so the default deterministic one applies and distinct names never tie.
+
+NON-BLOCKING
+1. Two mutant kills depend on PostgreSQL tie order (test_reader_evidence.py:100-135). Dropping the input-order or factor-order key,
+   or the cells-from-any-stock mutant, leaves rows tied in the sort, and the result order for ties is not guaranteed. Because the
+   reader keeps the last cell per factor in a dict, this can't be fully avoided. The RED log shows ties kept the order rows were
+   stored in, and inserting AAPL first is what makes the leak visible. The tests are deterministic against the correct code, so
+   this affects only how firmly those mutants are killed.
+2. The docstring overstates (test_reader_evidence.py:426). "Cannot fail without the tiebreaker" should read "is not guaranteed to
+   fail". Without the tiebreaker the result is simply unspecified.
+3. The YAML reason overstates slightly (tdd-evidence.yaml:101). "No stored state can distinguish it" is too strong: the uniqueness
+   rule is enforced by the service at write time, not by a database constraint, and this very test inserts such data directly.
+   "No state the product can write" would be exact.
+4. The YAML fix was made in cycle-1's record rather than in "the next cycle's evidence" as v1 asked. That is acceptable provided
+   the rework-1 cycle record lists the same disposition.
+
+VERDICT: APPROVED

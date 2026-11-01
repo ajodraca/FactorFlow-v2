@@ -1,0 +1,1397 @@
+diff --git a/src/factorflow/classification/reader.py b/src/factorflow/classification/reader.py
+index 06d0942..e96de91 100644
+--- a/src/factorflow/classification/reader.py
++++ b/src/factorflow/classification/reader.py
+@@ -2,7 +2,8 @@
+ 
+ Implements ``component-design-classification-reader.md`` sections 2.1 (placement), 2.3
+ (interface), 2.4 (current set, currency and the summary) and 7 (testing) for CAP-002-E3-S1, and
+-sections 2.3, 2.5 (the list query) and 2.7 (read sequence) for CAP-002-E3-S2.
++sections 2.3, 2.5 (the list query) and 2.7 (read sequence) for CAP-002-E3-S2, and sections 2.5
++and 2.6 (compare, evidence and memberships) for CAP-002-E3-S3.
+ 
+ - The current set is the latest set in state ``complete``; ``later`` is the most recent set
+   started after it, or the most recent set while none is complete; ``not_current`` is true
+@@ -32,6 +33,18 @@ The list (CAP-002-E3-S2):
+ - Every cell carries the stored ``restated_possible`` (DAC-E3-12; DAC-E3-S2-6); a stock's name is
+   its latest stored reference name, or None (DEC-0245, PROVISIONAL).
+ 
++Compare, evidence and memberships (CAP-002-E3-S3; DAC-E3-S3-1 to DAC-E3-S3-5, DAC-E3-7, DAC-E3-8,
++DAC-E3-12; TC-COMP-123, 124, 146, 113, 147):
++
++- ``compare`` is ``list_classifications`` with ``symbols`` set, so it applies the one list
++  statement, the one cell model and the one ``restated_possible`` rule; it accepts 2 to 6 distinct
++  symbols, returns every known one, retired and incomplete included, and reports the rest in
++  ``unknown_symbols`` (DEC-0127, DEC-0131, DEC-0132, DEC-0133).
++- ``stock_evidence`` returns the stock's three cells, every ``factor_input`` row of the current set
++  with value, ``as_of``, ``known_on`` and ``restated_possible``, and the active universes it
++  belongs to in name order; with no current set ``set`` is None in the same shape (DEC-0131,
++  DEC-0134, PROVISIONAL).
++
+ ``read_set_blocks`` is the one definition of the ``set`` and ``later`` blocks that the summary,
+ the list read and the API reuse (task plan Open Gap 3; SA-DUP-001). Statements are ``.sql`` files
+ under ``sql/``, loaded at import and executed with bound parameters only. The reader takes the
+@@ -39,9 +52,11 @@ caller's connection, writes nothing and never commits; database errors propagate
+ """
+ 
+ import base64
++import dataclasses
+ import hashlib
+ import json
+ import re
++from collections.abc import Mapping
+ from dataclasses import dataclass, field
+ from datetime import date, datetime
+ from decimal import Decimal, InvalidOperation
+@@ -53,15 +68,27 @@ from zoneinfo import ZoneInfo
+ import psycopg
+ 
+ from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+-from factorflow.classification.constants import FACTORS, MIN_PEER_SET_SIZE
++from factorflow.api.classification_bounds import MAX_COMPARE_SYMBOLS, MIN_COMPARE_SYMBOLS
++from factorflow.classification.constants import (
++    FACTORS,
++    INPUT_LABELS,
++    INPUT_NAMES,
++    MIN_PEER_SET_SIZE,
++)
++from factorflow.instruments.symbols import is_valid
+ from factorflow.runs.queries import CursorError
+ from factorflow.universes.replay import MEMBERSHIP_AS_OF_SQL
+ 
+ __all__ = [
+     "CURRENT_SET_SQL",
++    "EVIDENCE_SQL",
+     "FACTORS",
++    "INPUT_LABELS",
+     "INPUT_REASONS",
+     "LIST_SQL",
++    "MAX_COMPARE_SYMBOLS",
++    "MEMBERSHIPS_SQL",
++    "MIN_COMPARE_SYMBOLS",
+     "MIN_PEER_SET_SIZE",
+     "SORT_ALLOWLIST",
+     "SUMMARY_SQL",
+@@ -71,13 +98,18 @@ __all__ = [
+     "CursorError",
+     "FactorCell",
+     "FactorSummary",
++    "InputRow",
++    "InstrumentNotFound",
+     "LaterSet",
+     "ListFilters",
++    "Membership",
++    "StockEvidence",
+     "StockRow",
+     "StocksCurrent",
+     "Summary",
+     "Thresholds",
+     "UniverseNotFound",
++    "compare",
+     "current_set",
+     "decode_cursor",
+     "encode_cursor",
+@@ -86,6 +118,7 @@ __all__ = [
+     "list_classifications",
+     "read_set_blocks",
+     "resolve_sort",
++    "stock_evidence",
+     "summary",
+ ]
+ 
+@@ -94,6 +127,8 @@ CURRENT_SET_SQL: Final = (_SQL_DIR / "current_set.sql").read_text()
+ SUMMARY_SQL: Final = (_SQL_DIR / "summary.sql").read_text()
+ LIST_SQL: Final = (_SQL_DIR / "list_classifications.sql").read_text()
+ UNIVERSE_EXISTS_SQL: Final = (_SQL_DIR / "universe_exists.sql").read_text()
++EVIDENCE_SQL: Final = (_SQL_DIR / "stock_evidence.sql").read_text()
++MEMBERSHIPS_SQL: Final = (_SQL_DIR / "stock_memberships.sql").read_text()
+ 
+ INPUT_REASONS: Final = ("input_missing", "input_outdated", "input_not_computable")  # DEC-0079
+ 
+@@ -303,7 +338,7 @@ class StockRow:
+ @dataclass(frozen=True)
+ class ListFilters:
+     universe_id: UUID | None = None
+-    symbols: list[str] | None = None  # compare; its size is checked by CAP-002-E3-S3 (DEC-0127)
++    symbols: list[str] | None = None  # compare: 2 to 6 symbols of the symbol shape (DEC-0127)
+     sort: str = "symbol"  # key of SORT_ALLOWLIST
+     order: str = "asc"  # asc | desc
+     thresholds: Thresholds = field(default_factory=Thresholds)
+@@ -312,6 +347,14 @@ class ListFilters:
+ 
+     def __post_init__(self) -> None:
+         resolve_sort(self.sort)
++        if self.symbols is not None:
++            if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:
++                raise ValueError(
++                    f"symbols must hold {MIN_COMPARE_SYMBOLS} to {MAX_COMPARE_SYMBOLS} entries"
++                )
++            for symbol in self.symbols:
++                if not isinstance(symbol, str) or not is_valid(symbol):
++                    raise ValueError("each symbol must match ^[A-Z][A-Z0-9.-]{0,15}$")
+         if not isinstance(self.order, str) or self.order not in _ORDERS:
+             raise ValueError("order must be asc or desc")
+         if (
+@@ -333,6 +376,56 @@ class ClassificationPage:
+     next_cursor: str | None
+ 
+ 
++@dataclass(frozen=True)
++class Membership:
++    universe_id: UUID
++    name: str
++
++
++@dataclass(frozen=True)
++class InputRow:
++    factor: str  # beside design 2.3's list: the API's inputs[] carries it (Open Gap 5)
++    input_name: str
++    label: str  # product vocabulary, never the input name (STD-UI-1)
++    status: str  # present | missing | outdated | not_computable
++    value: Decimal | None
++    as_of: date | None
++    known_on: date | None
++    restated_possible: bool
++    detail: dict[str, Any]
++
++
++@dataclass(frozen=True)
++class StockEvidence:
++    set: CurrentSet | None  # None when no set is complete (DAC-E3-S3-5)
++    symbol: str
++    name: str | None
++    lifecycle: str
++    factors: dict[str, FactorCell]
++    inputs: list[InputRow]
++    memberships: list[Membership]
++
++
++class InstrumentNotFound(LookupError):
++    """The symbol names no instrument (the API maps it to 404)."""
++
++    def __init__(self, symbol: str) -> None:
++        super().__init__(symbol)
++        self.symbol = symbol
++
++
++def _normalise_symbols(symbols: list[str]) -> list[str]:
++    """Upper-case and deduplicate in first-seen order; the shape is ``ListFilters``' to refuse."""
++    normalised: list[str] = []
++    for symbol in symbols:
++        if not isinstance(symbol, str):
++            raise ValueError("symbols must be strings")
++        upper = symbol.upper()
++        if upper not in normalised:
++            normalised.append(upper)
++    return normalised
++
++
+ def _cursor_check(payload: dict[str, Any]) -> str:
+     """A digest of every other field, so an altered cursor is refused rather than read as a
+     different position (DEC-0246). It detects alteration; it is not a signature."""
+@@ -476,6 +569,90 @@ def list_classifications(conn: psycopg.Connection, filters: ListFilters) -> Clas
+     )
+ 
+ 
++def compare(conn: psycopg.Connection, symbols: list[str]) -> ClassificationPage:
++    """2 to 6 stocks side by side: the list statement with ``symbols`` set (design 2.5).
++
++    Every known symbol is returned, an incomplete or retired one included. A symbol that names no
++    instrument, or an instrument with no row in the current set, is reported in
++    ``unknown_symbols`` rather than dropped (DAC-E3-S3-2; DEC-0131). Reads only.
++    """
++    normalised = _normalise_symbols(symbols)
++    page = list_classifications(conn, ListFilters(symbols=normalised, limit=MAX_COMPARE_SYMBOLS))
++    if page.never_classified:
++        return page
++    found = {row.symbol for row in page.stocks}
++    return dataclasses.replace(
++        page, unknown_symbols=[symbol for symbol in normalised if symbol not in found]
++    )
++
++
++def stock_evidence(conn: psycopg.Connection, symbol: str) -> StockEvidence:
++    """One stock's cells, every input of the current set and its active universes (design 2.6).
++
++    With no current set, or no stored rows for the stock, ``factors`` and ``inputs`` are empty and
++    ``set`` is the current block (DEC-0131, PROVISIONAL). Raises ``InstrumentNotFound``.
++    """
++    upper = symbol.upper()
++    current, _later = read_set_blocks(conn)
++    params = {
++        "symbol": upper,
++        "set_id": current.set_id if current is not None else None,
++        "factor_order": list(FACTORS),
++        "input_order": [name for factor in FACTORS for name in INPUT_NAMES[factor]],
++    }
++    with conn.cursor() as cur:
++        cur.execute(EVIDENCE_SQL, params)
++        names = [column.name for column in cur.description] if cur.description else []
++        rows = [dict(zip(names, row, strict=True)) for row in cur.fetchall()]
++    if not rows or rows[0]["row_kind"] != "instrument":
++        raise InstrumentNotFound(upper)
++    stock = rows[0]
++    factors = {str(r["factor"]): _cell_from_row(r) for r in rows if r["row_kind"] == "cell"}
++    inputs = [
++        InputRow(
++            factor=str(r["factor"]),
++            input_name=str(r["input_name"]),
++            label=INPUT_LABELS[str(r["input_name"])],
++            status=str(r["status"]),
++            value=r["value"],
++            as_of=r["as_of"],
++            known_on=r["known_on"],
++            restated_possible=bool(r["restated_possible"]),
++            detail=r["detail"],
++        )
++        for r in rows
++        if r["row_kind"] == "input"
++    ]
++    return StockEvidence(
++        set=current,
++        symbol=str(stock["symbol"]),
++        name=stock["name"],
++        lifecycle=str(stock["lifecycle"]),
++        factors=factors,
++        inputs=inputs,
++        memberships=_memberships(conn, int(stock["instrument_id"])),
++    )
++
++
++def _memberships(conn: psycopg.Connection, instrument_id: int) -> list[Membership]:
++    with conn.cursor() as cur:
++        cur.execute(MEMBERSHIPS_SQL, {"instrument_id": instrument_id})
++        return [Membership(universe_id=row[0], name=str(row[1])) for row in cur.fetchall()]
++
++
++def _cell_from_row(row: Mapping[str, Any]) -> FactorCell:
++    """A ``FactorCell`` from the seven unprefixed columns; derives nothing (Open Gap 9)."""
++    return FactorCell(
++        status=str(row["status"]),
++        score=row["score"],
++        percentile=row["percentile"],
++        reason_code=row["reason_code"],
++        reason_input=row["reason_input"],
++        reason_detail=row["reason_detail"],
++        restated_possible=bool(row["restated_possible"]),
++    )
++
++
+ def evaluate_filter(conn: psycopg.Connection, set_id: UUID, thresholds: Thresholds) -> list[int]:
+     """The instrument ids the unscoped list matches in ``set_id``, unpaginated, ordered by id;
+     the same statement as the list, so it is the same predicate (DAC-E3-2)."""
+diff --git a/src/factorflow/classification/sql/list_classifications.sql b/src/factorflow/classification/sql/list_classifications.sql
+index aa50a0c..9eceac7 100644
+--- a/src/factorflow/classification/sql/list_classifications.sql
++++ b/src/factorflow/classification/sql/list_classifications.sql
+@@ -17,7 +17,9 @@ WITH scope AS (
+              ORDER BY r.recorded_at DESC, r.value_hash DESC
+              LIMIT 1) ref ON true
+      WHERE ((%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]))
+-            OR (NOT %(scoped)s::boolean AND i.lifecycle = 'active'))
++            -- DEC-0133: a compare (symbols set) also reads a retired stock
++            OR (NOT %(scoped)s::boolean
++                AND (i.lifecycle = 'active' OR %(symbols)s::text[] IS NOT NULL)))
+        AND (%(symbol_pattern)s::text IS NULL OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE '\')
+        AND (%(symbols)s::text[] IS NULL OR i.symbol = ANY(%(symbols)s::text[]))
+        AND EXISTS (SELECT 1 FROM factor_classification c
+diff --git a/src/factorflow/classification/sql/stock_evidence.sql b/src/factorflow/classification/sql/stock_evidence.sql
+new file mode 100644
+index 0000000..f6346ad
+--- /dev/null
++++ b/src/factorflow/classification/sql/stock_evidence.sql
+@@ -0,0 +1,41 @@
++-- One stock's evidence: component-design-classification-reader.md section 2.6, as one statement
++-- over a common column list. An instrument row (none means the symbol is unknown), the stock's
++-- cell rows and its factor_input rows, all of the one set bound as set_id (null: no cell or
++-- input row). Ordering needs no interpolation: the factor and input definition orders are bound
++-- arrays (SEC-INP-002). Every value is a stored row; nothing is recomputed (STD-UI-15).
++WITH instrument_row AS (
++    SELECT i.instrument_id, i.symbol, i.lifecycle,
++           (SELECT r.company_name
++              FROM instrument_reference r
++             WHERE r.instrument_id = i.instrument_id
++             ORDER BY r.recorded_at DESC, r.value_hash DESC
++             LIMIT 1) AS name
++      FROM instrument i
++     WHERE i.symbol = %(symbol)s::text
++)
++SELECT u.*
++  FROM (
++SELECT 0 AS row_kind_rank, 'instrument'::text AS row_kind, i.instrument_id, i.symbol, i.name,
++       i.lifecycle, NULL::text AS factor, NULL::text AS input_name, NULL::text AS status,
++       NULL::numeric AS score, NULL::numeric AS percentile, NULL::text AS reason_code,
++       NULL::text AS reason_input, NULL::text AS reason_detail, NULL::numeric AS value,
++       NULL::date AS as_of, NULL::date AS known_on, NULL::boolean AS restated_possible,
++       NULL::jsonb AS detail
++  FROM instrument_row i
++UNION ALL
++SELECT 1, 'cell', c.instrument_id, NULL, NULL, NULL, c.factor, NULL, c.status, c.score,
++       c.percentile, c.reason_code, c.reason_input, c.reason_detail, NULL, NULL, NULL,
++       c.restated_possible, NULL
++  FROM factor_classification c
++  JOIN instrument_row i USING (instrument_id)
++ WHERE c.set_id = %(set_id)s::uuid
++UNION ALL
++SELECT 2, 'input', f.instrument_id, NULL, NULL, NULL, f.factor, f.input_name, f.status, NULL,
++       NULL, NULL, NULL, NULL, f.value, f.as_of, f.known_on, f.restated_possible, f.detail
++  FROM factor_input f
++  JOIN instrument_row i USING (instrument_id)
++ WHERE f.set_id = %(set_id)s::uuid
++) u
++ ORDER BY u.row_kind_rank,
++          array_position(%(factor_order)s::text[], u.factor),
++          array_position(%(input_order)s::text[], u.input_name);
+diff --git a/src/factorflow/classification/sql/stock_memberships.sql b/src/factorflow/classification/sql/stock_memberships.sql
+new file mode 100644
+index 0000000..2ae83d4
+--- /dev/null
++++ b/src/factorflow/classification/sql/stock_memberships.sql
+@@ -0,0 +1,20 @@
++-- The active universes one instrument currently belongs to: component-design-classification-reader.md
++-- section 2.6 (DEC-0071, DEC-0079). The latest member event per universe decides membership
++-- (DEC-0057), the latest created or renamed event names it, and a retired universe is left out.
++-- The order is total: name, then universe_id (DEC-0134).
++WITH latest_member_event AS (
++    SELECT DISTINCT ON (e.universe_id) e.universe_id, e.event_type
++      FROM universe_event e
++     WHERE e.instrument_id = %(instrument_id)s
++       AND e.event_type IN ('member_added', 'member_removed')
++     ORDER BY e.universe_id, e.event_id DESC
++)
++SELECT u.universe_id, n.name
++  FROM latest_member_event m
++  JOIN universe u USING (universe_id)
++  JOIN LATERAL (SELECT name FROM universe_event WHERE universe_id = u.universe_id
++                  AND event_type IN ('created', 'renamed') ORDER BY event_id DESC LIMIT 1) n ON true
++ WHERE m.event_type = 'member_added'
++   AND NOT EXISTS (SELECT 1 FROM universe_event r
++                    WHERE r.universe_id = u.universe_id AND r.event_type = 'retired')
++ ORDER BY n.name, u.universe_id;
+diff --git a/tests/integration/reader_seed.py b/tests/integration/reader_seed.py
+index 6891564..b192b89 100644
+--- a/tests/integration/reader_seed.py
++++ b/tests/integration/reader_seed.py
+@@ -103,6 +103,8 @@ def insert_input(
+     value: Any = None,
+     as_of: date | None = None,
+     known_on: date | None = None,
++    restated_possible: bool = False,
++    detail: dict[str, Any] | None = None,
+ ) -> None:
+     """One ``factor_input`` row; a ``present`` one defaults its value and dates."""
+     if status == "present":
+@@ -111,8 +113,20 @@ def insert_input(
+         known_on = date(2026, 10, 1) if known_on is None else known_on
+     conn.execute(
+         "INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, "
+-        "as_of, known_on, detail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+-        (set_id, instrument_id, factor, input_name, status, value, as_of, known_on, Jsonb({})),
++        "as_of, known_on, restated_possible, detail) "
++        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
++        (
++            set_id,
++            instrument_id,
++            factor,
++            input_name,
++            status,
++            value,
++            as_of,
++            known_on,
++            restated_possible,
++            Jsonb(detail or {}),
++        ),
+     )
+     conn.commit()
+ 
+@@ -301,3 +315,45 @@ def seed_scored_stock(
+                 restated_possible=factor in marked,
+             )
+     return instrument_id
++
++
++# --- CAP-002-E3-S3: a stock's eight inputs and a universe rename ---------------------------
++
++
++def seed_inputs(
++    conn: psycopg.Connection,
++    set_id: UUID,
++    instrument_id: int,
++    *,
++    statuses: dict[str, str] | None = None,
++    values: dict[str, Any] | None = None,
++    restated: Iterable[str] = (),
++) -> None:
++    """The stock's eight ``factor_input`` rows through ``insert_input``.
++
++    Every input is ``present`` unless ``statuses`` names it; ``values`` overrides a present
++    input's value and ``restated`` names the inputs whose row carries ``restated_possible``.
++    """
++    given = statuses or {}
++    valued = values or {}
++    marked = set(restated)
++    for factor in FACTORS:
++        for input_name in INPUT_NAMES[factor]:
++            insert_input(
++                conn,
++                set_id,
++                instrument_id,
++                factor,
++                input_name,
++                given.get(input_name, "present"),
++                value=valued.get(input_name),
++                restated_possible=input_name in marked,
++            )
++
++
++def rename_universe(conn: psycopg.Connection, universe_id: UUID, name: str) -> None:
++    conn.execute(
++        "INSERT INTO universe_event (universe_id, event_type, name) VALUES (%s, 'renamed', %s)",
++        (universe_id, name),
++    )
++    conn.commit()
+diff --git a/tests/integration/test_reader_compare.py b/tests/integration/test_reader_compare.py
+new file mode 100644
+index 0000000..e37f3ca
+--- /dev/null
++++ b/tests/integration/test_reader_compare.py
+@@ -0,0 +1,313 @@
++"""Compare against a real store (CAP-002-E3-S3).
++
++Proves ``component-design-classification-reader.md`` sections 2.5 and 7 for compare:
++DAC-E3-S3-1, DAC-E3-S3-2 and the compare half of DAC-E3-S3-4 (TC-COMP-123, 124, 113), and,
++through them, DAC-E3-7 and DAC-E3-12 (AC-15, AC-16, AC-23). Sets and rows are seeded directly,
++so the reader is tested independently of the engine. Compare is ``list_classifications`` with
++``symbols`` set: one statement, one cell model, one ``restated_possible`` rule (DAC-E3-2).
++"""
++
++from datetime import UTC, date, datetime, timedelta
++from decimal import Decimal
++from typing import Any
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.classification import reader
++from tests.integration.reader_seed import (
++    insert_instrument,
++    insert_run,
++    insert_set,
++    insert_universe,
++    seed_scored_stock,
++)
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 14, 22, 30, tzinfo=UTC)
++D = Decimal
++RETIRED = ("retired", None)
++MISSING_VALUE = ("input_missing", "book_to_price")
++UNRANKED = ("not_enough_stocks", None)
++
++
++def _complete_set(conn: psycopg.Connection, *, started_at: datetime = T0) -> UUID:
++    run_id = insert_run(conn, "succeeded", started_at=started_at - timedelta(hours=1))
++    return insert_set(
++        conn,
++        run_id,
++        "complete",
++        started_at=started_at,
++        ended_at=started_at + timedelta(minutes=5),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=1,
++        factors={"value": (35, True), "growth": (35, True), "momentum": (35, True)},
++    )
++
++
++def _symbols(page: reader.ClassificationPage) -> list[str]:
++    return [row.symbol for row in page.stocks]
++
++
++def _row(page: reader.ClassificationPage, symbol: str) -> reader.StockRow:
++    return next(row for row in page.stocks if row.symbol == symbol)
++
++
++class CountingConnection:
++    """Delegates to a real connection and records every statement executed through it."""
++
++    def __init__(self, conn: psycopg.Connection) -> None:
++        self._conn = conn
++        self.statements: list[str] = []
++
++    def cursor(self) -> "CountingCursor":
++        return CountingCursor(self._conn.cursor(), self.statements)
++
++
++class CountingCursor:
++    def __init__(self, cursor: psycopg.Cursor[Any], statements: list[str]) -> None:
++        self._cursor = cursor
++        self._statements = statements
++
++    def __enter__(self) -> "CountingCursor":
++        return self
++
++    def __exit__(self, *exc: object) -> None:
++        self._cursor.close()
++
++    def execute(self, query: str, params: Any = None) -> "CountingCursor":
++        self._statements.append(query)
++        self._cursor.execute(query, params)
++        return self
++
++    def __getattr__(self, name: str) -> Any:
++        return getattr(self._cursor, name)
++
++
++def _seed_roster(conn: psycopg.Connection, set_id: UUID) -> None:
++    seed_scored_stock(conn, set_id, "A")
++    seed_scored_stock(conn, set_id, "B", value=MISSING_VALUE)
++    seed_scored_stock(conn, set_id, "C", growth=UNRANKED)
++    seed_scored_stock(
++        conn, set_id, "R", value=RETIRED, growth=RETIRED, momentum=RETIRED, lifecycle="retired"
++    )
++    seed_scored_stock(conn, set_id, "D")
++    seed_scored_stock(conn, set_id, "E")
++
++
++# Implements TC-COMP-123
++def test_compare_returns_every_known_symbol_two_to_six_only(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S3-1: an incomplete, unranked or retired stock is returned; 1 and 7 are refused."""
++    conn = migrated_run_schema_connection
++    _seed_roster(conn, _complete_set(conn))
++
++    two = reader.compare(conn, ["A", "B"])
++    assert _symbols(two) == ["A", "B"]
++    assert two.match_count == 2
++
++    six = reader.compare(conn, ["A", "B", "C", "R", "D", "E"])
++    assert _symbols(six) == ["A", "B", "C", "D", "E", "R"]
++    assert six.match_count == len(six.stocks) == 6
++    for row in six.stocks:
++        assert set(row.factors) == set(reader.FACTORS)
++    assert (
++        _row(six, "B").factors["value"].status,
++        _row(six, "B").factors["value"].reason_code,
++    ) == (
++        "not_classified",
++        "input_missing",
++    )
++    assert _row(six, "B").factors["growth"].status == "classified"
++    assert _row(six, "C").factors["growth"].reason_code == "not_enough_stocks"
++    assert _row(six, "R").lifecycle == "retired"
++    assert _row(six, "A").factors["value"].status == "classified"
++    assert six.next_cursor is None
++
++    counting = CountingConnection(conn)
++    with pytest.raises(ValueError):
++        reader.compare(counting, ["A"])  # type: ignore[arg-type]
++    with pytest.raises(ValueError):
++        reader.compare(counting, ["A", "B", "C", "D", "E", "R", "F"])  # type: ignore[arg-type]
++    assert counting.statements == []
++
++
++def test_compare_orders_by_symbol_whatever_the_request_order(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    _seed_roster(conn, _complete_set(conn))
++
++    assert _symbols(reader.compare(conn, ["E", "A", "D"])) == ["A", "D", "E"]
++
++
++# Implements TC-COMP-124
++def test_compare_reports_an_unrecognised_symbol(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S3-2: reported in ``unknown_symbols`` in request order, never dropped."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAA")
++    seed_scored_stock(conn, set_id, "BBB")
++
++    one = reader.compare(conn, ["AAA", "BBB", "NOPE"])
++    assert _symbols(one) == ["AAA", "BBB"]
++    assert one.unknown_symbols == ["NOPE"]
++
++    two = reader.compare(conn, ["ZZZ", "AAA", "NOPE"])
++    assert _symbols(two) == ["AAA"]
++    assert two.unknown_symbols == ["ZZZ", "NOPE"]
++
++    none = reader.compare(conn, ["NOPE", "NADA"])
++    assert none.stocks == []
++    assert none.unknown_symbols == ["NOPE", "NADA"]
++    assert none.match_count == 0
++
++    assert reader.compare(conn, ["AAA", "BBB"]).unknown_symbols == []
++
++
++# Implements TC-COMP-113
++def test_compare_keeps_a_retired_stock_while_the_list_still_omits_it(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S3-4, DAC-E3-S3-1 (compare half): the retired reason is kept (DEC-0133)."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "A")
++    seed_scored_stock(
++        conn, set_id, "R", value=RETIRED, growth=RETIRED, momentum=RETIRED, lifecycle="retired"
++    )
++
++    page = reader.compare(conn, ["R", "A"])
++    retired = _row(page, "R")
++    assert retired.lifecycle == "retired"
++    assert [retired.factors[f].reason_code for f in reader.FACTORS] == ["retired"] * 3
++    assert [retired.factors[f].status for f in reader.FACTORS] == ["not_classified"] * 3
++
++    listed = reader.list_classifications(conn, reader.ListFilters())
++    assert _symbols(listed) == ["A"]
++
++
++def test_compare_shares_the_list_statement_and_cell_model(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-12, AC-23: compare returns the list's cells, ``restated_possible`` as stored."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "A", restated=("value", "growth"))
++    seed_scored_stock(conn, set_id, "B", value=MISSING_VALUE, restated=("momentum",))
++    seed_scored_stock(conn, set_id, "C")
++
++    page = reader.compare(conn, ["A", "B", "C"])
++    listed = reader.list_classifications(conn, reader.ListFilters())
++    assert page.stocks == listed.stocks
++    assert [page.stocks[0].factors[f].restated_possible for f in reader.FACTORS] == [
++        True,
++        True,
++        False,
++    ]
++    assert [page.stocks[1].factors[f].restated_possible for f in reader.FACTORS] == [
++        False,
++        False,
++        True,
++    ]
++    assert not any(page.stocks[2].factors[f].restated_possible for f in reader.FACTORS)
++
++    counting = CountingConnection(conn)
++    reader.compare(counting, ["A", "B"])  # type: ignore[arg-type]
++    assert sum("WITH scope AS" in s for s in counting.statements) == 1
++
++
++def test_compare_ignores_thresholds_and_hides_nothing(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """An input-incomplete stock is returned: compare uses a default ``Thresholds``."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAA", value=MISSING_VALUE)
++    seed_scored_stock(conn, set_id, "BBB")
++
++    page = reader.compare(conn, ["AAA", "BBB"])
++    assert _symbols(page) == ["AAA", "BBB"]
++    assert page.unknown_symbols == []
++
++
++def test_compare_carries_the_set_and_later_blocks(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAA")
++    seed_scored_stock(conn, set_id, "BBB")
++    run_id = insert_run(conn, "succeeded", started_at=T0 + timedelta(hours=2))
++    insert_set(conn, run_id, "building", started_at=T0 + timedelta(hours=3))
++
++    page = reader.compare(conn, ["AAA", "BBB"])
++    assert (page.set, page.later) == reader.read_set_blocks(conn)
++    assert page.set is not None and page.set.not_current is True
++    assert page.never_classified is False
++
++
++def test_compare_with_no_complete_set_is_the_never_classified_page(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    insert_instrument(conn, "AAA")
++    insert_instrument(conn, "BBB")
++
++    counting = CountingConnection(conn)
++    page = reader.compare(counting, ["AAA", "BBB"])  # type: ignore[arg-type]
++
++    assert page.set is None
++    assert page.never_classified is True
++    assert page.stocks == []
++    assert page.unknown_symbols == []
++    assert page.match_count == 0
++    assert page.later == reader.read_set_blocks(conn)[1]
++    assert not any("WITH scope AS" in s for s in counting.statements)
++
++
++def test_compare_normalises_case_and_deduplicates(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DEC-0132: symbols are upper-cased and a duplicate appears once."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAPL")
++    seed_scored_stock(conn, set_id, "MSFT")
++
++    assert _symbols(reader.compare(conn, ["aapl", "msft"])) == ["AAPL", "MSFT"]
++    page = reader.compare(conn, ["AAPL", "aapl", "MSFT"])
++    assert _symbols(page) == ["AAPL", "MSFT"]
++    assert page.unknown_symbols == []
++
++
++def test_compare_reports_a_known_instrument_with_no_row_in_the_set(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """PROVISIONAL (DEC-0131): awaiting owner confirmation (2026-10-17), Open Gap 2 of
++    CAP-002-E3-S3-tasks. A stock added after the set was built is reported, not dropped."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAA")
++    insert_instrument(conn, "LATE")
++
++    page = reader.compare(conn, ["AAA", "LATE"])
++    assert _symbols(page) == ["AAA"]
++    assert page.unknown_symbols == ["LATE"]
++
++
++def test_compare_is_independent_of_universes(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    a = seed_scored_stock(conn, set_id, "AAA")
++    seed_scored_stock(conn, set_id, "BBB")
++    insert_universe(conn, "Only A", [a])
++
++    assert _symbols(reader.compare(conn, ["AAA", "BBB"])) == ["AAA", "BBB"]
+diff --git a/tests/integration/test_reader_evidence.py b/tests/integration/test_reader_evidence.py
+new file mode 100644
+index 0000000..fadf684
+--- /dev/null
++++ b/tests/integration/test_reader_evidence.py
+@@ -0,0 +1,479 @@
++"""Stock evidence and memberships against a real store (CAP-002-E3-S3).
++
++Proves ``component-design-classification-reader.md`` sections 2.6 and 7 for evidence:
++DAC-E3-S3-3, DAC-E3-S3-4 (evidence half) and DAC-E3-S3-5 (TC-COMP-146, 113, 147), and, through
++them, DAC-E3-8 and DAC-E3-12 (AC-12, AC-15, AC-17, AC-23). Sets and rows are seeded directly, so
++the reader is tested independently of the engine.
++"""
++
++import dataclasses
++from datetime import UTC, date, datetime, timedelta
++from decimal import Decimal
++from typing import Any
++from uuid import UUID
++from zoneinfo import ZoneInfo
++
++import psycopg
++import pytest
++
++from factorflow.classification import reader
++from factorflow.classification.constants import FACTORS, INPUT_NAMES
++from factorflow.universes.replay import MEMBERSHIP_AS_OF_SQL
++from tests.integration.reader_seed import (
++    add_member,
++    insert_classification,
++    insert_input,
++    insert_instrument,
++    insert_reference,
++    insert_run,
++    insert_set,
++    insert_universe,
++    remove_member,
++    rename_universe,
++    retire_universe,
++    seed_inputs,
++    seed_scored_stock,
++)
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 14, 22, 30, tzinfo=UTC)
++D = Decimal
++RETIRED = ("retired", None)
++DEFINITION_ORDER = [(f, n) for f in FACTORS for n in INPUT_NAMES[f]]
++
++
++def _complete_set(conn: psycopg.Connection, *, started_at: datetime = T0) -> UUID:
++    run_id = insert_run(conn, "succeeded", started_at=started_at - timedelta(hours=1))
++    return insert_set(
++        conn,
++        run_id,
++        "complete",
++        started_at=started_at,
++        ended_at=started_at + timedelta(minutes=5),
++        latest_trading_day=date(2026, 10, 14),
++        active_instruments=1,
++        factors={"value": (35, True), "growth": (35, True), "momentum": (35, True)},
++    )
++
++
++def _building_set(conn: psycopg.Connection, *, started_at: datetime) -> UUID:
++    run_id = insert_run(conn, "succeeded", started_at=started_at - timedelta(hours=1))
++    return insert_set(conn, run_id, "building", started_at=started_at)
++
++
++class CountingConnection:
++    """Delegates to a real connection and records every statement executed through it."""
++
++    def __init__(self, conn: psycopg.Connection) -> None:
++        self._conn = conn
++        self.statements: list[str] = []
++
++    def cursor(self) -> "CountingCursor":
++        return CountingCursor(self._conn.cursor(), self.statements)
++
++
++class CountingCursor:
++    def __init__(self, cursor: psycopg.Cursor[Any], statements: list[str]) -> None:
++        self._cursor = cursor
++        self._statements = statements
++
++    def __enter__(self) -> "CountingCursor":
++        return self
++
++    def __exit__(self, *exc: object) -> None:
++        self._cursor.close()
++
++    def execute(self, query: str, params: Any = None) -> "CountingCursor":
++        self._statements.append(query)
++        self._cursor.execute(query, params)
++        return self
++
++    def __getattr__(self, name: str) -> Any:
++        return getattr(self._cursor, name)
++
++
++# Implements TC-COMP-146
++def test_evidence_returns_every_input_with_dates_and_universes_in_name_order(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S3-3: eight input rows in definition order, memberships in name order."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    aapl = seed_scored_stock(conn, set_id, "AAPL", name="Apple Inc.", restated=("value",))
++    seed_inputs(
++        conn,
++        set_id,
++        aapl,
++        statuses={"return_12m": "missing"},
++        values={"book_to_price": D("0.1234567890"), "return_3m": D("-0.25")},
++        restated={"fcf_yield", "eps_growth"},
++    )
++    zeta = insert_universe(conn, "Zeta", [aapl])
++    alpha = insert_universe(conn, "Alpha", [aapl])
++
++    evidence = reader.stock_evidence(conn, "AAPL")
++
++    assert [(r.factor, r.input_name) for r in evidence.inputs] == DEFINITION_ORDER
++    by_name = {r.input_name: r for r in evidence.inputs}
++    assert [r.status for r in evidence.inputs].count("present") == 7
++    book = by_name["book_to_price"]
++    assert (book.status, book.value, book.label) == ("present", D("0.1234567890"), "book-to-price")
++    assert (book.as_of, book.known_on) == (date(2026, 9, 30), date(2026, 10, 1))
++    assert by_name["return_3m"].value == D("-0.25")
++    missing = by_name["return_12m"]
++    assert (missing.status, missing.value, missing.as_of, missing.known_on) == (
++        "missing",
++        None,
++        None,
++        None,
++    )
++    assert {n for n, r in by_name.items() if r.restated_possible} == {"fcf_yield", "eps_growth"}
++    assert all(r.detail == {} for r in evidence.inputs)
++
++    assert evidence.memberships == [
++        reader.Membership(alpha, "Alpha"),
++        reader.Membership(zeta, "Zeta"),
++    ]
++    assert evidence.set == reader.read_set_blocks(conn)[0]
++    assert (evidence.symbol, evidence.name, evidence.lifecycle) == (
++        "AAPL",
++        "Apple Inc.",
++        "active",
++    )
++    stored = conn.execute(
++        "SELECT factor, status, score, percentile, reason_code, reason_input, reason_detail, "
++        "restated_possible FROM factor_classification WHERE set_id = %s AND instrument_id = %s",
++        (set_id, aapl),
++    ).fetchall()
++    assert list(evidence.factors) == list(FACTORS)
++    for factor, status, score, percentile, code, rinput, detail, restated in stored:
++        assert evidence.factors[factor] == reader.FactorCell(
++            status, score, percentile, code, rinput, detail, restated
++        )
++
++
++def test_evidence_input_row_carries_the_dates_the_statement_stored(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-17: each input row's value, ``as_of`` and ``known_on`` are the stored ones."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    insert_input(
++        conn,
++        set_id,
++        stock,
++        "value",
++        "book_to_price",
++        "outdated",
++        value=D("0.5"),
++        as_of=date(2025, 12, 31),
++        known_on=date(2026, 2, 3),
++        detail={"statement": "10-K"},
++    )
++
++    row = reader.stock_evidence(conn, "AAPL").inputs[0]
++    assert (row.status, row.value, row.as_of, row.known_on) == (
++        "outdated",
++        D("0.5"),
++        date(2025, 12, 31),
++        date(2026, 2, 3),
++    )
++    assert row.detail == {"statement": "10-K"}
++
++
++# Implements TC-COMP-113
++def test_evidence_keeps_a_retired_stock_with_the_retired_reason(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-S3-4 (evidence half): three ``retired`` cells, no inputs, memberships kept."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    retired = seed_scored_stock(
++        conn, set_id, "R", value=RETIRED, growth=RETIRED, momentum=RETIRED, lifecycle="retired"
++    )
++    universe = insert_universe(conn, "Held", [retired])
++
++    evidence = reader.stock_evidence(conn, "R")
++
++    assert evidence.lifecycle == "retired"
++    assert [evidence.factors[f].reason_code for f in FACTORS] == ["retired"] * 3
++    assert [evidence.factors[f].status for f in FACTORS] == ["not_classified"] * 3
++    assert evidence.inputs == []
++    assert evidence.memberships == [reader.Membership(universe, "Held")]
++
++
++# Implements TC-COMP-147
++@pytest.mark.parametrize("case", ["no_set", "building_only"])
++def test_evidence_with_no_current_set_has_a_null_set_and_the_same_shape(
++    migrated_run_schema_connection: psycopg.Connection, case: str
++) -> None:
++    """DAC-E3-S3-5: ``set`` None, ``factors`` and ``inputs`` empty, memberships populated.
++
++    PROVISIONAL (DEC-0131): awaiting owner confirmation (2026-10-17), Open Gap 2 of
++    CAP-002-E3-S3-tasks; memberships do not depend on a set.
++    """
++    conn = migrated_run_schema_connection
++    stock = insert_instrument(conn, "AAPL")
++    universe = insert_universe(conn, "Held", [stock])
++    if case == "building_only":
++        building = _building_set(conn, started_at=T0)
++        seed_inputs(conn, building, stock)
++
++    evidence = reader.stock_evidence(conn, "AAPL")
++
++    assert isinstance(evidence, reader.StockEvidence)
++    assert evidence.set is None
++    assert evidence.factors == {}
++    assert evidence.inputs == []
++    assert (evidence.symbol, evidence.name, evidence.lifecycle) == ("AAPL", None, "active")
++    assert evidence.memberships == [reader.Membership(universe, "Held")]
++    populated = [f.name for f in dataclasses.fields(reader.StockEvidence)]
++    assert [f.name for f in dataclasses.fields(evidence)] == populated
++    assert populated == [
++        "set",
++        "symbol",
++        "name",
++        "lifecycle",
++        "factors",
++        "inputs",
++        "memberships",
++    ]
++    with pytest.raises(reader.InstrumentNotFound):
++        reader.stock_evidence(conn, "NOPE")
++
++
++def test_evidence_reads_only_the_current_set(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """AC-12: an older complete set and a newer building one never replace the current set."""
++    conn = migrated_run_schema_connection
++    older = _complete_set(conn, started_at=T0 - timedelta(days=2))
++    current = _complete_set(conn)
++    building = _building_set(conn, started_at=T0 + timedelta(days=1))
++    stock = insert_instrument(conn, "AAPL")
++    for set_id, value, score in ((older, D("1"), D("0.1")), (current, D("2"), D("0.2"))):
++        seed_inputs(conn, set_id, stock, values={"book_to_price": value})
++        for factor in FACTORS:
++            insert_classification(conn, set_id, stock, factor, score=score, percentile=D("50"))
++    seed_inputs(conn, building, stock, values={"book_to_price": D("3")})
++
++    evidence = reader.stock_evidence(conn, "AAPL")
++
++    assert evidence.set is not None
++    assert evidence.set.set_id == current
++    assert evidence.set.not_current is True
++    assert {r.value for r in evidence.inputs if r.input_name == "book_to_price"} == {D("2")}
++    assert evidence.factors["value"].score == D("0.2")
++    assert len(evidence.inputs) == 8
++
++
++def test_evidence_cell_and_input_restatement_flags_are_independent(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DAC-E3-12, AC-23: each is the stored column; nothing is derived from the other."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL", restated=("growth",))
++    seed_inputs(conn, set_id, stock, restated={"book_to_price"})
++
++    evidence = reader.stock_evidence(conn, "AAPL")
++
++    assert [evidence.factors[f].restated_possible for f in FACTORS] == [False, True, False]
++    assert {r.input_name for r in evidence.inputs if r.restated_possible} == {"book_to_price"}
++
++
++def test_evidence_shows_an_outdated_input_and_its_cell_reason_consistently(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL", growth=("input_outdated", "revenue_growth"))
++    seed_inputs(conn, set_id, stock, statuses={"revenue_growth": "outdated"})
++
++    evidence = reader.stock_evidence(conn, "AAPL")
++
++    growth = evidence.factors["growth"]
++    assert (growth.reason_code, growth.reason_input) == ("input_outdated", "revenue_growth")
++    revenue = next(r for r in evidence.inputs if r.input_name == "revenue_growth")
++    assert revenue.status == "outdated"
++    assert revenue.label == reader.INPUT_LABELS["revenue_growth"] == "revenue growth"
++
++
++def test_evidence_symbol_is_case_insensitive_and_unknown_symbol_is_refused(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DEC-0132."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAPL")
++
++    assert reader.stock_evidence(conn, "aapl").symbol == "AAPL"
++    with pytest.raises(reader.InstrumentNotFound):
++        reader.stock_evidence(conn, "NOPE")
++
++
++def test_evidence_of_a_stock_in_no_universe_has_no_memberships(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    seed_scored_stock(conn, set_id, "AAPL")
++
++    assert reader.stock_evidence(conn, "AAPL").memberships == []
++
++
++def test_evidence_issues_two_statements_besides_the_set_block_read(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """Never one statement per input or per universe."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    seed_inputs(conn, set_id, stock)
++    for name in ("One", "Two", "Three"):
++        insert_universe(conn, name, [stock])
++
++    blocks = CountingConnection(conn)
++    reader.read_set_blocks(blocks)  # type: ignore[arg-type]
++    counting = CountingConnection(conn)
++    reader.stock_evidence(counting, "AAPL")  # type: ignore[arg-type]
++
++    assert len(counting.statements) == len(blocks.statements) + 2
++    assert counting.statements[-2:] == [reader.EVIDENCE_SQL, reader.MEMBERSHIPS_SQL]
++
++
++# --- Memberships (DEC-0057, DEC-0134; AC-17) ---------------------------------------------
++
++
++def _memberships(conn: psycopg.Connection, symbol: str = "AAPL") -> list[tuple[UUID, str]]:
++    return [(m.universe_id, m.name) for m in reader.stock_evidence(conn, symbol).memberships]
++
++
++def test_memberships_list_both_universes_in_name_order(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    second = insert_universe(conn, "Bravo", [stock])
++    first = insert_universe(conn, "Alpha", [stock])
++
++    assert _memberships(conn) == [(first, "Alpha"), (second, "Bravo")]
++
++
++def test_memberships_follow_a_rename_a_removal_and_a_readd(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    renamed = insert_universe(conn, "Old name", [stock])
++    removed = insert_universe(conn, "Removed", [stock])
++    readded = insert_universe(conn, "Readded", [stock])
++    rename_universe(conn, renamed, "New name")
++    remove_member(conn, removed, stock)
++    remove_member(conn, readded, stock)
++    add_member(conn, readded, stock)
++
++    assert _memberships(conn) == [(renamed, "New name"), (readded, "Readded")]
++
++
++def test_memberships_omit_a_retired_universe_and_keep_a_late_addition(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """A membership is not a set property: a stock added after the set was built appears."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    gone = insert_universe(conn, "Gone", [stock])
++    retire_universe(conn, gone)
++    late = insert_universe(conn, "Late", [])
++    add_member(conn, late, stock)
++
++    assert _memberships(conn) == [(late, "Late")]
++
++
++def test_memberships_with_equal_names_order_by_universe_id(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    ids = [insert_universe(conn, "Same", [stock]) for _ in range(3)]
++
++    assert [uid for uid, _ in _memberships(conn)] == sorted(ids)
++
++
++def test_memberships_agree_with_the_membership_replay(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """SA-DUP-001: the reverse-direction statement cannot drift from E1-S2's replay."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stocks = {s: seed_scored_stock(conn, set_id, s) for s in ("AAA", "BBB", "CCC")}
++    one = insert_universe(conn, "One", [stocks["AAA"], stocks["BBB"]])
++    two = insert_universe(conn, "Two", [stocks["BBB"]])
++    three = insert_universe(conn, "Three", [stocks["CCC"]])
++    remove_member(conn, one, stocks["AAA"])
++    add_member(conn, two, stocks["AAA"])
++    retire_universe(conn, three)
++    today = datetime.now(ZoneInfo("America/Chicago")).date()
++
++    for universe in (one, two):
++        replay = {
++            row[0]
++            for row in conn.execute(
++                MEMBERSHIP_AS_OF_SQL, {"universe_id": universe, "as_of": today}
++            ).fetchall()
++        }
++        for symbol, instrument_id in stocks.items():
++            held = universe in {uid for uid, _ in _memberships(conn, symbol)}
++            assert held == (instrument_id in replay), (symbol, universe)
++
++
++def test_evidence_name_is_the_latest_stored_reference_name(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """DEC-0245: with two stored names the later one is the stock's name."""
++    conn = migrated_run_schema_connection
++    set_id = _complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAPL")
++    insert_reference(conn, stock, "Old Name", recorded_at=T0 - timedelta(days=2))
++    insert_reference(conn, stock, "New Name", recorded_at=T0 - timedelta(days=1))
++
++    assert reader.stock_evidence(conn, "AAPL").name == "New Name"
++
++
++def test_evidence_never_reads_rows_of_another_set(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """A stock with rows only in an older set has empty factors and inputs in the current one."""
++    conn = migrated_run_schema_connection
++    older = _complete_set(conn, started_at=T0 - timedelta(days=2))
++    _complete_set(conn)
++    stock = insert_instrument(conn, "AAPL")
++    seed_inputs(conn, older, stock)
++    for factor in FACTORS:
++        insert_classification(conn, older, stock, factor, score=D("0.2"), percentile=D("50"))
++
++    evidence = reader.stock_evidence(conn, "AAPL")
++
++    assert evidence.factors == {}
++    assert evidence.inputs == []
++
++
++def test_evidence_models_are_frozen_and_the_error_names_its_symbol() -> None:
++    membership = reader.Membership(UUID(int=1), "Name")
++    with pytest.raises(dataclasses.FrozenInstanceError):
++        membership.name = "Other"  # type: ignore[misc]
++    row = reader.InputRow(
++        "value", "book_to_price", "book-to-price", "missing", None, None, None, False, {}
++    )
++    with pytest.raises(dataclasses.FrozenInstanceError):
++        row.status = "present"  # type: ignore[misc]
++    evidence = reader.StockEvidence(None, "AAPL", None, "active", {}, [], [])
++    with pytest.raises(dataclasses.FrozenInstanceError):
++        evidence.symbol = "MSFT"  # type: ignore[misc]
++    assert reader.InstrumentNotFound("NOPE").symbol == "NOPE"
+diff --git a/tests/unit/test_reader_filters.py b/tests/unit/test_reader_filters.py
+index 54c1eb4..fd77530 100644
+--- a/tests/unit/test_reader_filters.py
++++ b/tests/unit/test_reader_filters.py
+@@ -2,8 +2,8 @@
+ 
+ Proves the model half of DAC-E3-S2-7 and DAC-E3-2 (TC-COMP-122): an empty ``Thresholds``
+ constrains nothing, and ``Thresholds`` and ``ListFilters`` refuse every value the reader
+-design section 4 bounds (SEC-INP-001). ``ListFilters.symbols`` is not size-checked here
+-(DEC-0127; CAP-002-E3-S3).
++design section 4 bounds (SEC-INP-001). ``ListFilters.symbols`` is size- and shape-checked by
++CAP-002-E3-S3 (DEC-0127, DEC-0132): DAC-E3-S3-1, TC-COMP-123.
+ """
+ 
+ import dataclasses
+@@ -169,3 +169,61 @@ def test_list_models_are_frozen(instance: object) -> None:
+     field = dataclasses.fields(instance)[0].name  # type: ignore[arg-type]
+     with pytest.raises(dataclasses.FrozenInstanceError):
+         setattr(instance, field, None)
++
++
++# --- CAP-002-E3-S3: the compare bound, symbol shape and normalisation -------------------------
++
++
++@pytest.mark.parametrize("symbols", [["AAA"], ["A", "B", "C", "D", "E", "F", "G"], []])
++def test_symbols_outside_two_to_six_are_refused(symbols: list[str]) -> None:
++    """DAC-E3-S3-1: fewer than 2 or more than 6 raises before any SQL (DEC-0127)."""
++    with pytest.raises(ValueError):
++        reader.ListFilters(symbols=symbols)
++
++
++@pytest.mark.parametrize("symbols", [["AAA", "BBB"], ["A", "B", "C", "D", "E", "F"], None])
++def test_symbols_two_to_six_or_none_are_accepted(symbols: list[str] | None) -> None:
++    assert reader.ListFilters(symbols=symbols).symbols == symbols
++
++
++@pytest.mark.parametrize(
++    "symbols",
++    [["AAA", "A%"], ["AAA", "a"], ["AAA", "1A"], ["AAA", "A B"], ["AAA", 7], ["AAA", "A" * 17]],
++)
++def test_each_symbol_must_match_the_instrument_symbol_shape(symbols: list[object]) -> None:
++    """Reader design section 4 (SEC-INP-001); DEC-0132: checked as stored, never rewritten."""
++    with pytest.raises(ValueError):
++        reader.ListFilters(symbols=symbols)  # type: ignore[arg-type]
++
++
++def test_the_compare_bound_has_one_definition() -> None:
++    from factorflow.api import classification_bounds
++
++    assert reader.MIN_COMPARE_SYMBOLS is classification_bounds.MIN_COMPARE_SYMBOLS
++    assert reader.MAX_COMPARE_SYMBOLS is classification_bounds.MAX_COMPARE_SYMBOLS
++
++
++class _NoStatementConnection:
++    """A connection that fails the test if the reader touches it."""
++
++    def cursor(self) -> object:
++        raise AssertionError("the reader ran a statement")
++
++    def execute(self, *args: object, **kwargs: object) -> object:
++        raise AssertionError("the reader ran a statement")
++
++
++@pytest.mark.parametrize(
++    "symbols",
++    [["A"], ["A"] * 7, ["aapl", "AAPL"], [], [1, 2], ["AAA", "a b"], ["AAA", "1A"]],
++)
++def test_compare_refuses_a_bad_request_before_any_statement(symbols: list[object]) -> None:
++    with pytest.raises(ValueError):
++        reader.compare(_NoStatementConnection(), symbols)  # type: ignore[arg-type]
++
++
++def test_normalise_symbols_upper_cases_and_deduplicates_in_first_seen_order() -> None:
++    assert reader._normalise_symbols(["b", "a", "B"]) == ["B", "A"]
++    assert reader._normalise_symbols(["AAA", "BBB"]) == ["AAA", "BBB"]
++    with pytest.raises(ValueError):
++        reader._normalise_symbols(["A", 1])  # type: ignore[list-item]
+diff --git a/tests/unit/test_reader_input_labels.py b/tests/unit/test_reader_input_labels.py
+new file mode 100644
+index 0000000..18c4797
+--- /dev/null
++++ b/tests/unit/test_reader_input_labels.py
+@@ -0,0 +1,32 @@
++"""The reader re-exports the one input-label table (CAP-002-E3-S3).
++
++Reader design 2.6 and DEC-0130: ``label`` of an evidence input is the product-vocabulary name,
++from the one table ``classify.sql`` writes ``reason_detail`` from, never a payload key
++(STD-UI-1).
++"""
++
++from factorflow.classification import constants, reader
++
++
++def test_the_reader_re_exports_the_one_label_table() -> None:
++    assert reader.INPUT_LABELS is constants.INPUT_LABELS
++
++
++def test_the_labels_cover_exactly_the_eight_inputs() -> None:
++    names = {name for factor in constants.FACTORS for name in constants.INPUT_NAMES[factor]}
++    assert set(reader.INPUT_LABELS) == names
++    assert len(names) == 8
++
++
++def test_the_labels_are_the_product_vocabulary() -> None:
++    assert reader.INPUT_LABELS == {
++        "book_to_price": "book-to-price",
++        "earnings_yield": "earnings yield",
++        "fcf_yield": "free-cash-flow yield",
++        "revenue_growth": "revenue growth",
++        "eps_growth": "earnings-per-share growth",
++        "return_3m": "3-month total return",
++        "return_6m": "6-month total return",
++        "return_12m": "12-month total return",
++    }
++    assert all(label != key for key, label in reader.INPUT_LABELS.items())
+diff --git a/tests/unit/test_reader_sql_read_only.py b/tests/unit/test_reader_sql_read_only.py
+index 8051a00..ca644c0 100644
+--- a/tests/unit/test_reader_sql_read_only.py
++++ b/tests/unit/test_reader_sql_read_only.py
+@@ -28,6 +28,8 @@ def _strip_comments(text: str) -> str:
+         "summary.sql",
+         "list_classifications.sql",  # CAP-002-E3-S2 T016
+         "universe_exists.sql",  # CAP-002-E3-S2 T016
++        "stock_evidence.sql",  # CAP-002-E3-S3 T012
++        "stock_memberships.sql",  # CAP-002-E3-S3 T012
+     ],
+ )
+ def test_reader_statement_is_one_read_only_query(name: str) -> None:
+@@ -47,3 +49,12 @@ def test_comment_stripping_does_not_hide_a_write() -> None:
+     stripped = _strip_comments(text)
+     assert "DROP" not in stripped
+     assert re.search(r"\bDELETE\b", stripped)
++
++
++@pytest.mark.parametrize("name", ["stock_evidence.sql", "stock_memberships.sql"])
++def test_evidence_statements_substitute_no_request_text(name: str) -> None:
++    """SEC-INP-002: no ``{`` placeholder and no ``%`` other than a bound ``%(name)s``."""
++    body = _strip_comments((SQL_DIR / name).read_text(encoding="utf-8"))
++
++    assert "{" not in body
++    assert not re.search(r"%(?!\([a-z_]+\)s)", body), body

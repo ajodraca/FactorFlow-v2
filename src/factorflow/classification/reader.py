@@ -2,7 +2,8 @@
 
 Implements ``component-design-classification-reader.md`` sections 2.1 (placement), 2.3
 (interface), 2.4 (current set, currency and the summary) and 7 (testing) for CAP-002-E3-S1, and
-sections 2.3, 2.5 (the list query) and 2.7 (read sequence) for CAP-002-E3-S2.
+sections 2.3, 2.5 (the list query) and 2.7 (read sequence) for CAP-002-E3-S2, and sections 2.5
+and 2.6 (compare, evidence and memberships) for CAP-002-E3-S3.
 
 - The current set is the latest set in state ``complete``; ``later`` is the most recent set
   started after it, or the most recent set while none is complete; ``not_current`` is true
@@ -32,6 +33,18 @@ The list (CAP-002-E3-S2):
 - Every cell carries the stored ``restated_possible`` (DAC-E3-12; DAC-E3-S2-6); a stock's name is
   its latest stored reference name, or None (DEC-0245, PROVISIONAL).
 
+Compare, evidence and memberships (CAP-002-E3-S3; DAC-E3-S3-1 to DAC-E3-S3-5, DAC-E3-7, DAC-E3-8,
+DAC-E3-12; TC-COMP-123, 124, 146, 113, 147):
+
+- ``compare`` is ``list_classifications`` with ``symbols`` set, so it applies the one list
+  statement, the one cell model and the one ``restated_possible`` rule; it accepts 2 to 6 distinct
+  symbols, returns every known one, retired and incomplete included, and reports the rest in
+  ``unknown_symbols`` (DEC-0127, DEC-0131, DEC-0132, DEC-0133).
+- ``stock_evidence`` returns the stock's three cells, every ``factor_input`` row of the current set
+  with value, ``as_of``, ``known_on`` and ``restated_possible``, and the active universes it
+  belongs to in name order; with no current set ``set`` is None in the same shape (DEC-0131,
+  DEC-0134, PROVISIONAL).
+
 ``read_set_blocks`` is the one definition of the ``set`` and ``later`` blocks that the summary,
 the list read and the API reuse (task plan Open Gap 3; SA-DUP-001). Statements are ``.sql`` files
 under ``sql/``, loaded at import and executed with bound parameters only. The reader takes the
@@ -39,9 +52,11 @@ caller's connection, writes nothing and never commits; database errors propagate
 """
 
 import base64
+import dataclasses
 import hashlib
 import json
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -53,15 +68,27 @@ from zoneinfo import ZoneInfo
 import psycopg
 
 from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
-from factorflow.classification.constants import FACTORS, MIN_PEER_SET_SIZE
+from factorflow.api.classification_bounds import MAX_COMPARE_SYMBOLS, MIN_COMPARE_SYMBOLS
+from factorflow.classification.constants import (
+    FACTORS,
+    INPUT_LABELS,
+    INPUT_NAMES,
+    MIN_PEER_SET_SIZE,
+)
+from factorflow.instruments.symbols import is_valid
 from factorflow.runs.queries import CursorError
 from factorflow.universes.replay import MEMBERSHIP_AS_OF_SQL
 
 __all__ = [
     "CURRENT_SET_SQL",
+    "EVIDENCE_SQL",
     "FACTORS",
+    "INPUT_LABELS",
     "INPUT_REASONS",
     "LIST_SQL",
+    "MAX_COMPARE_SYMBOLS",
+    "MEMBERSHIPS_SQL",
+    "MIN_COMPARE_SYMBOLS",
     "MIN_PEER_SET_SIZE",
     "SORT_ALLOWLIST",
     "SUMMARY_SQL",
@@ -71,13 +98,18 @@ __all__ = [
     "CursorError",
     "FactorCell",
     "FactorSummary",
+    "InputRow",
+    "InstrumentNotFound",
     "LaterSet",
     "ListFilters",
+    "Membership",
+    "StockEvidence",
     "StockRow",
     "StocksCurrent",
     "Summary",
     "Thresholds",
     "UniverseNotFound",
+    "compare",
     "current_set",
     "decode_cursor",
     "encode_cursor",
@@ -86,6 +118,7 @@ __all__ = [
     "list_classifications",
     "read_set_blocks",
     "resolve_sort",
+    "stock_evidence",
     "summary",
 ]
 
@@ -94,6 +127,8 @@ CURRENT_SET_SQL: Final = (_SQL_DIR / "current_set.sql").read_text()
 SUMMARY_SQL: Final = (_SQL_DIR / "summary.sql").read_text()
 LIST_SQL: Final = (_SQL_DIR / "list_classifications.sql").read_text()
 UNIVERSE_EXISTS_SQL: Final = (_SQL_DIR / "universe_exists.sql").read_text()
+EVIDENCE_SQL: Final = (_SQL_DIR / "stock_evidence.sql").read_text()
+MEMBERSHIPS_SQL: Final = (_SQL_DIR / "stock_memberships.sql").read_text()
 
 INPUT_REASONS: Final = ("input_missing", "input_outdated", "input_not_computable")  # DEC-0079
 
@@ -303,7 +338,7 @@ class StockRow:
 @dataclass(frozen=True)
 class ListFilters:
     universe_id: UUID | None = None
-    symbols: list[str] | None = None  # compare; its size is checked by CAP-002-E3-S3 (DEC-0127)
+    symbols: list[str] | None = None  # compare: 2 to 6 symbols of the symbol shape (DEC-0127)
     sort: str = "symbol"  # key of SORT_ALLOWLIST
     order: str = "asc"  # asc | desc
     thresholds: Thresholds = field(default_factory=Thresholds)
@@ -312,6 +347,14 @@ class ListFilters:
 
     def __post_init__(self) -> None:
         resolve_sort(self.sort)
+        if self.symbols is not None:
+            if not MIN_COMPARE_SYMBOLS <= len(self.symbols) <= MAX_COMPARE_SYMBOLS:
+                raise ValueError(
+                    f"symbols must hold {MIN_COMPARE_SYMBOLS} to {MAX_COMPARE_SYMBOLS} entries"
+                )
+            for symbol in self.symbols:
+                if not isinstance(symbol, str) or not is_valid(symbol):
+                    raise ValueError("each symbol must match ^[A-Z][A-Z0-9.-]{0,15}$")
         if not isinstance(self.order, str) or self.order not in _ORDERS:
             raise ValueError("order must be asc or desc")
         if (
@@ -331,6 +374,56 @@ class ClassificationPage:
     stocks: list[StockRow]
     unknown_symbols: list[str]  # compare only; [] on a list
     next_cursor: str | None
+
+
+@dataclass(frozen=True)
+class Membership:
+    universe_id: UUID
+    name: str
+
+
+@dataclass(frozen=True)
+class InputRow:
+    factor: str  # beside design 2.3's list: the API's inputs[] carries it (Open Gap 5)
+    input_name: str
+    label: str  # product vocabulary, never the input name (STD-UI-1)
+    status: str  # present | missing | outdated | not_computable
+    value: Decimal | None
+    as_of: date | None
+    known_on: date | None
+    restated_possible: bool
+    detail: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class StockEvidence:
+    set: CurrentSet | None  # None when no set is complete (DAC-E3-S3-5)
+    symbol: str
+    name: str | None
+    lifecycle: str
+    factors: dict[str, FactorCell]
+    inputs: list[InputRow]
+    memberships: list[Membership]
+
+
+class InstrumentNotFound(LookupError):
+    """The symbol names no instrument (the API maps it to 404)."""
+
+    def __init__(self, symbol: str) -> None:
+        super().__init__(symbol)
+        self.symbol = symbol
+
+
+def _normalise_symbols(symbols: list[str]) -> list[str]:
+    """Upper-case and deduplicate in first-seen order; the shape is ``ListFilters``' to refuse."""
+    normalised: list[str] = []
+    for symbol in symbols:
+        if not isinstance(symbol, str):
+            raise ValueError("symbols must be strings")
+        upper = symbol.upper()
+        if upper not in normalised:
+            normalised.append(upper)
+    return normalised
 
 
 def _cursor_check(payload: dict[str, Any]) -> str:
@@ -473,6 +566,90 @@ def list_classifications(conn: psycopg.Connection, filters: ListFilters) -> Clas
         stocks=stocks,
         unknown_symbols=[],
         next_cursor=next_cursor,
+    )
+
+
+def compare(conn: psycopg.Connection, symbols: list[str]) -> ClassificationPage:
+    """2 to 6 stocks side by side: the list statement with ``symbols`` set (design 2.5).
+
+    Every known symbol is returned, an incomplete or retired one included. A symbol that names no
+    instrument, or an instrument with no row in the current set, is reported in
+    ``unknown_symbols`` rather than dropped (DAC-E3-S3-2; DEC-0131). Reads only.
+    """
+    normalised = _normalise_symbols(symbols)
+    page = list_classifications(conn, ListFilters(symbols=normalised, limit=MAX_COMPARE_SYMBOLS))
+    if page.never_classified:
+        return page
+    found = {row.symbol for row in page.stocks}
+    return dataclasses.replace(
+        page, unknown_symbols=[symbol for symbol in normalised if symbol not in found]
+    )
+
+
+def stock_evidence(conn: psycopg.Connection, symbol: str) -> StockEvidence:
+    """One stock's cells, every input of the current set and its active universes (design 2.6).
+
+    With no current set, or no stored rows for the stock, ``factors`` and ``inputs`` are empty and
+    ``set`` is the current block (DEC-0131, PROVISIONAL). Raises ``InstrumentNotFound``.
+    """
+    upper = symbol.upper()
+    current, _later = read_set_blocks(conn)
+    params = {
+        "symbol": upper,
+        "set_id": current.set_id if current is not None else None,
+        "factor_order": list(FACTORS),
+        "input_order": [name for factor in FACTORS for name in INPUT_NAMES[factor]],
+    }
+    with conn.cursor() as cur:
+        cur.execute(EVIDENCE_SQL, params)
+        names = [column.name for column in cur.description] if cur.description else []
+        rows = [dict(zip(names, row, strict=True)) for row in cur.fetchall()]
+    if not rows or rows[0]["row_kind"] != "instrument":
+        raise InstrumentNotFound(upper)
+    stock = rows[0]
+    factors = {str(r["factor"]): _cell_from_row(r) for r in rows if r["row_kind"] == "cell"}
+    inputs = [
+        InputRow(
+            factor=str(r["factor"]),
+            input_name=str(r["input_name"]),
+            label=INPUT_LABELS[str(r["input_name"])],
+            status=str(r["status"]),
+            value=r["value"],
+            as_of=r["as_of"],
+            known_on=r["known_on"],
+            restated_possible=bool(r["restated_possible"]),
+            detail=r["detail"],
+        )
+        for r in rows
+        if r["row_kind"] == "input"
+    ]
+    return StockEvidence(
+        set=current,
+        symbol=str(stock["symbol"]),
+        name=stock["name"],
+        lifecycle=str(stock["lifecycle"]),
+        factors=factors,
+        inputs=inputs,
+        memberships=_memberships(conn, int(stock["instrument_id"])),
+    )
+
+
+def _memberships(conn: psycopg.Connection, instrument_id: int) -> list[Membership]:
+    with conn.cursor() as cur:
+        cur.execute(MEMBERSHIPS_SQL, {"instrument_id": instrument_id})
+        return [Membership(universe_id=row[0], name=str(row[1])) for row in cur.fetchall()]
+
+
+def _cell_from_row(row: Mapping[str, Any]) -> FactorCell:
+    """A ``FactorCell`` from the seven unprefixed columns; derives nothing (Open Gap 9)."""
+    return FactorCell(
+        status=str(row["status"]),
+        score=row["score"],
+        percentile=row["percentile"],
+        reason_code=row["reason_code"],
+        reason_input=row["reason_input"],
+        reason_detail=row["reason_detail"],
+        restated_possible=bool(row["restated_possible"]),
     )
 
 
