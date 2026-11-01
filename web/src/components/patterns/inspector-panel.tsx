@@ -258,9 +258,10 @@ function Loaded({ evidence }: { evidence: StockEvidence }): JSX.Element {
         ))}
       </dl>
       {sentences.length === 0 ? null : (
+        // Bordered with the theme's `--radius`, as UX design 1.1 item 4 asks (DEC-0262).
         <div
           data-testid="explanation"
-          className="flex flex-col gap-2 rounded border border-border p-3 text-sm"
+          className="flex flex-col gap-2 rounded-[var(--radius)] border border-border p-3 text-sm"
         >
           {sentences.map((sentence) => (
             <p key={sentence}>{sentence}</p>

@@ -367,3 +367,68 @@ cycles:
             synchronously and no gap opens. The render-phase reset already replaces the failure with loading on that
             commit (pinned by the Try again Profiler probe). No input tells the two apart. The attempt half is kept
             because review v2 IR-001 names the (symbol, attempt) key.
+
+  # Review-rework cycle against CAP-002-E4-S7-implementation-review-v3.md (CHANGES-REQUIRED; review commit 14c4522 over
+  # rework 9deeeef). This is the run's final rework attempt (the owner lifted the one-rework cap). The driver owns the
+  # commit. Finding responses:
+  #   IR-001 (HIGH): tests only, no production change, as the review requires.
+  #   IR-002 (LOW): every gap test now asserts the gap opened.
+  #   IR-003 (LOW): owner decision DEC-0262: the explanation box takes rounded-[var(--radius)], as CAP-002-E4-S8's
+  #     notices do. The swatch keeps rounded (DEC-0251). No theme.css or tailwind.config.js change.
+  #   IR-004 (LOW): no change. The carried follow-up stands for a story that may edit factor-cell.tsx.
+  # Decisions applied: DEC-0165, DEC-0251 and DEC-0262 (owner-decided). No new decision recorded. Decision-Id trailer
+  # for the stage commit: DEC-0262.
+  - id: cycle-6
+    tasks: [T007, T008, T012]
+    description: >
+      Rework of implementation review v3. IR-001: two T008 tests in which the previous stock's read fails after the
+      current read has settled. In the first, AAPL moves to MSFT, MSFT loads, then AAPL's read rejects: Microsoft stays
+      on screen with no skeleton and no Try again. In the second, AAPL moves to MSFT and back to AAPL within the 150 ms
+      wait, the fresh AAPL read loads, then the first AAPL read rejects: Apple stays with no Try again. In the second
+      test both reads carry the same (AAPL, 0) key, so only the cancelled guard can drop the late failure. IR-002: a
+      Profiler around the panel counts its commits after the move, and each of the four act()-free gap tests requires
+      exactly two: the move's commit and the stale read's state update. That update happens only while cancelled is
+      still false, which is the gap. IR-003 (DEC-0262): the box's class is rounded-[var(--radius)], with a code comment
+      citing the decision. The box test asserts that class and the absence of the plain rounded class.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/red-cycle-6.log
+    red_log_sha256: 12b97174f8ea3f07922af9c0987a70b758ac5fa44491ab8033b7d8cf5ff5eb73
+    red_evidence: >
+      With the cycle-6 tests and HEAD's production inspector-panel.tsx, the three focused suites ran 1 failed, 421
+      passed (red-cycle-6.log). The failure is the box corner, which still had rounded. The two IR-001 tests pin
+      behaviour HEAD already has. Their RED is review v3's survivor manual:review:fail-unguarded, rerun here as
+      manual:cycle-6:fail-unguarded: both new tests fail with it applied (the mutant's log names exactly those two).
+      The IR-002 assertion's RED was checked by temporarily replacing startTransition with flushSync, which closes the
+      gap. All four gap tests then failed with "expected 1 to be 2", and the file was restored. The code reviewer
+      reproduced the same result independently.
+    green_evidence: >
+      Focused suites 422 passed in 3 files: inspector-panel.test.tsx 64, selection-tray.test.tsx 24, copy.test.ts 334
+      (green-cycle-6.log). Full web suite 1335 passed in 60 files (full-suite-cycle-6.log). npm run lint, npm run format
+      (check), tsc --noEmit and npm run build are clean, and the built CSS has
+      .rounded-\[var\(--radius\)\]{border-radius:var(--radius)}. inspector-panel.test.tsx passed 5 runs in a row here
+      and 8 in the code reviewer's run. Code review (independent subagent): APPROVED, with two optional LOWs: a
+      redundant commits reset in beforeEach, and the exact toBe(2) count, which fails loudly rather than passing wrongly
+      if React adds a commit. Both were left as they are. Spec drift (independent subagent): none. It noted that
+      DEC-0262 is still status open with commits empty, which the record will need once this cycle is committed.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/green-cycle-6.log
+        sha256: 0e5b8471012b813fcaa91cb11e3c7f4f20c55738014786481e5d99b540840fa2
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/full-suite-cycle-6.log
+        sha256: 7a120f016e59e7cbf4f5fa6d20a56f1f95d3574b30937ef0adaaf685edf26326
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4389dd164af2e614490a3f3d5b61c8c1e8759b347e97ef283e85acb011be31ca
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S7-evidence/mutation-cycle-6-results.json
+      results_sha256: 0074ca2519ea4d4c006c7203fc9881b81936361ff065c87f282cb02ede987df9
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

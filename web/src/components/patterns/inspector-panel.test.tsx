@@ -434,6 +434,38 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
     expect(within(inspector()).getByRole("status")).toHaveTextContent(LOADING);
   });
 
+  it("never lets a stale failure replace the new selection's settled read", async () => {
+    const aapl = deferred<StockEvidence>();
+    const msft = deferred<StockEvidence>();
+    read.mockReturnValueOnce(aapl.promise).mockReturnValueOnce(msft.promise);
+    const { rerender } = render(panel("AAPL"));
+    await advance(150);
+    rerender(panel("MSFT"));
+    await advance(150);
+    await settle(() => msft.resolve(evidence({ symbol: "MSFT", name: "Microsoft Corp." })));
+    await settle(() => aapl.reject(new TypeError("Failed to fetch")));
+    expect(inspector()).toHaveTextContent("Microsoft Corp.");
+    expect(within(inspector()).queryByRole("status")).toBeNull();
+    expect(within(inspector()).queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
+  });
+
+  it("never lets the earlier read's failure replace a fresh read of the same stock", async () => {
+    const first = deferred<StockEvidence>();
+    const second = deferred<StockEvidence>();
+    read.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const { rerender } = render(panel("AAPL"));
+    await advance(150);
+    rerender(panel("MSFT"));
+    await advance(100);
+    rerender(panel("AAPL"));
+    await advance(150);
+    expect(read.mock.calls.map(([symbol]) => symbol)).toEqual(["AAPL", "AAPL"]);
+    await settle(() => second.resolve(evidence()));
+    await settle(() => first.reject(new TypeError("Failed to fetch")));
+    expect(inspector()).toHaveTextContent("Apple Inc.");
+    expect(within(inspector()).queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
+  });
+
   describe("a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001)", () => {
     // testing-library's act() flushes passive effects before any read can
     // settle, which hides this ordering. These tests run without act(), on a
@@ -444,11 +476,16 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
     // effect settles the previous stock's read during the new commit and then
     // holds the commit past the scheduler's 5 ms frame, so React yields, the
     // read's callback runs, and only then does React run the previous
-    // effect's cleanup.
+    // effect's cleanup. Each test checks that the gap opened: the stale
+    // read's state update, made before the cleanup flipped `cancelled`, adds a
+    // second commit of the panel after the move (review v3 IR-002). If React
+    // ran the cleanup first, the read would be dropped with no commit, and the
+    // test would fail rather than pass without exercising the gap.
     const realWait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     let container: HTMLDivElement;
     let root: Root;
     let actEnvironment: unknown;
+    let commits = 0;
 
     beforeEach(() => {
       vi.useRealTimers();
@@ -458,6 +495,7 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
       container = document.createElement("div");
       document.body.append(container);
       root = createRoot(container);
+      commits = 0;
     });
 
     afterEach(() => {
@@ -484,7 +522,14 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
     function tree(symbol: string | null, settle: (() => void) | null): JSX.Element {
       return (
         <MemoryRouter>
-          <InspectorPanel symbol={symbol} />
+          <Profiler
+            id="inspector"
+            onRender={() => {
+              commits += 1;
+            }}
+          >
+            <InspectorPanel symbol={symbol} />
+          </Profiler>
           <SettleDuringCommit settle={settle} />
         </MemoryRouter>
       );
@@ -500,9 +545,12 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
       root.render(tree("AAPL", null));
       await realWait(INSPECT_DEBOUNCE_MS + 100);
       expect(read).toHaveBeenCalledWith("AAPL");
+      commits = 0;
       startTransition(() => root.render(tree(next, () => settle(aapl))));
       // Less than the debounce, so the new selection's own read is not yet issued.
       await realWait(50);
+      // The move's commit, then the stale read's: the read settled inside the gap.
+      expect(commits).toBe(2);
     }
 
     it("never renders the previous stock's read under the new selection", async () => {
@@ -891,10 +939,10 @@ describe("the explanation box, the evidence link and the footnote (AC-16; classi
     );
     const box = explanation(section);
     expect(box).not.toBeNull();
-    // The delivered corner class the card and its buttons use, as DEC-0251
-    // chose for the swatch; the theme maps no `--radius` class yet (review v2
-    // IR-003, a theme follow-up for the owner).
-    expect(box).toHaveClass("rounded", "border", "border-border");
+    // The theme's `--radius`, as CAP-002-E4-S8's notices take it (DEC-0262);
+    // the swatch keeps `rounded` (DEC-0251).
+    expect(box).toHaveClass("rounded-[var(--radius)]", "border", "border-border");
+    expect(box).not.toHaveClass("rounded");
     const sentences = Array.from(box?.querySelectorAll("p") ?? []).map((p) => p.textContent);
     expect(sentences).toEqual([
       CELL.incompleteDetail(detail, "growth"),
