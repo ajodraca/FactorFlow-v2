@@ -103,6 +103,8 @@ def insert_input(
     value: Any = None,
     as_of: date | None = None,
     known_on: date | None = None,
+    restated_possible: bool = False,
+    detail: dict[str, Any] | None = None,
 ) -> None:
     """One ``factor_input`` row; a ``present`` one defaults its value and dates."""
     if status == "present":
@@ -111,8 +113,20 @@ def insert_input(
         known_on = date(2026, 10, 1) if known_on is None else known_on
     conn.execute(
         "INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, "
-        "as_of, known_on, detail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-        (set_id, instrument_id, factor, input_name, status, value, as_of, known_on, Jsonb({})),
+        "as_of, known_on, restated_possible, detail) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (
+            set_id,
+            instrument_id,
+            factor,
+            input_name,
+            status,
+            value,
+            as_of,
+            known_on,
+            restated_possible,
+            Jsonb(detail or {}),
+        ),
     )
     conn.commit()
 
@@ -301,3 +315,45 @@ def seed_scored_stock(
                 restated_possible=factor in marked,
             )
     return instrument_id
+
+
+# --- CAP-002-E3-S3: a stock's eight inputs and a universe rename ---------------------------
+
+
+def seed_inputs(
+    conn: psycopg.Connection,
+    set_id: UUID,
+    instrument_id: int,
+    *,
+    statuses: dict[str, str] | None = None,
+    values: dict[str, Any] | None = None,
+    restated: Iterable[str] = (),
+) -> None:
+    """The stock's eight ``factor_input`` rows through ``insert_input``.
+
+    Every input is ``present`` unless ``statuses`` names it; ``values`` overrides a present
+    input's value and ``restated`` names the inputs whose row carries ``restated_possible``.
+    """
+    given = statuses or {}
+    valued = values or {}
+    marked = set(restated)
+    for factor in FACTORS:
+        for input_name in INPUT_NAMES[factor]:
+            insert_input(
+                conn,
+                set_id,
+                instrument_id,
+                factor,
+                input_name,
+                given.get(input_name, "present"),
+                value=valued.get(input_name),
+                restated_possible=input_name in marked,
+            )
+
+
+def rename_universe(conn: psycopg.Connection, universe_id: UUID, name: str) -> None:
+    conn.execute(
+        "INSERT INTO universe_event (universe_id, event_type, name) VALUES (%s, 'renamed', %s)",
+        (universe_id, name),
+    )
+    conn.commit()
