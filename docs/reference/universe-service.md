@@ -11,14 +11,21 @@ removes a member and retires (CAP-002-E1-S4), and creates from a filter
 (CAP-002-E1-S5). Its reads are in `universes/sql/`; its writes are inline
 constants in `service.py`.
 
-No API route or screen calls the service yet: the only import of the package
-from elsewhere under `src/` is the classification reader's import of
-`MEMBERSHIP_AS_OF_SQL` from `replay.py`. The service imports `Thresholds`,
+The classification API's `/api/universes` routes call the service
+(`src/factorflow/api/routes/universes.py`, CAP-002-E1-S6; see
+[`classification-api.md`](classification-api.md)); they also page
+`replay.list_universe_rows` for the list's counts. The only other import of
+the package from elsewhere under `src/` is the classification reader's import
+of `MEMBERSHIP_AS_OF_SQL` from `replay.py`. The service imports `Thresholds`,
 `current_set` and `evaluate_filter` from `factorflow.classification.reader`;
 the reader never imports the service, so there is no cycle.
 
-Every function takes the caller's `psycopg.Connection`. Neither module commits
-and neither catches a database error.
+Every function takes the caller's `psycopg.Connection`. Neither module issues
+`COMMIT` itself and neither catches a database error. But on a
+connection with no transaction open, such as one fresh from the API's pool, a
+write's `with conn.transaction():` block is psycopg's outer transaction and
+commits when it exits (see the classification API's
+[accepted warning IR-001](classification-api.md#transactions)).
 
 ## Writes
 

@@ -1,0 +1,676 @@
+{
+  "schema": 1,
+  "repo_head": "8ec2a736136dd3f743fb22ac1b7eac771e28d032",
+  "range": "5cbac5bf5536e2aaf4af17ae8e45334d5aee9a18..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/routes/universes.py:62:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 62,
+      "original": "    service.UniverseNotFound: (404, \"universe_not_found\"),",
+      "mutated": "    service.UniverseNotFound: (405, \"universe_not_found\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:63:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 63,
+      "original": "    service.UniverseRetired: (409, \"universe_retired\"),",
+      "mutated": "    service.UniverseRetired: (410, \"universe_retired\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:64:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 64,
+      "original": "    service.UniverseNameInUse: (409, \"universe_name_in_use\"),",
+      "mutated": "    service.UniverseNameInUse: (410, \"universe_name_in_use\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:65:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 65,
+      "original": "    service.EmptyUniverse: (422, \"empty_universe\"),",
+      "mutated": "    service.EmptyUniverse: (423, \"empty_universe\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:66:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 66,
+      "original": "    service.LastMember: (409, \"last_member\"),",
+      "mutated": "    service.LastMember: (410, \"last_member\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:67:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 67,
+      "original": "    service.NotAMember: (404, \"not_a_member\"),",
+      "mutated": "    service.NotAMember: (405, \"not_a_member\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:68:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 68,
+      "original": "    service.InstrumentNotAcquired: (409, \"instrument_not_acquired\"),",
+      "mutated": "    service.InstrumentNotAcquired: (410, \"instrument_not_acquired\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:69:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 69,
+      "original": "    service.ClassificationSetChanged: (409, \"classification_set_changed\"),",
+      "mutated": "    service.ClassificationSetChanged: (410, \"classification_set_changed\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:70:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 70,
+      "original": "    CursorError: (422, \"cursor_invalid\"),",
+      "mutated": "    CursorError: (423, \"cursor_invalid\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:95:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 95,
+      "original": "        current = exc.current_set_id if exc.current_set_id is not None else \"none is complete\"",
+      "mutated": "        current = exc.current_set_id if exc.current_set_id is None else \"none is complete\""
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:117:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 117,
+      "original": "    member_route: bool = False,",
+      "mutated": "    member_route: bool = True,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:121:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 121,
+      "original": "    from_filter: bool = False,",
+      "mutated": "    from_filter: bool = True,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:145:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 145,
+      "original": "def _json(model: BaseModel, status_code: int = 200) -> JSONResponse:",
+      "mutated": "def _json(model: BaseModel, status_code: int = 201) -> JSONResponse:"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:152:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 152,
+      "original": "    total, cursor = 0, None",
+      "mutated": "    total, cursor = 1, None"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:153:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 153,
+      "original": "    while True:",
+      "mutated": "    while False:"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:165:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 165,
+      "original": "    while True:",
+      "mutated": "    while False:"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:169:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 169,
+      "original": "                universe_id=universe.universe_id, limit=MAX_PAGE_SIZE, cursor=cursor",
+      "mutated": "                universe_id=None, limit=MAX_PAGE_SIZE, cursor=cursor"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:182:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 182,
+      "original": "                symbol=member.symbol,",
+      "mutated": "                symbol=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:184:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 184,
+      "original": "                lifecycle=member.lifecycle,",
+      "mutated": "                lifecycle=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:185:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 185,
+      "original": "                member_since=member.member_since,",
+      "mutated": "                member_since=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:191:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 191,
+      "original": "        universe_id=universe.universe_id,",
+      "mutated": "        universe_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:192:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 192,
+      "original": "        name=universe.name,",
+      "mutated": "        name=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:193:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 193,
+      "original": "        lifecycle=universe.lifecycle,",
+      "mutated": "        lifecycle=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:194:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 194,
+      "original": "        created_at=universe.created_at,",
+      "mutated": "        created_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:195:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 195,
+      "original": "        retired_at=universe.retired_at,",
+      "mutated": "        retired_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:197:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 197,
+      "original": "        as_of=universe.as_of,",
+      "mutated": "        as_of=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:198:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 198,
+      "original": "        as_of_before_creation=universe.as_of_before_creation,",
+      "mutated": "        as_of_before_creation=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:200:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 200,
+      "original": "            kind=origin.kind,",
+      "mutated": "            kind=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:201:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 201,
+      "original": "            set_id=origin.set_id,",
+      "mutated": "            set_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:202:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 202,
+      "original": "            classification_date=origin.classification_date,",
+      "mutated": "            classification_date=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:203:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 203,
+      "original": "            thresholds=origin.thresholds,",
+      "mutated": "            thresholds=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:204:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 204,
+      "original": "            hide_incomplete=origin.hide_incomplete,",
+      "mutated": "            hide_incomplete=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:205:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 205,
+      "original": "            symbol=origin.symbol,",
+      "mutated": "            symbol=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:215:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 215,
+      "original": "@router.get(\"/api/universes\")",
+      "mutated": ".get(\"/api/universes\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:220:drop-defaulted-argument:1",
+      "cycle": "cycle-2",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 220,
+      "original": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),",
+      "mutated": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, le=MAX_PAGE_SIZE),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:220:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 220,
+      "original": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),",
+      "mutated": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=1, le=MAX_PAGE_SIZE),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:236:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 236,
+      "original": "                    universe_id=universe.universe_id,",
+      "mutated": "                    universe_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:237:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 237,
+      "original": "                    name=universe.name,",
+      "mutated": "                    name=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:238:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 238,
+      "original": "                    lifecycle=universe.lifecycle,",
+      "mutated": "                    lifecycle=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:240:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 240,
+      "original": "                    created_at=universe.created_at,",
+      "mutated": "                    created_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:241:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 241,
+      "original": "                    retired_at=universe.retired_at,",
+      "mutated": "                    retired_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:252:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 252,
+      "original": "@router.get(\"/api/universes/{universe_id}\")",
+      "mutated": ".get(\"/api/universes/{universe_id}\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:267:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 267,
+      "original": "@router.get(\"/api/universes/{universe_id}/events\")",
+      "mutated": ".get(\"/api/universes/{universe_id}/events\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:271:drop-defaulted-argument:1",
+      "cycle": "cycle-2",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 271,
+      "original": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),",
+      "mutated": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, le=MAX_PAGE_SIZE),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:271:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 271,
+      "original": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE),",
+      "mutated": "    limit: int = Query(default=DEFAULT_PAGE_SIZE, gt=1, le=MAX_PAGE_SIZE),"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:287:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 287,
+      "original": "                    event_id=event.event_id,",
+      "mutated": "                    event_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:288:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 288,
+      "original": "                    event_type=event.event_type,",
+      "mutated": "                    event_type=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:289:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 289,
+      "original": "                    name=event.name,",
+      "mutated": "                    name=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:290:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 290,
+      "original": "                    symbol=event.symbol,",
+      "mutated": "                    symbol=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:291:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 291,
+      "original": "                    recorded_at=event.recorded_at,",
+      "mutated": "                    recorded_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:292:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 292,
+      "original": "                    recorded_on=event.recorded_on,",
+      "mutated": "                    recorded_on=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:293:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 293,
+      "original": "                    filter_provenance=event.filter_provenance,",
+      "mutated": "                    filter_provenance=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:305:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 305,
+      "original": "@router.post(\"/api/universes\")",
+      "mutated": ".post(\"/api/universes\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:311:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 311,
+      "original": "            if body.filter is not None and body.set_id is not None:",
+      "mutated": "            if body.filter is None and body.set_id is not None:"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:311:negate-boolean:2",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 311,
+      "original": "            if body.filter is not None and body.set_id is not None:",
+      "mutated": "            if body.filter is not None and body.set_id is None:"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:323:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 323,
+      "original": "            name=body.name,",
+      "mutated": "            name=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:324:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 324,
+      "original": "            from_filter=body.filter is not None,",
+      "mutated": "            from_filter=body.filter is None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:326:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 326,
+      "original": "    return _json(created, status_code=201)",
+      "mutated": "    return _json(created, status_code=202)"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:329:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 329,
+      "original": "@router.patch(\"/api/universes/{universe_id}\")",
+      "mutated": ".patch(\"/api/universes/{universe_id}\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:346:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 346,
+      "original": "@router.delete(\"/api/universes/{universe_id}\")",
+      "mutated": ".delete(\"/api/universes/{universe_id}\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:357:drop-field-copy:1",
+      "cycle": "cycle-2",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 357,
+      "original": "    return _json(RetireUniverseResponse(lifecycle=\"retired\", retired_at=universe.retired_at))",
+      "mutated": "    return _json(RetireUniverseResponse(lifecycle=\"retired\", retired_at=None))"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:360:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 360,
+      "original": "@router.post(\"/api/universes/{universe_id}/members\")",
+      "mutated": ".post(\"/api/universes/{universe_id}/members\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:372:drop-defaulted-argument:1",
+      "cycle": "cycle-2",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 372,
+      "original": "            member_route=True,",
+      "mutated": "            "
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:372:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 372,
+      "original": "            member_route=True,",
+      "mutated": "            member_route=False,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:378:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 378,
+      "original": "@router.delete(\"/api/universes/{universe_id}/members/{symbol}\")",
+      "mutated": ".delete(\"/api/universes/{universe_id}/members/{symbol}\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:382:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 382,
+      "original": "    if not is_valid(clean):",
+      "mutated": "    if is_valid(clean):"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:384:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 384,
+      "original": "            status_code=422,",
+      "mutated": "            status_code=423,"
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:399:drop-defaulted-argument:1",
+      "cycle": "cycle-2",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 399,
+      "original": "            member_route=True,",
+      "mutated": "            "
+    },
+    {
+      "id": "src/factorflow/api/routes/universes.py:399:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/universes.py",
+      "line": 399,
+      "original": "            member_route=True,",
+      "mutated": "            member_route=False,"
+    },
+    {
+      "id": "manual:member-resource-ignores-route",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/universes.py",
+      "old": "member_route and isinstance(",
+      "new": "False and isinstance("
+    },
+    {
+      "id": "manual:count-first-page-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/universes.py",
+      "old": "        total += len(rows)\n        if cursor is None:",
+      "new": "        total += len(rows)\n        if True:"
+    },
+    {
+      "id": "manual:cells-first-page-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/universes.py",
+      "old": "        cursor = page.next_cursor\n",
+      "new": "        cursor = None\n"
+    },
+    {
+      "id": "manual:path-symbol-unchecked",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/universes.py",
+      "old": "    if not is_valid(clean):\n",
+      "new": "    if False:\n"
+    },
+    {
+      "id": "manual:symbols-field-dropped",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/universes.py",
+      "old": "        content[\"error\"][\"symbols\"] = exc.symbols\n",
+      "new": "        pass\n"
+    },
+    {
+      "id": "manual:empty-reason-ignores-filter",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/universes.py",
+      "old": "\"the filter matched no stock\" if from_filter else",
+      "new": "\"the filter matched no stock\" if not from_filter else"
+    }
+  ]
+}
