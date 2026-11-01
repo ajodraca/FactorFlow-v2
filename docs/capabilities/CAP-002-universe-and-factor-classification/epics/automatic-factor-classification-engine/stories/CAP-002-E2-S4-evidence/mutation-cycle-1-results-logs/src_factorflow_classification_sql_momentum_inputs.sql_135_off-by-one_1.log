@@ -1,0 +1,47 @@
+..............F
+=================================== FAILURES ===================================
+_ test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-string] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=50389 user=test database=test_55cefa4fbc2444dd81fff3be4a974e0...8a17cb0>, stock=1, set_id=UUID('0f942a2b-9034-4f28-b4b2-63ac96305b98'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a15c70>
+dividend = {'cash_amount': '1'}
+
+    @pytest.mark.parametrize(
+        "dividend", [{"cash_amount": "1"}, {"cash_amount": 1}], ids=["json-string", "json-number"]
+    )
+    def test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01(
+        env: Env, monkeypatch: pytest.MonkeyPatch, dividend: dict[str, Any]
+    ) -> None:
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, ex_date: 98, E: 99, L: 99},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, dividend)
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            assert_close(rows[name]["value"], ret(99, 90, Decimal("1.01")))
+>       assert rows["return_3m"]["detail"]["dividends"] == [
+            {
+                "effective_on": "2026-08-03",
+                "cash_amount": 1,
+                "observed_on": "2026-08-03",
+                "split_factor": 1,
+                "prior_session": bar(date(2026, 7, 31), 100),
+                "prior_adjusted_close": 100,
+            }
+        ]
+E       AssertionError: assert [{'cash_amoun...tor': 1, ...}] == [{'effective_...tor': 1, ...}]
+E         
+E         At index 0 diff: {'cash_amount': 1, 'observed_on': '2026-08-03', 'effective_on': '2026-08-03', 'split_factor': 1, 'prior_session': {'close': Decimal('100.000000'), 'observed_on': '2026-07-31', 'session_date': '2026-07-31'}, 'prior_adjusted_close': Decimal('200.000000')} != {'effective_on': '2026-08-03', 'cash_amount': 1, 'observed_on': '2026-08-03', 'split_factor': 1, 'prior_session': {'session_date': '2026-07-31', 'close': 100, 'observed_on': '2026-07-31'}, 'prior_adjusted_close': 100}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:481: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-string]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 14 passed in 4.40s

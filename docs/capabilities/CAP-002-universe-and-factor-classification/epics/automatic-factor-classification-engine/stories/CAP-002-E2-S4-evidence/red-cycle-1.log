@@ -1,0 +1,2832 @@
+# RED, CAP-002-E2-S4 cycle-1: new tests before any production code (HEAD 7688c92, 2026-10-30T02:08:35Z)
+# test files (sha256): tests/integration/test_engine_inputs_momentum.py 04af150dccb7ba506adf694c43ea803b211bf3ada6523bd95543605dd6e03799; tests/integration/engine_momentum_support.py ab42350b952d40aa9195d05cb7bbb8cfd90ca31da7b29b518c6fa0490b7896b9; 
+# git status --porcelain:  M docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-tasks.md; M docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4.md;?? docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S4-evidence/;?? tests/integration/engine_momentum_support.py;?? tests/integration/test_engine_inputs_momentum.py;
+# uv run --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider tests/integration/test_engine_inputs_momentum.py tests/unit/test_classification_stage_order.py tests/unit/test_engine_sql_safety.py
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF...................... [ 86%]
+...........                                                              [100%]
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_aed940cacd724b9193b6f225048a993...cfde090>, stock=1, set_id=UUID('80b602e1-60ad-40b2-8a88-63863be5b487'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfdc710>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_aed940cacd724b9193b6f225048a993c) at 0x10cfde090>
+set_id = UUID('80b602e1-60ad-40b2-8a88-63863be5b487')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfdc710>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+___________ test_every_window_is_present_with_bars_on_every_boundary ___________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_052d562ac9e74bf88d250b15c5ed9d9...d020bf0>, stock=1, set_id=UUID('3a63da49-0d7a-42ea-959f-9cdc4817073e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0208c0>
+
+    def test_every_window_is_present_with_bars_on_every_boundary(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-7, DEC-0055 (3), (4): three returns over (S_k, E], with E, S_k and both closes in
+        detail and no adjustment when the window holds no corporate action."""
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:165: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_052d562ac9e74bf88d250b15c5ed9d93) at 0x10d020bf0>
+set_id = UUID('3a63da49-0d7a-42ea-959f-9cdc4817073e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0208c0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+______ test_boundaries_resolve_to_the_latest_bar_on_or_before_each_target ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_63e6d7d2374e46c490f62246952824a...d0214c0>, stock=1, set_id=UUID('915c5536-83a7-4ae9-ba9e-79032c89fde4'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d021d60>
+
+    def test_boundaries_resolve_to_the_latest_bar_on_or_before_each_target(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (3), DAC-E2-1: E is the latest bar on or before D minus one month, S_k the
+        latest on or before the resolved E (not E's target) minus k months; a bar after a target
+        is never chosen."""
+        e = date(2026, 9, 15)  # no bar on 09-16 or 09-17, so E is 09-15 and S_k targets the 15th
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                date(2025, 9, 12): 40,
+                date(2025, 9, 16): 1,  # after S_12's target 2025-09-15, before E's target minus 12
+                date(2026, 3, 13): 60,
+                date(2026, 3, 16): 1,
+                date(2026, 6, 12): 80,
+                date(2026, 6, 17): 1,  # on E's target minus 3 months, after the resolved one
+                e: 100,
+                date(2026, 9, 18): 1,  # after E's target
+                L: 110,
+            },
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:205: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_63e6d7d2374e46c490f62246952824a4) at 0x10d0214c0>
+set_id = UUID('915c5536-83a7-4ae9-ba9e-79032c89fde4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d021d60>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_________ test_a_bar_on_the_target_date_is_chosen_over_an_earlier_one __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_0963d029025349b78b487250cff9fd9...d021f10>, stock=1, set_id=UUID('c3e8a72b-d475-4ae4-8f6f-ad3c4e5837b3'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d022330>
+
+    def test_a_bar_on_the_target_date_is_chosen_over_an_earlier_one(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (3): "on or before" includes the target date itself."""
+        day = timedelta(days=1)
+        earlier: dict[date, Decimal | int] = {target - day: 1 for target in (S12, S6, S3, E)}
+        add_close_series(env.conn, env.stock, earlier | STANDARD)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:228: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_0963d029025349b78b487250cff9fd93) at 0x10d021f10>
+set_id = UUID('c3e8a72b-d475-4ae4-8f6f-ad3c4e5837b3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d022330>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_one_month_before_a_month_end_is_the_shorter_month_end[classification_date0] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_57b9701335324539a73b9ca15ea6603...0d023230>, stock=1, set_id=UUID('0eadc9f7-115e-4cf7-b520-192617aad9b7'), latest_trading_day=datetime.date(2026, 3, 30))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d023e30>
+
+    @pytest.mark.parametrize("classification_date", [date(2026, 3, 31)])
+    def test_one_month_before_a_month_end_is_the_shorter_month_end(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4 (PostgreSQL interval arithmetic), DEC-0055 (3): 2026-03-31 minus one month
+        is 2026-02-28, and 2026-02-28 minus 3, 6 and 12 months the 28th of those months."""
+        e = date(2026, 2, 28)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                date(2025, 2, 28): 50,
+                date(2025, 3, 1): 1,
+                date(2025, 8, 28): 80,
+                date(2025, 8, 31): 1,
+                date(2025, 11, 28): 100,
+                date(2025, 11, 30): 1,  # E minus 90 days
+                date(2026, 2, 27): 1,
+                e: 120,
+                date(2026, 3, 1): 1,  # D minus 30 days
+                env.latest_trading_day: 130,
+            },
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_57b9701335324539a73b9ca15ea66030) at 0x10d023230>
+set_id = UUID('0eadc9f7-115e-4cf7-b520-192617aad9b7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d023e30>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+___ test_a_stock_with_no_bar_on_or_before_e_has_every_momentum_input_missing ___
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_cb6753aac6064e89bacf25f0d48bb6c...d023e90>, stock=1, set_id=UUID('6b20a337-3c24-4332-8cbb-d722ab926597'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0227b0>
+
+    def test_a_stock_with_no_bar_on_or_before_e_has_every_momentum_input_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (3), DEC-0118 (4): no bar on or before E's target leaves every window
+        without an end; nothing is dated."""
+        add_close_series(env.conn, env.stock, {date(2026, 9, 20): 100, L: 110})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:284: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_cb6753aac6064e89bacf25f0d48bb6c7) at 0x10d023e90>
+set_id = UUID('6b20a337-3c24-4332-8cbb-d722ab926597')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0227b0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-strings] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8ba3ea27214b4507bac062c3e3003f3...d021be0>, stock=1, set_id=UUID('643ecf84-46f3-4a05-b400-c021f7f93956'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0212e0>
+split = {'split_from': '1', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        "split",
+        [SPLIT_2_FOR_1, {"split_from": 1, "split_to": 2}],
+        ids=["json-strings", "json-numbers"],
+    )
+    def test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged(
+        env: Env, monkeypatch: pytest.MonkeyPatch, split: dict[str, Any]
+    ) -> None:
+        twin = add_instrument(env.conn, "TWIN")
+        split_on = date(2026, 7, 1)
+        pre: dict[date, Decimal | int] = {S12: 80, S6: 90, S3: 100, date(2026, 6, 30): 100}
+        post: dict[date, Decimal | int] = {split_on: 50, E: 55, L: 56}
+        add_close_series(env.conn, env.stock, pre | post)
+        add_close_series(env.conn, twin, {d: Decimal(c) / 2 for d, c in pre.items()} | post)
+        add_corporate_action(env.conn, env.stock, "split", split_on, split)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:319: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8ba3ea27214b4507bac062c3e3003f38) at 0x10d021be0>
+set_id = UUID('643ecf84-46f3-4a05-b400-c021f7f93956')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0212e0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-numbers] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_c74dd6744a5a4e5989b124fc859b4be...d0219a0>, stock=1, set_id=UUID('02cdd770-e55a-472f-b385-bd729a8fcc34'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d027860>
+split = {'split_from': 1, 'split_to': 2}
+
+    @pytest.mark.parametrize(
+        "split",
+        [SPLIT_2_FOR_1, {"split_from": 1, "split_to": 2}],
+        ids=["json-strings", "json-numbers"],
+    )
+    def test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged(
+        env: Env, monkeypatch: pytest.MonkeyPatch, split: dict[str, Any]
+    ) -> None:
+        twin = add_instrument(env.conn, "TWIN")
+        split_on = date(2026, 7, 1)
+        pre: dict[date, Decimal | int] = {S12: 80, S6: 90, S3: 100, date(2026, 6, 30): 100}
+        post: dict[date, Decimal | int] = {split_on: 50, E: 55, L: 56}
+        add_close_series(env.conn, env.stock, pre | post)
+        add_close_series(env.conn, twin, {d: Decimal(c) / 2 for d, c in pre.items()} | post)
+        add_corporate_action(env.conn, env.stock, "split", split_on, split)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:319: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_c74dd6744a5a4e5989b124fc859b4be0) at 0x10d0219a0>
+set_id = UUID('02cdd770-e55a-472f-b385-bd729a8fcc34')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d027860>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+________________ test_a_split_outside_the_window_is_not_applied ________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f53a4462c1d547ef942714ef4a3700a...d027050>, stock=1, set_id=UUID('3437fedc-2072-48d6-a04e-15c1135ce972'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d024ad0>
+
+    def test_a_split_outside_the_window_is_not_applied(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (4), DAC-E2-1: a split before S_k or after E adjusts nothing in that window."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                S12: 100,
+                S6: 100,
+                date(2026, 4, 30): 100,
+                date(2026, 5, 1): 50,
+                S3: 50,
+                E: 60,
+                date(2026, 9, 21): 30,
+                L: 31,
+            },
+        )
+        add_corporate_action(env.conn, env.stock, "split", date(2026, 5, 1), SPLIT_2_FOR_1)
+        add_corporate_action(env.conn, env.stock, "split", date(2026, 9, 21), SPLIT_2_FOR_1)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:358: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f53a4462c1d547ef942714ef4a3700a9) at 0x10d027050>
+set_id = UUID('3437fedc-2072-48d6-a04e-15c1135ce972')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d024ad0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+__________________ test_a_split_on_s_k_is_outside_the_window ___________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_ecbf951155f043e981a91da8cb974fe...d026870>, stock=1, set_id=UUID('71f2793e-db48-4413-95cf-65262d86fcd7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d025640>
+
+    def test_a_split_on_s_k_is_outside_the_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): the window is (S_k, E], so a split effective on S_k's own session (whose
+        close is already post-split) is not applied to it; the longer windows contain it."""
+        add_close_series(env.conn, env.stock, {S12: 200, S6: 200, S3: 100, E: 120, L: 120})
+        add_corporate_action(env.conn, env.stock, "split", S3, SPLIT_2_FOR_1)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:373: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_ecbf951155f043e981a91da8cb974fe7) at 0x10d026870>
+set_id = UUID('71f2793e-db48-4413-95cf-65262d86fcd7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d025640>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+____________________ test_a_split_on_e_is_inside_the_window ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f3ffe4d7885141758fe08f0f20e53aa...d0253a0>, stock=1, set_id=UUID('f9e56e4b-2f0f-491d-9027-f2f242b6beec'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d024ce0>
+
+    def test_a_split_on_e_is_inside_the_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): the window is (S_k, E], so a split effective on E adjusts every earlier
+        price."""
+        add_close_series(env.conn, env.stock, {S12: 100, S6: 100, S3: 100, E: 60, L: 60})
+        add_corporate_action(env.conn, env.stock, "split", E, SPLIT_2_FOR_1)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:387: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f3ffe4d7885141758fe08f0f20e53aaf) at 0x10d0253a0>
+set_id = UUID('f9e56e4b-2f0f-491d-9027-f2f242b6beec')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d024ce0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_________________ test_a_reverse_split_doubles_earlier_prices __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_bf41353c59734ee3b724d3d0f39f220...d021850>, stock=1, set_id=UUID('37dc4189-94aa-45c0-a957-f90c969c2e7b'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d022840>
+
+    def test_a_reverse_split_doubles_earlier_prices(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): prices before the split are scaled by split_from / split_to = 2."""
+        add_close_series(
+            env.conn, env.stock, {S12: 10, S6: 10, S3: 10, date(2026, 7, 1): 20, E: 25, L: 25}
+        )
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 7, 1), {"split_from": "2", "split_to": "1"}
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:402: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_bf41353c59734ee3b724d3d0f39f2202) at 0x10d021850>
+set_id = UUID('37dc4189-94aa-45c0-a957-f90c969c2e7b')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d022840>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+____________________ test_two_splits_in_one_window_compound ____________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_6f667a1df1ee42f997390c5afcae199...cfdae10>, stock=1, set_id=UUID('dd81d6af-7d3b-4065-9d84-bd3b993daf8f'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0250a0>
+
+    def test_two_splits_in_one_window_compound(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4), design 2.4: the factor is the product over every split after the bar."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 600, S6: 600, S3: 600, date(2026, 7, 1): 300, date(2026, 8, 3): 100, E: 110, L: 110},
+        )
+        add_corporate_action(env.conn, env.stock, "split", date(2026, 7, 1), SPLIT_2_FOR_1)
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 8, 3), {"split_from": "1", "split_to": "3"}
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:421: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_6f667a1df1ee42f997390c5afcae199c) at 0x10cfdae10>
+set_id = UUID('dd81d6af-7d3b-4065-9d84-bd3b993daf8f')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0250a0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-string] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f12df5ac1217481f8141e0e7706118a...d024e30>, stock=1, set_id=UUID('7db82508-00c1-49df-bcd6-7dbe326fd7bd'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d027020>
+dividend = {'cash_amount': '1'}
+
+    @pytest.mark.parametrize(
+        "dividend", [{"cash_amount": "1"}, {"cash_amount": 1}], ids=["json-string", "json-number"]
+    )
+    def test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01(
+        env: Env, monkeypatch: pytest.MonkeyPatch, dividend: dict[str, Any]
+    ) -> None:
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, ex_date: 98, E: 99, L: 99},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, dividend)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f12df5ac1217481f8141e0e7706118ad) at 0x10d024e30>
+set_id = UUID('7db82508-00c1-49df-bcd6-7dbe326fd7bd')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d027020>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-number] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8b058763ae2846faa1bba37d26cee99...d025e50>, stock=1, set_id=UUID('9a64aa7f-7f88-468f-b26a-a22b4e0af5a9'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0271a0>
+dividend = {'cash_amount': 1}
+
+    @pytest.mark.parametrize(
+        "dividend", [{"cash_amount": "1"}, {"cash_amount": 1}], ids=["json-string", "json-number"]
+    )
+    def test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01(
+        env: Env, monkeypatch: pytest.MonkeyPatch, dividend: dict[str, Any]
+    ) -> None:
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, ex_date: 98, E: 99, L: 99},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, dividend)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8b058763ae2846faa1bba37d26cee992) at 0x10d025e50>
+set_id = UUID('9a64aa7f-7f88-468f-b26a-a22b4e0af5a9')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0271a0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+__________ test_two_dividends_compound_against_their_own_prior_closes __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_368ca857e103404c8ccc31a64769986...d026210>, stock=1, set_id=UUID('0e0b21b6-e6ce-4cdf-a43e-0162bb8c6009'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0272c0>
+
+    def test_two_dividends_compound_against_their_own_prior_closes(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (4): each dividend compounds the factor against its own prior session."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                S12: 90,
+                S6: 90,
+                S3: 90,
+                date(2026, 7, 14): 100,
+                date(2026, 7, 15): 99,
+                date(2026, 8, 13): 50,
+                date(2026, 8, 14): 49,
+                E: 99,
+                L: 99,
+            },
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 7, 15), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 14), {"cash_amount": "1"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:488: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_368ca857e103404c8ccc31a647699863) at 0x10d026210>
+set_id = UUID('0e0b21b6-e6ce-4cdf-a43e-0162bb8c6009')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0272c0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+______________ test_a_dividend_outside_the_window_is_not_applied _______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f6f3a6d0894542738063c1e6d94956a...d030140>, stock=1, set_id=UUID('a2fce098-1efa-49cc-b5ad-7536005b25cd'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d030440>
+
+    def test_a_dividend_outside_the_window_is_not_applied(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (4): the window is (S_k, E]: a dividend on S_3's session or after E is not
+        applied to return_3m; the one on S_3 lies inside the longer windows."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, date(2026, 6, 16): 100, S3: 90, E: 99, date(2026, 9, 19): 99, L: 99},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", S3, {"cash_amount": "5"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 9, 20), {"cash_amount": "5"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:507: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f6f3a6d0894542738063c1e6d94956af) at 0x10d030140>
+set_id = UUID('a2fce098-1efa-49cc-b5ad-7536005b25cd')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d030440>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_________________ test_a_zero_dividend_leaves_the_factor_at_1 __________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_a1a88aeeb3034c34b79e818ec1e2503...d027800>, stock=1, set_id=UUID('0c2f572b-1891-45d5-a18a-7e76ef5985c8'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d027c50>
+
+    def test_a_zero_dividend_leaves_the_factor_at_1(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0117 (2): a cash_amount of 0 is usable and multiplies the factor by 1."""
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 7, 31): 110})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "0"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:521: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_a1a88aeeb3034c34b79e818ec1e25038) at 0x10d027800>
+set_id = UUID('0c2f572b-1891-45d5-a18a-7e76ef5985c8')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d027c50>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_________ test_a_dividend_before_a_later_split_is_scaled_by_that_split _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1c13e6c7ed3c419caf0b4f63625a2af...cf9ed20>, stock=1, set_id=UUID('bc3bdff7-b808-4d98-9c7e-96afdc88dd3e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f590>
+
+    def test_a_dividend_before_a_later_split_is_scaled_by_that_split(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0118 (2), design 2.4: the cash amount is scaled by the splits strictly after the
+        ex-date, as its prior close is."""
+        add_close_series(
+            env.conn,
+            env.stock,
+            {
+                S12: 90,
+                S6: 90,
+                S3: 90,
+                date(2026, 7, 14): 100,
+                date(2026, 7, 15): 98,
+                date(2026, 8, 3): 50,
+                E: 55,
+                L: 55,
+            },
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 7, 15), {"cash_amount": "2"})
+        add_corporate_action(env.conn, env.stock, "split", date(2026, 8, 3), SPLIT_2_FOR_1)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:550: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1c13e6c7ed3c419caf0b4f63625a2afe) at 0x10cf9ed20>
+set_id = UUID('bc3bdff7-b808-4d98-9c7e-96afdc88dd3e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f590>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+__________ test_a_split_on_the_ex_date_does_not_scale_the_cash_amount __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_87b99144d18c4d698bcbe0d7d3b8412...cf9fe60>, stock=1, set_id=UUID('a1d46969-8a95-433c-aaf9-2361f6a0aad1'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9cf50>
+
+    def test_a_split_on_the_ex_date_does_not_scale_the_cash_amount(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0118 (2): a split effective on the ex-date scales the prior session's close but
+        not the cash amount, so the factor is 1 + 1 / 50, not 1 + 0.5 / 50."""
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, ex_date: 50, E: 55, L: 55},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "split", ex_date, SPLIT_2_FOR_1)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:574: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_87b99144d18c4d698bcbe0d7d3b84126) at 0x10cf9fe60>
+set_id = UUID('a1d46969-8a95-433c-aaf9-2361f6a0aad1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9cf50>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+___________________ test_ticker_changes_and_ipos_are_ignored ___________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_931fc0d8951147d7b1dde3742e87287...cf9d190>, stock=1, set_id=UUID('de907090-5cef-48c2-a683-f7fdb93c6fc2'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfdad50>
+
+    def test_ticker_changes_and_ipos_are_ignored(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): only splits and dividends adjust a return, whatever another action's
+        payload carries."""
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_corporate_action(
+            env.conn, env.stock, "ticker_change", date(2026, 7, 15), {"cash_amount": "5"}
+        )
+        add_corporate_action(env.conn, env.stock, "ipo", date(2026, 7, 20), SPLIT_2_FOR_1)
+        add_corporate_action(env.conn, env.stock, "ticker_change", date(2026, 7, 25), {"ticker": "B"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:593: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_931fc0d8951147d7b1dde3742e87287d) at 0x10cf9d190>
+set_id = UUID('de907090-5cef-48c2-a683-f7fdb93c6fc2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfdad50>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[E bar] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_bae34ae93d3840ca828d5a7606bfaf3...cf64aa0>, stock=1, set_id=UUID('8c595448-3e6e-40c4-b1ce-44b2d3b5b844'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf646e0>
+latest = 'E bar'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        observed = {
+            "E bar": date(2026, 9, 18),
+            "S bar": date(2026, 6, 18),
+            "split": date(2026, 7, 2),
+            "dividend": date(2026, 8, 4),
+            "prior bar": date(2026, 8, 1),
+        }
+        observed[latest] = date(2026, 10, 5)
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, L: 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+        # Rows that feed no 3-month figure, each observed later than every row used.
+        add_bar_observed(env.conn, env.stock, date(2026, 8, 20), 52, date(2026, 10, 12))
+        add_bar_observed(env.conn, env.stock, date(2026, 9, 25), 57, date(2026, 10, 13))
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 9, 21), {"cash_amount": "1"}, date(2026, 10, 14)
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 5, 1),
+            {"split_from": "1", "split_to": "1"},
+            date(2026, 10, 15),
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:642: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_bae34ae93d3840ca828d5a7606bfaf38) at 0x10cf64aa0>
+set_id = UUID('8c595448-3e6e-40c4-b1ce-44b2d3b5b844')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf646e0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[S bar] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_3c60ef9ba4d04422919ece1c505cdfd...cf64a10>, stock=1, set_id=UUID('50c82ce7-10b2-4207-aafc-a77fb50682d9'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf65d60>
+latest = 'S bar'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        observed = {
+            "E bar": date(2026, 9, 18),
+            "S bar": date(2026, 6, 18),
+            "split": date(2026, 7, 2),
+            "dividend": date(2026, 8, 4),
+            "prior bar": date(2026, 8, 1),
+        }
+        observed[latest] = date(2026, 10, 5)
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, L: 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+        # Rows that feed no 3-month figure, each observed later than every row used.
+        add_bar_observed(env.conn, env.stock, date(2026, 8, 20), 52, date(2026, 10, 12))
+        add_bar_observed(env.conn, env.stock, date(2026, 9, 25), 57, date(2026, 10, 13))
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 9, 21), {"cash_amount": "1"}, date(2026, 10, 14)
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 5, 1),
+            {"split_from": "1", "split_to": "1"},
+            date(2026, 10, 15),
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:642: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_3c60ef9ba4d04422919ece1c505cdfd4) at 0x10cf64a10>
+set_id = UUID('50c82ce7-10b2-4207-aafc-a77fb50682d9')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf65d60>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[split] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_dc65e7802a8d4c1a83103ea08e2cdaa...cf66540>, stock=1, set_id=UUID('e188c7a1-7845-4a9e-a87d-2f4e65e2d460'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf66360>
+latest = 'split'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        observed = {
+            "E bar": date(2026, 9, 18),
+            "S bar": date(2026, 6, 18),
+            "split": date(2026, 7, 2),
+            "dividend": date(2026, 8, 4),
+            "prior bar": date(2026, 8, 1),
+        }
+        observed[latest] = date(2026, 10, 5)
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, L: 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+        # Rows that feed no 3-month figure, each observed later than every row used.
+        add_bar_observed(env.conn, env.stock, date(2026, 8, 20), 52, date(2026, 10, 12))
+        add_bar_observed(env.conn, env.stock, date(2026, 9, 25), 57, date(2026, 10, 13))
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 9, 21), {"cash_amount": "1"}, date(2026, 10, 14)
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 5, 1),
+            {"split_from": "1", "split_to": "1"},
+            date(2026, 10, 15),
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:642: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_dc65e7802a8d4c1a83103ea08e2cdaa6) at 0x10cf66540>
+set_id = UUID('e188c7a1-7845-4a9e-a87d-2f4e65e2d460')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf66360>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[dividend] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_0833e6d11b4e4384ad7e558f01e1806...cf650a0>, stock=1, set_id=UUID('a20e5580-cc65-49c7-a547-3be062fd6315'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf64470>
+latest = 'dividend'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        observed = {
+            "E bar": date(2026, 9, 18),
+            "S bar": date(2026, 6, 18),
+            "split": date(2026, 7, 2),
+            "dividend": date(2026, 8, 4),
+            "prior bar": date(2026, 8, 1),
+        }
+        observed[latest] = date(2026, 10, 5)
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, L: 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+        # Rows that feed no 3-month figure, each observed later than every row used.
+        add_bar_observed(env.conn, env.stock, date(2026, 8, 20), 52, date(2026, 10, 12))
+        add_bar_observed(env.conn, env.stock, date(2026, 9, 25), 57, date(2026, 10, 13))
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 9, 21), {"cash_amount": "1"}, date(2026, 10, 14)
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 5, 1),
+            {"split_from": "1", "split_to": "1"},
+            date(2026, 10, 15),
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:642: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_0833e6d11b4e4384ad7e558f01e18063) at 0x10cf650a0>
+set_id = UUID('a20e5580-cc65-49c7-a547-3be062fd6315')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf64470>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[prior bar] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_2da6d8a3537f457daa527f127bbb9c3...cf64d70>, stock=1, set_id=UUID('8d5b7527-0c10-4228-a417-e00c9f10312e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9e600>
+latest = 'prior bar'
+
+    @pytest.mark.parametrize("latest", ["E bar", "S bar", "split", "dividend", "prior bar"])
+    def test_known_on_is_the_latest_observation_of_the_bars_and_actions_used(
+        env: Env, monkeypatch: pytest.MonkeyPatch, latest: str
+    ) -> None:
+        observed = {
+            "E bar": date(2026, 9, 18),
+            "S bar": date(2026, 6, 18),
+            "split": date(2026, 7, 2),
+            "dividend": date(2026, 8, 4),
+            "prior bar": date(2026, 8, 1),
+        }
+        observed[latest] = date(2026, 10, 5)
+        split_on, prior, ex_date = date(2026, 7, 1), date(2026, 7, 31), date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, {S12: 90, S6: 90, L: 56})
+        add_bar_observed(env.conn, env.stock, S3, 90, observed["S bar"])
+        add_bar_observed(env.conn, env.stock, prior, 50, observed["prior bar"])
+        add_bar_observed(env.conn, env.stock, E, 55, observed["E bar"])
+        add_corporate_action(env.conn, env.stock, "split", split_on, SPLIT_2_FOR_1, observed["split"])
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "0.5"}, observed["dividend"]
+        )
+        # Rows that feed no 3-month figure, each observed later than every row used.
+        add_bar_observed(env.conn, env.stock, date(2026, 8, 20), 52, date(2026, 10, 12))
+        add_bar_observed(env.conn, env.stock, date(2026, 9, 25), 57, date(2026, 10, 13))
+        add_corporate_action(
+            env.conn, env.stock, "dividend", date(2026, 9, 21), {"cash_amount": "1"}, date(2026, 10, 14)
+        )
+        add_corporate_action(
+            env.conn,
+            env.stock,
+            "split",
+            date(2026, 5, 1),
+            {"split_from": "1", "split_to": "1"},
+            date(2026, 10, 15),
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:642: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_2da6d8a3537f457daa527f127bbb9c39) at 0x10cf64d70>
+set_id = UUID('8d5b7527-0c10-4228-a417-e00c9f10312e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9e600>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_______ test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8fd9b11e1a56425da5683ff00e2dbc0...cf9ff50>, stock=1, set_id=UUID('d5430c2e-f645-4e9d-9734-54916e1a0de7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f680>
+
+    def test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stale = add_instrument(env.conn, "STALE")
+        stale_day = date(2026, 10, 15)
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, stale_day: 130})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:663: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8fd9b11e1a56425da5683ff00e2dbc0a) at 0x10cf9ff50>
+set_id = UUID('d5430c2e-f645-4e9d-9734-54916e1a0de7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f680>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+___ test_a_latest_bar_after_e_but_before_the_latest_trading_day_is_outdated ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9185c81763364fcca847bba2b49d005...cf42e70>, stock=1, set_id=UUID('8501e7f5-88f9-430a-969e-7528103f3ea6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf42510>
+
+    def test_a_latest_bar_after_e_but_before_the_latest_trading_day_is_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (5), DAC-E2-6: currency is judged on the latest bar, not on E."""
+        add_close_series(
+            env.conn, env.stock, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 9, 30): 125}
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:694: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9185c81763364fcca847bba2b49d005a) at 0x10cf42e70>
+set_id = UUID('8501e7f5-88f9-430a-969e-7528103f3ea6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf42510>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_____ test_a_retired_stocks_later_bar_does_not_move_the_latest_trading_day _____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f5398bc909654dc795eecd208b86192...cf43440>, stock=1, set_id=UUID('fab7c9ce-5e0e-4ca4-810e-1a768e3e2b65'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf425d0>
+
+    def test_a_retired_stocks_later_bar_does_not_move_the_latest_trading_day(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0055 (5), AC-15: the latest trading day is held across active instruments only."""
+        retired = add_instrument(env.conn, "GONE", "retired")
+        add_bar_observed(env.conn, retired, D, 10)
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:709: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f5398bc909654dc795eecd208b861922) at 0x10cf43440>
+set_id = UUID('fab7c9ce-5e0e-4ca4-810e-1a768e3e2b65')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf425d0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+____________ test_momentum_currency_does_not_depend_on_fundamentals ____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_ca8915c14dab4f849202c0cebace244...cf0bf80>, stock=1, set_id=UUID('96449bf1-5b87-4b47-a910-ddff7308db36'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf0a0f0>
+
+    def test_momentum_currency_does_not_depend_on_fundamentals(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.4, AC-13: two stale stocks with the same bars have the same momentum inputs
+        whether or not they hold statements, and the statements' own inputs are computed."""
+        with_statements = add_instrument(env.conn, "FUND")
+        bars: dict[date, Decimal | int] = {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130}
+        add_close_series(env.conn, env.stock, bars)
+        add_close_series(env.conn, with_statements, bars)
+        quarter = {
+            "book_equity": Decimal(500),
+            "shares_outstanding": Decimal(100),
+            "net_income": Decimal(10),
+            "diluted_eps": Decimal(1),
+            "revenue": Decimal(100),
+            "operating_cash_flow": Decimal(30),
+            "capital_expenditure": Decimal(-5),
+        }
+        add_quarters(env.conn, with_statements, date(2026, 9, 30), 8, [dict(quarter)] * 8)
+        install_test_line_items(monkeypatch)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:736: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_ca8915c14dab4f849202c0cebace2449) at 0x10cf0bf80>
+set_id = UUID('96449bf1-5b87-4b47-a910-ddff7308db36')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf0a0f0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+________________ test_a_missing_boundary_ranks_before_outdated _________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_4800f8a437924639a3ffcf738a8ff3f...cf438c0>, stock=1, set_id=UUID('60734ee1-a93d-454a-b77c-4919561bf82c'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf42ae0>
+
+    def test_a_missing_boundary_ranks_before_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (1), DEC-0118 (4): a stale stock lacking the S_12 bar has return_12m missing
+        and the other two outdated; a stock with no bar at all is missing on all three."""
+        no_bars = add_instrument(env.conn, "NONE")
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:757: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_4800f8a437924639a3ffcf738a8ff3f8) at 0x10cf438c0>
+set_id = UUID('60734ee1-a93d-454a-b77c-4919561bf82c')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf42ae0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_________ test_unresolved_line_items_leave_the_momentum_inputs_present _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_d1d5fcda8a1549d5bc7d4015ee89e85...cf9edb0>, stock=1, set_id=UUID('7126f9c7-de9a-4580-816e-4823a19d0906'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9d9a0>
+
+    def test_unresolved_line_items_leave_the_momentum_inputs_present(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Supporting case for TC-COMP-059 (AC-12, design 2.4): with the real LINE_ITEMS, every
+        key REQUIRES_INPUT, value and growth are missing naming the cause, the three momentum
+        inputs are present and the set completes. "Momentum still classifies" is CAP-002-E2-S7's."""
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+>       result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:778: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_d1d5fcda8a1549d5bc7d4015ee89e85e) at 0x10cf9edb0>
+set_id = UUID('7126f9c7-de9a-4580-816e-4823a19d0906')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9d9a0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_every_active_stock_has_exactly_three_momentum_rows_and_a_retired_one_none _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_d0c4118b6da843fe9666a6a0f39ebe1...cf64d70>, stock=1, set_id=UUID('cc3d9ac7-570f-4afc-a81f-4b8aec74b7a0'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf642f0>
+
+    def test_every_active_stock_has_exactly_three_momentum_rows_and_a_retired_one_none(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-7, AC-15, DEC-0118 (4), DAC-E2-S6-2: three rows per active stock named for the
+        momentum factor, never marked; a retired instrument gets no row."""
+        retired = add_instrument(env.conn, "GONE", "retired")
+        add_close_series(env.conn, retired, STANDARD)
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:798: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_d0c4118b6da843fe9666a6a0f39ebe11) at 0x10cf64d70>
+set_id = UUID('cc3d9ac7-570f-4afc-a81f-4b8aec74b7a0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf642f0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+______ test_a_missing_momentum_input_carries_the_last_prices_acquisition _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_672d12b252194674ba4177f0b7f227e...cf9f6e0>, stock=1, set_id=UUID('2f8184a7-30c7-40df-9a43-5413b909c15d'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf09940>
+
+    def test_a_missing_momentum_input_carries_the_last_prices_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Design 2.3 step 5, AC-12, DEC-0115: a missing momentum input names the last prices
+        outcome, not another data type's; a present one carries no acquisition."""
+        acquired_at = datetime(2026, 10, 16, 21, tzinfo=UTC)
+        for data_type, outcome in (("prices", "not_found"), ("corporate_actions", "written")):
+            env.conn.execute(
+                "INSERT INTO acquisition_state (instrument_id, data_type, last_acquired_at, "
+                "last_run_id, last_outcome) VALUES (%s, %s, %s, gen_random_uuid(), %s)",
+                (env.stock, data_type, acquired_at, outcome),
+            )
+        env.conn.commit()
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:829: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_672d12b252194674ba4177f0b7f227e3) at 0x10cf9f6e0>
+set_id = UUID('2f8184a7-30c7-40df-9a43-5413b909c15d')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf09940>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+___ test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_819fc6f8c88446c1ae38617a68dab16...cf0aa80>, stock=1, set_id=UUID('1dd8b6f9-4b09-49ed-9fa2-b0ec5c26551e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf0b200>
+
+    def test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1), design 2.4, C5: the later observation of a session is used, and the
+        earlier row stays in the store."""
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_bar_observed(env.conn, env.stock, E, 150, date(2026, 9, 20))
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:847: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_819fc6f8c88446c1ae38617a68dab164) at 0x10cf0aa80>
+set_id = UUID('1dd8b6f9-4b09-49ed-9fa2-b0ec5c26551e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf0b200>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+______________ test_on_equal_observed_on_the_later_recording_wins ______________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_d335192dacce4533ae336f2e5b42218...c9eeed0>, stock=1, set_id=UUID('65c65429-058f-4bc9-bf34-9ea834ba026a'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c9ef170>
+
+    def test_on_equal_observed_on_the_later_recording_wins(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1): ties on observed_on are broken by recorded_at, for bars and for
+        corporate actions; the later recording is inserted first, so insertion order cannot pass."""
+        early = datetime(2026, 9, 17, 22, tzinfo=UTC)
+        late = early + timedelta(hours=1)
+        add_close_series(
+            env.conn, env.stock, {S12: 50, S6: 80, S3: 100, date(2026, 7, 31): 100, L: 130}
+        )
+        add_bar_observed(env.conn, env.stock, E, 160, E, late)
+        add_bar_observed(env.conn, env.stock, E, 150, E, early)
+        ex_date = date(2026, 8, 3)
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "2"}, ex_date, late
+        )
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "1"}, ex_date, early
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:880: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_d335192dacce4533ae336f2e5b42218b) at 0x10c9eeed0>
+set_id = UUID('65c65429-058f-4bc9-bf34-9ea834ba026a')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c9ef170>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+________ test_a_revised_dividend_is_applied_once_with_the_later_amount _________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1abf1684fd0645a6afc423ee9386c15...cf09df0>, stock=1, set_id=UUID('e59cd8c2-e45b-45b7-ac12-bd37ace1ec0d'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf09340>
+
+    def test_a_revised_dividend_is_applied_once_with_the_later_amount(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0117 (1): a revised dividend (same ex-date, later observation) is counted once,
+        with the revised amount."""
+        ex_date = date(2026, 8, 3)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 7, 31): 100})
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, {"cash_amount": "1"})
+        add_corporate_action(
+            env.conn, env.stock, "dividend", ex_date, {"cash_amount": "2"}, date(2026, 8, 10)
+        )
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:897: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1abf1684fd0645a6afc423ee9386c155) at 0x10cf09df0>
+set_id = UUID('e59cd8c2-e45b-45b7-ac12-bd37ace1ec0d')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf09340>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1f006ef5e6c2466b8392a62cab2e6bd...cf65760>, stock=1, set_id=UUID('286c38e8-8094-4c08-9490-008a43d4f158'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf64bf0>
+action_type = 'split', payload = {'split_from': '1', 'split_to': '0'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1f006ef5e6c2466b8392a62cab2e6bd6) at 0x10cf65760>
+set_id = UUID('286c38e8-8094-4c08-9490-008a43d4f158')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf64bf0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8d72eaaac9924bd4bd1d779dac8d162...cf42ba0>, stock=1, set_id=UUID('d16eae17-975e-430f-aa39-a122dce57524'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf436b0>
+action_type = 'split', payload = {'split_from': '0', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_8d72eaaac9924bd4bd1d779dac8d1621) at 0x10cf42ba0>
+set_id = UUID('d16eae17-975e-430f-aa39-a122dce57524')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf436b0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-negative] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_a7ee0166225141a199d728baeb83299...d0266c0>, stock=1, set_id=UUID('8357e528-c291-4751-8221-0bafad44e160'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d024560>
+action_type = 'split', payload = {'split_from': '-1', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_a7ee0166225141a199d728baeb832993) at 0x10d0266c0>
+set_id = UUID('8357e528-c291-4751-8221-0bafad44e160')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d024560>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-not-numeric] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_58dae1ceb4cb4159998f8e2fb8078ca...d024680>, stock=1, set_id=UUID('434889b2-3a86-4fc4-9751-6121f78c1e72'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d026540>
+action_type = 'split', payload = {'split_from': 'abc', 'split_to': '2'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_58dae1ceb4cb4159998f8e2fb8078caf) at 0x10d024680>
+set_id = UUID('434889b2-3a86-4fc4-9751-6121f78c1e72')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d026540>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-exponent] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_7f815b34405d4f4abec7d5f7e4096f4...d0211f0>, stock=1, set_id=UUID('a855b3a2-e37a-40c8-b958-f5261a08c9d5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0225d0>
+action_type = 'split', payload = {'split_from': '1', 'split_to': '2e0'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_7f815b34405d4f4abec7d5f7e4096f49) at 0x10d0211f0>
+set_id = UUID('a855b3a2-e37a-40c8-b958-f5261a08c9d5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0225d0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-absent] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_b9f124e550f54429b1bd50003f884c6...d026ed0>, stock=1, set_id=UUID('06ea73d5-2af6-4bda-869b-dfb2926221f5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0249b0>
+action_type = 'split', payload = {'split_from': '1'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_b9f124e550f54429b1bd50003f884c68) at 0x10d026ed0>
+set_id = UUID('06ea73d5-2af6-4bda-869b-dfb2926221f5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d0249b0>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-null] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9b96931f76ea4ba6a02206d4c7435f7...d0268a0>, stock=1, set_id=UUID('c038a41b-4250-4e24-8c29-e76906aea773'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f530>
+action_type = 'split', payload = {'split_from': '1', 'split_to': None}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9b96931f76ea4ba6a02206d4c7435f78) at 0x10d0268a0>
+set_id = UUID('c038a41b-4250-4e24-8c29-e76906aea773')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f530>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-negative] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_fdcc57033cd94740b461986516a14bd...cf096d0>, stock=1, set_id=UUID('1a3780d2-e446-4cf6-9fcd-19eb25c6b09e'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf08080>
+action_type = 'dividend', payload = {'cash_amount': '-1'}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_fdcc57033cd94740b461986516a14bdd) at 0x10cf096d0>
+set_id = UUID('1a3780d2-e446-4cf6-9fcd-19eb25c6b09e')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf08080>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-boolean] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9993a48fde28458d8dedbc60fa54433...d020c80>, stock=1, set_id=UUID('34e06175-8804-4f93-83cc-57e57ced09ff'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d020b30>
+action_type = 'dividend', payload = {'cash_amount': True}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9993a48fde28458d8dedbc60fa544331) at 0x10d020c80>
+set_id = UUID('34e06175-8804-4f93-83cc-57e57ced09ff')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d020b30>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-object] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9f5868ea11bc4818bd0af264da5f1fb...d033260>, stock=1, set_id=UUID('55e660bd-a8e1-4bc3-9030-6c07eaf91888'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d030a10>
+action_type = 'dividend', payload = {'cash_amount': {'value': '1'}}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_9f5868ea11bc4818bd0af264da5f1fb3) at 0x10d033260>
+set_id = UUID('55e660bd-a8e1-4bc3-9030-6c07eaf91888')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d030a10>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+_ test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-absent] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_bcd1a7a91df6446395d0987484cc2d5...d033860>, stock=1, set_id=UUID('8c774ca3-1d53-40dd-b422-71958092c3e8'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d030e00>
+action_type = 'dividend', payload = {}
+
+    @pytest.mark.parametrize(
+        ("action_type", "payload"),
+        [
+            ("split", {"split_from": "1", "split_to": "0"}),
+            ("split", {"split_from": "0", "split_to": "2"}),
+            ("split", {"split_from": "-1", "split_to": "2"}),
+            ("split", {"split_from": "abc", "split_to": "2"}),
+            ("split", {"split_from": "1", "split_to": "2e0"}),
+            ("split", {"split_from": "1"}),
+            ("split", {"split_from": "1", "split_to": None}),
+            ("dividend", {"cash_amount": "-1"}),
+            ("dividend", {"cash_amount": True}),
+            ("dividend", {"cash_amount": {"value": "1"}}),
+            ("dividend", {}),
+        ],
+        ids=[
+            "split-to-zero",
+            "split-from-zero",
+            "split-from-negative",
+            "split-from-not-numeric",
+            "split-to-exponent",
+            "split-to-absent",
+            "split-to-null",
+            "cash-negative",
+            "cash-boolean",
+            "cash-object",
+            "cash-absent",
+        ],
+    )
+    def test_an_unusable_payload_makes_only_the_windows_containing_it_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch, action_type: str, payload: dict[str, Any]
+    ) -> None:
+        """DEC-0117 (2), (3): an unusable split or dividend makes the inputs whose window
+        contains it missing, naming it, and never fails the set; DEC-0055 (7): known_on covers
+        the action the decision was read from. The other window is unaffected."""
+        effective_on, observed_on = date(2026, 5, 1), date(2026, 9, 30)
+        add_close_series(env.conn, env.stock, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(env.conn, env.stock, action_type, effective_on, payload, observed_on)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:944: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_bcd1a7a91df6446395d0987484cc2d50) at 0x10d033860>
+set_id = UUID('8c774ca3-1d53-40dd-b422-71958092c3e8')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d030e00>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+______ test_a_bar_committed_during_the_build_is_seen_by_the_next_set_only ______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_1f24435d19c34f0dbc7a03b1c4725a1...cf09820>, stock=1, set_id=UUID('414b0f53-108d-4467-b624-5a202e5a139f'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf0a570>
+postgres_connection_string = 'postgresql://test:test@localhost:61368/test_1f24435d19c34f0dbc7a03b1c4725a18'
+
+    def test_a_bar_committed_during_the_build_is_seen_by_the_next_set_only(
+        env: Env, monkeypatch: pytest.MonkeyPatch, postgres_connection_string: str
+    ) -> None:
+        """DAC-E2-9, AC-19, DEC-0111: the momentum stage reads the build's snapshot, so a newer
+        observation committed while it builds is not used until the next set."""
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+        def commit_newer_bar(_conn: psycopg.Connection, _ctx: engine.BuildContext) -> None:
+            with psycopg.connect(postgres_connection_string) as other:
+                add_bar_observed(other, env.stock, E, 150, date(2026, 10, 1))
+    
+        monkeypatch.setattr(
+            engine,
+            "_STAGES",
+>           [engine._fundamental_inputs_stage, commit_newer_bar, engine._momentum_inputs_stage],
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/test_engine_inputs_momentum.py:990: AttributeError
+__________ test_a_stock_with_one_bar_has_every_momentum_input_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f2fa9c272e7f46a29965a398361ca9a...d023710>, stock=1, set_id=UUID('e65530df-251a-42a6-9ee2-e7b677374b96'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d023c20>
+
+    def test_a_stock_with_one_bar_has_every_momentum_input_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-7, AC-13, DEC-0118 (4): with one bar, on E, no S_k resolves, so the inputs are
+        missing (not a zero return), although the stock is also stale."""
+        add_bar_observed(env.conn, env.stock, E, 100)
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:1009: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_engine_inputs_momentum.py:104: in build
+    result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=61368 user=test database=test_f2fa9c272e7f46a29965a398361ca9a0) at 0x10d023710>
+set_id = UUID('e65530df-251a-42a6-9ee2-e7b677374b96')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d023c20>
+
+    def run_momentum_stages(
+        conn: psycopg.Connection, set_id: UUID, monkeypatch: pytest.MonkeyPatch
+    ) -> BuildResult:
+        """Build ``set_id`` with the fundamentals and momentum stages only.
+    
+        The fundamentals stage creates the temporary table ``inputs`` the momentum stage
+        inserts into (DEC-0115). With the real ``LINE_ITEMS`` every value and growth input is
+        ``missing``, which the momentum tests ignore. No classification stage runs.
+        """
+        monkeypatch.setattr(
+>           engine, "_STAGES", [engine._fundamental_inputs_stage, engine._momentum_inputs_stage]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: module 'factorflow.classification.engine' has no attribute '_momentum_inputs_stage'. Did you mean: '_fundamental_inputs_stage'?
+
+tests/integration/engine_momentum_support.py:136: AttributeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+FAILED tests/integration/test_engine_inputs_momentum.py::test_every_window_is_present_with_bars_on_every_boundary
+FAILED tests/integration/test_engine_inputs_momentum.py::test_boundaries_resolve_to_the_latest_bar_on_or_before_each_target
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_bar_on_the_target_date_is_chosen_over_an_earlier_one
+FAILED tests/integration/test_engine_inputs_momentum.py::test_one_month_before_a_month_end_is_the_shorter_month_end[classification_date0]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_with_no_bar_on_or_before_e_has_every_momentum_input_missing
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-strings]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_2_for_1_split_inside_the_window_leaves_the_return_unchanged[json-numbers]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_outside_the_window_is_not_applied
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_on_s_k_is_outside_the_window
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_on_e_is_inside_the_window
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_reverse_split_doubles_earlier_prices
+FAILED tests/integration/test_engine_inputs_momentum.py::test_two_splits_in_one_window_compound
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-string]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_of_1_on_a_prior_close_of_100_multiplies_the_factor_by_1_01[json-number]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_two_dividends_compound_against_their_own_prior_closes
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_outside_the_window_is_not_applied
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_zero_dividend_leaves_the_factor_at_1
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_dividend_before_a_later_split_is_scaled_by_that_split
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_on_the_ex_date_does_not_scale_the_cash_amount
+FAILED tests/integration/test_engine_inputs_momentum.py::test_ticker_changes_and_ipos_are_ignored
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[E bar]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[S bar]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[split]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[dividend]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_known_on_is_the_latest_observation_of_the_bars_and_actions_used[prior bar]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_latest_bar_after_e_but_before_the_latest_trading_day_is_outdated
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_retired_stocks_later_bar_does_not_move_the_latest_trading_day
+FAILED tests/integration/test_engine_inputs_momentum.py::test_momentum_currency_does_not_depend_on_fundamentals
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_boundary_ranks_before_outdated
+FAILED tests/integration/test_engine_inputs_momentum.py::test_unresolved_line_items_leave_the_momentum_inputs_present
+FAILED tests/integration/test_engine_inputs_momentum.py::test_every_active_stock_has_exactly_three_momentum_rows_and_a_retired_one_none
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_momentum_input_carries_the_last_prices_acquisition
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_re_acquired_bar_is_used_and_the_earlier_observation_is_untouched
+FAILED tests/integration/test_engine_inputs_momentum.py::test_on_equal_observed_on_the_later_recording_wins
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_revised_dividend_is_applied_once_with_the_later_amount
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-zero]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-zero]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-negative]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-from-not-numeric]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-exponent]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-absent]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[split-to-null]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-negative]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-boolean]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-object]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_unusable_payload_makes_only_the_windows_containing_it_missing[cash-absent]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_bar_committed_during_the_build_is_seen_by_the_next_set_only
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_with_one_bar_has_every_momentum_input_missing
+50 failed, 33 passed in 7.80s
+# exit=1

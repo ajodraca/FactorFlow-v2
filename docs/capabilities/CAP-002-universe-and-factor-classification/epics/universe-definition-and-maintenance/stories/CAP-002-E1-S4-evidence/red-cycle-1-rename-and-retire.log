@@ -1,0 +1,213 @@
+FFFFFFFFFFFFF                                                            [100%]
+=================================== FAILURES ===================================
+______________ test_rename_keeps_identity_history_and_memberships ______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_35e290364cf342f1a9af8b7f0d41adba) at 0x10d044890>
+
+    def test_rename_keeps_identity_history_and_memberships(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-025."""
+        seed(conn, "AAPL", "MSFT", "NVDA")
+        uid = _create(conn, "Tech", "AAPL", "MSFT", "NVDA")
+        before_events = event_rows(conn, uid)
+        before = service.get_universe(conn, uid)
+        universes_before = count_universes(conn)
+        row_before = _universe_row(conn, uid)
+    
+>       renamed = service.rename(conn, uid, "  Technology ")
+                  ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:50: AttributeError
+___________ test_rename_to_an_active_name_is_refused_after_trimming ____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_fd66ae768d67446e8e311f50a92b0c57) at 0x10d0edbe0>
+
+    def test_rename_to_an_active_name_is_refused_after_trimming(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        _create(conn, "Growth", "AAA")
+        u2 = _create(conn, "Value", "AAA")
+        before = count_events(conn)
+    
+        with pytest.raises(UniverseNameInUse):
+>           service.rename(conn, u2, " Growth  ")
+            ^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:94: AttributeError
+______________ test_the_rename_comparison_is_exact_after_trimming ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_ba31edfea7904251b1f6e14e05fd7522) at 0x10d0ed1f0>
+
+    def test_the_rename_comparison_is_exact_after_trimming(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        _create(conn, "Growth", "AAA")
+        u2 = _create(conn, "Value", "AAA")
+    
+>       assert service.rename(conn, u2, "growth").name == "growth"
+               ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:107: AttributeError
+_____________ test_a_retired_universes_name_is_reusable_by_rename ______________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_437fe9232ad6454fb134d59b583996ef) at 0x10d045c10>
+
+    def test_a_retired_universes_name_is_reusable_by_rename(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        u1 = _create(conn, "Growth", "AAA")
+        u2 = _create(conn, "Value", "AAA")
+>       service.retire(conn, u1)
+        ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'retire'
+
+tests/integration/test_universe_maintenance.py:116: AttributeError
+_____________ test_a_universe_may_take_back_a_name_it_held_earlier _____________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_c84241170cf9430d9b88fee2eb628249) at 0x10d044890>
+
+    def test_a_universe_may_take_back_a_name_it_held_earlier(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        u2 = _create(conn, "Growth", "AAA")
+    
+>       service.rename(conn, u2, "Value")
+        ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:131: AttributeError
+___________ test_renaming_to_its_own_name_appends_one_renamed_event ____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_0795b88b72b84ae8ad3c91ce10f7e594) at 0x10d0efdd0>
+
+    def test_renaming_to_its_own_name_appends_one_renamed_event(conn: psycopg.Connection) -> None:
+        """Implements TC-COMP-023 (rename half). PROVISIONAL behaviour pinned by DEC-0096."""
+        seed(conn, "AAA")
+        uid = _create(conn, "Value", "AAA")
+        before = event_rows(conn, uid)
+    
+>       assert service.rename(conn, uid, " Value").name == "Value"
+               ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:143: AttributeError
+_______________ test_rename_to_a_blank_name_is_a_shape_failure[] _______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_dde0fc9218ff49d7afa34a6c8407c70d) at 0x10d0edcd0>
+name = ''
+
+    @pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+    def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        uid = _create(conn, "Value", "AAA")
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="must not be empty"):
+>           service.rename(conn, uid, name)
+            ^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:160: AttributeError
+_____________ test_rename_to_a_blank_name_is_a_shape_failure[   ] ______________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_7ccce45da86f432299131d4a804cbf37) at 0x10d0ee570>
+name = '   '
+
+    @pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+    def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        uid = _create(conn, "Value", "AAA")
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="must not be empty"):
+>           service.rename(conn, uid, name)
+            ^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:160: AttributeError
+_____________ test_rename_to_a_blank_name_is_a_shape_failure[\t\n] _____________
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_af1f0edf34e54d138b4258bdde8abd19) at 0x10d0ef380>
+name = '\t\n'
+
+    @pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+    def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+        seed(conn, "AAA")
+        uid = _create(conn, "Value", "AAA")
+        before = count_events(conn)
+    
+        with pytest.raises(ValueError, match="must not be empty"):
+>           service.rename(conn, uid, name)
+            ^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:160: AttributeError
+_____________________ test_rename_accepts_a_very_long_name _____________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_10eac84d9b0d461eaa8ab88fcef510ad) at 0x10d5dd310>
+
+    def test_rename_accepts_a_very_long_name(conn: psycopg.Connection) -> None:
+        """No length bound exists yet (system design question 2, abstained)."""
+        seed(conn, "AAA")
+        uid = _create(conn, "Value", "AAA")
+    
+>       assert service.rename(conn, uid, "N" * 10_000).name == "N" * 10_000
+               ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:171: AttributeError
+________________ test_rename_of_an_unknown_universe_is_refused _________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_287568b703484f958b9f5f9df6e57d56) at 0x10d5dc4a0>
+
+    def test_rename_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+        with pytest.raises(service.UniverseNotFound):
+>           service.rename(conn, UUID(int=7), "Anything")
+            ^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+
+tests/integration/test_universe_maintenance.py:177: AttributeError
+___________________ test_a_retired_universe_refuses_a_rename ___________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_8470e76079204dad9e19847e32db0713) at 0x10d5ddc10>
+
+    def test_a_retired_universe_refuses_a_rename(conn: psycopg.Connection) -> None:
+        """Part of TC-COMP-038; the other writes are tested with remove_member."""
+        seed(conn, "AAA")
+        uid = _create(conn, "U", "AAA")
+>       service.retire(conn, uid)
+        ^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.universes.service' has no attribute 'retire'
+
+tests/integration/test_universe_maintenance.py:187: AttributeError
+________________ test_retire_of_an_unknown_universe_is_refused _________________
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_e507c51b74514573b12f0ff0560c46d3) at 0x10d5dce00>
+
+    def test_retire_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+        with pytest.raises(service.UniverseNotFound):
+>           service.retire(conn, UUID(int=7))
+            ^^^^^^^^^^^^^^
+E           AttributeError: module 'factorflow.universes.service' has no attribute 'retire'
+
+tests/integration/test_universe_maintenance.py:203: AttributeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_universe_maintenance.py::test_rename_keeps_identity_history_and_memberships
+FAILED tests/integration/test_universe_maintenance.py::test_rename_to_an_active_name_is_refused_after_trimming
+FAILED tests/integration/test_universe_maintenance.py::test_the_rename_comparison_is_exact_after_trimming
+FAILED tests/integration/test_universe_maintenance.py::test_a_retired_universes_name_is_reusable_by_rename
+FAILED tests/integration/test_universe_maintenance.py::test_a_universe_may_take_back_a_name_it_held_earlier
+FAILED tests/integration/test_universe_maintenance.py::test_renaming_to_its_own_name_appends_one_renamed_event
+FAILED tests/integration/test_universe_maintenance.py::test_rename_to_a_blank_name_is_a_shape_failure[]
+FAILED tests/integration/test_universe_maintenance.py::test_rename_to_a_blank_name_is_a_shape_failure[   ]
+FAILED tests/integration/test_universe_maintenance.py::test_rename_to_a_blank_name_is_a_shape_failure[\t\n]
+FAILED tests/integration/test_universe_maintenance.py::test_rename_accepts_a_very_long_name
+FAILED tests/integration/test_universe_maintenance.py::test_rename_of_an_unknown_universe_is_refused
+FAILED tests/integration/test_universe_maintenance.py::test_a_retired_universe_refuses_a_rename
+FAILED tests/integration/test_universe_maintenance.py::test_retire_of_an_unknown_universe_is_refused
+13 failed in 3.69s

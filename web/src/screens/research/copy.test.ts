@@ -472,6 +472,9 @@ describe("copy.ts completeness and keying", () => {
       "Could not set the momentum threshold: a standardised score is a finite number.",
     );
     expect(copy.DIALOGS.saved(14, "Tech")).toBe("Saved 14 stocks as Tech");
+    expect(copy.NOTICES.dismiss).toBe("Dismiss");
+    expect(copy.DIALOGS.enterName).toBe("Enter a name for the universe.");
+    expect(copy.DIALOGS.universe).toBe("Universe");
     expect(copy.DIALOGS.added(3, "Tech", 0)).toBe("Added 3 stocks to Tech");
     expect(copy.DIALOGS.added(3, "Tech", 1)).toBe(
       "Added 3 stocks to Tech, and 1 were already members",

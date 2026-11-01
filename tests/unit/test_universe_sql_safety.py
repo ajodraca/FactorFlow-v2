@@ -14,6 +14,7 @@ from typing import TypeGuard
 
 import pytest
 
+import factorflow.universes.service as universe_service
 from factorflow.universes import replay
 from tests.unit.test_research_sql_is_append_only import prohibited_research_mutations
 
@@ -262,3 +263,108 @@ def test_the_read_text_scan_names_the_files_a_module_loads_at_import() -> None:
     )
 
     assert sorted(module_level_read_text_targets(source)) == ["a.sql", "b.sql"]
+
+
+# --- CAP-002-E1-S4: the maintenance statements (TC-COMP-054, DAC-E1-10) ----------------
+
+SERVICE_PY = UNIVERSES_DIR / "service.py"
+MAINTENANCE_FUNCTIONS = ("rename", "remove_member", "retire")
+ALLOWED_PREFIXES = ("SELECT pg_advisory_xact_lock", "INSERT INTO universe_event")
+MUTATION_WORD = re.compile(r"\b(UPDATE|DELETE)\b", re.IGNORECASE)
+
+
+def _service_sql_constants() -> dict[str, str]:
+    return {
+        name: value
+        for name, value in vars(universe_service).items()
+        if name.endswith("_SQL") and isinstance(value, str)
+    }
+
+
+def _top_level_functions(source: str, names: tuple[str, ...]) -> dict[str, ast.FunctionDef]:
+    return {
+        node.name: node
+        for node in ast.parse(source).body
+        if isinstance(node, ast.FunctionDef) and node.name in names
+    }
+
+
+def function_problems(source: str, names: tuple[str, ...]) -> list[str]:
+    """Mutation words in string constants and interpolated execute arguments in ``names``."""
+    problems: list[str] = []
+    functions = _top_level_functions(source, names)
+    problems.extend(
+        f"{name} is not a top-level function" for name in names if name not in functions
+    )
+    for name, function in functions.items():
+        for node in ast.walk(function):
+            if (
+                isinstance(node, ast.Constant)
+                and isinstance(node.value, str)
+                and MUTATION_WORD.search(node.value)
+            ):
+                problems.append(f"{name}: a string constant holds UPDATE or DELETE")
+            if _is_execute_call(node) and node.args:
+                first = node.args[0]
+                if not isinstance(first, ast.Name | ast.Constant):
+                    problems.append(f"{name}: execute() receives a built expression")
+    return problems
+
+
+def executed_constant_names(source: str, names: tuple[str, ...]) -> list[str]:
+    """The names of the module constants that ``names`` pass directly to execute calls."""
+    found: list[str] = []
+    for function in _top_level_functions(source, names).values():
+        for node in ast.walk(function):
+            if _is_execute_call(node) and node.args and isinstance(node.args[0], ast.Name):
+                found.append(node.args[0].id)
+    return found
+
+
+# Implements TC-COMP-054
+def test_the_service_holds_the_maintenance_insert_beside_s3s_statements() -> None:
+    constants = _service_sql_constants()
+
+    assert {
+        "COVERAGE_CHECK_SQL",
+        "_LOCK_SQL",
+        "_INSERT_UNIVERSE_SQL",
+        "_INSERT_EVENT_SQL",
+        "_INSTRUMENTS_BY_SYMBOL_SQL",
+        "_INSERT_MEMBER_REMOVED_SQL",
+    } <= set(constants)
+    for name, text in constants.items():
+        assert prohibited_research_mutations(text) == [], name
+        if text.strip() != LOCK_STATEMENT:
+            assert not UNNAMED_PLACEHOLDER.search(text), name
+
+
+# Implements TC-COMP-054
+def test_the_maintenance_functions_issue_no_mutation_and_no_built_statement() -> None:
+    assert function_problems(SERVICE_PY.read_text(), MAINTENANCE_FUNCTIONS) == []
+
+
+# Implements TC-COMP-054
+def test_the_maintenance_functions_only_lock_or_append_events() -> None:
+    names = executed_constant_names(SERVICE_PY.read_text(), MAINTENANCE_FUNCTIONS)
+    statements = [getattr(universe_service, name) for name in names]
+
+    assert sorted(names) == ["_INSERT_EVENT_SQL", "_INSERT_EVENT_SQL", "_INSERT_MEMBER_REMOVED_SQL"]
+    assert universe_service._LOCK_SQL.startswith(ALLOWED_PREFIXES[0])
+    for statement in statements:
+        assert statement.startswith(ALLOWED_PREFIXES), statement
+
+
+# Implements TC-COMP-054
+@pytest.mark.parametrize(
+    "source",
+    (
+        'def rename(c):\n    c.execute("DELETE FROM universe_event")\n',
+        'def rename(c, n):\n    c.execute(f"INSERT INTO universe_event VALUES ({n})")\n',
+        "def rename(c, n):\n    c.execute(Q.format(n))\n",
+        "def rename(c, n):\n    c.execute(Q % n)\n",
+        "def other(c):\n    pass\n",
+    ),
+)
+def test_the_maintenance_scan_fires(source: str) -> None:
+    assert function_problems(source, ("rename",)) != []

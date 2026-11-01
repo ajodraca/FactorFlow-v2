@@ -1,0 +1,275 @@
+# TDD evidence for CAP-002-E4-S8 - Save-as-Universe and Add-to-Universe Dialogs.
+# Three cycles, as the task plan's Other Notes lay out: (1) T009 then T010 (notices.tsx); (2) T001-T004, T006, T007
+# then T011 (the empty-name string), T012 (dialog-frame.tsx) and T013 (save-as-universe-dialog.tsx); (3) T005, T008
+# then T011 (the Universe label) and T014 (add-to-universe-dialog.tsx). T015 and T016 change no behaviour.
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is its
+# own staged diff: cycle-1.patch is HEAD..index after cycle 1, cycle-2.patch and cycle-3.patch are the diffs between
+# the index trees after each cycle (fingerprinted with check-tdd-evidence.py fingerprint --range), so the three apply
+# in order onto the stage parent f4deee3.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent before the next cycle began; findings were fixed, the patch regenerated and re-reviewed. The verdicts
+# below are the final reviews of the patches cited.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (the cycle's test file plus copy.test.ts);
+# generated operators plus hand-written mutants ("operator": "manual") for layout, DOM order, design-named classes,
+# focus, async guards and copy.
+# Decisions applied: DEC-0167 (no name maximum, empty-after-trim is a field error), DEC-0168 (notices.tsx, dialog
+# seams, no auto-dismiss), DEC-0169 (Add defaults, list bound, New universe route, the one empty-name key); all
+# owner-upheld. No new decision was recorded.
+# Cycle 4 is the rework for implementation review v1 (IR-001 to IR-004) under owner decisions DEC-0257, DEC-0258 and
+# DEC-0259; its patch is the staged diff over the review commit ec8c8b2.
+
+cycles:
+  - id: cycle-1
+    tasks: [T009, T010]
+    description: >
+      T009: notices.test.tsx through a local host calling useNotices once and rendering NoticeRegion once: a polite,
+      non-atomic status region (an output, tabindex -1) present and empty before any notice; one success item per
+      notice with a router link when `to` is given and plain text otherwise; messages rendered as text, never markup;
+      arrival order; Dismiss removes only its item (distinct ids for duplicate messages) and returns focus to the
+      region; nothing removed after 5 minutes of fake time; a notice raised by an unmounted component's callback still
+      shows; the toast tokens (--popover surface and text, --status-good accent, --radius) and the 24px dismiss target
+      (min-h-5/min-w-5 = --space-5) pinned; universePath encodes the id. Production: web/src/screens/research/
+      notices.tsx (Notice, HeldNotice, NoticesBinding, universePath, useNotices, NoticeRegion) and copy.ts
+      NOTICES.dismiss with its copy.test.ts anchor. Deviation from T010's wording: the region is an output (implicit
+      status role; biome rejects div role=status and the repo's status regions use output), so the items are spans.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/red-cycle-1.log
+    red_log_sha256: 8f0f009e38eaae71b096bdd75965bb2ed5262fb4514ca7a90721ee0c76a0a6f6
+    red_evidence: >
+      With notices.test.tsx and the copy.test.ts anchor written and no notices.tsx, the file failed to load (Failed to
+      resolve import "./notices") and the copy anchor failed (NOTICES undefined): 1 failed, 310 passed.
+    green_evidence: >
+      notices.test.tsx 10 and copy.test.ts 312 passed (green-cycle-1.log); tsc --noEmit, biome lint and biome format
+      clean. The spec-drift review's first pass found the surface used bg-background where the toast spec names
+      --popover; fixed with token-backed classes and re-reviewed (no drift). Code review LOWs: Esc-to-dismiss and the
+      stack-of-three cap (toast spec section 4) are not in the plan and are carried as owner follow-ups.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/green-cycle-1.log
+        sha256: a866e7ae0dd9037ccbc3e99403cb98af5ea5f45f55cb427a7bf8d05519ff44df
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 961c53e7b8630b9c02a959375941bc050f004f3c0ef451a77738f88272d3e9ce
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/mutation-cycle-1-results.json
+      results_sha256: 6d8050a8004577b1862edde995635f0c851b2985d496813f61430d433269e310
+      generated: 21
+      killed: 19
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/notices.tsx:43:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The id counter's start value (useRef(0) -> useRef(1)) only shifts every id by one; ids are opaque keys
+            compared for equality by dismiss and never rendered, and they stay unique, so no observable output changes.
+        - id: web/src/screens/research/notices.tsx:46:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Stepping the counter by 2 instead of 1 keeps every id unique and monotonic; ids are never rendered or
+            ordered on, so dismiss and arrival order behave identically.
+
+  - id: cycle-2
+    tasks: [T001, T002, T003, T004, T006, T007, T011, T012, T013]
+    description: >
+      TC-COMP-008 (blocked, focusable Save at zero matches or with no set, reason as the next sibling in one row,
+      no dialog or request by click, Enter or Space; outline control and dialog above zero; nothing under a universe
+      scope; an open dialog closed for good when the scope becomes a universe), TC-COMP-009 (the real createUniverse and
+      toThresholds through a stubbed fetch: bounds, hide_incomplete, the symbol prefix or null, set_id, no symbols or
+      scope; title and description lines, the including clause only for a known count above 0, no search clause
+      without a search, no aria-describedby when nothing is described), TC-COMP-010 (closes, notice with the server's
+      count and name linking to the encoded universe, focus back on the control), TC-COMP-011 (sentence in an alert,
+      Review new result in Save's slot keeping focus so Escape still closes, Enter after the conflict sends nothing,
+      props read at open), T006 (name_in_use on the field, empty-after-trim field error, trimmed name, no maxLength,
+      failure sentences never the envelope message, fallback for a network failure, no double submit with aria-busy and
+      aria-disabled, the earlier failure cleared on retry, a late failure dropped and a late success notified without
+      closing a reopened dialog) and T007 (native standard dialog, labelled and described, initial focus on Name, DOM
+      order and classes, Escape/Cancel with focus restore, Tab trap over the controls present at the keypress, empty on
+      reopen). Tests render under StrictMode as main.tsx does. Production: dialog-frame.tsx (DialogFrame, plus an
+      optional descriptionId for the dialog spec's aria-describedby), save-as-universe-dialog.tsx (SaveAsUniverse) and
+      copy.ts DIALOGS.enterName (copy.ts held no empty-name key, DEC-0169) with its anchor.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/red-cycle-2.log
+    red_log_sha256: 704df31f71bf68192b8780bec8f8c51396153edbad882fbcb80868e81f7413fd
+    red_evidence: >
+      With save-as-universe-dialog.test.tsx and the copy anchor written and no dialog files, the file failed to load
+      (Failed to resolve import "./save-as-universe-dialog") and the enterName anchor failed: 1 failed, 311 passed.
+    green_evidence: >
+      save-as-universe-dialog.test.tsx 46 and copy.test.ts 313 passed (green-cycle-2.log); tsc, lint and format
+      clean. The first mutation runs left real survivors (StrictMode remount of the mounted flag, the m = 1 boundary),
+      killed by StrictMode rendering and a new case. Code review's first pass raised a MEDIUM (focus loss on the
+      Save/Review swap; withdrawn on re-review: the unkeyed slot keeps the DOM node, pinned by a test and a keyed
+      mutant) and two LOWs (scope round-trip, empty describedby), all fixed and re-reviewed. The LOW that an
+      empty-name error may not be announced is carried as a follow-up.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/green-cycle-2.log
+        sha256: 701d99eb172ec89c7ea7847ce34dd87555a238496ec67e44124030f0188c5370
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2160936a4819f7418117759d441427b511bacd6f7a8c4e79d6a9c812ca61755b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/mutation-cycle-2-results.json
+      results_sha256: 0d9b78e0b69ea46065923ce8bd413493c290b6700b13baf396486b6bfabff66c
+      generated: 86
+      killed: 84
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/dialog-frame.tsx:67:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            first and last are focusable[0] and focusable[length - 1] of one array, so both are undefined exactly when
+            the array is empty; `first === undefined && last === undefined` equals the disjunction on every input.
+        - id: web/src/screens/research/save-as-universe-dialog.tsx:112:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            mountedRef's initial value (false -> true) is overwritten by the mount effect before any request can start
+            (a request needs a submit, which needs the mounted dialog), and StrictMode's remount sets it again; nothing
+            reads it in between. The effect's own assignment is pinned by the StrictMode tests (mounted-never-set killed).
+
+  - id: cycle-3
+    tasks: [T005, T008, T011, T014]
+    description: >
+      TC-COMP-033 (Added {n} stocks to {name} linking to the universe with and without the already-member clause,
+      counted from the response, for the chosen universe; universe_retired in an alert with Add still available) and
+      T008 (title, one active read at limit 500 never repeated on rerender, a status skeleton in the select's box and
+      labelled slot with Add unavailable, universes in the API's order then New universe, first chosen and focused or
+      New universe with Name focused when none, Name revealed and hidden with focus kept on the select, by-hand create
+      with the trimmed name and the response's count and name, empty-name and name_in_use field errors, failure
+      sentences by operation, list failure replacing the select with Cancel working, StrictMode's stale first list
+      read dropped, focus left where the owner moved it while loading, the choice fixed while a request is pending, no
+      double submit, notify then close, a late success after Escape notified without closing a reopened dialog, the
+      symbols fixed at open, DOM order and classes). Production: add-to-universe-dialog.tsx (AddToUniverseDialog) and
+      copy.ts DIALOGS.universe with its anchor.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/red-cycle-3.log
+    red_log_sha256: e946bae769aaabfda48dbca84d9e55339f9764c9094f7900587ddca91bcad33f
+    red_evidence: >
+      With add-to-universe-dialog.test.tsx and the copy anchor written and no add-to-universe-dialog.tsx, the file
+      failed to load (Failed to resolve import "./add-to-universe-dialog") and the universe anchor failed: 1 failed,
+      312 passed.
+    green_evidence: >
+      add-to-universe-dialog.test.tsx 35 and copy.test.ts 314 passed (green-cycle-3.log); tsc, lint and format clean.
+      The first mutation run left a stale-field-error survivor (killed by a new test); code review then showed the
+      cancelled-flag survivors were not equivalent under StrictMode (one instance, two reads) and raised three LOWs
+      (skeleton label target, focus taken back on load, choice editable while pending); all fixed with tests and
+      re-reviewed. Remaining LOWs (native select height parity with the output skeleton, Name p-2 versus select
+      px-2 py-1) are carried as follow-ups.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/green-cycle-3.log
+        sha256: abd1c9904b331145e31e64501a337e4b1e498472310a810e6d8a4c45e25349c5
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/full-suite.log
+        sha256: 30fcd59763c49c4d796ab540481185a7b244804e100c8655c8cd062b17714ad9
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b34ba88f3daca6e98cc9b6671b9fa12310d7fea124dc096f943aa5cd408555a8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/mutation-cycle-3-results.json
+      results_sha256: b18b8c2d35adbb3c55eb7cf80d5fb8577e3ccc5dc13386282c35e48912429eda
+      generated: 79
+      killed: 76
+      survived: 3
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/add-to-universe-dialog.tsx:80:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            mountedRef's initial value is overwritten by the mount effect before any submit (submit also requires the
+            list to have loaded, which only happens after mount); StrictMode's remount sets it again.
+        - id: manual:cycle-3:focus-follows-choice
+          disposition: equivalent
+          reason: >
+            Adding isNew to the focus effect's dependencies re-runs it on a choice change, but the effect moves focus
+            only while focus is on Cancel, and the choice changes only through the select, which holds focus at that
+            moment; the list effect sets the first choice in the same batch as loaded. Judged equivalent by the
+            independent code review.
+        - id: manual:cycle-3:wrong-resource
+          disposition: equivalent
+          reason: >
+            The resource argument is used only for a network failure, where failureSentence is called with code null;
+            copy.ts returns the operation label plus FALLBACK_ERROR for a non-code and never reads the resource.
+
+  - id: cycle-4
+    tasks: [T008, T009, T010, T012, T013, T014]
+    description: >
+      Review rework for implementation review v1 (IR-001 to IR-004), one cycle. IR-001: the Add dialog shows no Name
+      field (no textbox, no Name label) while the universe list is pending, including when it then arrives empty; a
+      Tab/Shift+Tab test inside the Add dialog wraps Add to the select and the select to Add, with and without the Name
+      field; a notice link activated inside a MemoryRouter renders the /research/universes/:universeId route (a plain
+      anchor does not). IR-002 (DEC-0257): the dialog surface and text are --popover / --popover-foreground; field
+      errors, alerts and the list failure use --destructive, and an invalid Name field gets a --destructive border
+      (form spec section 6); Save, Add and Review new result are --primary on --primary-foreground; the Save trigger
+      and both Cancels use the --input outline border. IR-003 (DEC-0258): Esc on a notice's link or Dismiss control
+      dismisses that notice and returns focus to the region; at most the three newest notices are shown, and older
+      ones are held (DEC-0168: kept until dismissed) and return as shown ones are dismissed. IR-004 (DEC-0259): the
+      frame draws an aria-hidden overlay (bg-background/80, an alpha on an existing token per STD-UI-29) behind the
+      dialog, which closes a standard dialog on click without taking focus; while a request is pending, Cancel,
+      Escape and the overlay do nothing (dialog spec section 4: never close before the result is known), Cancel is
+      aria-disabled with a muted cue, and the confirm shows a spinner in a reserved slot (button spec section 4:
+      label kept, width preserved) with aria-busy and data-pending; a failure stays in the open dialog. A Save
+      dialog pending when the scope becomes a universe stays open until its result (success closes and notifies;
+      failure stays until Cancel); an idle one still closes for good. Save no longer needs its mounted flag (nothing
+      can close the dialog mid-request), so it was removed; the Add dialog keeps it for a host-driven unmount, which
+      its rewritten test exercises. Deviations from the task plan's wording, all owner-directed: T012/T016's
+      bg-background, bg-foreground/text-background and text-status-critical classes are replaced by the DEC-0257
+      tokens; T013's "returns null under a universe scope" now hides only the control, keeping a pending dialog
+      mounted (DEC-0259); the T007/T006 tests that pinned close-mid-request and a dropped late failure were replaced
+      by the DEC-0259 behaviour.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/red-cycle-4.log
+    red_log_sha256: d72615a37641781e9d75c0247032225b40398f6d468d54baf9b54684db39ea08
+    red_evidence: >
+      With the tests written and no production change, 22 failed and 396 passed (red-cycle-4.log): the token, overlay,
+      pending, scope and notice Esc/stack tests. The three IR-001 tests pass on HEAD, as the review states the
+      behaviour is correct; their RED is the review's mutants (name-shown-while-loading, trap-skips-select,
+      plain-anchor), each killed in this cycle's mutation run.
+    green_evidence: >
+      The four focused suites 418 passed (green-cycle-4.log); the full suite 56 files and 1176 tests passed
+      (full-suite-cycle-4.log); biome lint and format clean, tsc --noEmit clean, vite build ok with every new class
+      present in the built CSS (size-4 = var(--space-4)). Code review (independent subagent) first pass APPROVED with
+      seven LOWs; fixed: comment on host unmount, aria-busy on the confirms, motion-safe spinner; also from the
+      spec-drift review (first pass drift_detected true, four LOWs): aria-busy, the destructive field border, a
+      visible cue on the unavailable Cancel, spinner classes as whole literals, plan drift recorded here. Both
+      re-reviewed the regenerated patch: APPROVED and drift_detected false. Carried to the owner, not changed: held
+      notices have no "+N more" marker (interpretation of DEC-0258's "collapse the rest"); a request that never
+      settles keeps the dialog locked because the API client has no timeout; after a failure under a universe scope,
+      Cancel restores focus to a trigger that is no longer mounted, so focus falls to the body.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/green-cycle-4.log
+        sha256: 654a1faa659d85ae18f9f1712f0408311672d4b184f9711f452d389ac66ba06a
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/full-suite-cycle-4.log
+        sha256: 2106e29920793d9e4dffedc1a0d42a669a5aa0559e7bccfecf48bafeb0d28d81
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 27f6a8f64326c14d194b112b8f3edcd1182fce6beef8011ca9f6df49f756d6b4
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S8-evidence/mutation-cycle-4-results.json
+      results_sha256: 10ba5b68afdb32c2bc6d5ee9605648d29d4b129c3364475675d34ca31a3dfb67
+      generated: 70
+      killed: 70
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

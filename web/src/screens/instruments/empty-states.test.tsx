@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as client from "../../api/client";
 import InstrumentsScreen from "./index";
@@ -33,7 +33,13 @@ describe("Instruments — empty states are distinct", () => {
     render(<InstrumentsScreen />);
 
     expect(await screen.findByText("No instruments named yet.")).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: /instrument symbol/i })).toHaveFocus();
+    // AddField focuses itself in a passive effect, which React may run one
+    // Scheduler task after the commit that `findByText` observes. Under CI
+    // load that task can land after the assertion, so await the focus
+    // rather than asserting it synchronously (EXP-20261031-1).
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: /instrument symbol/i })).toHaveFocus(),
+    );
   });
 
   it("renders 'No instrument matches this filter.' with a reset control when instruments exist but none match", async () => {

@@ -1,0 +1,655 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/green-cycle-4-not-postgres.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/green-cycle-4-not-postgres.log
+new file mode 100644
+index 0000000..e51517e
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/green-cycle-4-not-postgres.log
+@@ -0,0 +1,28 @@
++........................................................................ [  5%]
++........................................................................ [ 11%]
++........................................................................ [ 17%]
++........................................................................ [ 23%]
++........................................................................ [ 29%]
++........................................................................ [ 35%]
++...........................................x............................ [ 41%]
++........................................................................ [ 47%]
++........................................................................ [ 53%]
++........................................................................ [ 58%]
++........................................................................ [ 64%]
++........................................................................ [ 70%]
++........................................................................ [ 76%]
++........................................................................ [ 82%]
++........................................................................ [ 88%]
++........................................................................ [ 94%]
++......................................................................   [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++1221 passed, 671 deselected, 1 xfailed, 2 warnings in 26.51s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/green-cycle-4-postgres.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/green-cycle-4-postgres.log
+new file mode 100644
+index 0000000..78d524c
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/green-cycle-4-postgres.log
+@@ -0,0 +1,21 @@
++........................................................................ [ 10%]
++........................................................................ [ 21%]
++........................................................................ [ 32%]
++........................................................................ [ 42%]
++........................................................................ [ 53%]
++........................................................................ [ 64%]
++........................................................................ [ 75%]
++........................................................................ [ 85%]
++........................................................................ [ 96%]
++.......................                                                  [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/planning-run-learnbot-cap-001-d79e92/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++671 passed, 1222 deselected, 2 warnings in 250.89s (0:04:10)
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-4-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-4-results.json
+new file mode 100644
+index 0000000..997a000
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-4-results.json
+@@ -0,0 +1,113 @@
++{
++  "schema": 1,
++  "command": "uv sync -q --offline --all-extras --all-groups && uv run --offline pytest -m \"postgres or not postgres\" tests/unit/test_universe_sql_safety.py tests/unit/test_universe_service_validation.py tests/integration/test_universe_maintenance.py tests/integration/test_universe_create.py -x -q -p no:cacheprovider",
++  "repo_head": "d137e548c0bf29d5b3ecb39438cb2d7d26055fae",
++  "tree_patch_sha256": "93119354b558958f6cf1a374cc188871f87fa1ddf075c7df66456b8ffe0e61cf",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/mutants.json",
++  "mutants_sha256": "a069b0ce96208077aeb720e733b16eda603cf977e9115a7a2c6a3148513bfdcb",
++  "jobs": 4,
++  "started": "2026-10-31T02:36:25Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 13.5,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w2.log",
++      "log_sha256": "df7eacd5d9f2b6f5559879c688f186f3b1765a8f246c668a7cd0a35c772fb795"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 13.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w1.log",
++      "log_sha256": "d78ad28d641e9273bb1aef02d7f67ff0addff20880101771c820685f46e7e967"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 13.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w3.log",
++      "log_sha256": "4fa51d763643c0f3f7c1989ae6bd4554359eed867eef9f50d1f3c38479c298d8"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 13.7,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/baseline-w0.log",
++      "log_sha256": "b1f1ffa59100f9b717d635f86d4fa152120f4a802424d778205ff505b1cbe73a"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "review:remove-lock-after-replay",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        _take_lock(conn)\n        [clean_symbol] = _normalise_symbols([symbol])\n        universe = _require_active(conn, universe_id)\n",
++      "new": "        [clean_symbol] = _normalise_symbols([symbol])\n        universe = _require_active(conn, universe_id)\n        _take_lock(conn)\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_remove-lock-after-replay.log",
++      "log_sha256": "e080651222a7ec8585e245e01a049e90e7f2377d7121e6c9aea8bffefedf09ca"
++    },
++    {
++      "id": "review:retire-lock-after-replay",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        _take_lock(conn)\n        _require_active(conn, universe_id)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))\n",
++      "new": "        _require_active(conn, universe_id)\n        _take_lock(conn)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.9,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_retire-lock-after-replay.log",
++      "log_sha256": "df1c56fd84e65217ac986926f1fd5d27597a1f5b194ec791986c3ba0be99b8a3"
++    },
++    {
++      "id": "review:rename-lock-after-replay",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        _take_lock(conn)\n        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n",
++      "new": "        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n        _take_lock(conn)\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.7,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_rename-lock-after-replay.log",
++      "log_sha256": "83453d8f61d35269f2fa73bef6393b412caa68a759cc4ce714150fb4de1339aa"
++    },
++    {
++      "id": "review:rename-target-before-shape",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n",
++      "new": "        _require_active(conn, universe_id)\n        new_name = _normalise_name(name)\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_rename-target-before-shape.log",
++      "log_sha256": "57881a0693e0c82b0b04eeeda7871ac0243cfbae29a5228f5a5878d6a4068ace"
++    },
++    {
++      "id": "review:remove-target-before-shape",
++      "cycle": "cycle-4",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        [clean_symbol] = _normalise_symbols([symbol])\n        universe = _require_active(conn, universe_id)\n",
++      "new": "        universe = _require_active(conn, universe_id)\n        [clean_symbol] = _normalise_symbols([symbol])\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/rw/results-logs/review_remove-target-before-shape.log",
++      "log_sha256": "07ffe85f6876129a8b7bb5846c99b7a978a5f3d908db44718cc572341896e7ef"
++    }
++  ],
++  "finished": "2026-10-31T02:36:48Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-4.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-4.log
+new file mode 100644
+index 0000000..b475664
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-4.log
+@@ -0,0 +1,286 @@
++# RED for cycle-4: the five surviving mutants of CAP-002-E1-S4-implementation-review-v1-mutation.json, each applied alone in a scratch clone by scripts/mutation-run.py with the cycle-4 tests in place; production is unchanged in the reviewed repository.
++
++===== review:remove-lock-after-replay =====
++........................................................................ [ 47%]
++......................................F
++=================================== FAILURES ===================================
++_ test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[remove_member] _
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60647 user=test database=test_9be13792b60444c6821f7eccc245f1be) at 0x10d07dd90>
++postgres_connection_string = 'postgresql://test:test@localhost:60647/test_9be13792b60444c6821f7eccc245f1be'
++operation = 'remove_member'
++
++    @pytest.mark.parametrize("operation", sorted(_RACES))
++    def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
++        conn: psycopg.Connection, postgres_connection_string: str, operation: str
++    ) -> None:
++        """The lock precedes the replay checks, so two writes cannot both pass them.
++    
++        Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
++        AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
++        holder committed meanwhile, not on the state it could have read before waiting.
++        """
++        holder_change, call, refusal, holder_event = _RACES[operation]
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = [e["event_type"] for e in event_rows(conn, uid)]
++        conn_b = psycopg.connect(postgres_connection_string)
++        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
++        outcome: list[object] = []
++    
++        def writer() -> None:
++            try:
++                call(conn_b, uid)
++                conn_b.commit()
++                outcome.append("done")
++            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
++                outcome.append(exc)
++    
++        thread = threading.Thread(target=writer, daemon=True)
++        try:
++            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
++            thread.start()
++            waiting = _wait_for_a_lock_waiter(watcher)
++            # the same session holds the lock, so it is re-entrant here
++            holder_change(conn, uid)
++            conn.commit()
++            thread.join(timeout=10)
++            assert not thread.is_alive()
++        finally:
++            conn.rollback()
++            thread.join(timeout=10)
++            conn_b.close()
++            watcher.close()
++    
++        assert waiting == 1, f"{operation} never reached the lock"
++>       assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
++E       AssertionError: ['done']
++E       assert (1 == 1 and <class 'str'> is <class 'factorflow.universes.service.LastMember'>)
++E        +  where 1 = len(['done'])
++E        +  and   <class 'str'> = type('done')
++
++tests/integration/test_universe_maintenance.py:744: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_universe_maintenance.py::test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[remove_member]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 110 passed in 6.58s
++
++===== review:retire-lock-after-replay =====
++........................................................................ [ 47%]
++........................................F
++=================================== FAILURES ===================================
++__ test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[retire] ___
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60649 user=test database=test_564b2de0144b4453b62d9f682ed99608) at 0x10b40cb30>
++postgres_connection_string = 'postgresql://test:test@localhost:60649/test_564b2de0144b4453b62d9f682ed99608'
++operation = 'retire'
++
++    @pytest.mark.parametrize("operation", sorted(_RACES))
++    def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
++        conn: psycopg.Connection, postgres_connection_string: str, operation: str
++    ) -> None:
++        """The lock precedes the replay checks, so two writes cannot both pass them.
++    
++        Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
++        AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
++        holder committed meanwhile, not on the state it could have read before waiting.
++        """
++        holder_change, call, refusal, holder_event = _RACES[operation]
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = [e["event_type"] for e in event_rows(conn, uid)]
++        conn_b = psycopg.connect(postgres_connection_string)
++        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
++        outcome: list[object] = []
++    
++        def writer() -> None:
++            try:
++                call(conn_b, uid)
++                conn_b.commit()
++                outcome.append("done")
++            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
++                outcome.append(exc)
++    
++        thread = threading.Thread(target=writer, daemon=True)
++        try:
++            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
++            thread.start()
++            waiting = _wait_for_a_lock_waiter(watcher)
++            # the same session holds the lock, so it is re-entrant here
++            holder_change(conn, uid)
++            conn.commit()
++            thread.join(timeout=10)
++            assert not thread.is_alive()
++        finally:
++            conn.rollback()
++            thread.join(timeout=10)
++            conn_b.close()
++            watcher.close()
++    
++        assert waiting == 1, f"{operation} never reached the lock"
++>       assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
++E       AssertionError: [UniqueViolation('duplicate key value violates unique constraint "idx_universe_event_single_retired"
++E         DETAIL:  Key (universe_id)=(63a5de58-4912-4e77-9820-531c63daf050) already exists.')]
++E       assert (1 == 1 and <class 'psycopg.errors.UniqueViolation'> is <class 'factorflow.universes.service.UniverseRetired'>)
++E        +  where 1 = len([UniqueViolation('duplicate key value violates unique constraint "idx_universe_event_single_retired"\nDETAIL:  Key (universe_id)=(63a5de58-4912-4e77-9820-531c63daf050) already exists.')])
++E        +  and   <class 'psycopg.errors.UniqueViolation'> = type(UniqueViolation('duplicate key value violates unique constraint "idx_universe_event_single_retired"\nDETAIL:  Key (universe_id)=(63a5de58-4912-4e77-9820-531c63daf050) already exists.'))
++
++tests/integration/test_universe_maintenance.py:744: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_universe_maintenance.py::test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[retire]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 112 passed in 6.81s
++
++===== review:rename-lock-after-replay =====
++........................................................................ [ 47%]
++.......................................F
++=================================== FAILURES ===================================
++__ test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[rename] ___
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60646 user=test database=test_73ca03780b1d43189809f9b3e3474c9d) at 0x10cf42f30>
++postgres_connection_string = 'postgresql://test:test@localhost:60646/test_73ca03780b1d43189809f9b3e3474c9d'
++operation = 'rename'
++
++    @pytest.mark.parametrize("operation", sorted(_RACES))
++    def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
++        conn: psycopg.Connection, postgres_connection_string: str, operation: str
++    ) -> None:
++        """The lock precedes the replay checks, so two writes cannot both pass them.
++    
++        Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
++        AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
++        holder committed meanwhile, not on the state it could have read before waiting.
++        """
++        holder_change, call, refusal, holder_event = _RACES[operation]
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = [e["event_type"] for e in event_rows(conn, uid)]
++        conn_b = psycopg.connect(postgres_connection_string)
++        watcher = psycopg.connect(postgres_connection_string, autocommit=True)
++        outcome: list[object] = []
++    
++        def writer() -> None:
++            try:
++                call(conn_b, uid)
++                conn_b.commit()
++                outcome.append("done")
++            except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
++                outcome.append(exc)
++    
++        thread = threading.Thread(target=writer, daemon=True)
++        try:
++            conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
++            thread.start()
++            waiting = _wait_for_a_lock_waiter(watcher)
++            # the same session holds the lock, so it is re-entrant here
++            holder_change(conn, uid)
++            conn.commit()
++            thread.join(timeout=10)
++            assert not thread.is_alive()
++        finally:
++            conn.rollback()
++            thread.join(timeout=10)
++            conn_b.close()
++            watcher.close()
++    
++        assert waiting == 1, f"{operation} never reached the lock"
++>       assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
++E       AssertionError: ['done']
++E       assert (1 == 1 and <class 'str'> is <class 'factorflow.universes.service.UniverseRetired'>)
++E        +  where 1 = len(['done'])
++E        +  and   <class 'str'> = type('done')
++
++tests/integration/test_universe_maintenance.py:744: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_universe_maintenance.py::test_a_write_waiting_on_the_lock_checks_what_the_holder_committed[rename]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 111 passed in 6.66s
++
++===== review:rename-target-before-shape =====
++........................................................................ [ 47%]
++...........F
++=================================== FAILURES ===================================
++___ test_a_blank_rename_is_a_shape_failure_before_the_target_check[unknown] ____
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60648 user=test database=test_a3e4227066bf4e3b896372b5cf833725) at 0x10d95ce30>
++target = 'unknown'
++
++    @pytest.mark.parametrize("target", ["unknown", "retired"])
++    def test_a_blank_rename_is_a_shape_failure_before_the_target_check(
++        conn: psycopg.Connection, target: str
++    ) -> None:
++        """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
++        uid = _unknown_or_retired(conn, target)
++        before = count_events(conn)
++    
++        with pytest.raises(ValueError, match="must not be empty") as excinfo:
++>           service.rename(conn, uid, "   ")
++
++tests/integration/test_universe_maintenance.py:209: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++src/factorflow/universes/service.py:284: in rename
++    _require_active(conn, universe_id)
++src/factorflow/universes/service.py:190: in _require_active
++    universe = _replayed(conn, universe_id)
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60648 user=test database=test_a3e4227066bf4e3b896372b5cf833725) at 0x10d95ce30>
++universe_id = UUID('00000000-0000-0000-0000-000000000007')
++
++    def _replayed(conn: psycopg.Connection, universe_id: UUID) -> Universe:
++        universe = replay.current_state(conn, universe_id)
++        if universe is None:
++>           raise UniverseNotFound(str(universe_id))
++E           factorflow.universes.service.UniverseNotFound: 00000000-0000-0000-0000-000000000007
++
++src/factorflow/universes/service.py:199: UniverseNotFound
++=========================== short test summary info ============================
++FAILED tests/integration/test_universe_maintenance.py::test_a_blank_rename_is_a_shape_failure_before_the_target_check[unknown]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 83 passed in 3.30s
++
++===== review:remove-target-before-shape =====
++........................................................................ [ 47%]
++.........................F
++=================================== FAILURES ===================================
++_ test_a_malformed_symbol_is_a_shape_failure_before_the_target_check[unknown] __
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60853 user=test database=test_8bd1c2ad9bce40b2b65bd1f57ee2bf4e) at 0x10b66e5d0>
++target = 'unknown'
++
++    @pytest.mark.parametrize("target", ["unknown", "retired"])
++    def test_a_malformed_symbol_is_a_shape_failure_before_the_target_check(
++        conn: psycopg.Connection, target: str
++    ) -> None:
++        """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
++        uid = _unknown_or_retired(conn, target)
++        before = count_events(conn)
++    
++        with pytest.raises(ValueError, match="invalid symbol") as excinfo:
++>           service.remove_member(conn, uid, "1ABC")
++
++tests/integration/test_universe_maintenance.py:418: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++src/factorflow/universes/service.py:302: in remove_member
++    universe = _require_active(conn, universe_id)
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++src/factorflow/universes/service.py:190: in _require_active
++    universe = _replayed(conn, universe_id)
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60853 user=test database=test_8bd1c2ad9bce40b2b65bd1f57ee2bf4e) at 0x10b66e5d0>
++universe_id = UUID('00000000-0000-0000-0000-000000000007')
++
++    def _replayed(conn: psycopg.Connection, universe_id: UUID) -> Universe:
++        universe = replay.current_state(conn, universe_id)
++        if universe is None:
++>           raise UniverseNotFound(str(universe_id))
++E           factorflow.universes.service.UniverseNotFound: 00000000-0000-0000-0000-000000000007
++
++src/factorflow/universes/service.py:199: UniverseNotFound
++=========================== short test summary info ============================
++FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_before_the_target_check[unknown]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 97 passed in 4.39s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
+index b351871..f55717e 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
+@@ -7,7 +7,8 @@ status: draft
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-17
+-updated: 2026-10-18
++updated: 2026-10-31
++last_reworked_review: CAP-002-E1-S4-implementation-review-v1.md
+ ai_provenance:
+   agent_id: implementation-planning-agent
+   agent_version: "1.0"
+diff --git a/tests/integration/test_universe_maintenance.py b/tests/integration/test_universe_maintenance.py
+index 5be7202..282a844 100644
+--- a/tests/integration/test_universe_maintenance.py
++++ b/tests/integration/test_universe_maintenance.py
+@@ -187,6 +187,32 @@ def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, nam
+     assert count_events(conn) == before
+ 
+ 
++def _unknown_or_retired(conn: psycopg.Connection, target: str) -> UUID:
++    if target == "unknown":
++        return UUID(int=7)
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    service.retire(conn, uid)
++    conn.commit()
++    return uid
++
++
++@pytest.mark.parametrize("target", ["unknown", "retired"])
++def test_a_blank_rename_is_a_shape_failure_before_the_target_check(
++    conn: psycopg.Connection, target: str
++) -> None:
++    """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
++    uid = _unknown_or_retired(conn, target)
++    before = count_events(conn)
++
++    with pytest.raises(ValueError, match="must not be empty") as excinfo:
++        service.rename(conn, uid, "   ")
++    conn.rollback()
++
++    assert type(excinfo.value) is ValueError
++    assert count_events(conn) == before
++
++
+ def test_rename_accepts_a_very_long_name(conn: psycopg.Connection) -> None:
+     """No length bound exists yet (system design question 2, abstained)."""
+     seed(conn, "AAA")
+@@ -244,6 +270,9 @@ def test_retire_appends_one_retired_event_and_data_stays_readable(
+     assert page[0].event_type == "retired"
+     assert len(page) == len(after_events)
+     assert read.created_on is not None
++    # Every event here shares one recorded_on, so the creation day's end-of-day membership is
++    # today's (DEC-0065): this shows an as-of read still replays after retire, not a past
++    # membership that differs. Past-date replay is CAP-002-E1-S2's test_universe_as_of.py.
+     on_creation_day = service.get_universe(conn, uid, as_of=read.created_on)
+     assert [m.symbol for m in on_creation_day.members] == ["AAA"]
+     before_creation = service.get_universe(conn, uid, as_of=read.created_on - timedelta(days=1))
+@@ -377,6 +406,22 @@ def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
+     assert count_events(conn) == before
+ 
+ 
++@pytest.mark.parametrize("target", ["unknown", "retired"])
++def test_a_malformed_symbol_is_a_shape_failure_before_the_target_check(
++    conn: psycopg.Connection, target: str
++) -> None:
++    """Design 2.4: the shape check (step 2) precedes the target check (step 5)."""
++    uid = _unknown_or_retired(conn, target)
++    before = count_events(conn)
++
++    with pytest.raises(ValueError, match="invalid symbol") as excinfo:
++        service.remove_member(conn, uid, "1ABC")
++    conn.rollback()
++
++    assert type(excinfo.value) is ValueError
++    assert count_events(conn) == before
++
++
+ def test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member(
+     conn: psycopg.Connection,
+ ) -> None:
+@@ -539,7 +584,11 @@ _OPERATIONS: dict[str, tuple[Callable[[psycopg.Connection, UUID], object], str]]
+ def test_each_maintenance_write_waits_on_the_write_lock(
+     conn: psycopg.Connection, postgres_connection_string: str, operation: str
+ ) -> None:
+-    """The write lock is the first statement of every write (design 2.3, DEC-0065)."""
++    """Each write waits on the write lock before it writes (design 2.3, DEC-0065).
++
++    That the lock also precedes the replay checks is pinned by
++    ``test_a_write_waiting_on_the_lock_checks_what_the_holder_committed``.
++    """
+     call, event_type = _OPERATIONS[operation]
+     seed(conn, "AAA", "BBB")
+     uid = _create(conn, "U", "AAA", "BBB")
+@@ -619,6 +668,85 @@ def test_a_rename_waiting_on_the_lock_sees_a_create_that_took_the_name(
+     assert [u.name for u in active] == ["Race"]
+ 
+ 
++def _retire(c: psycopg.Connection, uid: UUID) -> object:
++    return service.retire(c, uid)
++
++
++# operation -> (the lock holder's change, the waiting write, its refusal, the holder's event)
++_RACES: dict[
++    str,
++    tuple[
++        Callable[[psycopg.Connection, UUID], object],
++        Callable[[psycopg.Connection, UUID], object],
++        type[Exception],
++        str,
++    ],
++] = {
++    "remove_member": (
++        lambda c, uid: service.remove_member(c, uid, "AAA"),
++        lambda c, uid: service.remove_member(c, uid, "BBB"),
++        LastMember,
++        "member_removed",
++    ),
++    "rename": (
++        _retire,
++        lambda c, uid: service.rename(c, uid, "Renamed"),
++        UniverseRetired,
++        "retired",
++    ),
++    "retire": (_retire, _retire, UniverseRetired, "retired"),
++}
++
++
++@pytest.mark.parametrize("operation", sorted(_RACES))
++def test_a_write_waiting_on_the_lock_checks_what_the_holder_committed(
++    conn: psycopg.Connection, postgres_connection_string: str, operation: str
++) -> None:
++    """The lock precedes the replay checks, so two writes cannot both pass them.
++
++    Design 2.3 ("as its first statement, performs its checks by replay"), DEC-0065 (4),
++    AC-5 and DAC-E1-S4-5: a write that waits on the lock must refuse on the state the
++    holder committed meanwhile, not on the state it could have read before waiting.
++    """
++    holder_change, call, refusal, holder_event = _RACES[operation]
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    before = [e["event_type"] for e in event_rows(conn, uid)]
++    conn_b = psycopg.connect(postgres_connection_string)
++    watcher = psycopg.connect(postgres_connection_string, autocommit=True)
++    outcome: list[object] = []
++
++    def writer() -> None:
++        try:
++            call(conn_b, uid)
++            conn_b.commit()
++            outcome.append("done")
++        except BaseException as exc:  # noqa: BLE001 - captured for the assertion below
++            outcome.append(exc)
++
++    thread = threading.Thread(target=writer, daemon=True)
++    try:
++        conn.execute("SELECT pg_advisory_xact_lock(%s)", (service.UNIVERSE_WRITE_LOCK_KEY,))
++        thread.start()
++        waiting = _wait_for_a_lock_waiter(watcher)
++        # the same session holds the lock, so it is re-entrant here
++        holder_change(conn, uid)
++        conn.commit()
++        thread.join(timeout=10)
++        assert not thread.is_alive()
++    finally:
++        conn.rollback()
++        thread.join(timeout=10)
++        conn_b.close()
++        watcher.close()
++
++    assert waiting == 1, f"{operation} never reached the lock"
++    assert len(outcome) == 1 and type(outcome[0]) is refusal, outcome
++    assert [e["event_type"] for e in event_rows(conn, uid)] == [*before, holder_event]
++    if operation == "remove_member":
++        assert [m.symbol for m in service.get_universe(conn, uid).members] == ["BBB"]
++
++
+ @pytest.mark.parametrize("operation", sorted(_OPERATIONS))
+ def test_a_failed_event_insert_propagates_and_writes_nothing(
+     conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch, operation: str

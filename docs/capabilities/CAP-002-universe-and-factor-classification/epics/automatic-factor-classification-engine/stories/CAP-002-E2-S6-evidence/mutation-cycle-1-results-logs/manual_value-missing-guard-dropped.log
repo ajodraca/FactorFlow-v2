@@ -1,0 +1,44 @@
+......F
+=================================== FAILURES ===================================
+________ test_a_not_classified_row_for_a_missing_input_carries_the_mark ________
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55579 user=test database=test_1cc3777364e04a0786ba2edec01de32e) at 0x10b8412b0>, set_id=UUID('cea22c96-8423-4a47-8951-ac4205052cb4'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b842720>
+
+    def test_a_not_classified_row_for_a_missing_input_carries_the_mark(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0122: A holds no cash-flow statement, so fcf_yield is missing and lists no period;
+        A's value row is not classified for it and still carries its other inputs' mark."""
+        conn, set_id = store
+        stocks = build_fixture(conn, statement_types={"A": ("balance_sheet", "income_statement")})
+    
+        assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
+    
+        a = stocks["A"]
+        rows = classifications_for(conn, set_id)
+        value = rows[(a, "value")]
+        assert (value["status"], value["reason_code"], value["reason_input"]) == (
+            "not_classified",
+            "input_missing",
+            "fcf_yield",
+        )
+        assert value["restated_possible"] is True
+        assert (rows[(a, "growth")]["status"], rows[(a, "growth")]["restated_possible"]) == (
+            "classified",
+            True,
+        )
+        assert inputs_for(conn, set_id, a)["fcf_yield"]["status"] == "missing"
+>       assert input_flags(conn, set_id, a) == expect("book_to_price", "earnings_yield", *GROWTH)
+E       AssertionError: assert {'book_to_pri...h': True, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'fcf_yield': True} != {'fcf_yield': False}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:400: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_a_not_classified_row_for_a_missing_input_carries_the_mark
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 6 passed in 3.59s

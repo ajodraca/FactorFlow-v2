@@ -1,0 +1,209 @@
+diff --git a/tests/integration/engine_proof_support.py b/tests/integration/engine_proof_support.py
+index cc49120..f08568d 100644
+--- a/tests/integration/engine_proof_support.py
++++ b/tests/integration/engine_proof_support.py
+@@ -194,7 +194,9 @@ def _insert_statements(
+     statement_types: tuple[str, ...] = STATEMENT_TYPES,
+ ) -> None:
+     # A statement is observed after its period ends, as a provider can report it.
+-    assert observed_on > max(period_ends), "statements observed before their period end"
++    assert observed_on > max(period_ends), (
++        f"statements observed on {observed_on}, not after their period end {max(period_ends)}"
++    )
+     cur.execute(
+         _STATEMENTS_SQL,
+         {
+diff --git a/tests/integration/test_engine_transaction.py b/tests/integration/test_engine_transaction.py
+index 5634dc6..a4e84b3 100644
+--- a/tests/integration/test_engine_transaction.py
++++ b/tests/integration/test_engine_transaction.py
+@@ -7,7 +7,8 @@ DAC-E2-S2-4. Stages are injected by replacing ``engine._STAGES`` (DEC-0112).
+ import logging
+ import time
+ from collections.abc import Iterator
+-from datetime import date
++from datetime import date, timedelta
++from decimal import Decimal
+ from typing import Any
+ from uuid import UUID, uuid4
+ 
+@@ -15,6 +16,15 @@ import psycopg
+ import pytest
+ 
+ from factorflow.classification import engine
++from tests.integration.engine_inputs_support import inputs_for, install_test_line_items
++from tests.integration.engine_proof_support import (
++    BackdatingPopulation,
++    backfill_statement,
++    complete_and_open_next,
++    populate_backdating,
++    revise_close,
++    snapshot_set,
++)
+ from tests.integration.engine_support import (
+     add_bar,
+     add_building_set,
+@@ -626,3 +636,163 @@ def test_failure_with_an_empty_message_is_recorded_with_its_class(
+     assert row["state"] == "failed"
+     assert row["ended_at"] is not None
+     assert row["failure_reason"] == "RuntimeError: "
++
++
++# --- CAP-002-E2-S7: later data changes nothing (DAC-E2-9, AC-19, DEC-0124) -------------------
++
++PROOF_DATE = date(2026, 11, 13)  # the backdating population's classification date, a Friday
++GROWTH_INPUTS = ("revenue_growth", "eps_growth")
++
++
++def build_complete(conn: psycopg.Connection, set_id: UUID) -> None:
++    """Build ``set_id`` with the real stages and the real peer-set floor."""
++    result = engine.build(conn, set_id, 60)
++    assert result.state == "complete", result.failure_reason
++
++
++def factor_row(conn: psycopg.Connection, set_id: UUID, factor: str) -> tuple[int, bool]:
++    row = conn.execute(
++        "SELECT qualified_count, ranked FROM classification_set_factor "
++        "WHERE set_id = %s AND factor = %s",
++        (set_id, factor),
++    ).fetchone()
++    conn.commit()
++    assert row is not None
++    return int(row[0]), bool(row[1])
++
++
++def classification_row(
++    conn: psycopg.Connection, set_id: UUID, instrument_id: int, factor: str
++) -> dict[str, object]:
++    row = conn.execute(
++        "SELECT status, reason_code, restated_possible FROM factor_classification "
++        "WHERE set_id = %s AND instrument_id = %s AND factor = %s",
++        (set_id, instrument_id, factor),
++    ).fetchone()
++    conn.commit()
++    assert row is not None
++    return dict(zip(("status", "reason_code", "restated_possible"), row, strict=True))
++
++
++def backfilled_row(conn: psycopg.Connection, pop: BackdatingPopulation) -> dict[str, Any]:
++    """The one stored row of the quarter A lacked, once ``backfill_statement`` wrote it."""
++    rows = conn.execute(
++        "SELECT observed_on, provider_filing_date, fiscal_period_end, recorded_at "
++        "FROM fundamental_observation WHERE instrument_id = %s "
++        "AND statement_type = 'income_statement' AND fiscal_period_end = %s",
++        (pop.a_id, pop.missing_period_end),
++    ).fetchall()
++    conn.commit()
++    assert len(rows) == 1
++    keys = ("observed_on", "provider_filing_date", "fiscal_period_end", "recorded_at")
++    return dict(zip(keys, rows[0], strict=True))
++
++
++# Implements TC-COMP-162
++def test_backfill_after_completion_leaves_the_set_unchanged(
++    conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-S7-2, DAC-E2-9, AC-19, DEC-0124: a backfilled statement recorded after a set
++    completes changes no row of that set, in any of its four tables or columns; the next set
++    sees it, known on the day it was observed and never earlier."""
++    pop = populate_backdating(conn, classification_date=PROOF_DATE)
++    install_test_line_items(monkeypatch)
++    set_1 = complete_and_open_next(conn, PROOF_DATE)
++    build_complete(conn, set_1)
++    before = snapshot_set(conn, set_1)
++
++    # Preconditions: A lacks its oldest income statement, so its growth inputs are missing and
++    # the growth peer set is the other 30, exactly the floor.
++    first = inputs_for(conn, set_1, pop.a_id)
++    for name in GROWTH_INPUTS:
++        assert first[name]["status"] == "missing"
++        assert len(first[name]["detail"]["periods_found"]) == 7
++    growth = classification_row(conn, set_1, pop.a_id, "growth")
++    assert growth["status"] == "not_classified"
++    assert growth["reason_code"] == "input_missing"
++    assert factor_row(conn, set_1, "growth") == (30, True)
++
++    backfilled_on = backfill_statement(conn, pop)
++    statement = backfilled_row(conn, pop)
++    ended_at = set_row(conn, set_1)["ended_at"]
++    conn.commit()
++    assert statement["observed_on"] == backfilled_on
++    assert statement["provider_filing_date"] < pop.first_observed_on  # backfilled, DEC-0056
++    assert statement["recorded_at"] > ended_at  # recorded after set 1 completed
++    assert snapshot_set(conn, set_1) == before
++
++    set_2 = complete_and_open_next(conn, backfilled_on)
++    build_complete(conn, set_2)
++
++    second = inputs_for(conn, set_2, pop.a_id)
++    for name in GROWTH_INPUTS:
++        assert second[name]["status"] == "present"
++        assert second[name]["restated_possible"] is True
++        assert second[name]["known_on"] == backfilled_on
++        assert second[name]["known_on"] not in (
++            statement["provider_filing_date"],
++            statement["fiscal_period_end"],
++        )
++    growth = classification_row(conn, set_2, pop.a_id, "growth")
++    assert growth["status"] == "classified"
++    assert growth["restated_possible"] is True
++    assert factor_row(conn, set_2, "growth") == (31, True)
++    known_later = conn.execute(
++        "SELECT count(*) FROM factor_input WHERE set_id = %s AND known_on >= %s",
++        (set_1, backfilled_on),
++    ).fetchone()
++    conn.commit()
++    assert known_later == (0,)
++    assert snapshot_set(conn, set_1) == before
++
++
++def test_revised_close_after_completion_leaves_the_set_unchanged(
++    conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-9 ("a fundamental or price"), AC-19, DEC-0124: a close revised after a set
++    completes changes no row of that set; the next set prices market capitalisation from the
++    revision, known on the day it was observed (DEC-0055 (6), (7); DEC-0117 (1))."""
++    pop = populate_backdating(conn, classification_date=PROOF_DATE)
++    install_test_line_items(monkeypatch)
++    set_1 = complete_and_open_next(conn, PROOF_DATE)
++    build_complete(conn, set_1)
++    before = snapshot_set(conn, set_1)
++    first = inputs_for(conn, set_1, pop.other_id)["book_to_price"]
++    assert first["status"] == "present"
++    assert first["known_on"] == PROOF_DATE
++    revised_on = PROOF_DATE + timedelta(days=1)
++    new_close = Decimal(first["detail"]["close"]) * 2
++
++    revise_close(conn, pop.other_id, PROOF_DATE, new_close, revised_on)
++    assert snapshot_set(conn, set_1) == before
++
++    set_2 = complete_and_open_next(conn, revised_on)
++    build_complete(conn, set_2)
++    second = inputs_for(conn, set_2, pop.other_id)["book_to_price"]
++    assert second["status"] == "present"
++    assert second["detail"]["close"] == new_close
++    assert second["value"] != first["value"]
++    assert second["known_on"] == revised_on
++    assert snapshot_set(conn, set_1) == before
++
++
++def test_backfill_before_the_build_is_seen_by_that_set(
++    conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """AC-19, DEC-0124: the control for TC-COMP-162. The same backfilled statement recorded
++    before set 1 builds, on the same date, gives A's growth inputs present in set 1: the
++    missing precondition there is the statement's absence, not an artefact of the fixture, so
++    the before-and-after comparison is able to fail. ``known_on`` is still the day the
++    statement was observed."""
++    pop = populate_backdating(conn, classification_date=PROOF_DATE)
++    backfilled_on = backfill_statement(conn, pop)
++    install_test_line_items(monkeypatch)
++    set_1 = complete_and_open_next(conn, PROOF_DATE)
++    build_complete(conn, set_1)
++
++    inputs = inputs_for(conn, set_1, pop.a_id)
++    for name in GROWTH_INPUTS:
++        assert inputs[name]["status"] == "present"
++        assert inputs[name]["restated_possible"] is True
++        assert inputs[name]["known_on"] == backfilled_on
++    assert factor_row(conn, set_1, "growth") == (31, True)

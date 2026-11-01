@@ -1,0 +1,41 @@
+...............................................................F
+=================================== FAILURES ===================================
+____________ test_missing_ranks_before_outdated_whatever_the_cause _____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=58229 user=test database=test_141afa9621414506a815b6f38ec0bd3...874f350>, stock=1, set_id=UUID('948fdc2a-9692-4256-b2f3-12d7f48d7de6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10874e210>
+
+    def test_missing_ranks_before_outdated_whatever_the_cause(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (1), DEC-0118 (4), DEC-0241 (2): on a stale stock every window that lacks a
+        boundary, uses a non-positive close or holds an unusable payload is missing, and the
+        missing causes rank a missing boundary, then a non-positive close, then the payload."""
+        stale_day = date(2026, 10, 15)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 50, S6: 0, date(2026, 4, 30): 90, S3: 0, E: 120, stale_day: 130},
+        )
+        # In (S_6, E] and (S_12, E], not in (S_3, E].
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+        )
+        shorter = add_instrument(env.conn, "SHORT")
+        add_close_series(env.conn, shorter, {S3: 100, E: 0, stale_day: 130})
+    
+        rows = build(env, monkeypatch)
+        shorter_rows = momentum(env.conn, env.set_id, shorter)
+    
+        assert rows["return_3m"]["detail"]["cause"] == "price_not_positive"
+>       assert rows["return_6m"]["detail"]["cause"] == "price_not_positive"
+E       AssertionError: assert 'corporate_ac...load_unusable' == 'price_not_positive'
+E         
+E         - price_not_positive
+E         + corporate_action_payload_unusable
+
+tests/integration/test_engine_inputs_momentum.py:1193: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_missing_ranks_before_outdated_whatever_the_cause
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 63 passed in 16.30s

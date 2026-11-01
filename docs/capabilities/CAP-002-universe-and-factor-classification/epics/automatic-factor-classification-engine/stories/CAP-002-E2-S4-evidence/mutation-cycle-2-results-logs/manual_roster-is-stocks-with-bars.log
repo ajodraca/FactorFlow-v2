@@ -1,0 +1,32 @@
+......................................F
+=================================== FAILURES ===================================
+________________ test_a_missing_boundary_ranks_before_outdated _________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53838 user=test database=test_a4925592de5448ba82c7085792c5ebf...95879e0>, stock=1, set_id=UUID('db73fe93-3310-4031-bbb3-230a61d7a5d9'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109587410>
+
+    def test_a_missing_boundary_ranks_before_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (1), DEC-0118 (4): a stale stock lacking the S_12 bar has return_12m missing
+        and the other two outdated; a stock with no bar at all is missing on all three."""
+        no_bars = add_instrument(env.conn, "NONE")
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+    
+        rows = build(env, monkeypatch)
+        none_rows = momentum(env.conn, env.set_id, no_bars)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["detail"]["boundary"] == "S_12"
+        assert rows["return_3m"]["status"] == "outdated"
+        assert rows["return_6m"]["status"] == "outdated"
+        for name in MOMENTUM:
+>           assert none_rows[name]["status"] == "missing", name
+                   ^^^^^^^^^^^^^^^
+E           KeyError: 'return_3m'
+
+tests/integration/test_engine_inputs_momentum.py:1007: KeyError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_boundary_ranks_before_outdated
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 38 passed in 7.77s

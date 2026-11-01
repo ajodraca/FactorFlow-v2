@@ -4,10 +4,14 @@ A plain module rather than ``conftest.py``: ``tests/conftest.py`` is a delivered
 The reader is tested independently of the engine (``component-design-classification-reader.md``
 section 7), so these helpers write ``research-store`` rows straight into the tables, with
 bound parameters only, and commit so the reader's statements see them. Later E3 reader
-stories import and extend this module.
+stories import and extend this module; CAP-002-E3-S2 adds the classification, reference and
+universe helpers below ``insert_stock_inputs``.
 """
 
+import hashlib
+from collections.abc import Iterable
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -126,3 +130,174 @@ def insert_stock_inputs(
             insert_input(
                 conn, set_id, instrument_id, factor, input_name, given.get(input_name, "present")
             )
+
+
+# --- CAP-002-E3-S2: classification rows, reference names and universes --------------------
+
+Reason = tuple[str, str | None]  # (reason_code, reason_input or None)
+Scored = tuple[Decimal, Decimal]  # (score, percentile)
+INPUT_REASONS = ("input_missing", "input_outdated", "input_not_computable")
+
+
+def insert_classification(
+    conn: psycopg.Connection,
+    set_id: UUID,
+    instrument_id: int,
+    factor: str,
+    status: str = "classified",
+    *,
+    score: Decimal | None = None,
+    percentile: Decimal | None = None,
+    reason_code: str | None = None,
+    reason_input: str | None = None,
+    reason_detail: str | None = None,
+    restated_possible: bool = False,
+) -> None:
+    """One ``factor_classification`` row; the caller supplies a shape the CHECKs accept
+    (``factor_classification_shape``, ``factor_classification_reason_input_agrees``)."""
+    conn.execute(
+        "INSERT INTO factor_classification (set_id, instrument_id, factor, status, score, "
+        "percentile, reason_code, reason_input, reason_detail, restated_possible) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (
+            set_id,
+            instrument_id,
+            factor,
+            status,
+            score,
+            percentile,
+            reason_code,
+            reason_input,
+            reason_detail,
+            restated_possible,
+        ),
+    )
+    conn.commit()
+
+
+def insert_reference(
+    conn: psycopg.Connection,
+    instrument_id: int,
+    company_name: str,
+    *,
+    recorded_at: datetime | None = None,
+) -> None:
+    """One ``instrument_reference`` row carrying the company name the list reads (DEC-0245);
+    ``recorded_at`` defaults to now()."""
+    conn.execute(
+        "INSERT INTO instrument_reference (instrument_id, value_hash, company_name, payload, "
+        "recorded_at) VALUES (%s, %s, %s, %s, COALESCE(%s, now()))",
+        (
+            instrument_id,
+            hashlib.sha256(f"{instrument_id}:{company_name}".encode()).digest(),
+            company_name,
+            Jsonb({"name": company_name}),
+            recorded_at,
+        ),
+    )
+    conn.commit()
+
+
+def insert_universe(conn: psycopg.Connection, name: str, instrument_ids: Iterable[int]) -> UUID:
+    """A ``universe`` with its ``created`` event and one ``member_added`` event per instrument."""
+    row = conn.execute("INSERT INTO universe DEFAULT VALUES RETURNING universe_id").fetchone()
+    assert row is not None
+    universe_id: UUID = row[0]
+    conn.execute(
+        "INSERT INTO universe_event (universe_id, event_type, name) VALUES (%s, 'created', %s)",
+        (universe_id, name),
+    )
+    for instrument_id in instrument_ids:
+        add_member(conn, universe_id, instrument_id)
+    conn.commit()
+    return universe_id
+
+
+def add_member(
+    conn: psycopg.Connection,
+    universe_id: UUID,
+    instrument_id: int,
+    *,
+    recorded_on: date | None = None,
+) -> None:
+    """A ``member_added`` event; ``recorded_on`` defaults to the column's America/Chicago
+    date of now (DEC-0065)."""
+    conn.execute(
+        "INSERT INTO universe_event (universe_id, event_type, instrument_id, recorded_on) "
+        "VALUES (%s, 'member_added', %s, "
+        "COALESCE(%s::date, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Chicago')::date))",
+        (universe_id, instrument_id, recorded_on),
+    )
+    conn.commit()
+
+
+def remove_member(conn: psycopg.Connection, universe_id: UUID, instrument_id: int) -> None:
+    conn.execute(
+        "INSERT INTO universe_event (universe_id, event_type, instrument_id) "
+        "VALUES (%s, 'member_removed', %s)",
+        (universe_id, instrument_id),
+    )
+    conn.commit()
+
+
+def retire_universe(conn: psycopg.Connection, universe_id: UUID) -> None:
+    conn.execute(
+        "INSERT INTO universe_event (universe_id, event_type) VALUES (%s, 'retired')",
+        (universe_id,),
+    )
+    conn.commit()
+
+
+def seed_scored_stock(
+    conn: psycopg.Connection,
+    set_id: UUID,
+    symbol: str,
+    *,
+    value: Scored | Reason = (Decimal("0.5"), Decimal("50")),
+    growth: Scored | Reason = (Decimal("0.5"), Decimal("50")),
+    momentum: Scored | Reason = (Decimal("0.5"), Decimal("50")),
+    lifecycle: str = "active",
+    restated: Iterable[str] = (),
+    name: str | None = None,
+) -> int:
+    """An instrument and its three ``factor_classification`` rows in one call.
+
+    Each factor takes ``(score, percentile)`` for a classified cell or ``(reason_code,
+    reason_input_or_None)`` for a ``not_classified`` one; an input reason gets a
+    ``reason_detail`` naming its input. ``restated`` names the factors whose row carries
+    ``restated_possible``; ``name`` stores an ``instrument_reference`` company name.
+    """
+    instrument_id = insert_instrument(conn, symbol, lifecycle)
+    if name is not None:
+        insert_reference(conn, instrument_id, name)
+    marked = set(restated)
+    for factor, given in zip(FACTORS, (value, growth, momentum), strict=True):
+        if isinstance(given[0], str):
+            reason_code, reason_input = given[0], given[1]
+            assert reason_input is None or isinstance(reason_input, str)
+            insert_classification(
+                conn,
+                set_id,
+                instrument_id,
+                factor,
+                "not_classified",
+                reason_code=reason_code,
+                reason_input=reason_input,
+                reason_detail=(
+                    f"{reason_input} is {reason_code}" if reason_code in INPUT_REASONS else None
+                ),
+                restated_possible=factor in marked,
+            )
+        else:
+            score, percentile = given
+            assert isinstance(score, Decimal) and isinstance(percentile, Decimal)
+            insert_classification(
+                conn,
+                set_id,
+                instrument_id,
+                factor,
+                score=score,
+                percentile=percentile,
+                restated_possible=factor in marked,
+            )
+    return instrument_id

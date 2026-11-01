@@ -1,0 +1,413 @@
+# RED, CAP-002-E2-S4 cycle-1 rework for the code review (DEC-0241 and review findings 4 and 5): the new tests against the momentum_inputs.sql the review judged (cycle-1.patch, diff_sha256 1f257ed05d7b241d3393302567e0b4df178e2b43c8a9d6b8bafd306fe7235040), HEAD 7688c92, 2026-10-30T02:59:43Z
+# momentum_inputs.sql sha256 bc9bbdc162ce9a474791564066195e80e2bedc69fe7ed3d998200c754ed6b664; test module sha256 b64ccebcd30d366593044f19510aa04821eb335a2a4a08598f9696676b260545
+# uv run --offline python -B -m pytest -m 'postgres or not postgres' -q -p no:cacheprovider tests/integration/test_engine_inputs_momentum.py
+........................................................FFFFFFF...       [100%]
+=================================== FAILURES ===================================
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[e-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_59c58ce4b0234d17ae86b3d14ba6655...cf9ea80>, stock=1, set_id=UUID('43bbe453-5fee-45e9-8bb2-c6d1f10d128c'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9f980>
+bars = {datetime.date(2026, 9, 17): 0}
+missing = ('return_3m', 'return_6m', 'return_12m')
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            row = rows[name]
+            if name not in missing:
+                assert row["status"] == "present", name
+                start = START[name]
+                assert_close(row["value"], ret(120, STANDARD[start], Decimal("1.01")))
+                continue
+>           assert row["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1129: AssertionError
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[s3-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_cd5743b614aa44799a958e68fa3bc17...cf9b890>, stock=1, set_id=UUID('b8eecd84-1ce8-4aff-a0f2-87117a798ed7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9b050>
+bars = {datetime.date(2026, 6, 17): 0}, missing = ('return_3m',)
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:1120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_cd5743b614aa44799a958e68fa3bc17...cf9b890>, stock=1, set_id=UUID('b8eecd84-1ce8-4aff-a0f2-87117a798ed7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9b050>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> dict[str, dict]:
+        result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: DivisionByZero: division by zero
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_momentum.py:105: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:140 classification build failed: DivisionByZero: division by zero
+Traceback (most recent call last):
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/engine.py", line 122, in build
+    stage(conn, context)
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/engine.py", line 223, in _momentum_inputs_stage
+    cur.execute(
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DivisionByZero: division by zero
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[s6-negative] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_73ac20ae547e4154b3881610b721f4a...cf9ba40>, stock=1, set_id=UUID('92c40377-b95c-4651-a6b5-96a464d55599'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cf9a420>
+bars = {datetime.date(2026, 3, 17): -1}, missing = ('return_6m',)
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            row = rows[name]
+            if name not in missing:
+                assert row["status"] == "present", name
+                start = START[name]
+                assert_close(row["value"], ret(120, STANDARD[start], Decimal("1.01")))
+                continue
+>           assert row["status"] == "missing", name
+E           AssertionError: return_6m
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1129: AssertionError
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-zero] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_95dbfeb72a9b4286812149a29174dc2...cfa2330>, stock=1, set_id=UUID('3504d827-aa26-4174-ad54-0c2076ad0440'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfa3230>
+bars = {datetime.date(2026, 7, 31): 0}
+missing = ('return_3m', 'return_6m', 'return_12m')
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:1120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_95dbfeb72a9b4286812149a29174dc2...cfa2330>, stock=1, set_id=UUID('3504d827-aa26-4174-ad54-0c2076ad0440'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfa3230>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> dict[str, dict]:
+        result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: DivisionByZero: division by zero
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_momentum.py:105: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:140 classification build failed: DivisionByZero: division by zero
+Traceback (most recent call last):
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/engine.py", line 122, in build
+    stage(conn, context)
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/engine.py", line 223, in _momentum_inputs_stage
+    cur.execute(
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DivisionByZero: division by zero
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-negative] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_8b6ffcf512594e23a58ab74fab8f8ae...cfa2db0>, stock=1, set_id=UUID('a438a452-68f6-40b9-a1e2-a66edec5e5e4'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfa0110>
+bars = {datetime.date(2026, 7, 31): -100}
+missing = ('return_3m', 'return_6m', 'return_12m')
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+            row = rows[name]
+            if name not in missing:
+                assert row["status"] == "present", name
+                start = START[name]
+                assert_close(row["value"], ret(120, STANDARD[start], Decimal("1.01")))
+                continue
+>           assert row["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1129: AssertionError
+_ test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[unused-bars] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_bc58386a74c54b9989cfe6fd1df03ee...cfa2f90>, stock=1, set_id=UUID('db421eda-96ce-44e4-b21e-f13e1d8225a2'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfa26c0>
+bars = {datetime.date(2025, 1, 2): 0, datetime.date(2026, 8, 20): 0}
+missing = ()
+
+    @pytest.mark.parametrize(
+        ("bars", "missing"),
+        [
+            ({E: 0}, ("return_3m", "return_6m", "return_12m")),
+            ({S3: 0}, ("return_3m",)),
+            ({S6: -1}, ("return_6m",)),
+            ({date(2026, 7, 31): 0}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2026, 7, 31): -100}, ("return_3m", "return_6m", "return_12m")),
+            ({date(2025, 1, 2): 0, date(2026, 8, 20): 0}, ()),
+        ],
+        ids=["e-zero", "s3-zero", "s6-negative", "prior-zero", "prior-negative", "unused-bars"],
+    )
+    def test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        bars: dict[date, Decimal | int],
+        missing: tuple[str, ...],
+    ) -> None:
+        """DEC-0241, DEC-0117 (3), design 2.4 and section 3: a zero or negative close on the E bar,
+        the S_k bar or an in-window dividend's prior session makes the inputs that use it missing,
+        naming it, and never fails the set; a bar no window uses, such as the prior session of a
+        dividend before S_12 or a bar between the boundaries, changes nothing."""
+        prior = date(2026, 7, 31)
+        add_close_series(
+            env.conn,
+            env.stock,
+            STANDARD | {date(2025, 1, 2): 40, date(2026, 8, 20): 110, prior: 100} | bars,
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", date(2025, 1, 3), {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "dividend", date(2026, 8, 3), {"cash_amount": "1"})
+    
+>       rows = build(env, monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_engine_inputs_momentum.py:1120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_bc58386a74c54b9989cfe6fd1df03ee...cfa2f90>, stock=1, set_id=UUID('db421eda-96ce-44e4-b21e-f13e1d8225a2'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfa26c0>
+
+    def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> dict[str, dict]:
+        result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
+>       assert result.state == "complete", result.failure_reason
+E       AssertionError: DivisionByZero: division by zero
+E       assert 'failed' == 'complete'
+E         
+E         - complete
+E         + failed
+
+tests/integration/test_engine_inputs_momentum.py:105: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.classification.engine:engine.py:140 classification build failed: DivisionByZero: division by zero
+Traceback (most recent call last):
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/engine.py", line 122, in build
+    stage(conn, context)
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/src/factorflow/classification/engine.py", line 223, in _momentum_inputs_stage
+    cur.execute(
+  File "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/feactorflow-v2-cap-002-e2-pipeline-285094/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DivisionByZero: division by zero
+____________ test_missing_ranks_before_outdated_whatever_the_cause _____________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55421 user=test database=test_a2b27971178440e6a73b547d9d97d03...cfa4d40>, stock=1, set_id=UUID('a9e751b2-c9c7-42e1-89c2-0509b4b1f945'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cfa5790>
+
+    def test_missing_ranks_before_outdated_whatever_the_cause(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (1), DEC-0118 (4), DEC-0241 (2): on a stale stock every window that lacks a
+        boundary, uses a non-positive close or holds an unusable payload is missing, and the
+        missing causes rank a missing boundary, then a non-positive close, then the payload."""
+        stale_day = date(2026, 10, 15)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 50, S6: 0, date(2026, 4, 30): 90, S3: 0, E: 120, stale_day: 130},
+        )
+        # In (S_6, E] and (S_12, E], not in (S_3, E].
+        add_corporate_action(
+            env.conn, env.stock, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+        )
+        shorter = add_instrument(env.conn, "SHORT")
+        add_close_series(env.conn, shorter, {S3: 100, E: 0, stale_day: 130})
+    
+        rows = build(env, monkeypatch)
+        shorter_rows = momentum(env.conn, env.set_id, shorter)
+    
+>       assert rows["return_3m"]["detail"]["cause"] == "price_not_positive"
+E       AssertionError: assert 'outdated' == 'price_not_positive'
+E         
+E         - price_not_positive
+E         + outdated
+
+tests/integration/test_engine_inputs_momentum.py:1171: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[e-zero]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[s3-zero]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[s6-negative]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-zero]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[prior-negative]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_non_positive_close_on_a_bar_used_makes_only_its_windows_missing[unused-bars]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_missing_ranks_before_outdated_whatever_the_cause
+7 failed, 59 passed in 7.73s
+# exit=1

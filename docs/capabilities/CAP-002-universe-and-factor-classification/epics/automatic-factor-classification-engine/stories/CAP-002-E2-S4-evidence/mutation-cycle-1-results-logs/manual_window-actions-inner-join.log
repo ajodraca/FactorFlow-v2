@@ -1,0 +1,23 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=58803 user=test database=test_73c2308ee9f944a1a5ec962cfa15e8b...b47dc40>, stock=1, set_id=UUID('6345efe2-882f-4685-88a3-d55ae8c99ae7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b47e750>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+>       assert rows["return_12m"]["status"] == "missing"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'return_12m'
+
+tests/integration/test_engine_inputs_momentum.py:141: KeyError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.13s

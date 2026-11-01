@@ -1,0 +1,1720 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/cycle-1.patch b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/cycle-1.patch
+new file mode 100644
+index 0000000..26e35ca
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/cycle-1.patch
+@@ -0,0 +1,696 @@
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-1-results.json
++new file mode 100644
++index 0000000..d79fe30
++--- /dev/null
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-1-results.json
++@@ -0,0 +1,155 @@
+++{
+++  "schema": 1,
+++  "command": "uv sync -q --all-extras --all-groups && uv run pytest -m postgres tests/integration/test_universe_maintenance.py -x -q -p no:cacheprovider",
+++  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
+++  "tree_patch_sha256": "b061b3ca910f4a63eae11823f13a2cd4147d80379fbadde7b6bb4d4643d5d26d",
+++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mutants-1.json",
+++  "mutants_sha256": "539bd2c858a9a5846f454f35584c117e408ee98f24c79fd235f9dc08c6c1ee8a",
+++  "jobs": 4,
+++  "started": "2026-10-31T02:00:01Z",
+++  "baselines": [
+++    {
+++      "worker": 1,
+++      "exit_code": 0,
+++      "seconds": 7.0,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/baseline-w1.log",
+++      "log_sha256": "c7db839e92b39ab1031eb5f9d937708dd686ad9e6ca09c4d10773651aa0b0211"
+++    },
+++    {
+++      "worker": 3,
+++      "exit_code": 0,
+++      "seconds": 7.1,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/baseline-w3.log",
+++      "log_sha256": "c7db839e92b39ab1031eb5f9d937708dd686ad9e6ca09c4d10773651aa0b0211"
+++    },
+++    {
+++      "worker": 0,
+++      "exit_code": 0,
+++      "seconds": 7.2,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/baseline-w0.log",
+++      "log_sha256": "c7db839e92b39ab1031eb5f9d937708dd686ad9e6ca09c4d10773651aa0b0211"
+++    },
+++    {
+++      "worker": 2,
+++      "exit_code": 0,
+++      "seconds": 7.2,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/baseline-w2.log",
+++      "log_sha256": "196e93d5852b530cee0307bb8c81c4d7d0d2c3892383c0b06c9620803f6eba75"
+++    }
+++  ],
+++  "mutants": [
+++    {
+++      "id": "manual:rename-skips-require-active",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "new_name = _normalise_name(name)\n        _require_active(conn, universe_id)\n",
+++      "new": "new_name = _normalise_name(name)\n",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 4.9,
+++      "worker": 0,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_rename-skips-require-active.log",
+++      "log_sha256": "52805f0ee61bba2922e356e23b9fdf4d10ef2673b5f4ebd382d0c3296b49f009"
+++    },
+++    {
+++      "id": "manual:rename-name-check-without-excluding",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "_name_in_use(conn, new_name, excluding=universe_id)",
+++      "new": "_name_in_use(conn, new_name)",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 4.4,
+++      "worker": 1,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_rename-name-check-without-excluding.log",
+++      "log_sha256": "f746aba792142bcd4256901deb562d61cffd1a8a7247ce41531aea099b23884a"
+++    },
+++    {
+++      "id": "manual:rename-skips-name-check",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "if _name_in_use(conn, new_name, excluding=universe_id):",
+++      "new": "if False:",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 3.7,
+++      "worker": 2,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_rename-skips-name-check.log",
+++      "log_sha256": "8406fb45009b54ec875f84b1bb865cd8a2c3c9d0e1efead4680f7ebaff436b43"
+++    },
+++    {
+++      "id": "manual:rename-records-untrimmed-name",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "_event_row(universe_id, \"renamed\", name=new_name)",
+++      "new": "_event_row(universe_id, \"renamed\", name=name)",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 3.6,
+++      "worker": 3,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_rename-records-untrimmed-name.log",
+++      "log_sha256": "ddb8eb60065532a97b3970514c2c68305a2eb95316c0d9fa15a34089ed1608f8"
+++    },
+++    {
+++      "id": "manual:rename-skips-normalise",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "new_name = _normalise_name(name)",
+++      "new": "new_name = name",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 3.1,
+++      "worker": 3,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_rename-skips-normalise.log",
+++      "log_sha256": "aaa312c13487364b2c904ef91869b048fb9513d7e1574a5142fd0ad58a6ff782"
+++    },
+++    {
+++      "id": "manual:rename-appends-no-event",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"renamed\", name=new_name))\n",
+++      "new": "",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 3.1,
+++      "worker": 2,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_rename-appends-no-event.log",
+++      "log_sha256": "97dfc6b3bd1e62aab1546a91fb7771b04f0454fa147e1b222fa0648bf0b0e604"
+++    },
+++    {
+++      "id": "manual:retire-skips-require-active",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "_take_lock(conn)\n        _require_active(conn, universe_id)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))",
+++      "new": "_take_lock(conn)\n        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 4.0,
+++      "worker": 1,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_retire-skips-require-active.log",
+++      "log_sha256": "66042e739f81cffcb0bed68984924362cae8f375ffcadd5fee640d4b446d8973"
+++    },
+++    {
+++      "id": "manual:retire-appends-no-event",
+++      "cycle": "cycle-1",
+++      "operator": "manual",
+++      "file": "src/factorflow/universes/service.py",
+++      "old": "        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, \"retired\"))\n",
+++      "new": "",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 3.3,
+++      "worker": 0,
+++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut1-logs/manual_retire-appends-no-event.log",
+++      "log_sha256": "e6c2bac2d8fea92f48e455e11ac53a464a53be8582ff9d378603b9e6cfc075ce"
+++    }
+++  ],
+++  "finished": "2026-10-31T02:00:16Z"
+++}
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-1-rename-and-retire.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-1-rename-and-retire.log
++new file mode 100644
++index 0000000..a4812b3
++--- /dev/null
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-1-rename-and-retire.log
++@@ -0,0 +1,213 @@
+++FFFFFFFFFFFFF                                                            [100%]
+++=================================== FAILURES ===================================
+++______________ test_rename_keeps_identity_history_and_memberships ______________
+++
+++conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_35e290364cf342f1a9af8b7f0d41adba) at 0x10d044890>
+++
+++    def test_rename_keeps_identity_history_and_memberships(conn: psycopg.Connection) -> None:
+++        """Implements TC-COMP-025."""
+++        seed(conn, "AAPL", "MSFT", "NVDA")
+++        uid = _create(conn, "Tech", "AAPL", "MSFT", "NVDA")
+++        before_events = event_rows(conn, uid)
+++        before = service.get_universe(conn, uid)
+++        universes_before = count_universes(conn)
+++        row_before = _universe_row(conn, uid)
+++    
+++>       renamed = service.rename(conn, uid, "  Technology ")
+++                  ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:50: AttributeError
+++___________ test_rename_to_an_active_name_is_refused_after_trimming ____________
+++
+++conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_fd66ae768d67446e8e311f50a92b0c57) at 0x10d0edbe0>
+++
+++    def test_rename_to_an_active_name_is_refused_after_trimming(conn: psycopg.Connection) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        _create(conn, "Growth", "AAA")
+++        u2 = _create(conn, "Value", "AAA")
+++        before = count_events(conn)
+++    
+++        with pytest.raises(UniverseNameInUse):
+++>           service.rename(conn, u2, " Growth  ")
+++            ^^^^^^^^^^^^^^
+++E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:94: AttributeError
+++______________ test_the_rename_comparison_is_exact_after_trimming ______________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_ba31edfea7904251b1f6e14e05fd7522) at 0x10d0ed1f0>
+++
+++    def test_the_rename_comparison_is_exact_after_trimming(conn: psycopg.Connection) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        _create(conn, "Growth", "AAA")
+++        u2 = _create(conn, "Value", "AAA")
+++    
+++>       assert service.rename(conn, u2, "growth").name == "growth"
+++               ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:107: AttributeError
+++_____________ test_a_retired_universes_name_is_reusable_by_rename ______________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_437fe9232ad6454fb134d59b583996ef) at 0x10d045c10>
+++
+++    def test_a_retired_universes_name_is_reusable_by_rename(conn: psycopg.Connection) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        u1 = _create(conn, "Growth", "AAA")
+++        u2 = _create(conn, "Value", "AAA")
+++>       service.retire(conn, u1)
+++        ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'retire'
+++
+++tests/integration/test_universe_maintenance.py:116: AttributeError
+++_____________ test_a_universe_may_take_back_a_name_it_held_earlier _____________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_c84241170cf9430d9b88fee2eb628249) at 0x10d044890>
+++
+++    def test_a_universe_may_take_back_a_name_it_held_earlier(conn: psycopg.Connection) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        u2 = _create(conn, "Growth", "AAA")
+++    
+++>       service.rename(conn, u2, "Value")
+++        ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:131: AttributeError
+++___________ test_renaming_to_its_own_name_appends_one_renamed_event ____________
+++
+++conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_0795b88b72b84ae8ad3c91ce10f7e594) at 0x10d0efdd0>
+++
+++    def test_renaming_to_its_own_name_appends_one_renamed_event(conn: psycopg.Connection) -> None:
+++        """Implements TC-COMP-023 (rename half). PROVISIONAL behaviour pinned by DEC-0096."""
+++        seed(conn, "AAA")
+++        uid = _create(conn, "Value", "AAA")
+++        before = event_rows(conn, uid)
+++    
+++>       assert service.rename(conn, uid, " Value").name == "Value"
+++               ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:143: AttributeError
+++_______________ test_rename_to_a_blank_name_is_a_shape_failure[] _______________
+++
+++conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_dde0fc9218ff49d7afa34a6c8407c70d) at 0x10d0edcd0>
+++name = ''
+++
+++    @pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+++    def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        uid = _create(conn, "Value", "AAA")
+++        before = count_events(conn)
+++    
+++        with pytest.raises(ValueError, match="must not be empty"):
+++>           service.rename(conn, uid, name)
+++            ^^^^^^^^^^^^^^
+++E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:160: AttributeError
+++_____________ test_rename_to_a_blank_name_is_a_shape_failure[   ] ______________
+++
+++conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_7ccce45da86f432299131d4a804cbf37) at 0x10d0ee570>
+++name = '   '
+++
+++    @pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+++    def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        uid = _create(conn, "Value", "AAA")
+++        before = count_events(conn)
+++    
+++        with pytest.raises(ValueError, match="must not be empty"):
+++>           service.rename(conn, uid, name)
+++            ^^^^^^^^^^^^^^
+++E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:160: AttributeError
+++_____________ test_rename_to_a_blank_name_is_a_shape_failure[\t\n] _____________
+++
+++conn = <psycopg.Connection [INTRANS] (host=localhost port=58404 user=test database=test_af1f0edf34e54d138b4258bdde8abd19) at 0x10d0ef380>
+++name = '\t\n'
+++
+++    @pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+++    def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+++        """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++        seed(conn, "AAA")
+++        uid = _create(conn, "Value", "AAA")
+++        before = count_events(conn)
+++    
+++        with pytest.raises(ValueError, match="must not be empty"):
+++>           service.rename(conn, uid, name)
+++            ^^^^^^^^^^^^^^
+++E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:160: AttributeError
+++_____________________ test_rename_accepts_a_very_long_name _____________________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_10eac84d9b0d461eaa8ab88fcef510ad) at 0x10d5dd310>
+++
+++    def test_rename_accepts_a_very_long_name(conn: psycopg.Connection) -> None:
+++        """No length bound exists yet (system design question 2, abstained)."""
+++        seed(conn, "AAA")
+++        uid = _create(conn, "Value", "AAA")
+++    
+++>       assert service.rename(conn, uid, "N" * 10_000).name == "N" * 10_000
+++               ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:171: AttributeError
+++________________ test_rename_of_an_unknown_universe_is_refused _________________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_287568b703484f958b9f5f9df6e57d56) at 0x10d5dc4a0>
+++
+++    def test_rename_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+++        with pytest.raises(service.UniverseNotFound):
+++>           service.rename(conn, UUID(int=7), "Anything")
+++            ^^^^^^^^^^^^^^
+++E           AttributeError: module 'factorflow.universes.service' has no attribute 'rename'
+++
+++tests/integration/test_universe_maintenance.py:177: AttributeError
+++___________________ test_a_retired_universe_refuses_a_rename ___________________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_8470e76079204dad9e19847e32db0713) at 0x10d5ddc10>
+++
+++    def test_a_retired_universe_refuses_a_rename(conn: psycopg.Connection) -> None:
+++        """Part of TC-COMP-038; the other writes are tested with remove_member."""
+++        seed(conn, "AAA")
+++        uid = _create(conn, "U", "AAA")
+++>       service.retire(conn, uid)
+++        ^^^^^^^^^^^^^^
+++E       AttributeError: module 'factorflow.universes.service' has no attribute 'retire'
+++
+++tests/integration/test_universe_maintenance.py:187: AttributeError
+++________________ test_retire_of_an_unknown_universe_is_refused _________________
+++
+++conn = <psycopg.Connection [IDLE] (host=localhost port=58404 user=test database=test_e507c51b74514573b12f0ff0560c46d3) at 0x10d5dce00>
+++
+++    def test_retire_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+++        with pytest.raises(service.UniverseNotFound):
+++>           service.retire(conn, UUID(int=7))
+++            ^^^^^^^^^^^^^^
+++E           AttributeError: module 'factorflow.universes.service' has no attribute 'retire'
+++
+++tests/integration/test_universe_maintenance.py:203: AttributeError
+++=========================== short test summary info ============================
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_keeps_identity_history_and_memberships
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_to_an_active_name_is_refused_after_trimming
+++FAILED tests/integration/test_universe_maintenance.py::test_the_rename_comparison_is_exact_after_trimming
+++FAILED tests/integration/test_universe_maintenance.py::test_a_retired_universes_name_is_reusable_by_rename
+++FAILED tests/integration/test_universe_maintenance.py::test_a_universe_may_take_back_a_name_it_held_earlier
+++FAILED tests/integration/test_universe_maintenance.py::test_renaming_to_its_own_name_appends_one_renamed_event
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_to_a_blank_name_is_a_shape_failure[]
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_to_a_blank_name_is_a_shape_failure[   ]
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_to_a_blank_name_is_a_shape_failure[\t\n]
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_accepts_a_very_long_name
+++FAILED tests/integration/test_universe_maintenance.py::test_rename_of_an_unknown_universe_is_refused
+++FAILED tests/integration/test_universe_maintenance.py::test_a_retired_universe_refuses_a_rename
+++FAILED tests/integration/test_universe_maintenance.py::test_retire_of_an_unknown_universe_is_refused
+++13 failed in 3.69s
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
++index b846928..7df6f54 100644
++--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
++@@ -61,7 +61,7 @@ Mapped component test cases (coverage-matrix rows DAC-E1-S4-1 to -7): TC-COMP-02
++ 
++ **Purpose**: Confirm the producer this story extends exists before any test is written.
++ 
++-- [ ] T001 Verify, without editing, that CAP-002-E1-S3 is present in the working tree: `src/factorflow/universes/service.py` exporting `UNIVERSE_WRITE_LOCK_KEY`, the eight exceptions, `create_by_hand`, `add_members`, `get_universe`, `list_events`, `list_universes` and the private helpers `_take_lock`, `_normalise_name`, `_normalise_symbols`, `_require_active`, `_name_in_use`, plus the module-level `_INSERT_EVENT_SQL`; and `tests/integration/test_universe_create.py` exporting the helpers `postgres` fixture usage, `seed_instrument`, `event_rows` and `count_events`; and S1's `tests/unit/test_research_sql_is_append_only.py` exporting `prohibited_research_mutations`; and S2's `tests/unit/test_universe_sql_safety.py`. If any is missing, STOP: hard edges `E1-S4: [E1-S1, E1-S2, E1-S3]` (see Dependencies) are unmet and this plan must not be coded yet. `rename`, `remove_member`, `retire` and `tests/integration/test_universe_maintenance.py` must not exist yet.
+++- [x] T001 Verify, without editing, that CAP-002-E1-S3 is present in the working tree: `src/factorflow/universes/service.py` exporting `UNIVERSE_WRITE_LOCK_KEY`, the eight exceptions, `create_by_hand`, `add_members`, `get_universe`, `list_events`, `list_universes` and the private helpers `_take_lock`, `_normalise_name`, `_normalise_symbols`, `_require_active`, `_name_in_use`, plus the module-level `_INSERT_EVENT_SQL`; and `tests/integration/test_universe_create.py` exporting the helpers `postgres` fixture usage, `seed_instrument`, `event_rows` and `count_events`; and S1's `tests/unit/test_research_sql_is_append_only.py` exporting `prohibited_research_mutations`; and S2's `tests/unit/test_universe_sql_safety.py`. If any is missing, STOP: hard edges `E1-S4: [E1-S1, E1-S2, E1-S3]` (see Dependencies) are unmet and this plan must not be coded yet. `rename`, `remove_member`, `retire` and `tests/integration/test_universe_maintenance.py` must not exist yet.
++ 
++ **Checkpoint**: S3's producers are importable; none of this story's functions or test files exist.
++ 
++@@ -73,8 +73,8 @@ Mapped component test cases (coverage-matrix rows DAC-E1-S4-1 to -7): TC-COMP-02
++ 
++ ### Mandatory Component Tests
++ 
++-- [ ] T002 [P] Implement TC-COMP-025 (Rename keeps identity, history and memberships) in `tests/integration/test_universe_maintenance.py` (`pytest.mark.postgres`, `# Implements TC-COMP-025`). Create `"Tech"` with `AAPL`, `MSFT`, `NVDA`; snapshot `before_events = event_rows(conn, uid)` and `before = service.get_universe(conn, uid)`; call `service.rename(conn, uid, "  Technology ")`, commit. Assert: returned `Universe.name == "Technology"` (trimmed), `universe_id == uid`, `lifecycle == "active"`, `members == before.members` (same symbols and `member_since`), `origin == before.origin`, `created_at == before.created_at`; `event_rows` now equals `before_events` plus exactly one row at the end (`event_type == "renamed"`, `name == "Technology"`, `instrument_id IS NULL`, `filter_provenance IS NULL`) with every earlier row identical (compare full tuples including `event_id` and `recorded_at`); `SELECT count(*) FROM universe` is unchanged and the `universe` row for `uid` is unchanged; `list_events(conn, uid, 50, None)` returns the `renamed` event first (newest first) and the `created` event still carries the original name `"Tech"`; a second rename `"Tech2"` appends a second `renamed` event and `get_universe` shows the latest name. `rename` on a by-filter universe cannot be built here (S5), so origin preservation is asserted on the by-hand origin only. Fails now: `service.rename` does not exist (`AttributeError`).
++-- [ ] T003 [P] Implement the rename branch of TC-COMP-023 (Active universe name must be unique; retired name reusable) in `tests/integration/test_universe_maintenance.py` (same file as T002, so it follows it; `# Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)`). Create `"Growth"` (U1) and `"Value"` (U2). (a) `rename(conn, U2, " Growth  ")` raises `UniverseNameInUse` and appends nothing (event count unchanged, U2 still named `"Value"`). (b) The comparison is exact after trimming: renaming U2 to `"growth"` succeeds. (c) Retire U1 with `service.retire`, commit; renaming U2 to `"Growth"` is now accepted (a retired universe's name is reusable) and the two universes have different ids. (d) A universe may be renamed to a name it held earlier: U2 `"Growth"` -> `"Value"` -> `"Growth"`. (e) Renaming a universe to its own current name (trimmed, e.g. `" Value"` when named `"Value"`) is not refused and appends one `renamed` event (PROVISIONAL, DEC-0096, see Open Gaps; the test pins the adopted behaviour and cites the decision). (f) Empty and whitespace-only names raise `ValueError` and write nothing; a 10 000-character name is accepted (no length bound exists, owner's open question). Fails now: `service.rename` does not exist.
+++- [x] T002 [P] Implement TC-COMP-025 (Rename keeps identity, history and memberships) in `tests/integration/test_universe_maintenance.py` (`pytest.mark.postgres`, `# Implements TC-COMP-025`). Create `"Tech"` with `AAPL`, `MSFT`, `NVDA`; snapshot `before_events = event_rows(conn, uid)` and `before = service.get_universe(conn, uid)`; call `service.rename(conn, uid, "  Technology ")`, commit. Assert: returned `Universe.name == "Technology"` (trimmed), `universe_id == uid`, `lifecycle == "active"`, `members == before.members` (same symbols and `member_since`), `origin == before.origin`, `created_at == before.created_at`; `event_rows` now equals `before_events` plus exactly one row at the end (`event_type == "renamed"`, `name == "Technology"`, `instrument_id IS NULL`, `filter_provenance IS NULL`) with every earlier row identical (compare full tuples including `event_id` and `recorded_at`); `SELECT count(*) FROM universe` is unchanged and the `universe` row for `uid` is unchanged; `list_events(conn, uid, 50, None)` returns the `renamed` event first (newest first) and the `created` event still carries the original name `"Tech"`; a second rename `"Tech2"` appends a second `renamed` event and `get_universe` shows the latest name. `rename` on a by-filter universe cannot be built here (S5), so origin preservation is asserted on the by-hand origin only. Fails now: `service.rename` does not exist (`AttributeError`).
+++- [x] T003 [P] Implement the rename branch of TC-COMP-023 (Active universe name must be unique; retired name reusable) in `tests/integration/test_universe_maintenance.py` (same file as T002, so it follows it; `# Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)`). Create `"Growth"` (U1) and `"Value"` (U2). (a) `rename(conn, U2, " Growth  ")` raises `UniverseNameInUse` and appends nothing (event count unchanged, U2 still named `"Value"`). (b) The comparison is exact after trimming: renaming U2 to `"growth"` succeeds. (c) Retire U1 with `service.retire`, commit; renaming U2 to `"Growth"` is now accepted (a retired universe's name is reusable) and the two universes have different ids. (d) A universe may be renamed to a name it held earlier: U2 `"Growth"` -> `"Value"` -> `"Growth"`. (e) Renaming a universe to its own current name (trimmed, e.g. `" Value"` when named `"Value"`) is not refused and appends one `renamed` event (PROVISIONAL, DEC-0096, see Open Gaps; the test pins the adopted behaviour and cites the decision). (f) Empty and whitespace-only names raise `ValueError` and write nothing; a 10 000-character name is accepted (no length bound exists, owner's open question). Fails now: `service.rename` does not exist.
++ - [ ] T004 [P] Implement TC-COMP-026 (Removing a non-member raises a typed error) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-026`). Create a universe with `AAA`, `BBB`; seed `CCC` covered but never added. (a) `remove_member(conn, uid, "CCC")` raises `service.NotAMember` (a `LookupError`), `symbols`-free message naming `CCC`, and `count_events` is unchanged. (b) A symbol with no `instrument` row at all (`"ZZZ"`) raises `NotAMember` too (removal does not consult coverage). (c) Lower-case input `"ccc"` is normalised and reported as `CCC`. (d) A symbol removed earlier (call `remove_member` for `BBB` first) is no longer a current member, so removing it again raises `NotAMember`. (e) A malformed symbol (`"1ABC"`, `""`) raises `ValueError` (not `NotAMember`), writing nothing. (f) A universe with one member asked to remove a non-member raises `NotAMember`, not `LastMember` (membership is checked before the last-member rule; see Resolved Conflicts). (g) An unknown `universe_id` raises `UniverseNotFound`. Fails now: `service.remove_member` does not exist.
++ - [ ] T005 [P] Implement TC-COMP-036 (Removing the sole member raises LastMember) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-036`). (a) A universe created with one symbol `AAA`: `remove_member(conn, uid, "AAA")` raises `service.LastMember` (a `ValueError`), `str(exc)` contains the word `retire` (it offers retirement, DAC-E1-S4-2), `count_events` is unchanged and `get_universe` still lists `AAA`. (b) A universe of `AAA`, `BBB`: removing `BBB` succeeds, then removing `AAA` raises `LastMember` (the rule applies to the replayed current membership, not to the created count). (c) A universe whose second member was removed and then re-added is judged on current membership: with `AAA`, `BBB`, remove `BBB`, add `BBB` again, remove `AAA` succeeds and then `BBB` is the last member. (d) The sole remaining member of a retired-lifecycle instrument (`lifecycle='retired'`, covered) is also protected: the rule counts members, not lifecycle (AC-15). (e) After `LastMember`, `service.retire(conn, uid)` succeeds (the offered alternative works). Fails now: `service.remove_member` does not exist.
++ - [ ] T006 [P] Implement TC-COMP-053 (Removed member keeps both events in history) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-053`). Create a universe with `AAA`, `BBB`, `CCC`; `removed_at = service.remove_member(conn, uid, "bbb")`, commit. Assert: `removed_at` is a timezone-aware `datetime` equal to the `recorded_at` of the appended `member_removed` row (design 2.3 returns `datetime`); `event_rows` holds both the original `member_added` for `BBB` and the new `member_removed` for `BBB` (same `instrument_id`, `member_removed.event_id > member_added.event_id`), with no row updated or deleted (all earlier rows identical to a snapshot taken before the call); exactly one new event; `get_universe(conn, uid).members` has symbols `["AAA", "CCC"]` (absent from current members); `list_events` returns the `member_removed` event first carrying `symbol == "BBB"` and the `member_added` event still present later in the page. Removal in one universe leaves the same instrument a member of a second universe built from the same symbol (AC-3). Re-adding `BBB` with `add_members` afterwards appends a new `member_added`, returns it in `added`, and the three events for `BBB` are all retained. Fails now: `service.remove_member` does not exist.
++diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4.md
++index e08e6f3..83b0980 100644
++--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4.md
+++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4.md
++@@ -10,7 +10,7 @@ component: FactorFlow-v2
++ type: feature
++ priority: P1
++ estimate: 5
++-status: planning
+++status: in-progress
++ owner: Alvaro de Jodra
++ owner_github: ajodraca
++ created: 2026-10-17
++diff --git a/src/factorflow/universes/service.py b/src/factorflow/universes/service.py
++index ceb38d5..29165e6 100644
++--- a/src/factorflow/universes/service.py
+++++ b/src/factorflow/universes/service.py
++@@ -1,4 +1,4 @@
++-"""Universe service: the first write half (create by hand, add members) and the reads.
+++"""Universe service: create by hand, add members, the maintenance writes and the reads.
++ 
++ Implements ``component-design-universe-service.md`` sections 2.3, 2.4, 2.5 and
++ 3. A universe is an append-only event log; every write runs in one transaction,
++@@ -9,11 +9,15 @@ replayed types and the paged reads live in ``replay.py`` and are re-exported or
++ delegated to here (DEC-0093); the name check and the coverage rule follow
++ DEC-0064 and DEC-0057.
++ 
++-``create_from_filter``, ``rename``, ``remove_member`` and ``retire`` belong to
++-CAP-002-E1-S4 and CAP-002-E1-S5 and are not defined here.
+++``rename``, ``remove_member`` and ``retire`` (CAP-002-E1-S4, design 2.3 and
+++2.4, DAC-E1-7) each append exactly one event under the same lock, after the
+++target is found active. ``create_from_filter`` belongs to CAP-002-E1-S5 and is
+++not defined here.
++ 
++ Satisfies AC-1, AC-3, AC-5, AC-15, DAC-E1-1, DAC-E1-4, DAC-E1-5, DAC-E1-6,
++-DAC-E1-9 and DAC-E1-S3-1 through DAC-E1-S3-8 (CAP-002-E1-S3).
+++DAC-E1-9 and DAC-E1-S3-1 through DAC-E1-S3-8 (CAP-002-E1-S3), and AC-4, AC-5,
+++AC-6, DAC-E1-4, DAC-E1-7, DAC-E1-10 and DAC-E1-S4-1 through DAC-E1-S4-7
+++(CAP-002-E1-S4).
++ """
++ 
++ from datetime import date
++@@ -43,6 +47,8 @@ __all__ = [
++     "UniverseNameInUse",
++     "UniverseNotFound",
++     "UniverseRetired",
+++    "rename",
+++    "retire",
++ ]
++ 
++ UNIVERSE_WRITE_LOCK_KEY: Final = 2002_0001  # one key for every universe write (DEC-0065)
++@@ -262,6 +268,31 @@ def add_members(
++         return added, already_member
++ 
++ 
+++def rename(conn: psycopg.Connection, universe_id: UUID, name: str) -> Universe:
+++    """Rename an active universe: one ``renamed`` event; id, history and members unchanged.
+++
+++    The name must be free among the other active universes after trimming. Its
+++    own current name is not refused and appends an event (DEC-0096).
+++    """
+++    with conn.transaction():
+++        _take_lock(conn)
+++        new_name = _normalise_name(name)
+++        _require_active(conn, universe_id)
+++        if _name_in_use(conn, new_name, excluding=universe_id):
+++            raise UniverseNameInUse(f"an active universe is already named {new_name!r}")
+++        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, "renamed", name=new_name))
+++        return get_universe(conn, universe_id)
+++
+++
+++def retire(conn: psycopg.Connection, universe_id: UUID) -> Universe:
+++    """Retire an active universe: one ``retired`` event; members and history stay readable."""
+++    with conn.transaction():
+++        _take_lock(conn)
+++        _require_active(conn, universe_id)
+++        conn.execute(_INSERT_EVENT_SQL, _event_row(universe_id, "retired"))
+++        return get_universe(conn, universe_id)
+++
+++
++ def list_universes(
++     conn: psycopg.Connection,
++     lifecycle: str,
++diff --git a/tests/integration/test_universe_maintenance.py b/tests/integration/test_universe_maintenance.py
++new file mode 100644
++index 0000000..655b992
++--- /dev/null
+++++ b/tests/integration/test_universe_maintenance.py
++@@ -0,0 +1,203 @@
+++"""Universe maintenance against PostgreSQL: rename, remove a member and retire.
+++
+++Satisfies AC-4, AC-5, AC-6, DAC-E1-4, DAC-E1-7 and DAC-E1-S4-1 through DAC-E1-S4-6
+++(CAP-002-E1-S4). The migrated-database fixture and the seeding and event helpers are
+++CAP-002-E1-S3's, imported from ``test_universe_create`` so both modules share them.
+++``conn.commit()`` follows each seeding step and each service call: with an idle
+++connection ``conn.transaction()`` opens and commits its own transaction (design 2.3).
+++"""
+++
+++from uuid import UUID
+++
+++import psycopg
+++import pytest
+++
+++from factorflow.universes import service
+++from factorflow.universes.service import UniverseNameInUse, UniverseRetired
+++from tests.integration.test_universe_create import conn as conn  # fixture
+++from tests.integration.test_universe_create import (
+++    count_events,
+++    count_universes,
+++    event_rows,
+++    seed,
+++)
+++
+++pytestmark = pytest.mark.postgres
+++
+++
+++def _universe_row(conn: psycopg.Connection, universe_id: UUID) -> tuple[object, ...] | None:
+++    return conn.execute("SELECT * FROM universe WHERE universe_id = %s", (universe_id,)).fetchone()
+++
+++
+++def _create(conn: psycopg.Connection, name: str, *symbols: str) -> UUID:
+++    universe = service.create_by_hand(conn, name, list(symbols))
+++    conn.commit()
+++    return universe.universe_id
+++
+++
+++# --- TC-COMP-025: rename keeps identity, history and memberships ------------------------
+++
+++
+++def test_rename_keeps_identity_history_and_memberships(conn: psycopg.Connection) -> None:
+++    """Implements TC-COMP-025."""
+++    seed(conn, "AAPL", "MSFT", "NVDA")
+++    uid = _create(conn, "Tech", "AAPL", "MSFT", "NVDA")
+++    before_events = event_rows(conn, uid)
+++    before = service.get_universe(conn, uid)
+++    universes_before = count_universes(conn)
+++    row_before = _universe_row(conn, uid)
+++
+++    renamed = service.rename(conn, uid, "  Technology ")
+++    conn.commit()
+++
+++    assert renamed.name == "Technology"
+++    assert renamed.universe_id == uid
+++    assert renamed.lifecycle == "active"
+++    assert renamed.members == before.members
+++    assert renamed.origin == before.origin
+++    assert renamed.created_at == before.created_at
+++    after_events = event_rows(conn, uid)
+++    assert after_events[: len(before_events)] == before_events
+++    assert len(after_events) == len(before_events) + 1
+++    new = after_events[-1]
+++    assert new["event_type"] == "renamed"
+++    assert new["name"] == "Technology"
+++    assert new["instrument_id"] is None
+++    assert new["filter_provenance"] is None
+++    assert count_universes(conn) == universes_before
+++    assert _universe_row(conn, uid) == row_before
+++
+++    page, _ = service.list_events(conn, uid, 50, None)
+++    assert page[0].event_type == "renamed"
+++    assert page[0].name == "Technology"
+++    created = [e for e in page if e.event_type == "created"]
+++    assert len(created) == 1 and created[0].name == "Tech"
+++
+++    again = service.rename(conn, uid, "Tech2")
+++    conn.commit()
+++    assert again.name == "Tech2"
+++    assert service.get_universe(conn, uid).name == "Tech2"
+++    assert [e["event_type"] for e in event_rows(conn, uid)].count("renamed") == 2
+++
+++
+++# --- TC-COMP-023 (rename half; create half is CAP-002-E1-S3) ----------------------------
+++
+++
+++def test_rename_to_an_active_name_is_refused_after_trimming(conn: psycopg.Connection) -> None:
+++    """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++    seed(conn, "AAA")
+++    _create(conn, "Growth", "AAA")
+++    u2 = _create(conn, "Value", "AAA")
+++    before = count_events(conn)
+++
+++    with pytest.raises(UniverseNameInUse):
+++        service.rename(conn, u2, " Growth  ")
+++    conn.rollback()
+++
+++    assert count_events(conn) == before
+++    assert service.get_universe(conn, u2).name == "Value"
+++
+++
+++def test_the_rename_comparison_is_exact_after_trimming(conn: psycopg.Connection) -> None:
+++    """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++    seed(conn, "AAA")
+++    _create(conn, "Growth", "AAA")
+++    u2 = _create(conn, "Value", "AAA")
+++
+++    assert service.rename(conn, u2, "growth").name == "growth"
+++    conn.commit()
+++
+++
+++def test_a_retired_universes_name_is_reusable_by_rename(conn: psycopg.Connection) -> None:
+++    """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++    seed(conn, "AAA")
+++    u1 = _create(conn, "Growth", "AAA")
+++    u2 = _create(conn, "Value", "AAA")
+++    service.retire(conn, u1)
+++    conn.commit()
+++
+++    renamed = service.rename(conn, u2, "Growth")
+++    conn.commit()
+++
+++    assert renamed.name == "Growth"
+++    assert renamed.universe_id == u2 != u1
+++
+++
+++def test_a_universe_may_take_back_a_name_it_held_earlier(conn: psycopg.Connection) -> None:
+++    """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++    seed(conn, "AAA")
+++    u2 = _create(conn, "Growth", "AAA")
+++
+++    service.rename(conn, u2, "Value")
+++    conn.commit()
+++    assert service.rename(conn, u2, "Growth").name == "Growth"
+++    conn.commit()
+++
+++
+++def test_renaming_to_its_own_name_appends_one_renamed_event(conn: psycopg.Connection) -> None:
+++    """Implements TC-COMP-023 (rename half). PROVISIONAL behaviour pinned by DEC-0096."""
+++    seed(conn, "AAA")
+++    uid = _create(conn, "Value", "AAA")
+++    before = event_rows(conn, uid)
+++
+++    assert service.rename(conn, uid, " Value").name == "Value"
+++    conn.commit()
+++
+++    after = event_rows(conn, uid)
+++    assert after[: len(before)] == before
+++    assert len(after) == len(before) + 1
+++    assert after[-1]["event_type"] == "renamed" and after[-1]["name"] == "Value"
+++
+++
+++@pytest.mark.parametrize("name", ["", "   ", "\t\n"])
+++def test_rename_to_a_blank_name_is_a_shape_failure(conn: psycopg.Connection, name: str) -> None:
+++    """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+++    seed(conn, "AAA")
+++    uid = _create(conn, "Value", "AAA")
+++    before = count_events(conn)
+++
+++    with pytest.raises(ValueError, match="must not be empty"):
+++        service.rename(conn, uid, name)
+++    conn.rollback()
+++
+++    assert count_events(conn) == before
+++
+++
+++def test_rename_accepts_a_very_long_name(conn: psycopg.Connection) -> None:
+++    """No length bound exists yet (system design question 2, abstained)."""
+++    seed(conn, "AAA")
+++    uid = _create(conn, "Value", "AAA")
+++
+++    assert service.rename(conn, uid, "N" * 10_000).name == "N" * 10_000
+++    conn.commit()
+++
+++
+++def test_rename_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+++    with pytest.raises(service.UniverseNotFound):
+++        service.rename(conn, UUID(int=7), "Anything")
+++
+++
+++# --- TC-COMP-038 (rename and retire half): a retired universe refuses writes ----------
+++
+++
+++def test_a_retired_universe_refuses_a_rename(conn: psycopg.Connection) -> None:
+++    """Part of TC-COMP-038; the other writes are tested with remove_member."""
+++    seed(conn, "AAA")
+++    uid = _create(conn, "U", "AAA")
+++    service.retire(conn, uid)
+++    conn.commit()
+++    before = count_events(conn)
+++
+++    with pytest.raises(UniverseRetired):
+++        service.rename(conn, uid, "Other")
+++    conn.rollback()
+++    with pytest.raises(UniverseRetired):
+++        service.retire(conn, uid)
+++    conn.rollback()
+++
+++    assert count_events(conn) == before
+++
+++
+++def test_retire_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+++    with pytest.raises(service.UniverseNotFound):
+++        service.retire(conn, UUID(int=7))
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..2a36cda
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,215 @@
++{
++  "schema": 1,
++  "command": "uv sync -q --all-extras --all-groups && uv run pytest -m postgres tests/integration/test_universe_maintenance.py -x -q -p no:cacheprovider",
++  "repo_head": "6a5eca7213a84853d9b0b6d46ee16a65e628d32a",
++  "tree_patch_sha256": "c39575bca3372999ec2399a1706110a8d7142af5e0749680c4d4337e00a168c8",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mutants-2.json",
++  "mutants_sha256": "b35b84c984088b05cae54ee44377036b4295225124f96c0a8428aabf98069db2",
++  "jobs": 4,
++  "started": "2026-10-31T02:03:43Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 7.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/baseline-w1.log",
++      "log_sha256": "94d0553cdb40472eb437b7095366b890e37d0193a057e93f9bacc9f7dfa351eb"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 7.9,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/baseline-w0.log",
++      "log_sha256": "b57917d24f061c06e680aab20dd144fc2ae2c752ada1ce7cc12b18487d9d7064"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 8.0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/baseline-w3.log",
++      "log_sha256": "b57917d24f061c06e680aab20dd144fc2ae2c752ada1ce7cc12b18487d9d7064"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 8.0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/baseline-w2.log",
++      "log_sha256": "8c0e9f1449557d8a26b71badfa6d8228fd39dffa506e488682ddc3dd80768b1a"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/universes/service.py:304:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/universes/service.py",
++      "line": 304,
++      "original": "        member = next((m for m in universe.members if m.symbol == clean_symbol), None)",
++      "mutated": "        member = next((m for m in universe.members if m.symbol != clean_symbol), None)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/src_factorflow_universes_service.py_304_negate-boolean_1.log",
++      "log_sha256": "2b6a44b63113b3ffce193ed01ebbebb5be9a656b80dc59f54107a59ea7955f6c"
++    },
++    {
++      "id": "src/factorflow/universes/service.py:307:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/universes/service.py",
++      "line": 307,
++      "original": "        if len(universe.members) == 1:",
++      "mutated": "        if len(universe.members) != 1:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/src_factorflow_universes_service.py_307_negate-boolean_1.log",
++      "log_sha256": "010ddec9b0070e6df737490897f8fb996326365c4d943d293ad647467863f980"
++    },
++    {
++      "id": "src/factorflow/universes/service.py:307:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "src/factorflow/universes/service.py",
++      "line": 307,
++      "original": "        if len(universe.members) == 1:",
++      "mutated": "        if len(universe.members) == 2:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/src_factorflow_universes_service.py_307_off-by-one_1.log",
++      "log_sha256": "ff79af14cfbb0e698973a53178d389453ba5a4526923bb198a8f8fd7befaa69f"
++    },
++    {
++      "id": "src/factorflow/universes/service.py:317:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "src/factorflow/universes/service.py",
++      "line": 317,
++      "original": "        removed_at: datetime = row[0]",
++      "mutated": "        removed_at: datetime = row[1]",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/src_factorflow_universes_service.py_317_off-by-one_1.log",
++      "log_sha256": "f4c80bbba9b690b789d2a0281f23e8e0e07b4c5a8652cfa983f56f89575d387e"
++    },
++    {
++      "id": "manual:remove-skips-require-active",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        universe = _require_active(conn, universe_id)\n        member = next(",
++      "new": "        universe = _replayed(conn, universe_id)\n        member = next(",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-skips-require-active.log",
++      "log_sha256": "00535a829cbce06158a339f451d96c21c9492e573fd650e8f4ac561d0b89f89a"
++    },
++    {
++      "id": "manual:remove-skips-not-a-member",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        if member is None:\n            raise NotAMember(",
++      "new": "        if False:\n            raise NotAMember(",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.7,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-skips-not-a-member.log",
++      "log_sha256": "8c29506213b8ea1190b4e349a617566e8ee75ec12c736b6db863aca5f74ad229"
++    },
++    {
++      "id": "manual:remove-skips-last-member",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        if len(universe.members) == 1:\n            raise LastMember(",
++      "new": "        if False:\n            raise LastMember(",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-skips-last-member.log",
++      "log_sha256": "01e1951b41c21ebd13e41299d0502e7d397435dfec793f6f27e1e5430d3f65b3"
++    },
++    {
++      "id": "manual:remove-last-member-before-membership",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        member = next((m for m in universe.members if m.symbol == clean_symbol), None)\n        if member is None:\n            raise NotAMember(f\"{clean_symbol} is not a current member of universe {universe_id}\")\n        if len(universe.members) == 1:\n            raise LastMember(\n                f\"cannot remove {clean_symbol}, the last member; retire the universe instead\"\n            )\n",
++      "new": "        member = next((m for m in universe.members if m.symbol == clean_symbol), None)\n        if len(universe.members) == 1:\n            raise LastMember(\n                f\"cannot remove {clean_symbol}, the last member; retire the universe instead\"\n            )\n        if member is None:\n            raise NotAMember(f\"{clean_symbol} is not a current member of universe {universe_id}\")\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-last-member-before-membership.log",
++      "log_sha256": "ed0bfcb20e4b8dcbe4e015fba87e8dd02986d25f47f354c57d12df8b282bf5ca"
++    },
++    {
++      "id": "manual:remove-skips-normalise",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        [clean_symbol] = _normalise_symbols([symbol])",
++      "new": "        clean_symbol = symbol",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.1,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-skips-normalise.log",
++      "log_sha256": "f91a754bd3be73c49a88515eb3bb3f71eccb1a4bd2537d6e3f3550ab5a798df1"
++    },
++    {
++      "id": "manual:remove-message-without-retire",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "the last member; retire the universe instead",
++      "new": "the last member",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.9,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-message-without-retire.log",
++      "log_sha256": "730d9b9d1961c0c810584ab60123c28bb4a62f72dcf3936ba52c87734da82ab5"
++    },
++    {
++      "id": "manual:remove-returns-now",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "        removed_at: datetime = row[0]",
++      "new": "        removed_at: datetime = datetime.now().astimezone()",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.6,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-returns-now.log",
++      "log_sha256": "6f62cd00c99d5009f5285940d5bf91324c77c494e9312a47cc8975bf8970e5b6"
++    },
++    {
++      "id": "manual:remove-sql-adds-member",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/universes/service.py",
++      "old": "VALUES (%(universe_id)s, 'member_removed', %(instrument_id)s) RETURNING recorded_at",
++      "new": "VALUES (%(universe_id)s, 'member_added', %(instrument_id)s) RETURNING recorded_at",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-planning-run-learnbot-cap-001-d79e92/96c5c236-c694-4a01-88e2-32b3ce2942aa/scratchpad/mut2-logs/manual_remove-sql-adds-member.log",
++      "log_sha256": "05898952c9ef8593d5096fdc479d9f9777d955ce2c2677f41421e925a9e3aeba"
++    }
++  ],
++  "finished": "2026-10-31T02:04:07Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-2-remove-member.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-2-remove-member.log
+new file mode 100644
+index 0000000..c86c6df
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-evidence/red-cycle-2-remove-member.log
+@@ -0,0 +1,313 @@
++............FFFFFFFFFFFFFFFF                                             [100%]
++=================================== FAILURES ===================================
++________ test_retire_appends_one_retired_event_and_data_stays_readable _________
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_b2f84eacdd6c48a69c23fd9a307f19aa) at 0x10c835880>
++
++    def test_retire_appends_one_retired_event_and_data_stays_readable(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-037."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++>       service.remove_member(conn, uid, "BBB")
++        ^^^^^^^^^^^^^^^^^^^^^
++E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:214: AttributeError
++________ test_every_write_to_a_retired_universe_raises_universe_retired ________
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_76a4126a07334b018fa340aadb02915a) at 0x10c8374a0>
++
++    def test_every_write_to_a_retired_universe_raises_universe_retired(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-038."""
++        seed(conn, "AAA", "BBB", "CCC")
++        seed_instrument(conn, "DDD", covered=False)
++        conn.commit()
++        _create(conn, "Taken", "AAA")
++        uid = _create(conn, "U", "AAA", "BBB")
++        service.retire(conn, uid)
++        conn.commit()
++        before = count_events(conn)
++        history = event_rows(conn, uid)
++    
++        writes = [
++            lambda: service.retire(conn, uid),
++            lambda: service.add_members(conn, uid, ["CCC"]),
++            lambda: service.remove_member(conn, uid, "AAA"),
++            lambda: service.rename(conn, uid, "Other"),
++            # the target check precedes the member and name checks (design 2.4 step 5)
++            lambda: service.remove_member(conn, uid, "ZZZ"),
++            lambda: service.rename(conn, uid, "Taken"),
++        ]
++        for write in writes:
++            with pytest.raises(UniverseRetired):
++>               write()
++
++tests/integration/test_universe_maintenance.py:283: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++>       lambda: service.remove_member(conn, uid, "AAA"),
++                ^^^^^^^^^^^^^^^^^^^^^
++        lambda: service.rename(conn, uid, "Other"),
++        # the target check precedes the member and name checks (design 2.4 step 5)
++        lambda: service.remove_member(conn, uid, "ZZZ"),
++        lambda: service.rename(conn, uid, "Taken"),
++    ]
++E   AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:275: AttributeError
++______ test_removing_a_non_member_raises_not_a_member_and_writes_nothing _______
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_407a3cf7cc38484f852dca534c9f8580) at 0x10cd25790>
++
++    def test_removing_a_non_member_raises_not_a_member_and_writes_nothing(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-026."""
++        seed(conn, "AAA", "BBB", "CCC")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = count_events(conn)
++    
++        with pytest.raises(NotAMember) as excinfo:
++>           service.remove_member(conn, uid, "CCC")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:311: AttributeError
++_______________ test_a_symbol_with_no_instrument_is_not_a_member _______________
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_8247b6d8eb784df8955ff849016c81bd) at 0x10c8359d0>
++
++    def test_a_symbol_with_no_instrument_is_not_a_member(conn: psycopg.Connection) -> None:
++        """Implements TC-COMP-026: removal does not consult coverage."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = count_events(conn)
++    
++        with pytest.raises(NotAMember, match="ZZZ"):
++>           service.remove_member(conn, uid, "ZZZ")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:326: AttributeError
++_____________ test_a_lower_case_non_member_is_reported_normalised ______________
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_1bcbfcbbf2604f1eaf3c7066ca685e4c) at 0x10c78f3b0>
++
++    def test_a_lower_case_non_member_is_reported_normalised(conn: psycopg.Connection) -> None:
++        """Implements TC-COMP-026."""
++        seed(conn, "AAA", "BBB", "CCC")
++        uid = _create(conn, "U", "AAA", "BBB")
++    
++        with pytest.raises(NotAMember) as excinfo:
++>           service.remove_member(conn, uid, "ccc")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:338: AttributeError
++_________________ test_a_removed_symbol_is_no_longer_a_member __________________
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_dd88dc518e6042ac82a029d516e8f434) at 0x10c7ab260>
++
++    def test_a_removed_symbol_is_no_longer_a_member(conn: psycopg.Connection) -> None:
++        """Implements TC-COMP-026."""
++        seed(conn, "AAA", "BBB", "CCC")
++        uid = _create(conn, "U", "AAA", "BBB", "CCC")
++>       service.remove_member(conn, uid, "BBB")
++        ^^^^^^^^^^^^^^^^^^^^^
++E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:349: AttributeError
++______ test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[1ABC] _______
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_5e05bab37c54471cbbf9157792175967) at 0x10c7aae10>
++symbol = '1ABC'
++
++    @pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
++    def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
++        conn: psycopg.Connection, symbol: str
++    ) -> None:
++        """Implements TC-COMP-026."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = count_events(conn)
++    
++        with pytest.raises(ValueError, match="invalid symbol"):
++>           service.remove_member(conn, uid, symbol)
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:370: AttributeError
++________ test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[] _________
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_222fe4a623e74209b0c0eacf6621778d) at 0x10c832ea0>
++symbol = ''
++
++    @pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
++    def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
++        conn: psycopg.Connection, symbol: str
++    ) -> None:
++        """Implements TC-COMP-026."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = count_events(conn)
++    
++        with pytest.raises(ValueError, match="invalid symbol"):
++>           service.remove_member(conn, uid, symbol)
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:370: AttributeError
++_______ test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[  ] ________
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_0d1f04b9bf0045c9a596c1850979169d) at 0x10c832d80>
++symbol = '  '
++
++    @pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
++    def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
++        conn: psycopg.Connection, symbol: str
++    ) -> None:
++        """Implements TC-COMP-026."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++        before = count_events(conn)
++    
++        with pytest.raises(ValueError, match="invalid symbol"):
++>           service.remove_member(conn, uid, symbol)
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:370: AttributeError
++__ test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member __
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_a7a58e9d9ddb4567bcca63518b6fa7c1) at 0x10c833c80>
++
++    def test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-026: membership is checked before the last-member rule."""
++        seed(conn, "AAA", "CCC")
++        uid = _create(conn, "U", "AAA")
++    
++        with pytest.raises(NotAMember):
++>           service.remove_member(conn, uid, "CCC")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:384: AttributeError
++______________ test_removing_from_an_unknown_universe_is_refused _______________
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_dbe2cde1c9974efd8234863135e97a67) at 0x10c7869c0>
++
++    def test_removing_from_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
++        """Implements TC-COMP-026."""
++        with pytest.raises(UniverseNotFound):
++>           service.remove_member(conn, UUID(int=7), "AAA")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:391: AttributeError
++_____ test_removing_the_sole_member_raises_last_member_offering_retirement _____
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_bf5aa7a826b14f8da10f01ddfa0e6f2b) at 0x10c77ee10>
++
++    def test_removing_the_sole_member_raises_last_member_offering_retirement(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-036."""
++        seed(conn, "AAA")
++        uid = _create(conn, "U", "AAA")
++        before = count_events(conn)
++    
++        with pytest.raises(LastMember) as excinfo:
++>           service.remove_member(conn, uid, "AAA")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:406: AttributeError
++_________ test_the_last_member_rule_applies_to_the_current_membership __________
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_b59b3d964aad4b3c818e1659372fe3c2) at 0x10c6767b0>
++
++    def test_the_last_member_rule_applies_to_the_current_membership(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-036."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++>       service.remove_member(conn, uid, "BBB")
++        ^^^^^^^^^^^^^^^^^^^^^
++E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:425: AttributeError
++_________ test_a_re_added_member_counts_towards_the_current_membership _________
++
++conn = <psycopg.Connection [IDLE] (host=localhost port=60669 user=test database=test_5645d8a5df2f4e63a6913f8b0a4ea847) at 0x10cd25220>
++
++    def test_a_re_added_member_counts_towards_the_current_membership(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-036."""
++        seed(conn, "AAA", "BBB")
++        uid = _create(conn, "U", "AAA", "BBB")
++>       service.remove_member(conn, uid, "BBB")
++        ^^^^^^^^^^^^^^^^^^^^^
++E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:439: AttributeError
++_____ test_the_sole_member_is_protected_whatever_its_instrument_lifecycle ______
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_479b4d9fc5d3418d880838cafe2e83f9) at 0x10cd251c0>
++
++    def test_the_sole_member_is_protected_whatever_its_instrument_lifecycle(
++        conn: psycopg.Connection,
++    ) -> None:
++        """Implements TC-COMP-036: the rule counts members, not lifecycle (AC-15)."""
++        seed_instrument(conn, "OLD", lifecycle="retired")
++        conn.commit()
++        uid = _create(conn, "U", "OLD")
++        before = count_events(conn)
++    
++        with pytest.raises(LastMember):
++>           service.remove_member(conn, uid, "OLD")
++            ^^^^^^^^^^^^^^^^^^^^^
++E           AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:462: AttributeError
++______________ test_a_removed_member_keeps_both_events_in_history ______________
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=60669 user=test database=test_b2654643ba3741e49aede141cee0506c) at 0x10cd253d0>
++
++    def test_a_removed_member_keeps_both_events_in_history(conn: psycopg.Connection) -> None:
++        """Implements TC-COMP-053."""
++        seed(conn, "AAA", "BBB", "CCC")
++        uid = _create(conn, "U", "AAA", "BBB", "CCC")
++        other = _create(conn, "Other", "BBB")
++        before = event_rows(conn, uid)
++    
++>       removed_at = service.remove_member(conn, uid, "bbb")
++                     ^^^^^^^^^^^^^^^^^^^^^
++E       AttributeError: module 'factorflow.universes.service' has no attribute 'remove_member'
++
++tests/integration/test_universe_maintenance.py:478: AttributeError
++=========================== short test summary info ============================
++FAILED tests/integration/test_universe_maintenance.py::test_retire_appends_one_retired_event_and_data_stays_readable
++FAILED tests/integration/test_universe_maintenance.py::test_every_write_to_a_retired_universe_raises_universe_retired
++FAILED tests/integration/test_universe_maintenance.py::test_removing_a_non_member_raises_not_a_member_and_writes_nothing
++FAILED tests/integration/test_universe_maintenance.py::test_a_symbol_with_no_instrument_is_not_a_member
++FAILED tests/integration/test_universe_maintenance.py::test_a_lower_case_non_member_is_reported_normalised
++FAILED tests/integration/test_universe_maintenance.py::test_a_removed_symbol_is_no_longer_a_member
++FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[1ABC]
++FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[]
++FAILED tests/integration/test_universe_maintenance.py::test_a_malformed_symbol_is_a_shape_failure_not_a_non_member[  ]
++FAILED tests/integration/test_universe_maintenance.py::test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member
++FAILED tests/integration/test_universe_maintenance.py::test_removing_from_an_unknown_universe_is_refused
++FAILED tests/integration/test_universe_maintenance.py::test_removing_the_sole_member_raises_last_member_offering_retirement
++FAILED tests/integration/test_universe_maintenance.py::test_the_last_member_rule_applies_to_the_current_membership
++FAILED tests/integration/test_universe_maintenance.py::test_a_re_added_member_counts_towards_the_current_membership
++FAILED tests/integration/test_universe_maintenance.py::test_the_sole_member_is_protected_whatever_its_instrument_lifecycle
++FAILED tests/integration/test_universe_maintenance.py::test_a_removed_member_keeps_both_events_in_history
++16 failed, 12 passed in 3.96s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
+index 7df6f54..6b5af0c 100644
+--- a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S4-tasks.md
+@@ -75,11 +75,11 @@ Mapped component test cases (coverage-matrix rows DAC-E1-S4-1 to -7): TC-COMP-02
+ 
+ - [x] T002 [P] Implement TC-COMP-025 (Rename keeps identity, history and memberships) in `tests/integration/test_universe_maintenance.py` (`pytest.mark.postgres`, `# Implements TC-COMP-025`). Create `"Tech"` with `AAPL`, `MSFT`, `NVDA`; snapshot `before_events = event_rows(conn, uid)` and `before = service.get_universe(conn, uid)`; call `service.rename(conn, uid, "  Technology ")`, commit. Assert: returned `Universe.name == "Technology"` (trimmed), `universe_id == uid`, `lifecycle == "active"`, `members == before.members` (same symbols and `member_since`), `origin == before.origin`, `created_at == before.created_at`; `event_rows` now equals `before_events` plus exactly one row at the end (`event_type == "renamed"`, `name == "Technology"`, `instrument_id IS NULL`, `filter_provenance IS NULL`) with every earlier row identical (compare full tuples including `event_id` and `recorded_at`); `SELECT count(*) FROM universe` is unchanged and the `universe` row for `uid` is unchanged; `list_events(conn, uid, 50, None)` returns the `renamed` event first (newest first) and the `created` event still carries the original name `"Tech"`; a second rename `"Tech2"` appends a second `renamed` event and `get_universe` shows the latest name. `rename` on a by-filter universe cannot be built here (S5), so origin preservation is asserted on the by-hand origin only. Fails now: `service.rename` does not exist (`AttributeError`).
+ - [x] T003 [P] Implement the rename branch of TC-COMP-023 (Active universe name must be unique; retired name reusable) in `tests/integration/test_universe_maintenance.py` (same file as T002, so it follows it; `# Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)`). Create `"Growth"` (U1) and `"Value"` (U2). (a) `rename(conn, U2, " Growth  ")` raises `UniverseNameInUse` and appends nothing (event count unchanged, U2 still named `"Value"`). (b) The comparison is exact after trimming: renaming U2 to `"growth"` succeeds. (c) Retire U1 with `service.retire`, commit; renaming U2 to `"Growth"` is now accepted (a retired universe's name is reusable) and the two universes have different ids. (d) A universe may be renamed to a name it held earlier: U2 `"Growth"` -> `"Value"` -> `"Growth"`. (e) Renaming a universe to its own current name (trimmed, e.g. `" Value"` when named `"Value"`) is not refused and appends one `renamed` event (PROVISIONAL, DEC-0096, see Open Gaps; the test pins the adopted behaviour and cites the decision). (f) Empty and whitespace-only names raise `ValueError` and write nothing; a 10 000-character name is accepted (no length bound exists, owner's open question). Fails now: `service.rename` does not exist.
+-- [ ] T004 [P] Implement TC-COMP-026 (Removing a non-member raises a typed error) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-026`). Create a universe with `AAA`, `BBB`; seed `CCC` covered but never added. (a) `remove_member(conn, uid, "CCC")` raises `service.NotAMember` (a `LookupError`), `symbols`-free message naming `CCC`, and `count_events` is unchanged. (b) A symbol with no `instrument` row at all (`"ZZZ"`) raises `NotAMember` too (removal does not consult coverage). (c) Lower-case input `"ccc"` is normalised and reported as `CCC`. (d) A symbol removed earlier (call `remove_member` for `BBB` first) is no longer a current member, so removing it again raises `NotAMember`. (e) A malformed symbol (`"1ABC"`, `""`) raises `ValueError` (not `NotAMember`), writing nothing. (f) A universe with one member asked to remove a non-member raises `NotAMember`, not `LastMember` (membership is checked before the last-member rule; see Resolved Conflicts). (g) An unknown `universe_id` raises `UniverseNotFound`. Fails now: `service.remove_member` does not exist.
+-- [ ] T005 [P] Implement TC-COMP-036 (Removing the sole member raises LastMember) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-036`). (a) A universe created with one symbol `AAA`: `remove_member(conn, uid, "AAA")` raises `service.LastMember` (a `ValueError`), `str(exc)` contains the word `retire` (it offers retirement, DAC-E1-S4-2), `count_events` is unchanged and `get_universe` still lists `AAA`. (b) A universe of `AAA`, `BBB`: removing `BBB` succeeds, then removing `AAA` raises `LastMember` (the rule applies to the replayed current membership, not to the created count). (c) A universe whose second member was removed and then re-added is judged on current membership: with `AAA`, `BBB`, remove `BBB`, add `BBB` again, remove `AAA` succeeds and then `BBB` is the last member. (d) The sole remaining member of a retired-lifecycle instrument (`lifecycle='retired'`, covered) is also protected: the rule counts members, not lifecycle (AC-15). (e) After `LastMember`, `service.retire(conn, uid)` succeeds (the offered alternative works). Fails now: `service.remove_member` does not exist.
+-- [ ] T006 [P] Implement TC-COMP-053 (Removed member keeps both events in history) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-053`). Create a universe with `AAA`, `BBB`, `CCC`; `removed_at = service.remove_member(conn, uid, "bbb")`, commit. Assert: `removed_at` is a timezone-aware `datetime` equal to the `recorded_at` of the appended `member_removed` row (design 2.3 returns `datetime`); `event_rows` holds both the original `member_added` for `BBB` and the new `member_removed` for `BBB` (same `instrument_id`, `member_removed.event_id > member_added.event_id`), with no row updated or deleted (all earlier rows identical to a snapshot taken before the call); exactly one new event; `get_universe(conn, uid).members` has symbols `["AAA", "CCC"]` (absent from current members); `list_events` returns the `member_removed` event first carrying `symbol == "BBB"` and the `member_added` event still present later in the page. Removal in one universe leaves the same instrument a member of a second universe built from the same symbol (AC-3). Re-adding `BBB` with `add_members` afterwards appends a new `member_added`, returns it in `added`, and the three events for `BBB` are all retained. Fails now: `service.remove_member` does not exist.
+-- [ ] T007 [P] Implement TC-COMP-037 (Retire appends one retired event, data stays readable) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-037`). Create a universe with `AAA`, `BBB`, remove `BBB`, snapshot `before_events` and `before_members = get_universe(...).members`; `result = service.retire(conn, uid)`, commit. Assert: `result.lifecycle == "retired"` with `retired_at` not `None` equal to the new event's `recorded_at`; exactly one new `universe_event` row, `event_type == "retired"`, `instrument_id IS NULL`, `name IS NULL`, all earlier rows identical; `get_universe(conn, uid)` returns `lifecycle == "retired"` with `members == before_members` (a retire removes no member) and the same `name`; `list_events(conn, uid, 50, None)` returns every event including the `retired` first; `get_universe(conn, uid, as_of=<creation day>)` still replays the creation-day membership (history stays readable); the `universe` row is unchanged. `list_universes(conn, "retired", None, 10, None)` returns it and `list_universes(conn, "active", ...)` does not. Fails now: `service.retire` does not exist.
+-- [ ] T008 [P] Implement TC-COMP-038 (Every write to a retired universe raises UniverseRetired) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-038`). Create a universe with `AAA`, `BBB`, seed `CCC` covered, `service.retire` it, commit, snapshot `count_events`. Each call raises `service.UniverseRetired` (a `ValueError`) and `count_events` is unchanged afterwards: (a) `retire(conn, uid)` a second time; (b) `add_members(conn, uid, ["CCC"])`; (c) `remove_member(conn, uid, "AAA")`; (d) `rename(conn, uid, "Other")`. Check order (design 2.4 step 5 precedes steps 6 and 7): `remove_member(conn, uid, "ZZZ")` (a non-member) on the retired universe raises `UniverseRetired`, not `NotAMember`; `rename(conn, uid, <name held by another active universe>)` raises `UniverseRetired`, not `UniverseNameInUse`; removing `AAA` after removing `BBB` is not reachable (retired first), so `LastMember` is never raised on a retired universe. Reads still work after each refusal: `get_universe` returns `lifecycle == "retired"` with both members; `list_events` returns the full log. `add_members` with an uncovered symbol on a retired universe raises `InstrumentNotAcquired` (coverage precedes the target check, S3 T011(a)), so this story does not alter that order. Fails now: `retire`, `remove_member` and `rename` do not exist.
++- [x] T004 [P] Implement TC-COMP-026 (Removing a non-member raises a typed error) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-026`). Create a universe with `AAA`, `BBB`; seed `CCC` covered but never added. (a) `remove_member(conn, uid, "CCC")` raises `service.NotAMember` (a `LookupError`), `symbols`-free message naming `CCC`, and `count_events` is unchanged. (b) A symbol with no `instrument` row at all (`"ZZZ"`) raises `NotAMember` too (removal does not consult coverage). (c) Lower-case input `"ccc"` is normalised and reported as `CCC`. (d) A symbol removed earlier (call `remove_member` for `BBB` first) is no longer a current member, so removing it again raises `NotAMember`. (e) A malformed symbol (`"1ABC"`, `""`) raises `ValueError` (not `NotAMember`), writing nothing. (f) A universe with one member asked to remove a non-member raises `NotAMember`, not `LastMember` (membership is checked before the last-member rule; see Resolved Conflicts). (g) An unknown `universe_id` raises `UniverseNotFound`. Fails now: `service.remove_member` does not exist.
++- [x] T005 [P] Implement TC-COMP-036 (Removing the sole member raises LastMember) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-036`). (a) A universe created with one symbol `AAA`: `remove_member(conn, uid, "AAA")` raises `service.LastMember` (a `ValueError`), `str(exc)` contains the word `retire` (it offers retirement, DAC-E1-S4-2), `count_events` is unchanged and `get_universe` still lists `AAA`. (b) A universe of `AAA`, `BBB`: removing `BBB` succeeds, then removing `AAA` raises `LastMember` (the rule applies to the replayed current membership, not to the created count). (c) A universe whose second member was removed and then re-added is judged on current membership: with `AAA`, `BBB`, remove `BBB`, add `BBB` again, remove `AAA` succeeds and then `BBB` is the last member. (d) The sole remaining member of a retired-lifecycle instrument (`lifecycle='retired'`, covered) is also protected: the rule counts members, not lifecycle (AC-15). (e) After `LastMember`, `service.retire(conn, uid)` succeeds (the offered alternative works). Fails now: `service.remove_member` does not exist.
++- [x] T006 [P] Implement TC-COMP-053 (Removed member keeps both events in history) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-053`). Create a universe with `AAA`, `BBB`, `CCC`; `removed_at = service.remove_member(conn, uid, "bbb")`, commit. Assert: `removed_at` is a timezone-aware `datetime` equal to the `recorded_at` of the appended `member_removed` row (design 2.3 returns `datetime`); `event_rows` holds both the original `member_added` for `BBB` and the new `member_removed` for `BBB` (same `instrument_id`, `member_removed.event_id > member_added.event_id`), with no row updated or deleted (all earlier rows identical to a snapshot taken before the call); exactly one new event; `get_universe(conn, uid).members` has symbols `["AAA", "CCC"]` (absent from current members); `list_events` returns the `member_removed` event first carrying `symbol == "BBB"` and the `member_added` event still present later in the page. Removal in one universe leaves the same instrument a member of a second universe built from the same symbol (AC-3). Re-adding `BBB` with `add_members` afterwards appends a new `member_added`, returns it in `added`, and the three events for `BBB` are all retained. Fails now: `service.remove_member` does not exist.
++- [x] T007 [P] Implement TC-COMP-037 (Retire appends one retired event, data stays readable) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-037`). Create a universe with `AAA`, `BBB`, remove `BBB`, snapshot `before_events` and `before_members = get_universe(...).members`; `result = service.retire(conn, uid)`, commit. Assert: `result.lifecycle == "retired"` with `retired_at` not `None` equal to the new event's `recorded_at`; exactly one new `universe_event` row, `event_type == "retired"`, `instrument_id IS NULL`, `name IS NULL`, all earlier rows identical; `get_universe(conn, uid)` returns `lifecycle == "retired"` with `members == before_members` (a retire removes no member) and the same `name`; `list_events(conn, uid, 50, None)` returns every event including the `retired` first; `get_universe(conn, uid, as_of=<creation day>)` still replays the creation-day membership (history stays readable); the `universe` row is unchanged. `list_universes(conn, "retired", None, 10, None)` returns it and `list_universes(conn, "active", ...)` does not. Fails now: `service.retire` does not exist.
++- [x] T008 [P] Implement TC-COMP-038 (Every write to a retired universe raises UniverseRetired) in `tests/integration/test_universe_maintenance.py` (`# Implements TC-COMP-038`). Create a universe with `AAA`, `BBB`, seed `CCC` covered, `service.retire` it, commit, snapshot `count_events`. Each call raises `service.UniverseRetired` (a `ValueError`) and `count_events` is unchanged afterwards: (a) `retire(conn, uid)` a second time; (b) `add_members(conn, uid, ["CCC"])`; (c) `remove_member(conn, uid, "AAA")`; (d) `rename(conn, uid, "Other")`. Check order (design 2.4 step 5 precedes steps 6 and 7): `remove_member(conn, uid, "ZZZ")` (a non-member) on the retired universe raises `UniverseRetired`, not `NotAMember`; `rename(conn, uid, <name held by another active universe>)` raises `UniverseRetired`, not `UniverseNameInUse`; removing `AAA` after removing `BBB` is not reachable (retired first), so `LastMember` is never raised on a retired universe. Reads still work after each refusal: `get_universe` returns `lifecycle == "retired"` with both members; `list_events` returns the full log. `add_members` with an uncovered symbol on a retired universe raises `InstrumentNotAcquired` (coverage precedes the target check, S3 T011(a)), so this story does not alter that order. Fails now: `retire`, `remove_member` and `rename` do not exist.
+ - [ ] T009 [P] Implement TC-COMP-054 (New membership SQL has no UPDATE or DELETE and is parameterised) by appending to CAP-002-E1-S2's `tests/unit/test_universe_sql_safety.py`, after S2's T005 cases (no database, no marker, `# Implements TC-COMP-054`; also names DAC-E1-10). The story (Implementation: "the existing `tests/unit/test_universe_sql_safety.py` scan") and design section 7 ("No mutation statement") place this test in that file. It is S2's CAP-002 module, not a delivered file: DEC-0064 governs only delivered CAP-001 files. Do not change or remove any S2 case or helper in the module. S2's checks (a), (a') and (b) already cover the new `service.py` constant without an edit; these appended cases add the assertions specific to this story's statements. (a) Import `factorflow.universes.service` and collect every module-level `str` constant whose name ends in `_SQL`. Assert that the set contains the statements S3 defined plus the new `remove_member` insert (T011). Assert that each passes `prohibited_research_mutations(text) == []` (imported from `tests.unit.test_research_sql_is_append_only`, S1). Assert that every `%` is the start of a named placeholder `%(name)s`, except the positional `%s` of the exact statement `SELECT pg_advisory_xact_lock(%s)` (S3's `_LOCK_SQL`), which is the one exception S2's check (a') allows. (b) Parse `service.py` with `ast` and assert `rename`, `remove_member` and `retire` exist as top-level functions whose bodies contain no `UPDATE` or `DELETE` token in any string constant and no `execute`/`executemany` call whose first argument is an `ast.JoinedStr`, `.format` call or `%` `BinOp` (names or constants only). (c) Every statement `rename`, `remove_member` and `retire` execute begins with `SELECT pg_advisory_xact_lock` or `INSERT INTO universe_event`: assert by resolving the constants those functions pass to `execute`. (d) Detection check: run the same predicate on a synthetic source string containing `DELETE FROM universe_event` and on one with an f-string argument to prove it fires. Fails now: the new insert constant and the three functions do not exist.
+ 
+ ### Additional Unit Tests
+diff --git a/src/factorflow/universes/service.py b/src/factorflow/universes/service.py
+index 29165e6..761eed8 100644
+--- a/src/factorflow/universes/service.py
++++ b/src/factorflow/universes/service.py
+@@ -20,7 +20,7 @@ AC-6, DAC-E1-4, DAC-E1-7, DAC-E1-10 and DAC-E1-S4-1 through DAC-E1-S4-7
+ (CAP-002-E1-S4).
+ """
+ 
+-from datetime import date
++from datetime import date, datetime
+ from pathlib import Path
+ from typing import Any, Final
+ from uuid import UUID
+@@ -47,6 +47,7 @@ __all__ = [
+     "UniverseNameInUse",
+     "UniverseNotFound",
+     "UniverseRetired",
++    "remove_member",
+     "rename",
+     "retire",
+ ]
+@@ -61,6 +62,10 @@ _INSERT_EVENT_SQL: Final = (
+     "INSERT INTO universe_event (universe_id, event_type, instrument_id, name, filter_provenance) "
+     "VALUES (%(universe_id)s, %(event_type)s, %(instrument_id)s, %(name)s, %(filter_provenance)s)"
+ )
++_INSERT_MEMBER_REMOVED_SQL: Final = (
++    "INSERT INTO universe_event (universe_id, event_type, instrument_id) "
++    "VALUES (%(universe_id)s, 'member_removed', %(instrument_id)s) RETURNING recorded_at"
++)
+ _INSTRUMENTS_BY_SYMBOL_SQL: Final = (
+     "SELECT instrument_id, symbol FROM instrument WHERE symbol = ANY(%(symbols)s)"
+ )
+@@ -284,6 +289,35 @@ def rename(conn: psycopg.Connection, universe_id: UUID, name: str) -> Universe:
+         return get_universe(conn, universe_id)
+ 
+ 
++def remove_member(conn: psycopg.Connection, universe_id: UUID, symbol: str) -> datetime:
++    """Remove a current member: one ``member_removed`` event; returns its ``recorded_at``.
++
++    Removal does not consult coverage. A symbol that is not a current member is
++    ``NotAMember``; the sole remaining member is ``LastMember``, which offers
++    retirement instead. Membership is checked first, so ``LastMember`` is raised
++    only when the removal would leave the universe empty.
++    """
++    with conn.transaction():
++        _take_lock(conn)
++        [clean_symbol] = _normalise_symbols([symbol])
++        universe = _require_active(conn, universe_id)
++        member = next((m for m in universe.members if m.symbol == clean_symbol), None)
++        if member is None:
++            raise NotAMember(f"{clean_symbol} is not a current member of universe {universe_id}")
++        if len(universe.members) == 1:
++            raise LastMember(
++                f"cannot remove {clean_symbol}, the last member; retire the universe instead"
++            )
++        row = conn.execute(
++            _INSERT_MEMBER_REMOVED_SQL,
++            {"universe_id": universe_id, "instrument_id": member.instrument_id},
++        ).fetchone()
++        if row is None:
++            raise RuntimeError("INSERT INTO universe_event returned no row")
++        removed_at: datetime = row[0]
++        return removed_at
++
++
+ def retire(conn: psycopg.Connection, universe_id: UUID) -> Universe:
+     """Retire an active universe: one ``retired`` event; members and history stay readable."""
+     with conn.transaction():
+diff --git a/tests/integration/test_universe_maintenance.py b/tests/integration/test_universe_maintenance.py
+index 655b992..bc5a114 100644
+--- a/tests/integration/test_universe_maintenance.py
++++ b/tests/integration/test_universe_maintenance.py
+@@ -7,19 +7,28 @@ CAP-002-E1-S3's, imported from ``test_universe_create`` so both modules share th
+ connection ``conn.transaction()`` opens and commits its own transaction (design 2.3).
+ """
+ 
++from datetime import datetime, timedelta
+ from uuid import UUID
+ 
+ import psycopg
+ import pytest
+ 
+ from factorflow.universes import service
+-from factorflow.universes.service import UniverseNameInUse, UniverseRetired
++from factorflow.universes.service import (
++    InstrumentNotAcquired,
++    LastMember,
++    NotAMember,
++    UniverseNameInUse,
++    UniverseNotFound,
++    UniverseRetired,
++)
+ from tests.integration.test_universe_create import conn as conn  # fixture
+ from tests.integration.test_universe_create import (
+     count_events,
+     count_universes,
+     event_rows,
+     seed,
++    seed_instrument,
+ )
+ 
+ pytestmark = pytest.mark.postgres
+@@ -104,9 +113,14 @@ def test_the_rename_comparison_is_exact_after_trimming(conn: psycopg.Connection)
+     _create(conn, "Growth", "AAA")
+     u2 = _create(conn, "Value", "AAA")
+ 
++    before = count_events(conn)
++
+     assert service.rename(conn, u2, "growth").name == "growth"
+     conn.commit()
+ 
++    assert count_events(conn) == before + 1
++    assert service.get_universe(conn, u2).name == "growth"
++
+ 
+ def test_a_retired_universes_name_is_reusable_by_rename(conn: psycopg.Connection) -> None:
+     """Implements TC-COMP-023 (rename half; create half is CAP-002-E1-S3)."""
+@@ -133,6 +147,12 @@ def test_a_universe_may_take_back_a_name_it_held_earlier(conn: psycopg.Connectio
+     assert service.rename(conn, u2, "Growth").name == "Growth"
+     conn.commit()
+ 
++    assert service.get_universe(conn, u2).name == "Growth"
++    assert [e["name"] for e in event_rows(conn, u2) if e["event_type"] == "renamed"] == [
++        "Value",
++        "Growth",
++    ]
++
+ 
+ def test_renaming_to_its_own_name_appends_one_renamed_event(conn: psycopg.Connection) -> None:
+     """Implements TC-COMP-023 (rename half). PROVISIONAL behaviour pinned by DEC-0096."""
+@@ -173,31 +193,313 @@ def test_rename_accepts_a_very_long_name(conn: psycopg.Connection) -> None:
+ 
+ 
+ def test_rename_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+-    with pytest.raises(service.UniverseNotFound):
++    with pytest.raises(UniverseNotFound):
+         service.rename(conn, UUID(int=7), "Anything")
+ 
+ 
+-# --- TC-COMP-038 (rename and retire half): a retired universe refuses writes ----------
++def test_retire_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
++    with pytest.raises(UniverseNotFound):
++        service.retire(conn, UUID(int=7))
+ 
+ 
+-def test_a_retired_universe_refuses_a_rename(conn: psycopg.Connection) -> None:
+-    """Part of TC-COMP-038; the other writes are tested with remove_member."""
+-    seed(conn, "AAA")
+-    uid = _create(conn, "U", "AAA")
++# --- TC-COMP-037: retire appends one retired event, data stays readable -----------------
++
++
++def test_retire_appends_one_retired_event_and_data_stays_readable(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-037."""
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    service.remove_member(conn, uid, "BBB")
++    conn.commit()
++    before_events = event_rows(conn, uid)
++    before = service.get_universe(conn, uid)
++    row_before = _universe_row(conn, uid)
++
++    result = service.retire(conn, uid)
++    conn.commit()
++
++    after_events = event_rows(conn, uid)
++    assert after_events[: len(before_events)] == before_events
++    assert len(after_events) == len(before_events) + 1
++    new = after_events[-1]
++    assert new["event_type"] == "retired"
++    assert new["instrument_id"] is None
++    assert new["name"] is None
++    assert result.lifecycle == "retired"
++    assert result.retired_at is not None
++    assert result.retired_at == new["recorded_at"]
++    assert result.members == before.members
++
++    read = service.get_universe(conn, uid)
++    assert read.lifecycle == "retired"
++    assert read.members == before.members
++    assert read.name == "U"
++    page, _ = service.list_events(conn, uid, 50, None)
++    assert page[0].event_type == "retired"
++    assert len(page) == len(after_events)
++    assert read.created_on is not None
++    on_creation_day = service.get_universe(conn, uid, as_of=read.created_on)
++    assert [m.symbol for m in on_creation_day.members] == ["AAA"]
++    before_creation = service.get_universe(conn, uid, as_of=read.created_on - timedelta(days=1))
++    assert before_creation.as_of_before_creation is True
++    assert _universe_row(conn, uid) == row_before
++
++    retired, _ = service.list_universes(conn, "retired", None, 10, None)
++    active, _ = service.list_universes(conn, "active", None, 10, None)
++    assert [u.universe_id for u in retired] == [uid]
++    assert uid not in [u.universe_id for u in active]
++
++
++# --- TC-COMP-038: every write to a retired universe raises UniverseRetired -------------
++
++
++def test_every_write_to_a_retired_universe_raises_universe_retired(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-038."""
++    seed(conn, "AAA", "BBB", "CCC")
++    seed_instrument(conn, "DDD", covered=False)
++    conn.commit()
++    _create(conn, "Taken", "AAA")
++    uid = _create(conn, "U", "AAA", "BBB")
+     service.retire(conn, uid)
+     conn.commit()
+     before = count_events(conn)
++    history = event_rows(conn, uid)
++
++    writes = [
++        lambda: service.retire(conn, uid),
++        lambda: service.add_members(conn, uid, ["CCC"]),
++        lambda: service.remove_member(conn, uid, "AAA"),
++        lambda: service.rename(conn, uid, "Other"),
++        # the target check precedes the member and name checks (design 2.4 step 5)
++        lambda: service.remove_member(conn, uid, "ZZZ"),
++        lambda: service.rename(conn, uid, "Taken"),
++    ]
++    for write in writes:
++        with pytest.raises(UniverseRetired):
++            write()
++        conn.rollback()
++        assert count_events(conn) == before
++        read = service.get_universe(conn, uid)
++        assert read.lifecycle == "retired"
++        assert [m.symbol for m in read.members] == ["AAA", "BBB"]
++        page, _ = service.list_events(conn, uid, 50, None)
++        assert len(page) == len(history)
++
++    # coverage still precedes the target check for add_members (S3), unchanged here
++    with pytest.raises(InstrumentNotAcquired):
++        service.add_members(conn, uid, ["DDD"])
++    conn.rollback()
++    assert count_events(conn) == before
++
++
++# --- TC-COMP-026: removing a non-member raises a typed error ---------------------------
++
++
++def test_removing_a_non_member_raises_not_a_member_and_writes_nothing(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-026."""
++    seed(conn, "AAA", "BBB", "CCC")
++    uid = _create(conn, "U", "AAA", "BBB")
++    before = count_events(conn)
+ 
+-    with pytest.raises(UniverseRetired):
+-        service.rename(conn, uid, "Other")
++    with pytest.raises(NotAMember) as excinfo:
++        service.remove_member(conn, uid, "CCC")
+     conn.rollback()
+-    with pytest.raises(UniverseRetired):
+-        service.retire(conn, uid)
++
++    assert isinstance(excinfo.value, LookupError)
++    assert "CCC" in str(excinfo.value)
++    assert count_events(conn) == before
++
++
++def test_a_symbol_with_no_instrument_is_not_a_member(conn: psycopg.Connection) -> None:
++    """Implements TC-COMP-026: removal does not consult coverage."""
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    before = count_events(conn)
++
++    with pytest.raises(NotAMember, match="ZZZ"):
++        service.remove_member(conn, uid, "ZZZ")
+     conn.rollback()
+ 
+     assert count_events(conn) == before
+ 
+ 
+-def test_retire_of_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
+-    with pytest.raises(service.UniverseNotFound):
+-        service.retire(conn, UUID(int=7))
++def test_a_lower_case_non_member_is_reported_normalised(conn: psycopg.Connection) -> None:
++    """Implements TC-COMP-026."""
++    seed(conn, "AAA", "BBB", "CCC")
++    uid = _create(conn, "U", "AAA", "BBB")
++
++    with pytest.raises(NotAMember) as excinfo:
++        service.remove_member(conn, uid, "ccc")
++    conn.rollback()
++
++    assert "CCC" in str(excinfo.value)
++    assert "ccc" not in str(excinfo.value)
++
++
++def test_a_removed_symbol_is_no_longer_a_member(conn: psycopg.Connection) -> None:
++    """Implements TC-COMP-026."""
++    seed(conn, "AAA", "BBB", "CCC")
++    uid = _create(conn, "U", "AAA", "BBB", "CCC")
++    service.remove_member(conn, uid, "BBB")
++    conn.commit()
++    before = count_events(conn)
++
++    with pytest.raises(NotAMember):
++        service.remove_member(conn, uid, "BBB")
++    conn.rollback()
++
++    assert count_events(conn) == before
++
++
++@pytest.mark.parametrize("symbol", ["1ABC", "", "  "])
++def test_a_malformed_symbol_is_a_shape_failure_not_a_non_member(
++    conn: psycopg.Connection, symbol: str
++) -> None:
++    """Implements TC-COMP-026."""
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    before = count_events(conn)
++
++    with pytest.raises(ValueError, match="invalid symbol"):
++        service.remove_member(conn, uid, symbol)
++    conn.rollback()
++
++    assert count_events(conn) == before
++
++
++def test_a_non_member_of_a_one_member_universe_is_not_a_member_not_last_member(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-026: membership is checked before the last-member rule."""
++    seed(conn, "AAA", "CCC")
++    uid = _create(conn, "U", "AAA")
++
++    with pytest.raises(NotAMember):
++        service.remove_member(conn, uid, "CCC")
++    conn.rollback()
++
++
++def test_removing_from_an_unknown_universe_is_refused(conn: psycopg.Connection) -> None:
++    """Implements TC-COMP-026."""
++    with pytest.raises(UniverseNotFound):
++        service.remove_member(conn, UUID(int=7), "AAA")
++
++
++# --- TC-COMP-036: removing the sole member raises LastMember ---------------------------
++
++
++def test_removing_the_sole_member_raises_last_member_offering_retirement(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-036."""
++    seed(conn, "AAA")
++    uid = _create(conn, "U", "AAA")
++    before = count_events(conn)
++
++    with pytest.raises(LastMember) as excinfo:
++        service.remove_member(conn, uid, "AAA")
++    conn.rollback()
++
++    assert isinstance(excinfo.value, ValueError)
++    assert "retire" in str(excinfo.value)
++    assert count_events(conn) == before
++    assert [m.symbol for m in service.get_universe(conn, uid).members] == ["AAA"]
++
++    retired = service.retire(conn, uid)
++    conn.commit()
++    assert retired.lifecycle == "retired"
++
++
++def test_the_last_member_rule_applies_to_the_current_membership(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-036."""
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    service.remove_member(conn, uid, "BBB")
++    conn.commit()
++
++    with pytest.raises(LastMember):
++        service.remove_member(conn, uid, "AAA")
++    conn.rollback()
++
++
++def test_a_re_added_member_counts_towards_the_current_membership(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-036."""
++    seed(conn, "AAA", "BBB")
++    uid = _create(conn, "U", "AAA", "BBB")
++    service.remove_member(conn, uid, "BBB")
++    conn.commit()
++    service.add_members(conn, uid, ["BBB"])
++    conn.commit()
++
++    service.remove_member(conn, uid, "AAA")
++    conn.commit()
++    assert [m.symbol for m in service.get_universe(conn, uid).members] == ["BBB"]
++    with pytest.raises(LastMember):
++        service.remove_member(conn, uid, "BBB")
++    conn.rollback()
++
++
++def test_the_sole_member_is_protected_whatever_its_instrument_lifecycle(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-036: the rule counts members, not lifecycle (AC-15)."""
++    seed_instrument(conn, "OLD", lifecycle="retired")
++    conn.commit()
++    uid = _create(conn, "U", "OLD")
++    before = count_events(conn)
++
++    with pytest.raises(LastMember):
++        service.remove_member(conn, uid, "OLD")
++    conn.rollback()
++
++    assert count_events(conn) == before
++
++
++# --- TC-COMP-053: a removed member keeps both events in history ------------------------
++
++
++def test_a_removed_member_keeps_both_events_in_history(conn: psycopg.Connection) -> None:
++    """Implements TC-COMP-053."""
++    seed(conn, "AAA", "BBB", "CCC")
++    uid = _create(conn, "U", "AAA", "BBB", "CCC")
++    other = _create(conn, "Other", "BBB")
++    before = event_rows(conn, uid)
++
++    removed_at = service.remove_member(conn, uid, "bbb")
++    conn.commit()
++
++    after = event_rows(conn, uid)
++    assert after[: len(before)] == before
++    assert len(after) == len(before) + 1
++    new = after[-1]
++    assert new["event_type"] == "member_removed"
++    assert new["name"] is None
++    assert isinstance(removed_at, datetime)
++    assert removed_at.tzinfo is not None
++    assert removed_at == new["recorded_at"]
++    added = [e for e in before if e["instrument_id"] == new["instrument_id"]]
++    assert len(added) == 1 and added[0]["event_type"] == "member_added"
++    assert new["event_id"] > added[0]["event_id"]
++    assert [m.symbol for m in service.get_universe(conn, uid).members] == ["AAA", "CCC"]
++
++    page, _ = service.list_events(conn, uid, 50, None)
++    assert page[0].event_type == "member_removed" and page[0].symbol == "BBB"
++    assert any(e.event_type == "member_added" and e.symbol == "BBB" for e in page[1:])
++    assert [m.symbol for m in service.get_universe(conn, other).members] == ["BBB"]
++
++    assert service.add_members(conn, uid, ["BBB"]) == (["BBB"], [])
++    conn.commit()
++    bbb = [
++        e["event_type"] for e in event_rows(conn, uid) if e["instrument_id"] == new["instrument_id"]
++    ]
++    assert bbb == ["member_added", "member_removed", "member_added"]

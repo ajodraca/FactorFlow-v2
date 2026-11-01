@@ -1,0 +1,53 @@
+..................................F
+=================================== FAILURES ===================================
+________________ test_a_missing_boundary_ranks_before_outdated _________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55647 user=test database=test_db26e02e93aa40a9839f69277793c85...b50e8d0>, stock=1, set_id=UUID('9994d5ac-2175-461a-9d72-6517a0f8076d'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b50eed0>
+
+    def test_a_missing_boundary_ranks_before_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0116 (1), DEC-0118 (4): a stale stock lacking the S_12 bar has return_12m missing
+        and the other two outdated; a stock with no bar at all is missing on all three."""
+        no_bars = add_instrument(env.conn, "NONE")
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+    
+        rows = build(env, monkeypatch)
+        none_rows = momentum(env.conn, env.set_id, no_bars)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["detail"]["boundary"] == "S_12"
+        assert rows["return_3m"]["status"] == "outdated"
+        assert rows["return_6m"]["status"] == "outdated"
+        for name in MOMENTUM:
+            assert none_rows[name]["status"] == "missing", name
+            assert none_rows[name]["detail"]["boundary"] == "E"
+>       assert_momentum_invariants(env.conn, env.set_id)
+
+tests/integration/test_engine_inputs_momentum.py:854: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [IDLE] (host=localhost port=55647 user=test database=test_db26e02e93aa40a9839f69277793c859) at 0x10b50e8d0>
+set_id = UUID('9994d5ac-2175-461a-9d72-6517a0f8076d')
+
+    def assert_momentum_invariants(conn: psycopg.Connection, set_id: UUID) -> None:
+        """T018, DEC-0118 (4), DAC-E2-S6-2: no momentum input is ever not_computable or marked."""
+        row = conn.execute(
+            "SELECT count(*) FILTER (WHERE status = 'not_computable'), "
+            "count(*) FILTER (WHERE restated_possible) "
+            "FROM factor_input WHERE set_id = %s AND factor = 'momentum'",
+            (set_id,),
+        ).fetchone()
+        conn.commit()
+>       assert row == (0, 0)
+E       assert (0, 9) == (0, 0)
+E         
+E         At index 1 diff: 9 != 0
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:127: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_boundary_ranks_before_outdated
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 passed in 7.30s

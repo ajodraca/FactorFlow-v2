@@ -1,0 +1,192 @@
+diff --git a/tests/integration/test_universe_filter_snapshot.py b/tests/integration/test_universe_filter_snapshot.py
+index 2d18356..7050992 100644
+--- a/tests/integration/test_universe_filter_snapshot.py
++++ b/tests/integration/test_universe_filter_snapshot.py
+@@ -20,6 +20,7 @@ from datetime import UTC, date, datetime, timedelta
+ from decimal import Decimal
+ from typing import Any
+ from uuid import UUID
++from zoneinfo import ZoneInfo
+ 
+ import psycopg
+ import pytest
+@@ -287,8 +288,7 @@ def test_members_equal_the_hand_computed_list_and_evaluate_filter(
+     assert created["instrument_id"] is None
+     members = events[1:]
+     assert [e["event_id"] for e in members] == sorted(e["event_id"] for e in members)
+-    assert symbols_of(conn, [e["instrument_id"] for e in members]) == expected
+-    by_id = dict(
++    by_id: dict[int, str] = dict(
+         conn.execute(
+             "SELECT instrument_id, symbol FROM instrument WHERE instrument_id = ANY(%s)",
+             ([e["instrument_id"] for e in members],),
+@@ -471,10 +471,13 @@ def test_an_unknown_set_id_is_refused_as_changed(conn: psycopg.Connection) -> No
+     """Implements TC-COMP-013 (d): not a database error."""
+     current, _ = seed_base(conn)
+     unknown = UUID("00000000-0000-4000-8000-000000000001")
++    before = written(conn)
+     with pytest.raises(service.ClassificationSetChanged) as refused:
+         service.create_from_filter(conn, "Unknown", unknown, HIGH_VALUE)
+     assert refused.value.requested_set_id == unknown
+     assert refused.value.current_set_id == current
++    conn.rollback()
++    assert written(conn) == before
+ 
+ 
+ @pytest.mark.parametrize("state", ["building", "failed"])
+@@ -503,12 +506,15 @@ def test_a_stale_set_is_reported_before_the_name_and_the_empty_result(
+     old, ids = seed_base(conn)
+     new = seed_newer_complete(conn, ids)
+     save(conn, "Taken", new, HIGH_VALUE)
++    before = written(conn)
+     with pytest.raises(service.ClassificationSetChanged):
+         service.create_from_filter(conn, "Taken", old, HIGH_VALUE)
+     conn.rollback()
+     nothing = Thresholds(bounds={"value_score_min": Decimal("100")})
+     with pytest.raises(service.ClassificationSetChanged):
+         service.create_from_filter(conn, "Nothing", old, nothing)
++    conn.rollback()
++    assert written(conn) == before
+ 
+ 
+ # --- TC-COMP-039: a filter matching no stock is refused -------------------------------
+@@ -534,8 +540,11 @@ def test_a_set_with_an_empty_scope_raises_empty_universe(conn: psycopg.Connectio
+     seed_instrument(conn, "AAA")
+     conn.commit()
+     set_id = seed_set(conn)
++    before = written(conn)
+     with pytest.raises(service.EmptyUniverse):
+         service.create_from_filter(conn, "Empty scope", set_id, Thresholds())
++    conn.rollback()
++    assert written(conn) == before
+ 
+ 
+ def test_hiding_every_incomplete_stock_can_leave_nothing(conn: psycopg.Connection) -> None:
+@@ -554,8 +563,11 @@ def test_hiding_every_incomplete_stock_can_leave_nothing(conn: psycopg.Connectio
+ def test_a_prefix_matching_nothing_raises_empty_universe(conn: psycopg.Connection) -> None:
+     """Implements TC-COMP-039 (d)."""
+     set_id, _ = seed_base(conn)
++    before = written(conn)
+     with pytest.raises(service.EmptyUniverse):
+         service.create_from_filter(conn, "ZZ", set_id, Thresholds(symbol="ZZ"))
++    conn.rollback()
++    assert written(conn) == before
+ 
+ 
+ def test_an_empty_result_is_reported_before_the_name(conn: psycopg.Connection) -> None:
+@@ -576,6 +588,93 @@ def test_an_empty_result_is_reported_before_the_name(conn: psycopg.Connection) -
+     assert written(conn) == (before[0] + 1, before[1] + 6)
+ 
+ 
++# --- TC-COMP-015: hide_incomplete decides membership of incomplete stocks ---------------
++
++
++def seed_incompleteness(conn: psycopg.Connection, inc_reason: str) -> UUID:
++    """OKK complete, INC input-incomplete on value, NER unranked on growth, RET retired.
++
++    The momentum bound of ``MOMENTUM`` admits all four: INC, NER and OKK are classified on
++    momentum above it, RET is not classified on momentum. Only the reader's unscoped scope
++    (active instruments only, DEC-0073) keeps RET out.
++    """
++    set_id = seed_set(conn)
++    seed_stock(conn, set_id, "OKK", {"momentum": ("0.5", 70)})
++    seed_stock(conn, set_id, "INC", {"value": NC(inc_reason), "momentum": ("0.3", 60)})
++    seed_stock(conn, set_id, "NER", {"growth": NC("not_enough_stocks"), "momentum": ("0.2", 55)})
++    retired = seed_instrument(conn, "RET", lifecycle="retired")
++    for factor in FACTORS:
++        seed_not_classified(conn, set_id, retired, factor, "retired")
++    conn.commit()
++    return set_id
++
++
++MOMENTUM = {"momentum_score_min": Decimal("0")}
++
++
++@pytest.mark.parametrize("reason", ["input_missing", "input_outdated", "input_not_computable"])
++def test_hide_incomplete_hides_exactly_the_input_reason_stocks(
++    conn: psycopg.Connection, reason: str
++) -> None:
++    """Implements TC-COMP-015 (DAC-E1-S5-5; DEC-0079 (a), (b))."""
++    set_id = seed_incompleteness(conn, reason)
++
++    shown = Thresholds(bounds=MOMENTUM, hide_incomplete=False)
++    kept = save(conn, "Shown", set_id, shown)
++    assert member_symbols(kept) == ["INC", "NER", "OKK"]
++    assert oracle(conn, set_id, shown) == ["INC", "NER", "OKK"]
++    assert created_provenance(conn, kept.universe_id)["hide_incomplete"] is False
++    assert kept.origin.hide_incomplete is False
++
++    hidden = Thresholds(bounds=MOMENTUM, hide_incomplete=True)
++    pruned = save(conn, "Hidden", set_id, hidden)
++    assert member_symbols(pruned) == ["NER", "OKK"]  # not_enough_stocks never hides
++    assert oracle(conn, set_id, hidden) == ["NER", "OKK"]
++    assert created_provenance(conn, pruned.universe_id)["hide_incomplete"] is True
++    assert pruned.origin.hide_incomplete is True
++
++    every = save(conn, "Every", set_id, Thresholds())
++    assert "RET" not in member_symbols(every)  # unscoped: active instruments only (DEC-0073)
++
++
++# --- TC-COMP-016: later sets do not change a saved snapshot ---------------------------
++
++
++def test_a_later_set_that_changes_the_matches_leaves_the_members_unchanged(
++    conn: psycopg.Connection,
++) -> None:
++    """Implements TC-COMP-016 (DAC-E1-S5-6, AC-2)."""
++    old, ids = seed_base(conn)
++    universe = save(conn, "Frozen", old, HIGH_VALUE)
++    today = datetime.now(ZoneInfo("America/Chicago")).date()
++    before = service.get_universe(conn, universe.universe_id)
++    before_events = event_rows(conn, universe.universe_id)
++    as_of_before = service.get_universe(conn, universe.universe_id, as_of=today)
++
++    newer = seed_set(conn, classification_date=SET_DATE + timedelta(days=1), ended_at=NEWER)
++    changed = dict(BASE)
++    changed["AAA"] = {"value": ("0.1", 10), "momentum": ("0.5", 70)}  # an old member now fails
++    changed["CCC"] = {"value": ("1.4", 92), "momentum": ("1.2", 95)}  # a non-member now passes
++    for symbol, cells in changed.items():
++        classify(conn, newer, ids[symbol], cells)
++    current = reader.current_set(conn)
++    assert current is not None and current.set_id == newer
++    now_matching = oracle(conn, newer, HIGH_VALUE)
++    assert now_matching == ["AAC", "BAA", "BBB", "CCC", "DDD"]
++    assert now_matching != member_symbols(before)  # the test cannot pass vacuously
++
++    after = service.get_universe(conn, universe.universe_id)
++    assert after.members == before.members
++    assert member_symbols(after) == ["AAA", "AAC", "BAA", "BBB", "DDD"]
++    assert after.origin == before.origin
++    assert after.origin.set_id == old and after.origin.classification_date == SET_DATE
++    assert event_rows(conn, universe.universe_id) == before_events
++    assert service.get_universe(conn, universe.universe_id, as_of=today) == as_of_before
++    listed, _ = service.list_universes(conn, "active", None, 50, None)
++    (same,) = [u for u in listed if u.universe_id == universe.universe_id]
++    assert same.members == before.members
++
++
+ # --- additional: search then save, one predicate, unique members ----------------------
+ 
+ 
+diff --git a/tests/unit/test_universe_filter_provenance.py b/tests/unit/test_universe_filter_provenance.py
+index aabc867..1f0b17b 100644
+--- a/tests/unit/test_universe_filter_provenance.py
++++ b/tests/unit/test_universe_filter_provenance.py
+@@ -152,7 +152,7 @@ def test_the_encoded_provenance_reads_back_as_the_evaluated_decimals(
+     assert origin.symbol == "AA"
+ 
+ 
+-def test_a_half_reads_back_exactly_not_as_a_binary_float_artefact() -> None:
++def test_a_tenth_reads_back_exactly_not_as_a_binary_float_artefact() -> None:
+     decoded = json.loads(
+         service._dump_json(_provenance(Thresholds(bounds={"value_score_min": Decimal("0.1")})))
+     )
+@@ -247,7 +247,7 @@ def test_the_predicate_is_the_readers() -> None:
+         for alias in node.names
+     }
+     assert {"Thresholds", "current_set", "evaluate_filter"} <= imported
+-    assert service.evaluate_filter is reader.evaluate_filter
++    assert getattr(service, "evaluate_filter") is reader.evaluate_filter  # noqa: B009
+     for node in ast.walk(module):
+         assert not (isinstance(node, ast.ClassDef) and node.name == "Thresholds")
+     for node in ast.walk(_create_from_filter()):

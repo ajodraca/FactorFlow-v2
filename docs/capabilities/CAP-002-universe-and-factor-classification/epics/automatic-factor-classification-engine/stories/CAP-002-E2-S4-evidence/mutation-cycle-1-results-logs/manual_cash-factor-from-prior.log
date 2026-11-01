@@ -1,0 +1,44 @@
+....................F
+=================================== FAILURES ===================================
+__________ test_a_split_on_the_ex_date_does_not_scale_the_cash_amount __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=58645 user=test database=test_d781065a32d04081b3f968cae0db1c3...d6ae690>, stock=1, set_id=UUID('3d9826ac-29f7-4404-9b30-e3a345857fe5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d6acbc0>
+
+    def test_a_split_on_the_ex_date_does_not_scale_the_cash_amount(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DEC-0118 (2): a split effective on the ex-date scales the prior session's close but
+        not the cash amount, so the factor is 1 + 1 / 50, not 1 + 0.5 / 50."""
+        ex_date = date(2026, 8, 3)
+        add_close_series(
+            env.conn,
+            env.stock,
+            {S12: 90, S6: 90, S3: 90, date(2026, 7, 31): 100, ex_date: 50, E: 55, L: 55},
+        )
+        add_corporate_action(env.conn, env.stock, "dividend", ex_date, {"cash_amount": "1"})
+        add_corporate_action(env.conn, env.stock, "split", ex_date, SPLIT_2_FOR_1)
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+>           assert_close(rows[name]["value"], ret(55, 45, Decimal("1.02")))
+
+tests/integration/test_engine_inputs_momentum.py:604: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('0.2344444444')
+expected = Decimal('0.246666666666666666666666666')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('0.2344444444'), Decimal('0.246666666666666666666666666'))
+E       assert Decimal('0.012222222266666666666666666') <= Decimal('1E-8')
+E        +  where Decimal('0.012222222266666666666666666') = abs((Decimal('0.2344444444') - Decimal('0.246666666666666666666666666')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_on_the_ex_date_does_not_scale_the_cash_amount
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 20 passed in 7.55s

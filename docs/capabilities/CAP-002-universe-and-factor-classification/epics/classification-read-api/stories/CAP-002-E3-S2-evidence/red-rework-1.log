@@ -1,0 +1,63 @@
+# RED, CAP-002-E3-S2 rework-1: the rework tests written against the reviewed code (HEAD a4608e7; reader.py, list_classifications.sql and universe_exists.sql as reviewed)
+$ uv run --offline pytest tests/unit/test_reader_cursor.py tests/integration/test_reader_list.py -q -p no:randomly -rfE --tb=line
+...............................FFFFFFFFF...F..FFF....................... [ 60%]
+...............................................                          [100%]
+=================================== FAILURES ===================================
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   Failed: DID NOT RAISE CursorError
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:206: Failed: DID NOT RAISE CursorError
+E   AssertionError: assert (True and -7 == -6)
+     +  where True = isinstance(Decimal('1.5000000'), Decimal)
+     +  and   -7 = DecimalTuple(sign=0, digits=(1, 5, 0, 0, 0, 0, 0, 0), exponent=-7).exponent
+     +    where DecimalTuple(sign=0, digits=(1, 5, 0, 0, 0, 0, 0, 0), exponent=-7) = <built-in method as_tuple of decimal.Decimal object at 0x108d1dca0>()
+     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1dca0> = Decimal('1.5000000').as_tuple
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and -7 == -6)
+E   AssertionError: assert (True and 0 == -6)
+     +  where True = isinstance(Decimal('100'), Decimal)
+     +  and   0 = DecimalTuple(sign=0, digits=(1, 0, 0), exponent=0).exponent
+     +    where DecimalTuple(sign=0, digits=(1, 0, 0), exponent=0) = <built-in method as_tuple of decimal.Decimal object at 0x108d1e1e0>()
+     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1e1e0> = Decimal('100').as_tuple
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and 0 == -6)
+E   AssertionError: assert (True and -200000 == -6)
+     +  where True = isinstance(Decimal('0E-200000'), Decimal)
+     +  and   -200000 = DecimalTuple(sign=0, digits=(0,), exponent=-200000).exponent
+     +    where DecimalTuple(sign=0, digits=(0,), exponent=-200000) = <built-in method as_tuple of decimal.Decimal object at 0x108d1e410>()
+     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1e410> = Decimal('0E-200000').as_tuple
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and -200000 == -6)
+E   AssertionError: assert (True and 200000 == -6)
+     +  where True = isinstance(Decimal('0E+200000'), Decimal)
+     +  and   200000 = DecimalTuple(sign=0, digits=(0,), exponent=200000).exponent
+     +    where DecimalTuple(sign=0, digits=(0,), exponent=200000) = <built-in method as_tuple of decimal.Decimal object at 0x108d1e6b0>()
+     +      where <built-in method as_tuple of decimal.Decimal object at 0x108d1e6b0> = Decimal('0E+200000').as_tuple
+/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-design-cap-003-f106a0/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_reader_cursor.py:231: AssertionError: assert (True and 200000 == -6)
+=========================== short test summary info ============================
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-1E+200000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score--1E+200000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-1E-200000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-1000000000000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score--1000000000000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[value_score-0.0000001]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[growth_percentile-1000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[growth_percentile--1000]
+FAILED tests/unit/test_reader_cursor.py::test_key_no_stored_value_can_equal_is_refused[momentum_percentile-50.0000001]
+FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[value_score-1.5000000]
+FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[momentum_percentile-100]
+FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[value_score-0E-200000]
+FAILED tests/unit/test_reader_cursor.py::test_key_at_the_edge_of_its_column_round_trips_at_its_scale[value_score-0E+200000]
+13 failed, 106 passed in 12.97s
+exit=1

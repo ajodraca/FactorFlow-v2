@@ -1,0 +1,33 @@
+F
+=================================== FAILURES ===================================
+_ test_statement_filed_before_first_observation_marks_its_inputs_and_classifications _
+
+store = Store(conn=<psycopg.Connection [IDLE] (host=localhost port=55585 user=test database=test_5b48d0f6002c4350a873320fbe3052d9) at 0x108a9cfb0>, set_id=UUID('5d89ddc2-fdce-415f-8da3-21ebd5bba74b'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a9e7e0>
+
+    def test_statement_filed_before_first_observation_marks_its_inputs_and_classifications(
+        store: Store, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn, set_id = store
+        stocks = build_fixture(conn)
+    
+        result = run_two_stage_build(conn, set_id, monkeypatch)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = classifications_for(conn, set_id)
+        a = stocks["A"]
+>       assert input_flags(conn, set_id, a) == expect(*FUNDAMENTAL_INPUTS)
+E       AssertionError: assert {'book_to_pri...h': True, ...} == {'book_to_pri...h': True, ...}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'earnings_yield': False} != {'earnings_yield': True}
+E         {'fcf_yield': False} != {'fcf_yield': True}
+E         {'book_to_price': False} != {'book_to_price': True}
+E         Use -v to get more diff
+
+tests/integration/test_engine_restatement.py:159: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_restatement.py::test_statement_filed_before_first_observation_marks_its_inputs_and_classifications
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.23s

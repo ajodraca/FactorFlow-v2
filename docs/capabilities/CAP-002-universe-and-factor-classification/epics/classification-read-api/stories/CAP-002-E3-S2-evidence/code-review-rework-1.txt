@@ -1,0 +1,35 @@
+The rework is correct and meets every point you asked me to judge. I found no blocking issues, and all six review findings are addressed. I read the code and logs and did not re-run anything.
+
+**IR-005 production change (`reader.py:122,416-422`): correct.**
+- Limits match the migration at `0006_classifications.sql:73-74`. `numeric(18,6)` holds values below 10^12 and `numeric(9,6)` below 10^3, so `abs(number) >= limit` is the exact boundary.
+- `sort.endswith("_percentile")` picks the right limit for every allowlisted factor sort. The `symbol` sort returns earlier, so it is unaffected.
+- The range check runs before `quantize`, so `1E+200000` is refused without calling `quantize`. `1E-200000` is refused by the scale check. `0E±200000` passes and is normalised to exponent -6.
+- `quantize` cannot overflow the default context. The result has at most 18 digits against 28 of precision.
+- Cursors the server issues still decode. Stored keys always have six places, so the scale check does not reject them.
+- The early `_parse_cursor` call in `list_classifications` now also refuses out-of-range keys before the set is read.
+
+**Tests and survivors**
+- **IR-001:** `test_value_and_growth_marks_are_each_their_own_cell` seeds one stock marked on value only and one on growth only, which kills both swap survivors.
+- **IR-002:** the value and growth input-reason test uses different inputs per factor (`book_to_price` and `revenue_growth`) and asserts reason code, input and detail on both, which kills all four cross-wiring survivors.
+- **IR-004:** the missing-factor-row test is parametrised with and without a bound on the missing factor. It kills the missing-row-accepted, `<>`-guard and inner-join survivors.
+- **IR-005:** the refusal test has boundary pairs: `10^12` is refused and `999999999999.999999` accepted, `1000` refused and `999.999999` accepted, and `50.0000001` refused.
+  - The round-trip test asserts the value and `exponent == -6`, which pins the quantum.
+  - Together they kill the limit, quantum, `>=`, `abs` and scale-check mutants.
+- **IR-006:** the `INC` input-reason member is added to the scoped test, so its docstring is now true, and the counts were updated consistently (3 to 4).
+- **Mutation results:** 75 killed and 2 survived. The survivors are `rv-name-tiebreak-asc` and `outer-order-dropped`, both judged equivalent in the review.
+
+**Clock patch (IR-003): sound.**
+- Patching `reader.datetime` works because `_members_today` is the only runtime user of that name; the annotations are already evaluated.
+- `FixedNow.now(tz)` goes through `fromtimestamp(..., tz)`, so the Chicago date is computed correctly.
+- The two instants sit at 00:30 and 23:30 CDT. They catch zones behind Chicago (Los Angeles), zones ahead of it (New York, UTC) and the host date.
+- Membership events are inserted with an explicit `recorded_on`, and `universe_event.recorded_on` is only `NOT NULL`, with no constraint on its value.
+- The test result does not depend on the host date. The `date.today()` mutant is killed on any host date except 2026-10-15.
+
+**NON-BLOCKING**
+1. The red log shows failures only for the cursor tests. The integration tests passed against the reviewed code, since they close mutation gaps rather than fix behaviour. The mutation run is the evidence they are meaningful, and the log header could say so.
+2. `monkeypatch.setattr(reader, "datetime", ...)` couples the test to `reader` importing `datetime` by name. A refactor to `import datetime as dt` would fail loudly with `AttributeError`, not silently.
+3. The red log contains absolute worktree paths. This is cosmetic.
+
+I saw no coding-rule violations. The diff stays within the review's scope, `add_member` changed backward-compatibly, and the `Implements` markers follow the file's convention.
+
+VERDICT: APPROVED

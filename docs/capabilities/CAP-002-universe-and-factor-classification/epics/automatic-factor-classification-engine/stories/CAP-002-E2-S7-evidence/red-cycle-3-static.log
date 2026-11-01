@@ -1,0 +1,59 @@
+# RED cycle-3 (T007, final tests after the review round): three falsification runs on HEAD f4deee3 plus the cycle-1 to cycle-3 test files, each perturbing tests/integration/test_engine_volume.py and reverted after its run
+# test_engine_volume.py (unperturbed) sha256 b874ff6ec725d6a98efa332ec88d50b34bec1897cdb815b48464ad49a72204ec
+# test_engine_volume_static.py sha256 5824bfe3ca06e0e9a1c84d00fbd809a9b14dc31bc30abe201f430613b32fc9c7
+# run 1 perturbation: the @pytest.mark.slow decorator removed from the volume test
+# command: uv run pytest tests/unit/test_engine_volume_static.py -q
+F............................                                            [100%]
+=================================== FAILURES ===================================
+____________________ test_the_volume_test_keeps_every_rule _____________________
+
+    def test_the_volume_test_keeps_every_rule() -> None:
+        """DAC-E2-5: the delivered volume test times one real build under the pinned budget."""
+>       assert violations(VOLUME_TEST.read_text()) == []
+E       AssertionError: assert ['test_3000_i... marked slow'] == []
+E         
+E         Left contains one more item: 'test_3000_instruments_build_within_the_budget is not marked slow'
+E         Use -v to get more diff
+
+tests/unit/test_engine_volume_static.py:195: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_engine_volume_static.py::test_the_volume_test_keeps_every_rule
+1 failed, 28 passed in 0.61s
+
+# run 2 perturbation: BUDGET_SECONDS = 295 -> 300
+# command: uv run pytest tests/unit/test_engine_volume_static.py -q
+F............................                                            [100%]
+=================================== FAILURES ===================================
+____________________ test_the_volume_test_keeps_every_rule _____________________
+
+    def test_the_volume_test_keeps_every_rule() -> None:
+        """DAC-E2-5: the delivered volume test times one real build under the pinned budget."""
+>       assert violations(VOLUME_TEST.read_text()) == []
+E       AssertionError: assert ['the literal...module level'] == []
+E         
+E         Left contains 2 more items, first extra item: 'the literal 295 appears 0 times, not once'
+E         Use -v to get more diff
+
+tests/unit/test_engine_volume_static.py:195: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_engine_volume_static.py::test_the_volume_test_keeps_every_rule
+1 failed, 28 passed in 0.44s
+
+# run 3 perturbation: the line 'assert elapsed <= BUDGET_SECONDS' deleted
+# command: uv run pytest tests/unit/test_engine_volume_static.py -q
+F............................                                            [100%]
+=================================== FAILURES ===================================
+____________________ test_the_volume_test_keeps_every_rule _____________________
+
+    def test_the_volume_test_keeps_every_rule() -> None:
+        """DAC-E2-5: the delivered volume test times one real build under the pinned budget."""
+>       assert violations(VOLUME_TEST.read_text()) == []
+E       AssertionError: assert ['no single a...DGET_SECONDS'] == []
+E         
+E         Left contains one more item: 'no single assert compares the elapsed time <= BUDGET_SECONDS'
+E         Use -v to get more diff
+
+tests/unit/test_engine_volume_static.py:195: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_engine_volume_static.py::test_the_volume_test_keeps_every_rule
+1 failed, 28 passed in 0.48s

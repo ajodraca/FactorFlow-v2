@@ -8,7 +8,10 @@ two layers and one codec:
 - the classification fetch layer, `classification-types.ts` and
   `classification-client.ts`, for `/api/universes` and `/api/classifications`
   (CAP-002-E4-S1; `component-design-classification-ui.md` sections 2.1 and
-  2.4). No screen or hook imports it yet;
+  2.4). Its importers are in `web/src/screens/research/`: the score-set
+  poll, the Filters pane and the Universes screen
+  ([`research-screen.md`](research-screen.md)), none of which a route mounts
+  yet;
 - the Research URL codec, `research-query.ts`, between the Research URL query
   and the list read's parameters (CAP-002-E4-S2;
   `component-design-classification-ui.md` section 2.4). Only

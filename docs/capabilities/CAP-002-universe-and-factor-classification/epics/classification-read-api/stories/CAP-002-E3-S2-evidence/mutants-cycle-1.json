@@ -1,0 +1,1358 @@
+{
+ "schema": 1,
+ "repo_head": "b6b583838dfa172827b1f6e2b4f965a0a9dcd492",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/classification/reader.py:117:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 117,
+   "original": "_CURSOR_VERSION: Final = 1",
+   "mutated": "_CURSOR_VERSION: Final = 2"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:142:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 142,
+   "original": "        self.universe_id = universe_id",
+   "mutated": "        pass"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:237:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 237,
+   "original": "    if not isinstance(value, str) or value not in SORT_ALLOWLIST:",
+   "mutated": "    if isinstance(value, str) or value not in SORT_ALLOWLIST:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:237:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 237,
+   "original": "    if not isinstance(value, str) or value not in SORT_ALLOWLIST:",
+   "mutated": "    if not isinstance(value, str) or value in SORT_ALLOWLIST:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:247:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 247,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:253:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 253,
+   "original": "    hide_incomplete: bool = False",
+   "mutated": "    hide_incomplete: bool = True"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:258:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 258,
+   "original": "            if name not in _BOUNDS:",
+   "mutated": "            if name in _BOUNDS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:260:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 260,
+   "original": "            if not isinstance(bound, Decimal) or not bound.is_finite():",
+   "mutated": "            if isinstance(bound, Decimal) or not bound.is_finite():"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:260:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 260,
+   "original": "            if not isinstance(bound, Decimal) or not bound.is_finite():",
+   "mutated": "            if not isinstance(bound, Decimal) or bound.is_finite():"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:262:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 262,
+   "original": "            if \"_percentile_\" in name and not Decimal(0) <= bound <= Decimal(100):",
+   "mutated": "            if \"_percentile_\" in name and Decimal(0) <= bound <= Decimal(100):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:262:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 262,
+   "original": "            if \"_percentile_\" in name and not Decimal(0) <= bound <= Decimal(100):",
+   "mutated": "            if \"_percentile_\" in name and not Decimal(0) < bound <= Decimal(100):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:262:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 262,
+   "original": "            if \"_percentile_\" in name and not Decimal(0) <= bound <= Decimal(100):",
+   "mutated": "            if \"_percentile_\" in name and not Decimal(0) <= bound < Decimal(100):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:262:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 262,
+   "original": "            if \"_percentile_\" in name and not Decimal(0) <= bound <= Decimal(100):",
+   "mutated": "            if \"_percentile_\" in name and not Decimal(1) <= bound <= Decimal(100):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:262:off-by-one:4",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 262,
+   "original": "            if \"_percentile_\" in name and not Decimal(0) <= bound <= Decimal(100):",
+   "mutated": "            if \"_percentile_\" in name and not Decimal(0) <= bound <= Decimal(101):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:264:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 264,
+   "original": "        if not isinstance(self.hide_incomplete, bool):",
+   "mutated": "        if isinstance(self.hide_incomplete, bool):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:266:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 266,
+   "original": "        if self.symbol is not None:",
+   "mutated": "        if self.symbol is None:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:267:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 267,
+   "original": "            if not isinstance(self.symbol, str):",
+   "mutated": "            if isinstance(self.symbol, str):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:270:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 270,
+   "original": "            if not _SYMBOL_PREFIX.fullmatch(upper):",
+   "mutated": "            if _SYMBOL_PREFIX.fullmatch(upper):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:275:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 275,
+   "original": "        return {name.split(\"_\", 1)[0] for name in self.bounds}",
+   "mutated": "        return {name.split(\"_\", 2)[0] for name in self.bounds}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:275:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 275,
+   "original": "        return {name.split(\"_\", 1)[0] for name in self.bounds}",
+   "mutated": "        return {name.split(\"_\", 1)[1] for name in self.bounds}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:278:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 278,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:289:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 289,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:298:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 298,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:310:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 310,
+   "original": "        if not isinstance(self.order, str) or self.order not in _ORDERS:",
+   "mutated": "        if isinstance(self.order, str) or self.order not in _ORDERS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:310:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 310,
+   "original": "        if not isinstance(self.order, str) or self.order not in _ORDERS:",
+   "mutated": "        if not isinstance(self.order, str) or self.order in _ORDERS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:313:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 313,
+   "original": "            not isinstance(self.limit, int)",
+   "mutated": "            isinstance(self.limit, int)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:315:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 315,
+   "original": "            or not 1 <= self.limit <= MAX_PAGE_SIZE",
+   "mutated": "            or 1 <= self.limit <= MAX_PAGE_SIZE"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:315:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 315,
+   "original": "            or not 1 <= self.limit <= MAX_PAGE_SIZE",
+   "mutated": "            or not 1 < self.limit <= MAX_PAGE_SIZE"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:315:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 315,
+   "original": "            or not 1 <= self.limit <= MAX_PAGE_SIZE",
+   "mutated": "            or not 1 <= self.limit < MAX_PAGE_SIZE"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:315:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 315,
+   "original": "            or not 1 <= self.limit <= MAX_PAGE_SIZE",
+   "mutated": "            or not 2 <= self.limit <= MAX_PAGE_SIZE"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:320:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 320,
+   "original": "@dataclass(frozen=True)",
+   "mutated": "@dataclass(frozen=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:334:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 334,
+   "original": "    body = {k: v for k, v in payload.items() if k != \"chk\"}",
+   "mutated": "    body = {k: v for k, v in payload.items() if k == \"chk\"}"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:335:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 335,
+   "original": "    canonical = json.dumps(body, separators=(\",\", \":\"), sort_keys=True)",
+   "mutated": "    canonical = json.dumps(body, separators=(\",\", \":\"))"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:335:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 335,
+   "original": "    canonical = json.dumps(body, separators=(\",\", \":\"), sort_keys=True)",
+   "mutated": "    canonical = json.dumps(body, separators=(\",\", \":\"), sort_keys=False)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:336:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 336,
+   "original": "    return hashlib.sha256(canonical.encode()).hexdigest()[:16]",
+   "mutated": "    return hashlib.sha256(canonical.encode()).hexdigest()[:17]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:369:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 369,
+   "original": "    if (data[\"set\"], data[\"sort\"], data[\"order\"]) != (str(set_id), sort, order):",
+   "mutated": "    if (data[\"set\"], data[\"sort\"], data[\"order\"]) == (str(set_id), sort, order):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:379:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 379,
+   "original": "    if not cursor:",
+   "mutated": "    if cursor:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:382:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 382,
+   "original": "        data = json.loads(base64.urlsafe_b64decode(cursor + \"=\" * (-len(cursor) % 4)))",
+   "mutated": "        data = json.loads(base64.urlsafe_b64decode(cursor + \"=\" * (-len(cursor) % 5)))"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:385:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 385,
+   "original": "    if not isinstance(data, dict):",
+   "mutated": "    if isinstance(data, dict):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:388:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 388,
+   "original": "    if type(version) is not int or version != _CURSOR_VERSION:",
+   "mutated": "    if type(version) is not int or version == _CURSOR_VERSION:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:388:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 388,
+   "original": "    if type(version) is not int or version != _CURSOR_VERSION:",
+   "mutated": "    if type(version) is int or version != _CURSOR_VERSION:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:390:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 390,
+   "original": "    if set(data) != _CURSOR_FIELDS:",
+   "mutated": "    if set(data) == _CURSOR_FIELDS:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:392:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 392,
+   "original": "    if data[\"chk\"] != _cursor_check(data):",
+   "mutated": "    if data[\"chk\"] == _cursor_check(data):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:395:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 395,
+   "original": "    if not isinstance(key_is_null, bool) or not isinstance(symbol, str):",
+   "mutated": "    if isinstance(key_is_null, bool) or not isinstance(symbol, str):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:395:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 395,
+   "original": "    if not isinstance(key_is_null, bool) or not isinstance(symbol, str):",
+   "mutated": "    if not isinstance(key_is_null, bool) or isinstance(symbol, str):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:398:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 398,
+   "original": "        if key is not None or sort == \"symbol\":",
+   "mutated": "        if key is not None or sort != \"symbol\":"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:398:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 398,
+   "original": "        if key is not None or sort == \"symbol\":",
+   "mutated": "        if key is None or sort == \"symbol\":"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:400:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 400,
+   "original": "        return data, (None, True, symbol)",
+   "mutated": "        return data, (None, False, symbol)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:401:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 401,
+   "original": "    if not isinstance(key, str):",
+   "mutated": "    if isinstance(key, str):"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:403:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 403,
+   "original": "    if sort == \"symbol\":",
+   "mutated": "    if sort != \"symbol\":"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:404:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 404,
+   "original": "        return data, (key, False, symbol)",
+   "mutated": "        return data, (key, True, symbol)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:409:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 409,
+   "original": "    if not number.is_finite():",
+   "mutated": "    if number.is_finite():"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:411:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 411,
+   "original": "    return data, (number, False, symbol)",
+   "mutated": "    return data, (number, True, symbol)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:417:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 417,
+   "original": "    if filters.cursor is not None:",
+   "mutated": "    if filters.cursor is None:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:422:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 422,
+   "original": "            set=None,",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:423:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 423,
+   "original": "            never_classified=True,",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:423:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 423,
+   "original": "            never_classified=True,",
+   "mutated": "            never_classified=False,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:425:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 425,
+   "original": "            match_count=0,",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:425:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 425,
+   "original": "            match_count=0,",
+   "mutated": "            match_count=1,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:426:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 426,
+   "original": "            stocks=[],",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:427:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 427,
+   "original": "            unknown_symbols=[],",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:428:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 428,
+   "original": "            next_cursor=None,",
+   "mutated": "            "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:431:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 431,
+   "original": "        decode_cursor(filters.cursor, set_id=current.set_id, sort=filters.sort, order=filters.order)",
+   "mutated": "        decode_cursor(filters.cursor, set_id=None, sort=filters.sort, order=filters.order)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:431:drop-field-copy:2",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 431,
+   "original": "        decode_cursor(filters.cursor, set_id=current.set_id, sort=filters.sort, order=filters.order)",
+   "mutated": "        decode_cursor(filters.cursor, set_id=current.set_id, sort=None, order=filters.order)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:431:drop-field-copy:3",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 431,
+   "original": "        decode_cursor(filters.cursor, set_id=current.set_id, sort=filters.sort, order=filters.order)",
+   "mutated": "        decode_cursor(filters.cursor, set_id=current.set_id, sort=filters.sort, order=None)"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:432:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 432,
+   "original": "        if filters.cursor is not None",
+   "mutated": "        if filters.cursor is None"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:436:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 436,
+   "original": "        _members_today(conn, filters.universe_id) if filters.universe_id is not None else None",
+   "mutated": "        _members_today(conn, filters.universe_id) if filters.universe_id is None else None"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:442:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 442,
+   "original": "        sort=filters.sort,",
+   "mutated": "        sort=None,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:444:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 444,
+   "original": "        order=filters.order,",
+   "mutated": "        order=None,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:446:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 446,
+   "original": "        limit_plus_one=filters.limit + 1,",
+   "mutated": "        limit_plus_one=filters.limit + 2,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:448:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 448,
+   "original": "        symbols=filters.symbols,",
+   "mutated": "        symbols=None,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:451:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 451,
+   "original": "    if len(stocks) > filters.limit:",
+   "mutated": "    if len(stocks) >= filters.limit:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:453:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 453,
+   "original": "        key = keys[filters.limit - 1]",
+   "mutated": "        key = keys[filters.limit - 2]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:455:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 455,
+   "original": "            current.set_id, filters.sort, filters.order, key, key is None, stocks[-1].symbol",
+   "mutated": "            current.set_id, filters.sort, filters.order, key, key is None, stocks[-2].symbol"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:459:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 459,
+   "original": "        never_classified=False,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:459:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 459,
+   "original": "        never_classified=False,",
+   "mutated": "        never_classified=True,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:463:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 463,
+   "original": "        unknown_symbols=[],",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:478:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 478,
+   "original": "        position=None,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:479:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 479,
+   "original": "        limit_plus_one=None,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:480:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 480,
+   "original": "        member_ids=None,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:481:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 481,
+   "original": "        symbols=None,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:491:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 491,
+   "original": "        if row is None or not row[0]:",
+   "mutated": "        if row is None or row[0]:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:491:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 491,
+   "original": "        if row is None or not row[0]:",
+   "mutated": "        if row is None or not row[1]:"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:495:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 495,
+   "original": "        return [int(member[0]) for member in cur.fetchall()]",
+   "mutated": "        return [int(member[1]) for member in cur.fetchall()]"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:515:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 515,
+   "original": "        scoped=member_ids is not None,",
+   "mutated": "        scoped=member_ids is None,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:518:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 518,
+   "original": "            escape_like(thresholds.symbol) + \"%\" if thresholds.symbol is not None else None",
+   "mutated": "            escape_like(thresholds.symbol) + \"%\" if thresholds.symbol is None else None"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:521:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 521,
+   "original": "        hide_incomplete=thresholds.hide_incomplete,",
+   "mutated": "        hide_incomplete=None,"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:524:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 524,
+   "original": "        k=None,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:525:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 525,
+   "original": "        ksym=None,",
+   "mutated": "        "
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:532:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 532,
+   "original": "        kind = \"text\" if sort == \"symbol\" else \"numeric\"",
+   "mutated": "        kind = \"text\" if sort != \"symbol\" else \"numeric\""
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:543:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 543,
+   "original": "    match_count = 0",
+   "mutated": "    match_count = 1"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:548:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 548,
+   "original": "        columns = dict(zip(names, row, strict=True))",
+   "mutated": "        columns = dict(zip(names, row))"
+  },
+  {
+   "id": "src/factorflow/classification/reader.py:548:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 548,
+   "original": "        columns = dict(zip(names, row, strict=True))",
+   "mutated": "        columns = dict(zip(names, row, strict=False))"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:1:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 1,
+   "original": "-- The classification list: component-design-classification-reader.md section 2.5, as DEC-0129",
+   "mutated": "-- The classification list: component-design-classification-reader.md section 2.5, as DEC-130"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:4:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 4,
+   "original": "-- threshold bounds, each applied only where the stock is classified on its factor (DEC-0081), and",
+   "mutated": "-- threshold bounds, each applied only where the stock is classified on its factor (DEC-82), and"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:5:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 5,
+   "original": "-- hide_incomplete over the input reasons only (DEC-0079). match_count is counted once over",
+   "mutated": "-- hide_incomplete over the input reasons only (DEC-80). match_count is counted once over"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:8:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 8,
+   "original": "-- ASC or DESC keyword and a fixed keyset fragment; every value is a bound parameter (SEC-INP-002).",
+   "mutated": "-- ASC or DESC keyword and a fixed keyset fragment; every value is a bound parameter (SEC-INP-3)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:9:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 9,
+   "original": "-- The name is the latest stored reference name (DEC-0245).",
+   "mutated": "-- The name is the latest stored reference name (DEC-246)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:18:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 18,
+   "original": "             LIMIT 1) ref ON true",
+   "mutated": "             LIMIT 1) ref ON false"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:18:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 18,
+   "original": "             LIMIT 1) ref ON true",
+   "mutated": "             LIMIT 2) ref ON true"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:23:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 23,
+   "original": "       AND EXISTS (SELECT 1 FROM factor_classification c",
+   "mutated": "       AND EXISTS (SELECT 2 FROM factor_classification c"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:52:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 52,
+   "original": "            OR c_value.score >= %(value_score_min)s::numeric)",
+   "mutated": "            OR c_value.score > %(value_score_min)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:54:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 54,
+   "original": "            OR c_value.score <= %(value_score_max)s::numeric)",
+   "mutated": "            OR c_value.score < %(value_score_max)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:56:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 56,
+   "original": "            OR c_value.percentile >= %(value_percentile_min)s::numeric)",
+   "mutated": "            OR c_value.percentile > %(value_percentile_min)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:58:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 58,
+   "original": "            OR c_value.percentile <= %(value_percentile_max)s::numeric)",
+   "mutated": "            OR c_value.percentile < %(value_percentile_max)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:60:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 60,
+   "original": "            OR c_growth.score >= %(growth_score_min)s::numeric)",
+   "mutated": "            OR c_growth.score > %(growth_score_min)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:62:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 62,
+   "original": "            OR c_growth.score <= %(growth_score_max)s::numeric)",
+   "mutated": "            OR c_growth.score < %(growth_score_max)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:64:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 64,
+   "original": "            OR c_growth.percentile >= %(growth_percentile_min)s::numeric)",
+   "mutated": "            OR c_growth.percentile > %(growth_percentile_min)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:66:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 66,
+   "original": "            OR c_growth.percentile <= %(growth_percentile_max)s::numeric)",
+   "mutated": "            OR c_growth.percentile < %(growth_percentile_max)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:69:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 69,
+   "original": "            OR c_momentum.score >= %(momentum_score_min)s::numeric)",
+   "mutated": "            OR c_momentum.score > %(momentum_score_min)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:72:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 72,
+   "original": "            OR c_momentum.score <= %(momentum_score_max)s::numeric)",
+   "mutated": "            OR c_momentum.score < %(momentum_score_max)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:75:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 75,
+   "original": "            OR c_momentum.percentile >= %(momentum_percentile_min)s::numeric)",
+   "mutated": "            OR c_momentum.percentile > %(momentum_percentile_min)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:78:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 78,
+   "original": "            OR c_momentum.percentile <= %(momentum_percentile_max)s::numeric)",
+   "mutated": "            OR c_momentum.percentile < %(momentum_percentile_max)s::numeric)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:80:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 80,
+   "original": "                COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "mutated": "                COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), true)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:81:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 81,
+   "original": "             OR COALESCE(c_growth.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "mutated": "             OR COALESCE(c_growth.reason_code = ANY(%(input_reasons)s::text[]), true)"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:82:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 82,
+   "original": "             OR COALESCE(c_momentum.reason_code = ANY(%(input_reasons)s::text[]), false)))",
+   "mutated": "             OR COALESCE(c_momentum.reason_code = ANY(%(input_reasons)s::text[]), true)))"
+  },
+  {
+   "id": "src/factorflow/classification/sql/list_classifications.sql:91:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "line": 91,
+   "original": "         LIMIT %(limit_plus_one)s::bigint) m ON true",
+   "mutated": "         LIMIT %(limit_plus_one)s::bigint) m ON false"
+  },
+  {
+   "id": "src/factorflow/classification/sql/universe_exists.sql:2:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/universe_exists.sql",
+   "line": 2,
+   "original": "-- (an unknown universe_id raises UniverseNotFound; a retired one is still a scope, DEC-0128).",
+   "mutated": "-- (an unknown universe_id raises UniverseNotFound; a retired one is still a scope, DEC-129)."
+  },
+  {
+   "id": "src/factorflow/classification/sql/universe_exists.sql:3:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/classification/sql/universe_exists.sql",
+   "line": 3,
+   "original": "SELECT EXISTS (SELECT 1 FROM universe WHERE universe_id = %(universe_id)s::uuid);",
+   "mutated": "SELECT EXISTS (SELECT 2 FROM universe WHERE universe_id = %(universe_id)s::uuid);"
+  },
+  {
+   "id": "manual:value-score-min-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.score >= %(value_score_min)s::numeric",
+   "new": "OR c_value.score > %(value_score_min)s::numeric"
+  },
+  {
+   "id": "manual:value-score-max-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.score <= %(value_score_max)s::numeric",
+   "new": "OR c_value.score < %(value_score_max)s::numeric"
+  },
+  {
+   "id": "manual:value-pmin-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.percentile >= %(value_percentile_min)s::numeric",
+   "new": "OR c_value.percentile > %(value_percentile_min)s::numeric"
+  },
+  {
+   "id": "manual:value-pmax-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_value.percentile <= %(value_percentile_max)s::numeric",
+   "new": "OR c_value.percentile < %(value_percentile_max)s::numeric"
+  },
+  {
+   "id": "manual:growth-score-min-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.score >= %(growth_score_min)s::numeric",
+   "new": "OR c_growth.score > %(growth_score_min)s::numeric"
+  },
+  {
+   "id": "manual:growth-score-max-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.score <= %(growth_score_max)s::numeric",
+   "new": "OR c_growth.score < %(growth_score_max)s::numeric"
+  },
+  {
+   "id": "manual:growth-pmin-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.percentile >= %(growth_percentile_min)s::numeric",
+   "new": "OR c_growth.percentile > %(growth_percentile_min)s::numeric"
+  },
+  {
+   "id": "manual:growth-pmax-exclusive",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_growth.percentile <= %(growth_percentile_max)s::numeric",
+   "new": "OR c_growth.percentile < %(growth_percentile_max)s::numeric"
+  },
+  {
+   "id": "manual:momentum-score-min-other-metric",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_momentum.score >= %(momentum_score_min)s::numeric",
+   "new": "OR c_momentum.percentile >= %(momentum_score_min)s::numeric"
+  },
+  {
+   "id": "manual:momentum-pmax-other-factor",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR c_momentum.percentile <= %(momentum_percentile_max)s::numeric",
+   "new": "OR c_value.percentile <= %(momentum_percentile_max)s::numeric"
+  },
+  {
+   "id": "manual:value-pmin-classified-only-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(%(value_percentile_min)s::numeric IS NULL OR c_value.status IS DISTINCT FROM 'classified'",
+   "new": "(%(value_percentile_min)s::numeric IS NULL"
+  },
+  {
+   "id": "manual:momentum-pmin-classified-only-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(%(momentum_percentile_min)s::numeric IS NULL\n            OR c_momentum.status IS DISTINCT FROM 'classified'",
+   "new": "(%(momentum_percentile_min)s::numeric IS NULL"
+  },
+  {
+   "id": "manual:hide-design-snippet-null",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "c_value.reason_code = ANY(%(input_reasons)s::text[])"
+  },
+  {
+   "id": "manual:hide-drops-growth",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR COALESCE(c_growth.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "OR false"
+  },
+  {
+   "id": "manual:hide-drops-momentum",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR COALESCE(c_momentum.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "OR false"
+  },
+  {
+   "id": "manual:hide-any-not-classified",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "COALESCE(c_value.reason_code = ANY(%(input_reasons)s::text[]), false)",
+   "new": "COALESCE(c_value.reason_code IS NOT NULL, false)"
+  },
+  {
+   "id": "manual:unscoped-includes-retired",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR (NOT %(scoped)s::boolean AND i.lifecycle = 'active'))",
+   "new": "OR (NOT %(scoped)s::boolean))"
+  },
+  {
+   "id": "manual:scoped-active-only",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]))",
+   "new": "(%(scoped)s::boolean AND i.instrument_id = ANY(%(member_ids)s::bigint[]) AND i.lifecycle = 'active')"
+  },
+  {
+   "id": "manual:no-set-row-required",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "WHERE c.set_id = %(set_id)s::uuid AND c.instrument_id = i.instrument_id",
+   "new": "WHERE c.instrument_id = i.instrument_id"
+  },
+  {
+   "id": "manual:growth-joins-value",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "AND c_growth.factor = 'growth'",
+   "new": "AND c_growth.factor = 'value'"
+  },
+  {
+   "id": "manual:nulls-first",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
+   "new": "ORDER BY ({sort_expr} IS NULL) DESC, {sort_expr} {order}, m.symbol ASC\n         LIMIT"
+  },
+  {
+   "id": "manual:tie-symbol-desc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC\n         LIMIT",
+   "new": "ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol DESC\n         LIMIT"
+  },
+  {
+   "id": "manual:outer-order-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": " ORDER BY ({sort_expr} IS NULL) ASC, {sort_expr} {order}, m.symbol ASC;",
+   "new": " ;"
+  },
+  {
+   "id": "manual:count-over-page",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "FROM (SELECT count(*) AS match_count FROM matched) c",
+   "new": "FROM (SELECT count(*) AS match_count FROM matched WHERE {keyset}) c"
+  },
+  {
+   "id": "manual:name-oldest",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "ORDER BY r.recorded_at DESC, r.value_hash DESC",
+   "new": "ORDER BY r.recorded_at ASC, r.value_hash DESC"
+  },
+  {
+   "id": "manual:symbol-prefix-ignored",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/list_classifications.sql",
+   "old": "OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE",
+   "new": "OR true OR i.symbol LIKE %(symbol_pattern)s::text ESCAPE"
+  },
+  {
+   "id": "manual:keyset-desc-wrong-way",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} < %(k)s::numeric\"",
+   "new": "(\"desc\", \"numeric\"): \"({sort_expr} IS NULL OR {sort_expr} > %(k)s::numeric\""
+  },
+  {
+   "id": "manual:keyset-ties-repeat",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol > %(ksym)s::text)\"",
+   "new": "_KEYSET_AFTER_NULL: Final = \"({sort_expr} IS NULL AND m.symbol >= %(ksym)s::text)\""
+  },
+  {
+   "id": "manual:page-no-lookahead",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "limit_plus_one=filters.limit + 1,",
+   "new": "limit_plus_one=filters.limit,"
+  },
+  {
+   "id": "manual:prefix-not-a-prefix",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "escape_like(thresholds.symbol) + \"%\" if",
+   "new": "escape_like(thresholds.symbol) if"
+  },
+  {
+   "id": "manual:escape-order",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "return prefix.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\")",
+   "new": "return prefix.replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\").replace(\"\\\\\", \"\\\\\\\\\")"
+  },
+  {
+   "id": "manual:cursor-ignores-set",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if (data[\"set\"], data[\"sort\"], data[\"order\"]) != (str(set_id), sort, order):",
+   "new": "if (data[\"sort\"], data[\"order\"]) != (sort, order):"
+  },
+  {
+   "id": "manual:cursor-no-check",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "if data[\"chk\"] != _cursor_check(data):",
+   "new": "if False:"
+  },
+  {
+   "id": "manual:evaluate-hides-incomplete-always",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "hide_incomplete=thresholds.hide_incomplete,",
+   "new": "hide_incomplete=True,"
+  },
+  {
+   "id": "manual:universe-today-utc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "old": "today = datetime.now(_CHICAGO).date()",
+   "new": "today = date(2000, 1, 1)"
+  }
+ ]
+}

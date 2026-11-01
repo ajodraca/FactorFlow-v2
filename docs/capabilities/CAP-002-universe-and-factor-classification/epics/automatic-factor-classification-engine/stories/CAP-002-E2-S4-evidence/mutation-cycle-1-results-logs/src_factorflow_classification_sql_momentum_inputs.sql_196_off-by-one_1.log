@@ -1,0 +1,35 @@
+.........F
+=================================== FAILURES ===================================
+__________________ test_a_split_on_s_k_is_outside_the_window ___________________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=53170 user=test database=test_9cb65ba8714745c98d1dec20a6c2a74...b576900>, stock=1, set_id=UUID('da5b0559-8728-457e-a3b5-2465f3a1ff5f'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b576300>
+
+    def test_a_split_on_s_k_is_outside_the_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+        """DEC-0055 (4): the window is (S_k, E], so a split effective on S_k's own session (whose
+        close is already post-split) is not applied to it; the longer windows contain it."""
+        add_close_series(env.conn, env.stock, {S12: 200, S6: 200, S3: 100, E: 120, L: 120})
+        add_corporate_action(env.conn, env.stock, "split", S3, SPLIT_2_FOR_1)
+    
+        rows = build(env, monkeypatch)
+    
+        for name in MOMENTUM:
+>           assert_close(rows[name]["value"], ret(120, 100))
+
+tests/integration/test_engine_inputs_momentum.py:376: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+actual = Decimal('1.4000000000'), expected = Decimal('0.2')
+
+    def assert_close(actual: Decimal | None, expected: Decimal) -> None:
+        assert actual is not None
+>       assert abs(actual - expected) <= TOLERANCE, (actual, expected)
+E       AssertionError: (Decimal('1.4000000000'), Decimal('0.2'))
+E       assert Decimal('1.2000000000') <= Decimal('1E-8')
+E        +  where Decimal('1.2000000000') = abs((Decimal('1.4000000000') - Decimal('0.2')))
+
+tests/integration/test_engine_inputs_momentum.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_split_on_s_k_is_outside_the_window
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 9 passed in 3.94s

@@ -21,7 +21,7 @@ needed (input_name, line_item) AS (
 used AS (
     -- The eight quarterly income statements of the trailing and prior-year windows, each
     -- line item read through the guard of value_inputs.sql (DEC-0116 (4)).
-    SELECT r.instrument_id, n.input_name, s.fiscal_period_end, s.observed_on,
+    SELECT r.instrument_id, n.input_name, s.fiscal_period_end, s.observed_on, s.backfilled,
            s.ttm_slot IS NOT NULL AS in_ttm,
            jsonb_build_object('statement_type', s.statement_type,
                               'fiscal_period_end', s.fiscal_period_end,
@@ -48,6 +48,7 @@ windows AS (
            bool_or(amount IS NULL) AS absent,
            max(fiscal_period_end) AS as_of,
            max(observed_on) AS known_on,
+           bool_or(backfilled) AS restated,
            jsonb_agg(period ORDER BY fiscal_period_end DESC) AS periods
       FROM used
      GROUP BY instrument_id, input_name
@@ -65,7 +66,7 @@ found AS (
 decided AS (
     -- Missing before outdated before not computable (DEC-0116 (1)); a bar is never read.
     SELECT r.instrument_id, n.input_name, n.line_item, w.trailing_sum, w.prior_sum,
-           w.as_of, w.known_on, f.periods_found,
+           w.as_of, w.known_on, w.restated, f.periods_found,
            jsonb_build_object('periods', w.periods) AS base,
            CASE WHEN n.line_item = ANY(%(unresolved)s::text[]) THEN %(unresolved_cause)s::text
                 -- either window short, or no row of either (w is NULL)
@@ -96,9 +97,9 @@ SELECT s.instrument_id,
        CASE WHEN s.status = 'present' THEN s.trailing_sum / s.prior_sum - 1 END,
        CASE WHEN s.status <> 'missing' THEN s.as_of END,
        CASE WHEN s.status <> 'missing' THEN s.known_on END,
-       -- The constant false: CAP-002-E2-S6 turns the backfilled flags of detail.periods
-       -- into the mark (DEC-0056, DEC-0122).
-       false,
+       -- Marked when any statement row detail.periods lists is backfilled; a missing
+       -- input lists none (AC-23, DAC-E2-11, DEC-0056, DEC-0122).
+       s.status <> 'missing' AND s.restated,
        CASE s.status
             WHEN 'missing' THEN jsonb_strip_nulls(jsonb_build_object(
                 'cause', s.missing_cause,

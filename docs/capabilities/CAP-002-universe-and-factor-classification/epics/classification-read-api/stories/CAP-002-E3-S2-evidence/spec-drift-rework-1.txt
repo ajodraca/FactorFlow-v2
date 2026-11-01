@@ -1,0 +1,21 @@
+No drift. Every change in the rework traces to a review finding, and it adds nothing beyond what that finding authorizes.
+
+I read the patch's source and test diffs in full. The rest of it is evidence files (green and red logs, mutant catalogue, mutation results), where I read only the first 853 lines and the red log, so I didn't check the remaining mutation-results JSON. I did not run any tests. The rework's `reader.py`, seed and test changes map to the findings as follows:
+
+| Finding | Rework change | Authorized by |
+|---|---|---|
+| IR-001 | `test_value_and_growth_marks_are_each_their_own_cell` seeds a value-only and a growth-only stock | The finding's remediation, T008 and DAC-E3-S2-6. The SQL is untouched. |
+| IR-002 | New test asserts `reason_input` and `reason_detail` on both a value and a growth input-reason cell | The finding's remediation and T014. |
+| IR-003 | New test parametrized at 00:30 and 23:30 Chicago time. `add_member` gets a keyword-only `recorded_on=None` that defaults to the old behaviour, and the test patches `reader.datetime`. | The finding allows patching the clock or an equivalent seam inside the story's files. The Chicago rule itself is DEC-0128 and DEC-0065, unchanged. |
+| IR-004 | New test expects `ValueError` for a stock missing its value row, with and without a bound on value | The finding's remediation and Open Gap 7. |
+| IR-005 | `_parse_cursor` refuses a factor-sort key at or beyond the column range with `CursorError`. The range limits are `_KEY_LIMITS` and `_KEY_QUANTUM`. | The finding's remediation, T018 ("`CursorError` for any failure"), and design section 4 ("refused on any mismatch"). |
+| IR-006 | `test_empty_thresholds_match_every_stock_in_scope` now seeds an input-reason member `INC` | The finding's first remedy. |
+
+The patch also flips the story's `status` from `in-review` to `in-progress`. That is a lifecycle field outside the content revision, as the review itself noted.
+
+I did not count these as drift:
+- **IR-005 scope.** The finding's remediation names only the range, but the rework also refuses keys finer than six decimal places and returns the key quantized to six places. Its expected-behavior sentence ("a key no stored value can equal is malformed") covers the first of those. The second changes only the Decimal's exponent, not its value. Engine-issued cursors always satisfy both checks, because stored values have scale 6 and sit inside the range.
+- **Decisions.** The rework doesn't touch DEC-0245, DEC-0246, DEC-0128, DEC-0129 or DEC-0065. DEC-0246 only adds the `chk` field; its requirement that decoding rejects altered cursors is unchanged. The rework adds a stricter `CursorError` check without a new decision record, which stays within T018.
+- **Other behaviour.** The SQL files, the `StockRow.name` handling, the hide-incomplete logic and the keyset fragments are all untouched.
+
+DRIFT: none

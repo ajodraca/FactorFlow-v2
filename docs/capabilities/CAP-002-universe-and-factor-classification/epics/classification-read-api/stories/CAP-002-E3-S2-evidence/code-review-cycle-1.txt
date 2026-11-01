@@ -1,0 +1,33 @@
+The patch is correct on the paths I traced, and I found no blocking issues.
+
+I read the patch and traced the paths against the design and the schema. I could not run the tests: `uv` fails in the sandbox because it cannot write its cache. I did not re-run the mutation results either. The verdict rests on the code, SQL and test inventory, plus the red log and mutation JSON committed in the evidence folder.
+
+**What I checked and found sound**
+- **SEC-INP-002:** The only text that reaches SQL is the three `.format` slots.
+  - `sort_expr` comes from `SORT_ALLOWLIST`, which `resolve_sort` guards (`reader.py:235`).
+  - `order` comes from the fixed `_ORDERS` dict.
+  - The keyset fragment is chosen in code from fixed templates.
+  - Every request value is a bound parameter: the twelve bounds, the LIKE pattern (escaped by `escape_like` with `ESCAPE '\'`), `member_ids`, the symbols list and the cursor key.
+  - The SQL contains no stray `{}`, so `.format` is safe.
+- **Thresholds (DAC-E3-3):** Each bound is guarded by `status IS DISTINCT FROM 'classified'`. The 0006 shape CHECK guarantees a classified row has a non-null score and percentile, so there is no NULL-comparison leak.
+- **`hide_incomplete` (DAC-E3-4):** It matches only the three input reasons through `COALESCE(... = ANY(...), false)`. `not_enough_stocks` and `retired` stay listed.
+- **Scope (DAC-E3-5):** Unscoped is `lifecycle = 'active'`. A universe scope uses the replayed membership and keeps retired members. A retired universe is still a scope, and an unknown one raises `UniverseNotFound`. An empty member list yields an empty page.
+- **`match_count` (DAC-E3-6):** It is counted over `matched` before the keyset and limit, in the same statement. The `LEFT JOIN ... ON true` returns a count-only row when the page is empty, and the reader skips it when `instrument_id` is null.
+- **Keyset:** Nulls sort last in both directions, with symbol ascending as the tie-break. The four numeric and text templates plus the null-key fragment match that `ORDER BY`. `evaluate_filter` reuses `_run_list` with no limit, so list, compare and snapshot share one predicate (DAC-E3-2).
+- **Cursor:**
+  - It is checked in this order: base64 and JSON, object, version, exact field set, checksum, types, then the null/symbol consistency rule.
+  - A malformed cursor is refused before the set is read (design 2.7).
+  - A cursor issued for another set, sort or order is refused.
+  - `ValueError` also covers non-ASCII input.
+- **Mutation survivors:** The 15 equivalence claims hold on a read. The one that could matter is the unused `k`/`ksym` defaults. Those only bind when `keyset` is `true`, and no placeholder references them then.
+
+**Findings (all non-blocking)**
+1. `ListFilters.symbols` without `universe_id` still gets `lifecycle = 'active'` from the scope CTE. DAC-E3-5 says compare keeps retired stocks. S3 owns compare and `unknown_symbols` is still `[]` here, but S3 must widen the scope when `symbols` is set. Record it as an S3 task or acceptance criterion.
+2. `Thresholds.bounds` is a mutable dict inside a frozen dataclass, so mutating it after `__post_init__` bypasses validation. This is low risk because the API layer builds it once.
+3. DEC-0245 (`StockRow.name` from the latest `instrument_reference.company_name`, `None` when absent) is still PROVISIONAL, with the owner review pending. The choice is well reasoned and avoids silent substitution (STD-UI-16). Keep it flagged for owner confirmation before release.
+4. DEC-0246's cursor check is a plain SHA-256 digest, not a signature. It only detects accidental or casual tampering, and the code and docstring say so. This is acceptable because the cursor carries no authority.
+5. `_row_to_cell` raises `ValueError` if a stock lacks one of its three factor rows. The invariant is documented in the task plan (Open Gap 7), so failing loudly is the right call.
+6. Each of `read_set_blocks`, `_members_today` and the list statement runs as its own statement, so there is no single snapshot. Binding `set_id` keeps the set consistent. A universe edit between the membership read and the list could skew the result slightly, but design 2.7 accepts that.
+7. The constitution folder holds only UI conventions, so there were no further coding rules to check against. The code follows the surrounding style.
+
+VERDICT: APPROVED
