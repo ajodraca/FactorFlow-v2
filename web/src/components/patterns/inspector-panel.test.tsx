@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import { type JSX, Profiler, useLayoutEffect } from "react";
+import { type JSX, Profiler, startTransition, useLayoutEffect } from "react";
+import { type Root, createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ClassificationApiError, getStockEvidence } from "../../api/classification-client";
@@ -433,6 +434,109 @@ describe("loading, failure and stale reads (DAC-E4-S7-2; DEC-0165)", () => {
     expect(within(inspector()).getByRole("status")).toHaveTextContent(LOADING);
   });
 
+  describe("a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001)", () => {
+    // testing-library's act() flushes passive effects before any read can
+    // settle, which hides this ordering. These tests run without act(), on a
+    // concurrent root with real timers, and move the selection in a
+    // transition, as React Router's v7_startTransition would; a transition
+    // keeps the update off the discrete lane even though jsdom leaves
+    // `window.event` set after an earlier test's click. A sibling's layout
+    // effect settles the previous stock's read during the new commit and then
+    // holds the commit past the scheduler's 5 ms frame, so React yields, the
+    // read's callback runs, and only then does React run the previous
+    // effect's cleanup.
+    const realWait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    let container: HTMLDivElement;
+    let root: Root;
+    let actEnvironment: unknown;
+
+    beforeEach(() => {
+      vi.useRealTimers();
+      const scope = globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown };
+      actEnvironment = scope.IS_REACT_ACT_ENVIRONMENT;
+      scope.IS_REACT_ACT_ENVIRONMENT = false;
+      container = document.createElement("div");
+      document.body.append(container);
+      root = createRoot(container);
+    });
+
+    afterEach(() => {
+      root.unmount();
+      container.remove();
+      (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT =
+        actEnvironment;
+    });
+
+    function SettleDuringCommit({ settle }: { settle: (() => void) | null }): null {
+      useLayoutEffect(() => {
+        if (settle === null) {
+          return;
+        }
+        settle();
+        const start = performance.now();
+        while (performance.now() - start < 10) {
+          // Hold the commit past one scheduler frame.
+        }
+      }, [settle]);
+      return null;
+    }
+
+    function tree(symbol: string | null, settle: (() => void) | null): JSX.Element {
+      return (
+        <MemoryRouter>
+          <InspectorPanel symbol={symbol} />
+          <SettleDuringCommit settle={settle} />
+        </MemoryRouter>
+      );
+    }
+
+    /** Mounts AAPL with its read pending, then moves the selection to `next`, settling AAPL's read in that commit. */
+    async function moveOnWhileSettling(
+      next: string | null,
+      settle: (aapl: Deferred<StockEvidence>) => void,
+    ) {
+      const aapl = deferred<StockEvidence>();
+      read.mockReturnValueOnce(aapl.promise).mockReturnValue(deferred<StockEvidence>().promise);
+      root.render(tree("AAPL", null));
+      await realWait(INSPECT_DEBOUNCE_MS + 100);
+      expect(read).toHaveBeenCalledWith("AAPL");
+      startTransition(() => root.render(tree(next, () => settle(aapl))));
+      // Less than the debounce, so the new selection's own read is not yet issued.
+      await realWait(50);
+    }
+
+    it("never renders the previous stock's read under the new selection", async () => {
+      await moveOnWhileSettling("MSFT", (aapl) => aapl.resolve(evidence()));
+      expect(container).not.toHaveTextContent("Apple Inc.");
+      expect(container).not.toHaveTextContent("AAPL");
+      expect(within(container).getByRole("status")).toHaveTextContent(LOADING);
+    });
+
+    it("never renders the previous stock's failure under the new selection", async () => {
+      await moveOnWhileSettling("MSFT", (aapl) => aapl.reject(new TypeError("Failed to fetch")));
+      expect(within(container).queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
+      expect(within(container).getByRole("status")).toHaveTextContent(LOADING);
+    });
+
+    it("never renders the previous stock's read once the selection is cleared", async () => {
+      await moveOnWhileSettling(null, (aapl) => aapl.resolve(evidence()));
+      expect(container).not.toHaveTextContent("Apple Inc.");
+      expect(container).toHaveTextContent(SELECTION.inspectorEmpty);
+    });
+
+    it("still renders the new selection's own read when it settles", async () => {
+      const msft = deferred<StockEvidence>();
+      await moveOnWhileSettling("MSFT", (aapl) => aapl.resolve(evidence()));
+      read.mockReturnValueOnce(msft.promise);
+      await realWait(INSPECT_DEBOUNCE_MS + 100);
+      expect(read).toHaveBeenLastCalledWith("MSFT");
+      msft.resolve(evidence({ symbol: "MSFT", name: "Microsoft Corp." }));
+      await realWait(50);
+      expect(container).toHaveTextContent("Microsoft Corp.");
+      expect(container).not.toHaveTextContent("Apple Inc.");
+    });
+  });
+
   it("issues no read when unmounted before the wait ends", async () => {
     const { unmount } = render(panel("AAPL"));
     await advance(100);
@@ -787,7 +891,10 @@ describe("the explanation box, the evidence link and the footnote (AC-16; classi
     );
     const box = explanation(section);
     expect(box).not.toBeNull();
-    expect(box).toHaveClass("border", "border-border");
+    // The delivered corner class the card and its buttons use, as DEC-0251
+    // chose for the swatch; the theme maps no `--radius` class yet (review v2
+    // IR-003, a theme follow-up for the owner).
+    expect(box).toHaveClass("rounded", "border", "border-border");
     const sentences = Array.from(box?.querySelectorAll("p") ?? []).map((p) => p.textContent);
     expect(sentences).toEqual([
       CELL.incompleteDetail(detail, "growth"),

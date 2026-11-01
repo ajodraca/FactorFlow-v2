@@ -28,11 +28,17 @@ import { FactorCell } from "./factor-cell";
  */
 export const INSPECT_DEBOUNCE_MS = 150;
 
+/** The (symbol, attempt) a read was issued for; a settled read carries it. */
+interface ReadKey {
+  symbol: string;
+  attempt: number;
+}
+
 type InspectorState =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "loaded"; evidence: StockEvidence }
-  | { kind: "failed"; sentence: string };
+  | ({ kind: "loaded"; evidence: StockEvidence } & ReadKey)
+  | ({ kind: "failed"; sentence: string } & ReadKey);
 
 const IDLE: InspectorState = { kind: "idle" };
 const LOADING: InspectorState = { kind: "loading" };
@@ -318,8 +324,7 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
     setState(symbol === null ? IDLE : LOADING);
   }
 
-  // `attempt` is a dependency it does not read: Try again re-runs the read.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
+  // `attempt` changes on Try again, which re-runs the read, and keys its result.
   useEffect(() => {
     if (symbol === null) {
       return;
@@ -329,12 +334,12 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
       getStockEvidence(symbol).then(
         (evidence) => {
           if (!cancelled) {
-            setState({ kind: "loaded", evidence });
+            setState({ kind: "loaded", evidence, symbol, attempt });
           }
         },
         (cause: unknown) => {
           if (!cancelled) {
-            setState({ kind: "failed", sentence: failureOf(cause) });
+            setState({ kind: "failed", sentence: failureOf(cause), symbol, attempt });
           }
         },
       );
@@ -345,13 +350,26 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
     };
   }, [symbol, attempt]);
 
+  // The `cancelled` flag flips only when React runs the previous effect's
+  // cleanup, which can come after the new selection commits; a read for the
+  // previous (symbol, attempt) that settles in that gap is never shown, so a
+  // response for a symbol that is no longer current is always dropped
+  // (T011; DEC-0165; review v2 IR-001).
+  const current =
+    (state.kind === "loaded" || state.kind === "failed") &&
+    (state.symbol !== symbol || state.attempt !== attempt)
+      ? symbol === null
+        ? IDLE
+        : LOADING
+      : state;
+
   let body: ReactNode;
-  if (state.kind === "loaded") {
-    body = <Loaded evidence={state.evidence} />;
-  } else if (state.kind === "failed") {
+  if (current.kind === "loaded") {
+    body = <Loaded evidence={current.evidence} />;
+  } else if (current.kind === "failed") {
     body = (
       <>
-        <p className="text-sm">{state.sentence}</p>
+        <p className="text-sm">{current.sentence}</p>
         <button
           type="button"
           onClick={() => {
@@ -366,7 +384,7 @@ export function InspectorPanel({ symbol }: { symbol: string | null }): JSX.Eleme
         </button>
       </>
     );
-  } else if (state.kind === "loading") {
+  } else if (current.kind === "loading") {
     body = (
       // An `output` carries `role="status"` implicitly (as `as-of-line.tsx`);
       // its height is a spacing token, never a literal (STD-UI-29; DEC-0251).

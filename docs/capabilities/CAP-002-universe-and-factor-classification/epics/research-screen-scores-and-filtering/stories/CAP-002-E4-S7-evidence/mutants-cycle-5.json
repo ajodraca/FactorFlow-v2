@@ -1,0 +1,121 @@
+{
+ "schema": 1,
+ "repo_head": "46ff3cdd5a3bd9e31f7f85020ddde9914d178aeb",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:359:negate-boolean:1",
+   "cycle": "cycle-5",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 359,
+   "original": "    (state.kind === \"loaded\" || state.kind === \"failed\") &&",
+   "mutated": "    (state.kind === \"loaded\" && state.kind === \"failed\") &&"
+  },
+  {
+   "id": "web/src/components/patterns/inspector-panel.tsx:360:negate-boolean:1",
+   "cycle": "cycle-5",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "line": 360,
+   "original": "    (state.symbol !== symbol || state.attempt !== attempt)",
+   "mutated": "    (state.symbol !== symbol && state.attempt !== attempt)"
+  },
+  {
+   "id": "manual:cycle-5:no-key-check",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  const current =\n    (state.kind === \"loaded\" || state.kind === \"failed\") &&\n    (state.symbol !== symbol || state.attempt !== attempt)\n      ? symbol === null\n        ? IDLE\n        : LOADING\n      : state;",
+   "new": "  const current = state;"
+  },
+  {
+   "id": "manual:cycle-5:key-ignores-symbol",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "(state.symbol !== symbol || state.attempt !== attempt)",
+   "new": "(state.attempt !== attempt)"
+  },
+  {
+   "id": "manual:cycle-5:key-ignores-attempt",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "(state.symbol !== symbol || state.attempt !== attempt)",
+   "new": "(state.symbol !== symbol)"
+  },
+  {
+   "id": "manual:cycle-5:key-only-loaded",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "(state.kind === \"loaded\" || state.kind === \"failed\") &&",
+   "new": "state.kind === \"loaded\" &&"
+  },
+  {
+   "id": "manual:cycle-5:key-only-failed",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "(state.kind === \"loaded\" || state.kind === \"failed\") &&",
+   "new": "state.kind === \"failed\" &&"
+  },
+  {
+   "id": "manual:cycle-5:stale-always-loading",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      ? symbol === null\n        ? IDLE\n        : LOADING\n      : state;",
+   "new": "      ? LOADING\n      : state;"
+  },
+  {
+   "id": "manual:cycle-5:stale-always-idle",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "      ? symbol === null\n        ? IDLE\n        : LOADING\n      : state;",
+   "new": "      ? IDLE\n      : state;"
+  },
+  {
+   "id": "manual:cycle-5:loaded-key-missing",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "setState({ kind: \"loaded\", evidence, symbol, attempt });",
+   "new": "setState({ kind: \"loaded\", evidence, symbol, attempt: attempt + 1 } as never);"
+  },
+  {
+   "id": "manual:cycle-5:failed-key-missing",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "setState({ kind: \"failed\", sentence: failureOf(cause), symbol, attempt });",
+   "new": "setState({ kind: \"failed\", sentence: failureOf(cause), symbol: \"\", attempt } as never);"
+  },
+  {
+   "id": "manual:cycle-5:body-reads-state-loaded",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  if (current.kind === \"loaded\") {\n    body = <Loaded evidence={current.evidence} />;",
+   "new": "  if (state.kind === \"loaded\") {\n    body = <Loaded evidence={state.evidence} />;"
+  },
+  {
+   "id": "manual:cycle-5:body-reads-state-failed",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "  } else if (current.kind === \"failed\") {",
+   "new": "  } else if (state.kind === \"failed\") {"
+  },
+  {
+   "id": "manual:cycle-5:box-unrounded",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/components/patterns/inspector-panel.tsx",
+   "old": "className=\"flex flex-col gap-2 rounded border border-border p-3 text-sm\"",
+   "new": "className=\"flex flex-col gap-2 border border-border p-3 text-sm\""
+  }
+ ]
+}

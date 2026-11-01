@@ -1,0 +1,97 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cap-001-e1-s1-adversarial-01dc9a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ✓ src/screens/research/copy.test.ts (334 tests) 24ms
+stderr | src/components/patterns/inspector-panel.test.tsx > TC-COMP-141: the inspector waits 150 ms, then issues one read (DAC-E4-S7-2; DEC-0164) > issues no read before 150 ms and exactly one at 150 ms, then none
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/components/patterns/selection-tray.test.tsx > TC-COMP-140: Compare is blocked at 1 or 7 checked and enabled at 2 to 6 (DAC-E4-S7-1) > with 1 checked > renders Compare as a focusable blocked button carrying its reason
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/patterns/selection-tray.test.tsx (24 tests) 191ms
+ ❯ src/components/patterns/inspector-panel.test.tsx (62 tests | 3 failed) 1754ms
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > never renders the previous stock's read under the new selection 308ms
+     → expect(element).not.toHaveTextContent()
+
+Expected element not to have text content:
+  Apple Inc.
+Received:
+  AAPLApple Inc.In no universeValue88+1.27Growth40-0.25Momentum610.00See every input and its datePercentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > never renders the previous stock's failure under the new selection 310ms
+     → expected <button type="button" …(1)></button> to be null
+   × loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > never renders the previous stock's read once the selection is cleared 305ms
+     → expect(element).not.toHaveTextContent()
+
+Expected element not to have text content:
+  Apple Inc.
+Received:
+  AAPLApple Inc.In no universeValue88+1.27Growth40-0.25Momentum610.00See every input and its datePercentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.
+   ✓ loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > still renders the new selection's own read when it settles 609ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > never renders the previous stock's read under the new selection
+Error: expect(element).not.toHaveTextContent()
+
+Expected element not to have text content:
+  Apple Inc.
+Received:
+  AAPLApple Inc.In no universeValue88+1.27Growth40-0.25Momentum610.00See every input and its datePercentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.
+ ❯ src/components/patterns/inspector-panel.test.tsx:510:29
+    508|     it("never renders the previous stock's read under the new selectio…
+    509|       await moveOnWhileSettling("MSFT", (aapl) => aapl.resolve(evidenc…
+    510|       expect(container).not.toHaveTextContent("Apple Inc.");
+       |                             ^
+    511|       expect(container).not.toHaveTextContent("AAPL");
+    512|       expect(within(container).getByRole("status")).toHaveTextContent(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > never renders the previous stock's failure under the new selection
+AssertionError: expected <button type="button" …(1)></button> to be null
+
+- Expected: 
+null
+
++ Received: 
+<button
+  class="w-fit rounded border border-border px-3 py-2 text-sm"
+  type="button"
+>
+  Try again
+</button>
+
+ ❯ src/components/patterns/inspector-panel.test.tsx:517:83
+    515|     it("never renders the previous stock's failure under the new selec…
+    516|       await moveOnWhileSettling("MSFT", (aapl) => aapl.reject(new Type…
+    517|       expect(within(container).queryByRole("button", { name: RESULTS.t…
+       |                                                                                   ^
+    518|       expect(within(container).getByRole("status")).toHaveTextContent(…
+    519|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/patterns/inspector-panel.test.tsx > loading, failure and stale reads (DAC-E4-S7-2; DEC-0165) > a stale read that settles between the new selection's commit and its effect cleanup (review v2 IR-001) > never renders the previous stock's read once the selection is cleared
+Error: expect(element).not.toHaveTextContent()
+
+Expected element not to have text content:
+  Apple Inc.
+Received:
+  AAPLApple Inc.In no universeValue88+1.27Growth40-0.25Momentum610.00See every input and its datePercentile first: 88 means better than 88% of the stocks scored on this factor. The small number is the standardised score.
+ ❯ src/components/patterns/inspector-panel.test.tsx:523:29
+    521|     it("never renders the previous stock's read once the selection is …
+    522|       await moveOnWhileSettling(null, (aapl) => aapl.resolve(evidence(…
+    523|       expect(container).not.toHaveTextContent("Apple Inc.");
+       |                             ^
+    524|       expect(container).toHaveTextContent(SELECTION.inspectorEmpty);
+    525|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 417 passed (420)
+   Start at  19:59:28
+   Duration  2.51s (transform 175ms, setup 146ms, collect 352ms, tests 1.97s, environment 813ms, prepare 465ms)
+
