@@ -18,7 +18,16 @@ CAP-002-E4-S4 added three:
   from which download, and announces a change;
 - `status-badge.tsx`, the tiered badge the banner and the line share.
 
-All five are pure functions of their props: no state, no effect, no fetch.
+CAP-002-E4-S7 added the two selection controls:
+
+- `selection-tray.tsx`, the tray under the results that counts the checked
+  rows and offers **Compare side by side** and **Add to universe…**;
+- `inspector-panel.tsx`, the panel beside the results that reads and
+  explains one selected stock.
+
+Six of the seven are pure functions of their props: no state, no effect, no
+fetch. The inspector is the exception: it holds its read's state and issues
+`getStockEvidence` itself ([The inspector](#the-inspector-inspector-paneltsx)).
 The poll that feeds the banner and the line lives beside the screen code, in
 `web/src/screens/research/use-score-set-poll.ts`
 ([`research-screen.md`](research-screen.md#the-score-set-poll-use-score-set-pollts)).
@@ -28,11 +37,14 @@ formatting and owner-facing strings from `web/src/screens/research/`
 ([`research-screen.md`](research-screen.md)); no string shown to the owner is
 written in any of them. No route or screen imports them yet; their only
 importers are each other (`status-badge.tsx` is imported by the banner and
-the line) and their own tests beside them (`factor-cell.test.tsx`,
-`restated-mark.test.tsx`, `not-current-banner.test.tsx`,
-`as-of-line.test.tsx`), which carry TC-COMP-073, TC-COMP-074, TC-COMP-097,
-TC-COMP-109, TC-COMP-174, TC-COMP-175, TC-COMP-176 and TC-COMP-179.
-CAP-002-E4-S9 is the first planned consumer of the banner and the line.
+the line, `factor-cell.tsx` by the inspector) and their own tests beside them
+(`factor-cell.test.tsx`, `restated-mark.test.tsx`,
+`not-current-banner.test.tsx`, `as-of-line.test.tsx`,
+`selection-tray.test.tsx`, `inspector-panel.test.tsx`), which carry
+TC-COMP-073, TC-COMP-074, TC-COMP-097, TC-COMP-109, TC-COMP-140 to
+TC-COMP-143, TC-COMP-174, TC-COMP-175, TC-COMP-176 and TC-COMP-179.
+CAP-002-E4-S9 is the first planned consumer of the banner, the line, the
+tray and the inspector.
 
 ## The factor cell (`factor-cell.tsx`)
 
@@ -294,3 +306,178 @@ announced once; the checked tick, the link, the outcome badge and **Try
 again** are not. A failed poll clears no mark: the set sentence, the outcome
 badge and *Updating* all stay. The banner beside the line is unaffected by a
 failed poll, because the hook keeps the summary it reads from.
+
+## The selection tray (`selection-tray.tsx`)
+
+`SelectionTray({ checked, onAddToUniverse })` renders the tray the Research
+screen (CAP-002-E4-S9) and a universe's Members tab mount under their results
+(DAC-E4-S7-1, AC-16; classification-ui section 2.5; UX design 1.1). It is
+controlled and stateless: `checked` is the host's, the host keeps it unique by
+symbol, and the tray counts what it is given by `checked.length`, a duplicate
+included (DEC-0163).
+
+| Prop | Type | Meaning |
+|------|------|---------|
+| `checked` | `string[]` | the checked symbols, in the order checked |
+| `onAddToUniverse` | `(symbols: string[]) => void`, optional | called with `checked` by **Add to universe…**; the host opens the add dialog with it ([`research-screen.md`](research-screen.md#add-to-a-universe-add-to-universe-dialogtsx)). Without it the button is absent |
+
+With no checked row it renders nothing (`null`). It does not mount an empty
+live region at 0, so the count it shows on first appearance may not be
+announced by every screen reader; the Research screen that composes it owns
+announcing the first selection (DEC-0249, owner-decided, propagating to
+CAP-002-E4-S9).
+
+From one checked row it renders a `section` labelled `REGIONS.selection`,
+*Selection* (so its role is `region`), with the classes `flex flex-wrap
+items-center gap-3 rounded bg-foreground p-3 text-background`, holding in
+order:
+
+1. a `p` with `aria-live="polite"` reading `SELECTION.selected(n)`, *{n}
+   selected*;
+2. **Compare side by side** (`SELECTION.compareSideBySide`). While 2 to 6 rows
+   are checked (`COMPARE_MIN` and `COMPARE_MAX`, exported; the API's
+   `symbols` bound, DEC-0070) it is a react-router `Link` to
+   `/research/compare?symbols=` followed by the symbols in the order checked,
+   each `encodeURIComponent`-encoded and joined by literal commas, with
+   `data-variant="outline"`. At 1 or at 7 and more it is a `button` with
+   `data-variant="blocked"` and `aria-disabled="true"`, never `disabled`, so it
+   keeps focus; it has no handler, so a click, Enter or Space does nothing. Its
+   reason, `SELECTION.compareBlocked`, *Check 2 to 6 stocks to compare them.*,
+   is a visible `span` beside it, referenced by the button's
+   `aria-describedby`. This is the blocked pattern of
+   `screens/instruments/start-action.tsx`;
+3. **Add to universe…** (`SELECTION.addToUniverse`), a `button` with
+   `data-variant="outline"`, only when `onAddToUniverse` is given.
+
+The link and both buttons share the delivered button size `w-fit rounded
+border border-border px-3 py-2 text-sm`.
+
+Tests: `selection-tray.test.tsx` (TC-COMP-140, and the tray's appearance,
+count, encoding and Add seam).
+
+## The inspector (`inspector-panel.tsx`)
+
+`InspectorPanel({ symbol })` renders the panel the Research screen
+(CAP-002-E4-S9) and a universe's Members tab mount beside their results
+(DAC-E4-S7-2, DAC-E4-S7-3, DAC-E4-S7-4, AC-16; classification-ui section 2.5;
+UX design 1.1). `symbol` is the host's immediate selection, `null` when none,
+not the results table's debounced `onInspect` value: the inspector owns the
+one 150 ms wait (`INSPECT_DEBOUNCE_MS`, exported; DEC-0164).
+
+It is always one `section` labelled `REGIONS.selectedStock`, *Selected
+stock*, with `data-variant="summary"`, `tabIndex={-1}` and the classes `flex
+flex-col gap-3 rounded border border-border bg-card p-4 text-card-foreground`.
+The `tabIndex` makes it focusable by script only; it is never a tab stop.
+
+### Reading the selected stock
+
+- **Nothing selected.** With `symbol` null it reads `SELECTION.inspectorEmpty`,
+  *Select a stock to see why it scores as it does.*, and issues no read.
+  Clearing the selection discards a read in flight or a shown failure.
+- **One read per settled selection.** A symbol that stays selected for 150 ms
+  is read once with `getStockEvidence(symbol)`
+  ([`web-api.md`](web-api.md#endpoint-functions-classification-clientts)).
+  A burst of selections issues one read, for the last. There is no polling, no cache and no prefetch.
+- **Loading.** From the moment a symbol is selected until its read settles,
+  the body is a skeleton: an `output` (implicitly `role="status"`) with the
+  classes `block h-8 w-full animate-pulse rounded bg-secondary`, holding
+  `SELECTION.inspectorLoading`, *Loading the selected stock.*, in an `sr-only`
+  `span`. Its height is the spacing token `h-8` (`var(--space-8)`), never a
+  literal (STD-UI-29; DEC-0251, owner-upheld). A new selection resets the
+  panel during render, before the commit, so the previous stock is never
+  shown under the new one.
+- **Failure.** A rejected read shows a `p` with its STD-UI-19 sentence and a
+  **Try again** button (`RESULTS.tryAgain`). A `ClassificationApiError` gives
+  `failureSentence(error)`, built from its code, never its `message`; any
+  other rejection, a network error say, gives the `get-stock-evidence`
+  sentence with a null code. **Try again** moves focus to the section, the one
+  element that stays through the failure, the skeleton and the loaded stock,
+  then reads the same symbol once more after the same 150 ms wait (DEC-0250,
+  provisional; STD-UI-24). The focused section shows the browser's default
+  focus outline.
+- **Stale reads are dropped** (DEC-0165). Each read is keyed by the
+  `(symbol, attempt)` it was issued for, `attempt` counting **Try again**
+  presses. A read for a selection that is no longer current is ignored,
+  whether it succeeds or fails and whether it settles before or after the
+  current read. Two guards cover this: the effect's cleanup flag, and a key
+  check at render, which covers the gap between the new selection's commit
+  and React running the previous effect's cleanup.
+
+### The loaded stock
+
+Top to bottom, as UX design 1.1 orders it:
+
+1. the symbol in `font-numeric text-xl`, followed by a *Not followed* badge
+   when `lifecycle` is `retired`, then the name in `text-sm`;
+2. the memberships line, a `p` with `data-testid="memberships"`: *In no
+   universe* (`SELECTION.inNoUniverse`) when the stock belongs to none,
+   otherwise *In* followed by each universe name as an underlined link to
+   `/research/universes/{universeId}` (encoded), joined by `, ` and a final
+   ` and ` (`SELECTION.inUniversesLead`, `listComma`, `listAnd`), so it reads
+   as `SELECTION.inUniverses` does;
+3. a `dl` with one block per factor, value, growth, momentum:
+   - the `dt`: the factor's identity swatch, an `aria-hidden` `inline-block
+     h-2 w-2 rounded` `span` painted `hsl(var(--factor-{factor}))` as an
+     inline style (the Tailwind config maps no `factor` colour; DEC-0166),
+     then `FACTOR_LABELS[factor]`. The swatch's corner is `rounded`, the
+     corner the other patterns use (DEC-0251);
+   - a `dd` with [`FactorCell`](#the-factor-cell-factor-celltsx) with
+     `showScore`, or `CELL.absentValue` (`—`) when the evidence has no cell
+     for the factor. *Not enough to rank* prints no count;
+   - when any of the factor's inputs has an `asOf`, a `dd` with
+     `data-testid="inputs-line"` in `text-xs`: the dated inputs grouped by
+     identical `(asOf, knownOn)` in the order first seen, one clause per group
+     joined by `SELECTION.inputsLineSeparator` (`; `). A clause is
+     `SELECTION.inputsLine(labels, asOf, knownOn)`, *From {inputs}, as of
+     {date}, known {date}*, or `SELECTION.inputsLineAsOf(labels, asOf)` when
+     the group has no `knownOn`. Dates pass through `formatDate`. Only each
+     input's `label` is printed, never its `inputName` or `detail`
+     (STD-UI-1);
+4. the explanation box, when it holds a sentence (below);
+5. **See every input and its date** (`SELECTION.seeEveryInput`), a link to
+   `/research/stocks/{symbol}` (encoded) with `data-variant="outline"` and the
+   delivered button classes;
+6. the footnote, `SELECTION.footnote`, in `text-xs text-muted-foreground`.
+
+The holdings line and **Start a strategy from this screen** belong to M2 and
+are absent.
+
+**The *Not followed* badge** repeats `FactorCell`'s `status-neutral` badge
+markup (dash in a circle, `CELL.notFollowed`) rather than importing it,
+because `factor-cell.tsx` exports no badge. Likewise the box below restates
+the cell's choice of state. A later change to `FactorCell`'s state order
+must be mirrored here (open warning IR-002 of the story's implementation
+review v4).
+
+### The explanation box
+
+The box explains what the factor cells draw, so its rules follow
+`FactorCell`'s choice of state (DEC-0151, DEC-0247). Its sentences, in this
+order:
+
+1. one *Incomplete* sentence per factor `FactorCell` draws *Incomplete*
+   (not `retired`, not `not_enough_stocks`, and not `classified` with a
+   percentile), in factor order. It is the badge's own `title`:
+   `CELL.incompleteDetail` from `reasonDetail`, else `CELL.incompleteGeneric`
+   from an input reason code. A cell with neither contributes no sentence
+   (DEC-0229);
+2. `CELL.notFollowedNoDate`, *Not followed. Earlier scores stand.*, when the
+   stock's `lifecycle` is `retired`;
+3. `CELL.restatedExplanation`, the STD-UI-17 sentence, once, when any value or
+   growth cell is drawn scored with `restatedPossible`, that is, when a
+   *Possibly restated* mark is on screen.
+
+The box opens whenever it holds at least one sentence and is absent
+otherwise, so a followed stock with every factor scored and no mark has no
+box. It is a `div` with `data-testid="explanation"` and the classes `flex
+flex-col gap-2 rounded-[var(--radius)] border border-border p-3 text-sm`,
+one `p` per sentence. Its corner is the theme's `--radius` through an
+arbitrary-value class, as CAP-002-E4-S8's dialog frame and notices use,
+with no theme or Tailwind change (DEC-0262, owner-decided); the card,
+buttons, skeleton and badge keep `rounded`.
+
+Tests: `inspector-panel.test.tsx` (TC-COMP-141, TC-COMP-142, TC-COMP-143, and
+the loading, failure, **Try again**, stale-read, factor-block and explanation
+cases). Open warning IR-001 of implementation review v4: no test yet drives
+the new selection's own read failing after a stale success settles in the
+commit gap; the code handles it.

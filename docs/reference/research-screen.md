@@ -37,9 +37,10 @@ No route mounts any of them yet: `/research/universes` and
 `/research/universes/:universeId` are registered by CAP-002-E4-S10. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
 dialogs and the tests. The factor cell, the *Possibly
-restated* mark, the not-current banner and the as-of line in
-`web/src/components/patterns/` import `format.ts` and `copy.ts`
-(CAP-002-E4-S3, CAP-002-E4-S4); see
+restated* mark, the not-current banner, the as-of line, the selection tray
+and the inspector in `web/src/components/patterns/` import `copy.ts`, and
+all but the tray and the mark import `format.ts`
+(CAP-002-E4-S3, CAP-002-E4-S4, CAP-002-E4-S7); see
 [`component-patterns.md`](component-patterns.md). The poll hook's only
 importer is its test. The URL query model the screens read lives in
 `web/src/api/research-query.ts`; see
@@ -102,7 +103,7 @@ section 14.
 | `thresholdFieldError(factor, measure)` | the threshold field's error on blur, *Could not set the {factor} threshold: {rule}.*, where `rule` is *a percentile is a number from 0 to 100* or *a standardised score is a finite number* (DEC-0157, provisional). A standalone string: not `failureSentence` output and no `OPERATION_LABELS` entry |
 | `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history |
-| `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
+| `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. `SELECTION` entries no design contains carry a doc comment saying so (CAP-002-E4-S7; DEC-0165): `inspectorLoading`, *Loading the selected stock.*, the inspector skeleton's screen-reader text; `inputsLineAsOf(inputs, asOf)`, the inputs clause with no `known_on`; `inputsLineSeparator`, `; `, between clauses of differing dates. `inUniversesLead`, `listComma` and `listAnd` split `inUniverses` so the inspector can link each name. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
 | `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional) |
 | `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels |
