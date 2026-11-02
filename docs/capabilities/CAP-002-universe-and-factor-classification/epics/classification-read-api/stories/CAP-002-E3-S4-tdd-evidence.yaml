@@ -1,0 +1,173 @@
+# TDD evidence for CAP-002-E3-S4 - Stock history, set list and single-set reads with the 3000-stock volume test.
+# One cycle: the plan writes every test first (Phase 2, T003-T011, on the T002 seed helpers), then the two statements,
+# the row models and the three reads (Phase 3, T012-T016), so there is a single RED and a single GREEN. The story is
+# committed once on its stage branch: commit_hash is stage.
+# Decisions: this stage recorded DEC-0264 (the postgres-marked tests run against a local PostgreSQL 16.15 server
+# substituted for the testcontainers container by an out-of-repository pytest plugin, Docker being absent) and
+# DEC-0265 (PROVISIONAL: SetRow.factors is {} for a set with no classification_set_factor row, as the engine leaves
+# every building and failed set). It applied the plan-time DEC-0132, DEC-0135, DEC-0136 and DEC-0137.
+# Reviews: one independent code-review session and one independent spec-drift session (fresh `claude -p` sessions,
+# read-only tools, no history) judged cycle-1.patch, the staged diff the fingerprint hashes: APPROVED and
+# drift_detected false, with NON-BLOCKING notes only (the two-statement read window shared with stock_evidence; a
+# partial set of factor rows the engine never writes; the existing runs.queries cursor accepting a naive timestamp).
+# TC-COMP-153 passed in the RED run: it exercises the CAP-002-E3-S2 list, count and sorts at volume, which exist; the
+# volume extras (T009) failed there on the missing history and sets reads.
+# Rework cycle (added in the rework of implementation review v1, CHANGES-REQUIRED): rework-1 resolves IR-001, IR-002 and
+# IR-005 in tests and one reader function (commit_hash: stage, the driver's rework commit). IR-003 and IR-004 change no
+# code: DEC-0265 is amended to class propagating and blocks CAP-002-E3-S5 (IR-003), and DEC-0269 records the two-statement
+# window as accepted (IR-004). DEC-0268 records why IR-002 is fixed in the reader rather than in runs.queries. Validation
+# again ran against the local PostgreSQL 16.15 server under DEC-0264; the four IPv6 deploy-smoke failures are DEC-0267's.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019, T020]
+    description: >
+      src/factorflow/classification/reader.py (stock_history, list_sets, get_set, HistoryRow, SetRow, SetNotFound,
+      _check_limit, _decode_page_cursor, _run_sets, _row_to_set, HISTORY_SQL and SETS_SQL, and the rename-only
+      extraction of _factor_summaries from _row_to_current), sql/stock_history.sql and sql/sets.sql. Tests:
+      tests/integration/reader_seed.py (bulk_seed_scored_stocks, analyze_classification_tables),
+      tests/integration/test_reader_history.py (TC-COMP-150, 151, 152 and the history, sets and get_set details),
+      tests/integration/test_reader_volume.py (TC-COMP-153 and the volume extras, postgres and slow),
+      tests/unit/test_reader_paging.py and the T011 extension of test_reader_sql_read_only.py. The first mutation run
+      left the frozen-model, exact-limit-page and three-way ended_at tie mutants alive; tests were added for each and
+      the rerun left only the 13 equivalent survivors below. Five mutants that make paging never end (an inclusive or
+      ignored keyset) hang the paging loops and are recorded as timeouts.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/red-cycle-1.log
+    red_log_sha256: 5c546379cbb3b5f2d9da85296f214707e204857a6a9d82f8ecac4fe7050f0155
+    red_evidence: >
+      Observed with the test files written and no S4 production code (HEAD c886972, reader.py and sql/ unchanged):
+      59 failed, 12 passed. The failures are the history, sets, get_set, paging and volume-extras tests on the missing
+      reader names (stock_history, list_sets, get_set, SetNotFound, HistoryRow, SetRow) and the two missing SQL files;
+      the 12 that passed are the pre-existing read-only guard cases, the two runs.queries cursor checks and TC-COMP-153,
+      which exercises the existing list at volume.
+    green_evidence: >
+      The story's test files with test_package_data_ships_sql.py: 83 passed (green-cycle-1.log). Full suite against
+      PostgreSQL 16.15: 891 postgres-marked and 1489 not-postgres passed; 5 failed, the same 5 that fail at the base
+      commit c886972 in this sandbox (a pg_dump test that needs a container, and four deploy-smoke tests needing
+      IPv6 sockets), none touching a story file (full-suite-cycle-1.log). ruff check, ruff format --check and mypy src
+      clean. The T018 greps return as the plan states.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/green-cycle-1.log
+        sha256: 40f07bac1b4c604d7085ab53d7c7f6b9d3e14e9f0d83b41fa9e1d29e81979756
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/full-suite-cycle-1.log
+        sha256: b0b45ad51488e9b65b00b965e9e23b397b6694017d1563d0228d7cad95fb76fc
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/code-review-cycle-1.txt
+        sha256: f932afb2e489941e3c5529c3531e8c2df7b7309dbb662a478499dacab0454dbc
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/spec-drift-cycle-1.txt
+        sha256: 1f20584cf29fd30286a8945b08018a855ed13984c70898e3eb8b67032e9e120b
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7dfbe87838edac841b2b64aa5ef909640e05e691b4d1af028578b7d5e5a43af8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 1c687d1dc0316fc6ef99203b97b56e373e9d31e05d1cccd71d515872d3b6dd9a
+      generated: 73
+      killed: 55
+      survived: 13
+      stillborn: 0
+      timeout: 5
+      score: 0.822
+      survivors:
+        - id: src/factorflow/classification/reader.py:741:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:741:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:811:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/reader.py:811:negate-boolean:1
+          disposition: equivalent
+          reason: names and row come from the same cursor result, so they always have equal length and strict never fires
+        - id: src/factorflow/classification/sql/sets.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/sets.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/sets.sql:3:off-by-one:2
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/sets.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_history.sql:1:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_history.sql:2:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_history.sql:3:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_history.sql:4:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+        - id: src/factorflow/classification/sql/stock_history.sql:5:off-by-one:1
+          disposition: equivalent
+          reason: the mutated digit sits inside the -- header comment, which Postgres discards
+  - id: rework-1
+    tasks: [T003, T007, T009, T010, T014]
+    description: >
+      Rework of CAP-002-E3-S4-implementation-review-v1.md. IR-001 (HIGH): test_reader_history.py adds
+      test_history_orders_same_day_reruns_by_ended_at_not_by_date_or_id, three earlier complete sets sharing one
+      classification_date whose ended_at and started_at are set after reading the generated ids, so newest ended_at first
+      is the smallest id, then the largest, then the middle one: neither the date, the id nor started_at, in either
+      direction, gives that order or selects the right page; asserted unpaged and paged at limit 1 and 2. No production
+      change for IR-001: the statement was correct. IR-002 (MEDIUM): reader._decode_page_cursor re-raises the TypeError
+      and AttributeError runs.queries.decode_cursor lets escape on a field of the wrong JSON type as CursorError (chained),
+      for both reads and before any statement (DEC-0268); test_reader_paging.py adds a non-string and a null ts and id to
+      MALFORMED. IR-005 (LOW): test_reader_volume.py's index helper takes the column, and T009 now asserts every
+      factor_classification access in the history plan carries an Index Cond naming instrument_id. The first code review
+      round noted, non-blocking, that the first layout of the same-day test left a started_at order and a set_id ASC order
+      to chance; the layout was changed, re-fingerprinted, re-mutated (two more manual mutants) and re-reviewed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/red-rework-1.log
+    red_log_sha256: 3204e97b56c370c5127a26bd97f4d3a84f714eabd9e3a5bd00c7e193938af136
+    red_evidence: >
+      Observed in two parts (red-rework-1.log). IR-002: the new tests with reader.py as reviewed (HEAD 4b0bbd4): 8 failed,
+      74 passed, the four type-confused cursors through both reads escaping as TypeError or AttributeError. IR-001 and
+      IR-005 concern a correct statement, so their RED is the review's survivors: against a clone of HEAD 4b0bbd4 with the
+      tests as reviewed, manual:rv-hist-page-order-by-date and manual:rv-hist-index-defeated survived (final-order was
+      killed there only by chance, as review v1 observed: 2 of 5 survived). With rework-1 staged all are killed, and the
+      new same-day test alone kills the two date-order mutants and the started_at and set_id ASC order mutants in 3 of 3
+      runs each.
+    green_evidence: >
+      The focused files (paging, read-only, history, volume, package data, current set, summary) with rework-1 staged: 117
+      passed (green-rework-1.log). Full suite (full-suite-rework-1.log): postgres-marked 893 of 893 against PostgreSQL 16.15
+      (892 under localpg_plugin; the pg_dump/pg_restore test, which needs exec_run, passed under an exec_run-capable copy of
+      the reviewer's plugin against the same server); not-postgres 1497 passed, 1 xfailed and the four deploy-smoke tests
+      that need IPv6 sockets failed, as at the base (DEC-0267). ruff check, ruff format --check and mypy src clean. Code
+      review APPROVED in both rounds, NON-BLOCKING notes only; spec drift none in both rounds.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/green-rework-1.log
+        sha256: 0e189af2b2a6172d3c9c6091f47689cd3da8856de0c4fab6291e59e7db516085
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/full-suite-rework-1.log
+        sha256: b4b0588651db1309250010ca0612d40ab94f8c127ba3213889a4f79af54dd7f5
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/code-review-rework-1.txt
+        sha256: b62aff873ff8a7d4c83ab303b88afb190283543709cd74d489ad7b94cb94410f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/spec-drift-rework-1.txt
+        sha256: 4f65ef1c7d349fd36ecc5f7c56e884c18da1db8e6d56f68bcf1149d658602332
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: dfdb196e3dc69ceea7e78ea37aa0f54e5ae68c2ab0c899ff6e061fea28876012
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/rework-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S4-evidence/mutation-rework-1-results.json
+      results_sha256: 5d4bcf731c94f2a3d746a6fd822c1fb015166882cb8504e9dc099c0eeda1ab2f
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -45,6 +45,19 @@ DAC-E3-12; TC-COMP-123, 124, 146, 113, 147):
   belongs to in name order; with no current set ``set`` is None in the same shape (DEC-0131,
   DEC-0134, PROVISIONAL).
 
+History and sets (CAP-002-E3-S4; DAC-E3-S4-1 to DAC-E3-S4-4, DAC-E3-9, DAC-E3-12; TC-COMP-150,
+151, 152, 153):
+
+- ``stock_history`` returns the stock's results in complete sets other than the current one,
+  newest ``ended_at`` first, each cell and its restatement mark as stored; ``([], None)`` for a
+  known stock with none and ``InstrumentNotFound`` for an unknown symbol (DEC-0137, DEC-0132).
+- ``list_sets`` returns every set, ``building`` and ``failed`` included, newest ``started_at``
+  first, with its state, ``failure_reason``, the run's outcome and start and the factor counts;
+  ``get_set`` returns one or raises ``SetNotFound``. A set with no factor row carries empty
+  ``factors`` (DEC-0265, PROVISIONAL).
+- Both page by the ``factorflow.runs.queries`` ``(timestamp, id)`` cursor; ``limit`` is 1 to
+  ``MAX_PAGE_SIZE`` (DEC-0136, PROVISIONAL).
+
 ``read_set_blocks`` is the one definition of the ``set`` and ``later`` blocks that the summary,
 the list read and the API reuse (task plan Open Gap 3; SA-DUP-001). Statements are ``.sql`` files
 under ``sql/``, loaded at import and executed with bound parameters only. The reader takes the
@@ -76,6 +89,7 @@ from factorflow.classification.constants import (
     MIN_PEER_SET_SIZE,
 )
 from factorflow.instruments.symbols import is_valid
+from factorflow.runs import queries as _run_queries
 from factorflow.runs.queries import CursorError
 from factorflow.universes.replay import MEMBERSHIP_AS_OF_SQL
 
@@ -83,6 +97,7 @@ __all__ = [
     "CURRENT_SET_SQL",
     "EVIDENCE_SQL",
     "FACTORS",
+    "HISTORY_SQL",
     "INPUT_LABELS",
     "INPUT_REASONS",
     "LIST_SQL",
@@ -90,6 +105,7 @@ __all__ = [
     "MEMBERSHIPS_SQL",
     "MIN_COMPARE_SYMBOLS",
     "MIN_PEER_SET_SIZE",
+    "SETS_SQL",
     "SORT_ALLOWLIST",
     "SUMMARY_SQL",
     "UNIVERSE_EXISTS_SQL",
@@ -98,11 +114,14 @@ __all__ = [
     "CursorError",
     "FactorCell",
     "FactorSummary",
+    "HistoryRow",
     "InputRow",
     "InstrumentNotFound",
     "LaterSet",
     "ListFilters",
     "Membership",
+    "SetNotFound",
+    "SetRow",
     "StockEvidence",
     "StockRow",
     "StocksCurrent",
@@ -115,10 +134,13 @@ __all__ = [
     "encode_cursor",
     "escape_like",
     "evaluate_filter",
+    "get_set",
     "list_classifications",
+    "list_sets",
     "read_set_blocks",
     "resolve_sort",
     "stock_evidence",
+    "stock_history",
     "summary",
 ]
 
@@ -129,6 +151,8 @@ LIST_SQL: Final = (_SQL_DIR / "list_classifications.sql").read_text()
 UNIVERSE_EXISTS_SQL: Final = (_SQL_DIR / "universe_exists.sql").read_text()
 EVIDENCE_SQL: Final = (_SQL_DIR / "stock_evidence.sql").read_text()
 MEMBERSHIPS_SQL: Final = (_SQL_DIR / "stock_memberships.sql").read_text()
+HISTORY_SQL: Final = (_SQL_DIR / "stock_history.sql").read_text()
+SETS_SQL: Final = (_SQL_DIR / "sets.sql").read_text()
 
 INPUT_REASONS: Final = ("input_missing", "input_outdated", "input_not_computable")  # DEC-0079
 
@@ -414,6 +438,46 @@ class InstrumentNotFound(LookupError):
         self.symbol = symbol
 
 
+@dataclass(frozen=True)
+class HistoryRow:
+    """One earlier complete set's result for a stock (design 2.3)."""
+
+    set_id: UUID
+    classification_date: date
+    run_id: UUID
+    run_outcome: str  # acquisition_run.state
+    ended_at: datetime
+    factors: dict[str, FactorCell]
+
+
+@dataclass(frozen=True)
+class SetRow:
+    """A ``classification_set`` with its run's state and start and its factor counts (design 2.3;
+    the API design's ``SetResponse``; DEC-0083)."""
+
+    set_id: UUID
+    state: str  # building | complete | failed
+    classification_date: date
+    run_id: UUID
+    run_started_at: datetime | None  # acquisition_run.started_at
+    run_outcome: str  # acquisition_run.state as stored (task plan Open Gap 6)
+    started_at: datetime
+    ended_at: datetime | None  # None while building
+    failure_reason: str | None  # set exactly when failed
+    latest_trading_day: date | None
+    active_instruments: int | None
+    factors: dict[str, FactorSummary]  # empty when the set has no factor row (DEC-0265)
+
+
+class SetNotFound(LookupError):
+    """``set_id`` names no set (the API maps it to 404 ``classification_set_not_found``;
+    DEC-0136)."""
+
+    def __init__(self, set_id: UUID) -> None:
+        super().__init__(f"classification set not found: {set_id}")
+        self.set_id = set_id
+
+
 def _normalise_symbols(symbols: list[str]) -> list[str]:
     """Upper-case and deduplicate in first-seen order; the shape is ``ListFilters``' to refuse."""
     normalised: list[str] = []
@@ -653,6 +717,118 @@ def _cell_from_row(row: Mapping[str, Any]) -> FactorCell:
     )
 
 
+def stock_history(
+    conn: psycopg.Connection, symbol: str, limit: int, cursor: str | None
+) -> tuple[list[HistoryRow], str | None]:
+    """One page of the stock's results in earlier complete sets, newest ``ended_at`` first
+    (design 2.6; DEC-0137). ``([], None)`` for a known stock with none; raises
+    ``InstrumentNotFound``, and ``ValueError`` or ``CursorError`` before any statement."""
+    _check_limit(limit)
+    after_ended_at, after_set_id = _decode_page_cursor(cursor)
+    upper = symbol.upper()
+    current, _later = read_set_blocks(conn)
+    params = {
+        "symbol": upper,
+        "current_set_id": current.set_id if current is not None else None,
+        "after_ended_at": after_ended_at,
+        "after_set_id": after_set_id,
+        "page_size": limit + 1,
+        "factor_order": list(FACTORS),
+    }
+    with conn.cursor() as cur:
+        cur.execute(HISTORY_SQL, params)
+        names = [column.name for column in cur.description] if cur.description else []
+        rows = [dict(zip(names, row, strict=True)) for row in cur.fetchall()]
+    if not rows:
+        raise InstrumentNotFound(upper)
+    history: list[HistoryRow] = []
+    for row in rows:
+        if row["set_id"] is None:  # the known stock with no earlier result
+            continue
+        if not history or history[-1].set_id != row["set_id"]:
+            history.append(
+                HistoryRow(
+                    set_id=row["set_id"],
+                    classification_date=row["classification_date"],
+                    run_id=row["run_id"],
+                    run_outcome=str(row["run_outcome"]),
+                    ended_at=row["ended_at"],
+                    factors={},
+                )
+            )
+        history[-1].factors[str(row["factor"])] = _cell_from_row(row)
+    if len(history) <= limit:
+        return history, None
+    kept = history[:limit]
+    return kept, _run_queries.encode_cursor(kept[-1].ended_at, kept[-1].set_id)
+
+
+def list_sets(
+    conn: psycopg.Connection, limit: int, cursor: str | None
+) -> tuple[list[SetRow], str | None]:
+    """One page of every set, newest ``started_at`` first, ``building`` and ``failed`` included
+    (design 2.6; AC-20, AC-21). Raises ``ValueError`` or ``CursorError`` before any statement."""
+    _check_limit(limit)
+    after_started_at, after_set_id = _decode_page_cursor(cursor)
+    sets = _run_sets(
+        conn,
+        set_id=None,
+        after_started_at=after_started_at,
+        after_set_id=after_set_id,
+        page_size=limit + 1,
+    )
+    if len(sets) <= limit:
+        return sets, None
+    kept = sets[:limit]
+    return kept, _run_queries.encode_cursor(kept[-1].started_at, kept[-1].set_id)
+
+
+def get_set(conn: psycopg.Connection, set_id: UUID) -> SetRow:
+    """The one set ``set_id`` names, as ``list_sets`` carries it; raises ``SetNotFound``."""
+    sets = _run_sets(conn, set_id=set_id, after_started_at=None, after_set_id=None, page_size=1)
+    if not sets:
+        raise SetNotFound(set_id)
+    return sets[0]
+
+
+def _run_sets(
+    conn: psycopg.Connection,
+    *,
+    set_id: UUID | None,
+    after_started_at: datetime | None,
+    after_set_id: UUID | None,
+    page_size: int,
+) -> list[SetRow]:
+    params = {
+        "set_id": set_id,
+        "after_started_at": after_started_at,
+        "after_set_id": after_set_id,
+        "page_size": page_size,
+    }
+    with conn.cursor() as cur:
+        cur.execute(SETS_SQL, params)
+        names = [column.name for column in cur.description] if cur.description else []
+        return [_row_to_set(dict(zip(names, row, strict=True))) for row in cur.fetchall()]
+
+
+def _check_limit(limit: int) -> None:
+    """``limit`` is an integer from 1 to ``MAX_PAGE_SIZE``, as on ``ListFilters`` (DEC-0136)."""
+    if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= MAX_PAGE_SIZE:
+        raise ValueError(f"limit must be an integer from 1 to {MAX_PAGE_SIZE}")
+
+
+def _decode_page_cursor(cursor: str | None) -> tuple[datetime | None, UUID | None]:
+    """The ``runs.queries`` keyset ``(timestamp, id)``, or ``(None, None)`` on a first page; its
+    ``CursorError`` is the reader's (one wire format, SA-DUP-001). A field of the wrong JSON type,
+    which ``decode_cursor`` lets escape as ``TypeError`` or ``AttributeError``, is malformed too."""
+    if cursor is None:
+        return None, None
+    try:
+        return _run_queries.decode_cursor(cursor)
+    except (TypeError, AttributeError) as exc:
+        raise CursorError(f"cursor field error: {exc}") from exc
+
+
 def evaluate_filter(conn: psycopg.Connection, set_id: UUID, thresholds: Thresholds) -> list[int]:
     """The instrument ids the unscoped list matches in ``set_id``, unpaginated, ordered by id;
     the same statement as the list, so it is the same predicate (DAC-E3-2)."""
@@ -779,8 +955,25 @@ def _row_to_later(c: dict[str, Any]) -> LaterSet:
     )
 
 
-def _row_to_current(c: dict[str, Any], *, not_current: bool) -> CurrentSet:
+def _row_to_set(c: dict[str, Any]) -> SetRow:
     stored = c["factors"]
+    return SetRow(
+        set_id=c["set_id"],
+        state=str(c["state"]),
+        classification_date=c["classification_date"],
+        run_id=c["run_id"],
+        run_started_at=c["run_started_at"],
+        run_outcome=str(c["run_outcome"]),
+        started_at=c["started_at"],
+        ended_at=c["ended_at"],
+        failure_reason=c["failure_reason"],
+        latest_trading_day=c["latest_trading_day"],
+        active_instruments=c["active_instruments"],
+        factors={} if stored is None else _factor_summaries(stored),
+    )
+
+
+def _row_to_current(c: dict[str, Any], *, not_current: bool) -> CurrentSet:
     return CurrentSet(
         set_id=c["set_id"],
         classification_date=c["classification_date"],
@@ -792,13 +985,18 @@ def _row_to_current(c: dict[str, Any], *, not_current: bool) -> CurrentSet:
         ended_at=c["ended_at"],
         latest_trading_day=c["latest_trading_day"],
         active_instruments=int(c["active_instruments"]),
-        factors={
-            f: FactorSummary(
-                qualified_count=int(stored[f]["qualified_count"]),
-                ranked=bool(stored[f]["ranked"]),
-                min_peer_set_size=MIN_PEER_SET_SIZE,
-            )
-            for f in FACTORS
-        },
+        factors=_factor_summaries(c["factors"]),
         not_current=not_current,
     )
+
+
+def _factor_summaries(stored: dict[str, Any]) -> dict[str, FactorSummary]:
+    """The three ``classification_set_factor`` rows in ``FACTORS`` order; the one constructor."""
+    return {
+        f: FactorSummary(
+            qualified_count=int(stored[f]["qualified_count"]),
+            ranked=bool(stored[f]["ranked"]),
+            min_peer_set_size=MIN_PEER_SET_SIZE,
+        )
+        for f in FACTORS
+    }

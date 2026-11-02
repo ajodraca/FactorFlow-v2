@@ -1,0 +1,106 @@
+{
+ "schema": 1,
+ "repo_head": "4b0bbd4dfd225061e83735e920c795606b6d545c",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:rw1-cursor-attributeerror-escapes",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 828,
+   "original": "    except (TypeError, AttributeError) as exc:",
+   "old": "    except (TypeError, AttributeError) as exc:",
+   "new": "    except TypeError as exc:",
+   "mutated": "    except TypeError as exc:"
+  },
+  {
+   "id": "manual:rw1-cursor-typeerror-escapes",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 828,
+   "original": "    except (TypeError, AttributeError) as exc:",
+   "old": "    except (TypeError, AttributeError) as exc:",
+   "new": "    except AttributeError as exc:",
+   "mutated": "    except AttributeError as exc:"
+  },
+  {
+   "id": "manual:rw1-cursor-reraised-as-valueerror",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/reader.py",
+   "line": 829,
+   "original": "        raise CursorError(f\"cursor field error: {exc}\") from exc",
+   "old": "        raise CursorError(f\"cursor field error: {exc}\") from exc",
+   "new": "        raise ValueError(f\"cursor field error: {exc}\") from exc",
+   "mutated": "        raise ValueError(f\"cursor field error: {exc}\") from exc"
+  },
+  {
+   "id": "manual:rv-hist-page-order-by-date",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_history.sql",
+   "line": 22,
+   "original": "     ORDER BY s.ended_at DESC, s.set_id DESC",
+   "old": "     ORDER BY s.ended_at DESC, s.set_id DESC",
+   "new": "     ORDER BY s.classification_date DESC, s.set_id DESC",
+   "mutated": "     ORDER BY s.classification_date DESC, s.set_id DESC"
+  },
+  {
+   "id": "manual:rv-hist-final-order-by-date",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_history.sql",
+   "line": 44,
+   "original": " ORDER BY p.ended_at DESC, p.set_id DESC,",
+   "old": " ORDER BY p.ended_at DESC, p.set_id DESC,",
+   "new": " ORDER BY p.classification_date DESC, p.set_id DESC,",
+   "mutated": " ORDER BY p.classification_date DESC, p.set_id DESC,"
+  },
+  {
+   "id": "manual:rv-hist-index-defeated",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_history.sql",
+   "line": 15,
+   "original": "     WHERE fc.instrument_id = (SELECT instrument_id FROM inst)",
+   "old": "     WHERE fc.instrument_id = (SELECT instrument_id FROM inst)",
+   "new": "     WHERE fc.instrument_id + 0 = (SELECT instrument_id FROM inst)",
+   "mutated": "     WHERE fc.instrument_id + 0 = (SELECT instrument_id FROM inst)"
+  },
+  {
+   "id": "manual:rw1-hist-page-order-by-started",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_history.sql",
+   "line": 22,
+   "original": "     ORDER BY s.ended_at DESC, s.set_id DESC",
+   "old": "     ORDER BY s.ended_at DESC, s.set_id DESC",
+   "new": "     ORDER BY s.started_at DESC, s.set_id DESC",
+   "mutated": "     ORDER BY s.started_at DESC, s.set_id DESC"
+  },
+  {
+   "id": "manual:rw1-hist-page-order-by-id-asc",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_history.sql",
+   "line": 22,
+   "original": "     ORDER BY s.ended_at DESC, s.set_id DESC",
+   "old": "     ORDER BY s.ended_at DESC, s.set_id DESC",
+   "new": "     ORDER BY s.set_id ASC",
+   "mutated": "     ORDER BY s.set_id ASC"
+  },
+  {
+   "id": "manual:rw1-hist-final-order-by-id-asc",
+   "cycle": "rework-1",
+   "operator": "manual",
+   "file": "src/factorflow/classification/sql/stock_history.sql",
+   "line": 44,
+   "original": " ORDER BY p.ended_at DESC, p.set_id DESC,",
+   "old": " ORDER BY p.ended_at DESC, p.set_id DESC,",
+   "new": " ORDER BY p.set_id ASC, p.ended_at DESC,",
+   "mutated": " ORDER BY p.set_id ASC, p.ended_at DESC,"
+  }
+ ]
+}

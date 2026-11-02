@@ -362,3 +362,132 @@ def rename_universe(conn: psycopg.Connection, universe_id: UUID, name: str) -> N
         (universe_id, name),
     )
     conn.commit()
+
+
+# --- CAP-002-E3-S4: a full-size set for the volume tests -----------------------------------
+
+_BULK_MODULUS = 3000  # the multipliers below are coprime with it, so values are distinct per index
+_BULK_SCORE_STEP = {"value": 7919, "growth": 4111, "momentum": 2311}
+_BULK_PERCENTILE_STEP = {"value": 1009, "growth": 2003, "momentum": 3001}
+_SIX_PLACES = Decimal("0.000001")
+
+
+def _bulk_cell(index: int, factor: str, score_shift: Decimal) -> tuple[Any, ...]:
+    """``(status, score, percentile, reason_code, reason_input, reason_detail, restated)``."""
+    restated = index % 40 == 0 and factor in ("value", "growth")
+    if factor == "value" and index % 10 == 0:
+        return (
+            "not_classified",
+            None,
+            None,
+            "input_missing",
+            "book_to_price",
+            "book_to_price is input_missing",
+            restated,
+        )
+    if factor == "growth" and index % 25 == 0:
+        return ("not_classified", None, None, "not_enough_stocks", None, None, restated)
+    score = Decimal(index * _BULK_SCORE_STEP[factor] % _BULK_MODULUS) / 1000 + score_shift
+    percentile = Decimal(index * _BULK_PERCENTILE_STEP[factor] % _BULK_MODULUS) / Decimal(30)
+    return (
+        "classified",
+        score.quantize(_SIX_PLACES),
+        percentile.quantize(_SIX_PLACES),
+        None,
+        None,
+        None,
+        restated,
+    )
+
+
+def bulk_seed_scored_stocks(
+    conn: psycopg.Connection,
+    set_id: UUID,
+    count: int,
+    *,
+    symbol_prefix: str = "S",
+    all_inputs: bool = True,
+    score_shift: Decimal = Decimal(0),
+) -> list[int]:
+    """``count`` active instruments with their three ``factor_classification`` rows in ``set_id``
+    and, when ``all_inputs``, their eight ``factor_input`` rows, in a few bulk statements.
+
+    Symbols are ``{symbol_prefix}0000`` upwards; an existing symbol is reused, so a second set
+    can hold the same stocks. Values are deterministic from the index (``count`` up to 3000):
+    scores and percentiles distinct per factor and spread over their range (``score_shift`` moves
+    every score, so two sets differ); every 10th stock is ``not_classified`` on value with
+    ``input_missing`` on ``book_to_price`` and that input ``missing``; every 25th is
+    ``not_classified`` on growth with ``not_enough_stocks``; every 40th carries
+    ``restated_possible`` on value and growth. Returns the instrument ids in index order.
+    """
+    symbols = [f"{symbol_prefix}{index:04d}" for index in range(count)]
+    with conn.cursor() as cur:
+        cur.executemany(
+            "INSERT INTO instrument (symbol, lifecycle) VALUES (%s, 'active') "
+            "ON CONFLICT (symbol) DO UPDATE SET symbol = EXCLUDED.symbol "
+            "RETURNING instrument_id",
+            [(symbol,) for symbol in symbols],
+            returning=True,
+        )
+        ids: list[int] = []
+        while True:
+            row = cur.fetchone()
+            assert row is not None
+            ids.append(int(row[0]))
+            if not cur.nextset():
+                break
+        with cur.copy(
+            "COPY factor_classification (set_id, instrument_id, factor, status, score, "
+            "percentile, reason_code, reason_input, reason_detail, restated_possible) FROM STDIN"
+        ) as copy:
+            for index, instrument_id in enumerate(ids):
+                for factor in FACTORS:
+                    copy.write_row(
+                        (set_id, instrument_id, factor, *_bulk_cell(index, factor, score_shift))
+                    )
+        if all_inputs:
+            with cur.copy(
+                "COPY factor_input (set_id, instrument_id, factor, input_name, status, value, "
+                "as_of, known_on, detail) FROM STDIN"
+            ) as copy:
+                for index, instrument_id in enumerate(ids):
+                    for factor in FACTORS:
+                        for input_name in INPUT_NAMES[factor]:
+                            if index % 10 == 0 and input_name == "book_to_price":
+                                copy.write_row(
+                                    (
+                                        set_id,
+                                        instrument_id,
+                                        factor,
+                                        input_name,
+                                        "missing",
+                                        None,
+                                        None,
+                                        None,
+                                        "{}",
+                                    )
+                                )
+                            else:
+                                copy.write_row(
+                                    (
+                                        set_id,
+                                        instrument_id,
+                                        factor,
+                                        input_name,
+                                        "present",
+                                        Decimal(index + 1),
+                                        date(2026, 9, 30),
+                                        date(2026, 10, 1),
+                                        "{}",
+                                    )
+                                )
+    conn.commit()
+    return ids
+
+
+def analyze_classification_tables(conn: psycopg.Connection) -> None:
+    """Planner statistics for the three tables a volume read touches."""
+    conn.execute("ANALYZE classification_set")
+    conn.execute("ANALYZE factor_classification")
+    conn.execute("ANALYZE factor_input")
+    conn.commit()

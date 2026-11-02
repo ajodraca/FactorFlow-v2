@@ -1,0 +1,55 @@
+# Spec-drift review, rework-1, round 2 (final; judged rework-1.patch as recorded). Fresh claude -p session, Read/Grep/Glob only.
+I found no drift. The rework stays inside the story, the task plan, the reader design and the decisions.
+
+I couldn't run git in this session, so I didn't confirm that the staged index matches `rework-1.patch`. I reviewed the patch file and checked that the working-tree files hold its changes. All six changed lines are in `reader.py`, `test_reader_history.py`, `test_reader_volume.py` and `test_reader_paging.py`, which is within T019's file list. No SQL statement, row model, public signature or `runs/queries.py` changed.
+
+**What each change does against the spec:**
+
+- **IR-001, the history order test** (`tests/integration/test_reader_history.py:411`). The new test seeds three earlier complete sets on one `classification_date`. Newest `ended_at` first is the smallest `set_id`, then the largest, then the middle one. I worked through the timings: ordering by date, by `set_id` or by `started_at`, in either direction, gives a different order. The test checks the unpaged read and paging at `limit=1` and `limit=2`. This pins DAC-E3-9 and DAC-E3-S4-1 ("newest first"), DEC-0137 ("newest ended_at first, tie broken by set_id"), Open Gap 4 and design 2.6's keyset. It is in T007's scope. No production change was needed, as the review said.
+
+- **IR-002, the cursor wrapper** (`src/factorflow/classification/reader.py:820-829`). A `TypeError` or `AttributeError` from `runs.queries.decode_cursor` is now re-raised as `CursorError`. It happens before any statement, so only the error type changes. This is what DEC-0136, T010, T014 and design §4/§6 require, and what S5 maps to 422. It calls the one shared `decode_cursor` rather than copying it, so the plan's no-copy rule (SA-DUP-001) holds. The message matches the existing `runs/queries.py:194`. The four new cases at `tests/unit/test_reader_paging.py:110-114` go beyond T010's list, but IR-002 asked for them.
+
+- **IR-005, the history index assertion** (`tests/integration/test_reader_volume.py:85-96` and `:316-317`). The helper is renamed and takes the column to check. Each `factor_classification` access in the history plan must now have an `Index Cond` naming `instrument_id`. This matches T009 and design §5 ("History pages by `idx_factor_classification_instrument`"). It is stricter than DEC-0135's three plan properties and loosens none of them, and T006's existing `set_id` check is unchanged.
+
+**Whether the decision records' reasoning holds:**
+
+- **DEC-0268 (IR-002 fixed in the reader):** holds. `runs/queries.py` is not in the plan's file list, and the review left that lane to the owner. A cursor with a timestamp that has no time zone is still accepted. That is consistent: it decodes into `(datetime, UUID)`, DEC-0136 already accepts that a tampered cursor returns a wrong page, and design §4's "refused on any mismatch" is about version, sort and set. The same gap on `/api/runs` is left as a reported follow-up for the owner, which is correct for this scope.
+- **DEC-0269 (IR-004 window accepted):** holds. T015 prescribes `read_set_blocks` followed by `HISTORY_SQL`. The review marked the finding optional and listed recording acceptance as a valid fix. The window is brief, touches no stored data, and `stock_evidence` has the same one. Its confidence is medium and the owner has not reviewed it yet.
+- **DEC-0265 amended (IR-003):** holds. It is now `class: propagating` and blocks CAP-002-E3-S5. The decision itself is unchanged, with no code change, as the review required.
+- **DEC-0135, DEC-0136, DEC-0137 and DEC-0264:** not contradicted. Nothing in the change touches DEC-0264's local-server test setup.
+
+**Drift items:** none.
+
+DRIFT: false
+
+# Round 1 (earlier staged diff)
+I found no drift. The staged rework stays within the story, the task plan, the reader design and the decision records. I compared the saved `rework-1.patch` with the test and code files in the repository, not by running `git diff --cached` (that command wasn't approved here). All three files exist and match the patch at the lines cited.
+
+**What changed and what authorises it**
+
+- **IR-002, `src/factorflow/classification/reader.py:820-829`:** `_decode_page_cursor` now catches `TypeError` and `AttributeError` from `runs.queries.decode_cursor` and re-raises them as `CursorError`, chained to the original.
+  - Authorised by T014 ("re-raises … as the reader's `CursorError`"), DEC-0136 ("malformed cursor surfaces as the reader's `CursorError`") and design §4 ("cursors … refused on any mismatch").
+  - It still uses the shared decoder, so there is one cursor format, as SA-DUP-001 and T018 require. `runs/queries.py` is untouched, and `reader.py` is on the T019 file list.
+  - The message `cursor field error: …` matches the wording `runs/queries.py:194` already uses, so it exposes nothing new.
+  - No new public interface.
+- **IR-002 tests, `tests/unit/test_reader_paging.py:110-114`:** four new malformed cursors (`ts` set to 5 or `null`, `id` set to 5 or `null`). This is within T010's "malformed cursor raises `CursorError` for both reads, before any statement". Test only.
+- **IR-001, `tests/integration/test_reader_history.py:411-450`:** a new test with three earlier complete sets on the same `classification_date`. They end an hour apart, and the newest end time goes to the smallest `set_id`, so neither the date nor the id gives the right order. The test checks the order with no paging and with pages of 1 and 2.
+  - This pins "newest first" (DAC-E3-9, DAC-E3-S4-1, AC-18) to the order DEC-0137 and design §2.6 fix: newest `ended_at` first, keyset `(ended_at, set_id)`.
+  - It covers plan Open Gap 4 ("both are listed, ordered by `ended_at`") and is a T003/T007 test in a file the plan lists.
+  - The fourth (current) set ends last, at hour 5, so it is excluded as DEC-0137 requires. The expected order comes from the stored ids and end times, never from the statement under test.
+- **IR-005, `tests/integration/test_reader_volume.py:121-138, 244, 316-317`:** the index-check helper now takes the column as a parameter. The list check still uses `set_id`, so TC-COMP-153 is unchanged. The history check now also requires every `factor_classification` access to have an `Index Cond` on `instrument_id`.
+  - This is tighter than DEC-0135's three history properties, but it is the property design §5 states ("History pages by `idx_factor_classification_instrument`"). DEC-0135's own amendment and plan T009 and Other Notes describe the same keyed access.
+  - It is a stronger test, not new behaviour, so it is not drift.
+
+**Do the decision records hold up?**
+
+- **DEC-0268 (IR-002 fixed in the reader, not in `runs.queries`): yes.** `runs/queries.py` is outside the plan's file list, and copying the decoder is forbidden. Wrapping the one call meets DEC-0136 and design §4.
+  - One gap remains: a `ts` with no time zone is still accepted. Design §4's "refused on any mismatch" could be read to cover that. But the review's IR-002 remedy (a non-string `ts` or `id`) doesn't require it, and DEC-0136 already accepts that a tampered cursor can return a wrong page.
+  - Leaving the same gap in `/api/runs` to the owner's CAP-001 work is correct.
+- **DEC-0269 (IR-004, the gap between the current-set read and the history read accepted, no code change): yes.** T015 prescribes that two-statement order. The review marked the finding optional and listed accepting it as a valid remedy. `stock_evidence` has the same gap, and the connection's isolation level belongs to the API layer (S5).
+- **DEC-0265 amendment (IR-003, now `class: propagating`, also blocks CAP-002-E3-S5): yes.** S5's plan uses the `SetRow.factors` shape, and DEC-0136 and DEC-0137 were reclassified the same way for the same reason. The decision itself is unchanged.
+- **DEC-0135, DEC-0136, DEC-0137 (owner upheld) and DEC-0264:** the rework is consistent with all of them and doesn't depend on reinterpreting any. DEC-0264 is about the test environment and doesn't bear on the diff.
+
+**Drift items:** none.
+
+DRIFT: false

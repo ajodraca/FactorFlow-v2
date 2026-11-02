@@ -1,0 +1,132 @@
+diff --git a/src/factorflow/classification/reader.py b/src/factorflow/classification/reader.py
+index fcf713c..82d6cb6 100644
+--- a/src/factorflow/classification/reader.py
++++ b/src/factorflow/classification/reader.py
+@@ -819,10 +819,14 @@ def _check_limit(limit: int) -> None:
+ 
+ def _decode_page_cursor(cursor: str | None) -> tuple[datetime | None, UUID | None]:
+     """The ``runs.queries`` keyset ``(timestamp, id)``, or ``(None, None)`` on a first page; its
+-    ``CursorError`` is the reader's (one wire format, SA-DUP-001)."""
++    ``CursorError`` is the reader's (one wire format, SA-DUP-001). A field of the wrong JSON type,
++    which ``decode_cursor`` lets escape as ``TypeError`` or ``AttributeError``, is malformed too."""
+     if cursor is None:
+         return None, None
+-    return _run_queries.decode_cursor(cursor)
++    try:
++        return _run_queries.decode_cursor(cursor)
++    except (TypeError, AttributeError) as exc:
++        raise CursorError(f"cursor field error: {exc}") from exc
+ 
+ 
+ def evaluate_filter(conn: psycopg.Connection, set_id: UUID, thresholds: Thresholds) -> list[int]:
+diff --git a/tests/integration/test_reader_history.py b/tests/integration/test_reader_history.py
+index d7b2bdf..ba43497 100644
+--- a/tests/integration/test_reader_history.py
++++ b/tests/integration/test_reader_history.py
+@@ -408,6 +408,48 @@ def test_history_breaks_an_ended_at_tie_by_set_id_descending(
+     assert _all_history(conn, "AAPL", limit=2) == [expected[:2], expected[2:]]
+ 
+ 
++def test_history_orders_same_day_reruns_by_ended_at_not_by_date_or_id(
++    migrated_run_schema_connection: psycopg.Connection,
++) -> None:
++    """Same-day re-runs (plan Open Gap 4): three earlier complete sets share one
++    ``classification_date`` and end an hour apart. Newest ``ended_at`` first is the smallest
++    ``set_id``, then the largest, then the middle one; the newest starts first and the largest
++    last, so neither the date, the id nor ``started_at`` gives that order in either direction,
++    nor picks the right page. History is newest ``ended_at`` first, unpaged and paged, no set
++    repeated or skipped (DEC-0137; review v1 IR-001)."""
++    conn = migrated_run_schema_connection
++    day = date(2026, 10, 2)
++    morning = datetime(2026, 10, 2, 8, 0, tzinfo=UTC)
++    same_day = [_set(conn, started_at=morning, classification_date=day) for _ in range(3)]
++    current = _set(
++        conn,
++        started_at=morning + timedelta(hours=4),
++        ended_at=morning + timedelta(hours=5),
++        classification_date=day,
++    )
++    small, middle, large = sorted(s.set_id for s in same_day)
++    timing = {small: (0, 3), middle: (1, 1), large: (2, 2)}  # (start minute, end hour)
++    for set_id, (minute, hour) in timing.items():
++        conn.execute(
++            "UPDATE classification_set SET started_at = %s, ended_at = %s WHERE set_id = %s",
++            (morning + timedelta(minutes=minute), morning + timedelta(hours=hour), set_id),
++        )
++    conn.commit()
++    aapl = insert_instrument(conn, "AAPL")
++    for set_id in [small, middle, large, current.set_id]:
++        for factor in FACTORS:
++            insert_classification(conn, set_id, aapl, factor, score=D(1), percentile=D(1))
++    expected = [small, large, middle]  # newest ended_at first
++
++    rows, cursor = reader.stock_history(conn, "AAPL", limit=50, cursor=None)
++
++    assert (_history_ids(rows), cursor) == (expected, None)
++    assert [row.ended_at for row in rows] == [morning + timedelta(hours=h) for h in (3, 2, 1)]
++    assert {row.classification_date for row in rows} == {day}
++    assert _all_history(conn, "AAPL", limit=1) == [[set_id] for set_id in expected]
++    assert _all_history(conn, "AAPL", limit=2) == [expected[:2], expected[2:]]
++
++
+ def test_a_page_holding_the_last_set_carries_no_cursor(
+     migrated_run_schema_connection: psycopg.Connection,
+ ) -> None:
+diff --git a/tests/integration/test_reader_volume.py b/tests/integration/test_reader_volume.py
+index 0cc7001..abc39b5 100644
+--- a/tests/integration/test_reader_volume.py
++++ b/tests/integration/test_reader_volume.py
+@@ -118,8 +118,8 @@ def _seq_scanned(plan: dict[str, Any]) -> set[str]:
+     return {n["Relation Name"] for n in _nodes(plan) if n["Node Type"] == "Seq Scan"}
+ 
+ 
+-def _assert_classification_reads_keyed_on_set(plan: dict[str, Any]) -> int:
+-    """Every ``factor_classification`` access has an index condition naming ``set_id``."""
++def _assert_classification_reads_keyed_on(plan: dict[str, Any], column: str) -> int:
++    """Every ``factor_classification`` access has an index condition naming ``column``."""
+     accesses = 0
+     for node in _nodes(plan):
+         if node.get("Relation Name") != "factor_classification":
+@@ -134,7 +134,7 @@ def _assert_classification_reads_keyed_on_set(plan: dict[str, Any]) -> int:
+         else:
+             assert node["Node Type"] in ("Index Scan", "Index Only Scan"), node["Node Type"]
+             conditions = [node.get("Index Cond", "")]
+-        assert conditions and all("set_id" in c for c in conditions), node
++        assert conditions and all(column in c for c in conditions), node
+     return accesses
+ 
+ 
+@@ -241,7 +241,7 @@ def test_list_sort_and_count_at_3000_stocks_are_correct_and_indexed(
+                     assert "instrument" not in scanned, (sort, order, scanned)
+                 assert str(older) not in text, (sort, order)
+                 if "factor_classification" in query:  # the list statement itself
+-                    assert _assert_classification_reads_keyed_on_set(plan) > 0
++                    assert _assert_classification_reads_keyed_on(plan, "set_id") > 0
+                     assert str(current) in text  # the bound set is the one the plan reads
+     elapsed = time.perf_counter() - started
+     print(f"\nTC-COMP-153: 14 full passes over {STOCKS} stocks in {elapsed:.2f}s (diagnostic only)")
+@@ -313,6 +313,8 @@ def test_thresholds_summary_history_and_sets_at_3000_stocks(
+     plan = _plan(conn, history_query, history_params)
+     assert "factor_classification" not in _seq_scanned(plan)
+     assert "idx_factor_classification_instrument" in json.dumps(plan)
++    # A keyed probe, not a full scan of the same index (review v1 IR-005).
++    assert _assert_classification_reads_keyed_on(plan, "instrument_id") > 0
+     assert "factor_input" not in json.dumps(plan)
+ 
+     recording = RecordingConnection(conn)
+diff --git a/tests/unit/test_reader_paging.py b/tests/unit/test_reader_paging.py
+index 318f719..e951a82 100644
+--- a/tests/unit/test_reader_paging.py
++++ b/tests/unit/test_reader_paging.py
+@@ -107,6 +107,11 @@ MALFORMED = [
+     _raw({"v": 1, "ts": TS.isoformat(), "id": "not-a-uuid"}),
+     _raw({"v": 1, "ts": "yesterday", "id": str(SET_ID)}),
+     _raw({"v": 1, "id": str(SET_ID)}),
++    # Fields of the wrong JSON type (review v1 IR-002).
++    _raw({"v": 1, "ts": 5, "id": str(SET_ID)}),
++    _raw({"v": 1, "ts": None, "id": str(SET_ID)}),
++    _raw({"v": 1, "ts": TS.isoformat(), "id": 5}),
++    _raw({"v": 1, "ts": TS.isoformat(), "id": None}),
+ ]
+ 
+ 

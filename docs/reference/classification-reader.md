@@ -6,8 +6,9 @@ resolves the current set, the later attempt beside it and the set summary
 (CAP-002-E3-S1), serves the classification list and the `evaluate_filter`
 predicate (CAP-002-E3-S2, design sections 2.5 and 2.7), and compares 2 to 6
 stocks and reads one stock's evidence and universe memberships (CAP-002-E3-S3,
-design sections 2.5 and 2.6). Its six statements are in `classification/sql/`.
-The history read is a later story.
+design sections 2.5 and 2.6), and reads a stock's earlier results and the list
+of classification sets (CAP-002-E3-S4, design section 2.6). Its eight
+statements are in `classification/sql/`.
 
 Its callers under `src/` are the classification API's `/api/universes`
 routes, which page `list_classifications` scoped to a universe to fill each
@@ -19,8 +20,8 @@ service, whose `create_from_filter` imports `Thresholds`, `current_set` and
 imports `MEMBERSHIP_AS_OF_SQL` from `factorflow.universes.replay`, never the
 universe service, so the service imports the reader without a cycle
 (`test_reader_does_not_import_the_universe_service`). No module under `src/`
-calls `compare` or `stock_evidence` yet; the `/api/classifications` routes that
-will are CAP-002-E3-S5's.
+calls `compare`, `stock_evidence`, `stock_history`, `list_sets` or `get_set`
+yet; the `/api/classifications` routes that will are CAP-002-E3-S5's.
 
 Every function that reads the database takes the caller's `psycopg.Connection`. The reader writes
 nothing, never commits and catches no database error. Every value it returns
@@ -52,6 +53,9 @@ is a stored column; nothing is recomputed (DAC-E3-S1-6).
 | `list_classifications(conn, filters)` | A `ClassificationPage`: one page of the scored stocks in scope for the current set. See [The list](#the-list) |
 | `compare(conn, symbols)` | A `ClassificationPage` of 2 to 6 stocks side by side, with `unknown_symbols` filled. See [Compare](#compare) |
 | `stock_evidence(conn, symbol)` | A `StockEvidence`: one stock's cells, inputs and memberships, or `InstrumentNotFound`. See [Stock evidence](#stock-evidence) |
+| `stock_history(conn, symbol, limit, cursor)` | `(list[HistoryRow], next_cursor)`: one page of the stock's results in earlier complete sets, or `InstrumentNotFound`. See [Stock history](#stock-history) |
+| `list_sets(conn, limit, cursor)` | `(list[SetRow], next_cursor)`: one page of every set, in any state. See [Sets](#sets) |
+| `get_set(conn, set_id)` | The `SetRow` for `set_id`, or `SetNotFound`. See [Sets](#sets) |
 | `evaluate_filter(conn, set_id, thresholds)` | The instrument ids the unscoped list matches in `set_id` for `thresholds`, unpaginated and sorted by id. It runs the list statement itself, so the list and the universe filter snapshot apply one predicate (DAC-E3-2, DAC-E3-S2-7) |
 | `resolve_sort(value)` | The `SORT_ALLOWLIST` expression for `value`; `ValueError` for anything else |
 | `encode_cursor(set_id, sort, order, key, key_is_null, symbol)` | The cursor for the position after a row. See [Cursors](#cursors) |
@@ -63,7 +67,7 @@ aggregate returns no row, which an ungrouped aggregate does not do.
 
 ## Returned shapes
 
-All thirteen are frozen dataclasses.
+All fifteen are frozen dataclasses.
 
 | Type | Fields |
 |---|---|
@@ -80,6 +84,8 @@ All thirteen are frozen dataclasses.
 | `StockEvidence` | `set` (the current set, or `None` when no set is complete), `symbol`, `name`, `lifecycle`, `factors` (a `FactorCell` per stored cell, keyed by factor), `inputs` (an `InputRow` list), `memberships` (a `Membership` list) |
 | `InputRow` | `factor`, `input_name`, `label` (from `INPUT_LABELS`, never the input name; STD-UI-1), `status` (`present`, `missing`, `outdated` or `not_computable`), `value`, `as_of`, `known_on`, `restated_possible`, `detail` (the stored `jsonb` as a `dict`), each but `label` the stored `factor_input` column |
 | `Membership` | `universe_id`, `name` |
+| `HistoryRow` | `set_id`, `classification_date`, `run_id`, `run_outcome` (the run's state), `ended_at`, `factors` (a `FactorCell` per stored cell, keyed by factor) |
+| `SetRow` | `set_id`, `state` (`building`, `complete` or `failed`), `classification_date`, `run_id`, `run_started_at`, `run_outcome` (the run's state as stored, any state; task plan Open Gap 6), `started_at`, `ended_at` (`None` while building), `failure_reason`, `latest_trading_day`, `active_instruments`, `factors` (a `FactorSummary` per name in `FACTORS`, or `{}`; see [Sets](#sets)) |
 
 The module re-exports `FACTORS`, `INPUT_LABELS` and `MIN_PEER_SET_SIZE` from
 `constants.py` (see [Constants](classification-engine.md#constants)),
@@ -90,7 +96,8 @@ codes `hide_incomplete` acts on: `input_missing`, `input_outdated` and
 `input_not_computable` (DEC-0079). `UniverseNotFound` is a `LookupError`
 carrying the `universe_id`. `InstrumentNotFound` is a `LookupError` carrying
 the upper-cased `symbol`; it is the reader's own class, not the Massive
-client's error of the same name.
+client's error of the same name. `SetNotFound` is a `LookupError` carrying the
+`set_id` (DEC-0136).
 
 ## Stocks current
 
@@ -233,11 +240,75 @@ through `read_set_blocks`, `stock_evidence.sql` and `stock_memberships.sql`.
   name and then `universe_id` (DEC-0134). See
   [Statements](#statements).
 
+## Stock history
+
+`stock_history(conn, symbol, limit, cursor)` pages one stock's results in
+earlier sets (design 2.6; AC-18, DAC-E3-9, DAC-E3-S4-1). It upper-cases
+`symbol` and does no other rewriting (DEC-0132). It runs two statements:
+`current_set.sql` through `read_set_blocks`, then `stock_history.sql`. A set
+that completes between the two can make that one response list the newly
+current set and leave out the former one; this window is accepted, as for
+`stock_evidence` (DEC-0269, provisional).
+
+- **Which sets.** The `complete` sets other than the current one in which the
+  stock has a `factor_classification` row (DEC-0137). A set is left out by its
+  state, so a `building` or `failed` set is never listed even when it holds the
+  stock's rows (DAC-E3-S4-3).
+- **Order.** Newest `ended_at` first, ties by `set_id` descending. Two sets
+  with the same `classification_date` are ordered by `ended_at`, not by date.
+- **Rows.** Each `HistoryRow` carries the set's stored `classification_date`,
+  `run_id`, `ended_at` and its run's state as `run_outcome`. `factors` holds
+  the stock's stored cells of that set in `FACTORS` order, each built by the
+  same cell mapper as the evidence read, with its stored `restated_possible`
+  (DAC-E3-12). Nothing is recomputed (AC-19).
+- **Empty or unknown.** A symbol that names no instrument raises
+  `InstrumentNotFound`. A known stock with no earlier result returns
+  `([], None)`: never classified, classified only in the current set, or no
+  set complete yet (DAC-E3-S4-2).
+
+## Sets
+
+`list_sets(conn, limit, cursor)` pages every `classification_set`,
+`building` and `failed` included, newest `started_at` first, ties by `set_id`
+descending (design 2.6; AC-20, AC-21, DEC-0083). `get_set(conn, set_id)` runs
+the same statement for one set and returns the `SetRow` the list carries for
+it, or raises `SetNotFound`. Each runs `sets.sql` once.
+
+- **Values.** `state`, `classification_date`, `started_at`, `ended_at`,
+  `failure_reason`, `latest_trading_day` and `active_instruments` are the
+  set's stored columns; `run_outcome` and `run_started_at` are its run's
+  `state` and `started_at`.
+- **`factors`.** With the set's `classification_set_factor` rows, a
+  `FactorSummary` per factor in `FACTORS` order, built by the constructor
+  `read_set_blocks` uses. A set with no such row, as the engine leaves a
+  `building` or `failed` set, carries `{}`; nothing is filled in (DEC-0265,
+  provisional).
+
+## Paging history and sets
+
+`stock_history` and `list_sets` share one paging contract (DEC-0136):
+
+- **`limit`.** An `int`, not a `bool`, from 1 to `MAX_PAGE_SIZE` (500), both
+  inclusive; anything else raises `ValueError`.
+- **Keyset.** The reader fetches `limit + 1` sets. When the extra one exists
+  it returns `limit` and a `next_cursor` for the last one kept, keyed on
+  `(ended_at, set_id)` for history and `(started_at, set_id)` for sets. A
+  newer set inserted between page requests shifts no page.
+- **Cursor.** The `factorflow.runs.queries` cursor, `encode_cursor(ts, id)`
+  and `decode_cursor`: URL-safe base64 JSON, version 1, holding a timestamp
+  and an id. A malformed cursor, including one whose fields have the wrong
+  JSON type, raises the reader's `CursorError` (DEC-0268). It is not bound to
+  the symbol or the read that issued it: a cursor from another read returns a
+  wrong page, not an error.
+
+Both checks run before any statement.
+
 ## Statements
 
-All six are loaded once, at import, from `classification/sql/`, which ships
+All eight are loaded once, at import, from `classification/sql/`, which ships
 as package data. They are exposed as `CURRENT_SET_SQL`, `SUMMARY_SQL`,
-`LIST_SQL`, `UNIVERSE_EXISTS_SQL`, `EVIDENCE_SQL` and `MEMBERSHIPS_SQL`.
+`LIST_SQL`, `UNIVERSE_EXISTS_SQL`, `EVIDENCE_SQL`, `MEMBERSHIPS_SQL`,
+`HISTORY_SQL` and `SETS_SQL`.
 
 | Statement | Parameters | Result |
 |---|---|---|
@@ -247,6 +318,8 @@ as package data. They are exposed as `CURRENT_SET_SQL`, `SUMMARY_SQL`,
 | `universe_exists.sql` | `%(universe_id)s` | One row: whether a universe with that id exists, retired or not |
 | `stock_evidence.sql` | `symbol`, `set_id` (null with no current set), `factor_order`, `input_order` | Rows over one column list, told apart by `row_kind`: an `instrument` row first (none when the symbol is unknown), then the stock's `cell` rows and its `input` rows of the set, ordered by the bound `FACTORS` and input-name arrays. A null `set_id` matches no cell or input row |
 | `stock_memberships.sql` | `%(instrument_id)s` | One row per active universe the instrument belongs to (`universe_id`, `name`), ordered by name and then `universe_id`. It reads `universe_event` directly: the latest `member_added` or `member_removed` event per universe decides membership (DEC-0057), the latest `created` or `renamed` event gives the name, and a universe with a `retired` event is left out |
+| `stock_history.sql` | `symbol`, `current_set_id` (null with no current set), `after_ended_at` and `after_set_id` (null on a first page), `page_size`, `factor_order` | No row when the symbol is unknown; one row with a null `set_id` for a known stock with no earlier result; otherwise one row per stored cell of the page's sets (`instrument_id`, the set's `classification_date`, `run_id`, `run_outcome` and `ended_at`, then `factor` and the seven cell columns), ordered by `ended_at` and `set_id` descending and then the bound `FACTORS` array. It reads the stock's rows through `idx_factor_classification_instrument` and touches no `factor_input` |
+| `sets.sql` | `set_id` (null for the list), `after_started_at` and `after_set_id` (null on a first page), `page_size` | One row per set: its stored columns, its run's `started_at` and `state` as `run_started_at` and `run_outcome`, and its `classification_set_factor` rows as one `jsonb` object in the `current_set.sql` spelling, null when the set has none. Ordered by `started_at` and `set_id` descending |
 
 `list_classifications.sql` has three substitution slots, filled with
 `str.format` before it runs: `{sort_expr}`, from `SORT_ALLOWLIST`; `{order}`,
@@ -255,15 +328,33 @@ first page). Every value is a bound parameter, so no request text reaches the
 SQL (SEC-INP-002). `test_list_statement_placeholders_are_the_documented_ones`
 holds the file to those three slots and to `%(name)s` placeholders.
 
-`tests/unit/test_reader_sql_read_only.py` holds each of the six files to one statement
+`tests/unit/test_reader_sql_read_only.py` holds each of the eight files to one statement
 beginning `WITH` or `SELECT` with no write keyword, and the two evidence
-statements to bound `%(name)s` parameters with no `{` slot (SEC-INP-002). The engine's
+statements, `stock_history.sql` and `sets.sql` to bound `%(name)s` parameters
+with no `{` slot (SEC-INP-002). The engine's
 [safety rules](classification-engine.md#safety-rules) apply to these files too.
 
-Migration `0006_classifications.sql` gives both statements an index path:
-`idx_classification_set_complete_recent` for the current set,
+Migration `0006_classifications.sql` gives `current_set.sql` and `summary.sql`
+an index path: `idx_classification_set_complete_recent` for the current set,
 `idx_classification_set_started` for `later`, and the `factor_input` and
 `classification_set_factor` keys. `test_summary_and_current_set_are_served_from_indexes`
 checks that, with sequential scans off, neither plan scans those three tables
-whole. The planner's choice at full volume is CAP-002-E3-S4's test. The list
-statement's plan has no test in this story.
+whole.
+
+`tests/integration/test_reader_volume.py` (`postgres` and `slow`; TC-COMP-153,
+DAC-E3-S4-4) checks the reads at 3000 stocks, with an older complete set of the
+same stocks beside the current one:
+
+- the list under each of the seven sorts in both directions, paged at
+  `MAX_PAGE_SIZE`, carries `match_count` 3000 on every page and the expected
+  order, and its plan, with sequential scans off, reads `factor_classification`
+  by an index condition on `set_id` and never the older set;
+- thresholds, `hide_incomplete` and a symbol prefix give the expected count on
+  the first and last pages, and the summary statement returns one row;
+- history over 20 earlier sets reads `factor_classification` through
+  `idx_factor_classification_instrument` with an index condition on
+  `instrument_id`, and the set list over 21 sets reads `classification_set`
+  through `idx_classification_set_started` or its primary key.
+
+It prints the elapsed time and asserts no bound: no read-latency target exists
+(DEC-0135; design sections 5 and 14).
