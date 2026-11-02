@@ -1,0 +1,55 @@
+**Verdict: no blocking drift. Both round-2 fixes are confirmed and nothing new rises above LOW.** I reviewed the whole patch again against T009, T010 (a)–(h), T016, the T011 string, T017's host checks, UX design 1.4, classification-ui 2.4 and 2.7, the tabs spec, and DEC-0109, DEC-0145, DEC-0270 and DEC-0271. I did not run the tests; this is a read-only check.
+
+**Round-2 fixes**
+1. **A later read's failure:** fixed. Once the page has loaded, a failed read is kept apart from the page (`index.tsx` patch lines 970–974). It shows below `SummaryHeader` with the failure sentence and **Try again** (lines 1164–1175), and it clears on any successful read (line 964). The status region is now an `<output aria-live="polite">` that only `setStatus` writes, and only with the Add result and *Retired {name}*. Tests cover it at index.test.tsx lines 703–728, including that the status region stays empty.
+2. **Missing Implements tag:** fixed. The page-level describe block carries `// Implements TC-COMP-044 (T007's page-level half, T010 a)` (line 217).
+
+**What I checked and found consistent**
+- **T009 (TC-COMP-058):**
+  - On a retired universe, the `h1` holds only the name, and *Retired* and the retired sentence are shown.
+  - **Add stocks…**, **Retire…** and the rename control are all absent.
+  - The Members stub gets `lifecycle: "retired"` and `memberCount: 3`, and History mounts when its tab is opened.
+  - On a stale page, a refused add shows the `universe_retired` sentence in the dialog, the header is re-read and turns retired, and the actions leave.
+- **T010 (a) retire flow:**
+  - The DELETE is called with `"u1"`.
+  - The dialog closes and the header shows Retired with the `formatTimestamp` time; the actions leave.
+  - The status region reads *Retired Tech*, from `UNIVERSE_LIFECYCLE.retired` (DEC-0145 group), and focus moves to the `h1` (it has `tabIndex={-1}` in `summary-header.tsx:202`).
+  - A `universe_retired` refusal shows the sentence and re-reads the header; any other refusal shows the generic sentence and keeps the dialog.
+- **T010 (b) tabs:** `tablist`/`tab`/`tabpanel` with `aria-selected` and `aria-controls`, one panel, and roving `tabIndex`. Left/Right/Home/End work, and `?tab=history&as_of=…` is restored from the URL. This matches the tabs spec's sections 4 and 5, including the focusable panel.
+- **T010 (c)–(e):**
+  - `as_of` is set and removed while the Research parameters are left alone.
+  - `onViewMembersAsOf` changes `tab` and `as_of` in one navigation.
+  - Members is re-keyed after a successful add but not after `onMembershipChanged`, and History is a fresh mount each time it opens.
+  - `onRetire` opens the retire dialog.
+- **T010 (f)–(h):**
+  - Loading shows a skeleton with `aria-busy`.
+  - A failed read shows the code-keyed `failureSentence` with **Try again**, which reads again.
+  - `universe_not_found` shows *No universe with this address exists.* with a link to `/research/universes`.
+  - The breadcrumb is a `nav` labelled *Breadcrumb* reading *Research › Universes › Tech*, with the first two linked.
+  - There is one status region, and a rename adds no confirmation to it (DEC-0109).
+- **T016 contracts:**
+  - `UniverseDetailScreen` is the default export.
+  - The read state is a local union and no envelope `message` is ever rendered (DEC-0271).
+  - Both dialogs stay open while their request is pending (dialog spec section 4).
+  - Any write refused with `universe_retired` re-reads the header.
+  - No route is registered.
+- **T011:** the only new string is `UNIVERSE_DETAIL.breadcrumb: "Breadcrumb"`. It has no *retire* wording, so it does not belong in the `UNIVERSE_LIFECYCLE` group, and `copy.test.ts` is untouched.
+- **T017 host checks:**
+  - (a) `members-tab.tsx:478-481` already calls `setRemoval(null)` before `onRetire()`, so only one dialog can be open and no edit is needed.
+  - (b) The default export is there.
+  - (c) The patch touches only `copy.ts`, `detail/index.tsx` and `detail/index.test.tsx`.
+- **Test conventions:** the tests mock only the classification client, `./members-tab` and `./history-tab`, and assert the owner-facing strings as literals rather than importing them from `copy.ts`.
+
+**LOW (not blocking)**
+- **L1. Stale-write test doesn't assert the *Retired* label.** T009 says that after the stale-page write is refused, the header "now shows *Retired* with the actions gone". The second test (index.test.tsx lines 200–214) checks the retired header sentence and that the actions are gone, but not the *Retired* text itself. The retired state is still proven, and the first T009 test and the retire-flow test do assert *Retired*.
+- **L2. The later-read failure line is not a live region.** No artifact requires it to be, but a screen-reader user isn't told when a background re-read fails. The UX States row's "the active panel's body replaced" reads as the panel's own failures (CAP-002-E1-S8's job), so keeping the panel and showing the failure under the header matches "Header retained".
+
+**Carried LOWs, unchanged and not drift**
+- Tab changes push history entries.
+- A repeated identical status is not re-announced.
+- There is no state reset if `universeId` changes while the page is mounted.
+- Only the active panel is mounted (T016 governs over tabs spec section 4).
+- An unreachable API on the first read shows the generic sentence with **Try again**, as `HistoryTab` does.
+- A first-load error replaces the breadcrumb too.
+
+DRIFT_DETECTED: false

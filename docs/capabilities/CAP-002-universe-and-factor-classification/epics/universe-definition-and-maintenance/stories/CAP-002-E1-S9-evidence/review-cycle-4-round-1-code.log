@@ -1,0 +1,35 @@
+I couldn't run the tests or `tsc`: the sandbox requires approval for `npx vitest`, so this is a static review only. I checked the patch against T009, T010, T016, DEC-0109, DEC-0271, UX design 1.4 and the tabs spec, and against the delivered `summary-header.tsx`, `retire-dialog.tsx` and `add-stocks-dialog.tsx`. It is approved with three MEDIUM findings and several LOW ones.
+
+The host does what the plan asks:
+- **Read state:** a local union, as DEC-0271 requires. Stale reads are ignored, and the first read and Try again show the skeleton.
+- **URL:** only `tab` and `as_of` are written, and the Research parameters are left in place.
+- **Tabs:** roving `tabIndex`, Left/Right/Home/End with `preventDefault`, and one labelled panel.
+- **Status:** one persistent polite `<output>` region, which rename leaves alone.
+- **Pending dialogs:** both close requests are ignored while a request is pending.
+- **Members tab:** the `key` remounts it after Add stocks only.
+- **Retire success:** the page re-reads before the dialog closes, then announces *Retired Tech* and moves focus to the `h1`, which already has `tabIndex={-1}` in `summary-header.tsx`. React runs the dialog's unmount cleanup before the effect that focuses the `h1`, so focus ends on the `h1`.
+
+The tests trace to TC-COMP-058, TC-COMP-044 (page) and T010 (a)–(h). The pending-guard, superseded-read and mount-counter tests would fail if their behaviour broke.
+
+### MEDIUM
+1. **`detail/index.tsx:143-145, 212, 230, 247` — a failed re-read wipes the whole loaded page.** Every re-read goes through the same `setRead({kind:"error"})` as the first read. So after a write, a failed `GET` removes the header, tabs, status region and any open dialog. UX 1.4's States table says "Error: Header retained; the active panel's body replaced…".
+   - **Concrete cases:**
+     - A `universe_retired` refusal whose re-read fails unmounts the dialog and its alert.
+     - After a successful retire, if the re-read fails, *Retired Tech* is set while no status region is rendered, so the announcement is lost. `focusHeading` also stays `true` and fires later, after Try again.
+   - **Fix:** once loaded, keep the last universe on a re-read failure. Only the first read, or Try again from the error state, should replace the page.
+2. **`detail/index.tsx:212, 222-226` — focus is lost after a stale-page `universe_retired` refusal.** The re-read removes **Add stocks…** and **Retire…**, but their dialogs stay open. On Cancel or Escape, the dialog puts focus back on a trigger that no longer exists, so focus drops to `<body>`. UX 1.4 Accessibility requires that each dialog "returns it to its trigger". Retire success already handles the missing trigger by focusing the `h1`; this path, which TC-COMP-058 exercises, does not. No test covers focus after cancelling here.
+3. **`detail/index.tsx:190-200` — a successful rename shows the old name until the re-read lands.** `rename` resolves as soon as the `PATCH` does and only then starts `void reread()`. The header closes the field and shows the old name in the `h1`, breadcrumb and Members props until the `GET` returns. This contradicts UX 1.4 ("the new name renders"). The `PATCH` already returns the universe (the test mocks it that way), so the page could use that response, or `await reread()` as `retire` does. The rename test cannot catch this, because both mocks return "Growth".
+
+### LOW
+- **`index.tsx:156` — URL history:** `setSearchParams` pushes a history entry for every tab change, arrow-key press and as-of change, so Back steps through tab switches. Consider `{ replace: true }` for tab changes. No design pins this either way.
+- **`index.tsx:292` — repeated sentences aren't announced:** setting the same status text twice, such as two identical "All 1 were already members of Tech." results, changes nothing in the DOM, so the polite region does not announce it again.
+- **`index.tsx:113-122, 143-146` — changing universe in place:** if `universeId` changes while the component stays mounted, `status`, `adding`, `retiring`, `membersKey` and `focusHeading` are not reset. The effect also has no cleanup to cancel an in-flight read when the screen unmounts.
+- **Plan-sanctioned deviation:** mounting only the active panel follows T016, but differs from tabs spec lines 47–48 ("keep it mounted afterwards"). This is worth noting in the evidence.
+- **`index.test.tsx:316` — weak test:** "restores the tab and as_of from the URL" never checks that `as_of` survived.
+- **`index.test.tsx:376` — weak test:** "in one navigation" is never verified, for example by counting history entries or location changes.
+- **`index.test.tsx:198` — implementation detail in a test:** asserting `tagName === "OUTPUT"` pins the element rather than the contract; the role and `aria-live` already cover it.
+- **`copy.ts:+14` — no issue:** the `breadcrumb` key and its doc comment are fine.
+
+No CRITICAL or HIGH findings.
+
+CODE_REVIEW_VERDICT: APPROVED

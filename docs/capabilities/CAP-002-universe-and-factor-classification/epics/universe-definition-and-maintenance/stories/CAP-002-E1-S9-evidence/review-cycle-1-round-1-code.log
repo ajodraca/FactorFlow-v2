@@ -1,0 +1,39 @@
+I couldn't run the tests, so this review is from reading the code only. Running vitest needed approval I didn't have. Running `npx vitest run src/screens/research/universes/detail/retire-dialog.test.tsx` from `web/` would settle it. I found no CRITICAL or HIGH issues. The dialog meets UX design 1.4 and classification-ui 2.7:
+- It is a native `<dialog open aria-modal="true">` with `data-variant="confirm"` and is never destructive.
+- Its accessible name and description come from the title and description.
+- Focus starts on **Cancel** and is restored to the previous element on unmount.
+- It keeps its own Tab cycle, and Escape cancels.
+- **Retire universe** is natively disabled while pending.
+- Errors are chosen by code, never from the server's message. The generic sentence comes from `failureSentence` and resolves through `"retire-universe"` to *Could not retire the universe: FactorFlow hit an unexpected problem. Try again.*, which matches the test's literal.
+- Every string comes from `copy.ts` (`UNIVERSE_LIFECYCLE` or `DIALOGS`), so `copy.ts` needs no edit, and there is no `dangerouslySetInnerHTML`.
+- Tests trace to TC-COMP-044 and T008 (a) to (d), and the T013 contract is met.
+
+## Findings
+
+**MEDIUM: the pending focus fix is weaker than in `remove-dialog.tsx`** (`web/src/screens/research/universes/detail/retire-dialog.tsx:55-59`)
+- **Defect:** The effect moves focus to **Cancel** only when focus is still exactly on the confirm. `remove-dialog.tsx:72-79` also moves focus there whenever it has left the dialog, because it allows for "a browser either drops focus from a control it disables or leaves it there". The comment here says the effect "runs while focus is still on the confirm", which is only true if the parent sets `pending` during the click itself.
+- **Failure scenario:** The parent sets `pending` asynchronously, for example after an `await` or a deferred state update. The browser's focus fix-up moves focus from the newly disabled confirm to `<body>` before the effect runs. The check then fails, focus stays outside the dialog, and Escape no longer cancels because the dialog's `onKeyDown` never fires. That breaks the "each dialog traps focus" contract.
+- **Fix:** Use the convention the reference file already has: a `dialogRef`, then `if (dialogRef.current?.contains(active) && !strandedOnConfirm) return; cancelRef.current?.focus();`.
+
+**MEDIUM: no test covers a browser dropping focus** (`web/src/screens/research/universes/detail/retire-dialog.test.tsx:118-126`)
+- **Defect:** The test only covers jsdom, which leaves focus on a disabled button. `remove-dialog.test.tsx` has a case that calls `confirm.blur()` before `rerender(... pending)` to imitate a browser ("A browser drops focus from a control it disables; jsdom does not, so the test does."). This file has no such case.
+- **Failure scenario:** The gap in the finding above goes undetected; a blur-then-pending case would fail against the current code.
+
+**LOW: `aria-busy` is never asserted** (`retire-dialog.tsx:91`)
+- **Defect:** The dialog sets `aria-busy="true"` while pending, but no test checks it. `remove-dialog.test.tsx` checks both the pending and not-pending states.
+- **Failure scenario:** Removing the attribute would pass every test.
+
+**LOW: one test only repeats the first** (`retire-dialog.test.tsx:43-47`)
+- **Defect:** "is never the destructive variant" is already covered by the first test's `data-variant="confirm"` assertion. Its document-wide check for a destructive element adds a little, and the remove-dialog test folds that check into its TC test.
+- **Failure scenario:** None on its own; it adds a test without adding coverage.
+
+**LOW: the T008 tests carry no plan ID** (`retire-dialog.test.tsx:49-165`)
+- **Defect:** Only the first test has `// Implements TC-COMP-044`. The T008 tests have no T008 or DAC ID, which matches the remove-dialog file but makes them harder to trace to the plan.
+
+## Checked and fine
+- The Tab trap handles a disabled confirm by making **Cancel** the only stop, and the test at `:128-136` would fail if that broke.
+- Tests on the restored focus, missing overlay (`[data-slot="overlay"]`, the repo's own convention) and markup-in-name all fail if their behaviour breaks.
+- The `universe_retired` alert keeps the confirm enabled, as T008(c) asks.
+- The mount effect's empty dependency array and the single-dependency `[pending]` effect are correct.
+
+CODE_REVIEW_VERDICT: APPROVED

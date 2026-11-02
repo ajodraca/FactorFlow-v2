@@ -1,0 +1,21 @@
+**Code review: CAP-002-E1-S9, cycle 2, round 3. Verdict: APPROVED.** There are no CRITICAL, HIGH or MEDIUM findings, only four LOWs.
+
+I could not run the tests myself because the vitest command needed approval. The suite result below comes from the committed `green-cycle-2.log`, not from a run of mine. That log shows 34 tests passing in `add-stocks-dialog.test.tsx`, and that count matches the 34 tests in the patch. `tsc`, `biome lint` and `biome format` exit 0 in the same log.
+
+**Both round 2 fixes are in place:**
+- **Host keeps the dialog open while pending (was MEDIUM):** the docblock at `add-stocks-dialog.tsx:105-107` now says `onCancel` fires at any time and the host must keep the dialog open until the result is known. This matches T016, where Cancel closes the dialog, and T006(e), which requires Cancel to stay enabled while pending.
+- **No progress shown on Add while pending (was LOW drift):** Add now shows `<ConfirmProgress pending>` and sets `data-pending="true"`. The test "shows progress in place on Add while pending, and none otherwise" checks both states: the spinner is hidden when idle and spinning when pending. It would fail if either part broke.
+
+**Checked across the whole patch, no issues:**
+- **Parsing, plain text and the Add guard:** the parser is the delivered `parseBulkSymbols`, imported rather than copied, and it runs on paste and blur, never per keystroke (T014). The blocked Add stays focusable, is described by its reason and never uses a bare `disabled`. That matches the button spec and the `create-dialog.tsx` precedent. Submit re-parses the current text, and duplicates count towards the 1000 limit (DEC-0104; the 999 + 2 duplicates case is tested). Errors render by kind through `copy.ts` and never show an envelope message. Nothing is rendered as HTML.
+- **Pending focus:** when Add becomes pending, focus moves to Cancel, whether Add still holds focus or the browser dropped it, as `remove-dialog.tsx` does. The effect returns early unless pending is true, so a finished request moves no focus. All three cases are tested.
+- **Test coverage:** TC-COMP-031, TC-COMP-032 and T006 (a) to (f) are all covered, and each test traces to its id. DEC-0270's comma-separated inputs and the kept-list check after blur are applied as recorded.
+- **Copy strings:** `addedStocks`, `allAlreadyMembers` and `addNotFollowed` match DEC-0109's wording exactly. That includes the fixed clause ", and {m} were already members" at m of 1, and no trailing period on the Added sentence.
+
+**Findings (all LOW):**
+1. **LOW, `add-stocks-dialog.tsx:105`:** this docblock contradicts the shared `dialog-frame.tsx` docblock. The frame says each dialog makes Escape, the overlay and Cancel do nothing while a request is pending, and `add-to-universe-dialog.tsx` does guard them itself. This dialog hands that duty to the host instead. That is acceptable under T006(e) and T016, but the frame docblock now describes something this dialog does not do. The next cycle's `index.tsx` tests must cover Escape and the overlay while pending, not just Cancel.
+2. **LOW, `add-stocks-dialog.tsx:31` (with lines 54-57):** the error type allows `instrument_not_acquired` with an empty `symbols` list. The dialog would then render "…doesn't follow . Follow them…". `create-dialog.tsx` guards this case (`caught.symbols.length > 0`, otherwise the generic sentence). This dialog leaves it to the host, so the next cycle's mapping in `index.tsx` must add the guard.
+3. **LOW (carried), `copy.ts:689`:** the singular is made by running `.replace("Added 1 stocks", …)` on the output of `DIALOGS.added`. If that wording changes, the singular breaks silently. Only the dialog test would catch it.
+4. **LOW (carried), `add-stocks-dialog.tsx:189`:** the result `<output>` mounts with its text already in it, so screen readers may not announce it. Under T016 the success sentence moves to the page's status region, which limits the impact. DEC-0270's literal deviation is also carried. It is recorded but not yet reviewed by the owner.
+
+CODE_REVIEW_VERDICT: APPROVED

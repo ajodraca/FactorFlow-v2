@@ -1,0 +1,46 @@
+**Spec-drift verdict for CAP-002-E1-S9 cycle 2 (round 3): the patch matches T004, T005, T006, T014 and the three T011 strings. I found no drift.**
+
+I could not run the tests: the sandbox refused the `vitest` command. I checked the patch against the tests' assertions and the code they call, but I have not seen them pass.
+
+**Round-2 fixes**
+- **Host keeps the dialog open while pending (code review MEDIUM):** fixed. The docblock now states that `onCancel` fires for Escape, the overlay and **Cancel** at any time, and that the host must keep the dialog open while its request is pending. This matches T006(e) ("natively disables **Add** and not **Cancel**"). The shared `DialogFrame` docblock expects each dialog to make `onCancel` a no-op while pending. This dialog leaves that to the host instead, which the design allows because it only requires that the dialog never closes before the result is known. The check that `index.tsx` actually keeps it open is due in the next cycle.
+- **No progress shown on Add while pending (drift LOW, dialog spec section 4):** fixed. **Add** renders `<ConfirmProgress pending>` with `data-pending="true"`, and its spinner slot is always reserved. A test covers both states.
+
+**Requirements checked**
+- **T004 / DAC-E1-S9-2 / DAC-E1-6:**
+  - `onSubmit(["AAPL","MSFT"])` is called once.
+  - The result renders in `<output>`, which has the implicit `role="status"`. There is no `role="alert"` and no error variant.
+  - The sentences match DEC-0109 exactly: *Added 1 stock to Tech, and 1 were already members* (no period, the clause unchanged at m = 1), *Added 2 stocks to Tech* with no clause at m = 0, and *All 2 were already members of Tech.*
+  - The clause comes from the existing `DIALOGS.added` key. No second key or singular variant was added.
+- **T005 / DAC-E1-S9-3:**
+  - The alert reads *Could not add the stocks: FactorFlow doesn't follow MSFT, TSLA. Follow them on Data health, then try again.*, symbols in the order the error gave them.
+  - It links to `SHELL_ROUTES.followedStocks` (`/instruments`) through `withLink`.
+  - The dialog stays open, the list is kept and **Add** is enabled for a retry. The second attempt is tested.
+- **T006(a):** native `<dialog open aria-modal="true" data-variant="standard">` titled *Add stocks to Tech*. One `textarea` with `data-variant="list"`, labelled *Stocks*. **Add** and **Cancel**. Initial focus on the textarea, Escape calls `onCancel`, Tab and Shift+Tab cycle inside, focus is restored on unmount.
+- **T006(b) / DEC-0104:**
+  - **Add** is `blocked`, keeps `tabIndex=0` and is never a bare `disabled`. Its `aria-describedby` points at *Enter at least one stock.* or *Up to 1000 stocks can be added in one request.*, both reused from CAP-002-E1-S7's keys with no new key.
+  - The count is recognised entries with duplicates included, so 1001 blocks and exactly 1000 sends. Only distinct upper-case symbols are sent.
+  - Submit parses the field again before sending, so clicking a blocked **Add** sends nothing.
+  - Each malformed entry is listed with its count line.
+- **T006(c)–(f):**
+  - Symbols are upper-cased on blur, not while typing.
+  - `universe_retired` shows the design 2.7 sentence and keeps the list.
+  - The generic error uses `failureSentence` with operation `add-universe-members`.
+  - While `pending`, **Add** is natively disabled and **Cancel** is not.
+  - A list containing `<b>` and a name containing `<i>` render as plain text.
+- **T014 props contract:** `{ universeName, error, result, pending, onSubmit, onCancel }` with exactly the planned `error` and `result` types. The delivered `parseBulkSymbols` is imported, not copied. Errors are chosen by `kind` through `copy.ts`, never from a server message.
+- **T011:** the three entries sit in `UNIVERSE_DETAIL`, one key each. None contains *retire*, so they do not belong in `UNIVERSE_LIFECYCLE` and the copy scanner is unaffected. `addNotFollowed` takes the already-joined list because `copy.test.ts` cannot be edited; the rendered sentence is unchanged.
+- **DEC-0270:** the tests type comma-separated lists, and the kept list is asserted after blur (`AAPL\nMSFT\nTSLA`), exactly as the decision records.
+
+**Behaviour beyond the plan, none forbidden**
+- Focus moves to **Cancel** when **Add** becomes pending, following the delivered remove and retire dialogs so Escape and Tab keep working.
+- The dialog sets `aria-busy` while pending.
+- `addResultSentence` is exported for the host's status region (T016).
+- Paste is parsed immediately, as in the create dialog.
+
+**Carried LOWs, unchanged and not drift**
+1. The singular is built with `.replace("Added 1 stocks", "Added 1 stock")` on `DIALOGS.added`'s output. It is correct for every input today, but it depends on that string's wording.
+2. The result `<output>` mounts with its text already in it, so some screen readers may not announce it. T016 moves the success sentence to the page's status region on success, which limits the impact.
+3. DEC-0270 swaps the plan's space-separated inputs for comma-separated ones. The decision is still open and the owner has not reviewed it.
+
+DRIFT_DETECTED: false

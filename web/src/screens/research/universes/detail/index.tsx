@@ -1,0 +1,428 @@
+import {
+  type JSX,
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import {
+  ClassificationApiError,
+  addUniverseMembers,
+  getUniverse,
+  renameUniverse,
+  retireUniverse,
+} from "../../../../api/classification-client";
+import type { RetireUniverseResult, UniverseDetail } from "../../../../api/classification-types";
+import {
+  RESULTS,
+  UNIVERSES,
+  UNIVERSE_DETAIL,
+  UNIVERSE_LIFECYCLE,
+  failureSentence,
+} from "../../copy";
+import { AddStocksDialog, type AddStocksError, addResultSentence } from "./add-stocks-dialog";
+import { HistoryTab } from "./history-tab";
+import { MembersTab } from "./members-tab";
+import { type RetireError, RetireDialog } from "./retire-dialog";
+import { SummaryHeader } from "./summary-header";
+
+/** The Research screen and the Universes list, registered by CAP-002-E4-S10. */
+const RESEARCH_ROUTE = "/research";
+const UNIVERSES_ROUTE = "/research/universes";
+
+/** The two tabs, in order; the `tab` parameter's values (DEC-0109). */
+const TABS = ["members", "history"] as const;
+type Tab = (typeof TABS)[number];
+
+const TAB_LABELS: Record<Tab, string> = {
+  members: UNIVERSE_DETAIL.membersTab,
+  history: UNIVERSE_DETAIL.historyTab,
+};
+
+/**
+ * The universe read. A local union rather than `ScreenState`, whose `error`
+ * carries a `message` this screen must never render and no code to select the
+ * sentence by (classification-ui 2.4; DEC-0271).
+ */
+type Read =
+  | { kind: "loading" }
+  | { kind: "loaded"; universe: UniverseDetail }
+  | { kind: "error"; error: unknown };
+
+interface AddState {
+  pending: boolean;
+  error: AddStocksError | null;
+}
+
+interface RetireState {
+  pending: boolean;
+  error: RetireError | null;
+}
+
+function codeOf(caught: unknown): string | null {
+  return caught instanceof ClassificationApiError ? caught.code : null;
+}
+
+function addErrorFor(caught: unknown): AddStocksError {
+  const code = codeOf(caught);
+  if (
+    code === "instrument_not_acquired" &&
+    caught instanceof ClassificationApiError &&
+    caught.symbols.length > 0
+  ) {
+    return { kind: "instrument_not_acquired", symbols: caught.symbols };
+  }
+  return code === "universe_retired" ? { kind: "universe_retired" } : { kind: "generic" };
+}
+
+function readSentence(error: unknown): string {
+  return error instanceof ClassificationApiError
+    ? failureSentence(error)
+    : failureSentence({ operation: "get-universe", resource: "universe", code: null });
+}
+
+/**
+ * One universe's detail page, `/research/universes/:universeId` (UX design
+ * 1.4; classification-ui 2.7; CAP-002-E1-S9), which CAP-002-E4-S10 routes to.
+ *
+ * One read of the universe feeds the breadcrumb, the summary header and the
+ * Members tab's name, lifecycle and count; it is read again after every write
+ * and after `onMembershipChanged`, keeping the page mounted meanwhile, and a
+ * superseded read is ignored. The active tab and the as-of date live in the
+ * URL as `tab` and `as_of` (DEC-0109), and only those two keys are written, so
+ * the Research filters the Members tab keeps there survive. Only the active
+ * panel is mounted, so History is read afresh each time it opens; the Members
+ * tab is remounted after Add stocks, so the added stocks appear with their
+ * scores, and not after its own removals.
+ *
+ * Confirmations go to one polite status region (DEC-0109: no toast is
+ * delivered); a rename writes none, the new name rendering in the `h1`. Both
+ * dialogs stay open while their request is pending, so neither closes before
+ * the result is known (dialog spec section 4). A `universe_retired` refusal
+ * re-reads the header, so a stale page learns the universe was retired.
+ */
+export default function UniverseDetailScreen(): JSX.Element {
+  const { universeId = "" } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabsId = useId();
+  const pageRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({ members: null, history: null });
+  const generation = useRef(0);
+  const [read, setRead] = useState<Read>({ kind: "loading" });
+  const [attempt, setAttempt] = useState(0);
+  const [membersKey, setMembersKey] = useState(0);
+  const [status, setStatus] = useState("");
+  const [refreshError, setRefreshError] = useState<unknown>(null);
+  const [adding, setAdding] = useState<AddState | null>(null);
+  const [retiring, setRetiring] = useState<RetireState | null>(null);
+  const [focusHeading, setFocusHeading] = useState(false);
+
+  // What a failed read replaces: the page only before it first loaded.
+  const readRef = useRef(read);
+  readRef.current = read;
+
+  const tab: Tab = searchParams.get("tab") === "history" ? "history" : "members";
+  const asOf = searchParams.get("as_of");
+
+  /**
+   * Reads the universe, unless a later read or write supersedes it. A failed
+   * read replaces the page only before it has loaded; once loaded the page and
+   * any open dialog stay, and the failure is stated under the header with
+   * **Try again** until a read succeeds (UX design 1.4 States: the header is
+   * retained).
+   */
+  const reread = useCallback(async (): Promise<void> => {
+    generation.current += 1;
+    const mine = generation.current;
+    try {
+      const universe = await getUniverse(universeId);
+      if (mine === generation.current) {
+        setRead({ kind: "loaded", universe });
+        setRefreshError(null);
+      }
+    } catch (caught) {
+      if (mine !== generation.current) {
+        return;
+      }
+      if (readRef.current.kind === "loaded") {
+        setRefreshError(caught);
+      } else {
+        setRead({ kind: "error", error: caught });
+      }
+    }
+  }, [universeId]);
+
+  /**
+   * Shows a write's own result at once. Each caller then starts a read, which
+   * supersedes any read still in flight, so none can bring the old state back.
+   */
+  function show(update: (universe: UniverseDetail) => UniverseDetail): void {
+    setRead((previous) =>
+      previous.kind === "loaded"
+        ? { kind: "loaded", universe: update(previous.universe) }
+        : previous,
+    );
+  }
+
+  // The first read, and Try again's: the page shows its skeleton meanwhile.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` is the Try again trigger.
+  useEffect(() => {
+    setRead({ kind: "loading" });
+    void reread();
+  }, [reread, attempt]);
+
+  // After a retirement the trigger has left the page: focus moves to the `h1`.
+  // Once, so a later read leaves focus where it is.
+  useEffect(() => {
+    if (focusHeading && read.kind === "loaded") {
+      pageRef.current?.querySelector<HTMLElement>("h1")?.focus();
+      setFocusHeading(false);
+    }
+  }, [focusHeading, read]);
+
+  function setParams(changes: Record<string, string | null>): void {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      for (const [key, value] of Object.entries(changes)) {
+        if (value === null) {
+          next.delete(key);
+        } else {
+          next.set(key, value);
+        }
+      }
+      return next;
+    });
+  }
+
+  function selectTab(next: Tab): void {
+    setParams({ tab: next });
+    tabRefs.current[next]?.focus();
+  }
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>): void {
+    const at = TABS.indexOf(tab);
+    const target: Record<string, Tab> = {
+      ArrowRight: TABS[(at + 1) % TABS.length],
+      ArrowLeft: TABS[(at + TABS.length - 1) % TABS.length],
+      Home: TABS[0],
+      End: TABS[TABS.length - 1],
+    };
+    const next = target[event.key];
+    if (next !== undefined) {
+      event.preventDefault();
+      selectTab(next);
+    }
+  }
+
+  async function rename(name: string): Promise<void> {
+    let renamed: UniverseDetail;
+    try {
+      renamed = await renameUniverse(universeId, name);
+    } catch (caught) {
+      if (codeOf(caught) === "universe_retired") {
+        void reread();
+      }
+      throw caught;
+    }
+    // The new name renders at once (UX design 1.4), then the read confirms it.
+    show(() => renamed);
+    void reread();
+  }
+
+  async function addStocks(symbols: string[], universeName: string): Promise<void> {
+    setAdding({ pending: true, error: null });
+    try {
+      const result = await addUniverseMembers(universeId, symbols);
+      setAdding(null);
+      setStatus(addResultSentence(result, universeName));
+      setMembersKey((key) => key + 1);
+      void reread();
+    } catch (caught) {
+      setAdding({ pending: false, error: addErrorFor(caught) });
+      if (codeOf(caught) === "universe_retired") {
+        void reread();
+      }
+    }
+  }
+
+  async function retire(universeName: string): Promise<void> {
+    setRetiring({ pending: true, error: null });
+    let result: RetireUniverseResult;
+    try {
+      result = await retireUniverse(universeId);
+    } catch (caught) {
+      const retired = codeOf(caught) === "universe_retired";
+      setRetiring({ pending: false, error: retired ? "universe_retired" : "generic" });
+      if (retired) {
+        void reread();
+      }
+      return;
+    }
+    // The header shows Retired from the response at once; the read follows.
+    show((universe) => ({ ...universe, lifecycle: result.lifecycle, retiredAt: result.retiredAt }));
+    setRetiring(null);
+    setStatus(UNIVERSE_LIFECYCLE.retired(universeName));
+    setFocusHeading(true);
+    void reread();
+  }
+
+  /**
+   * Closes a dialog unless its request is pending (dialog spec section 4). On
+   * a universe retired meanwhile the trigger has left the page, so focus moves
+   * to the `h1` rather than being lost.
+   */
+  function closeDialog(pending: boolean, close: () => void, retired: boolean): void {
+    if (pending) {
+      return;
+    }
+    close();
+    if (retired) {
+      setFocusHeading(true);
+    }
+  }
+
+  if (read.kind === "loading") {
+    return (
+      <output aria-busy="true" className="flex flex-col gap-2 p-5">
+        <span className="sr-only">{UNIVERSES.loading}</span>
+        <span aria-hidden="true" className="block h-6 w-1/3 rounded bg-secondary" />
+        <span aria-hidden="true" className="block h-2 rounded bg-secondary" />
+        <span aria-hidden="true" className="block h-2 rounded bg-secondary" />
+      </output>
+    );
+  }
+
+  if (read.kind === "error") {
+    const notFound = codeOf(read.error) === "universe_not_found";
+    return (
+      <div className="flex flex-col gap-2 p-5 text-sm">
+        <p>{readSentence(read.error)}</p>
+        {notFound ? (
+          <Link to={UNIVERSES_ROUTE} className="underline">
+            {UNIVERSES.title}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAttempt((count) => count + 1)}
+            className="w-fit rounded border border-border px-3 py-2"
+          >
+            {RESULTS.tryAgain}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const universe = read.universe;
+  const retired = universe.lifecycle === "retired";
+  const panelId = `${tabsId}-panel`;
+  const tabId = (value: Tab): string => `${tabsId}-${value}`;
+
+  return (
+    <div ref={pageRef} className="flex flex-col gap-5 p-5">
+      <nav aria-label={UNIVERSE_DETAIL.breadcrumb} className="text-sm text-muted-foreground">
+        <Link to={RESEARCH_ROUTE} className="underline">
+          {UNIVERSES.researchLink}
+        </Link>
+        <span aria-hidden="true"> › </span>
+        <Link to={UNIVERSES_ROUTE} className="underline">
+          {UNIVERSES.title}
+        </Link>
+        <span aria-hidden="true"> › </span>
+        <span aria-current="page">{universe.name}</span>
+      </nav>
+      <SummaryHeader
+        universe={universe}
+        onRename={rename}
+        onAddStocks={() => setAdding({ pending: false, error: null })}
+        onRetire={() => setRetiring({ pending: false, error: null })}
+      />
+      {refreshError === null ? null : (
+        <div className="flex items-center gap-2 text-sm">
+          <p>{readSentence(refreshError)}</p>
+          <button
+            type="button"
+            onClick={() => void reread()}
+            className="w-fit rounded border border-border px-3 py-2"
+          >
+            {RESULTS.tryAgain}
+          </button>
+        </div>
+      )}
+      <output aria-live="polite" className="text-sm">
+        {status}
+      </output>
+      <div className="flex flex-col gap-3">
+        <div role="tablist" className="flex gap-4 border-b border-border">
+          {TABS.map((value) => (
+            <button
+              key={value}
+              ref={(element) => {
+                tabRefs.current[value] = element;
+              }}
+              type="button"
+              role="tab"
+              id={tabId(value)}
+              aria-selected={tab === value}
+              aria-controls={panelId}
+              tabIndex={tab === value ? 0 : -1}
+              onClick={() => selectTab(value)}
+              onKeyDown={handleTabKeyDown}
+              className={
+                tab === value
+                  ? "border-b-2 border-primary px-1 py-2 font-semibold text-foreground"
+                  : "px-1 py-2 text-muted-foreground"
+              }
+            >
+              {TAB_LABELS[value]}
+            </button>
+          ))}
+        </div>
+        {/* biome-ignore lint/a11y/noNoninteractiveTabindex: the tabs contract (design spec section 5) makes the panel focusable so the next Tab reaches its content. */}
+        <div role="tabpanel" id={panelId} aria-labelledby={tabId(tab)} tabIndex={0}>
+          {tab === "members" ? (
+            <MembersTab
+              key={membersKey}
+              universeId={universeId}
+              universeName={universe.name}
+              lifecycle={universe.lifecycle}
+              memberCount={universe.memberCount}
+              asOf={asOf}
+              onAsOfChange={(date) => setParams({ as_of: date })}
+              onMembershipChanged={() => void reread()}
+              onRetire={() => setRetiring({ pending: false, error: null })}
+            />
+          ) : (
+            <HistoryTab
+              universeId={universeId}
+              onViewMembersAsOf={(date) => setParams({ tab: "members", as_of: date })}
+            />
+          )}
+        </div>
+      </div>
+      {adding === null ? null : (
+        <AddStocksDialog
+          universeName={universe.name}
+          error={adding.error}
+          result={null}
+          pending={adding.pending}
+          onSubmit={(symbols) => void addStocks(symbols, universe.name)}
+          onCancel={() => closeDialog(adding.pending, () => setAdding(null), retired)}
+        />
+      )}
+      {retiring === null ? null : (
+        <RetireDialog
+          universeName={universe.name}
+          error={retiring.error}
+          pending={retiring.pending}
+          onConfirm={() => void retire(universe.name)}
+          onCancel={() => closeDialog(retiring.pending, () => setRetiring(null), retired)}
+        />
+      )}
+    </div>
+  );
+}

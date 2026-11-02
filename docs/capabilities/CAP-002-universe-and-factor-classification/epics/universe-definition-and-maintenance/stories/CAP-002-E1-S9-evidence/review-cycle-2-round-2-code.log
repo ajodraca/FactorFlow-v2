@@ -1,0 +1,38 @@
+## Code review: CAP-002-E1-S9 cycle 2, round 2 (AddStocksDialog and its three copy entries)
+
+**Verdict: approved.** No CRITICAL or HIGH findings. One MEDIUM stays open on purpose for the next cycle.
+
+I couldn't run anything myself: vitest needed approval in this read-only session. The checks below come from the recorded `green-cycle-2.log`. It shows `add-stocks-dialog.test.tsx` passing 33 tests, `copy.test.ts` passing unchanged with 361 tests, and `tsc --noEmit`, `biome lint` and `biome format` all clean. The 33 matches the number of tests in the patch.
+
+### Round-1 fixes
+1. **Focus stuck when Add becomes disabled while pending: fixed.** The effect at `add-stocks-dialog.tsx:128-137` moves focus to Cancel in two cases: focus is on Add, or focus has left the form. Focus anywhere else in the dialog stays where it is. This works like `remove-dialog.tsx:73-80`. Effect order is safe: `DialogFrame` is the child, so its mount effect runs first and records the real trigger before this effect runs. Four tests cover it (`add-stocks-dialog.test.tsx:333-371`): focus still on Add, focus already dropped, no move when the request ends, and focus left in the field. Each one fails if the effect is removed or its guard is reversed.
+2. **Escape, overlay and Cancel close the dialog mid-request: still open, deferred to T016.** See MEDIUM-1.
+3. **Tests covering several behaviours: split.** The retry test is now its own test (`:122-131`). Escape and Cancel are separate tests, and so are the pending-state focus cases.
+
+### Findings
+
+**MEDIUM-1: cancel during a pending request is still not blocked, and the dialog doesn't say so** (`add-stocks-dialog.tsx:174-178` and `:221`)
+- The `DialogFrame` doc comment (`dialog-frame.tsx`) says each dialog makes `onCancel` do nothing while a request is pending. This dialog passes `onCancel` through unguarded, and its own doc comment (`:91-103`) doesn't say the host is responsible instead.
+- Until T016 lands, any host that wires `onCancel` straight to "close" can close the dialog before the result is known. That breaks dialog spec section 4.
+- It doesn't block approval: the detail directory already does this (`remove-dialog.tsx` also calls `onCancel` unguarded), and T006(a) tests the plain contract.
+- Recommendation: add one sentence to the docblock naming the host's obligation. The T016 review should confirm that the host ignores cancel for both dialogs while a write is pending.
+
+**LOW-1: the result status may not be announced** (`add-stocks-dialog.tsx:183-185`). The `<output>` is mounted at the same moment its text appears, and it has no explicit `aria-live`. Some screen readers don't announce a live region that arrives already filled. `members-tab.tsx:434` and `notices.tsx` keep their `<output aria-live="polite">` mounted all the time. This matters little here, because UX 1.4 closes the dialog on 200 and confirms with a toast.
+
+**LOW-2: no progress spinner on Add while pending** (`:232-248`). Carried from round 1. `ConfirmProgress` exists in `dialog-frame.tsx` and `add-to-universe-dialog.tsx` uses it. The plan only requires Add to be natively disabled.
+
+**LOW-3: the singular "stock" is made by string replacement** (`copy.ts:687-690`). Carried from round 1. `.replace("Added 1 stocks", …)` depends on the exact wording of `DIALOGS.added`. If that key changes, this silently goes back to the plural. The T004 anchored regex would catch it.
+
+**LOW-4: the kept-list check reads the normalised text** (`add-stocks-dialog.test.tsx:117`). Carried from round 1. It reads `"AAPL\nMSFT\nTSLA"`, not the plan's `AAPL MSFT TSLA`, and the tests type comma-separated lists. Both follow DEC-0270, which is still `owner_reviewed: false`.
+
+**LOW-5: two test titles still name two behaviours each** (`add-stocks-dialog.test.tsx:105` and `:248`). The first is "…keeps the list and allows a retry". It is the single TC-COMP-032 case, so that's acceptable. The second is "parses a paste together with the text already in the field, and describes the field by the count". Cosmetic.
+
+### Checked and fine
+- **Copy strings:** `addedStocks`, `allAlreadyMembers` and `addNotFollowed` match DEC-0109 and the T011 wording, including no trailing period. The already-member clause reuses `DIALOGS.added` word for word, as E4-F21 requires.
+- **Error sentences:** each refusal's text is chosen by its kind, never from a server message. The link is added through `withLink` and goes to `SHELL_ROUTES.followedStocks`, and the test checks `/instruments`.
+- **Add blocked state:** Add stays focusable and is described by its reason, built the same way as `create-dialog.tsx:321-333`. The 1000-symbol limit counts duplicates; `onSubmit` sends the distinct symbols.
+- **Parsing:** `parseBulkSymbols` is imported, not copied. It runs on paste and on blur, never on each keystroke, and submit re-parses the current text.
+- **Tests:** the anchored regexes, the 999+2 duplicate case, the exact-1000 case, the distinct-symbols case and the plain-text case would each fail if the behaviour they cover broke. Every test traces to TC-COMP-031, TC-COMP-032 or T006 (a) to (f).
+- **React:** no common React mistakes found, such as stale closures, unstable keys or effects missing a dependency.
+
+CODE_REVIEW_VERDICT: APPROVED

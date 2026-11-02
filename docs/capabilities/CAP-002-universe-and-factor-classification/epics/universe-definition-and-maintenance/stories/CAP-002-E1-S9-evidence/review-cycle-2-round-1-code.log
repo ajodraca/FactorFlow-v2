@@ -1,0 +1,38 @@
+I've finished the review. **The patch is approved, with three MEDIUM and four LOW findings.** I couldn't run anything: the sandbox blocked both the vitest command and the git status check, so this is a static reading of the patch against the plan, the designs, the decision records and the sibling dialogs. No file was modified.
+
+**Correctness against the plan.**
+- **T004 and T005 are met.**
+  - **Polite result (T004):** `result` shows inside an `<output>`, which has the status role, and never as an alert. The sentence says *stock* only when one was added, keeps *, and {m} were already members* unchanged whenever m > 0, and uses *All {m} were already members of {name}.* when nothing was added.
+  - **Uncovered symbol (T005):** `instrument_not_acquired` names every symbol in the order the envelope gave them. It reuses the create dialog's `withLink` with `SHELL_ROUTES.followedStocks`. The typed list is kept and Add stays enabled for a retry.
+- **T006 and T014 are met.**
+  - **Blocked Add:** it is `blocked`, keeps `tabIndex=0` and is never a bare `disabled`. Its description is the existing *Enter at least one stock.* / *Up to 1000 stocks can be added in one request.* keys from the create story.
+  - **Counting (DEC-0104):** entries are counted as parsed, duplicates included. Exactly 1000 is allowed and 1001 is blocked. `onSubmit` receives the distinct upper-case symbols.
+  - **Parsing:** the shared `parseBulkSymbols` is imported, not copied. It runs on paste and on blur, never per keystroke.
+  - **Refusals:** each is selected by `kind` through `copy.ts`. Content is plain text only.
+- **T011 is met.** The three new `copy.ts` entries match DEC-0109's wording, and no second key was added for a blocked reason or for the already-member clause.
+
+**MEDIUM**
+1. **Keyboard focus is lost while a request is pending** (`web/src/screens/research/universes/detail/add-stocks-dialog.tsx:215`). `disabled={pending}` disables Add while it holds focus, because the user just clicked it. The browser then drops focus out of the dialog, and nothing moves it back.
+   - After a refusal arrives, Escape no longer reaches the dialog (its key handler is on the dialog), and Tab leaves for the page behind it.
+   - Both precedents handle this. `remove-dialog.tsx:73-80` moves focus away from the stranded confirm. `create-dialog.tsx` moves focus back to Create or Name after a failure.
+   - No test covers going from pending to an error with focus restored.
+2. **The dialog does not follow the frame's pending contract** (`add-stocks-dialog.tsx:152`). It passes `onCancel` straight to `DialogFrame`. The frame's own documentation says each dialog makes Escape, the overlay and Cancel do nothing while a request is pending (DEC-0259), and `add-to-universe-dialog.tsx:192-197` does exactly that.
+   - T006(e) only forbids natively disabling Cancel. It does not require Cancel to close the dialog mid-request.
+   - Here all three close it mid-request, so a refusal that arrives afterwards has nowhere to show.
+   - Either guard it in this dialog, or record that the host (T016) must ignore cancel while pending.
+3. **Some tests check more than one behaviour.** This breaks the "one behaviour per test" rule in the brief:
+   - `add-stocks-dialog.test.tsx:152` checks Escape and Cancel together.
+   - `add-stocks-dialog.test.tsx:208` checks the 1001 block and the exactly-1000 pass together.
+   - `add-stocks-dialog.test.tsx:105` (TC-COMP-032) checks the refusal and the retry together.
+
+   Each would still fail if its behaviour broke, but a failure in one hides the other. (I graded this MEDIUM against the brief's rule; it is the closest call of the three.)
+
+**LOW**
+4. **The singular wording is patched onto another key's output** (`web/src/screens/research/copy.ts:687-690`). `addedStocks` calls `.replace("Added 1 stocks", "Added 1 stock")` on `DIALOGS.added`'s text. If `DIALOGS.added` is ever reworded, the singular silently stops working and only T004 would notice.
+5. **No visible pending state.** The sibling dialogs on `DialogFrame` show `ConfirmProgress` and `data-pending`; this one shows only `aria-busy` on the dialog. The plan doesn't require it, but it is inconsistent with the dialogs it was meant to match.
+6. **`handleSubmit` doesn't check `pending`** (`add-stocks-dialog.tsx:137`). Today only the native `disabled` prevents a second submit. The create dialog checks explicitly.
+7. **TC-COMP-032 types `AAPL, MSFT, TSLA` and expects `AAPL\nMSFT\nTSLA` after blur** (`add-stocks-dialog.test.tsx:121`), where T005 literally says `AAPL MSFT TSLA`. DEC-0270 records this deviation, so it is acceptable as documented.
+
+**Conventions.** Ids come from `useId`, the list field and its live counter match the create dialog's markup, refusals are selected by kind and never by an envelope message, and there is no `dangerouslySetInnerHTML`. No React pitfalls were found beyond finding 1.
+
+CODE_REVIEW_VERDICT: APPROVED

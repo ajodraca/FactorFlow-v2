@@ -678,6 +678,33 @@ export const UNIVERSE_DETAIL = {
   origin: "Origin",
   addStocksAction: "Add stocks…",
   addStocksTitle: (name: string): string => `Add stocks to ${name}`,
+  /**
+   * The Add stocks result when at least one stock was added (DEC-0109):
+   * `DIALOGS.added`, whose *, and {m} were already members* is the designs'
+   * fixed clause at every m > 0, with only the noun *stock* singular at one
+   * (CAP-002-E1-S9 T011).
+   */
+  addedStocks: (added: number, name: string, alreadyMembers: number): string =>
+    added === 1
+      ? DIALOGS.added(added, name, alreadyMembers).replace("Added 1 stocks", "Added 1 stock")
+      : DIALOGS.added(added, name, alreadyMembers),
+  /** The Add stocks result when every symbol was already a member (DEC-0109). No design contains it. */
+  allAlreadyMembers: (count: number, name: string): string =>
+    `All ${count} were already members of ${name}.`,
+  /**
+   * The Add stocks `instrument_not_acquired` refusal: UX 1.4's "as in Section
+   * 1.3" with the verb adapted, its own entry beside the create sentence
+   * (DEC-0109). `{symbols}` is the envelope's list joined with ", ", as the
+   * create sentence prints it; `UNIVERSES.followThemLink` is the linked phrase.
+   */
+  addNotFollowed: (symbols: string): string =>
+    `Could not add the stocks: FactorFlow doesn't follow ${symbols}. Follow them on Data health, then try again.`,
+  /**
+   * The detail page's breadcrumb `nav` label (UX 1.4, *Research › Universes ›
+   * Tech*; CAP-002-E1-S9 T011). No design words it; the crumbs reuse
+   * `UNIVERSES.researchLink` and `UNIVERSES.title`.
+   */
+  breadcrumb: "Breadcrumb",
   membersTab: "Members",
   historyTab: "History",
   memberSince: "Member since",

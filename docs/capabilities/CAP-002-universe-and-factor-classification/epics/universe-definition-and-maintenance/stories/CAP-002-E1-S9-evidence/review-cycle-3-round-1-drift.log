@@ -1,0 +1,46 @@
+**Spec-drift check: CAP-002-E1-S9, cycle 3 (T002, T003, T012, T015, plus T011 strings)**
+
+I checked the patch against the task plan, the story's acceptance criteria, UX design 1.4, classification-ui 2.7, the decision records and `copy.ts`. The behaviour matches what they require for this scope. I found one low-severity test-convention gap and one low-severity edge case that the specs don't cover.
+
+**What matches**
+- **Strings (T011):** every string comes from an existing `copy.ts` key, and the patch makes no `copy.ts` edit.
+  - `UNIVERSE_DETAIL`: *Universe name*, **Rename**, *Lifecycle*, *Active*, *Members*, *Created*, *Origin*, **Add stocks…**.
+  - `UNIVERSE_LIFECYCLE`: **Retire…**, *Retired*, the retired-header sentence and the `universe_retired` sentence (word for word as in design 2.7).
+  - `UNIVERSES.nameInUse`: one shared entry, filled with the trimmed name that was submitted (DEC-0109).
+  - `DIALOGS.enterName`: the shared empty-name key.
+  - The generic error comes from `failureSentence` for `rename-universe` with no code: *Could not rename the universe: FactorFlow hit an unexpected problem. Try again.*
+- **Rename behaviour (T015, DAC-E1-S9-1, DEC-0109):**
+  - The name is trimmed. An empty or whitespace-only name is a field error and sends no request. A name unchanged after trimming closes the field and sends no request.
+  - `Enter` and **Rename** submit the same way.
+  - **Rename** is secondary, only shows while editing, and is natively `disabled` while the request is pending.
+  - `Esc` closes the field and returns focus to the name control.
+  - A refusal keeps the field open with `aria-invalid` and `aria-describedby`, and puts focus back in the field. `universe_name_in_use` and `universe_retired` get their own sentences; anything else gets the generic sentence.
+  - A successful rename adds no confirmation, as DEC-0109 says.
+- **Header layout (UX 1.4):**
+  - The card is a native `section` with `data-variant="summary"`, labelled by the `h1`.
+  - The description list shows Lifecycle, Members, Created and Origin; Created goes through `formatTimestamp`.
+  - **Add stocks…** is `default` and **Retire…** is `secondary`, on the right.
+  - A retired universe shows a plain `h1`, a secondary *Retired* badge beside `formatTimestamp(retiredAt)`, the retired sentence, and no actions or rename.
+  - The tokens match the design: muted labels, destructive field errors, card and border.
+- **T012 and DEC-0108:**
+  - The only change to `universe-table.tsx` is the `export` keyword.
+  - `originToProvenance` lives in `summary-header.tsx`. It maps a by-hand origin to `null`, and a filter origin to `{classification_date, thresholds, hide_incomplete, symbol}` with the query-parameter keys.
+  - It produces exactly the parameter type `describeOrigin` takes, so the origin line has one wording.
+- **The two design choices you asked me to judge:**
+  - Keeping the `h1` in the page while editing (visually hidden, plain text) is sound. Without it the page would have no `h1` while editing and the card would lose its label. Sighted users still see the name swap for the form.
+  - The local `RetiredBadge` is an exact copy of the one in `universe-table.tsx`, so it can't drift today. T012's export-only rule leaves no other option, and none of the shared components in `components/patterns` is a secondary badge.
+- **Tests:** they cover T002 (a)–(d) and T003 (a)–(g), and assert the owner-facing strings as literals, as the plan says.
+
+**Drift**
+1. **Low: test convention.** The plan's test conventions say "every render in a `MemoryRouter`". `summary-header.test.tsx` renders `SummaryHeader` without one (`renderHeader`, patch lines 60–69). The other test files in `detail/` (`members-tab`, `history-tab`, `add-stocks-dialog`) do use one. Since `SummaryHeader` doesn't use the router, nothing breaks today. Still, it is a stated requirement that this file misses.
+
+**Edge case (low; no spec covers it)**
+- If `Esc` is pressed while a rename is pending, the field closes but the request keeps going (`stopEditing` doesn't cancel the pending call, patch lines 555–560).
+  - If the server then accepts it, the name changes even though the user cancelled.
+  - If the server refuses it, the error goes into a field that is no longer shown, so the user never sees it.
+  - Reopening the field before the request settles shows **Rename** still disabled.
+- The plan says "`Esc` cancels" but doesn't say what happens while a request is pending, so I'm flagging this as a gap rather than drift.
+
+**Nothing added beyond scope:** clearing the field error when the value changes and the test for a name containing markup are both small and in scope.
+
+DRIFT_DETECTED: true

@@ -1,0 +1,53 @@
+**Spec-drift verification: CAP-002-E1-S9, cycle 4, round 2**
+
+I found two LOW drifts. There is nothing at MEDIUM or above.
+
+**The round-1 fixes are in place**
+- **Header kept when a later read fails:** `reread` only replaces the page if the first read has not finished yet (`index.tsx` patch lines 949–957). A test covers it (patch line 703).
+- **Focus after cancelling a dialog on a universe retired meanwhile:** `closeDialog` moves focus to the h1 for both dialogs (patch lines 1080–1088). Tests cover it (patch lines 261 and 492).
+- **Rename shows the new name at once:** `show(() => renamed)` runs before the re-read, and a read already in flight cannot bring the old name back (patch line 766).
+- **Test nits:** there are now tests for `as_of` surviving a reload (373), the `value.*` threshold keys (424) and a single navigation (440).
+
+**Requirements that match the plan, the designs and the decisions**
+- **T009 / TC-COMP-058:** the retired header has no write controls, and both tab stubs receive the right props. A write from a stale page shows the exact `universe_retired` sentence and the header is read again.
+- **T010 (a), retire flow:** `DELETE` is called with the id. The dialog closes, the header shows *Retired* with the time, and the actions are gone. The status region reads *Retired Tech* and focus lands on the h1. A `universe_retired` refusal shows the sentence and re-reads; any other refusal shows the generic sentence and keeps the dialog.
+- **T010 (b)–(c), tabs and URL:**
+  - `tablist`, `tab` and `tabpanel` with `aria-selected`, `aria-controls` and roving `tabIndex`; arrow keys, Home and End work; the panel is focusable (tabs spec §5).
+  - `tab` and `as_of` are the only parameters written, and the Research parameters are left alone.
+  - `onViewMembersAsOf` changes both parameters in one navigation.
+- **T010 (d)–(e):** remounts and re-reads behave as the plan says; `onRetire` opens the retire dialog.
+- **T010 (f):** skeleton with `aria-busy`, the failure sentence chosen by error code, **Try again**, and `universe_not_found` linking to `/research/universes`. The local union for the read state follows DEC-0271.
+- **T010 (g):** the *Breadcrumb* nav reads *Research › Universes › Tech*, with the first two as links.
+- **T010 (h):** one polite status region holds the confirmations, and a rename writes none (DEC-0109).
+- **Dialogs:** both stay open while their request is pending (dialog spec §4).
+- **T011:** the only string added is `UNIVERSE_DETAIL.breadcrumb`. It contains no *retire*, so DEC-0145's group rule does not apply.
+- **T017 host checks:**
+  - `UniverseDetailScreen` is the default export.
+  - The patch touches only `copy.ts`, `index.tsx` and `index.test.tsx`; nothing under `app/` or `api/`.
+  - The test file mocks only `./members-tab` and `./history-tab`.
+  - The current `members-tab.tsx` closes its Remove dialog before calling `onRetire` (lines 478–481), so no one-line change is needed.
+
+**Drifts**
+
+1. **LOW: the round-1 fix puts a read failure in the confirmations region, with no Try again, and the error stays after recovery.**
+   - **Evidence:** `index.tsx` patch lines 953–954 call `setStatus(readSentence(caught))`.
+   - **Requirement:** the UX 1.4 States table says an error state shows "the operation, resource, reason and **Try again**". DEC-0109 limits the polite status line to confirmations (added, retired).
+   - **What the code does:** it puts an error sentence in that confirmation region, offers no **Try again** button, and never clears the sentence when a later read succeeds (the success path only calls `setRead`).
+   - **Consequence:** after a failed `onMembershipChanged` re-read and then a successful one, the page still says *Could not load the universe…* above a correct header. The only way to retry is reloading the page.
+   - **Mitigation:** UX 1.4 describes the active panel's read failing, not a failed re-read of the header, so this case is only partly specified.
+
+2. **LOW: the page-level half of TC-COMP-044 has no `Implements` tag.**
+   - **Requirement:** the plan's test conventions ask for a `// Implements TC-COMP-0NN` comment on each mapped test.
+   - **Evidence:** the retire flow block is tagged `// T010 (a), with T007's page-level half of TC-COMP-044` (patch line 217). Only `retire-dialog.test.tsx:23` carries `Implements TC-COMP-044`, so a scan for the tag will not find the page half.
+
+**Carried LOWs, not new drift:**
+- Tab changes push history entries.
+- A repeated identical status text is not announced again.
+- State is not reset if the universe id changes while mounted.
+- Only the active panel is mounted. This contradicts tabs spec §4 ("keep it mounted"), but T016 and the S8 contract require it.
+
+**Also seen, not counted as drift:**
+- An unreachable API on the first read shows the generic sentence with **Try again** rather than leaving it to the shell (UX "Unreachable: Shell state"). `HistoryTab` (S8, accepted) does the same and T016 does not mention it.
+- The first-load error replaces the breadcrumb as well. T016 says "replaces the page body".
+
+DRIFT_DETECTED: true

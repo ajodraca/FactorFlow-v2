@@ -1,0 +1,28 @@
+I'm approving this patch: there are no CRITICAL, HIGH or MEDIUM findings, only three LOWs. I reviewed it by reading the code. I could not run the test file, because running vitest needs a permission I don't have here, so the tests passing is not something I saw.
+
+**Round-1 fixes: all confirmed**
+- **Focus while pending (was MEDIUM):** the effect at `retire-dialog.tsx:262-269` now matches `remove-dialog.tsx:73-80`. When the confirm becomes pending, focus moves to Cancel in both cases: when focus is still on the confirm, and when it has fallen outside the dialog. Remove-dialog also re-runs this on `error` because of its `last_member` swap. Retire has no such swap, so depending on `[pending]` alone is correct.
+- **No test for a browser dropping focus (was MEDIUM):** fixed at `retire-dialog.test.tsx:128-136`. The test blurs the confirm, then sets pending, and checks that Cancel has focus. It would fail under the old, narrower check, which only moved focus when it was still on the confirm.
+- **`aria-busy` not asserted (was LOW):** fixed at `retire-dialog.test.tsx:146-151`, which checks both states.
+- **Redundant destructive test (was LOW):** removed. The absence of `destructive` is now one assertion inside the TC-COMP-044 test (`:39`).
+- **T008 tests untagged (was LOW):** a group tag is now on `:50`.
+
+**Whole-patch review**
+- **Correctness:** the dialog matches T013 and UX design 1.4:
+  - a native `<dialog open aria-modal="true">` with `aria-labelledby` and `aria-describedby`, and `data-variant="confirm"`;
+  - Cancel gets focus first, and focus returns to the trigger on unmount;
+  - its own Tab cycle, including when the confirm is disabled;
+  - Escape cancels;
+  - the confirm is natively `disabled` while pending, and Cancel never is.
+- **Errors:** the alert sentence is chosen by error code, never from the server's message. The text resolves through `copy.ts`: `retiredRefusal` for `universe_retired`, and `failureSentence` with `"retire-universe"` for anything else, which produces the generic sentence the test expects.
+- **Strings:** every string comes from `UNIVERSE_LIFECYCLE` or `DIALOGS`, so `copy.ts` needs no edit, as the cycle scope says. There is no `dangerouslySetInnerHTML`, and the universe name is rendered as text (tested at `:188-192`).
+- **Conventions:** the structure follows `remove-dialog.tsx` line for line, apart from the `last_member` / Retire… branch that retire doesn't need.
+- **React:** effects and cleanups run in the right order, and the mount and pending effects don't conflict.
+- **Tests:** TC-COMP-044's first half and T008 (a) to (d) are all covered.
+
+**Findings**
+- **LOW, `retire-dialog.test.tsx:138-144`, a test that cannot fail.** "leaves focus where it is when it is already inside the dialog" changes only `error`. The focus effect depends on `[pending]` alone, so it never re-runs and the test passes even if the inside-the-dialog check is deleted. It was copied from remove-dialog, where the effect also depends on `error` and the test is meaningful. Either remove it or rewrite it around a `pending` change. In jsdom, though, this check may not be observable at all, because Cancel is the only other control that can take focus.
+- **LOW, `retire-dialog.test.tsx:29`, T007 not named.** The tag reads `// Implements TC-COMP-044` without naming T007 or its DAC/AC ids. The sibling convention is `// Implements TC-COMP-057 (T007): DAC-…, AC-…`, so for example `(T007): DAC-E1-S9-4, DAC-E1-7, AC-5, AC-6`.
+- **LOW, `retire-dialog.test.tsx:179-186`, weak outside-click test.** The no-outside-click part passes trivially, because the component attaches no outside-click handler, so it would only catch a regression that added one. This matches the sibling's convention and T008(d) as written, so no change is needed.
+
+CODE_REVIEW_VERDICT: APPROVED

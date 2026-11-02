@@ -1,0 +1,43 @@
+I found no spec drift in cycle 2. The patch does what T004, T005, T006, T014 and the three T011 strings require, and I found nothing the plan, designs or decisions forbid. I checked it against the story, the task plan, UX design 1.4 (lines 939–1113), classification-ui section 2.7, DEC-0104, DEC-0109, DEC-0145 and DEC-0270, and against the current `copy.ts`, `dialog-frame.tsx` and `create-dialog.tsx`. I did not run the tests.
+
+**Wording (`copy.ts`)**
+- **`addedStocks`** wraps the existing `DIALOGS.added` and only changes "stocks" to "stock" when one stock was added. The clause *, and {m} were already members* stays exactly as written at every m > 0, including 1, with no trailing period. That matches DEC-0109, T011 and T014. No pluralising builder or second clause key was added.
+- **`allAlreadyMembers`** reads *All {m} were already members of {name}.*, as DEC-0109 requires.
+- **`addNotFollowed`** reads *Could not add the stocks: FactorFlow doesn't follow {symbols}. Follow them on Data health, then try again.* It is its own entry, not the create sentence, as DEC-0109 and T011 require.
+- **Reused strings:** the blocked reasons reuse the create dialog's existing keys, so no second key exists for either. The retired refusal reuses `UNIVERSE_LIFECYCLE.retiredRefusal`. The generic error uses `failureSentence`, keyed by error code only.
+- **Retire scan (DEC-0145):** none of the new strings contains *retire*, and `copy.test.ts` is not touched.
+
+**Props contract (T014)**
+- The props are exactly `{ universeName, error, result, pending, onSubmit, onCancel }`.
+- The `error` union matches the plan.
+- `AddMembersResult` is `{ added: string[]; alreadyMember: string[] }`, the shape T014 states.
+- `onSubmit` receives the distinct upper-case symbols in the order entered.
+
+**Variants and ARIA**
+- The dialog is `<dialog open aria-modal="true" data-variant="standard">`, through the shared dialog frame, titled *Add stocks to {name}*. The frame adds `aria-busy` while pending.
+- There is one `textarea` with `data-variant="list"` and `rows=4`.
+- **Add** shows as `blocked` while no symbol is recognised or more than 1000 are. While blocked it stays focusable (`tabIndex=0`, no `disabled`) and points to its reason sentence through `aria-describedby`. It is natively disabled only while `pending`; **Cancel** is never disabled.
+- Errors render as `role="alert"`. The not-followed error contains a link to `/instruments` (the followed-stocks page). The entered list is kept on every error.
+- The `result` renders in an `<output>` element (implicit `role="status"`, polite) and never as an error. Text is plain; no raw HTML is inserted.
+
+**Focus**
+- Initial focus is on the textarea.
+- Escape cancels, Tab and Shift+Tab cycle inside the dialog, and focus returns to the previously focused element on unmount.
+
+**Parsing**
+- The field uses the delivered `parseBulkSymbols`, imported rather than copied.
+- It parses on paste and on blur, never per keystroke, and normalises to upper case on blur, as `create-dialog.tsx` does.
+- The 1000 limit counts entries as the parser returns them, duplicates included, while duplicates are sent once (DEC-0104).
+
+**Tests**
+- TC-COMP-031, TC-COMP-032 and T006 (a)–(f) are all covered.
+- Owner-facing strings are asserted as literals, not imported from `copy.ts`.
+- Using comma-separated lists, and expecting the kept list one symbol per line after blur, follows DEC-0270.
+- The `// Implements` comment sits on each `describe` block, the way the create dialog's tests already do it.
+
+**Observations (not drift)**
+- **Closing while a request is in flight.** Escape and a click outside the dialog both call `onCancel` even while a request is pending. The shared frame's comment says each dialog should ignore cancel during a request (DEC-0259). The create dialog does that, but this one passes `onCancel` straight through. T006(e) explicitly requires **Cancel** to stay enabled while pending, and DEC-0259 is scoped to CAP-002-E4-S8, so whether a mid-request cancel is ignored falls to the screen in the T016 cycle. Worth checking there.
+- **No loading spinner on Add.** There is no in-place spinner (`ConfirmProgress`) while a request is pending. Nothing in this story's plan requires one.
+- **Fragile singular wording.** `addedStocks` makes the singular with `.replace("Added 1 stocks", …)`. That is correct today but breaks silently if `DIALOGS.added` is ever reworded. This is a code-quality point, not a spec point.
+
+DRIFT_DETECTED: false

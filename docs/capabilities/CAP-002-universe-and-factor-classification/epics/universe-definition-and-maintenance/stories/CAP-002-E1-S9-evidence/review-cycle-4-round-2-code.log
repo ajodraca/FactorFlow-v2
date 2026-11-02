@@ -1,0 +1,25 @@
+**Code review verdict: APPROVED.** There are no CRITICAL, HIGH or MEDIUM findings. I could not run the tests here because the commands needed approval. Instead I relied on the committed `green-cycle-4.log`, which shows vitest 587/587, `tsc`, `biome lint` and `biome format` all exiting 0. The working-tree `index.tsx` (413 lines) and `index.test.tsx` (777 lines) are the same length as the patch.
+
+**The three round-1 MEDIUMs and the drift item are all fixed:**
+- **A failed read after load no longer wipes the page.** In `reread`, a failed read (`web/src/screens/research/universes/detail/index.tsx:147-151`) only replaces the page before the first load. Once loaded, the page stays and the failure sentence goes into the status region, so the header is retained as UX 1.4 States requires. The test at `index.test.tsx:680-691` covers it.
+- **Cancelling a dialog on a universe retired meanwhile now moves focus to the `h1`.** `closeDialog` (`index.tsx:274-282`) together with the focus effect at `:176-181` does this. The ordering works: the dialog's unmount cleanup first tries to refocus a trigger that is no longer on the page, which does nothing, and then the effect focuses the `h1`. Tests cover both the retire dialog and the Add stocks dialog (`index.test.tsx:238-249`, `:469-481`).
+- **The rename's and the retire's own responses render at once.** `show()` applies the response, then `reread()` runs in the same tick and supersedes any read in flight, so an older read cannot bring the old name back. Tests are at `index.test.tsx:669-678`, `:225-236` and `:743-760`.
+- **The test nits are fixed:** `as_of` across reload is covered (`:350-357`), the `value.*` threshold keys (`:401-415`), and exactly one navigation for `onViewMembersAsOf` (`:417-427`).
+
+**Fresh review of the whole patch:**
+- **Correctness:** reads are ordered by a generation counter, and the tests cover a superseded read both succeeding and failing (`:727-741`, `:762-776`). Both dialogs stay open while their request is pending, through Cancel and through Escape. Only `tab` and `as_of` are written to the URL.
+- **Accessibility:** the tabs follow the tablist pattern: only the active tab is in the Tab order, the arrow keys, Home and End work, the panel is focusable and labelled by its tab, and the default is suppressed only for the keys handled. There is one polite status region. The breadcrumb is a labelled `nav` with `aria-current` on the last crumb. No focus moves on load.
+- **Tests:** each traces to TC-COMP-058, TC-COMP-044 (page) or T010, tests one behaviour, and would fail if that behaviour broke. The mutation-sensitive cases are there: the mount counts and the read-call counts.
+- **Conventions:** the host keeps the dialogs open while pending through the same `pending` guard as Members' remove dialog, and every string comes from `copy.ts`.
+
+**Findings:**
+
+1. **LOW, `index.tsx:141` and `:147-148`: a failure message can stay up after the data recovers.** Once a later re-read fails, the status region says "Could not load the universe: … Try again." The next successful read, for example from `onMembershipChanged`, does not clear it. So the page shows fresh data under a failure message until another write replaces the text. Also, the sentence says "Try again." but no Try again control is offered in this state; UX 1.4's Error row pairs the sentence with one. Possible fix: clear the status when a read succeeds after a read failure, or add a Try again control in this state.
+
+2. **LOW, `index.tsx:274-282`, `:399` and `:408`: focus can still be lost in a narrow timing window.** `retired` is taken from the current render. Suppose the user cancels the dialog after the `universe_retired` refusal shows but before the follow-up re-read returns. Focus goes back to the trigger (**Retire…** or **Add stocks…**), and that trigger then disappears when the read lands, so focus drops to `body`. The round-1 fix covers the usual order, where the read lands first. Possible fix: also set `focusHeading` when the dialog's error is `universe_retired`.
+
+3. **LOW, `index.tsx:123-124`: `readRef.current = read` is written during render.** It works today, because only the async catch reads it and that runs after commit. Under concurrent rendering, though, a render that is thrown away could leave the ref ahead of what is on screen. Possible fix: update it in an effect.
+
+**Carried LOWs, still present and acceptable:** tab changes push history entries; a repeated identical status text is not re-announced; state is not reset if `universeId` changes while the screen is mounted; only the active panel is mounted.
+
+CODE_REVIEW_VERDICT: APPROVED

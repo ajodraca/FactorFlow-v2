@@ -1,0 +1,38 @@
+I approve this patch. I found no CRITICAL, HIGH or MEDIUM issues, only two new LOWs.
+
+**How I checked:** I read the whole patch and the code it depends on: the retire, add-stocks and remove dialogs, the summary header, the Members and History tabs, T009, T010, T016 and T017 in the task plan, and DEC-0109. I couldn't run the tests myself, because each attempt needed approval. The pass results come from `green-cycle-4.log`, which records all 51 tests in `index.test.tsx` passing (588 across the files it ran), and `tsc --noEmit` and the Biome lint and format checks clean.
+
+**Both round-2 fixes are in place:**
+- **Later read failing:** the failure sentence and **Try again** now show under the header (`index.tsx:1164-1175`). A successful read clears them (`index.tsx:964`), and the status region holds confirmations only. Two tests cover this: `index.test.tsx:703` and `index.test.tsx:717`.
+- **Traceability tag:** the TC-COMP-044 describe block carries `// Implements TC-COMP-044` (`index.test.tsx:217`).
+
+**The rest of the patch, reviewed afresh:**
+- **Correctness:**
+  - The generation counter drops results from any read that a newer read or write has replaced. Tests cover a stale success, a stale failure, and a rename's response landing while a read is in flight.
+  - `show()` applies a write's result immediately and then starts a fresh read, so an older read can't bring back the previous state.
+  - A `universe_retired` refusal on rename, add or retire re-reads the header.
+- **Dialogs stay open while pending (dialog spec section 4):** the guard in `closeDialog` is really tested. Neither dialog disables **Cancel** or swallows Escape itself, so the two pending tests (`index.test.tsx:296` and `:553`) would fail if the host's guard were removed.
+- **Focus:** after a retirement, and after closing a dialog on a universe retired elsewhere, focus moves to the `h1` once. The header's `h1` has `tabIndex={-1}`, so it can take focus.
+- **Tabs:** they follow the contract: roving `tabIndex`, `preventDefault` on the keys it handles, one focusable `tabpanel` labelled by the active tab.
+- **URL:** only `tab` and `as_of` are written, and the Research filter parameters survive.
+- **T017 (host side):** `MembersTab` closes its Remove dialog before calling `onRetire` (`members-tab.tsx:478-481`), so the two dialogs don't stack.
+- **Coverage:** every item in T010 (a) to (h) and every T009 assertion has a test.
+- **Conventions:** the patch matches `remove-dialog.tsx` and its test. Strings come from `copy.ts`, and the only one added is `UNIVERSE_DETAIL.breadcrumb`.
+
+**Findings:**
+- **LOW, `index.tsx:1164-1175`:** the failure line for a later read is a plain `<p>` with no `role="alert"` or live region. If a background re-read fails (for example after `onMembershipChanged`), a screen-reader user isn't told. This matches how `HistoryTab` and the first-load error behave, so it's consistent with the baseline.
+- **LOW, `index.test.tsx:730`:** the test is named "a refused rename keeps the field error and, for universe_retired, re-reads the header", but it only checks the re-read. Nothing confirms the field error stays shown, so either add that assertion or shorten the name.
+
+**Carried LOWs, unchanged:**
+- Each tab change pushes a new history entry.
+- The same status sentence twice in a row isn't re-announced.
+- Nothing resets if `universeId` changes while the page is mounted.
+- Only the active panel is mounted.
+- An unreachable API on the first read shows the generic sentence.
+- A first-load error also replaces the breadcrumb.
+
+**Not findings, but worth knowing:**
+- The test that checks there's one status region (`index.test.tsx:676`) passes because the tabs are stubbed. The real `MembersTab` has its own polite region for removal confirmations (DEC-0107), so the live page has more than one status region. That's allowed under the decisions.
+- The evidence folder has no `mutation-cycle-4-results.json`, although cycles 1 to 3 each have one.
+
+CODE_REVIEW_VERDICT: APPROVED
