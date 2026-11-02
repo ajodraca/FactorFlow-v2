@@ -819,10 +819,14 @@ def _check_limit(limit: int) -> None:
 
 def _decode_page_cursor(cursor: str | None) -> tuple[datetime | None, UUID | None]:
     """The ``runs.queries`` keyset ``(timestamp, id)``, or ``(None, None)`` on a first page; its
-    ``CursorError`` is the reader's (one wire format, SA-DUP-001)."""
+    ``CursorError`` is the reader's (one wire format, SA-DUP-001). A field of the wrong JSON type,
+    which ``decode_cursor`` lets escape as ``TypeError`` or ``AttributeError``, is malformed too."""
     if cursor is None:
         return None, None
-    return _run_queries.decode_cursor(cursor)
+    try:
+        return _run_queries.decode_cursor(cursor)
+    except (TypeError, AttributeError) as exc:
+        raise CursorError(f"cursor field error: {exc}") from exc
 
 
 def evaluate_filter(conn: psycopg.Connection, set_id: UUID, thresholds: Thresholds) -> list[int]:

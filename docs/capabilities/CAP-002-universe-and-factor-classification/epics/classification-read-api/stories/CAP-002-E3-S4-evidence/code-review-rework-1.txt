@@ -1,0 +1,72 @@
+# Code review, rework-1, round 2 (final; judged rework-1.patch as recorded). Fresh claude -p session, Read/Grep/Glob only.
+**Review of the CAP-002-E3-S4 rework-1 staged diff (IR-001, IR-002, IR-005)**
+
+All three code findings are resolved the way the review's "Required remediation" asks, and I found nothing blocking. I did not run the tests or the mutants, as instructed. Every conclusion below comes from reading the code.
+
+**IR-001: resolved**
+- `tests/integration/test_reader_history.py:411` creates three earlier complete sets on one `classification_date`. It sorts their generated ids first, then sets their times:
+
+  | Set | Starts | Ends |
+  |---|---|---|
+  | smallest id | 08:00 | 11:00 |
+  | middle id | 08:01 | 09:00 |
+  | largest id | 08:02 | 10:00 |
+
+- The expected order is therefore smallest, largest, middle. No ordering by date, by id or by `started_at`, in either direction, produces that order. The test cannot pass on a wrong ordering.
+- It does not depend on random UUIDs: each set's role comes from its sorted position, so the arrangement is the same on every run.
+- The current set is the one with the latest `ended_at` (13:00), and `current_set.sql:9` orders by `ended_at`. So the excluded set is the same on every run, even though all four sets share a date.
+- Both mutants that survived the review are killed on every run:
+  - The final-order mutant returns largest, middle, smallest, which fails the unpaged assertion.
+  - The page-order mutant at `limit=1` takes {largest, middle} into the page and returns largest first, which fails the `limit=1` assertion.
+- The test asserts the order unpaged, the `ended_at` values, the shared date, and paging at `limit=1` and `limit=2` with no set repeated or skipped.
+
+**IR-002: resolved, and the wrapping is not too broad**
+- `reader.py:826-829` re-raises only `TypeError` and `AttributeError`, as a chained `CursorError`.
+- In `runs/queries.py:172-195`, `_pad`, base64 and `json.loads` are already inside a catch-all that raises `CursorError`. `data` is known to be a dict before the fields are read. So the only places these two exceptions can come from are `fromisoformat` and `UUID()` given a wrong JSON type.
+- `tests/unit/test_reader_paging.py:110-114` adds four cases (`ts` as 5 or null, `id` as 5 or null). They run against both reads, and each must raise `CursorError` before any statement.
+- DEC-0268 records why the fix sits in the reader rather than in `runs.queries`. It keeps one wire format and copies no code.
+
+**IR-005: resolved**
+- `test_reader_volume.py:317` now requires every `factor_classification` access in the history plan to carry an Index Cond naming `instrument_id`, through the generalised helper at `:121`.
+- With the `instrument_id + 0` mutant, the `page_sets` access loses its Index Cond, so the assertion fails. The list test's `set_id` check is unchanged.
+
+**IR-003 / IR-004:** DEC-0265 is amended to `class: propagating` and now blocks CAP-002-E3-S5, as IR-003 asked. DEC-0269 records the read window as accepted, which IR-004 lists as a valid remedy.
+
+**Constitution:** Nothing conflicts. The new tests use pytest, the `postgres` marker and a fresh database per test, and the production change stays in a file the task plan lists.
+
+**Findings**
+1. NON-BLOCKING, `src/factorflow/classification/reader.py:828`: the `except` wraps the whole `decode_cursor` call. If a future bug inside `decode_cursor` raised `TypeError` or `AttributeError`, it would surface as a 422 `CursorError` instead of a 500. Today that is unreachable. Wrapping the field lookups alone would need the fix in `runs.queries`, which DEC-0268 rules out.
+2. NON-BLOCKING, `src/factorflow/runs/queries.py:191`: a cursor with a timestamp but no time zone is still accepted and read in the session's time zone. DEC-0268 records this as outside IR-002 (DEC-0136 already accepts that a tampered cursor gives a wrong page). The same type-confusion gap on `/api/runs` is left as a follow-up for CAP-001.
+3. NON-BLOCKING, `tests/integration/test_reader_volume.py:137`: the IR-005 check depends on the plan PostgreSQL chooses. If the final join ever used an index keyed only on `set_id`, with `instrument_id` as a Filter, the test would fail even though the query is correct. The review asked for exactly this check, and the review's own EXPLAIN shows both accesses use the instrument index, so I accept it.
+4. NON-BLOCKING, evidence directory: there are no rework-1 RED or GREEN logs yet, only cycle-1's. So I could not confirm from evidence that the four new cursor cases failed before the fix and that the new history test passes.
+
+VERDICT: APPROVED
+
+# Round 1 (judged an earlier staged diff whose same-day test left started_at and set_id ASC order to chance; its two NON-BLOCKING notes were taken, the test re-laid, re-mutated and re-reviewed above)
+I found no blocking findings. All three code findings are fixed the way the review's "Required remediation" asks, and the decision records cover IR-003 and IR-004. As instructed, I did not run the tests, the mutants or git commands that change state; everything below comes from reading the code and documents.
+
+**IR-001: resolved.** The new test is `test_history_orders_same_day_reruns_by_ended_at_not_by_date_or_id` (`tests/integration/test_reader_history.py:411`).
+- It builds three earlier complete sets plus a current set, all on 2026-10-02. After reading the generated ids, it sorts them and gives the newest `ended_at` (11:00, 10:00, 09:00) to the smallest id, so the outcome does not depend on the random UUIDs.
+- The current set ends at 13:00, after all three, so it really is the one left out.
+- It checks the order unpaged, paged at `limit=1` and paged at `limit=2`, so no set can repeat or go missing.
+- Both surviving mutants become `classification_date DESC, set_id DESC`. Since all dates are equal, they reduce to `set_id DESC`, which returns the exact reverse of the expected order. Both are killed on every run.
+
+**IR-002: resolved, and the wrapping is not too broad.** The fix is in `src/factorflow/classification/reader.py:826-829`.
+- The `try` covers only the call to `decode_cursor` (`runs/queries.py:172-195`). That function already turns base64, JSON, non-object, version, missing-key and bad-value errors into `CursorError`.
+- The only remaining sources of `TypeError` or `AttributeError` are `datetime.fromisoformat(data["ts"])` and `UUID(data["id"])` given a field of the wrong type. That is the class IR-002 names, so the wrapping cannot hide an unrelated bug.
+- The original error stays attached via `from exc`, and the message wording matches `decode_cursor`'s own.
+- The four new cases (`tests/unit/test_reader_paging.py:110-114`) are a non-string and a null value for each of `ts` and `id`. Each runs through both reads and also checks that no statement executed. DEC-0268 records where the fix lives and why `runs.queries` is unchanged.
+
+**IR-005: resolved.** `tests/integration/test_reader_volume.py:121-138` and `:317` now take the column name as a parameter. Every `factor_classification` access in the history plan must be an index scan whose Index Cond names `instrument_id`. Under the `+0` mutant, the access that picks the page of sets loses its Index Cond, so the assertion fails. The existing `set_id` call site is unchanged in meaning (`:244`).
+
+**IR-003 / IR-004: resolved by decision record.** DEC-0265 is now `class: propagating` and lists CAP-002-E3-S5 under `blocks`. DEC-0269 records the two-statement read window as accepted, as the review allowed.
+
+**Findings**
+
+1. **NON-BLOCKING** (`tests/integration/test_reader_history.py:421-423`): the test does not control `started_at`. The three sets start at 08:00, 08:01 and 08:02 in creation order, which is unrelated to the sorted ids. A mutant that orders history by `started_at DESC` matches the expected order with probability 1/6. That mutant is plausible, because the set list does sort by `started_at`. The other history tests seed `started_at` in `ended_at` order, so they don't catch it either. As a result, a `started_at` regression is killed with probability 5/6 (the `ORDER BY started_at` mutant), not deterministically. The docstring's "neither the date nor the id gives the order" is true, but the start time is left to chance. Fix: give `started_at` an order that differs from both `ended_at` and the ids, for example by updating `started_at` along with `ended_at`.
+2. **NON-BLOCKING** (`tests/integration/test_reader_history.py:430`): the expected order equals ascending `set_id`. A mutant that orders by `set_id ASC` alone would pass this test. Other tests catch it only by chance, though keyset paging on `ended_at` likely breaks it. A non-monotone layout, such as giving the newest `ended_at` to the middle id, would close this as well.
+3. **NON-BLOCKING / informational** (`src/factorflow/classification/reader.py:826`): a `ts` without a time zone is still accepted, and `/api/runs` keeps the same type-confusion gap. DEC-0268 records both as outside IR-002 and sends the `/api/runs` gap to the owner as a CAP-001 follow-up. Both are acceptable.
+
+I found no violations of the constitution. No production behaviour changes other than the cursor error type, and the new tests follow existing patterns: seeding from stored values, and the fake connection for checks that run before any statement.
+
+VERDICT: APPROVED

@@ -1,0 +1,551 @@
+# RED rework-1 (CAP-002-E3-S4, rework of implementation review v1)
+# Part 1 - IR-002: the new tests with production unchanged (HEAD 4b0bbd4, reader.py as reviewed); PostgreSQL 16.15 via -p localpg_plugin (DEC-0264).
+# Command: PYTHONPATH=src:<scratch>/plugin .venv/bin/python -m pytest -q -p localpg_plugin -p no:cacheprovider -p no:randomly tests/unit/test_reader_paging.py tests/unit/test_reader_sql_read_only.py tests/integration/test_reader_history.py tests/integration/test_reader_volume.py
+# The 8 failures are the four type-confused cursors x two reads, escaping as TypeError/AttributeError. The IR-001 and IR-005 tests pass here because the production code is correct (review v1); their RED is part 2.
+...........................FFFFFFFF..................................... [ 87%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_history] _
+
+read = <function _history at 0x7fe86d10fce0>
+cursor = 'eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:61: in _history
+    return reader.stock_history(fake, "AAPL", limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:727: in stock_history
+    after_ended_at, after_set_id = _decode_page_cursor(cursor)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cursor = 'eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    def decode_cursor(cursor: str) -> tuple[datetime, UUID]:
+        """Decode a cursor back to (requested_at, run_id).
+    
+        Raises `CursorError` if the cursor is malformed or has an unsupported version.
+        """
+        if not cursor:
+            raise CursorError("empty cursor")
+        try:
+            raw = base64.urlsafe_b64decode(_pad(cursor))
+            data = json.loads(raw)
+        except Exception as exc:
+            raise CursorError(f"malformed cursor: {exc}") from exc
+        if not isinstance(data, dict):
+            raise CursorError("cursor payload is not a JSON object")
+        if data.get("v") != _CURSOR_VERSION:
+            raise CursorError(
+                f"unsupported cursor version {data.get('v')!r}; expected {_CURSOR_VERSION}"
+            )
+        try:
+>           ts = datetime.fromisoformat(data["ts"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: fromisoformat: argument must be str
+
+src/factorflow/runs/queries.py:191: TypeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_sets] _
+
+read = <function _sets at 0x7fe86cd80ea0>
+cursor = 'eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:65: in _sets
+    return reader.list_sets(fake, limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:772: in list_sets
+    after_started_at, after_set_id = _decode_page_cursor(cursor)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cursor = 'eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    def decode_cursor(cursor: str) -> tuple[datetime, UUID]:
+        """Decode a cursor back to (requested_at, run_id).
+    
+        Raises `CursorError` if the cursor is malformed or has an unsupported version.
+        """
+        if not cursor:
+            raise CursorError("empty cursor")
+        try:
+            raw = base64.urlsafe_b64decode(_pad(cursor))
+            data = json.loads(raw)
+        except Exception as exc:
+            raise CursorError(f"malformed cursor: {exc}") from exc
+        if not isinstance(data, dict):
+            raise CursorError("cursor payload is not a JSON object")
+        if data.get("v") != _CURSOR_VERSION:
+            raise CursorError(
+                f"unsupported cursor version {data.get('v')!r}; expected {_CURSOR_VERSION}"
+            )
+        try:
+>           ts = datetime.fromisoformat(data["ts"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: fromisoformat: argument must be str
+
+src/factorflow/runs/queries.py:191: TypeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_history] _
+
+read = <function _history at 0x7fe86d10fce0>
+cursor = 'eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:61: in _history
+    return reader.stock_history(fake, "AAPL", limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:727: in stock_history
+    after_ended_at, after_set_id = _decode_page_cursor(cursor)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cursor = 'eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    def decode_cursor(cursor: str) -> tuple[datetime, UUID]:
+        """Decode a cursor back to (requested_at, run_id).
+    
+        Raises `CursorError` if the cursor is malformed or has an unsupported version.
+        """
+        if not cursor:
+            raise CursorError("empty cursor")
+        try:
+            raw = base64.urlsafe_b64decode(_pad(cursor))
+            data = json.loads(raw)
+        except Exception as exc:
+            raise CursorError(f"malformed cursor: {exc}") from exc
+        if not isinstance(data, dict):
+            raise CursorError("cursor payload is not a JSON object")
+        if data.get("v") != _CURSOR_VERSION:
+            raise CursorError(
+                f"unsupported cursor version {data.get('v')!r}; expected {_CURSOR_VERSION}"
+            )
+        try:
+>           ts = datetime.fromisoformat(data["ts"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: fromisoformat: argument must be str
+
+src/factorflow/runs/queries.py:191: TypeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_sets] _
+
+read = <function _sets at 0x7fe86cd80ea0>
+cursor = 'eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:65: in _sets
+    return reader.list_sets(fake, limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:772: in list_sets
+    after_started_at, after_set_id = _decode_page_cursor(cursor)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cursor = 'eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ'
+
+    def decode_cursor(cursor: str) -> tuple[datetime, UUID]:
+        """Decode a cursor back to (requested_at, run_id).
+    
+        Raises `CursorError` if the cursor is malformed or has an unsupported version.
+        """
+        if not cursor:
+            raise CursorError("empty cursor")
+        try:
+            raw = base64.urlsafe_b64decode(_pad(cursor))
+            data = json.loads(raw)
+        except Exception as exc:
+            raise CursorError(f"malformed cursor: {exc}") from exc
+        if not isinstance(data, dict):
+            raise CursorError("cursor payload is not a JSON object")
+        if data.get("v") != _CURSOR_VERSION:
+            raise CursorError(
+                f"unsupported cursor version {data.get('v')!r}; expected {_CURSOR_VERSION}"
+            )
+        try:
+>           ts = datetime.fromisoformat(data["ts"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: fromisoformat: argument must be str
+
+src/factorflow/runs/queries.py:191: TypeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOjV9-_history] _
+
+read = <function _history at 0x7fe86d10fce0>
+cursor = 'eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOjV9'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:61: in _history
+    return reader.stock_history(fake, "AAPL", limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:727: in stock_history
+    after_ended_at, after_set_id = _decode_page_cursor(cursor)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/runs/queries.py:192: in decode_cursor
+    run_id = UUID(data["id"])
+             ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x7fe86c50ab90>
+hex = 5, bytes = None, bytes_le = None, fields = None, int = None
+version = None, is_safe = <SafeUUID.unknown: None>
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a 16-byte bytes object as the 'bytes' argument, a 16-byte bytes object
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes=b'\x12\x34\x56\x78'*4)
+        UUID(bytes_le=b'\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      b'\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+            raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+        if hex is not None:
+>           hex = hex.replace('urn:', '').replace('uuid:', '')
+                  ^^^^^^^^^^^
+E           AttributeError: 'int' object has no attribute 'replace'
+
+/usr/local/lib/python3.13/uuid.py:178: AttributeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOjV9-_sets] _
+
+read = <function _sets at 0x7fe86cd80ea0>
+cursor = 'eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOjV9'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:65: in _sets
+    return reader.list_sets(fake, limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:772: in list_sets
+    after_started_at, after_set_id = _decode_page_cursor(cursor)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/runs/queries.py:192: in decode_cursor
+    run_id = UUID(data["id"])
+             ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x7fe86c69f710>
+hex = 5, bytes = None, bytes_le = None, fields = None, int = None
+version = None, is_safe = <SafeUUID.unknown: None>
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a 16-byte bytes object as the 'bytes' argument, a 16-byte bytes object
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes=b'\x12\x34\x56\x78'*4)
+        UUID(bytes_le=b'\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      b'\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+            raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+        if hex is not None:
+>           hex = hex.replace('urn:', '').replace('uuid:', '')
+                  ^^^^^^^^^^^
+E           AttributeError: 'int' object has no attribute 'replace'
+
+/usr/local/lib/python3.13/uuid.py:178: AttributeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOm51bGx9-_history] _
+
+read = <function _history at 0x7fe86d10fce0>
+cursor = 'eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOm51bGx9'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:61: in _history
+    return reader.stock_history(fake, "AAPL", limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:727: in stock_history
+    after_ended_at, after_set_id = _decode_page_cursor(cursor)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/runs/queries.py:192: in decode_cursor
+    run_id = UUID(data["id"])
+             ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x7fe86d10bf90>
+hex = None, bytes = None, bytes_le = None, fields = None, int = None
+version = None, is_safe = <SafeUUID.unknown: None>
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a 16-byte bytes object as the 'bytes' argument, a 16-byte bytes object
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes=b'\x12\x34\x56\x78'*4)
+        UUID(bytes_le=b'\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      b'\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+>           raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+E           TypeError: one of the hex, bytes, bytes_le, fields, or int arguments must be given
+
+/usr/local/lib/python3.13/uuid.py:175: TypeError
+_ test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOm51bGx9-_sets] _
+
+read = <function _sets at 0x7fe86cd80ea0>
+cursor = 'eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOm51bGx9'
+
+    @pytest.mark.parametrize("read", READS)
+    @pytest.mark.parametrize("cursor", MALFORMED)
+    def test_malformed_cursor_is_refused_before_any_statement(
+        read: Callable[..., Any], cursor: str
+    ) -> None:
+        fake = RecordingConnection()
+    
+        with pytest.raises(reader.CursorError):
+>           read(fake, 10, cursor)
+
+tests/unit/test_reader_paging.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_reader_paging.py:65: in _sets
+    return reader.list_sets(fake, limit=limit, cursor=cursor)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:772: in list_sets
+    after_started_at, after_set_id = _decode_page_cursor(cursor)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/classification/reader.py:825: in _decode_page_cursor
+    return _run_queries.decode_cursor(cursor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/runs/queries.py:192: in decode_cursor
+    run_id = UUID(data["id"])
+             ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x7fe86c6731d0>
+hex = None, bytes = None, bytes_le = None, fields = None, int = None
+version = None, is_safe = <SafeUUID.unknown: None>
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a 16-byte bytes object as the 'bytes' argument, a 16-byte bytes object
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes=b'\x12\x34\x56\x78'*4)
+        UUID(bytes_le=b'\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      b'\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+>           raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+E           TypeError: one of the hex, bytes, bytes_le, fields, or int arguments must be given
+
+/usr/local/lib/python3.13/uuid.py:175: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_history]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6NSwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_sets]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_history]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6bnVsbCwiaWQiOiIwYjBlOGU3Yy0xMTExLTQyMjItODMzMy00NDQ0NTU1NTY2NjYifQ-_sets]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOjV9-_history]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOjV9-_sets]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOm51bGx9-_history]
+FAILED tests/unit/test_reader_paging.py::test_malformed_cursor_is_refused_before_any_statement[eyJ2IjoxLCJ0cyI6IjIwMjYtMTAtMTRUMjI6MzU6MDEuMTIzNDU2KzAwOjAwIiwiaWQiOm51bGx9-_sets]
+8 failed, 74 passed in 11.76s
+
+# Part 2 - IR-001 and IR-005: the review's surviving mutants against the tests as reviewed (clone of HEAD 4b0bbd4, no rework), scripts/mutation-run.py, same focused files, no -x:
+survived  manual:rv-hist-page-order-by-date-tests-as-reviewed | ORDER BY s.ended_at DESC, s.set_id DESC -> ORDER BY s.classification_date DESC, s.set_id DESC
+killed    manual:rv-hist-final-order-by-date-tests-as-reviewed | ORDER BY p.ended_at DESC, p.set_id DESC, -> ORDER BY p.classification_date DESC, p.set_id DESC,
+survived  manual:rv-hist-index-defeated-tests-as-reviewed | WHERE fc.instrument_id = (SELECT instrument_id FROM inst) -> WHERE fc.instrument_id + 0 = (SELECT instrument_id FROM inst)
+results sha256 of red-mutation-results.json: 4c727066ff309c51b6831ff7074dadef31b4db988c0efe52962d22d85c10c8a4
+# Review v1's own runs: page-order survived 5/5, final-order 2/5 (killed only by chance via the midnight-crossing tie test), index-defeated survived.
+# With rework-1 staged, all three are killed (mutation-rework-1-results.json); the two date-order mutants plus started_at and set_id-ASC order mutants are killed by test_history_orders_same_day_reruns_by_ended_at_not_by_date_or_id alone in 3 of 3 runs each:
+killed    manual:rv-hist-page-order-by-date-only-new-test-r1
+killed    manual:rv-hist-final-order-by-date-only-new-test-r1
+killed    manual:rw1-hist-page-order-by-started-only-new-test-r1
+killed    manual:rw1-hist-final-order-by-id-asc-only-new-test-r1
+killed    manual:rv-hist-page-order-by-date-only-new-test-r2
+killed    manual:rv-hist-final-order-by-date-only-new-test-r2
+killed    manual:rw1-hist-page-order-by-started-only-new-test-r2
+killed    manual:rw1-hist-final-order-by-id-asc-only-new-test-r2
+killed    manual:rv-hist-page-order-by-date-only-new-test-r3
+killed    manual:rv-hist-final-order-by-date-only-new-test-r3
+killed    manual:rw1-hist-page-order-by-started-only-new-test-r3
+killed    manual:rw1-hist-final-order-by-id-asc-only-new-test-r3

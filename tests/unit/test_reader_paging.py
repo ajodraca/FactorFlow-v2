@@ -107,6 +107,11 @@ MALFORMED = [
     _raw({"v": 1, "ts": TS.isoformat(), "id": "not-a-uuid"}),
     _raw({"v": 1, "ts": "yesterday", "id": str(SET_ID)}),
     _raw({"v": 1, "id": str(SET_ID)}),
+    # Fields of the wrong JSON type (review v1 IR-002).
+    _raw({"v": 1, "ts": 5, "id": str(SET_ID)}),
+    _raw({"v": 1, "ts": None, "id": str(SET_ID)}),
+    _raw({"v": 1, "ts": TS.isoformat(), "id": 5}),
+    _raw({"v": 1, "ts": TS.isoformat(), "id": None}),
 ]
 
 

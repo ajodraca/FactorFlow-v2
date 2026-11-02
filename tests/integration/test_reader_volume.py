@@ -118,8 +118,8 @@ def _seq_scanned(plan: dict[str, Any]) -> set[str]:
     return {n["Relation Name"] for n in _nodes(plan) if n["Node Type"] == "Seq Scan"}
 
 
-def _assert_classification_reads_keyed_on_set(plan: dict[str, Any]) -> int:
-    """Every ``factor_classification`` access has an index condition naming ``set_id``."""
+def _assert_classification_reads_keyed_on(plan: dict[str, Any], column: str) -> int:
+    """Every ``factor_classification`` access has an index condition naming ``column``."""
     accesses = 0
     for node in _nodes(plan):
         if node.get("Relation Name") != "factor_classification":
@@ -134,7 +134,7 @@ def _assert_classification_reads_keyed_on_set(plan: dict[str, Any]) -> int:
         else:
             assert node["Node Type"] in ("Index Scan", "Index Only Scan"), node["Node Type"]
             conditions = [node.get("Index Cond", "")]
-        assert conditions and all("set_id" in c for c in conditions), node
+        assert conditions and all(column in c for c in conditions), node
     return accesses
 
 
@@ -241,7 +241,7 @@ def test_list_sort_and_count_at_3000_stocks_are_correct_and_indexed(
                     assert "instrument" not in scanned, (sort, order, scanned)
                 assert str(older) not in text, (sort, order)
                 if "factor_classification" in query:  # the list statement itself
-                    assert _assert_classification_reads_keyed_on_set(plan) > 0
+                    assert _assert_classification_reads_keyed_on(plan, "set_id") > 0
                     assert str(current) in text  # the bound set is the one the plan reads
     elapsed = time.perf_counter() - started
     print(f"\nTC-COMP-153: 14 full passes over {STOCKS} stocks in {elapsed:.2f}s (diagnostic only)")
@@ -313,6 +313,8 @@ def test_thresholds_summary_history_and_sets_at_3000_stocks(
     plan = _plan(conn, history_query, history_params)
     assert "factor_classification" not in _seq_scanned(plan)
     assert "idx_factor_classification_instrument" in json.dumps(plan)
+    # A keyed probe, not a full scan of the same index (review v1 IR-005).
+    assert _assert_classification_reads_keyed_on(plan, "instrument_id") > 0
     assert "factor_input" not in json.dumps(plan)
 
     recording = RecordingConnection(conn)

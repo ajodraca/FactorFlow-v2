@@ -408,6 +408,48 @@ def test_history_breaks_an_ended_at_tie_by_set_id_descending(
     assert _all_history(conn, "AAPL", limit=2) == [expected[:2], expected[2:]]
 
 
+def test_history_orders_same_day_reruns_by_ended_at_not_by_date_or_id(
+    migrated_run_schema_connection: psycopg.Connection,
+) -> None:
+    """Same-day re-runs (plan Open Gap 4): three earlier complete sets share one
+    ``classification_date`` and end an hour apart. Newest ``ended_at`` first is the smallest
+    ``set_id``, then the largest, then the middle one; the newest starts first and the largest
+    last, so neither the date, the id nor ``started_at`` gives that order in either direction,
+    nor picks the right page. History is newest ``ended_at`` first, unpaged and paged, no set
+    repeated or skipped (DEC-0137; review v1 IR-001)."""
+    conn = migrated_run_schema_connection
+    day = date(2026, 10, 2)
+    morning = datetime(2026, 10, 2, 8, 0, tzinfo=UTC)
+    same_day = [_set(conn, started_at=morning, classification_date=day) for _ in range(3)]
+    current = _set(
+        conn,
+        started_at=morning + timedelta(hours=4),
+        ended_at=morning + timedelta(hours=5),
+        classification_date=day,
+    )
+    small, middle, large = sorted(s.set_id for s in same_day)
+    timing = {small: (0, 3), middle: (1, 1), large: (2, 2)}  # (start minute, end hour)
+    for set_id, (minute, hour) in timing.items():
+        conn.execute(
+            "UPDATE classification_set SET started_at = %s, ended_at = %s WHERE set_id = %s",
+            (morning + timedelta(minutes=minute), morning + timedelta(hours=hour), set_id),
+        )
+    conn.commit()
+    aapl = insert_instrument(conn, "AAPL")
+    for set_id in [small, middle, large, current.set_id]:
+        for factor in FACTORS:
+            insert_classification(conn, set_id, aapl, factor, score=D(1), percentile=D(1))
+    expected = [small, large, middle]  # newest ended_at first
+
+    rows, cursor = reader.stock_history(conn, "AAPL", limit=50, cursor=None)
+
+    assert (_history_ids(rows), cursor) == (expected, None)
+    assert [row.ended_at for row in rows] == [morning + timedelta(hours=h) for h in (3, 2, 1)]
+    assert {row.classification_date for row in rows} == {day}
+    assert _all_history(conn, "AAPL", limit=1) == [[set_id] for set_id in expected]
+    assert _all_history(conn, "AAPL", limit=2) == [expected[:2], expected[2:]]
+
+
 def test_a_page_holding_the_last_set_carries_no_cursor(
     migrated_run_schema_connection: psycopg.Connection,
 ) -> None:
