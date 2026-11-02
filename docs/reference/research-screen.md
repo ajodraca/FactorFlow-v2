@@ -22,7 +22,7 @@ and the save and add dialogs with their notices (CAP-002-E4-S8):
 
 - `notices.tsx`, the success notices the dialogs confirm through
   ([Success notices](#success-notices-noticestsx));
-- `dialog-frame.tsx`, the frame both dialogs share
+- `dialog-frame.tsx`, the frame the dialogs share
   ([Dialog frame](#dialog-frame-dialog-frametsx));
 - `save-as-universe-dialog.tsx`, **Save these {n} as a universe…** and its
   dialog ([Save as a universe](#save-as-a-universe-save-as-universe-dialogtsx));
@@ -42,15 +42,21 @@ and the first screen, the universes list with its create dialog
 
 and a universe's Members and History tabs with the remove dialog
 (CAP-002-E1-S8), in `universes/detail/`; see
-[Universe detail tabs](#universe-detail-tabs-universesdetail).
+[Universe detail tabs](#universe-detail-tabs-universesdetail);
+
+and the universe detail page that mounts them, with its summary header and
+the Add stocks and retire dialogs (CAP-002-E1-S9), also in
+`universes/detail/`; see
+[Universe detail page](#universe-detail-page-universesdetail).
 
 No route mounts any of them yet: `/research/universes` and
 `/research/universes/:universeId` are registered by CAP-002-E4-S10. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
-dialogs and the tests. The results table's importers are its test and the
+dialogs and the tests, `dialog-frame.tsx` also by the Add stocks dialog. The results table's importers are its test and the
 Members tab (CAP-002-E4-S9 is its other planned host), which also imports
-`filters-pane.tsx` and `use-research-query.ts`. Nothing imports the detail
-tabs but their tests yet (CAP-002-E1-S9 mounts them). The factor cell, the *Possibly
+`filters-pane.tsx` and `use-research-query.ts`. The detail tabs are
+imported by their tests and the detail page (CAP-002-E1-S9), which no route
+mounts yet either. The factor cell, the *Possibly
 restated* mark, the not-current banner, the as-of line, the selection tray
 and the inspector in `web/src/components/patterns/` import `copy.ts`, and
 all but the tray and the mark import `format.ts`
@@ -120,7 +126,7 @@ section 14.
 | `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history. `RESULTS.columns`, the table's *Symbol* and *Name* headers, is CAP-002-E4-S6's (DEC-0239) |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. `SELECTION` entries no design contains carry a doc comment saying so (CAP-002-E4-S7; DEC-0165): `inspectorLoading`, *Loading the selected stock.*, the inspector skeleton's screen-reader text; `inputsLineAsOf(inputs, asOf)`, the inputs clause with no `known_on`; `inputsLineSeparator`, `; `, between clauses of differing dates. `inUniversesLead`, `listComma` and `listAnd` split `inUniverses` so the inspector can link each name. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
-| `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional). CAP-002-E1-S8 added six `UNIVERSE_DETAIL` entries: `removeAction` (*Remove…*) and `renamedDetail(before, after)` (*{before} → {after}*) are UX 1.4's; `asOfFiltersNote` (*Filters and sorting apply to current members only.*; DEC-0105), `malformedDate` (*Enter a date as YYYY-MM-DD.*) and `noLongerMember(symbol, name)` (DEC-0107), and `loadMore` (*Load more*; DEC-0107) are in no design and carry a doc comment saying so |
+| `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional). CAP-002-E1-S8 added six `UNIVERSE_DETAIL` entries: `removeAction` (*Remove…*) and `renamedDetail(before, after)` (*{before} → {after}*) are UX 1.4's; `asOfFiltersNote` (*Filters and sorting apply to current members only.*; DEC-0105), `malformedDate` (*Enter a date as YYYY-MM-DD.*) and `noLongerMember(symbol, name)` (DEC-0107), and `loadMore` (*Load more*; DEC-0107) are in no design and carry a doc comment saying so. CAP-002-E1-S9 added four (DEC-0109): `addedStocks(added, name, alreadyMembers)`, `DIALOGS.added` with *stock* singular at one; `allAlreadyMembers(count, name)` (*All {n} were already members of {name}.*), in no design; `addNotFollowed(symbols)`, the Add stocks `instrument_not_acquired` refusal, UX 1.4's *as in Section 1.3* with the verb adapted; and `breadcrumb` (*Breadcrumb*), the detail page's breadcrumb `nav` label, which no design words |
 | `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels |
 
 ### The retire allow-list
@@ -529,7 +535,7 @@ Tests: `notices.test.tsx`.
 ## Dialog frame (`dialog-frame.tsx`)
 
 `DialogFrame({ title, children, initialFocusRef, onCancel, busy,
-descriptionId? })` is the `dialog` `standard` frame both dialogs render
+descriptionId? })` is the `dialog` `standard` frame the save, add and Add stocks dialogs render
 (classification-ui 2.7; dialog design spec sections 3 to 6), following the
 frame `screens/instruments/retire-dialog.tsx` established. It keeps no state
 of its own.
@@ -564,7 +570,7 @@ overlay and still receives the pointer. This is the open warning IR-001 of
 the story's implementation review v2, to be settled before CAP-002-E4-S9
 places the region.
 
-Tests: the frame is exercised through both dialogs' tests.
+Tests: the frame is exercised through the dialogs' tests.
 
 ## Save as a universe (`save-as-universe-dialog.tsx`)
 
@@ -747,14 +753,16 @@ The universes list and its create dialog (UX design 1.3; classification-ui
 2.7; AC-1, AC-3, AC-5; CAP-002-E1-S7). Three modules:
 
 - `index.tsx`, the default export `UniversesScreen`;
-- `universe-table.tsx`, `UniverseTable` and `universeDetailPath(universeId)`,
-  which gives `/research/universes/{id}` with the id URI-encoded;
+- `universe-table.tsx`, `UniverseTable`, `universeDetailPath(universeId)`,
+  which gives `/research/universes/{id}` with the id URI-encoded, and
+  `describeOrigin(provenance)` (below);
 - `create-dialog.tsx`, `CreateDialog({ onCreated, onCancel })` and
   `withLink(sentence, phrase, to)`, which renders the `phrase` inside
-  `sentence` as a link and leaves the words verbatim (DEC-0254).
+  `sentence` as a link and leaves the words verbatim (DEC-0254). The Add
+  stocks dialog imports `withLink` too.
 
 No route mounts the screen yet (CAP-002-E4-S10), and universe detail is
-CAP-002-E1-S9's.
+CAP-002-E1-S9's ([Universe detail page](#universe-detail-page-universesdetail)).
 
 ### The list (`index.tsx`)
 
@@ -811,9 +819,9 @@ cell; `busy` sets `aria-busy` and the `tbody` class `opacity-50`.
   `list-universe-events` as an alert with **Try again**, which re-reads and
   moves focus to the row's expander.
 
-`describeOrigin(provenance)` is module-private and pure (DEC-0108: CAP-002-E1-S9
-will export and import it, so its name, parameter, `string` return and
-wording are fixed). `null` gives *Created by hand*. Otherwise it gives
+`describeOrigin(provenance)` is exported and pure. CAP-002-E1-S9's summary
+header imports it for its *Origin* (DEC-0108), so its name, parameter,
+`string` return and wording are fixed. `null` gives *Created by hand*. Otherwise it gives
 *Saved from a filter on {classification_date}*, then, each only when it
 applied: `: ` and the bounds, in factor order value, growth, momentum,
 percentile before standardised score, minimum before maximum, each
@@ -875,8 +883,9 @@ modules, all named exports:
   `RemoveError`.
 
 They build no route, tab container, detail header, add-stocks or retire
-dialog: CAP-002-E1-S9 mounts the tabs and owns those, and the props below
-are the contract it imports.
+dialog: CAP-002-E1-S9's detail page mounts the tabs and owns those
+([Universe detail page](#universe-detail-page-universesdetail)), and the
+props below are the contract it imports.
 
 ### Members tab (`members-tab.tsx`)
 
@@ -1042,3 +1051,201 @@ Open warnings from the story's implementation review v1:
 - After **Show current members**, a later `422` shows the as-of table of an
   earlier visit under the field error (IR-004).
 - Three Members-tab tests end before their reads settle (IR-005).
+
+## Universe detail page (`universes/detail/`)
+
+One universe's detail page at `/research/universes/:universeId`, which
+mounts the tabs above under a summary header with rename, **Add stocks…** and
+**Retire…** (UX design 1.4; classification-ui 2.7; AC-4, AC-5, AC-6,
+DAC-E1-4, DAC-E1-6, DAC-E1-7, DAC-E1-S9-1 to DAC-E1-S9-5; CAP-002-E1-S9;
+DEC-0108, DEC-0109, DEC-0271). Four modules:
+
+- `index.tsx`, the default export `UniverseDetailScreen`;
+- `summary-header.tsx`, `SummaryHeader`, `originToProvenance(origin)` and
+  the type `HeaderUniverse`;
+- `add-stocks-dialog.tsx`, `AddStocksDialog`, `addResultSentence(result,
+  universeName)` and the type `AddStocksError`;
+- `retire-dialog.tsx`, `RetireDialog` and the type `RetireError`.
+
+No route mounts the page yet: CAP-002-E4-S10 registers
+`/research/universes/:universeId`. Every write goes through
+`classification-client.ts` ([`web-api.md`](web-api.md)).
+
+### The page (`index.tsx`)
+
+`UniverseDetailScreen` reads `:universeId` from the route and
+`getUniverse(universeId)` once on mount. That one read feeds the breadcrumb,
+the header and the Members tab's `universeName`, `lifecycle` and
+`memberCount`. It keeps a local read union (`loading`, `loaded`, `error`)
+rather than `ScreenState`, whose error carries no code to select the sentence
+by (DEC-0271).
+
+| State | Renders |
+|-------|---------|
+| loading (first read, or the first-load **Try again**) | a busy `output` with `UNIVERSES.loading` for screen readers and three `aria-hidden` skeleton bars |
+| first read failed, `universe_not_found` | `failureSentence` of the error and a link to `/research/universes` (`UNIVERSES.title`) |
+| first read failed, any other | `failureSentence` of the `ClassificationApiError`, or of `get-universe` with no code, and **Try again**, which shows the skeleton and reads again |
+| loaded | the page below |
+
+The loaded page, top to bottom:
+
+- a `nav` labelled `UNIVERSE_DETAIL.breadcrumb`: *Research* (`/research`) ›
+  *Universes* (`/research/universes`) › the name, `aria-current="page"`;
+- `SummaryHeader`;
+- after a later read fails, its `failureSentence` and **Try again** under the
+  header. The page, its tabs and any open dialog stay; **Try again** reads
+  again without the skeleton, and the line goes when a read succeeds;
+- one polite `output`, the page's status region, for the Add stocks result
+  and *Retired {name}* (DEC-0109: no toast is delivered);
+- a `tablist` of two native `button` tabs, *Members* and *History*, with a
+  roving `tabIndex`. Click, Arrow Left and Right (wrapping), Home and End
+  select a tab and focus it;
+- one `tabpanel` (`tabIndex={0}`) labelled by the active tab, holding only
+  the active panel. History is therefore read afresh each time it opens.
+
+**URL state** (DEC-0109). The active tab is `tab` (`history`, or anything
+else for `members`) and the Members tab's as-of date is `as_of`. The page
+writes only those two keys, so the Research filters the Members tab keeps in
+the URL survive. `onAsOfChange(date)` writes `as_of`, and `null` deletes it.
+History's `onViewMembersAsOf(date)` writes `tab=members` and `as_of` in one
+navigation.
+
+**Re-reads.** The universe is read again after every successful write, after
+`universe_retired` refusals, and on the Members tab's
+`onMembershipChanged`. The loaded page stays mounted meanwhile, and a read
+superseded by a later one is ignored, so none can bring an old state back. The Members tab is
+remounted (`key`) after a successful Add stocks, so the added stocks appear
+with their scores, and not after its own removals.
+
+| Write | Request | Success | Refusal |
+|-------|---------|---------|---------|
+| rename | `renameUniverse(universeId, name)` | the response renders at once, then the read; no status sentence, the new name being the `h1` | rethrown to the header, which shows the field error; `universe_retired` also re-reads |
+| Add stocks | `addUniverseMembers(universeId, symbols)` | the dialog closes, the status reads `addResultSentence(result, name)`, Members remounts, and the read follows | the dialog stays open with its `AddStocksError`: `instrument_not_acquired` with symbols, `universe_retired` (which also re-reads), otherwise `generic` |
+| retire | `retireUniverse(universeId)` | the header shows *Retired* and the time from the response at once, the dialog closes, the status reads `UNIVERSE_LIFECYCLE.retired(name)`, focus moves once to the `h1`, and the read follows | the dialog stays open with `universe_retired` (which also re-reads) or `generic` |
+
+**Add stocks…** opens `AddStocksDialog` with `result={null}`, since the
+result goes to the page's status region. **Retire…** in the header, and the
+Members tab's `onRetire`, open `RetireDialog`. Cancel, Escape and the overlay
+do nothing while a dialog's request is pending (dialog spec section 4). A
+dialog closed on a universe that is now retired moves focus to the `h1`,
+because the trigger has gone.
+
+### Summary header (`summary-header.tsx`)
+
+`SummaryHeader({ universe, onRename, onAddStocks, onRetire })` is the `card`
+`summary` (`data-variant="summary"`), a `section` labelled by the page's only
+`h1`. `universe` is a `HeaderUniverse`: `name`, `lifecycle`, `createdAt`,
+`retiredAt`, `memberCount` and `origin` of the universe read.
+
+- A description list: *Lifecycle* (*Active*, or the `secondary` *Retired*
+  badge, text with a hollow square (STD-UI-8), then `formatTimestamp(retiredAt)`),
+  *Members* (`memberCount`), *Created* (`formatTimestamp(createdAt)`) and
+  *Origin*, which is `describeOrigin(originToProvenance(origin))`.
+  `originToProvenance` turns the read's `origin` into the stored
+  `filter_provenance` spelling `describeOrigin` takes. It returns `null` for
+  `by_hand` or a missing `classificationDate` (*Created by hand*). Otherwise
+  it returns the date, the thresholds (`{}` when absent), `hide_incomplete`
+  and `symbol` (DEC-0108).
+- **Add stocks…** (`default`) and **Retire…** (`secondary`) call
+  `onAddStocks` and `onRetire`.
+- A retired universe has a plain `h1`, `UNIVERSE_LIFECYCLE.retiredHeader`
+  under the list, and no action or rename (AC-6, DAC-E1-S9-5).
+
+**Inline rename** (DAC-E1-S9-1). On an active universe the `h1` holds the
+name as a button. Activating it opens a `form` `inline`
+(`data-variant="inline"`). The form holds one text field named
+`UNIVERSE_DETAIL.universeName`, focused with the name selected, and
+**Rename** (`secondary`). The `h1` stays for screen readers only while the
+form is open.
+
+- Enter or **Rename** submits the trimmed value. Empty gives the field error
+  `DIALOGS.enterName`; the unchanged name closes the field and sends nothing
+  (DEC-0109). Anything else calls `onRename(trimmed)`.
+- While it is pending, **Rename** is natively disabled, focus is moved into
+  the field, and Escape is ignored. On success the field closes.
+- A rejection keeps the field open with an error by code:
+  `universe_name_in_use` gives `UNIVERSES.nameInUse(trimmed)` (DAC-E1-4),
+  `universe_retired` gives `UNIVERSE_LIFECYCLE.retiredRefusal`, and anything
+  else gives `failureSentence` of `rename-universe` with no code. The field
+  is `aria-invalid` and described by the error, which typing clears.
+- Escape closes the field and discards the edit. Closing returns focus to the
+  name button, or to the `h1` when the universe was retired meanwhile.
+
+### Add stocks dialog (`add-stocks-dialog.tsx`)
+
+`AddStocksDialog({ universeName, error, result, pending, onSubmit,
+onCancel })` is the `dialog` `standard` on `DialogFrame`, titled
+`UNIVERSE_DETAIL.addStocksTitle(universeName)` (DAC-E1-S9-2, DAC-E1-S9-3,
+DAC-E1-6). Its one field is the *Stocks* `textarea` `list`, initially
+focused, and it parses as the create dialog does:
+
+- It parses with CAP-001's `parseBulkSymbols` on paste and on blur, never per
+  keystroke. That parser splits on newline, comma, tab and semicolon
+  (DEC-0270). Blur rewrites the field one normalised entry per line.
+- A polite counter reads `UNIVERSES.recognised(n, m)` and lists each rejected
+  entry.
+- **Add** is `blocked` (`data-variant="blocked"`, still focusable, described
+  by the reason) while the recognised entries, counted as parsed with
+  duplicates, number zero (`UNIVERSES.enterAtLeastOne`) or more than 1000
+  (`UNIVERSES.tooMany`) (DEC-0104).
+- Submit re-parses the field first, sends nothing while blocked, and
+  otherwise calls `onSubmit` with the distinct normalised symbols in the
+  order entered.
+- While `pending`, **Add** is natively disabled and shows `ConfirmProgress`.
+  Focus on it, or outside the form, moves to **Cancel**.
+- **Cancel**, Escape and the overlay call `onCancel`.
+
+`error` renders as a `role="alert"` sentence by kind, never the envelope's
+message. The entered list is kept:
+
+| `error.kind` | Sentence |
+|--------------|----------|
+| `instrument_not_acquired` | `UNIVERSE_DETAIL.addNotFollowed` naming the symbols joined with `, `, with `UNIVERSES.followThemLink` linking to `SHELL_ROUTES.followedStocks` |
+| `universe_retired` | `UNIVERSE_LIFECYCLE.retiredRefusal` |
+| `generic` | `failureSentence` of `add-universe-members` with no code |
+
+`addResultSentence(result, universeName)` is the polite result, never an
+error (DEC-0109). It is `UNIVERSE_DETAIL.allAlreadyMembers` when nothing was
+added, and `UNIVERSE_DETAIL.addedStocks(added, name, alreadyMembers)`
+otherwise. A non-null `result` renders it in an `output` inside the dialog.
+The page always passes `null`.
+
+### Retire dialog (`retire-dialog.tsx`)
+
+`RetireDialog({ universeName, error, pending, onConfirm, onCancel })` is
+the `dialog` `confirm` (`data-variant="confirm"`), never `destructive`,
+because retiring discards nothing (DAC-E1-S9-4, DAC-E1-7; STD-UI-2). It
+follows `remove-dialog.tsx`:
+
+- a native `<dialog open>` with no overlay, `aria-modal`, titled
+  `UNIVERSE_LIFECYCLE.retireTitle(name)` (*Retire {name}*) and described by
+  `retireDescription`; `aria-busy` while `pending`;
+- initial focus on **Cancel**; on unmount, focus returns to whatever held it
+  before the dialog opened;
+- Escape calls `onCancel`. Tab and Shift+Tab cycle between **Cancel** and the
+  confirm, or stay on **Cancel** while the confirm is disabled;
+- the confirm, **Retire universe** (`retireConfirm`), is `disabled` while
+  `pending`, and focus stranded on it moves to **Cancel**.
+
+`error` is a `RetireError` shown as a `role="alert"` sentence:
+`universe_retired` gives `UNIVERSE_LIFECYCLE.retiredRefusal`, and `generic`
+gives `failureSentence` of `retire-universe` with no code.
+
+Tests: `index.test.tsx` (TC-COMP-058, the page half of TC-COMP-044, and the
+T010 cases), `summary-header.test.tsx` (TC-COMP-030 and the T003 cases),
+`add-stocks-dialog.test.tsx` (TC-COMP-031, TC-COMP-032 and the T006 cases)
+and `retire-dialog.test.tsx` (TC-COMP-044 and the T008 cases).
+`index.test.tsx` mocks `classification-client` and stubs the Members and
+History tabs; the other three render their component with props.
+
+Open warnings from the story's implementation review v1:
+
+- A header write made while History is the open tab leaves the History panel
+  stale until the tab is reopened, although UX 1.4 says it gains the event
+  (IR-003).
+- No test pins a failed **Try again** after a later read failure (IR-001), or
+  an **Add** activated without a blur first (IR-002); the code does both.
+- `retire-dialog.test.tsx` renders without the `MemoryRouter` the plan's test
+  conventions require (IR-004).
+- The TDD evidence says T017 (c) and (d) are recorded in the task plan; they
+  are in the evidence file's header comment (IR-005).
