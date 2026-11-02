@@ -1,0 +1,30 @@
+**Verdict: there are no blocking drifts. One LOW drift remains: the Add button shows no progress while a request is pending, which the dialog spec requires.** Both round-1 fixes are correct, and the dialog matches T004, T005, T006, T014 and its three T011 strings. I read the patch, the story, the task plan, UX 1.4, classification-ui 2.7, DEC-0104, DEC-0109, DEC-0145, DEC-0259, DEC-0270 and DEC-0271, and the baseline `copy.ts`, `dialog-frame.tsx` and `create-dialog.tsx`. I did not run the tests.
+
+### Round-1 fixes
+- **Focus left on a disabled Add (fixed).** When `pending` turns true and focus is on Add or has dropped out of the form, a `useEffect` moves it to Cancel, as `remove-dialog.tsx` does. Focus elsewhere in the dialog stays where it is. Four separate tests cover this: Add focused, focus dropped, request ending, and focus in the field. That matches the dialog's focus rules.
+- **Escape, overlay and Cancel close the dialog mid-request (still open, but not drift this cycle).** The dialog only reports cancel through `onCancel`; the host decides whether to close it. T006(a) says "Esc calls `onCancel`", T006(e) says pending "disables Add and not Cancel", and T014 says "Esc cancels", so the component follows the plan. The dialog spec's rule (§4: "Never close the dialog before the result is known") falls on the host. T016's text does not say so, so the next cycle's `index.tsx` must ignore cancel while a write is pending. If it doesn't, that becomes a MEDIUM drift.
+- **Tests that checked several behaviours at once (fixed).** They are now split into single-behaviour cases, for example the T005 retry and T006(e)'s pending cases.
+
+### Requirements that match
+- **Structure (T006a, T014):** a `<dialog open aria-modal="true">` with `data-variant="standard"`, titled with `addStocksTitle`. It has one `textarea` with `data-variant="list"`, labelled *Stocks*. Focus starts in the textarea. Tab cycling, Escape and restoring focus on unmount come from `DialogFrame`.
+- **Props:** they match T014 exactly. The error union and `AddMembersResult` (`added`, `alreadyMember`) are as specified.
+- **Parsing:** it uses the delivered `parseBulkSymbols`, imported rather than copied. It parses on paste and on blur, never on a keystroke, and rewrites the field in upper case, one symbol per line, on blur. That is the same as `create-dialog.tsx`.
+- **Blocked Add (T006b, DEC-0104):** Add is blocked at zero recognised entries and above 1000. Duplicates count towards the 1000; malformed entries don't. The button stays focusable (`tabIndex 0`, never a bare `disabled`) and `aria-describedby` points at the reason. Both reasons reuse CAP-002-E1-S7's keys (`UNIVERSES.enterAtLeastOne`, `UNIVERSES.tooMany`) with no second key. Submit sends the distinct symbols and re-parses first, so an outdated preview can't be sent.
+- **Wording (DEC-0109):**
+  - *Added 1 stock to Tech, and 1 were already members* has no trailing period. The already-member clause is reused word for word through `DIALOGS.added` and stays the same at m = 1.
+  - *All {m} were already members of {name}.*
+  - *Could not add the stocks: FactorFlow doesn't follow {symbols}. Follow them on Data health, then try again.* has its own key and links to `SHELL_ROUTES.followedStocks` (`/instruments`) through `withLink`, which is plain text and a `Link`.
+  - `universe_retired` uses `UNIVERSE_LIFECYCLE.retiredRefusal`, which is the classification-ui 2.7 sentence.
+  - The generic error goes through `failureSentence` with the `add-universe-members` operation.
+- **ARIA:** errors render as `role="alert"`. The result renders in an `<output>`, whose implicit role is `status`, and is never styled as an error. The count line is an `aria-live="polite"` region that also describes the textarea. `aria-busy` is set while pending.
+- **DEC-0145:** none of the three new strings contains *retire*, so the TC-COMP-072 scan is unaffected and `copy.test.ts` is not edited.
+
+### Drift and remaining LOW findings
+1. **LOW, drift: no progress shown on Add while pending.** UX 1.4's component table cites the dialog spec, and its §4 (Submitting) says "disable the confirm action and show progress in place". The shared `ConfirmProgress` from `dialog-frame.tsx` (DEC-0259) is already used by `save-as-universe-dialog.tsx` and `add-to-universe-dialog.tsx`, but `add-stocks-dialog.tsx` only disables Add. T014 doesn't ask for it, so this is the cited design's requirement only. Carried over from round 1.
+2. **LOW, not drift: the singular sentence is built by text replacement.** `UNIVERSE_DETAIL.addedStocks` runs `.replace("Added 1 stocks", "Added 1 stock")` on the output of `DIALOGS.added`. The text is correct and the shared clause is reused unchanged as T011 requires, but it breaks silently if `DIALOGS.added` is reworded. Carried.
+3. **LOW, recorded deviation (DEC-0270, owner review still open).** The tests type comma-separated lists, and T005's kept-list assertion reads the text after the blur rewrite (`"AAPL\nMSFT\nTSLA"`). The plan's literals were space-separated. Every outcome the plan asserts is otherwise kept.
+4. **Informational:** `addNotFollowed` takes the already-joined string (the reason is in your note). The output matches DEC-0109 word for word. The doc comment on `allAlreadyMembers` says "No design contains it", which is true of the designs; the wording comes from DEC-0109.
+
+Nothing outside the cycle's scope was added: the focus move to Cancel follows the dialog accessibility rules and an existing precedent.
+
+DRIFT_DETECTED: true

@@ -1,0 +1,31 @@
+The cycle-3 patch passes review: I found no CRITICAL, HIGH or MEDIUM issues, only five LOWs.
+
+My permissions here don't let me run commands, so I didn't rerun the tests. The cycle's own log (`CAP-002-E1-S9-evidence/green-cycle-3.log`) shows them green:
+- **Tests:** 35 tests in `summary-header.test.tsx` pass, and `universes.test.tsx` (27), `create-dialog.test.tsx`, `copy.test.ts` and `render.test.tsx` pass unchanged.
+- **Type check:** `tsc --noEmit` exits 0.
+- **Biome:** lint and format checks report nothing to fix.
+
+**Round 1 fixes, all confirmed in the code and covered by tests:**
+- **Field closes on retirement:** editing is now "open and not retired" (`summary-header.tsx:123`). When the universe is retired mid-edit, focus goes to the heading, which has `tabIndex={-1}`. The test "drops the field … focuses the heading when the universe is retired meanwhile" covers it.
+- **Escape:** it is handled on the form, so it works from the field and from the Rename button, and it is ignored while a rename is pending. Both cases have tests.
+- **Focus while pending:** when Rename disables itself, focus moves from Rename to the field (`:139-143`), with a test.
+- **Refusals:** the extra refocus after a refusal is gone, so focus stays wherever the owner put it. A test checks focus stays on the body.
+- **Mount:** the `opened` ref stops focus from moving on mount, with a test.
+- **MemoryRouter:** every render, including rerenders, is wrapped, as the plan requires.
+- **T012:** the only change to `universe-table.tsx` is the `export` keyword, and its tests pass unchanged (DEC-0108).
+
+**What else I checked:**
+- **Error handling:** refusals are mapped by code. `universe_name_in_use` names the trimmed name that was sent, `universe_retired` gets its own sentence, and anything else, including a non-client error, gets the generic sentence. An empty or whitespace-only name, or one equal to the current name, sends no request.
+- **Pending state:** errors clear when the value is edited, and a second attempt works after a refusal.
+- **Rendering:** the name renders as plain text, never markup.
+- **Header content:** the name is the only `h1`, and the section is labelled by it. The Lifecycle, Members, Created and Origin rows, the actions' variants, and the retired view all match T015 and UX design 1.4.
+- **Test traceability:** tests trace to TC-COMP-030 (T002) and T003 (a)–(g), following the same comment style as this story's sibling test files. The assertions use literal strings and would fail if the behaviour broke.
+
+**Findings:**
+1. **LOW (carried)** – `summary-header.tsx:236`: an error that arrives after the request returns is only linked from the field (`aria-describedby`). Screen readers usually don't read that out while focus stays in the field. This matches the existing `create-dialog.tsx`, so it is acceptable for now; a polite live region would fix it across both.
+2. **LOW (carried)** – `summary-header.tsx:38`: a filter-made universe with no classification date would be described as "Created by hand". The API never sends that combination, but the fallback reports the wrong origin instead of failing.
+3. **LOW** – `summary-header.tsx:208`: the name button's accessible name is just the universe name ("Tech"). It looks like plain heading text with no hint that activating it renames. The design doesn't specify this, but a screen-reader user hears "Tech, button" with no purpose. Possible fix: a description such as "Rename", or a visible edit cue.
+4. **LOW** – `summary-header.tsx:167-169` and `:244`: the only thing preventing a double send while pending is the disabled Rename button, which by the HTML spec blocks Enter from submitting. That is correct and tested, but `handleSubmit` has no `if (pending) return` of its own, so a future change to the button would silently reopen double sends.
+5. **LOW** – `summary-header.test.tsx:112` and `:408`: each of these two tests checks two behaviours (Rename's visibility plus that it submits; Add stocks plus Retire). Both match how the plan words T002(a) and T003(d), so it's a style point only.
+
+CODE_REVIEW_VERDICT: APPROVED

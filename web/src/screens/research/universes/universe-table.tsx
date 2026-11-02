@@ -45,7 +45,7 @@ const DIRECTIONS = [
  * function, so its name, parameter, `string` return and wording stay as they
  * are, and it stays pure and at module scope.
  */
-function describeOrigin(
+export function describeOrigin(
   provenance: {
     set_id?: string;
     classification_date: string;

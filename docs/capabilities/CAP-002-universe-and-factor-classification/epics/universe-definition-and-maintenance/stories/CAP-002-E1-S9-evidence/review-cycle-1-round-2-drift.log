@@ -1,0 +1,44 @@
+I found no spec drift in this cycle's `RetireDialog` patch. I couldn't run the tests: the vitest command was denied permission, so everything below comes from reading the code.
+
+**Round 1 fixes:**
+
+| Round-1 finding | Status |
+|---|---|
+| MEDIUM: the pending focus move was narrower than in `remove-dialog.tsx` | **Fixed.** The `[pending]` effect now uses the same logic as `remove-dialog.tsx`: if focus is still inside the dialog and not stuck on the confirm, it stays put; otherwise it moves to Cancel. `remove-dialog.tsx` also re-runs on `error` because its `last_member` case swaps the button; retire has no such case, so leaving `error` out is right. Tests: patch lines 118–144. |
+| MEDIUM: no test for a browser dropping focus | **Fixed.** The test at patch lines 128–136 calls `confirm.blur()` before the switch to `pending`, then checks focus lands on Cancel. |
+| LOW: `aria-busy` not asserted | **Fixed** (lines 146–151): attribute absent when not pending, `"true"` when pending. |
+| LOW: redundant destructive test | **Fixed.** The `destructive` check now sits inside the TC-COMP-044 test (line 39). |
+| LOW: T008 tests untagged | **Fixed** with the block comment at line 50 (`T008 (a) to (d), DAC-E1-S9-4`). |
+
+**What each requirement asks for and what the patch does:**
+
+- **Wording.** All of it comes from copy.ts, and each string matches the design and plan character for character:
+  - Title: `UNIVERSE_LIFECYCLE.retireTitle` gives *Retire {name}*.
+  - Description: *It leaves your active universes. Its members and history stay viewable.* (UX 1.4, T007).
+  - Confirm: **Retire universe**.
+  - Cancel: `DIALOGS.cancel`.
+  - `universe_retired`: `retiredRefusal`, matching T008(c) and classification-ui 2.7 exactly.
+  - Generic error: `failureSentence({operation:"retire-universe", code:null})`, which gives *Could not retire the universe: FactorFlow hit an unexpected problem. Try again.* (T011's "generic write-failure sentence").
+  - The sentence is chosen by error code, never from an error message, and copy.ts is not edited, as the brief says.
+- **Variant.** The dialog is `confirm` and never `destructive` (UX 1.4 and 1.4's components table, classification-ui section 10, STD-UI-2). This is asserted.
+- **Props.** `RetireDialog({ universeName, error, pending, onConfirm, onCancel })`, with `error` typed as `"universe_retired" | "generic" | null`. This is exactly what T013 specifies.
+- **ARIA and structure.** The native `<dialog open aria-modal="true">` has `aria-labelledby` (title) and `aria-describedby` (description). Errors render as `role="alert"`. There is no `dangerouslySetInnerHTML`, and a test confirms the universe name renders as text, not markup.
+- **Focus** (T013, UX 1.4, UX 1.4 Accessibility):
+  - Initial focus is on Cancel; the confirm is never focused first.
+  - Escape cancels.
+  - Tab and Shift+Tab cycle between Cancel and the confirm; while the confirm is disabled, Cancel is the only stop.
+  - Focus returns to the trigger on unmount.
+  - There is no overlay and an outside click does not close the dialog (T008(d)).
+- **Pending.** The confirm is natively `disabled` and Cancel stays enabled (T008(b)). On `universe_retired` the confirm stays enabled (T008(c)).
+- **Tests.**
+  - TC-COMP-044, first half: matches T007 point by point.
+  - T008 (a) to (d): each item has its own tests.
+  - The page-level half (header shows *Retired*, the actions leave) belongs to T010 and `index.tsx` in a later cycle, so I did not count it.
+
+**Additions beyond the plan's wording, none counted as drift:**
+- `aria-busy` while pending and the move of focus to Cancel when pending starts are not spelled out in T013. Both are inherited from `remove-dialog.tsx`, which T013 says to copy "in structure", and neither contradicts any requirement.
+- The confirm's styling (`bg-foreground text-background`) also matches `remove-dialog.tsx`. No design sets a different style for this dialog's confirm.
+
+None of the decision records listed in the brief (DEC-0104, 0108, 0109, 0145, 0270, 0271) constrains this dialog differently. DEC-0145 only requires the *retire* strings to sit in `UNIVERSE_LIFECYCLE`, and they do.
+
+DRIFT_DETECTED: false

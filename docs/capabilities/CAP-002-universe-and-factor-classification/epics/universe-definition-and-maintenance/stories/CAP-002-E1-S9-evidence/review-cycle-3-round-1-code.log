@@ -1,0 +1,44 @@
+I found no CRITICAL or HIGH issues, so the patch is approved, with two MEDIUM and four LOW findings below. I could not run the tests: running `vitest` and `git apply --check` both needed approval I didn't have. So "the tests pass" and "`universes.test.tsx` passes unchanged" are not confirmed. The working-tree files match the patch's line counts (276 and 373 lines). Everything below comes from reading the code.
+
+**What checks out**
+- **Strings:** every key used exists in `copy.ts`, and there is no `copy.ts` edit:
+  - `UNIVERSE_DETAIL.universeName/rename/lifecycle/active/members/created/origin/addStocksAction`
+  - `UNIVERSE_LIFECYCLE.retiredLabel/retiredHeader/retiredRefusal/retireAction`
+  - `DIALOGS.enterName`, `UNIVERSES.nameInUse` (DEC-0109)
+  - `failureSentence` with `rename-universe` gives the generic sentence the tests expect.
+- **T012:** only the `export` keyword changes in `universe-table.tsx` (DEC-0108). The adapter maps `by_hand` to `null` and the filter fields to the snake_case spelling `describeOrigin` takes.
+- **Design 1.4 / 2.7 and T015:**
+  - The card is a native `section` with `data-variant="summary"`, labelled by the `h1`.
+  - Rename is a `secondary` button shown only while editing. Input is trimmed; an empty name is a field error with no request; an unchanged name closes with no request.
+  - Refusals are chosen by error code. While editing, the field keeps `aria-invalid` and `aria-describedby`.
+  - The `dl` order is right. Retired shows a plain `h1`, the badge with `formatTimestamp`, the retired sentence and no actions.
+- **The two design choices you asked me to judge:**
+  - Keeping a visually hidden, plain-text `h1` while editing is sound: the page keeps one `h1`, the card stays labelled, and the heading never contains a control.
+  - The local copy of `RetiredBadge` is justified, because T012 allows only the `export` keyword on `universe-table.tsx`.
+- **Focus:** the `opened` ref stops focus moving on mount, and closing returns focus to the name button.
+- **Pending:** the Rename button is natively `disabled` while the rename is pending, and that same state blocks a second implicit submit from `Enter`.
+- **Conventions:** it matches `remove-dialog.tsx` (`BUTTON` constant, `data-variant`, a code-to-sentence helper, `useId`) and `create-dialog.tsx`'s field-error pattern.
+- **Tests:** each test checks one behaviour, and T002 (a)–(d) and T003 (a)–(f) are all covered. The assertions are specific (selection range, call count, accessible description, focus target), so they would fail if the behaviour broke.
+
+**Findings**
+
+1. **MEDIUM – `summary-header.tsx:183-230` (form block gated only on `editing`; focus effect at :126-134).** The form is shown whenever `editing` is true, even if `universe.lifecycle` has become `retired`. Scenario: a rename gets `universe_retired`, and the detail screen refetches and passes the retired universe.
+   - The header then shows the rename field and an enabled Rename button on a retired universe, which goes against "no rename" (DAC-E1-S9-4, AC-6).
+   - The `h1` stays visually hidden, so the visible name disappears.
+   - Pressing `Escape` runs the close effect, but `nameRef` is null on a retired universe, so focus drops to `body`.
+
+   Fix: render the form only when `editing && !retired`, or close editing when `retired` becomes true. Add a test that re-renders with the retired universe while editing.
+
+2. **MEDIUM – `summary-header.tsx:170-175, 210`.** `Escape` is handled only on the `input`. If focus is on the Rename button (the user tabbed there, or clicked it and was refused), `Escape` does nothing, though the design says `Esc` cancels. Also, clicking Rename disables it while pending, so focus falls to `body` until the request settles. `remove-dialog.tsx` deals with exactly this case (its effect at :68-80). Fix: put `onKeyDown` on the `form`.
+
+3. **LOW – `summary-header.tsx:215-219`.** The field error is linked only through `aria-describedby`. When a refusal arrives after `Enter`, focus is already in the field, so `fieldRef.current?.focus()` does nothing and most screen readers won't announce the new description. This matches `create-dialog.tsx`, but `members-tab.tsx:378` uses `role="alert"` for the same kind of error, so the repo isn't consistent. Consider `role="alert"`.
+
+4. **LOW – `summary-header.tsx:38-40`.** `originToProvenance` returns `null` ("Created by hand") for a `from_filter` origin whose `classificationDate` is null. That silently misreports the origin, whereas `universe-table.tsx`'s `toProvenance` throws on the same bad data. No test covers this branch.
+
+5. **LOW – `summary-header.test.tsx:322-338`.** T003 (e) asks for the date part of the expected filter sentence to come from calling `describeOrigin`, with only the search and hidden clauses written as literals. The test writes the whole sentence as a literal. It still checks the right output, just not in the form the plan specified.
+
+6. **LOW – `summary-header.test.tsx:166`.** The T003 tests sit under one comment ("T003 (a) to (g)") and none says which sub-item it covers. A per-test `(a)`…`(f)` tag would make tracing to the plan exact.
+
+Findings 1 and 2 should go into a later cycle (or this one, if cheap). Neither blocks approval at this severity.
+
+CODE_REVIEW_VERDICT: APPROVED

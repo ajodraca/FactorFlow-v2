@@ -1,0 +1,66 @@
+**Verdict: one minor drift.** On a re-read that fails after the page has loaded, the patch drops the header that UX 1.4 says to keep. Everything else in scope matches the plan, the designs and the decision records.
+
+## Drift
+
+**D-1 (Minor): a failed re-read replaces the whole page instead of keeping the header.**
+- **Requirement:** UX design 1.4, States table (`ux-design.md:1088`): "Error | Header retained; the active panel's body replaced by the operation, resource, reason and **Try again**". T016 says only "an error replaces the page body", which leaves open whether the header stays.
+- **Patch:** `reread()` (`index.tsx`, patch lines 813–826) sets `{ kind: "error" }` on any failed read. That includes the re-reads after `onMembershipChanged`, after an Add stocks success, after a rename, after a retire success and after a `universe_retired` refusal. The `read.kind === "error"` branch (patch lines 934–954) then returns only the sentence and **Try again**. The breadcrumb, `SummaryHeader`, tablist, the status region and any open dialog are all removed.
+- **Effect:** a loaded page loses its header on a transient re-read failure, which contradicts "Header retained". There is also a knock-on effect. In `retire()`, a successful `DELETE` is followed by `await reread()`. If that read fails, `setStatus(UNIVERSE_LIFECYCLE.retired(...))` writes to a status region that no longer exists, so *Retired Tech* is never announced. The same happens to the Add stocks result sentence.
+- **Initial load:** replacing the whole page on the first read is consistent, because there is no header to keep yet. No test covers a failed re-read.
+
+## Checked and matching (no drift)
+
+- **TC-COMP-058 (T009):**
+  - The retired header shows *Retired* and *This universe is retired. Its members and history stay viewable.*
+  - There is no **Add stocks…**, no **Retire…** and no rename button in the `h1`.
+  - The Members stub gets `lifecycle: "retired"` and `memberCount: 3`, and History mounts.
+  - When a stale page's Add stocks is refused with `universe_retired`, the dialog shows the refusal sentence exactly and the header is re-read to Retired (`getUniverse` called twice).
+- **T010(a) and the page half of TC-COMP-044:**
+  - `retireUniverse("u1")` is called, the dialog closes, and the header shows *Retired* with the formatted `retiredAt`.
+  - The actions leave, the status reads exactly `Retired Tech`, and focus moves to the `h1`.
+  - A `universe_retired` refusal shows the sentence in the dialog and re-reads; any other refusal shows the generic sentence and keeps the dialog without re-reading.
+  - `onRetire` from the Members stub opens the dialog (T010 e).
+- **T010(b) tabs:**
+  - `tablist` with two native-button `tab`s carrying `aria-selected` and `aria-controls`, and one `tabpanel` labelled by its tab.
+  - Roving `tabIndex`, Left/Right/Home/End with `preventDefault`, Members as the default, and `?tab=history` written on activation.
+  - Automatic activation is allowed by the tabs spec, whose Enter/Space row applies only "when activation is manual".
+  - The panel's `tabIndex=0` follows tabs spec §5 ("The panel is focusable").
+- **T010(c) URL handling:**
+  - `setParams` changes only the `tab` and `as_of` keys and keeps `sort` and the other Research parameters.
+  - `onAsOfChange(null)` deletes `as_of`.
+  - `onViewMembersAsOf` sets `tab=members` and `as_of` in one `setSearchParams` call.
+- **T010(d) re-reads and remounts:**
+  - `onMembershipChanged` re-reads without remounting Members (`key` unchanged).
+  - An Add stocks success increments `membersKey` and re-reads.
+  - History is a fresh mount on each open.
+  - A superseded read is ignored, which is a reasonable guard.
+- **T010(f) states:**
+  - The skeleton has `aria-busy="true"`, including during **Try again**.
+  - Failure sentences are chosen by code through `failureSentence` and never from `message`.
+  - `universe_not_found` gives *No universe with this address exists.* with a *Universes* link to `/research/universes` and no **Try again**.
+  - The read state is a local union, as DEC-0271 records.
+- **T010(g) breadcrumb:** a `nav` labelled *Breadcrumb* reads `Research › Universes › Tech`, with exactly two links (`/research`, `/research/universes`). The crumbs reuse `UNIVERSES.researchLink` ("Research") and `UNIVERSES.title` ("Universes"), as T011 allows.
+- **T010(h) and DEC-0109 status region:**
+  - One polite `<output aria-live="polite">`, which the next text replaces.
+  - The Add result reads `Added 1 stock to Tech, and 1 were already members` and `Added 2 stocks to Tech`.
+  - A rename writes no confirmation, the `h1` shows the new name, and nothing else changes.
+  - The dialog's `result={null}` is consistent with "on success the dialog closes and the sentence moves to the status region" (T016). There is no toast (DEC-0109).
+- **Pending dialogs:** **Cancel**, Escape and the overlay are ignored for both dialogs while a request is pending (dialog spec §4), and Cancel works again once a refusal has arrived.
+- **`universe_retired` from any write re-reads:** this holds for rename, add and retire. A `universe_name_in_use` rename refusal does not re-read and shows *Another active universe is already named Growth.*
+- **MembersTab props:** `universeId`, `universeName`, `lifecycle`, `memberCount`, `asOf`, `onAsOfChange`, `onMembershipChanged` and `onRetire` match the S8 contract. HistoryTab gets `universeId` and `onViewMembersAsOf`.
+- **T017(b), (c):** the default export is `UniverseDetailScreen`. No route is registered and no file outside the allowed change set is touched.
+- **T011:** the new key `UNIVERSE_DETAIL.breadcrumb: "Breadcrumb"` contains no *retire*, so it correctly stays outside `UNIVERSE_LIFECYCLE` (DEC-0145). The other strings the screen uses are existing keys: `UNIVERSE_LIFECYCLE.retired`, `RESULTS.tryAgain` and `UNIVERSES.loading`.
+
+## Departures from the cited sources that the plan or a decision allows (not drift)
+
+- **Tabs mounting:** tabs spec §4 says to keep panels mounted after first activation and to keep panel state when switching. T016 overrides this on purpose ("Only the active panel is mounted, so `HistoryTab` is fresh on each open"), and the `as_of` and filter state survive through the URL.
+- **Hand-built tabs:** tabs spec §4 says Radix handles roving focus and "do not re-implement". T016 asks for native buttons with roving `tabIndex`, so the plan governs.
+- **Full-page skeleton:** the loading skeleton covers the whole page rather than UX 1.4's skeleton on the header, the as-of line and `member_count` table rows. T010(f) asks only for an `aria-busy` skeleton, and `member_count` is not known before the read.
+- **Symbol-less refusal:** an `instrument_not_acquired` refusal that carries no symbols falls back to the generic sentence. This is a small defensive addition: the Add stocks sentence cannot name every symbol without them.
+
+## Test-coverage nits (not behavioural drift)
+
+- **Reload case:** T010(b) asks that `tab` and `as_of` both survive a reload when rendered with `?tab=history&as_of=2026-09-30`. The "restores the tab and as_of from the URL" test asserts only the tab. `as_of` is asserted separately, with the Members tab active.
+- **Threshold parameters:** T010(c) names "thresholds" among the Research parameters that must survive. The test uses `value_measure` and `sort`.
+
+DRIFT_DETECTED: true

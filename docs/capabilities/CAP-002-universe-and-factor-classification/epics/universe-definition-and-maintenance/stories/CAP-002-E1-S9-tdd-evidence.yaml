@@ -1,0 +1,377 @@
+# TDD evidence for CAP-002-E1-S9 - universe detail screen: summary header, rename, add stocks and retire.
+# Four cycles, one per component file: (1) the retire dialog - T007, T008, T013; (2) the add stocks dialog -
+# T004 to T006, T014 with their T011 strings; (3) the summary header - T002, T003, T012, T015 with theirs;
+# (4) the detail screen - T009, T010, T016 with theirs. T001 (verification), T017 and T018 (integration and
+# whole-suite validation) change no code; T019 is this file.
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch
+# is the diff between the trees before and after that cycle (a private index holding only that cycle's code
+# files), so the four apply in order onto the stage parent (the frozen integration base fadf2c4).
+# Reviews: each cycle's patch was judged by an independent code-review agent and an independent spec-drift
+# agent (fresh `claude -p` processes restricted to Read, Grep and Glob) before the next cycle began; the
+# verdicts below are the final rounds of the patches cited, earlier rounds' findings having been fixed with
+# tests. Each round's transcript is kept beside this file (review-cycle-N-round-M-{code,drift}.log).
+# Mutation: scripts/mutation-run.py with each cycle's focused suite (node_modules symlinked into each clone);
+# generated operators plus hand-written mutants ("operator": "manual"). Every survivor is disposed of as
+# equivalent with its reason; none by exception.
+# Lint and format: `npm run lint` and `npm run format` also scan build/, the git-ignored output of an earlier
+# `uv build` that predates this run (a minified bundle: 60 lint errors, and the formatter does not finish on
+# it). The green logs therefore run the same Biome commands with the VCS ignore file honoured, which checks
+# every tracked source.
+# T017: (a) see cycle-4; (b) detail/index.tsx default-exports UniverseDetailScreen; (c) the change set is the four
+# source and four test files under detail/, copy.ts (three Add stocks entries and the breadcrumb label, additive),
+# the export keyword in universe-table.tsx, the story status, this plan's checkboxes, this file and its evidence
+# folder; nothing under web/src/app or web/src/api, no CAP-001 file, members-tab.tsx and copy.test.ts untouched,
+# and dependencies.yaml already lists CAP-002-E1-S7 for this story, so it is unchanged; (d) universes.test.tsx,
+# create-dialog.test.tsx, results-table.test.tsx and filters-pane.test.tsx all ran (4 files, 189 tests passed).
+# T018, on the final tree: npm run test 69 files, 1702 tests passed; npm run build succeeded; npx tsc --noEmit
+# clean; biome lint and format clean over every tracked file (npm run lint/format themselves fail only on the
+# git-ignored build/ bundle described above). The story changes no Python, and the Python commands were run for
+# completeness: ruff check and ruff format --check clean; uv run pytest -m 'not postgres' 1497 passed, 1 xfailed,
+# 4 failed, all in tests/unit/test_deploy_smoke.py on "OSError: [Errno 97] Address family not supported by
+# protocol" from this sandbox's network stack (the postgres-marked tests need a container runtime, absent here).
+# T001 findings: E4-S1 exports getUniverse(id, {asOf}), renameUniverse(id, name), addUniverseMembers(id,
+# symbols) -> {added, alreadyMember} and retireUniverse(id) -> {lifecycle, retiredAt}; ClassificationApiError
+# exposes code and symbols; origin.kind is by_hand | from_filter with thresholds keyed by query-parameter
+# name. copy.ts already holds every retire string in UNIVERSE_LIFECYCLE, UNIVERSE_DETAIL's header labels,
+# UNIVERSES.nameInUse (DEC-0109), DIALOGS.enterName (the shared empty-name key, DEC-0167/0169),
+# UNIVERSES.enterAtLeastOne/tooMany, DIALOGS.added (the verbatim already-member clause) and
+# SHELL_ROUTES.followedStocks. research-query.ts owns neither tab nor as_of and keeps unknown keys.
+# MembersTab closes its Remove dialog before calling onRetire, so T017 needs no members-tab.tsx change.
+# describeOrigin is file-local in universe-table.tsx and takes the snake_case filter_provenance shape.
+# Decisions applied: DEC-0104, DEC-0108, DEC-0109, DEC-0145, DEC-0167, DEC-0169 (owner-upheld or
+# agent-decided at planning); recorded during this coding run: DEC-0270 (the Add stocks test lists use the
+# delivered parser's separators), DEC-0271 (the screen's read state is a local union, not ScreenState).
+
+cycles:
+  - id: cycle-1
+    tasks: [T007, T008, T013]
+    description: >
+      TC-COMP-044, first half (the native dialog open with aria-modal, data-variant confirm and never destructive;
+      title Retire Tech; the description It leaves your active universes. Its members and history stay
+      viewable.; confirm Retire universe; initial focus on Cancel; confirming calls onConfirm once) and T008
+      (Escape cancels; a two-way Tab cycle, Cancel the only stop while the confirm is disabled; focus restored on
+      unmount; the confirm natively disabled while pending, never Cancel, aria-busy while pending; focus moved to
+      Cancel when the pending confirm held or dropped it; universe_retired and generic alerts by code, the confirm
+      kept enabled; no overlay and no outside-click close; the name rendered as text). Production:
+      web/src/screens/research/universes/detail/retire-dialog.tsx (RetireDialog). Every string reused from
+      UNIVERSE_LIFECYCLE and DIALOGS; copy.ts unchanged by this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/red-cycle-1.log
+    red_log_sha256: 7858e29c5a27daaf511811aeacbe6f4ae8a150351878a71d46e185cfc0e266e0
+    red_evidence: >
+      With retire-dialog.test.tsx written and no retire-dialog.tsx, the file failed to load: Failed to resolve
+      import "./retire-dialog" (no tests ran).
+    green_evidence: >
+      retire-dialog.test.tsx 20 passed, with copy.test.ts (TC-COMP-072 scan unchanged) and render.test.tsx
+      (green-cycle-1.log, 379 tests); tsc --noEmit, biome lint and biome format clean. Round 1: code review
+      APPROVED with two MEDIUM (the pending focus move narrower than remove-dialog.tsx's, so a browser that drops
+      focus from the disabled confirm would strand it outside the dialog; no test for that) and LOWs (aria-busy
+      unasserted, a redundant destructive test, T008 tests untagged); spec drift none. Fixed with tests; round 2:
+      APPROVED with LOW notes only, drift none. Carried LOW follow-ups: the "leaves focus where it is" case
+      changes only error, which the [pending] effect does not depend on, so it cannot fail; the TC-COMP-044 tag
+      names no T007/DAC ids; the no-outside-click assertion guards only a future regression.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/green-cycle-1.log
+        sha256: 2b4ba415d5cd61ad6a9f39a26f32ab39bf0e1207a922f8c50183cc317da2e8b1
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-1-round-1-code.log
+        sha256: de1952e77e039d983df5ba5ffb935257fa9f8919dc94cc9c95fac8523d32a94d
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-1-round-1-drift.log
+        sha256: 9661999667389c50dff991ad9a7cf8d223ab1ecf5a96a53e9e09ff760aa4a199
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-1-round-2-code.log
+        sha256: b44b6d80f5fd4fa5ab6b2a6d6a668fe915535e521aa156f255f6d26d617faa79
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-1-round-2-drift.log
+        sha256: eb56a9d241149d1a5ba6df0cb15d7ce0401152edd3f3e7e6c6d24f4567213b55
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9253edf0c02cdd853090c1d062401ff9cec1b6188f8044b367499f2c06b07c18
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/mutation-cycle-1-results.json
+      results_sha256: c00c55453e286891053b4cc45734607c9bacac4ca28cce8f6c23dc095739032b
+      generated: 26
+      killed: 23
+      survived: 3
+      stillborn: 0
+      timeout: 0
+      score: 0.885
+      survivors:
+        - id: web/src/screens/research/universes/detail/retire-dialog.tsx:65:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The [pending] effect runs on mount, when the first effect has already put focus on Cancel, and when pending changes. pending || (focus on the confirm) differs from the original only with pending false and focus on the confirm, which the effect never sees: on mount focus is on Cancel, and on a true-to-false change the confirm was disabled throughout, so it holds no focus (the earlier run moved it to Cancel).
+        - id: web/src/screens/research/universes/detail/retire-dialog.tsx:65:negate-boolean:2
+          disposition: equivalent
+          reason: >
+            (pending && focus non-null) || focus on the confirm differs from the original only with pending false and focus on the confirm, the same unreachable state as the first mutant of this line.
+        - id: web/src/screens/research/universes/detail/retire-dialog.tsx:85:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The Tab trap's guard reads the Cancel and confirm refs, both attached to buttons rendered unconditionally while the dialog is mounted, and a keydown reaches the dialog only while it is mounted; `||` and `&&` take the same branch on every reachable input. The guard only narrows the types.
+
+  - id: cycle-2
+    tasks: [T004, T005, T006, T011, T014]
+    description: >
+      TC-COMP-031 (the typed symbols submitted once, distinct and in order; a result with an already-current symbol
+      reported in an output, the status role, as Added 1 stock to Tech, and 1 were already members, never an alert
+      or error styling; All 2 were already members of Tech. when nothing was added), TC-COMP-032 (the
+      instrument_not_acquired refusal naming every symbol in the envelope's order with the Follow them on Data
+      health link to the followed-stocks page, the entered list kept, Add enabled for a retry) and T006 (the
+      standard modal on the shared DialogFrame with one list textarea labelled Stocks, initial focus in it, Escape and
+      Cancel calling onCancel, the Tab cycle and focus restored on unmount; Add blocked, focusable and described by
+      Enter at least one stock. or Up to 1000 stocks can be added in one request., counted per recognised entry,
+      duplicates included (DEC-0104), malformed entries reported one by one; parsing on paste and blur only,
+      normalised upper case one per line on blur; universe_retired and generic alerts keeping the list; Add natively
+      disabled, busy and showing progress in place while pending, focus moved from it to Cancel; plain text only).
+      Production: web/src/screens/research/universes/detail/add-stocks-dialog.tsx (AddStocksDialog,
+      addResultSentence) and T011's UNIVERSE_DETAIL.addedStocks (DIALOGS.added with only the noun singular at one),
+      allAlreadyMembers and addNotFollowed (its own entry, DEC-0109) in copy.ts; every other string reused
+      (UNIVERSES.enterAtLeastOne, tooMany, stocks, recognised, invalidSymbol, followThemLink; DIALOGS.add, cancel;
+      UNIVERSE_LIFECYCLE.retiredRefusal). The test lists are comma-separated, the delivered parser's separator, and
+      T005's kept list is read after the blur rewrite (DEC-0270). addNotFollowed takes the joined list because
+      copy.test.ts, which this story must not edit, calls every copy function with string and number arguments.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/red-cycle-2.log
+    red_log_sha256: 7a5f544b101c72b26bb20a748695c1eb8d0a8e97f98c5d80dbf6732e3b53725c
+    red_evidence: >
+      With add-stocks-dialog.test.tsx written and no add-stocks-dialog.tsx, the file failed to load: Failed to
+      resolve import "./add-stocks-dialog" (no tests ran).
+    green_evidence: >
+      add-stocks-dialog.test.tsx 34 passed, with create-dialog.test.tsx (withLink unchanged), copy.test.ts
+      (TC-COMP-072 scan unchanged) and render.test.tsx (green-cycle-2.log, 420 tests); tsc --noEmit, biome lint and
+      biome format clean. Round 1: code review APPROVED with three MEDIUM (focus stranded on the Add that pending
+      disables; Escape, the overlay and Cancel close the dialog mid-request against dialog spec section 4; tests
+      holding several behaviours) and LOWs; drift none. Fixed with tests, the mid-request close assigned to the host
+      (cycle-4). Round 2: code review APPROVED with one MEDIUM (the docblock did not state the host's obligation);
+      spec drift DETECTED, LOW (no progress shown in place on Add while pending, dialog spec section 4). Fixed with a
+      test; round 3: APPROVED with LOW notes only, drift none. Carried LOW follow-ups: the singular is made by a
+      replace on DIALOGS.added's output, which a rewording of that key would silently undo (T004's anchored
+      assertion would catch it); the result output mounts already filled, which some screen readers do not
+      announce (the screen shows the result in its own persistent region, cycle-4).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/green-cycle-2.log
+        sha256: 44ae876cbead8271269f60d9736b4b51392b0be10d39e2301db8660ede2e6e6b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-2-round-1-code.log
+        sha256: e7efeab98ef5dc467ed6f49fc0fbca3bcb0bc99affe332863b8845d9b798e366
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-2-round-1-drift.log
+        sha256: 788c160006a23e8308531f4b18c458186dfe2915e1c270d99dd5d8be6c4c25e0
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-2-round-2-code.log
+        sha256: 27bacfe2e7eba5aadb2686da205d92b7a606f01f77c822bc4c504d295193f7c4
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-2-round-2-drift.log
+        sha256: 57fb0c39b2b9a1c4d46008e6b86f9926ecfb41b2a49f01a9cc7d8360240fc417
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-2-round-3-code.log
+        sha256: 5d2c6e487ca155ed686ded9adc71e36e39c1091966756662ec9382e83e0dd92c
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-2-round-3-drift.log
+        sha256: ee8ca08606897d40fd6f6f024ae403f0145cead433788307fb8bb0cdf232b59c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b5991ac8fc65ff7ef7f1039b6d70d03959d76f8a16efbaac0c7350a14eba15ca
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/mutation-cycle-2-results.json
+      results_sha256: ac20e8eae56a281ba72fdc0c0c8f9285ce2e352e784d31c9f5b262f27f42716f
+      generated: 48
+      killed: 48
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T003, T011, T012, T015]
+    description: >
+      TC-COMP-030 (activating the name opens the Universe name field holding it, selected and focused; Enter and the
+      secondary Rename, shown only while editing, send the trimmed name once; Escape closes, restores the name, sends
+      nothing and returns focus to the name; universe_name_in_use keeps the field open, aria-invalid and described by
+      Another active universe is already named {name}. with focus in it; an empty or whitespace-only name is the
+      field error Enter a name for the universe. without a request) and T003 (an unchanged trimmed name closes
+      without a request; universe_retired and any other failure as field errors keeping the typed value; Rename
+      natively disabled while pending, focus moved to the field and Escape ignored meanwhile; a second attempt after
+      a refusal; the name the page's only h1, kept as plain visually hidden text while editing; the summary card
+      section labelled by it; Lifecycle Active, Members, Created through formatTimestamp and the Origin line through
+      describeOrigin for by-hand and filter origins; Add stocks… default and Retire… secondary; a retired universe's
+      plain h1, Retired badge with its time and retired sentence and no action; a universe retired while editing
+      dropping the field and focusing the h1; plain text). Production:
+      web/src/screens/research/universes/detail/summary-header.tsx (SummaryHeader, originToProvenance) and T012's
+      export keyword on describeOrigin in universe-table.tsx (DEC-0108; universes.test.tsx and create-dialog.test.tsx
+      pass unchanged). T011 needed no copy.ts entry: every string is reused (UNIVERSE_DETAIL header labels,
+      UNIVERSES.nameInUse per DEC-0109, DIALOGS.enterName as the one shared empty-name key per DEC-0167 and
+      DEC-0169, UNIVERSE_LIFECYCLE). The Retired badge copies universe-table.tsx's file-local one, since T012 allows
+      only the export keyword there.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/red-cycle-3.log
+    red_log_sha256: 1975644537aec0f00f3dc8266a018b5d386501ee8f80ea4011dbfc29cc0f0a07
+    red_evidence: >
+      With summary-header.test.tsx written and no summary-header.tsx, the file failed to load: Failed to resolve
+      import "./summary-header" (no tests ran).
+    green_evidence: >
+      summary-header.test.tsx 35 passed, with universes.test.tsx (TC-COMP-020, TC-COMP-021 unchanged after the
+      export), create-dialog.test.tsx, copy.test.ts and render.test.tsx (green-cycle-3.log, 448 tests); tsc
+      --noEmit, biome lint and biome format clean. Round 1: code review APPROVED with two MEDIUM (the rename form
+      stayed open on a universe that became retired; Escape handled only on the input, and focus dropped when Rename
+      disabled itself) and LOWs; spec drift DETECTED, LOW (renders not wrapped in a MemoryRouter as the plan's test
+      conventions require), plus an edge case (Escape while pending closed the field with the request in flight).
+      All fixed with tests; round 2: APPROVED with LOW notes only, drift none. Carried LOW follow-ups: a field error
+      is announced only through aria-describedby, as create-dialog.tsx does; a from_filter origin without a date
+      (never sent) would read as by hand; the name control's accessible name is the name alone; the double-send
+      guard is the disabled Rename (HTML implicit submission), not a check in the handler.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/green-cycle-3.log
+        sha256: c86d824161ac875ad0e667ebf1f386c73f8b60b8e6186de1a1c823f136ef6f1b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-3-round-1-code.log
+        sha256: 9c6f588feecf60d9d545ed5b33f5490fc3e62aa49fd4a93163e9b9c6198f8bdf
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-3-round-1-drift.log
+        sha256: 89103517c7988aa6949b9806d5979418ca886d99e2569713caf492616d6831a7
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-3-round-2-code.log
+        sha256: c276fa18a6c6a2119d844e131020bdea1ab1712e7f4fcd0991f0d3a324129237
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-3-round-2-drift.log
+        sha256: ad89fda0b866b943b30bad9dd121b8b337199b9c3163e5a8619569cb991854be
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6de6673aa6abc79bd867e1c7718214c6940dc9afdd09168d25cc510e03f9aa55
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/mutation-cycle-3-results.json
+      results_sha256: df0f1fa29ede39be2292e76defb37271cefdfcf795e670be93277a3a7a1bdad2
+      generated: 51
+      killed: 47
+      survived: 4
+      stillborn: 0
+      timeout: 0
+      score: 0.922
+      survivors:
+        - id: web/src/screens/research/universes/detail/summary-header.tsx:37:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Parameters<...>[1] changes only the declared return type; at run time the function is identical, and npx tsc --noEmit, part of every validation run, rejects it (the returned object and null are not assignable to the parameter-less index).
+        - id: web/src/screens/research/universes/detail/summary-header.tsx:38:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            by_hand && (date null) differs from by_hand || (date null) only for a by_hand origin with a date or a from_filter origin without one. UniverseOrigin's five nullable fields are null only for by_hand (its doc comment; universe-service Origin, DEC-0065), and a from_filter origin always carries its classification_date, so by_hand never has a date and from_filter never lacks one: the second operand never changes the branch. It only narrows classificationDate to string; npx tsc --noEmit rejects the mutant's object.
+        - id: web/src/screens/research/universes/detail/summary-header.tsx:202:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Any negative tabIndex makes the heading focusable by script and absent from the Tab order; -1 and -2 behave identically.
+        - id: web/src/screens/research/universes/detail/summary-header.tsx:manual:1
+          disposition: equivalent
+          reason: >
+            Dropping the date operand changes the branch only for a from_filter origin without a classification date. UniverseOrigin's five nullable fields are null only for by_hand (its doc comment; universe-service Origin, DEC-0065), and a from_filter origin always carries its classification_date, so by_hand never has a date and from_filter never lacks one: the second operand never changes the branch. It only narrows classificationDate to string; npx tsc --noEmit rejects the mutant's object.
+
+  - id: cycle-4
+    tasks: [T009, T010, T011, T016, T017]
+    description: >
+      TC-COMP-058 (a retired universe: the h1, Retired and the retired sentence, no Add stocks…, Retire… or rename,
+      the Members tab given lifecycle retired and the count, History readable; a stale page's Add stocks refused
+      universe_retired shows the sentence in the dialog and re-reads the header, which turns retired), the page half
+      of TC-COMP-044 and T010 (a) (DELETE with the id; the dialog closes, the header shows Retired with retiredAt
+      from the response at once, the actions leave, the status region reads Retired Tech and focus is on the h1;
+      universe_retired in the dialog with a re-read; any other refusal generic, keeping the dialog), (b) (a tablist
+      of Members and History, Members by default, one tabpanel labelled by its tab, tab=history written, tab and
+      as_of restored from the URL, roving tabIndex with arrow keys, Home and End), (c) (as_of from the URL to the
+      Members tab, onAsOfChange setting and removing it with the Research threshold and sort keys untouched,
+      onViewMembersAsOf writing tab=members and as_of in one navigation), (d) (onMembershipChanged re-reads without
+      remounting Members; Add stocks success re-reads and remounts it; History a fresh mount on each open; a
+      superseded read or failure ignored), (e) (onRetire opens the retire dialog), (f) (the busy skeleton, also
+      during Try again; the code-keyed failure sentence with Try again; universe_not_found with the Universes link;
+      once loaded, a later read's failure keeps the page and shows its sentence with Try again under the header),
+      (g) (the Breadcrumb nav Research › Universes › Tech, two links) and (h) (one persistent polite status region
+      for the Add result and Retired {name}; a rename renders the PATCH response's name at once and writes no
+      status). Both dialogs stay open while their request is pending (dialog spec section 4), close afterwards on
+      Cancel or Escape, and move focus to the h1 when the universe was retired meanwhile. Production:
+      web/src/screens/research/universes/detail/index.tsx (default export UniverseDetailScreen) and T011's
+      UNIVERSE_DETAIL.breadcrumb in copy.ts; the crumbs reuse UNIVERSES.researchLink and UNIVERSES.title. The read
+      state is a local union, not ScreenState (DEC-0271). T017: (a) an uncommitted scratch test rendering the real
+      MembersTab and HistoryTab in this screen type-checked and, after Retire… inside the Remove dialog on a
+      last_member refusal, left exactly one dialog (Retire Tech) open, so members-tab.tsx is unchanged and no case
+      was added; (b) the default export is UniverseDetailScreen; (c) and (d) are recorded under T017 in the task
+      plan.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/red-cycle-4.log
+    red_log_sha256: 05bee88c77bc7d150d20d7958227c8b0f206e3249131fd9ef4e16d0f5588444a
+    red_evidence: >
+      With index.test.tsx written and no index.tsx, the file failed to load: Failed to resolve import "./index"
+      (no tests ran).
+    green_evidence: >
+      index.test.tsx 51 passed, with every detail/ suite (the retire, add stocks and remove dialogs, the summary
+      header, the Members and History tabs), copy.test.ts and render.test.tsx (green-cycle-4.log, 588 tests); tsc
+      --noEmit, biome lint and biome format clean. Round 1: code review APPROVED with three MEDIUM (a failed re-read
+      after load wiped the page; focus lost when cancelling a dialog whose trigger left after universe_retired; a
+      rename showed the old name until the re-read) and LOWs; spec drift DETECTED, minor (the header must be kept
+      when a later read fails, UX 1.4 States) with test nits. Fixed with tests; round 2: APPROVED with LOWs, spec
+      drift DETECTED, two LOW (the later read's failure sat in the confirmations region without Try again and was
+      never cleared; the page half of TC-COMP-044 lacked its Implements tag). Fixed with tests; round 3: APPROVED
+      with LOW notes only, drift none. Carried LOW follow-ups: tab changes push history entries; an identical
+      status text is not announced twice; state is not reset if universeId changes while mounted (the route
+      remounts per id); only the active panel is mounted, as T016 requires over tabs spec section 4; the later
+      read's failure line is not a live region; an unreachable API on first read shows the generic sentence with
+      Try again, as HistoryTab does; the first-load error replaces the breadcrumb too; one rename-refusal test name
+      promises more than it asserts.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/green-cycle-4.log
+        sha256: f2230c2be005a5ca67f568d55a8e850fb3ab28eb7817dbcccc8bfd663b12943f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-4-round-1-code.log
+        sha256: 239391b9971e9054463087057dd340d3c786d421cf9fa3da6a792f6b782bbac4
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-4-round-1-drift.log
+        sha256: 75950b2665b97fa4f4eb0daf929523f44c857725d89c8bc0179d2cb2e15fc6fc
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-4-round-2-code.log
+        sha256: 3f7e2c6897d11b74b53f3fb2a57b2408d04f39d3bbdb2a6d308a19802bb9945e
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-4-round-2-drift.log
+        sha256: 4b603a10cf10904aa2df7d4a6434c178c929e2682f006785db57a97569ec3eab
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-4-round-3-code.log
+        sha256: 151c31b00d9443f13074efb10ce8e452c458565b4562e4b7ed31b63eb12e5a79
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/review-cycle-4-round-3-drift.log
+        sha256: fbe7b50e3e623d656ded97162e2e64e6711b84dde3bee80078c81539c09ba648
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: eebbb4fcc570452b05668e87d03422f0a4e6a230aa33fe25c6a9bdb2a6ae4dc0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/universe-definition-and-maintenance/stories/CAP-002-E1-S9-evidence/mutation-cycle-4-results.json
+      results_sha256: c1f827770ba9e75b4fc3d102650b5a9faa339476eb8fd120f852a6a80cf30e8c
+      generated: 77
+      killed: 70
+      survived: 7
+      stillborn: 0
+      timeout: 0
+      score: 0.909
+      survivors:
+        - id: web/src/screens/research/universes/detail/index.tsx:113:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation is only compared for equality with a value captured from itself in the same read, so its starting value and its step are irrelevant: any increment supersedes the earlier reads alike.
+        - id: web/src/screens/research/universes/detail/index.tsx:115:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt is a re-read or remount trigger: only its change matters (an effect dependency or a React key), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/index.tsx:116:off-by-one:1
+          disposition: equivalent
+          reason: >
+            membersKey is a re-read or remount trigger: only its change matters (an effect dependency or a React key), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/index.tsx:138:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation is only compared for equality with a value captured from itself in the same read, so its starting value and its step are irrelevant: any increment supersedes the earlier reads alike.
+        - id: web/src/screens/research/universes/detail/index.tsx:241:off-by-one:1
+          disposition: equivalent
+          reason: >
+            membersKey is a re-read or remount trigger: only its change matters (an effect dependency or a React key), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/index.tsx:310:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt is a re-read or remount trigger: only its change matters (an effect dependency or a React key), so a different start value or step changes no render and no request.
+        - id: web/src/screens/research/universes/detail/index.tsx:385:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The mutated digit is inside a JSX comment (the biome-ignore justification's section number); the compiled component is identical.

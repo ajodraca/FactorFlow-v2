@@ -1,0 +1,43 @@
+I found no drift in cycle 3, round 2. The patch matches T002, T003, T012, T015 and the T011 strings they use, the story's acceptance criteria, UX design 1.4, classification-ui 2.7 and the relevant decision records. I reviewed it by reading only and changed no file. I did not run the tests myself: `green-cycle-3.log` shows `summary-header.test.tsx` passing 35 tests (all 35 in the patch), `universes.test.tsx` passing 27 unchanged, and `tsc` and biome clean.
+
+**Round-1 fixes, all confirmed in the code and covered by a test**
+- **Rename form on a universe retired meanwhile:** editing is now `open && !retired`, so the form and Rename drop out. Focus falls back from the name control to the `h1` (`tabIndex={-1}`). Test: "drops the field, shows the name and focuses the heading…".
+- **Escape:** it is handled on the `<form>`, so it cancels from the field and from Rename, and it is ignored while a rename is pending. Tests: "Escape from the Rename button also cancels" and "ignores Escape while the rename is pending".
+- **Focus when Rename disables itself:** while pending, focus moves from Rename to the field. Test: "moves focus from Rename to the field…".
+- **Refocus after a refusal:** removed. A refusal leaves focus where the owner put it, and the mount moves no focus. Tests: "leaves focus where the owner moved it…" and "moves no focus when it mounts".
+- **MemoryRouter (round-1 drift):** every render, including `rerenderWith`, now sits inside a `MemoryRouter`, as the plan's conventions require.
+
+**Requirements checked against the patch**
+- **Props:** `SummaryHeader({ universe, onRename, onAddStocks, onRetire })`. `universe` is `{name, lifecycle, createdAt, retiredAt, memberCount, origin}` from `UniverseDetail`, and `onRename(name) => Promise<void>` rejects with the client error. This is exactly T015's contract.
+- **Card:** a native `section` with `data-variant="summary"`, labelled by the `h1`. The name is the page's only `h1` and renders as plain text, never markup. There is no `dangerouslySetInnerHTML` (T003 g).
+- **Inline rename (DAC-E1-S9-1, DAC-E1-4, AC-4, DEC-0109):**
+  - The form is `data-variant="inline"` with one text input named *Universe name*. Its value starts as the name, selected and focused.
+  - **Rename** (`secondary`) appears only while editing and is natively disabled while the rename is pending. A second Enter during that time sends nothing.
+  - Enter and Rename both trim the name before deciding. An empty name gives a field error with no request. The unchanged name closes the field with no request. Escape closes, restores the name and returns focus to the name control.
+- **Refusal wording, chosen by error code:**
+  - `universe_name_in_use` uses the shared `UNIVERSES.nameInUse(trimmed)`: *Another active universe is already named {name}.*
+  - `universe_retired` uses `UNIVERSE_LIFECYCLE.retiredRefusal`, the classification-ui 2.7 sentence.
+  - Any other failure gets the generic `failureSentence` line: *Could not rename the universe: FactorFlow hit an unexpected problem. Try again.*
+  - In every case the field stays open with `aria-invalid` and `aria-describedby` and keeps the typed value.
+- **Description list:** Lifecycle *Active*, Members as a whole number, Created through `formatTimestamp` with its zone, and Origin through `describeOrigin(originToProvenance(...))` as plain text (DEC-0108).
+- **Actions:** **Add stocks…** (`default`) and **Retire…** (`secondary`) call their handlers.
+- **Retired universe (DAC-E1-S9-4, AC-6):**
+  - The `h1` is plain, with no rename control.
+  - A secondary *Retired* badge shows text plus a hollow square, so it never relies on colour alone, next to `formatTimestamp(retiredAt)`.
+  - The page shows *This universe is retired. Its members and history stay viewable.* and has no buttons at all.
+- **T012:**
+  - `universe-table.tsx` changes only by the `export` keyword.
+  - `originToProvenance` lives in `summary-header.tsx` and maps by-hand to `null`. A filter origin maps to `{classification_date, thresholds, hide_incomplete, symbol}`, with thresholds keyed by query-parameter name.
+  - `universes.test.tsx` passes unchanged.
+- **Strings (T011):** every string comes from existing `copy.ts` keys and the cycle adds none, as scoped. Every *retire/retired* string comes from `UNIVERSE_LIFECYCLE` (DEC-0145). The empty-name error reuses the shared `DIALOGS.enterName` (*Enter a name for the universe.*), which is the key T001 recorded. No maximum name length is enforced (DEC-0104).
+- **Tests:** they assert literal design wording, not imports from `copy.ts`, and carry the `// Implements TC-COMP-030` comment. T003 (e)'s filter-origin sentence is asserted as a literal; the date is fixed, so calling `describeOrigin` in the expectation isn't needed.
+
+**Choices that are not drift**
+- **The `h1` while editing:** it stays visually hidden (`sr-only`) and holds the current name. The plan says the control "swaps for" the form, and here the control is swapped out while the heading stays. This keeps UX 1.4's "the universe name is the page's `h1`" and T003 (d)'s only-one-`h1` check true while editing.
+- **Extra Escape and focus handling:** ignoring Escape while pending, cancelling from the Rename button and focusing the `h1` when the universe is retired meanwhile go beyond the plan's text. Each came from a round-1 finding, nothing forbids them, and they are consistent with "Esc cancels" and the plan's focus rules.
+
+**Carried LOWs, not drift**
+- **Field error announcement:** the error is announced through `aria-describedby`, which is what T015 specifies and what `create-dialog.tsx` does, not `role=alert`.
+- **Filter origin without a date:** `originToProvenance` would show a `from_filter` origin with no `classificationDate` as *Created by hand*. That goes against the letter of "filter to the provenance object" and STD-UI-15's honesty rule, but the API never sends that shape. It is still LOW.
+
+DRIFT_DETECTED: false

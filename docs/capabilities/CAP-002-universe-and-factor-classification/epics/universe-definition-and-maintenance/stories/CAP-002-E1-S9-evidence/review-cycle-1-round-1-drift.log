@@ -1,0 +1,46 @@
+**Verdict: no spec drift.** I compared the cycle-1 patch (`retire-dialog.tsx` and `retire-dialog.test.tsx`) against T007, T008, T013 and T011's retire strings, DAC-E1-S9-4 and DAC-E1-7, UX design 1.4 (the Retiring and Accessibility sections), component design 2.7 and its test table row, and the cited decision records. Every requirement in scope is met, and nothing the plan or designs forbid appears. I read the code; I did not run the tests.
+
+**Wording.** Every string is read from `copy.ts`, and the patch adds none of its own:
+
+| Element | Required | Delivered |
+|---|---|---|
+| Title | *Retire {name}* (T011, UX 1.4) | `UNIVERSE_LIFECYCLE.retireTitle` → "Retire Tech" |
+| Description | *It leaves your active universes. Its members and history stay viewable.* | `retireDescription`, word for word |
+| Confirm button | **Retire universe** | `retireConfirm` |
+| Cancel button | **Cancel** | `DIALOGS.cancel` |
+| `universe_retired` error | *This universe is retired and can't be changed. Its members and history are still viewable.* (2.7) | `retiredRefusal`, word for word |
+| Generic error | The generic failure sentence | `failureSentence({operation:"retire-universe", …, code:null})` → "Could not retire the universe: FactorFlow hit an unexpected problem. Try again." |
+
+The tests check these as literal strings, not by importing the keys, so a wording change in `copy.ts` would fail them. No `copy.ts` edit was needed, so the TC-COMP-072 scan (DEC-0145) is untouched.
+
+**Variant and ARIA (T013, T007, UX 1.4, 2.7).**
+- It is a native `<dialog open aria-modal="true" aria-labelledby aria-describedby>` with `data-variant="confirm"`, and is never `destructive`; a test checks both.
+- Errors show as `role="alert"`, chosen by code (`"universe_retired" | "generic"`) and never from an envelope `message`.
+- There is no `dangerouslySetInnerHTML`, and a test confirms a name containing markup renders as text.
+
+**Focus behaviour (T008(a), T013, UX 1.4 Accessibility).**
+- Focus starts on Cancel, so the confirm is never the initial focus.
+- Esc calls `onCancel`.
+- Tab and Shift+Tab cycle between the two buttons in both directions.
+- Focus returns to the previously focused element on unmount.
+
+**Props contract (T013).** `RetireDialog({ universeName, error, pending, onConfirm, onCancel })` with `error: "universe_retired" | "generic" | null`, exactly as specified.
+
+**Pending, errors and overlay (T008(b)–(d)).**
+- While pending, the confirm uses the native `disabled` attribute and Cancel stays enabled.
+- After a `universe_retired` error the confirm stays enabled, so a retry is possible.
+- There is no overlay, and clicking outside does not close the dialog.
+
+**Additions beyond the plan's wording, none counted as drift:**
+- `aria-busy` while pending, which the precedent `remove-dialog.tsx` also has.
+- Focus moves to Cancel when the focused confirm becomes disabled.
+- With the confirm disabled, Tab stays on Cancel.
+- An extra test that a name containing markup renders as plain text (T013's no-`dangerouslySetInnerHTML` rule).
+
+These follow the precedent and support required behaviour (Esc and the Tab cycle) rather than adding new behaviour.
+
+**One minor note, not drift.** The patch handles a disabled confirm more narrowly than `remove-dialog.tsx`, which T013 names as the structural model. The precedent also moves focus to Cancel when focus has already left the dialog. The patch only acts when the confirm is still the focused element. If a browser drops focus from the disabled button before the effect runs, Esc would stop reaching the dialog. In the normal case this doesn't happen, because the click that sets `pending` is handled before the browser can move focus. The behaviours T013 explicitly lists are all present.
+
+DEC-0270 and DEC-0271 cover the Add stocks dialog and the detail index, and DEC-0104 and DEC-0108 cover other dialogs and story dependencies, so none of them applies to this dialog. DEC-0109's *Retired {name}* announcement belongs to the page and lands with `index.tsx` in a later cycle, as does the second half of TC-COMP-044 (the header showing *Retired* after `200`).
+
+DRIFT_DETECTED: false

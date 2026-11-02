@@ -1,0 +1,768 @@
+diff --git a/web/src/screens/research/universes/detail/summary-header.test.tsx b/web/src/screens/research/universes/detail/summary-header.test.tsx
+new file mode 100644
+index 0000000..ea6ae6d
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/summary-header.test.tsx
+@@ -0,0 +1,447 @@
++import { act, render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { MemoryRouter } from "react-router-dom";
++import { describe, expect, it, vi } from "vitest";
++import { ClassificationApiError } from "../../../../api/classification-client";
++import type { UniverseOrigin } from "../../../../api/classification-types";
++import { type HeaderUniverse, SummaryHeader, type SummaryHeaderProps } from "./summary-header";
++
++const BY_HAND: UniverseOrigin = {
++  kind: "by_hand",
++  setId: null,
++  classificationDate: null,
++  thresholds: null,
++  hideIncomplete: null,
++  symbol: null,
++};
++
++const FROM_FILTER: UniverseOrigin = {
++  kind: "from_filter",
++  setId: "s-1",
++  classificationDate: "2026-10-15",
++  thresholds: { value_percentile_min: "80" },
++  hideIncomplete: true,
++  symbol: "AA",
++};
++
++const ACTIVE: HeaderUniverse = {
++  name: "Tech",
++  lifecycle: "active",
++  createdAt: "2026-10-15T22:46:00Z",
++  retiredAt: null,
++  memberCount: 12,
++  origin: BY_HAND,
++};
++
++const RETIRED: HeaderUniverse = {
++  ...ACTIVE,
++  lifecycle: "retired",
++  retiredAt: "2026-10-16T05:00:00Z",
++};
++
++const RETIRED_REFUSAL =
++  "This universe is retired and can't be changed. Its members and history are still viewable.";
++const GENERIC = "Could not rename the universe: FactorFlow hit an unexpected problem. Try again.";
++const EMPTY_NAME = "Enter a name for the universe.";
++
++function apiError(code: string): ClassificationApiError {
++  return new ClassificationApiError("refused", "req-1", {
++    code,
++    operation: "rename-universe",
++    resource: "universe",
++  });
++}
++
++function renderHeader(overrides: Partial<SummaryHeaderProps> = {}) {
++  const props: SummaryHeaderProps = {
++    universe: ACTIVE,
++    onRename: vi.fn().mockResolvedValue(undefined),
++    onAddStocks: vi.fn(),
++    onRetire: vi.fn(),
++    ...overrides,
++  };
++  const view = render(
++    <MemoryRouter>
++      <SummaryHeader {...props} />
++    </MemoryRouter>,
++  );
++  function rerenderWith(next: Partial<SummaryHeaderProps>): void {
++    view.rerender(
++      <MemoryRouter>
++        <SummaryHeader {...props} {...next} />
++      </MemoryRouter>,
++    );
++  }
++  return { props, rerenderWith, ...view };
++}
++
++function nameControl(name = "Tech"): HTMLElement {
++  return within(screen.getByRole("heading", { level: 1 })).getByRole("button", { name });
++}
++
++function nameField(): HTMLInputElement {
++  return screen.getByRole("textbox", { name: "Universe name" }) as HTMLInputElement;
++}
++
++async function startEditing(user: ReturnType<typeof userEvent.setup>): Promise<void> {
++  await user.click(nameControl());
++}
++
++// Implements TC-COMP-030 (T002): DAC-E1-S9-1, DAC-E1-4, AC-4.
++describe("TC-COMP-030: inline rename", () => {
++  it("activating the name opens the Universe name field holding the name, selected and focused", async () => {
++    const user = userEvent.setup();
++    renderHeader();
++    await startEditing(user);
++    const field = nameField();
++    expect(field.value).toBe("Tech");
++    expect(field).toHaveFocus();
++    expect(field.selectionStart).toBe(0);
++    expect(field.selectionEnd).toBe(4);
++  });
++
++  it("Enter sends the rename once with the typed name", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("Tech and Dividend growers{Enter}");
++    expect(props.onRename).toHaveBeenCalledTimes(1);
++    expect(props.onRename).toHaveBeenCalledWith("Tech and Dividend growers");
++  });
++
++  it("shows a secondary Rename only while editing, which submits the same way", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    expect(screen.queryByRole("button", { name: "Rename" })).toBeNull();
++    await startEditing(user);
++    const rename = screen.getByRole("button", { name: "Rename" });
++    expect(rename).toHaveAttribute("data-variant", "secondary");
++    await user.keyboard("Growth");
++    await user.click(rename);
++    expect(props.onRename).toHaveBeenCalledTimes(1);
++    expect(props.onRename).toHaveBeenCalledWith("Growth");
++  });
++
++  it("Escape closes the field, restores the name, sends nothing and returns focus to the name", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("Growth{Escape}");
++    expect(screen.queryByRole("textbox", { name: "Universe name" })).toBeNull();
++    expect(nameControl()).toHaveFocus();
++    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/^Tech$/);
++    expect(props.onRename).not.toHaveBeenCalled();
++  });
++
++  it("keeps the field open with the name-in-use error, described and invalid, focus in the field", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader({
++      onRename: vi.fn().mockRejectedValue(apiError("universe_name_in_use")),
++    });
++    await startEditing(user);
++    await user.keyboard("Tech and Dividend growers{Enter}");
++    const field = nameField();
++    expect(props.onRename).toHaveBeenCalledTimes(1);
++    expect(field).toHaveAttribute("aria-invalid", "true");
++    expect(field).toHaveAccessibleDescription(
++      "Another active universe is already named Tech and Dividend growers.",
++    );
++    expect(field).toHaveFocus();
++    expect(field.value).toBe("Tech and Dividend growers");
++  });
++
++  it("refuses an empty name as a field error without a request", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("{Backspace}{Enter}");
++    expect(nameField()).toHaveAttribute("aria-invalid", "true");
++    expect(nameField()).toHaveAccessibleDescription(EMPTY_NAME);
++    expect(props.onRename).not.toHaveBeenCalled();
++  });
++
++  it("refuses a whitespace-only name as a field error without a request", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("   {Enter}");
++    expect(nameField()).toHaveAccessibleDescription(EMPTY_NAME);
++    expect(props.onRename).not.toHaveBeenCalled();
++  });
++});
++
++// T003 (a) to (g): trimming, the other refusals, pending, the header's content and plain text.
++describe("SummaryHeader", () => {
++  it("closes without a request when the trimmed value equals the current name", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("  Tech  {Enter}");
++    expect(screen.queryByRole("textbox", { name: "Universe name" })).toBeNull();
++    expect(props.onRename).not.toHaveBeenCalled();
++    expect(nameControl()).toHaveFocus();
++  });
++
++  it("trims surrounding spaces before sending", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("  Growth  {Enter}");
++    expect(props.onRename).toHaveBeenCalledWith("Growth");
++  });
++
++  it("names the trimmed name in the name-in-use error", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn().mockRejectedValue(apiError("universe_name_in_use")) });
++    await startEditing(user);
++    await user.keyboard("  Growth  {Enter}");
++    expect(nameField()).toHaveAccessibleDescription(
++      "Another active universe is already named Growth.",
++    );
++  });
++
++  it("closes the field and returns focus to the name after the rename resolves", async () => {
++    const user = userEvent.setup();
++    renderHeader();
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    expect(screen.queryByRole("textbox", { name: "Universe name" })).toBeNull();
++    expect(nameControl()).toHaveFocus();
++  });
++
++  it("states universe_retired as the field error", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn().mockRejectedValue(apiError("universe_retired")) });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    expect(nameField()).toHaveAccessibleDescription(RETIRED_REFUSAL);
++    expect(nameField()).toHaveAttribute("aria-invalid", "true");
++  });
++
++  it("states any other failure with the generic sentence and keeps the typed value", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn().mockRejectedValue(apiError("internal_error")) });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    expect(nameField()).toHaveAccessibleDescription(GENERIC);
++    expect(nameField().value).toBe("Growth");
++  });
++
++  it("states a failure that is not a client error with the generic sentence", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn().mockRejectedValue(new Error("boom")) });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    expect(nameField()).toHaveAccessibleDescription(GENERIC);
++  });
++
++  it("clears the field error once the value is edited", async () => {
++    const user = userEvent.setup();
++    renderHeader();
++    await startEditing(user);
++    await user.keyboard("{Backspace}{Enter}");
++    await user.keyboard("G");
++    expect(nameField()).not.toHaveAttribute("aria-invalid");
++    expect(nameField()).not.toHaveAttribute("aria-describedby");
++  });
++
++  it("natively disables Rename while the rename is pending, and a second Enter sends nothing", async () => {
++    const user = userEvent.setup();
++    const onRename = vi.fn(() => new Promise<void>(() => {}));
++    renderHeader({ onRename });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    expect(screen.getByRole("button", { name: "Rename" })).toBeDisabled();
++    await user.keyboard("{Enter}");
++    expect(onRename).toHaveBeenCalledTimes(1);
++  });
++
++  it("makes the name the page's only h1", () => {
++    renderHeader();
++    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
++    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/^Tech$/);
++  });
++
++  it("keeps the name as the h1 while editing, as text with no control in it", async () => {
++    const user = userEvent.setup();
++    renderHeader();
++    await startEditing(user);
++    const heading = screen.getByRole("heading", { level: 1 });
++    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
++    expect(heading).toHaveTextContent(/^Tech$/);
++    expect(within(heading).queryByRole("button")).toBeNull();
++  });
++
++  it("Escape from the Rename button also cancels", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    await startEditing(user);
++    await user.keyboard("Growth");
++    screen.getByRole("button", { name: "Rename" }).focus();
++    await user.keyboard("{Escape}");
++    expect(screen.queryByRole("textbox", { name: "Universe name" })).toBeNull();
++    expect(props.onRename).not.toHaveBeenCalled();
++  });
++
++  it("ignores Escape while the rename is pending", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn(() => new Promise<void>(() => {})) });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}{Escape}");
++    expect(nameField()).toBeInTheDocument();
++  });
++
++  it("moves focus from Rename to the field while the rename is pending", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn(() => new Promise<void>(() => {})) });
++    await startEditing(user);
++    await user.keyboard("Growth");
++    await user.click(screen.getByRole("button", { name: "Rename" }));
++    expect(nameField()).toHaveFocus();
++  });
++
++  it("drops the field, shows the name and focuses the heading when the universe is retired meanwhile", async () => {
++    const user = userEvent.setup();
++    const { rerenderWith } = renderHeader({
++      onRename: vi.fn().mockRejectedValue(apiError("universe_retired")),
++    });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    rerenderWith({ universe: RETIRED });
++    expect(screen.queryByRole("textbox", { name: "Universe name" })).toBeNull();
++    expect(screen.queryByRole("button", { name: "Rename" })).toBeNull();
++    const heading = screen.getByRole("heading", { level: 1 });
++    expect(heading).not.toHaveClass("sr-only");
++    expect(heading).toHaveFocus();
++  });
++
++  it("leaves focus where the owner moved it while the rename was pending when it is refused", async () => {
++    const user = userEvent.setup();
++    let reject: (reason: unknown) => void = () => {};
++    const onRename = vi.fn(
++      () =>
++        new Promise<void>((_, rejectRename) => {
++          reject = rejectRename;
++        }),
++    );
++    renderHeader({ onRename });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    nameField().blur();
++    await act(async () => reject(apiError("universe_name_in_use")));
++    expect(nameField()).toHaveAttribute("aria-invalid", "true");
++    expect(document.body).toHaveFocus();
++  });
++
++  it("moves no focus when it mounts", () => {
++    renderHeader();
++    expect(document.body).toHaveFocus();
++  });
++
++  it("returns focus to the field when a rename sent with Rename is refused", async () => {
++    const user = userEvent.setup();
++    renderHeader({ onRename: vi.fn().mockRejectedValue(apiError("universe_name_in_use")) });
++    await startEditing(user);
++    await user.keyboard("Growth");
++    await user.click(screen.getByRole("button", { name: "Rename" }));
++    expect(nameField()).toHaveFocus();
++  });
++
++  it("allows a second attempt after a refusal", async () => {
++    const user = userEvent.setup();
++    const onRename = vi.fn().mockRejectedValue(apiError("internal_error"));
++    renderHeader({ onRename });
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    expect(screen.getByRole("button", { name: "Rename" })).toBeEnabled();
++    await user.keyboard("{Enter}");
++    expect(onRename).toHaveBeenCalledTimes(2);
++  });
++
++  it("offers an enabled Rename again when the field is reopened after a rename", async () => {
++    const user = userEvent.setup();
++    renderHeader();
++    await startEditing(user);
++    await user.keyboard("Growth{Enter}");
++    await startEditing(user);
++    expect(screen.getByRole("button", { name: "Rename" })).toBeEnabled();
++  });
++
++  it("is a summary card section labelled by the name", () => {
++    renderHeader();
++    const card = screen.getByRole("region", { name: "Tech" });
++    expect(card.tagName).toBe("SECTION");
++    expect(card).toHaveAttribute("data-variant", "summary");
++  });
++
++  it("lists Lifecycle Active, Members, Created with its zone, and Origin", () => {
++    renderHeader();
++    const list = document.querySelector("dl") as HTMLElement;
++    const terms = within(list)
++      .getAllByRole("term")
++      .map((term) => term.textContent);
++    const values = within(list)
++      .getAllByRole("definition")
++      .map((value) => value.textContent);
++    expect(terms).toEqual(["Lifecycle", "Members", "Created", "Origin"]);
++    expect(values).toEqual(["Active", "12", "2026-10-15 17:46 CDT", "Created by hand"]);
++  });
++
++  it("states a filter origin in words, each clause that applied", () => {
++    renderHeader({ universe: { ...ACTIVE, origin: FROM_FILTER } });
++    expect(
++      screen.getByText(
++        'Saved from a filter on 2026-10-15: value percentile at least 80; search "AA"; stocks with an incomplete score hidden',
++      ),
++    ).toBeInTheDocument();
++  });
++
++  it("states a filter origin with no search and nothing hidden without those clauses", () => {
++    renderHeader({
++      universe: { ...ACTIVE, origin: { ...FROM_FILTER, symbol: null, hideIncomplete: false } },
++    });
++    expect(
++      screen.getByText("Saved from a filter on 2026-10-15: value percentile at least 80"),
++    ).toBeInTheDocument();
++  });
++
++  it("offers Add stocks… as the default action and Retire… as the secondary one", async () => {
++    const user = userEvent.setup();
++    const { props } = renderHeader();
++    const add = screen.getByRole("button", { name: "Add stocks…" });
++    const retire = screen.getByRole("button", { name: "Retire…" });
++    expect(add).toHaveAttribute("data-variant", "default");
++    expect(retire).toHaveAttribute("data-variant", "secondary");
++    await user.click(add);
++    expect(props.onAddStocks).toHaveBeenCalledTimes(1);
++    await user.click(retire);
++    expect(props.onRetire).toHaveBeenCalledTimes(1);
++  });
++
++  it("on a retired universe shows a plain h1, the Retired badge with its time and the retired sentence", () => {
++    renderHeader({ universe: RETIRED });
++    const heading = screen.getByRole("heading", { level: 1 });
++    expect(heading).toHaveTextContent(/^Tech$/);
++    expect(within(heading).queryByRole("button")).toBeNull();
++    const badge = screen.getByText("Retired");
++    expect(badge.closest('[data-variant="secondary"]')).not.toBeNull();
++    expect(screen.getByText("2026-10-16 00:00 CDT")).toBeInTheDocument();
++    expect(
++      screen.getByText("This universe is retired. Its members and history stay viewable."),
++    ).toBeInTheDocument();
++  });
++
++  it("on a retired universe offers no Add stocks…, Retire… or rename", () => {
++    renderHeader({ universe: RETIRED });
++    expect(screen.queryByRole("button", { name: "Add stocks…" })).toBeNull();
++    expect(screen.queryByRole("button", { name: "Retire…" })).toBeNull();
++    expect(screen.queryByRole("button", { name: "Rename" })).toBeNull();
++    expect(screen.queryByRole("button")).toBeNull();
++  });
++
++  it("renders the name as text, never as markup", () => {
++    renderHeader({ universe: { ...ACTIVE, name: "<b>Tech</b>" } });
++    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("<b>Tech</b>");
++    expect(document.querySelector("h1 b")).toBeNull();
++  });
++});
+diff --git a/web/src/screens/research/universes/detail/summary-header.tsx b/web/src/screens/research/universes/detail/summary-header.tsx
+new file mode 100644
+index 0000000..53806ff
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/summary-header.tsx
+@@ -0,0 +1,296 @@
++import {
++  type FormEvent,
++  type JSX,
++  type KeyboardEvent,
++  useEffect,
++  useId,
++  useRef,
++  useState,
++} from "react";
++import { ClassificationApiError } from "../../../../api/classification-client";
++import type { UniverseDetail, UniverseOrigin } from "../../../../api/classification-types";
++import {
++  DIALOGS,
++  UNIVERSES,
++  UNIVERSE_DETAIL,
++  UNIVERSE_LIFECYCLE,
++  failureSentence,
++} from "../../copy";
++import { formatTimestamp } from "../../format";
++import { describeOrigin } from "../universe-table";
++
++/** What the header reads from the universe read (`GET /api/universes/{id}`). */
++export type HeaderUniverse = Pick<
++  UniverseDetail,
++  "name" | "lifecycle" | "createdAt" | "retiredAt" | "memberCount" | "origin"
++>;
++
++const BUTTON = "rounded px-3 py-2 text-sm";
++const DESTRUCTIVE = "text-[hsl(var(--destructive))] text-sm";
++
++/**
++ * The universe read's `origin` as `describeOrigin`'s parameter, the stored
++ * `filter_provenance` spelling (DEC-0108): `null` for a universe made by hand,
++ * otherwise the provenance with its thresholds keyed by query-parameter name,
++ * as both sides already key them (DEC-0144).
++ */
++export function originToProvenance(origin: UniverseOrigin): Parameters<typeof describeOrigin>[0] {
++  if (origin.kind === "by_hand" || origin.classificationDate === null) {
++    return null;
++  }
++  return {
++    classification_date: origin.classificationDate,
++    thresholds: origin.thresholds ?? {},
++    hide_incomplete: origin.hideIncomplete === true,
++    symbol: origin.symbol,
++  };
++}
++
++/** The rename field's error for a refusal, selected by code (DEC-0109; classification-ui 2.7). */
++function renameErrorFor(caught: unknown, submitted: string): string {
++  const code = caught instanceof ClassificationApiError ? caught.code : null;
++  if (code === "universe_name_in_use") {
++    return UNIVERSES.nameInUse(submitted);
++  }
++  if (code === "universe_retired") {
++    return UNIVERSE_LIFECYCLE.retiredRefusal;
++  }
++  return failureSentence({ operation: "rename-universe", resource: "universe", code: null });
++}
++
++/** The `secondary` *Retired* badge: text and a hollow square, never colour alone (STD-UI-8). */
++function RetiredBadge(): JSX.Element {
++  return (
++    <span
++      data-variant="secondary"
++      className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
++    >
++      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
++        <rect
++          x="1"
++          y="1"
++          width="10"
++          height="10"
++          fill="none"
++          stroke="currentColor"
++          strokeWidth="2"
++        />
++      </svg>
++      {UNIVERSE_LIFECYCLE.retiredLabel}
++    </span>
++  );
++}
++
++export interface SummaryHeaderProps {
++  universe: HeaderUniverse;
++  /** Sends the rename; rejects with the client error, whose code selects the field error. */
++  onRename: (name: string) => Promise<void>;
++  onAddStocks: () => void;
++  onRetire: () => void;
++}
++
++/**
++ * A universe's summary header, the `card` `summary` (UX design 1.4;
++ * classification-ui 2.7; DAC-E1-S9-1, DAC-E1-S9-4, AC-4, AC-6). The name is
++ * the page's only `h1`. On an active universe it is a control that opens the
++ * inline rename (`form` `inline`, one field named *Universe name*, its value
++ * selected, and **Rename** while editing): `Enter` or **Rename** sends the
++ * trimmed name, an empty one is a field error and the unchanged one closes
++ * without a request (DEC-0109); `Escape` closes and restores the name. A
++ * refusal keeps the field open with its error by code. Beneath, a description
++ * list of Lifecycle, Members, Created and Origin; the actions **Add stocks…**
++ * and **Retire…** sit right. A retired universe shows a plain `h1`, the
++ * *Retired* badge with its time and the retired sentence, and no action.
++ */
++export function SummaryHeader({
++  universe,
++  onRename,
++  onAddStocks,
++  onRetire,
++}: SummaryHeaderProps): JSX.Element {
++  const headingId = useId();
++  const errorId = useId();
++  const headingRef = useRef<HTMLHeadingElement>(null);
++  const nameRef = useRef<HTMLButtonElement>(null);
++  const fieldRef = useRef<HTMLInputElement>(null);
++  const [open, setOpen] = useState(false);
++  const [value, setValue] = useState("");
++  const [error, setError] = useState<string | null>(null);
++  const [pending, setPending] = useState(false);
++
++  const opened = useRef(false);
++
++  const retired = universe.lifecycle === "retired";
++  // A universe retired while its name was being edited offers no rename.
++  const editing = open && !retired;
++
++  // Opening moves focus into the field with the name selected; closing
++  // returns it to the name control, which mounts again in the same commit, or
++  // to the heading when the universe was retired meanwhile and has none.
++  useEffect(() => {
++    if (editing) {
++      opened.current = true;
++      fieldRef.current?.focus();
++      fieldRef.current?.select();
++    } else if (opened.current) {
++      (nameRef.current ?? headingRef.current)?.focus();
++    }
++  }, [editing]);
++
++  // Rename is natively disabled while pending, and a browser drops focus from
++  // a control it disables: focus moves to the field, so Escape still reaches
++  // the form.
++  useEffect(() => {
++    if (pending && document.activeElement !== fieldRef.current) {
++      fieldRef.current?.focus();
++    }
++  }, [pending]);
++
++  function startEditing(): void {
++    setValue(universe.name);
++    setError(null);
++    setOpen(true);
++  }
++
++  function stopEditing(): void {
++    setOpen(false);
++    setError(null);
++  }
++
++  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
++    event.preventDefault();
++    const trimmed = value.trim();
++    if (trimmed === "") {
++      setError(DIALOGS.enterName);
++      return;
++    }
++    if (trimmed === universe.name) {
++      stopEditing();
++      return;
++    }
++    setPending(true);
++    try {
++      await onRename(trimmed);
++      setPending(false);
++      stopEditing();
++    } catch (caught) {
++      setPending(false);
++      setError(renameErrorFor(caught, trimmed));
++    }
++  }
++
++  /** Escape cancels from anywhere in the form, but never while the rename is pending. */
++  function handleKeyDown(event: KeyboardEvent<HTMLFormElement>): void {
++    if (event.key === "Escape") {
++      event.preventDefault();
++      if (!pending) {
++        stopEditing();
++      }
++    }
++  }
++
++  return (
++    <section
++      aria-labelledby={headingId}
++      data-variant="summary"
++      className="flex flex-wrap items-start justify-between gap-4 rounded border border-border bg-card p-5 text-card-foreground"
++    >
++      <div className="flex flex-col gap-3">
++        <h1
++          ref={headingRef}
++          id={headingId}
++          tabIndex={-1}
++          className={editing ? "sr-only" : "text-xl"}
++        >
++          {retired || editing ? (
++            universe.name
++          ) : (
++            <button ref={nameRef} type="button" onClick={startEditing} className="text-left">
++              {universe.name}
++            </button>
++          )}
++        </h1>
++        {editing ? (
++          <form
++            noValidate
++            onSubmit={(event) => void handleSubmit(event)}
++            onKeyDown={handleKeyDown}
++            data-variant="inline"
++            className="flex flex-wrap items-start gap-2"
++          >
++            <div className="flex flex-col gap-1">
++              <input
++                ref={fieldRef}
++                type="text"
++                aria-label={UNIVERSE_DETAIL.universeName}
++                value={value}
++                onChange={(event) => {
++                  setValue(event.target.value);
++                  setError(null);
++                }}
++                aria-invalid={error === null ? undefined : true}
++                aria-describedby={error === null ? undefined : errorId}
++                className="rounded border border-input p-2 text-xl"
++              />
++              {error === null ? null : (
++                <p id={errorId} className={DESTRUCTIVE}>
++                  {error}
++                </p>
++              )}
++            </div>
++            <button
++              type="submit"
++              data-variant="secondary"
++              disabled={pending}
++              className={`${BUTTON} bg-secondary text-secondary-foreground`}
++            >
++              {UNIVERSE_DETAIL.rename}
++            </button>
++          </form>
++        ) : null}
++        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
++          <dt className="text-muted-foreground">{UNIVERSE_DETAIL.lifecycle}</dt>
++          <dd>
++            {retired ? (
++              <span className="inline-flex items-center gap-2">
++                <RetiredBadge />
++                {universe.retiredAt === null ? null : (
++                  <span>{formatTimestamp(universe.retiredAt)}</span>
++                )}
++              </span>
++            ) : (
++              UNIVERSE_DETAIL.active
++            )}
++          </dd>
++          <dt className="text-muted-foreground">{UNIVERSE_DETAIL.members}</dt>
++          <dd className="font-numeric">{universe.memberCount}</dd>
++          <dt className="text-muted-foreground">{UNIVERSE_DETAIL.created}</dt>
++          <dd>{formatTimestamp(universe.createdAt)}</dd>
++          <dt className="text-muted-foreground">{UNIVERSE_DETAIL.origin}</dt>
++          <dd>{describeOrigin(originToProvenance(universe.origin))}</dd>
++        </dl>
++        {retired ? <p className="text-sm">{UNIVERSE_LIFECYCLE.retiredHeader}</p> : null}
++      </div>
++      {retired ? null : (
++        <div className="flex gap-2">
++          <button
++            type="button"
++            data-variant="default"
++            onClick={onAddStocks}
++            className={`${BUTTON} bg-primary text-primary-foreground`}
++          >
++            {UNIVERSE_DETAIL.addStocksAction}
++          </button>
++          <button
++            type="button"
++            data-variant="secondary"
++            onClick={onRetire}
++            className={`${BUTTON} bg-secondary text-secondary-foreground`}
++          >
++            {UNIVERSE_LIFECYCLE.retireAction}
++          </button>
++        </div>
++      )}
++    </section>
++  );
++}
+diff --git a/web/src/screens/research/universes/universe-table.tsx b/web/src/screens/research/universes/universe-table.tsx
+index eef88ca..071239d 100644
+--- a/web/src/screens/research/universes/universe-table.tsx
++++ b/web/src/screens/research/universes/universe-table.tsx
+@@ -45,7 +45,7 @@ const DIRECTIONS = [
+  * function, so its name, parameter, `string` return and wording stay as they
+  * are, and it stays pure and at module scope.
+  */
+-function describeOrigin(
++export function describeOrigin(
+   provenance: {
+     set_id?: string;
+     classification_date: string;

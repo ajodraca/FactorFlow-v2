@@ -1,0 +1,697 @@
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 345cb7a..5dccc8f 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -678,6 +678,27 @@ export const UNIVERSE_DETAIL = {
+   origin: "Origin",
+   addStocksAction: "Add stocks…",
+   addStocksTitle: (name: string): string => `Add stocks to ${name}`,
++  /**
++   * The Add stocks result when at least one stock was added (DEC-0109):
++   * `DIALOGS.added`, whose *, and {m} were already members* is the designs'
++   * fixed clause at every m > 0, with only the noun *stock* singular at one
++   * (CAP-002-E1-S9 T011).
++   */
++  addedStocks: (added: number, name: string, alreadyMembers: number): string =>
++    added === 1
++      ? DIALOGS.added(added, name, alreadyMembers).replace("Added 1 stocks", "Added 1 stock")
++      : DIALOGS.added(added, name, alreadyMembers),
++  /** The Add stocks result when every symbol was already a member (DEC-0109). No design contains it. */
++  allAlreadyMembers: (count: number, name: string): string =>
++    `All ${count} were already members of ${name}.`,
++  /**
++   * The Add stocks `instrument_not_acquired` refusal: UX 1.4's "as in Section
++   * 1.3" with the verb adapted, its own entry beside the create sentence
++   * (DEC-0109). `{symbols}` is the envelope's list joined with ", ", as the
++   * create sentence prints it; `UNIVERSES.followThemLink` is the linked phrase.
++   */
++  addNotFollowed: (symbols: string): string =>
++    `Could not add the stocks: FactorFlow doesn't follow ${symbols}. Follow them on Data health, then try again.`,
+   membersTab: "Members",
+   historyTab: "History",
+   memberSince: "Member since",
+diff --git a/web/src/screens/research/universes/detail/add-stocks-dialog.test.tsx b/web/src/screens/research/universes/detail/add-stocks-dialog.test.tsx
+new file mode 100644
+index 0000000..1031439
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/add-stocks-dialog.test.tsx
+@@ -0,0 +1,394 @@
++import { fireEvent, render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { MemoryRouter } from "react-router-dom";
++import { describe, expect, it, vi } from "vitest";
++import { AddStocksDialog, type AddStocksDialogProps } from "./add-stocks-dialog";
++
++const RETIRED_REFUSAL =
++  "This universe is retired and can't be changed. Its members and history are still viewable.";
++const GENERIC =
++  "Could not add the stocks to the universe: FactorFlow hit an unexpected problem. Try again.";
++
++function dialogProps(overrides: Partial<AddStocksDialogProps> = {}): AddStocksDialogProps {
++  return {
++    universeName: "Tech",
++    error: null,
++    result: null,
++    pending: false,
++    onSubmit: vi.fn(),
++    onCancel: vi.fn(),
++    ...overrides,
++  };
++}
++
++function renderDialog(overrides: Partial<AddStocksDialogProps> = {}) {
++  const props = dialogProps(overrides);
++  const view = render(
++    <MemoryRouter>
++      <AddStocksDialog {...props} />
++    </MemoryRouter>,
++  );
++  function rerenderWith(next: Partial<AddStocksDialogProps>): void {
++    view.rerender(
++      <MemoryRouter>
++        <AddStocksDialog {...props} {...next} />
++      </MemoryRouter>,
++    );
++  }
++  return { props, rerenderWith, ...view };
++}
++
++function stocksField(): HTMLTextAreaElement {
++  return screen.getByRole("textbox", { name: "Stocks" }) as HTMLTextAreaElement;
++}
++
++function addButton(): HTMLElement {
++  return screen.getByRole("button", { name: "Add" });
++}
++
++function describedText(element: HTMLElement): string {
++  const ids = (element.getAttribute("aria-describedby") ?? "").split(/\s+/).filter(Boolean);
++  return ids.map((id) => document.getElementById(id)?.textContent ?? "").join(" ");
++}
++
++function symbols(count: number): string[] {
++  return Array.from({ length: count }, (_, index) => `A${String(index + 1).padStart(4, "0")}`);
++}
++
++async function pasteStocks(user: ReturnType<typeof userEvent.setup>, text: string): Promise<void> {
++  await user.click(stocksField());
++  await user.paste(text);
++  await user.tab();
++}
++
++// Implements TC-COMP-031 (T004): DAC-E1-S9-2, DAC-E1-6, AC-4. Lists are comma-separated, the
++// delivered parser's separator (DEC-0270).
++describe("TC-COMP-031: an already-current symbol is reported politely", () => {
++  it("submits the typed symbols once, in order", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await user.type(stocksField(), "AAPL, MSFT");
++    await user.click(addButton());
++    expect(props.onSubmit).toHaveBeenCalledTimes(1);
++    expect(props.onSubmit).toHaveBeenCalledWith(["AAPL", "MSFT"]);
++  });
++
++  it("reports one added and one already a member as a status, never an alert", () => {
++    renderDialog({ result: { added: ["MSFT"], alreadyMember: ["AAPL"] } });
++    expect(screen.getByRole("status")).toHaveTextContent(
++      /^Added 1 stock to Tech, and 1 were already members$/,
++    );
++    expect(screen.queryByRole("alert")).toBeNull();
++    expect(document.querySelector('[data-variant="error"]')).toBeNull();
++  });
++
++  it("reports every symbol already a member without an error", () => {
++    renderDialog({ result: { added: [], alreadyMember: ["AAPL", "MSFT"] } });
++    expect(screen.getByRole("status")).toHaveTextContent(/^All 2 were already members of Tech\.$/);
++    expect(screen.queryByRole("alert")).toBeNull();
++    expect(document.querySelector('[data-variant="error"]')).toBeNull();
++  });
++
++  it("uses the plural noun from two added, and no clause when none were already members", () => {
++    renderDialog({ result: { added: ["AAPL", "MSFT"], alreadyMember: [] } });
++    expect(screen.getByRole("status")).toHaveTextContent(/^Added 2 stocks to Tech$/);
++  });
++
++  it("renders no status without a result", () => {
++    renderDialog();
++    expect(screen.queryByRole("status")).toBeNull();
++  });
++});
++
++// Implements TC-COMP-032 (T005): DAC-E1-S9-3, AC-4.
++describe("TC-COMP-032: an uncovered symbol refuses the whole request and names every symbol", () => {
++  it("names every symbol in order with the followed-stocks link, keeps the list and allows a retry", async () => {
++    const user = userEvent.setup();
++    const { props, rerenderWith } = renderDialog();
++    await user.type(stocksField(), "AAPL, MSFT, TSLA");
++    await user.click(addButton());
++    expect(props.onSubmit).toHaveBeenCalledWith(["AAPL", "MSFT", "TSLA"]);
++
++    rerenderWith({ error: { kind: "instrument_not_acquired", symbols: ["MSFT", "TSLA"] } });
++    const alert = screen.getByRole("alert");
++    expect(alert).toHaveTextContent(
++      "Could not add the stocks: FactorFlow doesn't follow MSFT, TSLA. Follow them on Data health, then try again.",
++    );
++    const link = within(alert).getByRole("link", { name: "Follow them on Data health" });
++    expect(link).toHaveAttribute("href", "/instruments");
++    expect(screen.getByRole("dialog", { name: "Add stocks to Tech" })).toBeInTheDocument();
++    // Normalised on blur, one symbol per line, as the create dialog rewrites it (DEC-0270).
++    expect(stocksField().value).toBe("AAPL\nMSFT\nTSLA");
++    expect(addButton()).toBeEnabled();
++    expect(addButton()).not.toHaveAttribute("data-variant", "blocked");
++  });
++
++  it("allows a second attempt after the refusal", async () => {
++    const user = userEvent.setup();
++    const { props, rerenderWith } = renderDialog();
++    await user.type(stocksField(), "AAPL, MSFT, TSLA");
++    await user.click(addButton());
++    rerenderWith({ error: { kind: "instrument_not_acquired", symbols: ["MSFT", "TSLA"] } });
++    await user.click(addButton());
++    expect(props.onSubmit).toHaveBeenCalledTimes(2);
++    expect(props.onSubmit).toHaveBeenLastCalledWith(["AAPL", "MSFT", "TSLA"]);
++  });
++});
++
++// T006 (a) to (f): structure, the blocked confirm, normalisation, refusals and plain text.
++describe("AddStocksDialog", () => {
++  it("is a standard modal dialog titled for the universe, with one list textarea and Add and Cancel", () => {
++    renderDialog();
++    const dialog = screen.getByRole("dialog", { name: "Add stocks to Tech" });
++    expect(dialog.tagName).toBe("DIALOG");
++    expect(dialog).toHaveAttribute("open");
++    expect(dialog).toHaveAttribute("aria-modal", "true");
++    expect(dialog).toHaveAttribute("data-variant", "standard");
++    expect(within(dialog).getAllByRole("textbox")).toHaveLength(1);
++    expect(stocksField().tagName).toBe("TEXTAREA");
++    expect(stocksField()).toHaveAttribute("data-variant", "list");
++    expect(stocksField()).toHaveAttribute("rows", "4");
++    expect(within(dialog).getByRole("button", { name: "Add" })).toBeInTheDocument();
++    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
++  });
++
++  it("puts initial focus on the textarea", () => {
++    renderDialog();
++    expect(stocksField()).toHaveFocus();
++  });
++
++  it("Escape calls onCancel", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await user.keyboard("{Escape}");
++    expect(props.onCancel).toHaveBeenCalledTimes(1);
++    expect(props.onSubmit).not.toHaveBeenCalled();
++  });
++
++  it("Cancel calls onCancel", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await user.click(screen.getByRole("button", { name: "Cancel" }));
++    expect(props.onCancel).toHaveBeenCalledTimes(1);
++    expect(props.onSubmit).not.toHaveBeenCalled();
++  });
++
++  it("cycles Tab and Shift+Tab inside the dialog", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    addButton().focus();
++    await user.tab();
++    expect(stocksField()).toHaveFocus();
++    await user.tab({ shift: true });
++    expect(addButton()).toHaveFocus();
++  });
++
++  it("restores focus to the previously focused element on unmount", () => {
++    const trigger = document.createElement("button");
++    document.body.append(trigger);
++    trigger.focus();
++    const { unmount } = renderDialog();
++    expect(trigger).not.toHaveFocus();
++    unmount();
++    expect(trigger).toHaveFocus();
++    trigger.remove();
++  });
++
++  it("is blocked, focusable and described while no symbol parses, and sends nothing", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    const add = addButton();
++    expect(add).toHaveAttribute("data-variant", "blocked");
++    expect(add).toBeEnabled();
++    expect(add).toHaveAttribute("tabindex", "0");
++    expect(describedText(add)).toBe("Enter at least one stock.");
++    await user.click(add);
++    expect(props.onSubmit).not.toHaveBeenCalled();
++  });
++
++  it("stays blocked when only malformed entries were entered, reporting each one after normalising", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await pasteStocks(user, "1BAD, zzzz zz");
++    expect(addButton()).toHaveAttribute("data-variant", "blocked");
++    expect(describedText(addButton())).toBe("Enter at least one stock.");
++    expect(screen.getByText("1BAD: not a valid symbol format")).toBeInTheDocument();
++    expect(screen.getByText("ZZZZ ZZ: not a valid symbol format")).toBeInTheDocument();
++    expect(screen.getByText("0 symbols recognised, 2 not recognised")).toBeInTheDocument();
++    await user.click(addButton());
++    expect(props.onSubmit).not.toHaveBeenCalled();
++  });
++
++  it("is blocked above 1000 recognised entries, duplicates counted, and sends nothing", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await pasteStocks(user, [...symbols(999), "A0001", "A0002"].join(", "));
++    expect(addButton()).toHaveAttribute("data-variant", "blocked");
++    expect(describedText(addButton())).toBe("Up to 1000 stocks can be added in one request.");
++    await user.click(addButton());
++    expect(props.onSubmit).not.toHaveBeenCalled();
++  });
++
++  it("is not blocked at exactly 1000 recognised entries, and sends them", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await pasteStocks(user, symbols(1000).join(", "));
++    expect(addButton()).not.toHaveAttribute("data-variant", "blocked");
++    expect(addButton()).not.toHaveAttribute("aria-describedby");
++    await user.click(addButton());
++    expect(props.onSubmit).toHaveBeenCalledWith(symbols(1000));
++  });
++
++  it("sends the distinct symbols, upper case, once each, and reports the recognised count", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog();
++    await pasteStocks(user, "aapl; msft\nAAPL, 1BAD");
++    expect(screen.getByText("3 symbols recognised, 1 not recognised")).toBeInTheDocument();
++    await user.click(addButton());
++    expect(props.onSubmit).toHaveBeenCalledWith(["AAPL", "MSFT"]);
++  });
++
++  it("parses a paste together with the text already in the field, and describes the field by the count", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await user.type(stocksField(), "A, ");
++    expect(stocksField()).not.toHaveAttribute("aria-describedby");
++    await user.paste("MSFT");
++    expect(stocksField()).toHaveAccessibleDescription("2 symbols recognised, 0 not recognised");
++    expect(screen.queryByRole("list")).toBeNull();
++  });
++
++  it("shows no count for a field left empty", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await user.type(stocksField(), " ");
++    await user.tab();
++    expect(screen.queryByText(/symbols recognised/)).toBeNull();
++    expect(stocksField()).not.toHaveAttribute("aria-describedby");
++  });
++
++  it("submitting never navigates the page: the form's default action is prevented", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await pasteStocks(user, "AAPL");
++    const form = stocksField().closest("form") as HTMLFormElement;
++    expect(fireEvent.submit(form)).toBe(false);
++  });
++
++  it("normalises symbols to upper case on blur, not while typing", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await user.type(stocksField(), "aapl, msft");
++    expect(stocksField().value).toBe("aapl, msft");
++    await user.tab();
++    expect(stocksField().value).toBe("AAPL\nMSFT");
++  });
++
++  it("parses a paste at once, without a blur", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await user.click(stocksField());
++    await user.paste("AAPL, MSFT");
++    expect(screen.getByText("2 symbols recognised, 0 not recognised")).toBeInTheDocument();
++    expect(addButton()).not.toHaveAttribute("data-variant", "blocked");
++  });
++
++  it("states universe_retired and keeps the list", async () => {
++    const user = userEvent.setup();
++    const { rerenderWith } = renderDialog();
++    await pasteStocks(user, "AAPL");
++    rerenderWith({ error: { kind: "universe_retired" } });
++    expect(screen.getByRole("alert")).toHaveTextContent(RETIRED_REFUSAL);
++    expect(stocksField().value).toBe("AAPL");
++  });
++
++  it("states any other failure with the generic sentence and keeps the list", async () => {
++    const user = userEvent.setup();
++    const { rerenderWith } = renderDialog();
++    await pasteStocks(user, "AAPL");
++    rerenderWith({ error: { kind: "generic" } });
++    expect(screen.getByRole("alert")).toHaveTextContent(GENERIC);
++    expect(stocksField().value).toBe("AAPL");
++  });
++
++  it("renders no alert without an error", () => {
++    renderDialog();
++    expect(screen.queryByRole("alert")).toBeNull();
++  });
++
++  it("while pending natively disables Add and not Cancel, and sends nothing more", async () => {
++    const user = userEvent.setup();
++    const { props } = renderDialog({ pending: true });
++    expect(addButton()).toBeDisabled();
++    expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
++    expect(screen.getByRole("dialog")).toHaveAttribute("aria-busy", "true");
++    await pasteStocks(user, "AAPL");
++    await user.click(addButton());
++    expect(props.onSubmit).not.toHaveBeenCalled();
++  });
++
++  it("moves focus to Cancel when Add, focused by its click, becomes pending", async () => {
++    const user = userEvent.setup();
++    const { rerenderWith } = renderDialog();
++    await pasteStocks(user, "AAPL");
++    await user.click(addButton());
++    expect(addButton()).toHaveFocus();
++    rerenderWith({ pending: true });
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++  });
++
++  it("moves focus to Cancel when a browser dropped it from the Add that became pending", async () => {
++    const user = userEvent.setup();
++    const { rerenderWith } = renderDialog();
++    await pasteStocks(user, "AAPL");
++    await user.click(addButton());
++    // A browser drops focus from a control it disables; jsdom does not, so the test does.
++    addButton().blur();
++    rerenderWith({ pending: true });
++    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
++  });
++
++  it("shows progress in place on Add while pending, and none otherwise", () => {
++    const { rerenderWith } = renderDialog();
++    expect(addButton()).not.toHaveAttribute("data-pending");
++    expect(addButton().querySelector('[aria-hidden="true"]')).toHaveClass("invisible");
++    rerenderWith({ pending: true });
++    expect(addButton()).toHaveAttribute("data-pending", "true");
++    const progress = addButton().querySelector('[aria-hidden="true"]');
++    expect(progress).toHaveClass("motion-safe:animate-spin");
++    expect(progress).not.toHaveClass("invisible");
++  });
++
++  it("moves no focus when a request ends", () => {
++    const { rerenderWith } = renderDialog({ pending: true });
++    stocksField().blur();
++    rerenderWith({ pending: false });
++    expect(document.body).toHaveFocus();
++  });
++
++  it("leaves focus in the field when a request becomes pending", () => {
++    const { rerenderWith } = renderDialog();
++    expect(stocksField()).toHaveFocus();
++    rerenderWith({ pending: true });
++    expect(stocksField()).toHaveFocus();
++  });
++
++  it("is enabled when not pending and a symbol parses", async () => {
++    const user = userEvent.setup();
++    renderDialog();
++    await pasteStocks(user, "AAPL");
++    expect(addButton()).toBeEnabled();
++    expect(addButton()).toHaveAttribute("data-variant", "default");
++    expect(screen.getByRole("dialog")).not.toHaveAttribute("aria-busy");
++  });
++
++  it("renders entered text as plain text, never as markup", async () => {
++    const user = userEvent.setup();
++    renderDialog({ universeName: "<i>Tech</i>" });
++    await pasteStocks(user, "<b>AAPL</b>");
++    expect(screen.getByText("<B>AAPL</B>: not a valid symbol format")).toBeInTheDocument();
++    expect(screen.getByRole("dialog", { name: "Add stocks to <i>Tech</i>" })).toBeInTheDocument();
++    expect(document.querySelector("dialog b")).toBeNull();
++    expect(document.querySelector("dialog i")).toBeNull();
++  });
++});
+diff --git a/web/src/screens/research/universes/detail/add-stocks-dialog.tsx b/web/src/screens/research/universes/detail/add-stocks-dialog.tsx
+new file mode 100644
+index 0000000..c02e0c1
+--- /dev/null
++++ b/web/src/screens/research/universes/detail/add-stocks-dialog.tsx
+@@ -0,0 +1,259 @@
++import {
++  type ClipboardEvent,
++  type FormEvent,
++  type JSX,
++  useEffect,
++  useId,
++  useRef,
++  useState,
++} from "react";
++import type { AddMembersResult } from "../../../../api/classification-types";
++import { type ParsedSymbol, parseBulkSymbols } from "../../../instruments/parse-bulk-symbols";
++import {
++  DIALOGS,
++  SHELL_ROUTES,
++  UNIVERSES,
++  UNIVERSE_DETAIL,
++  UNIVERSE_LIFECYCLE,
++  failureSentence,
++} from "../../copy";
++import { ConfirmProgress, DialogFrame } from "../../dialog-frame";
++import { withLink } from "../create-dialog";
++
++/** `MAX_SYMBOLS_PER_REQUEST` of classification-api section 2.4. */
++const MAX_SYMBOLS = 1000;
++
++/** UX 1.4 Token Usage: field and dialog errors are drawn in --destructive. */
++const DESTRUCTIVE = "text-[hsl(var(--destructive))] text-sm";
++
++/** The refusals the dialog states by kind (classification-ui 2.7; DEC-0109). */
++export type AddStocksError =
++  | { kind: "instrument_not_acquired"; symbols: string[] }
++  | { kind: "universe_retired" }
++  | { kind: "generic" };
++
++/** Why **Add** is `blocked`, or `null` when it is not (UX 1.4; DEC-0104). */
++function blockedReason(recognised: number): string | null {
++  if (recognised === 0) {
++    return UNIVERSES.enterAtLeastOne;
++  }
++  return recognised > MAX_SYMBOLS ? UNIVERSES.tooMany : null;
++}
++
++/** The polite result sentence (DEC-0109): never an error, whatever was already a member. */
++export function addResultSentence(result: AddMembersResult, universeName: string): string {
++  return result.added.length === 0
++    ? UNIVERSE_DETAIL.allAlreadyMembers(result.alreadyMember.length, universeName)
++    : UNIVERSE_DETAIL.addedStocks(result.added.length, universeName, result.alreadyMember.length);
++}
++
++function ErrorAlert({ error }: { error: AddStocksError }): JSX.Element {
++  switch (error.kind) {
++    case "instrument_not_acquired":
++      return (
++        <p role="alert" className={DESTRUCTIVE}>
++          {withLink(
++            UNIVERSE_DETAIL.addNotFollowed(error.symbols.join(", ")),
++            UNIVERSES.followThemLink,
++            SHELL_ROUTES.followedStocks,
++          )}
++        </p>
++      );
++    case "universe_retired":
++      return (
++        <p role="alert" className={DESTRUCTIVE}>
++          {UNIVERSE_LIFECYCLE.retiredRefusal}
++        </p>
++      );
++    case "generic":
++      return (
++        <p role="alert" className={DESTRUCTIVE}>
++          {failureSentence({
++            operation: "add-universe-members",
++            resource: "universe-member",
++            code: null,
++          })}
++        </p>
++      );
++  }
++}
++
++export interface AddStocksDialogProps {
++  universeName: string;
++  error: AddStocksError | null;
++  result: AddMembersResult | null;
++  pending: boolean;
++  /** Receives the distinct upper-case symbols, in the order entered. */
++  onSubmit: (symbols: string[]) => void;
++  onCancel: () => void;
++}
++
++/**
++ * The *Add stocks to {name}* dialog (UX design 1.4; classification-ui 2.7;
++ * DAC-E1-S9-2, DAC-E1-S9-3, DAC-E1-6). A `dialog` `standard` on the shared
++ * `DialogFrame` (Escape, the Tab cycle and focus restored on unmount) with
++ * the `textarea` `list` field alone, initially focused. The field parses with
++ * CAP-001's `parseBulkSymbols` on paste and on blur, never per keystroke, as
++ * the create dialog does, and is rewritten upper case one symbol per line on
++ * blur. **Add** is `blocked`, focusable and described by its reason while the
++ * recognised entries number zero or more than 1000, counted as parsed
++ * (DEC-0104); `onSubmit` receives the distinct symbols. Refusals render by
++ * kind through `copy.ts`, keeping the entered list; `result` renders the
++ * polite sentence of DEC-0109, never an error. While `pending` **Add** is
++ * natively disabled and shows its progress in place (dialog spec section 4).
++ *
++ * `onCancel` is called for Escape, the overlay and **Cancel** at any time: the
++ * host keeps the dialog open while its request is pending, so it never closes
++ * before the result is known (dialog spec section 4; `index.tsx`).
++ */
++export function AddStocksDialog({
++  universeName,
++  error,
++  result,
++  pending,
++  onSubmit,
++  onCancel,
++}: AddStocksDialogProps): JSX.Element {
++  const stocksId = useId();
++  const counterId = useId();
++  const blockedId = useId();
++  const stocksRef = useRef<HTMLTextAreaElement>(null);
++  const formRef = useRef<HTMLFormElement>(null);
++  const cancelRef = useRef<HTMLButtonElement>(null);
++  const addRef = useRef<HTMLButtonElement>(null);
++  const [raw, setRaw] = useState("");
++  const [parsed, setParsed] = useState<ParsedSymbol[] | null>(null);
++
++  const recognised = parsed?.filter((entry) => entry.valid) ?? [];
++  const rejected = parsed?.filter((entry) => !entry.valid) ?? [];
++  const blocked = blockedReason(recognised.length);
++
++  // Add is natively disabled while pending, and a browser either drops focus
++  // from a control it disables or leaves it there with no Tab stop. Either
++  // way focus moves to Cancel, so Escape and the Tab cycle keep working, as
++  // `remove-dialog.tsx` does. Focus elsewhere in the dialog stays put.
++  useEffect(() => {
++    if (!pending) {
++      return;
++    }
++    const active = document.activeElement;
++    if (formRef.current?.contains(active) && active !== addRef.current) {
++      return;
++    }
++    cancelRef.current?.focus();
++  }, [pending]);
++
++  function showParse(text: string): void {
++    const entries = parseBulkSymbols(text);
++    setParsed(entries.length === 0 ? null : entries);
++  }
++
++  function handleBlur(): void {
++    const rewritten = parseBulkSymbols(raw)
++      .map((entry) => entry.normalised)
++      .join("\n");
++    setRaw(rewritten);
++    showParse(rewritten);
++  }
++
++  /** Parses the text the paste produces, read from the event, so no keystroke ever parses. */
++  function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>): void {
++    const field = event.currentTarget;
++    const text = event.clipboardData.getData("text");
++    showParse(
++      field.value.slice(0, field.selectionStart) + text + field.value.slice(field.selectionEnd),
++    );
++  }
++
++  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
++    event.preventDefault();
++    // Re-parse the current text, so a preview older than the field cannot send.
++    const valid = parseBulkSymbols(raw).filter((entry) => entry.valid);
++    showParse(raw);
++    if (blockedReason(valid.length) !== null) {
++      return;
++    }
++    onSubmit(Array.from(new Set(valid.map((entry) => entry.normalised))));
++  }
++
++  return (
++    <DialogFrame
++      title={UNIVERSE_DETAIL.addStocksTitle(universeName)}
++      initialFocusRef={stocksRef}
++      onCancel={onCancel}
++      busy={pending}
++    >
++      <form ref={formRef} noValidate onSubmit={handleSubmit} className="flex flex-col gap-3">
++        {error === null ? null : <ErrorAlert error={error} />}
++        {result === null ? null : (
++          <output className="text-sm">{addResultSentence(result, universeName)}</output>
++        )}
++        <div className="flex flex-col gap-1">
++          <label htmlFor={stocksId}>{UNIVERSES.stocks}</label>
++          <textarea
++            ref={stocksRef}
++            id={stocksId}
++            data-variant="list"
++            rows={4}
++            value={raw}
++            placeholder={UNIVERSES.stocksPlaceholder}
++            onChange={(event) => setRaw(event.target.value)}
++            onPaste={handlePaste}
++            onBlur={handleBlur}
++            aria-describedby={parsed === null ? undefined : counterId}
++            className="rounded border border-input p-2"
++          />
++          <div id={counterId} aria-live="polite" className="flex flex-col gap-1 text-sm">
++            {parsed === null ? null : (
++              <>
++                <p>{UNIVERSES.recognised(recognised.length, rejected.length)}</p>
++                {rejected.length > 0 ? (
++                  <ul className="flex flex-col gap-1">
++                    {rejected.map((entry, index) => (
++                      <li key={`${entry.input}-${index}`} className="flex items-center gap-1">
++                        <span aria-hidden="true" className="text-status-warning">
++                          ▲
++                        </span>
++                        {UNIVERSES.invalidSymbol(entry.input)}
++                      </li>
++                    ))}
++                  </ul>
++                ) : null}
++              </>
++            )}
++          </div>
++        </div>
++        <div className="flex items-center justify-end gap-2">
++          {blocked === null ? null : (
++            <p id={blockedId} className="text-sm text-muted-foreground">
++              {blocked}
++            </p>
++          )}
++          <button
++            ref={cancelRef}
++            type="button"
++            onClick={onCancel}
++            className="rounded border border-border px-3 py-2"
++          >
++            {DIALOGS.cancel}
++          </button>
++          <button
++            ref={addRef}
++            type="submit"
++            data-variant={blocked === null ? "default" : "blocked"}
++            aria-describedby={blocked === null ? undefined : blockedId}
++            // Never a bare `disabled` while blocked: the reason must stay reachable
++            // (button `blocked` contract). In flight it is natively disabled.
++            tabIndex={0}
++            disabled={pending}
++            data-pending={pending ? "true" : undefined}
++            className="inline-flex items-center gap-2 rounded bg-foreground px-3 py-2 text-background data-[variant=blocked]:border data-[variant=blocked]:border-border data-[variant=blocked]:bg-transparent data-[variant=blocked]:text-muted-foreground"
++          >
++            <ConfirmProgress pending={pending} />
++            {DIALOGS.add}
++          </button>
++        </div>
++      </form>
++    </DialogFrame>
++  );
++}
