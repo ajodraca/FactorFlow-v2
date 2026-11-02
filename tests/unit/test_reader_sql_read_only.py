@@ -30,6 +30,8 @@ def _strip_comments(text: str) -> str:
         "universe_exists.sql",  # CAP-002-E3-S2 T016
         "stock_evidence.sql",  # CAP-002-E3-S3 T012
         "stock_memberships.sql",  # CAP-002-E3-S3 T012
+        "stock_history.sql",  # CAP-002-E3-S4 T011
+        "sets.sql",  # CAP-002-E3-S4 T011
     ],
 )
 def test_reader_statement_is_one_read_only_query(name: str) -> None:
@@ -51,7 +53,15 @@ def test_comment_stripping_does_not_hide_a_write() -> None:
     assert re.search(r"\bDELETE\b", stripped)
 
 
-@pytest.mark.parametrize("name", ["stock_evidence.sql", "stock_memberships.sql"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "stock_evidence.sql",
+        "stock_memberships.sql",
+        "stock_history.sql",  # CAP-002-E3-S4 T011
+        "sets.sql",  # CAP-002-E3-S4 T011
+    ],
+)
 def test_evidence_statements_substitute_no_request_text(name: str) -> None:
     """SEC-INP-002: no ``{`` placeholder and no ``%`` other than a bound ``%(name)s``."""
     body = _strip_comments((SQL_DIR / name).read_text(encoding="utf-8"))

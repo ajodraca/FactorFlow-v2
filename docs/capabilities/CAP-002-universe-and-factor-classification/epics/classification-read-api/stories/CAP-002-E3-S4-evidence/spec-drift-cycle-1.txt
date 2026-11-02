@@ -1,0 +1,36 @@
+**Verdict: no drift.** The cycle-1 diff matches the story, the task plan, reader design §2.3, §2.6, §5 and §7, the API design's `SetResponse`/`StockHistoryResponse`, and DEC-0132/0135/0136/0137/0264/0265. Git commands needed approval here, so I reviewed the saved `cycle-1.patch`, not a live `git diff --cached`.
+
+**Checked against the spec, no drift found:**
+- **`stock_history` (AC-18, DAC-E3-9, DAC-E3-S4-1, DAC-E3-S4-2, DAC-E3-S4-3; T012, T015).**
+  - `stock_history.sql:16-17` filters on `s.state = 'complete'` and leaves out the current set.
+  - It pages on `(ended_at, set_id)` with a strict `<` and orders `ended_at DESC, set_id DESC`. It reads the stock through the instrument filter and never touches `factor_input`.
+  - `reader.py` returns `InstrumentNotFound` when no row comes back. A known stock with no history gets one row with a null `set_id`, which becomes `([], None)`.
+  - Every cell is built through `_cell_from_row`, so `restated_possible` comes back exactly as stored (DAC-E3-12, AC-23).
+  - The `limit + 1` fetch and the cursor taken from the last kept set match T015.
+- **`list_sets` / `get_set` (DAC-E3-S4-3; T013, T016; design 2.6; DEC-0083).**
+  - `sets.sql` returns every state, newest `started_at` first, with `run_started_at` and `run_outcome` from `acquisition_run` and `failure_reason`. The `factors` expression is spelled exactly as in `current_set.sql`.
+  - `get_set` raises `SetNotFound(LookupError)`.
+  - `SetRow`'s fields match the API design's `SetResponse` field list. `HistoryRow` matches design 2.3 and `StockHistoryResponse`.
+- **DEC-0137 (current set left out of history).** Upheld by the owner. Its reasoning holds: no acceptance criterion requires the current set, design 2.6 says it is excluded, and the current result is already served by the evidence read.
+- **DEC-0136 (limit 1 to `MAX_PAGE_SIZE`, cursor format, `SetNotFound`).** Upheld by the owner and implemented as written.
+  - Cursors are encoded and decoded by `runs.queries`, with no second copy of that code.
+  - The reader's `CursorError` is the same class that `runs.queries` raises, so it reaches callers unchanged, as the decision requires.
+  - Booleans are rejected as a `limit`. That is stricter than the plan, but it is not new behaviour.
+- **DEC-0132 (upper-casing the symbol).** Upheld by the owner, and the record explicitly names `stock_history` and this story.
+- **Extracting `_factor_summaries`.** T016 allows this when the original code has one call site and the change is a pure move. The diff is a pure move out of `_row_to_current`, with behaviour unchanged.
+- **DEC-0135 (volume test).** Upheld by the owner. The volume test proves the reads go through the indexes with sequential scans disabled, prints the elapsed time and asserts no time limit. This matches reader design §5 ("without asserting a number").
+
+**Deviations, each covered by a decision record:**
+1. **`reader.py:2331` and `sets.sql:4-5`:** `SetRow.factors` is `{}` when a set has no `classification_set_factor` rows. Design 2.3 describes `SetRow` as joined to "its three" factor rows, and T005/T008/T016 plan three summaries. **DEC-0265 authorises this, and its reasoning holds.** I checked it against the code:
+   - `engine.py:99-148` writes the factor rows and completes the set in one transaction, and rolls back before marking a set failed.
+   - So a `building` set (as other connections see it) and every `failed` set have no factor rows. The planned mapping would raise on them and break DAC-E3-S4-3.
+   - An empty map invents no values (AC-19) and still fits the `factors` object in `SetResponse`.
+   - DEC-0265 is PROVISIONAL and the owner has not reviewed it yet.
+2. **`SetRow` field types (`reader.py:2175-2181`):** `run_started_at`, `latest_trading_day` and `active_instruments` can be `None`. Neither design fixes nullability for `SetRow`. These fields are only filled when a set completes, so `None` is the stored value for building and failed sets. This is consistent with the plan's Open Gap 6, which says to return stored values.
+3. **Test environment:** the database-backed tests ran against a local PostgreSQL 16.15 server instead of a container, under DEC-0264. That changes test infrastructure only, adds no repository change and the logs disclose it. The reasoning holds: same major version, and it allows the TDD red/green and mutation runs to be observed.
+
+**Housekeeping in the diff (not drift):** the T001–T018 checkboxes are ticked and the story status moves from `planning` to `in-progress`. These are process edits, not behaviour.
+
+**Minor observation, not drift:** `stock_history` finds the current set with one statement and then runs the history query as a second statement. If a set completes between the two, one page could be off. The spec says nothing about consistency across the two statements, and T007 expects exactly that two-statement shape.
+
+DRIFT: false

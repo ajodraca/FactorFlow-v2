@@ -1,0 +1,33 @@
+# Full validation, CAP-002-E3-S4 cycle-1 (staged on c886972). postgres-marked tests against a local PostgreSQL 16.15 server via localpg_plugin (DEC-0264; Docker absent).
+$ uv run --offline pytest -q -p localpg_plugin -p no:cacheprovider -m postgres
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_research_migrations_apply.py::test_pg_dump_restore_returns_the_current_set_and_membership_unchanged
+1 failed, 891 passed, 1494 deselected, 2 warnings in 566.47s (0:09:26)
+exit=1
+$ uv run --offline pytest -q -p no:cacheprovider -m 'not postgres'
+=========================== short test summary info ============================
+FAILED tests/unit/test_deploy_smoke.py::test_smoke_accepts_pg_hba_rules_using_scram_peer_or_reject
+FAILED tests/unit/test_deploy_smoke.py::test_smoke_defaults_to_factorflow_project_and_uses_proxy_free_redirect_free_curl
+FAILED tests/unit/test_deploy_smoke.py::test_smoke_targets_project_named_by_its_argument
+FAILED tests/unit/test_deploy_smoke.py::test_smoke_check_4_fails_when_non_loopback_address_accepts_connection
+4 failed, 1489 passed, 892 deselected, 1 xfailed, 2 warnings in 28.57s
+exit=1
+$ uv run --offline ruff check .
+All checks passed!
+exit=0
+$ uv run --offline ruff format --check .
+273 files already formatted
+exit=0
+$ uv run --offline mypy src
+Success: no issues found in 60 source files
+exit=0
+# The five failures are environmental and pre-existing: the same five fail identically in a clean clone of the
+# base commit c886972 (no S4 change) in this sandbox:
+#  - test_research_migrations_apply.py::test_pg_dump_restore_returns_the_current_set_and_membership_unchanged
+#    calls PostgresContainer.get_wrapped_container() (docker exec pg_dump); no container exists here (DEC-0264).
+#  - test_deploy_smoke.py (4 tests): the smoke script opens an AF_INET6 socket; the sandbox raises
+#    OSError [Errno 97] Address family not supported by protocol.
+# None touches a file this story changes. Every other test passed: 891 postgres + 1489 not-postgres.

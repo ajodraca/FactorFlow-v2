@@ -1,0 +1,30 @@
+## Review: CAP-002-E3-S4, cycle-1
+
+I found no blocking issues in this cycle. The production code matches design 2.3/2.6 and the cited decisions (DEC-0136, DEC-0137, DEC-0265). The tests check the behaviour against a real PostgreSQL 16 store, which DEC-0264 allows in place of the container. I did not re-run the tests; the green log shows 83 passed.
+
+**What I checked and found correct**
+- **`stock_history.sql`:**
+  - Only complete sets appear, the current set is left out, and ordering is newest `ended_at` first with ties broken by `set_id` descending.
+  - The `limit + 1` page of sets is chosen inside a CTE before rows are joined back, so a set's three factor rows are never split across pages.
+  - Rows for one set come back next to each other, so grouping them into `HistoryRow` by `set_id` is correct.
+  - The three cases stay distinct: no rows means unknown symbol, one row with a null `set_id` means a known stock with no history, otherwise there are results. Each is tested.
+- **`sets.sql`:** building and failed sets are listed. A set with no factor rows gets `factors = {}`, as DEC-0265 says. Paging uses `(started_at, set_id)` with the same total order.
+- **Cursors:** they reuse the `runs.queries` encoder and its `CursorError`, as DEC-0136 says. The next cursor comes from the last row kept. `limit` and cursor checks run before any statement, and the unit tests confirm nothing reaches the connection.
+- **Bound parameters only and read-only:** both new `.sql` files are added to the read-only and no-request-text checks.
+- **Tests:** they cover:
+  - ties broken by `set_id`, paging one and two at a time
+  - a new set added between page requests shifting no page
+  - case-insensitive symbols
+  - excluding failed and building sets by their state
+  - stored rows coming back unchanged
+  - exactly one statement besides the set-block read
+  - query plans at 3000 stocks using the indexes
+- **Mutation run:** the surviving mutants are harmless: `zip(strict=True)` dropped where column names always match row width, and edits to comments only.
+
+**Findings**
+
+1. NON-BLOCKING, `src/factorflow/classification/reader.py:729` (`stock_history`): the current set comes from a separate statement (`read_set_blocks`) that runs before `HISTORY_SQL`. Under READ COMMITTED, if a set completes between the two statements, that newly current set can show up in history. `stock_evidence` has the same pattern and the window is small. Choosing the current set inside `stock_history.sql`, or running both statements in one REPEATABLE READ transaction, would close it.
+2. NON-BLOCKING, `src/factorflow/classification/reader.py` `_factor_summaries` (around line 989): it raises `KeyError` if a set has one or two `classification_set_factor` rows rather than none or all three. The schema does not prevent that; the engine avoids it by writing all three in one transaction, so it cannot happen today.
+3. NON-BLOCKING, `src/factorflow/runs/queries.py:191`, existing code reached through the reader: a hand-built cursor with a timestamp that has no time zone is accepted and read in the session's time zone. A client tampering with the cursor would only get a wrong page, which DEC-0136 already accepts.
+
+VERDICT: APPROVED
