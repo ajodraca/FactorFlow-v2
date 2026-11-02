@@ -436,6 +436,13 @@ export const SORT = {
 
 /** The results header and the nothing-found and never-scored bodies (UX 1.1, 1.4). */
 export const RESULTS = {
+  /**
+   * The Research screen's title: the results `h1` before a count exists, while
+   * the first page loads and before any stock has been scored (UX design 1.1,
+   * the top bar's title *Research*; DEC-0170; CAP-002-E4-S9 T011). No catalogue
+   * group held it, so it is added under CAP-002-E4-S2 Open Gap 6.
+   */
+  screenTitle: "Research",
   /** The results table's two text column headers (UX 1.1 column table; CAP-002-E4-S6, DEC-0239). */
   columns: { symbol: "Symbol", name: "Name" },
   stocksMatch: (count: number): string => `${count} stocks match`,
@@ -455,6 +462,22 @@ export const RESULTS = {
     `The latest download, started ${started}, ended Complete at ${ended}`,
   latestDownloadFailed: (started: string, ended: string, reason: string): string =>
     `The latest download, started ${started}, ended Failed at ${ended}: ${reason}`,
+  /**
+   * The never-populated body's latest-download sentences for the run states
+   * UX design 1.1 does not word, in its own *is {state}* and *ended {state} at
+   * {time}* pattern with the delivered run screens' word for each state
+   * (`RUN_STATE_LABEL`, which agrees: Cancelling, Partial, Cancelled,
+   * Abandoned). A partial download is never *ended Complete* (DEC-0171;
+   * CAP-002-E4-S9 Open Gap 2; added under CAP-002-E4-S2 Open Gap 6).
+   */
+  latestDownloadCancelling: (started: string): string =>
+    `The latest download, started ${started}, is Cancelling`,
+  latestDownloadPartial: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Partial at ${ended}`,
+  latestDownloadCancelled: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Cancelled at ${ended}`,
+  latestDownloadAbandoned: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Abandoned at ${ended}`,
   openDataHealth: "Open Data health",
   tryAgain: "Try again",
 } as const;
@@ -466,6 +489,14 @@ export const SCORE_SET = {
   /** The clause whose time is the download link: *from the download started 2026-10-15 17:30 CDT* */
   fromTheDownloadStarted: (time: string): string => `from the download started ${time}`,
   sortedBy: (column: string): string => `sorted by ${column}`,
+  /**
+   * The *sorted by* clause's column on Research, always shown there: *symbol*
+   * for the default order or a Symbol sort, otherwise the sorted factor's name
+   * in lower case for both its percentile and standardised-score keys, with no
+   * direction (UX design sections 0 and 1.2; CAP-002-E4-S9 Open Gaps,
+   * owner-directed fix E4-F17). Added under CAP-002-E4-S2 Open Gap 6.
+   */
+  sortLabels: { symbol: "symbol", value: "value", growth: "growth", momentum: "momentum" },
   separator: " · ",
   /** The whole line; the *sorted by* clause is omitted on compare and evidence. */
   asOfLine: (scoresAt: string, downloadStarted: string, sortedBy: string | null): string =>
@@ -500,6 +531,14 @@ export const SCORE_SET = {
   scoresUpdatedToast: (scoresAt: string): string => `Scores updated to ${scoresAt}`,
   scoreUpdateFailedToast: (reason: string): string => `Score update failed: ${reason}`,
   couldNotCheck: "Could not check for newer scores.",
+  /**
+   * The set history dialog's next keyset page and its closing control
+   * (DEC-0172; CAP-002-E4-S9 T011). UX design 1.2 says only that the dialog
+   * is keyset paged and dismissible, with no confirm action, so both are
+   * added under CAP-002-E4-S2 Open Gap 6.
+   */
+  showMore: "Show more",
+  close: "Close",
   historyColumns: {
     state: "State",
     scoresDate: "Scores date",

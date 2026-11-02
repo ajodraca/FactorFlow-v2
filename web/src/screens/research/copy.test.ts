@@ -579,6 +579,30 @@ describe("copy.ts completeness and keying", () => {
     expect(copy.EVIDENCE.onlyQualified(12, 30, "value")).toBe(
       "Only 12 of 30 stocks qualified on value in this set, so no stock was ranked on it.",
     );
+    // CAP-002-E4-S9 T011 (DEC-0172): the set history dialog's paging and closing controls.
+    expect(copy.SCORE_SET.showMore).toBe("Show more");
+    expect(copy.SCORE_SET.close).toBe("Close");
+    // CAP-002-E4-S9 T011 (DEC-0170; Open Gaps E4-F17): the screen title and the sort labels.
+    expect(copy.RESULTS.screenTitle).toBe("Research");
+    // CAP-002-E4-S9 T011 (DEC-0171; Open Gap 2): the latest-download sentences UX design 1.1 lacks.
+    expect(copy.RESULTS.latestDownloadCancelling("T")).toBe(
+      "The latest download, started T, is Cancelling",
+    );
+    expect(copy.RESULTS.latestDownloadPartial("T", "U")).toBe(
+      "The latest download, started T, ended Partial at U",
+    );
+    expect(copy.RESULTS.latestDownloadCancelled("T", "U")).toBe(
+      "The latest download, started T, ended Cancelled at U",
+    );
+    expect(copy.RESULTS.latestDownloadAbandoned("T", "U")).toBe(
+      "The latest download, started T, ended Abandoned at U",
+    );
+    expect(copy.SCORE_SET.sortLabels).toEqual({
+      symbol: "symbol",
+      value: "value",
+      growth: "growth",
+      momentum: "momentum",
+    });
   });
 
   it("describes a query in words, each clause only when it applies", () => {
