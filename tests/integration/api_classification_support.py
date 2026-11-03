@@ -65,16 +65,36 @@ def complete_set(
     )
 
 
-def later_set(conn: psycopg.Connection, state: str) -> UUID:
-    """A newer ``building`` or ``failed`` set on its own run."""
-    run_id = insert_run(conn, "running" if state == "building" else "failed", started_at=T1)
+def building_run(conn: psycopg.Connection, started_at: datetime) -> UUID:
+    """A ``running`` acquisition run, claimed as ``acquisition_run_claim_agrees`` requires.
+
+    At most one run may be active (``idx_acquisition_run_single_active``), so a test that needs
+    two ``building`` sets ends the first run before it calls this again.
+    """
+    row = conn.execute(
+        "INSERT INTO acquisition_run (state, history_depth_years, started_at, claimed_by, "
+        "heartbeat_at) VALUES ('running', 5, %s, 'test-worker', %s) RETURNING run_id",
+        (started_at, started_at),
+    ).fetchone()
+    conn.commit()
+    assert row is not None
+    return row[0]  # type: ignore[no-any-return]
+
+
+def later_set(conn: psycopg.Connection, state: str, *, started_at: datetime = T1) -> UUID:
+    """A newer ``building`` or ``failed`` set on its own run, started at ``started_at``."""
     failed = state == "failed"
+    run_id = (
+        insert_run(conn, "failed", started_at=started_at)
+        if failed
+        else building_run(conn, started_at)
+    )
     return insert_set(
         conn,
         run_id,
         state,
-        started_at=T1,
-        ended_at=T1 if failed else None,
+        started_at=started_at,
+        ended_at=started_at if failed else None,
         failure_reason="boom" if failed else None,
     )
 

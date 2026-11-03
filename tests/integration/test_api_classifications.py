@@ -25,8 +25,6 @@ from tests.integration.api_classification_support import (
 from tests.integration.reader_seed import (
     insert_classification,
     insert_instrument,
-    insert_run,
-    insert_set,
     insert_universe,
     retire_universe,
     seed_inputs,
@@ -60,9 +58,14 @@ def test_the_list_carries_the_set_the_factors_and_string_scores(app: App) -> Non
     stock = body["stocks"][0]
     assert (stock["symbol"], stock["name"]) == ("AAA", "Alpha Inc")
     assert stock["factors"]["value"]["score"] == "1.250000"
+    block = body["set"]
+    assert block["run_started_at"] == "2026-10-15T21:00:00Z"
+    assert block["ended_at"] == "2026-10-15T21:05:00Z" and block["active_instruments"] == 3
+    assert stock["lifecycle"] == "active" and stock["factors"]["value"]["percentile"] == "87.500000"
     later_set(conn, "building")
     newer = client.get("/api/classifications").json()
     assert newer["set"]["not_current"] is True and newer["later"]["state"] == "building"
+    assert newer["later"]["run_started_at"] == "2026-10-16T14:30:00Z"
 
 
 def test_the_match_count_covers_the_whole_set_on_every_page(app: App) -> None:
@@ -97,6 +100,26 @@ def test_thresholds_and_hide_incomplete_follow_the_documented_rule(app: App) -> 
     bound = client.get("/api/classifications", params={"value_percentile_min": "90"}).json()
     assert "AAA" not in _symbols(bound)
     assert {"BBB", "CCC"} <= set(_symbols(bound))
+
+
+def test_filters_change_the_match_count_identically_on_every_page(app: App) -> None:
+    """Design section 7, "Match count is over the whole set": the filtered total is on each page."""
+    client, conn = app
+    set_id = complete_set(conn, active_instruments=6)
+    for index in range(4):
+        seed_scored_stock(conn, set_id, f"H{index}", value=SCORE)
+    seed_scored_stock(conn, set_id, "LOW1", value=LOW)
+    seed_scored_stock(conn, set_id, "LOW2", value=LOW)
+    filters: dict[str, str] = {"value_percentile_min": "50"}
+    for extra in ({}, {"hide_incomplete": "true"}, {"symbol": "h"}):
+        params = {**filters, **extra, "limit": 2}
+        first = client.get("/api/classifications", params=params).json()
+        second = client.get(
+            "/api/classifications", params={**params, "cursor": first["next_cursor"]}
+        ).json()
+        assert first["match_count"] == second["match_count"] == 4, extra
+    zero = client.get("/api/classifications", params={"value_score_min": "0"}).json()
+    assert _symbols(zero) == ["H0", "H1", "H2", "H3"] and zero["match_count"] == 4
 
 
 def test_nothing_classified_says_so(app: App) -> None:
@@ -151,6 +174,10 @@ def test_compare_reports_unknown_symbols_and_enforces_its_bounds(app: App) -> No
     seed_scored_stock(conn, set_id, "BBB", value=SCORE)
     body = client.get("/api/classifications", params={"symbols": "AAA,BBB,NOPE"}).json()
     assert _symbols(body) == ["AAA", "BBB"] and body["unknown_symbols"] == ["NOPE"]
+    seed_scored_stock(conn, set_id, "OLD", value=SCORE, lifecycle="retired")
+    kept = client.get("/api/classifications", params={"symbols": "AAA,OLD"}).json()
+    assert _symbols(kept) == ["AAA", "OLD"] and kept["unknown_symbols"] == []
+    assert kept["stocks"][1]["lifecycle"] == "retired"
     for symbols in ("AAA", "A1,A2,A3,A4,A5,A6,A7"):
         response = client.get("/api/classifications", params={"symbols": symbols})
         assert response.status_code == 422 and "`symbols`" in response.json()["error"]["message"]
@@ -173,6 +200,40 @@ def test_the_evidence_shows_inputs_with_their_dates_and_memberships(app: App) ->
     assert set(body["factors"]) == {"value", "growth", "momentum"}
 
 
+def test_the_evidence_carries_restated_and_detail_and_omits_a_retired_universe(app: App) -> None:
+    client, conn = app
+    set_id = complete_set(conn)
+    stock = seed_scored_stock(conn, set_id, "AAA", value=SCORE, restated=["value"])
+    seed_inputs(
+        conn, set_id, stock, restated=["book_to_price"], statuses={"earnings_yield": "missing"}
+    )
+    gone = insert_universe(conn, "Gone", [stock])
+    insert_universe(conn, "Live", [stock])
+    retire_universe(conn, gone)
+    body = client.get("/api/classifications/stocks/AAA").json()
+    inputs = {row["input_name"]: row for row in body["inputs"]}
+    assert inputs["book_to_price"]["restated_possible"] is True
+    assert inputs["earnings_yield"]["restated_possible"] is False
+    assert (
+        inputs["earnings_yield"]["status"] == "missing" and inputs["earnings_yield"]["detail"] == {}
+    )
+    assert inputs["fcf_yield"]["value"] == "1.0000000000"
+    assert body["factors"]["value"]["restated_possible"] is True
+    assert [m["name"] for m in body["memberships"]] == ["Live"]
+
+
+def test_a_known_stock_before_any_set_has_no_set_factors_or_inputs(app: App) -> None:
+    """DEC-0140, design section 7 "Evidence with memberships": 200 with the empty shape."""
+    client, conn = app
+    stock = insert_instrument(conn, "AAA")
+    insert_universe(conn, "Mine", [stock])
+    response = client.get("/api/classifications/stocks/AAA")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["set"] is None and body["factors"] == {} and body["inputs"] == []
+    assert [m["name"] for m in body["memberships"]] == ["Mine"]
+
+
 def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app: App) -> None:
     client, conn = app
     first = complete_set(conn, started_at=T0.replace(day=10))
@@ -189,14 +250,40 @@ def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app
     assert client.get("/api/classifications/stocks/NOPE/history").status_code == 404
 
 
+def test_the_history_carries_the_stored_restated_flag_and_a_new_stock_has_none(app: App) -> None:
+    client, conn = app
+    earlier = complete_set(conn, started_at=T0.replace(day=10))
+    complete_set(conn)
+    stock = insert_instrument(conn, "AAA")
+    for factor in ("value", "growth", "momentum"):
+        insert_classification(
+            conn,
+            earlier,
+            stock,
+            factor,
+            score=SCORE[0],
+            percentile=SCORE[1],
+            restated_possible=factor == "growth",
+        )
+    insert_instrument(conn, "NEW")
+    cells = client.get("/api/classifications/stocks/AAA/history").json()["sets"][0]["factors"]
+    assert [cells[f]["restated_possible"] for f in ("value", "growth", "momentum")] == [
+        False,
+        True,
+        False,
+    ]
+    fresh = client.get("/api/classifications/stocks/NEW/history")
+    assert fresh.status_code == 200
+    assert fresh.json() == {"symbol": "NEW", "sets": [], "next_cursor": None}
+
+
 def test_the_sets_list_and_detail_agree(app: App) -> None:
     client, conn = app
     done = complete_set(conn)
     later_set(conn, "failed")
-    run = insert_run(conn, "running", started_at=T1.replace(day=20))
-    insert_set(conn, run, "building", started_at=T1.replace(day=20))
+    later_set(conn, "building", started_at=T1.replace(day=20))
     body = client.get("/api/classifications/sets").json()
-    assert [s["state"] for s in body["sets"]][-1] == "complete"
+    assert [s["state"] for s in body["sets"]] == ["building", "failed", "complete"]
     assert all("run_started_at" in s for s in body["sets"])
     failed = next(s for s in body["sets"] if s["state"] == "failed")
     assert failed["failure_reason"] == "boom" and failed["ended_at"] is not None
@@ -214,6 +301,18 @@ def test_page_bounds(app: App) -> None:
         assert client.get(path, params={"limit": 500}).status_code == 200
         assert client.get(path, params={"limit": 501}).status_code == 422
     assert client.get("/api/classifications/stocks/AAA/history?limit=501").status_code == 422
+    insert_instrument(conn, "AAA")
+    assert client.get("/api/classifications/stocks/AAA/history?limit=500").status_code == 200
+
+
+def test_the_default_page_size_is_fifty(app: App) -> None:
+    client, conn = app
+    set_id = complete_set(conn, active_instruments=51)
+    for index in range(51):
+        seed_scored_stock(conn, set_id, f"S{index:02d}", value=SCORE)
+    body = client.get("/api/classifications").json()
+    assert len(body["stocks"]) == 50 and body["match_count"] == 51
+    assert body["next_cursor"] is not None
 
 
 def _forged(cursor: str) -> str:

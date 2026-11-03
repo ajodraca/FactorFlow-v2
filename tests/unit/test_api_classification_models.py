@@ -537,6 +537,14 @@ def test_symbols_split_strip_upper_case_and_de_duplicate_in_first_seen_order() -
     assert exc.value.errors()[0]["loc"] == ("symbols",)
 
 
+@pytest.mark.parametrize("bad", ["AAA,,BBB", "AAA,BBB,", ",AAA,BBB", "AAA, ,BBB"])
+def test_an_empty_symbols_entry_is_refused_on_symbols(bad: str) -> None:
+    """T016 (IR-007): each split entry is shape-checked, so an empty one is refused, not dropped."""
+    with pytest.raises(ValidationError) as exc:
+        _query(symbols=bad)
+    assert exc.value.errors()[0]["loc"] == ("symbols",)
+
+
 def test_an_unknown_field_is_refused() -> None:
     """Every request model forbids unknown keys."""
     with pytest.raises(ValidationError):
@@ -569,6 +577,12 @@ def test_to_filters_carries_only_the_supplied_bounds() -> None:
         limit=25,
         cursor="c",
     )
+
+
+def test_to_filters_keeps_a_zero_valued_bound() -> None:
+    """T010 (IR-006): `0` is a supplied bound ("score at least 0"), not an absent one."""
+    bounds = _query(value_score_min="0", growth_percentile_max="0").to_filters().thresholds.bounds
+    assert bounds == {"value_score_min": Decimal("0"), "growth_percentile_max": Decimal("0")}
 
 
 def test_compare_conflicts_names_what_the_request_set_besides_symbols_and_limit() -> None:

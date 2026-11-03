@@ -362,12 +362,19 @@ def test_a_foreign_host_is_refused_before_the_reader(client: TestClient, path: s
 
 
 # Implements TC-COMP-126
+@pytest.mark.parametrize(
+    ("name", "path"),
+    [
+        ("list_classifications", "/api/classifications?cursor=x"),
+        ("summary", "/api/classifications/summary"),
+    ],
+)
 def test_the_request_id_wraps_an_error_from_the_router(
-    client: TestClient, monkeypatch: pytest.MonkeyPatch
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, name: str, path: str
 ) -> None:
-    """DAC-E3-S5-6: the envelope's id is the response header's id."""
-    _double(monkeypatch, "list_classifications", raises=CursorError("x"))
-    response = client.get("/api/classifications?cursor=x")
+    """DAC-E3-S5-6 (T008 b): the envelope's id is the response header's id, list and summary."""
+    _double(monkeypatch, name, raises=CursorError("x") if name != "summary" else RuntimeError("x"))
+    response = client.get(path)
     assert response.headers["X-Request-Id"]
     assert response.json()["error"]["request_id"] == response.headers["X-Request-Id"]
 

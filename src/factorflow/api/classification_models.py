@@ -400,7 +400,7 @@ class ClassificationListQuery(BaseModel):
         for entry in entries:
             for part in str(entry).split(","):
                 symbol = normalise(part)
-                if symbol and symbol not in symbols:
+                if symbol not in symbols:
                     symbols.append(symbol)
         if not all(is_valid(symbol) for symbol in symbols):
             raise ValueError(f"every symbol must match {_SYMBOL_SHAPE} after upper-casing")

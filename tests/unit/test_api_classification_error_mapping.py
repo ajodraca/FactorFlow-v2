@@ -15,6 +15,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
+import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
@@ -325,14 +326,20 @@ def _reader_raises(monkeypatch: pytest.MonkeyPatch, name: str, exc: Exception) -
     monkeypatch.setattr(reader, name, _raising(exc))
 
 
-def _forge(cursor: str, **changes: Any) -> str:
-    """Change fields of a reader-issued cursor and re-encode it the reader's way."""
+def _forge(cursor: str, *, resign: bool = True, **changes: Any) -> str:
+    """Change fields of a reader-issued cursor and re-encode it the reader's way.
+
+    The checksum is recomputed unless ``resign`` is false, so a changed field is judged by the
+    rule it breaks and not by the checksum the change leaves stale (IR-004).
+    """
     payload = json.loads(base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4)))
     for key, value in changes.items():
         if value is None:
             payload.pop(key, None)
         else:
             payload[key] = value
+    if resign and "chk" in payload:
+        payload["chk"] = reader._cursor_check(payload)
     text = json.dumps(payload, separators=(",", ":"))
     return base64.urlsafe_b64encode(text.encode()).decode().rstrip("=")
 
@@ -388,6 +395,42 @@ def test_a_missing_universe_or_set_is_a_404_in_its_own_resource(
     assert str(SET_ID) in error["message"]
 
 
+def test_a_missing_universe_names_its_id_and_the_list_read(
+    reads: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Design 2.5, STD-UI-19: the message names the operation and the owner-supplied value."""
+    _reader_raises(monkeypatch, "list_classifications", reader.UniverseNotFound(OTHER_SET_ID))
+    message = reads.get("/api/classifications").json()["error"]["message"]
+    assert message == f"Could not list the classifications: no universe has the id {OTHER_SET_ID}."
+
+
+def test_each_read_that_can_refuse_names_its_own_operation(
+    reads: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """T019: the operation text tells the list, compare, set detail and set list apart."""
+    cases = (
+        ("compare", "/api/classifications?symbols=AAA,BBB", "compare the stocks"),
+        ("get_set", f"/api/classifications/sets/{SET_ID}", "read the classification set"),
+        ("list_sets", "/api/classifications/sets", "list the classification sets"),
+    )
+    for name, path, operation in cases:
+        _reader_raises(monkeypatch, name, CursorError("x"))
+        message = reads.get(path).json()["error"]["message"]
+        assert message.startswith(f"Could not {operation}:"), (name, message)
+
+
+@pytest.mark.parametrize("cursor", ["!!", "STALE"])
+def test_every_cursor_refusal_is_in_the_classification_resource(
+    reads: TestClient, monkeypatch: pytest.MonkeyPatch, cursor: str
+) -> None:
+    """DEC-0139: invalid and stale cursors alike carry resource `classification`."""
+    if cursor == "STALE":
+        cursor = reader.encode_cursor(SET_ID, "symbol", "asc", "AAA", False, "AAA")
+    _reader_raises(monkeypatch, "list_classifications", CursorError(cursor))
+    error = reads.get("/api/classifications", params={"cursor": cursor}).json()["error"]
+    assert error["resource"] == "classification"
+
+
 def _list_cursor(sort: str = "symbol") -> str:
     if sort == "symbol":
         return reader.encode_cursor(SET_ID, "symbol", "asc", "AAA", False, "AAA")
@@ -401,6 +444,8 @@ INVALID = {
     "bad key": _forge(_list_cursor("value_score"), key="abc"),
     "unknown sort": _forge(_list_cursor("value_score"), sort="bogus"),
     "unknown order": _forge(_list_cursor("value_score"), order="sideways"),
+    "set not a UUID": _forge(_list_cursor("value_score"), set="not-a-uuid"),
+    "altered checksum": _forge(_list_cursor("value_score"), resign=False, sym="ZZZ"),
 }
 STALE = {
     "symbol sort": _list_cursor(),
@@ -410,7 +455,7 @@ STALE = {
 }
 
 
-# Implements TC-COMP-148
+# Implements T009 (DEC-0138 rows)
 @pytest.mark.parametrize("cursor", INVALID.values(), ids=INVALID.keys())
 def test_a_malformed_list_cursor_is_cursor_invalid(
     reads: TestClient, monkeypatch: pytest.MonkeyPatch, cursor: str
@@ -457,7 +502,12 @@ def test_history_and_sets_cursors_are_always_invalid(
 
 @pytest.mark.parametrize("name", list(CLASSIFICATION_PATHS))
 @pytest.mark.parametrize(
-    "exc", [RuntimeError("password=hunter2 secret path /tmp/x"), ValueError(SENTINEL)]
+    "exc",
+    [
+        RuntimeError("password=hunter2 secret path /tmp/x"),
+        ValueError(SENTINEL),
+        psycopg.OperationalError("connection to server at 10.0.0.1 failed"),
+    ],
 )
 def test_an_unmapped_exception_is_the_bare_internal_error(
     reads: TestClient, monkeypatch: pytest.MonkeyPatch, name: str, exc: Exception
