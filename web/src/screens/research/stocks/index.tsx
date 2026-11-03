@@ -191,10 +191,14 @@ function EvidenceView({ symbol }: { symbol: string }): JSX.Element {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is the Try again trigger.
   useEffect(() => {
+    let superseded = false;
     setBody({ kind: "loading" });
     getStockEvidence(symbol)
-      .then((evidence) => setBody({ kind: "loaded", evidence }))
+      .then((evidence) => {
+        if (!superseded) setBody({ kind: "loaded", evidence });
+      })
       .catch((error: unknown) => {
+        if (superseded) return;
         if (error instanceof ApiUnreachableError) {
           setBody({ kind: "unreachable" });
         } else if (error instanceof ApiError && error.code === "instrument_not_found") {
@@ -203,6 +207,9 @@ function EvidenceView({ symbol }: { symbol: string }): JSX.Element {
           setBody({ kind: "error", error });
         }
       });
+    return () => {
+      superseded = true;
+    };
   }, [symbol, attempt]);
 
   if (body.kind === "unreachable") {

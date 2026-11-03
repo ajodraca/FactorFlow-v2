@@ -467,7 +467,11 @@ describe("FactorCard — card states", () => {
       "data-variant",
       "coverage-unknown",
     );
-    expect(within(card).getByText(/18 of 30 stocks qualified/)).toBeInTheDocument();
+    expect(
+      within(card).getByText(
+        "Only 18 of 30 stocks qualified on value in this set, so no stock was ranked on it.",
+      ),
+    ).toBeInTheDocument();
     expect(within(card).queryByText(CELL.incomplete)).not.toBeInTheDocument();
     expect(within(card).queryByText(/couldn't be scored/)).not.toBeInTheDocument();
     expect(within(card).getByText(INPUT_STATUS.outdated)).toBeInTheDocument();
@@ -666,5 +670,85 @@ describe("cardShowsMark", () => {
     expect(cardShowsMark("value", restatedCell, [restatedInput], "retired")).toBe(false);
     const retiredCell = cell({ reasonCode: "retired", restatedPossible: true });
     expect(cardShowsMark("value", retiredCell, [restatedInput], "active")).toBe(false);
+  });
+});
+
+describe("FactorCard — review v1 rework", () => {
+  const missingFcf = cell({
+    status: "not_classified",
+    score: null,
+    percentile: null,
+    reasonCode: "input_missing",
+    reasonInput: "fcf_yield",
+  });
+  const valueRows = [
+    input(),
+    input({ inputName: "earnings_yield", label: "earnings yield", value: "0.0512" }),
+    input({
+      inputName: "fcf_yield",
+      label: "free-cash-flow yield",
+      status: "missing",
+      value: null,
+      asOf: null,
+      knownOn: null,
+      detail: { last_acquisition: { outcome: "not_found" } },
+    }),
+  ];
+
+  // IR-002: the reason input is the third row of a realistic value card.
+  it("names the cell's reason input, not another row, in a multi-row card", () => {
+    const card = renderCard({ cell: missingFcf, inputs: valueRows });
+    expect(
+      within(card).getByText(
+        "Value for KO couldn't be scored: the provider reports no free-cash-flow yield for KO.",
+      ),
+    ).toBeInTheDocument();
+    expect(within(card).queryByText(/the provider reports no book-to-price/)).toBeNull();
+    expect(within(card).queryByText(/the provider reports no earnings yield/)).toBeNull();
+  });
+
+  it("names a missing reason input that is not first, and the recovery that goes with its own detail", () => {
+    const rows = [
+      input(),
+      input({ inputName: "earnings_yield", label: "earnings yield", value: "0.0512" }),
+      input({
+        inputName: "fcf_yield",
+        label: "free-cash-flow yield",
+        status: "missing",
+        value: null,
+        detail: {},
+      }),
+    ];
+    const card = renderCard({ cell: missingFcf, inputs: rows });
+    expect(
+      within(card).getByText("Value for KO couldn't be scored: free-cash-flow yield is missing."),
+    ).toBeInTheDocument();
+    expect(within(card).getByText(EVIDENCE.nextDownloadRecovery)).toBeInTheDocument();
+  });
+
+  // IR-003: a stock retired after its set was built arrives with its last active cells.
+  it("reads a lifecycle-retired stock's incomplete cell as Not followed, never Incomplete", () => {
+    const card = renderCard({
+      lifecycle: "retired",
+      cell: missingFcf,
+      inputs: valueRows,
+    });
+    expect(within(card).getByText(CELL.notFollowed).closest("[data-variant]")).toHaveAttribute(
+      "data-variant",
+      "status-neutral",
+    );
+    expect(within(card).queryByText(CELL.incomplete)).not.toBeInTheDocument();
+  });
+
+  it("prints no standardised score for a lifecycle-retired stock's classified cell", () => {
+    const card = renderCard({
+      lifecycle: "retired",
+      cell: cell({ percentile: "88.00", score: "-0.44" }),
+      inputs: [input()],
+    });
+    expect(within(card).queryByTestId("card-score")).not.toBeInTheDocument();
+    expect(within(card).queryByTestId("factor-percentile")).not.toBeInTheDocument();
+    expect(within(card).getByText(CELL.notFollowed)).toBeInTheDocument();
+    expect(within(card).getByText(CELL.notFollowedNoDate)).toBeInTheDocument();
   });
 });

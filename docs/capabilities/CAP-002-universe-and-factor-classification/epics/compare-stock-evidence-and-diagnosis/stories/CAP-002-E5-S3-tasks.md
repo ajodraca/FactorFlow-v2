@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-11-03
+last_reworked_review: CAP-002-E5-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -220,3 +221,4 @@ Owner-directed fixes (cross-plan review 2026-10-18):
 - T012: `git diff --stat` against the story branch base shows `index.tsx`, `factor-card.tsx`, `factor-card.test.tsx`, `stock-evidence.test.tsx`, `copy.ts` and `copy.test.ts` (its anchor for the new strings). `routes.tsx` and `history-tab.tsx` are untouched.
 - T014: no axe-style assertion was added; the delivered `shell.a11y.test.tsx` and `status-region.a11y.test.tsx` use none.
 
+- Review v1 rework (cycle-3): IR-001 to IR-005 addressed. The Earlier scores panel is handed the symbol as received (not upper-cased), so `/research/stocks/ko` labels its table "Earlier scores for ko" while the title and breadcrumb read KO; T011's display-only upper-casing and send-as-received cannot both hold through `HistoryTab`'s single `symbol` prop. Left as is for the owner. IR-006 (the 1180 px cap and `h-24` skeleton literals, STD-UI-29) and IR-007 (evidence-read failure not visible on `?tab=earlier`, DEC-0280's placement clause) are left for the owner; no code change was made for them.

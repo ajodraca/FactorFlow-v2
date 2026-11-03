@@ -535,6 +535,10 @@ describe("copy.ts completeness and keying", () => {
     expect(copy.EVIDENCE.notComputableReason("book-to-price", null)).toBe(
       "book-to-price couldn't be computed",
     );
+    // Review v1 IR-001 (DEC-0186): the engine's count fragment inside the sentence that says nothing was ranked.
+    expect(copy.EVIDENCE.notEnoughToRankSentence("18 of 30 stocks qualified", "value")).toBe(
+      "Only 18 of 30 stocks qualified on value in this set, so no stock was ranked on it.",
+    );
     expect(copy.EVIDENCE.breadcrumbSeparator).toBe("›");
     expect(copy.EVIDENCE.followedStocksLink).toBe("Followed stocks");
     expect(copy.EVIDENCE.dataHealthLink).toBe("Data health");

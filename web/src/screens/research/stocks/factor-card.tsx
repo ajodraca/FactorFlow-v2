@@ -287,7 +287,12 @@ export default function FactorCard(props: FactorCardProps): JSX.Element {
           </span>
         ) : null}
         {!retired && cell.reasonCode === "not_enough_stocks" && cell.reasonDetail !== null ? (
-          <p className="text-sm">{cell.reasonDetail}</p>
+          <p className="text-sm">
+            {EVIDENCE.notEnoughToRankSentence(
+              cell.reasonDetail,
+              FACTOR_LABELS[factor].toLowerCase(),
+            )}
+          </p>
         ) : null}
         {statement === null ? null : (
           <>

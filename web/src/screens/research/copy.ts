@@ -822,6 +822,12 @@ export const EVIDENCE = {
   noActionChangesThis: "No action in FactorFlow changes this.",
   onlyQualified: (count: number, needed: number, factor: string): string =>
     `Only ${count} of ${needed} stocks qualified on ${factor} in this set, so no stock was ranked on it.`,
+  /**
+   * The sentence around the engine's `reasonDetail` ("18 of 30 stocks
+   * qualified") on a Not enough to rank card (DEC-0186; UX design 1.6).
+   */
+  notEnoughToRankSentence: (reasonDetail: string, factor: string): string =>
+    `Only ${reasonDetail} on ${factor} in this set, so no stock was ranked on it.`,
   showHowComputed: (input: string): string => `Show how ${input} was computed`,
   historyNote:
     "Each row is what was known when that set was produced. Later data does not change it.",

@@ -113,3 +113,56 @@ cycles:
           disposition: equivalent
           reason: >
             Try again's increment (+1 -> +2) only has to change attempt; the read effect depends on it, not on its size.
+
+  - id: cycle-3
+    tasks: [T002, T003, T005, T007, T010, T011]
+    description: >
+      Review-rework cycle for CAP-002-E5-S3-implementation-review-v1 (CHANGES-REQUIRED). IR-001: the Not enough to
+      rank card prints the DEC-0186 sentence (EVIDENCE.notEnoughToRankSentence around the engine's reasonDetail and the
+      factor label) instead of the bare fragment. IR-002: multi-row value card whose reason input is not first.
+      IR-003: lifecycle-retired stock tests (Not followed with an incomplete cell, no score on a classified cell, no
+      restatement sentence). IR-004: error sentence chosen by code (validation_error) and the history read sent the
+      symbol as received. IR-005: the evidence read discards a superseded response. IR-006 (two size literals) and
+      IR-007 (error placement on ?tab=earlier, DEC-0280 clause) are left for the owner; IR-008 is addressed by this
+      entry (RED observed as a behavioural assertion failure, accurate counts).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/red-cycle-3.log
+    red_log_sha256: 782f34130feb14c97606b3f54a4f129345ea347396ead9c2d7d7dae200aad18f
+    red_evidence: >
+      With the rework tests written and no production change, 3 tests failed on assertions: the copy anchor
+      (notEnoughToRankSentence is not a function), the card test (the full DEC-0186 sentence was not found, the bare
+      fragment was rendered) and the validation_error sentence test (expected text mistyped, corrected before the
+      change). The IR-002, IR-003 and IR-004 history-symbol tests pin behaviour that was already correct, so they
+      pass at RED by design; the mutation run below shows they fail under the review's surviving mutants.
+    green_evidence: >
+      stocks/ and copy.test.ts 535 tests passed (green-cycle-3.log); the full npm run test is 75 files, 1988 tests
+      (full-suite-cycle-3.log); lint, format, tsc --noEmit and npm run build are clean. Code review APPROVED; spec
+      drift none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/green-cycle-3.log
+        sha256: 374b73d973bf846972d456fdf9bf7678fecd2118d703eff1565b3d264d5c2b76
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/full-suite-cycle-3.log
+        sha256: f022a24bf9de812f600dd395f2344fae2255c28733a6eff8f210980afc943fb8
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 173e3e54893f2035715a2033b3135e4ff3871be9ff9bc71cbdcdb4ab55aa0bcd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 589e8d4eb91d91849c909cb86488ed01b377f0f32b47543af71c199cdcaa8ecd
+      generated: 9
+      killed: 8
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.889
+      survivors:
+        - id: web/src/screens/research/stocks/index.tsx:211:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The cleanup that sets superseded to true is unobservable: the screen is rendered with key=symbol, so a
+            changed symbol remounts and a stale setState lands on an unmounted component, and Try again exists only
+            after a read has settled. Setting it false in the cleanup changes no rendered output.

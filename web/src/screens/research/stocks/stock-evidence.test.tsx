@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -454,6 +454,38 @@ describe("StockEvidenceScreen — screen states", () => {
 });
 
 describe("StockEvidenceScreen — symbol and header edges", () => {
+  // IR-004: the sentence is chosen by code, and the history read sends the symbol as received.
+  it("chooses the error sentence by the API error's code", async () => {
+    getStockEvidence.mockRejectedValueOnce(apiError("validation_error"));
+    renderScreen();
+    expect(
+      await screen.findByText(
+        "Could not load the stock's scores and inputs: FactorFlow could not accept the scores as entered. Check it, then try again.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("sends the symbol as received to the history read too", async () => {
+    renderScreen("/research/stocks/ko?tab=earlier");
+    await waitFor(() => expect(getStockHistory).toHaveBeenCalled());
+    expect(getStockHistory.mock.calls[0]?.[0]).toBe("ko");
+  });
+
+  // IR-003: a stock retired since its set was built keeps its last active cells until the next set.
+  it("places no restatement sentence for a lifecycle-retired stock whose cells are classified and restated", async () => {
+    getStockEvidence.mockResolvedValue(
+      evidence({
+        lifecycle: "retired",
+        factors: { value: marked, growth: marked, momentum: cell() },
+        inputs: [input({ restatedPossible: true })],
+      }),
+    );
+    renderScreen();
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
+    expect(screen.getAllByText(CELL.notFollowed).length).toBeGreaterThan(0);
+  });
+
   it("sends the symbol as received and shows it upper-cased", async () => {
     getStockEvidence.mockResolvedValue(evidence());
     renderScreen("/research/stocks/ko");
@@ -595,6 +627,32 @@ describe("StockEvidenceScreen — tabs", () => {
       "true",
     );
     expect(getStockHistory).toHaveBeenCalledTimes(1);
+  });
+
+  // IR-005: a read from a superseded symbol must not overwrite the newer one.
+  it("discards an evidence read that settles after the symbol changed", async () => {
+    let settleKo: (value: StockEvidence) => void = () => {};
+    getStockEvidence.mockReturnValueOnce(
+      new Promise<StockEvidence>((resolve) => {
+        settleKo = resolve;
+      }),
+    );
+    const view = render(
+      <MemoryRouter initialEntries={["/research/stocks/KO"]}>
+        <Routes>
+          <Route path="/research/stocks/:symbol" element={<StockEvidenceScreen />} />
+        </Routes>
+        <GoTo to="/research/stocks/PEP" />
+      </MemoryRouter>,
+    );
+    getStockEvidence.mockResolvedValue(evidence({ symbol: "PEP", name: "PepsiCo" }));
+    await userEvent.click(within(view.container).getByRole("button", { name: "go" }));
+    expect(await screen.findByText("PepsiCo")).toBeInTheDocument();
+    await act(async () => {
+      settleKo(evidence({ symbol: "KO", name: "The Coca-Cola Company" }));
+    });
+    expect(screen.queryByText("The Coca-Cola Company")).not.toBeInTheDocument();
+    expect(screen.getByText("PepsiCo")).toBeInTheDocument();
   });
 });
 
