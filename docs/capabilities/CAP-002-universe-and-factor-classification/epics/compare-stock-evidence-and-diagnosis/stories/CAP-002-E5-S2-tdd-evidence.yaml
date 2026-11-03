@@ -1,0 +1,155 @@
+# TDD evidence for CAP-002-E5-S2 - Stock History Tab: Earlier Scores as Recorded.
+# Two cycles: (1) T002, T003, T004, T005, T008 and the symbol-change part of T006 (the table, rows as recorded, the
+# restatement mark and sentence, the empty statement, the strings); (2) T006 (Show more) and T007 (skeleton, failure
+# sentences, Try again, unreachable renders nothing) plus the late test gaps the cycle-1 reviews listed. T001 and T009
+# change no behaviour; T010 is a review whose findings are covered by the tests (the delivered a11y tests use no axe
+# assertion, so none was added).
+# The driver commits once per stage, so every cycle's commit_hash is `stage`. cycle-1.patch is HEAD..index after
+# cycle 1; cycle-2.patch is the diff between the index trees after cycle 1 and after cycle 2
+# (check-tdd-evidence.py fingerprint --range), so the two apply in order onto the stage parent 543198f.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift subagent
+# before the next cycle began. Cycle 1: first code review REJECTED (restatement-sentence condition untested), fixed and
+# re-reviewed APPROVED; spec drift none. Cycle 2: first code review REJECTED (first-read failure race untested) and
+# spec drift found four drifts, all fixed and re-reviewed (APPROVED, no drift). The verdicts below are the final reviews.
+# Mutation: scripts/mutation-run.py with the focused suite, generated operators plus hand-written mutants
+# ("operator": "manual"). The runner needs node_modules in each clone, so the command links it.
+# Decisions applied: DEC-0178 to DEC-0180 (owner-provisional); DEC-0278 recorded for the local state union.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T008]
+    description: >
+      TC-COMP-154, TC-COMP-155, TC-COMP-115, TC-COMP-191 (T003), T004 and T005: HistoryTab ({ symbol }) default export
+      in history-tab.tsx reads the first page on mount through getStockHistory and renders the rows in the order
+      received inside a native table labelled Earlier scores for {SYMBOL} (column and row headers; Produced from the
+      set's end time through formatTimestamp; Complete or Partial badge; every cell through FactorCell with the score),
+      the history sentence once above the table, the STD-UI-17 sentence once only when FactorCell draws a mark (scored
+      value or growth cell with restatedPossible), No earlier scores for {SYMBOL}. for an empty history, and a symbol
+      change that resets the rows and ignores a late response. T002 strings: EVIDENCE.earlierScoresFor and
+      EVIDENCE.producedColumn with a copy.test.ts anchor. Production: web/src/screens/research/stocks/history-tab.tsx
+      and copy.ts.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/red-cycle-1.log
+    red_log_sha256: 4310b688f27f2c68f0822432e1ab20e1d862946ef639ce296e9aeb6effaaa79e
+    red_evidence: >
+      With history-tab.test.tsx and the copy.test.ts anchor written and no tab file or strings, the tab file failed to
+      load (Failed to resolve import ./history-tab) and the copy anchor failed (EVIDENCE.earlierScoresFor is not a
+      function): 2 files failed.
+    green_evidence: >
+      history-tab.test.tsx 24 tests and copy.test.ts passed (402 tests in green-cycle-1.log); tsc --noEmit, biome lint and
+      format clean. Code review first pass REJECTED (the restatement-sentence condition, the unmarked history-sentence
+      case, the symbol-change reset and a wrong comment were untested or wrong): all fixed, the patch regenerated and
+      re-reviewed APPROVED. Spec-drift: no drift on either pass.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/green-cycle-1.log
+        sha256: 5a6e5103962cce2de92daad622194197687a06771ada60be6f4cd64f6725bd84
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9fadf466b292e546dc01c435c231315462cd5511c626e93855c22cda54500de4
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 3bf33806fd13a2905a565962b46edb8a3991954f34408de896439907f4889b03
+      generated: 30
+      killed: 30
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T006, T007]
+    description: >
+      T006 and T007: Show more (secondary variant, focusable aria-disabled while a read is in flight, appends the
+      next keyset page after the rows, focus moves to the table when the last page removes it); the skeleton table
+      with the final columns; a failed first read replaced by the operation, resource and reason sentence by code
+      (never the envelope message, instrument_not_found naming the stock) with Try again; a failed later page keeping
+      the rows with the sentence and Try again beneath them (a refused cursor restarts from the first page); an
+      unreachable API renders nothing (the shell owns it); every read guarded by a generation so a response after a
+      symbol change is ignored. DEC-0278 records the local state union. Also the cycle-1 reviews' late test gaps
+      (scores date as recorded, table label by symbol, numeric face).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/red-cycle-2.log
+    red_log_sha256: 300ce3886f2a04a6ba55971cda82e2933748bf4003c05377b8bdd57b36dcc57e
+    red_evidence: >
+      With the cycle-2 tests written against the cycle-1 component (no paging, states or catch), 11 of 38 tests
+      failed (Show more absent, no skeleton table, no failure sentences, unreachable not handled); the late-gap tests
+      passed because cycle 1 already behaved so.
+    green_evidence: >
+      history-tab.test.tsx 56 tests and copy.test.ts passed (434 tests in green-cycle-2.log); the full npm run test
+      (73 files, 1887 tests, full-suite.log), lint, format, tsc --noEmit and the build are clean. Code review first
+      pass REJECTED (first-read failure race untested; focus lost on the last page; instrument_not_found unnamed;
+      refused cursor retried) and spec drift found four (no Try again on a failed page, state union without a
+      decision, unnamed stock, button style): all fixed or recorded (DEC-0278), the patch regenerated and re-reviewed
+      APPROVED with no drift. Accepted LOW advisories: focus after Try again (as the sibling tab), the skeleton has no
+      sr-only loading text, Show more stays beside the page-level Try again.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/green-cycle-2.log
+        sha256: f50599c4716c4cd025caeb845049973e3cb5a72c0c113f66a5c7551f91d3d8fa
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/full-suite.log
+        sha256: 267c3ecdeec430a9eb84da2a8850151af2fb17c66a54b5a1f5ee326b55bb73af
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 0a0bf08b0fba5f3e0d0ade9a82bbb0ccfa24871f4060525f20bd38b9e62c19a1
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 41df53eac322aedb430c008ae191ea5eadb0a8a15995f831d45ce9973fd4bc13
+      generated: 79
+      killed: 68
+      survived: 11
+      stillborn: 0
+      timeout: 0
+      score: 0.861
+      survivors:
+        - id: web/src/screens/research/stocks/history-tab.tsx:131:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            pagePending's initial value (false -> true) is overwritten by the mount effect (setPagePending(false)) before the loaded body, the only place it is read, can render.
+        - id: web/src/screens/research/stocks/history-tab.tsx:133:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            unreachable's initial value (false -> true) is overwritten by the mount effect (setUnreachable(false)) in the same commit batch; every test observes the settled state.
+        - id: web/src/screens/research/stocks/history-tab.tsx:135:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            focusTable's initial true runs the focus effect once on mount, which resets it and focuses a table ref that is still null under the skeleton, so nothing differs.
+        - id: web/src/screens/research/stocks/history-tab.tsx:139:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt is only compared by identity as an effect dependency; its starting value 0 vs 1 changes no behaviour.
+        - id: web/src/screens/research/stocks/history-tab.tsx:141:off-by-one:1
+          disposition: equivalent
+          reason: >
+            generation's starting value is only compared with later values of the same counter; 0 vs 1 changes no behaviour.
+        - id: web/src/screens/research/stocks/history-tab.tsx:145:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The unmount bump by 2 instead of 1 still differs from every captured value, and React 18 drops a state update after unmount without output.
+        - id: web/src/screens/research/stocks/history-tab.tsx:152:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The per-read bump by 0 or 2 changes the counter's step, not whether a stale value differs from the current one; a bump of 2 behaves as 1 and 0 is killed elsewhere by the stale-response tests (first-read and page guards).
+        - id: web/src/screens/research/stocks/history-tab.tsx:236:off-by-one:3
+          disposition: equivalent
+          reason: >
+            The skeleton's placeholder indices [0, 1, 2] are used only as React keys; [0, 1, 3] renders the same three rows.
+        - id: web/src/screens/research/stocks/history-tab.tsx:254:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Try again increments attempt to trigger the effect; +2 instead of +1 triggers it identically.
+        - id: web/src/screens/research/stocks/history-tab.tsx:296:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The page-level Try again restart increments attempt as above; +2 triggers the effect identically.
+        - id: manual:fallback-op
+          disposition: equivalent
+          reason: >
+            A non-API failure mapped to code internal_error gives `${action}: ${FALLBACK_ERROR}`, exactly the sentence a null code gives (copy.ts ERROR_SENTENCES.internal_error), so no output differs.

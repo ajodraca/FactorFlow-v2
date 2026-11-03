@@ -1,0 +1,605 @@
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index e91a13c..cded9ed 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -513,6 +513,9 @@ describe("copy.ts completeness and keying", () => {
+     expect(copy.SCORE_SET.noReasonRecorded).toBe("no reason was recorded");
+     expect(copy.EVIDENCE.noEarlierScores("AAPL").startsWith("No earlier scores for")).toBe(true);
+     expect(copy.EVIDENCE.noEarlierScores("AAPL")).toBe("No earlier scores for AAPL.");
++    // CAP-002-E5-S2 T002: the Earlier scores table's label and its Produced heading.
++    expect(copy.EVIDENCE.earlierScoresFor("AAPL")).toBe("Earlier scores for AAPL");
++    expect(copy.EVIDENCE.producedColumn).toBe("Produced");
+     expect(copy.CELL.notFollowedSince("2026-10-01")).toBe(
+       "Not followed since 2026-10-01. Earlier scores stand.",
+     );
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index d295f70..7fb774e 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -828,4 +828,8 @@ export const EVIDENCE = {
+   noScoreYet: (symbol: string): string =>
+     `${symbol} has no score yet because no stocks have been scored.`,
+   noEarlierScores: (symbol: string): string => `No earlier scores for ${symbol}.`,
++  /** The Earlier scores table's accessible label (CAP-002-E5-S2 T002). */
++  earlierScoresFor: (symbol: string): string => `Earlier scores for ${symbol}`,
++  /** The column naming when a set was produced, from the set's end time (DEC-0179). */
++  producedColumn: "Produced",
+ } as const;
+diff --git a/web/src/screens/research/stocks/history-tab.test.tsx b/web/src/screens/research/stocks/history-tab.test.tsx
+new file mode 100644
+index 0000000..2aa8aac
+--- /dev/null
++++ b/web/src/screens/research/stocks/history-tab.test.tsx
+@@ -0,0 +1,430 @@
++import { render, screen, waitFor, within } from "@testing-library/react";
++import { MemoryRouter } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import * as classificationClient from "../../../api/classification-client";
++import type {
++  FactorCell,
++  FactorName,
++  StockHistory,
++  StockHistoryRow,
++} from "../../../api/classification-types";
++import { CELL, EVIDENCE, SCORE_SET } from "../copy";
++import { formatTimestamp } from "../format";
++import HistoryTab from "./history-tab";
++
++vi.mock("../../../api/classification-client", async () => ({
++  ...(await vi.importActual<typeof import("../../../api/classification-client")>(
++    "../../../api/classification-client",
++  )),
++  getStockHistory: vi.fn(),
++}));
++
++const getStockHistory = vi.mocked(classificationClient.getStockHistory);
++
++function cell(overrides: Partial<FactorCell> = {}): FactorCell {
++  return {
++    status: "classified",
++    score: "0.50",
++    percentile: "50.00",
++    reasonCode: null,
++    reasonInput: null,
++    reasonDetail: null,
++    restatedPossible: false,
++    ...overrides,
++  };
++}
++
++function row(
++  setId: string,
++  classificationDate: string,
++  endedAt: string,
++  factors: Partial<Record<FactorName, FactorCell>> = {},
++  runOutcome: StockHistoryRow["runOutcome"] = "succeeded",
++): StockHistoryRow {
++  return {
++    setId,
++    classificationDate,
++    runId: `run-${setId}`,
++    runOutcome,
++    endedAt,
++    factors: {
++      value: factors.value ?? cell(),
++      growth: factors.growth ?? cell(),
++      momentum: factors.momentum ?? cell(),
++    },
++  };
++}
++
++function history(sets: StockHistoryRow[], nextCursor: string | null = null): StockHistory {
++  return { symbol: "AAPL", sets, nextCursor };
++}
++
++const NEWEST = row("s-3", "2026-10-15", "2026-10-15T22:46:00Z", {
++  value: cell({ percentile: "91.00", score: "1.34" }),
++  growth: cell({ percentile: "72.00", score: "0.58" }),
++  momentum: cell({ percentile: "33.00", score: "-0.44" }),
++});
++const MIDDLE = row("s-2", "2026-10-01", "2026-10-01T22:40:00Z", {
++  value: cell({ percentile: "64.00", score: "0.36", restatedPossible: true }),
++  growth: cell({ percentile: "55.00", score: "0.13" }),
++  momentum: cell({ percentile: "21.00", score: "-0.81" }),
++});
++const OLDEST = row(
++  "s-1",
++  "2026-09-15",
++  "2026-09-15T22:30:00Z",
++  {
++    value: cell({ percentile: "12.00", score: "-1.17" }),
++    growth: cell({ percentile: "48.00", score: "-0.05", restatedPossible: true }),
++    momentum: cell({ percentile: "80.00", score: "0.84" }),
++  },
++  "partial",
++);
++
++function renderTab(symbol = "AAPL") {
++  return render(
++    <MemoryRouter>
++      <HistoryTab symbol={symbol} />
++    </MemoryRouter>,
++  );
++}
++
++function bodyRows(): HTMLElement[] {
++  const table = screen.getByRole("table");
++  return within(table).getAllByRole("row").slice(1);
++}
++
++beforeEach(() => {
++  getStockHistory.mockReset();
++});
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++describe("HistoryTab rows as recorded", () => {
++  // Implements TC-COMP-154
++  it("lists the rows in the order received, each as its own set recorded it", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE, OLDEST]));
++    renderTab();
++
++    await screen.findByRole("table");
++    const rows = bodyRows();
++    expect(rows).toHaveLength(3);
++    const dates = rows.map((tr) => within(tr).getByRole("rowheader").textContent);
++    expect(dates).toEqual(["2026-10-15", "2026-10-01", "2026-09-15"]);
++
++    const percentiles = rows.map((tr) =>
++      within(tr)
++        .getAllByTestId("factor-percentile")
++        .map((node) => node.textContent),
++    );
++    expect(percentiles).toEqual([
++      ["91", "72", "33"],
++      ["64", "55", "21"],
++      ["12", "48", "80"],
++    ]);
++    const scores = rows.map((tr) =>
++      within(tr)
++        .getAllByTestId("factor-score")
++        .map((node) => node.textContent),
++    );
++    expect(scores).toEqual([
++      ["+1.34", "+0.58", "-0.44"],
++      ["+0.36", "+0.13", "-0.81"],
++      ["-1.17", "-0.05", "+0.84"],
++    ]);
++    expect(screen.getAllByText(EVIDENCE.historyNote)).toHaveLength(1);
++  });
++
++  // Implements TC-COMP-154
++  it("does not re-sort rows whose order differs from their dates", async () => {
++    getStockHistory.mockResolvedValueOnce(history([OLDEST, NEWEST, MIDDLE]));
++    renderTab();
++
++    await screen.findByRole("table");
++    const dates = bodyRows().map((tr) => within(tr).getByRole("rowheader").textContent);
++    expect(dates).toEqual(["2026-09-15", "2026-10-15", "2026-10-01"]);
++  });
++
++  // Implements TC-COMP-155
++  it("states that there are no earlier scores, apart from never scored", async () => {
++    getStockHistory.mockResolvedValueOnce(history([]));
++    renderTab();
++
++    expect(await screen.findByText("No earlier scores for AAPL.")).toBeInTheDocument();
++    expect(screen.queryByRole("table")).not.toBeInTheDocument();
++    expect(screen.queryByText(EVIDENCE.noScoreYet("AAPL"))).not.toBeInTheDocument();
++    expect(screen.queryByText(/no stocks have been scored/i)).not.toBeInTheDocument();
++    expect(screen.queryByText(/has no score yet/i)).not.toBeInTheDocument();
++  });
++
++  // Implements TC-COMP-115
++  it("keeps a retired stock's recorded rows, without replacing a cell by Not followed", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE]));
++    renderTab("OLD");
++
++    await screen.findByRole("table");
++    expect(getStockHistory).toHaveBeenCalledWith("OLD", expect.anything());
++    expect(bodyRows()).toHaveLength(2);
++    expect(screen.getAllByTestId("factor-percentile")).toHaveLength(6);
++    expect(screen.queryByText(CELL.notFollowed)).not.toBeInTheDocument();
++    expect(screen.queryByText(/^No earlier scores/)).not.toBeInTheDocument();
++  });
++});
++
++describe("HistoryTab restated mark", () => {
++  // Implements TC-COMP-191
++  it("marks the older rows that carry it and leaves the newest unmarked", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE, OLDEST]));
++    renderTab();
++
++    await screen.findByRole("table");
++    const [newest, middle, oldest] = bodyRows();
++    expect(within(newest).queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
++    expect(within(middle).getAllByText(CELL.possiblyRestated)).toHaveLength(1);
++    expect(within(oldest).getAllByText(CELL.possiblyRestated)).toHaveLength(1);
++    // On the value cell of the middle row and the growth cell of the oldest.
++    const middleCells = within(middle).getAllByTestId("factor-cell");
++    expect(within(middleCells[0]).getByText(CELL.possiblyRestated)).toBeInTheDocument();
++    const oldestCells = within(oldest).getAllByTestId("factor-cell");
++    expect(within(oldestCells[1]).getByText(CELL.possiblyRestated)).toBeInTheDocument();
++  });
++
++  it("states the restatement sentence once, above the table, when any row is marked", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE, OLDEST]));
++    renderTab();
++
++    const table = await screen.findByRole("table");
++    const sentence = screen.getByText(CELL.restatedExplanation);
++    expect(screen.getAllByText(CELL.restatedExplanation)).toHaveLength(1);
++    expect(sentence.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    const note = screen.getByText(EVIDENCE.historyNote);
++    expect(note.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    expect(document.querySelector("[aria-describedby]")).toBeNull();
++  });
++
++  it("omits the restatement sentence when no row is marked", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    renderTab();
++
++    await screen.findByRole("table");
++    expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
++    // The history sentence is stated every time, marked or not.
++    expect(screen.getAllByText(EVIDENCE.historyNote)).toHaveLength(1);
++  });
++
++  it.each(["value", "growth"] as const)(
++    "states the restatement sentence when only a %s cell is marked",
++    async (factor) => {
++      const only = row("s-6", "2026-10-11", "2026-10-11T22:00:00Z", {
++        [factor]: cell({ restatedPossible: true }),
++      });
++      getStockHistory.mockResolvedValueOnce(history([only]));
++      renderTab();
++
++      await screen.findByRole("table");
++      expect(screen.getAllByText(CELL.possiblyRestated)).toHaveLength(1);
++      expect(screen.getAllByText(CELL.restatedExplanation)).toHaveLength(1);
++    },
++  );
++
++  it.each(["value", "growth"] as const)(
++    "draws no mark and no sentence for an Incomplete %s cell that carries the flag",
++    async (factor) => {
++      const flagged = row("s-7", "2026-10-11", "2026-10-11T22:00:00Z", {
++        [factor]: cell({
++          status: "not_classified",
++          percentile: null,
++          score: null,
++          reasonCode: "input_missing",
++          restatedPossible: true,
++        }),
++      });
++      getStockHistory.mockResolvedValueOnce(history([flagged]));
++      renderTab();
++
++      await screen.findByRole("table");
++      expect(screen.getByText(CELL.incomplete)).toBeInTheDocument();
++      expect(screen.queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
++      expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
++    },
++  );
++
++  it.each([
++    ["a retired reason", { reasonCode: "retired" as const }],
++    ["a not-enough-stocks reason", { reasonCode: "not_enough_stocks" as const }],
++    ["an unclassified status", { status: "not_classified" as const }],
++    ["no percentile", { percentile: null }],
++  ])("draws no sentence for a flagged cell the factor cell does not score: %s", async (_, over) => {
++    const flagged = row("s-8", "2026-10-11", "2026-10-11T22:00:00Z", {
++      value: cell({ restatedPossible: true, ...over }),
++    });
++    getStockHistory.mockResolvedValueOnce(history([flagged]));
++    renderTab();
++
++    await screen.findByRole("table");
++    expect(screen.queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
++    expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
++  });
++
++  it("never marks momentum, even when the wire says restated", async () => {
++    const odd = row("s-9", "2026-10-10", "2026-10-10T22:00:00Z", {
++      momentum: cell({ restatedPossible: true }),
++    });
++    getStockHistory.mockResolvedValueOnce(history([odd]));
++    renderTab();
++
++    await screen.findByRole("table");
++    expect(screen.queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
++    // The sentence needs a mark to explain: a momentum flag draws none.
++    expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
++  });
++});
++
++describe("HistoryTab table content", () => {
++  it("is a native table with labelled column and row headers", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    renderTab();
++
++    const table = await screen.findByRole("table", { name: EVIDENCE.earlierScoresFor("AAPL") });
++    expect(table).toHaveAttribute("data-variant", "history");
++    const headers = within(table)
++      .getAllByRole("columnheader")
++      .map((th) => th.textContent);
++    expect(headers).toEqual([
++      SCORE_SET.historyColumns.scoresDate,
++      EVIDENCE.producedColumn,
++      "Value",
++      "Growth",
++      "Momentum",
++    ]);
++    for (const th of within(table).getAllByRole("columnheader")) {
++      expect(th).toHaveAttribute("scope", "col");
++    }
++    expect(within(table).getByRole("rowheader")).toHaveAttribute("scope", "row");
++  });
++
++  it("shows Produced as the end time, and the outcome as a word badge", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, OLDEST]));
++    renderTab();
++
++    await screen.findByRole("table");
++    const [first, second] = bodyRows();
++    expect(within(first).getByText(formatTimestamp("2026-10-15T22:46:00Z"))).toBeInTheDocument();
++    expect(within(first).getByRole("rowheader")).toHaveClass("font-numeric");
++    const complete = within(first).getByText(SCORE_SET.complete);
++    expect(complete.closest("[data-variant]")).toHaveAttribute("data-variant", "status-good");
++    const partial = within(second).getByText(SCORE_SET.partial);
++    expect(partial.closest("[data-variant]")).toHaveAttribute("data-variant", "status-warning");
++  });
++
++  it("names no run id, number or download link", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE]));
++    renderTab();
++
++    await screen.findByRole("table");
++    expect(screen.queryByRole("link")).not.toBeInTheDocument();
++    expect(screen.queryByText(/run-s-/)).not.toBeInTheDocument();
++    expect(screen.queryByText(/#\d/)).not.toBeInTheDocument();
++    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
++    expect(within(screen.getByRole("table")).queryByRole("button")).not.toBeInTheDocument();
++  });
++
++  it("keeps an Incomplete recorded cell Incomplete and prints no polarity colour", async () => {
++    const incomplete = row("s-4", "2026-10-12", "2026-10-12T22:00:00Z", {
++      growth: cell({
++        status: "not_classified",
++        percentile: null,
++        score: null,
++        reasonCode: "input_missing",
++      }),
++    });
++    getStockHistory.mockResolvedValueOnce(history([incomplete]));
++    renderTab();
++
++    await screen.findByRole("table");
++    const [only] = bodyRows();
++    expect(within(only).getByText(CELL.incomplete)).toBeInTheDocument();
++    expect(within(only).getAllByTestId("factor-percentile")).toHaveLength(2);
++    expect(within(only).queryByText(CELL.notFollowed)).not.toBeInTheDocument();
++    const html = screen.getByRole("table").outerHTML;
++    expect(html).not.toMatch(/\b(?:text|bg)-(?:gain|loss)\b/);
++  });
++
++  it("issues exactly one read on mount, with no cursor", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    renderTab();
++
++    await screen.findByRole("table");
++    await waitFor(() => expect(getStockHistory).toHaveBeenCalledTimes(1));
++    expect(getStockHistory).toHaveBeenCalledWith("AAPL", { limit: 50 });
++  });
++});
++
++describe("HistoryTab fetch per symbol", () => {
++  // Implements T006: a rerender with the same symbol issues no new read; a changed symbol reads once.
++  it("reads again only when the symbol changes, and drops the previous rows", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    const view = renderTab("AAPL");
++    await screen.findByRole("table");
++
++    view.rerender(
++      <MemoryRouter>
++        <HistoryTab symbol="AAPL" />
++      </MemoryRouter>,
++    );
++    expect(getStockHistory).toHaveBeenCalledTimes(1);
++
++    let settleSecond: (value: StockHistory) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((resolve) => {
++        settleSecond = resolve;
++      }),
++    );
++    view.rerender(
++      <MemoryRouter>
++        <HistoryTab symbol="MSFT" />
++      </MemoryRouter>,
++    );
++    // While MSFT is read, AAPL's rows are not shown under MSFT's label.
++    expect(screen.queryByRole("table")).not.toBeInTheDocument();
++    settleSecond({ symbol: "MSFT", sets: [], nextCursor: null });
++    expect(await screen.findByText("No earlier scores for MSFT.")).toBeInTheDocument();
++    expect(getStockHistory).toHaveBeenCalledTimes(2);
++    expect(getStockHistory).toHaveBeenLastCalledWith("MSFT", { limit: 50 });
++    expect(screen.queryByRole("table")).not.toBeInTheDocument();
++  });
++
++  it("ignores a response that settles after the symbol changed", async () => {
++    let settleFirst: (value: StockHistory) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((resolve) => {
++        settleFirst = resolve;
++      }),
++    );
++    const view = renderTab("AAPL");
++    getStockHistory.mockResolvedValueOnce({ symbol: "MSFT", sets: [], nextCursor: null });
++    view.rerender(
++      <MemoryRouter>
++        <HistoryTab symbol="MSFT" />
++      </MemoryRouter>,
++    );
++    await screen.findByText("No earlier scores for MSFT.");
++
++    settleFirst(history([NEWEST]));
++    await waitFor(() => expect(screen.queryByRole("table")).not.toBeInTheDocument());
++    expect(screen.getByText("No earlier scores for MSFT.")).toBeInTheDocument();
++  });
++
++  it("keys rows by set, so two sets on one day render without a key warning", async () => {
++    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
++    const same = row("s-5", "2026-10-15", "2026-10-15T23:46:00Z");
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, same]));
++    renderTab();
++
++    await screen.findByRole("table");
++    expect(bodyRows()).toHaveLength(2);
++    expect(errors).not.toHaveBeenCalled();
++  });
++});
+diff --git a/web/src/screens/research/stocks/history-tab.tsx b/web/src/screens/research/stocks/history-tab.tsx
+new file mode 100644
+index 0000000..ad5c81a
+--- /dev/null
++++ b/web/src/screens/research/stocks/history-tab.tsx
+@@ -0,0 +1,136 @@
++import { type JSX, useEffect, useState } from "react";
++import { getStockHistory } from "../../../api/classification-client";
++import type { FactorName, StockHistoryRow } from "../../../api/classification-types";
++import { FactorCell } from "../../../components/patterns/factor-cell";
++import { StatusBadge, type StatusTier } from "../../../components/patterns/status-badge";
++import { CELL, EVIDENCE, FACTOR_LABELS, SCORE_SET, UNIVERSES } from "../copy";
++import { formatDate, formatTimestamp } from "../format";
++
++/** The API's default page size (DEC-0178). */
++const PAGE_SIZE = 50;
++
++const FACTORS: readonly FactorName[] = ["value", "growth", "momentum"];
++
++const OUTCOME_TIER: Record<StockHistoryRow["runOutcome"], { tier: StatusTier; word: string }> = {
++  succeeded: { tier: "good", word: SCORE_SET.complete },
++  partial: { tier: "warning", word: SCORE_SET.partial },
++};
++
++const HEAD_CLASS = "px-2 py-1 text-left text-xs text-muted-foreground";
++const CELL_CLASS = "px-2 py-1 text-left align-top text-sm";
++
++type Body = { kind: "loading" } | { kind: "loaded"; rows: StockHistoryRow[] };
++
++/**
++ * Whether `FactorCell` draws the mark on this factor's cell: a scored value or
++ * growth cell that carries `restatedPossible` (DAC-E4-S3-3). The sentence
++ * explains a mark, so it is shown only when one is drawn (DEC-0180).
++ */
++function drawsMark(row: StockHistoryRow, factor: "value" | "growth"): boolean {
++  const cell = row.factors[factor];
++  return (
++    cell.restatedPossible &&
++    cell.status === "classified" &&
++    cell.percentile !== null &&
++    cell.reasonCode !== "retired" &&
++    cell.reasonCode !== "not_enough_stocks"
++  );
++}
++
++function marksARow(row: StockHistoryRow): boolean {
++  return drawsMark(row, "value") || drawsMark(row, "growth");
++}
++
++function HistoryRow({ row }: { row: StockHistoryRow }): JSX.Element {
++  const outcome = OUTCOME_TIER[row.runOutcome];
++  return (
++    <tr className="border-t border-border">
++      <th scope="row" className={`${CELL_CLASS} font-numeric font-normal`}>
++        {formatDate(row.classificationDate)}
++      </th>
++      <td className={CELL_CLASS}>
++        <span className="font-numeric">{formatTimestamp(row.endedAt)}</span>{" "}
++        <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
++      </td>
++      {FACTORS.map((factor) => (
++        <td key={factor} className={CELL_CLASS}>
++          <FactorCell cell={row.factors[factor]} factor={factor} showScore />
++        </td>
++      ))}
++    </tr>
++  );
++}
++
++/**
++ * The Earlier scores panel of the Stock evidence screen (AC-15, AC-18, AC-19,
++ * AC-23; DAC-E5-S2-1 to -4; UX design 1.6; classification-ui 2.4, 10): one
++ * stock's classifications in earlier sets in the order the history read
++ * returned them, each row one set's result as recorded. The tab fetches,
++ * renders and nothing more: no row is sorted, filtered, re-dated or
++ * recomputed, and a retired stock's rows are not special-cased (DEC-0178,
++ * DEC-0179, DEC-0180).
++ */
++export default function HistoryTab({ symbol }: { symbol: string }): JSX.Element {
++  const [body, setBody] = useState<Body>({ kind: "loading" });
++
++  useEffect(() => {
++    let current = true;
++    setBody({ kind: "loading" });
++    getStockHistory(symbol, { limit: PAGE_SIZE }).then((page) => {
++      if (current) {
++        setBody({ kind: "loaded", rows: page.sets });
++      }
++    });
++    return () => {
++      current = false;
++    };
++  }, [symbol]);
++
++  if (body.kind === "loading") {
++    return (
++      <output aria-busy="true" className="flex flex-col gap-2">
++        <span className="sr-only">{UNIVERSES.loading}</span>
++        <span aria-hidden="true" className="block h-2 rounded bg-secondary" />
++      </output>
++    );
++  }
++
++  if (body.rows.length === 0) {
++    return <p className="text-sm">{EVIDENCE.noEarlierScores(symbol)}</p>;
++  }
++
++  return (
++    <div className="flex flex-col gap-2">
++      <p className="text-xs text-muted-foreground">{EVIDENCE.historyNote}</p>
++      {body.rows.some(marksARow) ? (
++        <p className="text-xs text-muted-foreground">{CELL.restatedExplanation}</p>
++      ) : null}
++      <table
++        aria-label={EVIDENCE.earlierScoresFor(symbol)}
++        data-variant="history"
++        className="w-full border-collapse"
++      >
++        <thead>
++          <tr>
++            <th scope="col" className={HEAD_CLASS}>
++              {SCORE_SET.historyColumns.scoresDate}
++            </th>
++            <th scope="col" className={HEAD_CLASS}>
++              {EVIDENCE.producedColumn}
++            </th>
++            {FACTORS.map((factor) => (
++              <th key={factor} scope="col" className={HEAD_CLASS}>
++                {FACTOR_LABELS[factor]}
++              </th>
++            ))}
++          </tr>
++        </thead>
++        <tbody>
++          {body.rows.map((row) => (
++            <HistoryRow key={row.setId} row={row} />
++          ))}
++        </tbody>
++      </table>
++    </div>
++  );
++}

@@ -513,6 +513,9 @@ describe("copy.ts completeness and keying", () => {
     expect(copy.SCORE_SET.noReasonRecorded).toBe("no reason was recorded");
     expect(copy.EVIDENCE.noEarlierScores("AAPL").startsWith("No earlier scores for")).toBe(true);
     expect(copy.EVIDENCE.noEarlierScores("AAPL")).toBe("No earlier scores for AAPL.");
+    // CAP-002-E5-S2 T002: the Earlier scores table's label and its Produced heading.
+    expect(copy.EVIDENCE.earlierScoresFor("AAPL")).toBe("Earlier scores for AAPL");
+    expect(copy.EVIDENCE.producedColumn).toBe("Produced");
     expect(copy.CELL.notFollowedSince("2026-10-01")).toBe(
       "Not followed since 2026-10-01. Earlier scores stand.",
     );

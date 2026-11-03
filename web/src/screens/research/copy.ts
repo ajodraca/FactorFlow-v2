@@ -828,4 +828,8 @@ export const EVIDENCE = {
   noScoreYet: (symbol: string): string =>
     `${symbol} has no score yet because no stocks have been scored.`,
   noEarlierScores: (symbol: string): string => `No earlier scores for ${symbol}.`,
+  /** The Earlier scores table's accessible label (CAP-002-E5-S2 T002). */
+  earlierScoresFor: (symbol: string): string => `Earlier scores for ${symbol}`,
+  /** The column naming when a set was produced, from the set's end time (DEC-0179). */
+  producedColumn: "Produced",
 } as const;
