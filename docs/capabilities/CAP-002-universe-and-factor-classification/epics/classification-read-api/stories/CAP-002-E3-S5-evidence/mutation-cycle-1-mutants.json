@@ -1,0 +1,835 @@
+{
+  "schema": 1,
+  "repo_head": "aed93bd8debe45c4c2dbc2de6a9c120d879041a9",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/classification_models.py:358:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 358,
+      "original": "_PERCENTILE_BOUND = Field(default=None, ge=0, le=100)",
+      "mutated": "_PERCENTILE_BOUND = Field(default=None, le=100)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:358:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 358,
+      "original": "_PERCENTILE_BOUND = Field(default=None, ge=0, le=100)",
+      "mutated": "_PERCENTILE_BOUND = Field(default=None, ge=1, le=100)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:358:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 358,
+      "original": "_PERCENTILE_BOUND = Field(default=None, ge=0, le=100)",
+      "mutated": "_PERCENTILE_BOUND = Field(default=None, ge=0, le=101)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:387:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 387,
+      "original": "    hide_incomplete: bool = False",
+      "mutated": "    hide_incomplete: bool = True"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:388:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 388,
+      "original": "    limit: int = Field(DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE)",
+      "mutated": "    limit: int = Field(DEFAULT_PAGE_SIZE, le=MAX_PAGE_SIZE)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:388:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 388,
+      "original": "    limit: int = Field(DEFAULT_PAGE_SIZE, gt=0, le=MAX_PAGE_SIZE)",
+      "mutated": "    limit: int = Field(DEFAULT_PAGE_SIZE, gt=1, le=MAX_PAGE_SIZE)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:391:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 391,
+      "original": "    @field_validator(\"symbols\", mode=\"before\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:397:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 397,
+      "original": "        if not isinstance(entries, list):",
+      "mutated": "        if isinstance(entries, list):"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:403:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 403,
+      "original": "                if symbol and symbol not in symbols:",
+      "mutated": "                if symbol and symbol in symbols:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:405:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 405,
+      "original": "        if not all(is_valid(symbol) for symbol in symbols):",
+      "mutated": "        if all(is_valid(symbol) for symbol in symbols):"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:411:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 411,
+      "original": "        if not low <= len(symbols) <= high:",
+      "mutated": "        if low <= len(symbols) <= high:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:411:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 411,
+      "original": "        if not low <= len(symbols) <= high:",
+      "mutated": "        if not low < len(symbols) <= high:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:411:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 411,
+      "original": "        if not low <= len(symbols) <= high:",
+      "mutated": "        if not low <= len(symbols) < high:"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:415:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 415,
+      "original": "    @field_validator(\"symbol\")",
+      "mutated": "    pass"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:421:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 421,
+      "original": "        if not is_valid(prefix):",
+      "mutated": "        if is_valid(prefix):"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:428:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 428,
+      "original": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name)) is not None",
+      "mutated": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name)) is None"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:431:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 431,
+      "original": "            universe_id=self.universe_id,",
+      "mutated": "            universe_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:432:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 432,
+      "original": "            sort=self.sort,",
+      "mutated": "            sort=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:433:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 433,
+      "original": "            order=self.order,",
+      "mutated": "            order=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:435:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 435,
+      "original": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=self.symbol",
+      "mutated": "                bounds=bounds, hide_incomplete=None, symbol=self.symbol"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:437:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 437,
+      "original": "            limit=self.limit,",
+      "mutated": "            limit=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:438:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 438,
+      "original": "            cursor=self.cursor,",
+      "mutated": "            cursor=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:490:drop-defaulted-argument:1",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 490,
+      "original": "                qualified_count=0, ranked=False, min_peer_set_size=reader.MIN_PEER_SET_SIZE",
+      "mutated": "                qualified_count=0, min_peer_set_size=reader.MIN_PEER_SET_SIZE"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:490:drop-defaulted-argument:2",
+      "cycle": "cycle-1",
+      "operator": "drop-defaulted-argument",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 490,
+      "original": "                qualified_count=0, ranked=False, min_peer_set_size=reader.MIN_PEER_SET_SIZE",
+      "mutated": "                ranked=False, min_peer_set_size=reader.MIN_PEER_SET_SIZE"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:490:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 490,
+      "original": "                qualified_count=0, ranked=False, min_peer_set_size=reader.MIN_PEER_SET_SIZE",
+      "mutated": "                qualified_count=0, ranked=True, min_peer_set_size=reader.MIN_PEER_SET_SIZE"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:490:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 490,
+      "original": "                qualified_count=0, ranked=False, min_peer_set_size=reader.MIN_PEER_SET_SIZE",
+      "mutated": "                qualified_count=1, ranked=False, min_peer_set_size=reader.MIN_PEER_SET_SIZE"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:500:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 500,
+      "original": "            qualified_count=summary.qualified_count,",
+      "mutated": "            qualified_count=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:501:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 501,
+      "original": "            ranked=summary.ranked,",
+      "mutated": "            ranked=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:502:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 502,
+      "original": "            min_peer_set_size=summary.min_peer_set_size,",
+      "mutated": "            min_peer_set_size=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:512:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 512,
+      "original": "        set_id=later.set_id,",
+      "mutated": "        set_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:513:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 513,
+      "original": "        state=later.state,",
+      "mutated": "        state=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:514:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 514,
+      "original": "        started_at=later.started_at,",
+      "mutated": "        started_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:515:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 515,
+      "original": "        ended_at=later.ended_at,",
+      "mutated": "        ended_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:516:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 516,
+      "original": "        failure_reason=later.failure_reason,",
+      "mutated": "        failure_reason=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:517:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 517,
+      "original": "        run_id=later.run_id,",
+      "mutated": "        run_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:518:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 518,
+      "original": "        run_started_at=later.run_started_at,",
+      "mutated": "        run_started_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:553:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 553,
+      "original": "            match_count=page.match_count,",
+      "mutated": "            match_count=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:556:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 556,
+      "original": "                    symbol=stock.symbol,",
+      "mutated": "                    symbol=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:557:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 557,
+      "original": "                    name=stock.name,",
+      "mutated": "                    name=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:558:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 558,
+      "original": "                    lifecycle=stock.lifecycle,",
+      "mutated": "                    lifecycle=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:563:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 563,
+      "original": "            unknown_symbols=page.unknown_symbols,",
+      "mutated": "            unknown_symbols=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:564:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 564,
+      "original": "            next_cursor=page.next_cursor,",
+      "mutated": "            next_cursor=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:579:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 579,
+      "original": "                current_count=current.current_count, followed_count=current.followed_count",
+      "mutated": "                current_count=None, followed_count=current.followed_count"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:614:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 614,
+      "original": "            symbol=evidence.symbol,",
+      "mutated": "            symbol=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:615:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 615,
+      "original": "            name=evidence.name,",
+      "mutated": "            name=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:616:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 616,
+      "original": "            lifecycle=evidence.lifecycle,",
+      "mutated": "            lifecycle=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:620:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 620,
+      "original": "                    factor=row.factor,",
+      "mutated": "                    factor=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:621:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 621,
+      "original": "                    input_name=row.input_name,",
+      "mutated": "                    input_name=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:622:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 622,
+      "original": "                    label=row.label,",
+      "mutated": "                    label=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:623:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 623,
+      "original": "                    status=row.status,",
+      "mutated": "                    status=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:624:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 624,
+      "original": "                    value=row.value,",
+      "mutated": "                    value=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:625:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 625,
+      "original": "                    as_of=row.as_of,",
+      "mutated": "                    as_of=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:626:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 626,
+      "original": "                    known_on=row.known_on,",
+      "mutated": "                    known_on=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:627:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 627,
+      "original": "                    restated_possible=row.restated_possible,",
+      "mutated": "                    restated_possible=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:628:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 628,
+      "original": "                    detail=row.detail,",
+      "mutated": "                    detail=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:633:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 633,
+      "original": "                MembershipResponse(universe_id=m.universe_id, name=m.name)",
+      "mutated": "                MembershipResponse(universe_id=None, name=m.name)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:633:drop-field-copy:2",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 633,
+      "original": "                MembershipResponse(universe_id=m.universe_id, name=m.name)",
+      "mutated": "                MembershipResponse(universe_id=m.universe_id, name=None)"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:650:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 650,
+      "original": "            set_id=row.set_id,",
+      "mutated": "            set_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:651:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 651,
+      "original": "            classification_date=row.classification_date,",
+      "mutated": "            classification_date=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:652:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 652,
+      "original": "            run_id=row.run_id,",
+      "mutated": "            run_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:653:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 653,
+      "original": "            run_outcome=row.run_outcome,",
+      "mutated": "            run_outcome=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:654:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 654,
+      "original": "            ended_at=row.ended_at,",
+      "mutated": "            ended_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:692:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 692,
+      "original": "            set_id=row.set_id,",
+      "mutated": "            set_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:693:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 693,
+      "original": "            state=row.state,",
+      "mutated": "            state=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:694:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 694,
+      "original": "            classification_date=row.classification_date,",
+      "mutated": "            classification_date=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:695:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 695,
+      "original": "            run_id=row.run_id,",
+      "mutated": "            run_id=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:696:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 696,
+      "original": "            run_started_at=row.run_started_at,",
+      "mutated": "            run_started_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:697:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 697,
+      "original": "            run_outcome=row.run_outcome,",
+      "mutated": "            run_outcome=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:698:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 698,
+      "original": "            started_at=row.started_at,",
+      "mutated": "            started_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:699:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 699,
+      "original": "            ended_at=row.ended_at,",
+      "mutated": "            ended_at=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:700:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 700,
+      "original": "            failure_reason=row.failure_reason,",
+      "mutated": "            failure_reason=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:701:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 701,
+      "original": "            latest_trading_day=row.latest_trading_day,",
+      "mutated": "            latest_trading_day=None,"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:702:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 702,
+      "original": "            active_instruments=row.active_instruments,",
+      "mutated": "            active_instruments=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:44:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 44,
+      "original": "    reader.UniverseNotFound: (404, \"universe_not_found\", \"universe\"),",
+      "mutated": "    reader.UniverseNotFound: (405, \"universe_not_found\", \"universe\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:45:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 45,
+      "original": "    reader.InstrumentNotFound: (404, \"instrument_not_found\", _RESOURCE),",
+      "mutated": "    reader.InstrumentNotFound: (405, \"instrument_not_found\", _RESOURCE),"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:46:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 46,
+      "original": "    reader.SetNotFound: (404, \"classification_set_not_found\", \"classification-set\"),",
+      "mutated": "    reader.SetNotFound: (405, \"classification_set_not_found\", \"classification-set\"),"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:47:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 47,
+      "original": "    CursorError: (422, \"cursor_invalid\", _RESOURCE),",
+      "mutated": "    CursorError: (423, \"cursor_invalid\", _RESOURCE),"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:68:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 68,
+      "original": "    if kind != \"list\" or not cursor:",
+      "mutated": "    if kind == \"list\" or not cursor:"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:68:negate-boolean:2",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 68,
+      "original": "    if kind != \"list\" or not cursor:",
+      "mutated": "    if kind != \"list\" or cursor:"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:71:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 71,
+      "original": "        payload = json.loads(base64.urlsafe_b64decode(cursor + \"=\" * (-len(cursor) % 4)))",
+      "mutated": "        payload = json.loads(base64.urlsafe_b64decode(cursor + \"=\" * (-len(cursor) % 5)))"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:73:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 73,
+      "original": "        if sort not in reader.SORT_ALLOWLIST or order not in (\"asc\", \"desc\"):",
+      "mutated": "        if sort in reader.SORT_ALLOWLIST or order not in (\"asc\", \"desc\"):"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:73:negate-boolean:2",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 73,
+      "original": "        if sort not in reader.SORT_ALLOWLIST or order not in (\"asc\", \"desc\"):",
+      "mutated": "        if sort not in reader.SORT_ALLOWLIST or order in (\"asc\", \"desc\"):"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:111:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 111,
+      "original": "    if not is_valid(normalised):",
+      "mutated": "    if is_valid(normalised):"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:126:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 126,
+      "original": "PageLimit = Annotated[int, Query(gt=0, le=MAX_PAGE_SIZE)]",
+      "mutated": "PageLimit = Annotated[int, Query(gt=1, le=MAX_PAGE_SIZE)]"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:149:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 149,
+      "original": "@router.get(",
+      "mutated": ".get("
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:162:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 162,
+      "original": "    if query.symbols is not None:",
+      "mutated": "    if query.symbols is None:"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:184:drop-field-copy:1",
+      "cycle": "cycle-1",
+      "operator": "drop-field-copy",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 184,
+      "original": "            cursor=query.cursor,",
+      "mutated": "            cursor=None,"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:192:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 192,
+      "original": "@router.get(\"/api/classifications/summary\")",
+      "mutated": ".get(\"/api/classifications/summary\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:200:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 200,
+      "original": "@router.get(\"/api/classifications/sets\")",
+      "mutated": ".get(\"/api/classifications/sets\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:216:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 216,
+      "original": "@router.get(\"/api/classifications/sets/{set_id}\")",
+      "mutated": ".get(\"/api/classifications/sets/{set_id}\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:226:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 226,
+      "original": "@router.get(\"/api/classifications/stocks/{symbol}\")",
+      "mutated": ".get(\"/api/classifications/stocks/{symbol}\")"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:238:remove-attribute:1",
+      "cycle": "cycle-1",
+      "operator": "remove-attribute",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 238,
+      "original": "@router.get(\"/api/classifications/stocks/{symbol}/history\")",
+      "mutated": ".get(\"/api/classifications/stocks/{symbol}/history\")"
+    }
+  ]
+}

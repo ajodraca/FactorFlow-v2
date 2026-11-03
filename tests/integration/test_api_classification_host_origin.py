@@ -118,3 +118,35 @@ def test_a_foreign_origin_cannot_change_a_universe(
     for method, url, body, status in writes:
         response = client.request(method, url, json=body, headers={"Origin": OWN})
         assert response.status_code == status, response.text
+
+
+# --- classification routes (CAP-002-E3-S5; task plan T014) ---------------------------------
+
+CLASSIFICATION_PATHS = (
+    "/api/classifications",
+    "/api/classifications/summary",
+    "/api/classifications/sets",
+    "/api/classifications/stocks/AAA",
+    "/api/classifications/stocks/AAA/history",
+)
+
+
+def test_a_foreign_host_cannot_read_the_classifications(client: TestClient) -> None:
+    """DAC-E3-S5-6: the Host check wraps every classification read."""
+    for path in CLASSIFICATION_PATHS:
+        refused(client.get(path, headers={"Host": "evil.example:8000"}), 400, "host_not_allowed")
+        assert client.get(path).status_code in (200, 404)
+
+
+def test_a_foreign_origin_does_not_refuse_a_classification_read(client: TestClient) -> None:
+    """The Origin check covers state-changing methods only."""
+    assert client.get("/api/classifications", headers={"Origin": FOREIGN}).status_code == 200
+
+
+def test_no_classification_route_accepts_a_state_changing_method(client: TestClient) -> None:
+    """Each path answers 405 in the envelope."""
+    for path in CLASSIFICATION_PATHS:
+        for method in ("POST", "PATCH", "DELETE"):
+            response = client.request(method, path, headers={"Origin": OWN})
+            assert response.status_code == 405, (method, path)
+            assert response.json()["error"]["code"] == "method_not_allowed"

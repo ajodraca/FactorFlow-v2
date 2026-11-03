@@ -1,0 +1,60 @@
+# TDD evidence for CAP-002-E3-S5 - Classifications router mounted in the application.
+# One cycle: the unit tests were written first by an earlier run (commit 64251c2, never run) and carried onto this
+# story branch; the router, the models and the mount then made them pass. commit_hash is stage.
+# Decision: DEC-0281 (three plan statements corrected to the delivered code).
+# NOT EXECUTED: the postgres-marked integration files (T012-T014: test_api_classifications.py,
+# test_api_classification_summary.py, the additions to test_api_classification_host_origin.py, and the
+# api_classification_support.py helper) were written but never run; PostgreSQL and Docker are absent on this machine.
+# The three unit packaging tests (test_release_excludes_test_paths, test_distribution_contents) cannot run in the
+# sandbox: uv cannot open its cache.
+# Review notes: reviews were run on the unit and integration files together; both APPROVED with non-blocking notes.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019, T020, T021, T022, T023]
+    description: >
+      src/factorflow/api/routes/classifications.py (six reads, REFUSALS table, _cursor_code), the request and
+      response models appended to src/factorflow/api/classification_models.py, the one include_router line and the
+      import in src/factorflow/api/app.py. Tests: tests/unit/test_api_classifications_routes.py,
+      test_api_classification_models.py and test_api_classification_error_mapping.py (extended), and the unrun
+      integration files named above. The first mutation run left 32 survivors (unserialised fields, the cursor
+      padding, the page lower bound); full-body tests were added and two redundant arguments removed, and the rerun
+      killed all 92. Two defects in the carried-over tests were fixed: the static-mount test looked for
+      /api/classifications routes at the top of router.routes, where FastAPI wraps included routers, and a duplicated
+      test name hid one symbol-prefix test.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-1.log
+    red_log_sha256: f51bc6cb835bce742e31de027080ce770e7b6da8cb45a10dbb0053d25f3f0f6e
+    red_evidence: >
+      Observed with the test files at 64251c2 and the production tree at the base commit aed93bd (a clean archive of
+      it): collection fails on ImportError for ClassificationListQuery and for the classifications router, so no test
+      in the three files ran.
+    green_evidence: >
+      The three unit files: 201 passed (green-cycle-1.log). Full not-postgres suite: 1594 passed, 1 failed and 2 errors,
+      all three the packaging tests whose uv build cannot open its cache in the sandbox. ruff check, ruff format
+      --check and mypy src clean. T021 checks: app.py differs by the import and one include_router line; no SQL or
+      massive reference in the router; the three E1-S6 classes are defined once; the delivered API suites (83) pass.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/green-cycle-1.log
+        sha256: e3ede66788c802f0b79a36c510cbc63954c37d7c9132f71f9e26acf8045f3e36
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/code-review-cycle-1.txt
+        sha256: 0322ea86d93908e71c5ea5599ab3963d875a7f8913c8ec68c033e3402efca96b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/spec-drift-cycle-1.txt
+        sha256: 6a3f16312dac8a86997242cff1bce956020a38bcc4f8614e789e61b7327c311b
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 0965b666d9596e2b782e65f4a36410abfa378319775e67b9f65c8c293629df71
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: 7f36ee894bcf71f2e00719bfaabd850186154ef2ebca7660850e3c7cefc1af44
+      generated: 92
+      killed: 92
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
